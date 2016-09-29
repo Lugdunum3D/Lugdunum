@@ -54,6 +54,12 @@ macro(lug_add_library target)
         target_link_libraries(${target} ${THIS_EXTERNAL_LIBS})
     endif()
 
-    # TODO: setup the install
+    # setup the install of the library
+    install(TARGETS ${target}
+            RUNTIME DESTINATION bin COMPONENT bin
+            LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT bin
+            ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT devel
+            FRAMEWORK DESTINATION ${CMAKE_INSTALL_FRAMEWORK_PREFIX} COMPONENT bin
+    )
 
 endmacro()

@@ -43,5 +43,14 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
 # add the subdirectories
 add_subdirectory(src/lug/)
 
-# TODO: setup the install for include files
-# TODO: setup the install for misc files (license, readme, FindLUG.cmake)
+# setup the install of headers
+install(DIRECTORY include
+        DESTINATION .
+        COMPONENT devel
+        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl"
+)
+
+# setup the install of misc files
+install(FILES README.md DESTINATION ${INSTALL_MISC_DIR})
+
+# TODO: setup the install for license and FindLUG.cmake
