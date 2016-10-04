@@ -9,6 +9,10 @@ macro(lug_set_option var default type docstring)
     set(${var} ${${var}} CACHE ${type} ${docstring} FORCE)
 endmacro()
 
+if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
+endif()
+
 # determine the build type
 lug_set_option(CMAKE_BUILD_TYPE Release STRING "Choose the type of build (Debug or Release)")
 
@@ -52,5 +56,6 @@ install(DIRECTORY include
 
 # setup the install of misc files
 install(FILES README.md DESTINATION ${INSTALL_MISC_DIR})
+install(FILES cmake/modules/FindLUG.cmake DESTINATION ${INSTALL_MISC_DIR}/cmake/modules)
 
-# TODO: setup the install for license and FindLUG.cmake
+# TODO: setup the install for license
