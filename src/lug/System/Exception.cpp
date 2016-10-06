@@ -29,7 +29,7 @@ const char* lug::System::Exception::what() const noexcept {
 
     msg << _typeName << ": " << _description << std::endl;
     msg << "In " << _file;
-    msg << " at " << _function << " line " << _line;
+    msg << " at `" << _function << "` line " << _line;
 
     _fullDesc = msg.str();
     return _fullDesc.c_str();
