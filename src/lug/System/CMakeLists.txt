@@ -3,12 +3,13 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/System)
 
 # all source files
 set(SRC
-
+    ${SRCROOT}/Exception.cpp
 )
 source_group("src" FILES ${SRC})
 
 # all header files
 set(INC
+    ${INCROOT}/Exception.hpp
     ${INCROOT}/Export.hpp
 )
 source_group("inc" FILES ${INC})
