@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <lug/System/Export.hpp>
+#include <lug/System/Utils.hpp>
 
 
 namespace lug {
@@ -85,12 +86,6 @@ public:
     : Exception{"WindowException", description, file, function, line} {}
 };
 
-
-#if defined(LUG_COMPILER_MSVC)
-    #define LUG_SYSTEM_FUNCTION_NAME __FUNCSIG__
-#else
-    #define LUG_SYSTEM_FUNCTION_NAME __PRETTY_FUNCTION__
-#endif
 
 #define LUG_EXCEPT(type, desc)\
 do {\
