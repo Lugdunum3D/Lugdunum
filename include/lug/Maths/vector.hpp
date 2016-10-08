@@ -4,7 +4,8 @@
 
 namespace lug {
 namespace Maths {
-	template <typename T, uint8_t dimensions> class Vector
+	template <typename T, uint8_t dimensions>
+	class Vector
 	{
 	public:
 		Vector();
@@ -19,7 +20,8 @@ namespace Maths {
 		T& dot(const Vector<T, dimensions>& rightOperand);
 	};
 
-	template <typename T> class Vector<T, 2> {
+	template <typename T> 
+	class Vector<T, 2> {
 		union {
 			T values[2];
 			struct {
@@ -28,7 +30,8 @@ namespace Maths {
 		};
 	};
 
-	template <typename T> class Vector<T, 3> {
+	template <typename T> 
+	class Vector<T, 3> {
 		union
 		{
 			T values[3];
@@ -38,7 +41,8 @@ namespace Maths {
 		};
 	};
 
-	template <typename T> class Vector<T, 4> {
+	template <typename T>
+	class Vector<T, 4> {
 		union
 		{
 			T values[4];
