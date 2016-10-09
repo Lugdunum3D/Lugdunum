@@ -9,14 +9,14 @@ namespace Maths {
 	{
 	public:
 		Matrix();
-		~Matrix(){}
+		~Matrix() {};
 
 		T values[dimensionY][dimensionX];
 
 		Matrix<T, dimensionY, dimensionX>& operator+(const Matrix<T, dimensionY, dimensionX>& rightOperand);
 		Matrix<T, dimensionY, dimensionX>& operator-(const Matrix<T, dimensionY, dimensionX>& rightOperand);
 		Matrix<T, dimensionY, dimensionX>& operator*(const T& number);
-		Matrix<T, dimensionY, dimensionX>& operator*(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+		Matrix<T, dimensionY, dimensionX>& operator*(const Matrix<T, dimensionY, dimensionX>& rightOperand);
 		void operator=(const Matrix<T, dimensionY, dimensionX>& rightOperand);
 
 		T det(lug::Maths::Matrix<T, dimensionY, dimensionX> matrix, uint8_t dimension);

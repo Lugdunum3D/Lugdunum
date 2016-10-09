@@ -1,15 +1,16 @@
-set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Maths)
+﻿set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Maths)
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Maths)
 
 # all source files
-# set(SRC
-#    ${SRCROOT}/Exception.cpp
-# )
+ set(SRC
+    ${INCROOT}/Matrix.inl
+ )
 source_group("src" FILES ${SRC})
 
 # all header files
 set(INC
     ${INCROOT}/Export.hpp
+    ${INCROOT}/Matrix.hpp
 )
 source_group("inc" FILES ${INC})
 
