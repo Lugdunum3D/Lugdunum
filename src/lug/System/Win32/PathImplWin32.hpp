@@ -1,26 +1,25 @@
 #pragma once
 
+#include <lug/System/Path.hpp>
 #include <windows.h>
 #include <Shlobj.h>
 
-#include "Path.hpp"
-
-namespace lug
-{
-namespace System
-{
-class PathWindows : Path {
+namespace lug {
+namespace System {
+namespace priv {
+class PathImpl {
 public:
-    PathWindows() = default;
-    ~PathWindows() = default;
-    PathWindows(PathWindows const &) = default;
-    PathWindows &operator=(const PathWindows &) = default;
+    PathImpl() = default;
+    ~PathImpl() = default;
+    PathImpl(PathImpl const &) = default;
+    PathImpl &operator=(const PathImpl &) = default;
     std::string getRoot() const;
     std::string getHome() const;
     std::string getCwd() const;
     std::string getSave() const;
 private:
     char *getEnv(char *variable) const;
+};
 };
 };
 };

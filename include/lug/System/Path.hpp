@@ -2,20 +2,29 @@
 
 #include <string>
 #include <iostream>
+#include <lug/System/Export.hpp>
 
 #define MAX_PATH_SIZE 4096
 
+namespace lug {
+namespace System {
 
-namespace                   lug
+namespace priv {
+    class PathImpl;
+} // namespace priv
+
+class LUG_PATH_API Path
 {
-namespace                   System
-{
-class                       Path {
 public:
-    virtual std::string     getRoot() const = 0;
-    virtual std::string     getHome() const = 0;
-    virtual std::string     getCwd() const = 0;
-    virtual std::string     getSave() const = 0;
+    ~Path();
+    std::string getRoot() const;
+    std::string getHome() const;
+    std::string getCwd() const;
+    std::string getSave() const;
+private:
+    Path();
+    priv::PathImpl *_impl;
 };
-};
-};
+
+} // namespace System
+} // namespace lug
