@@ -1,4 +1,4 @@
-#include "PathLinux.hpp"
+#include <lug/System/PathLinux.hpp>
 
 std::string lug::System::PathLinux::getRoot() const {
     return std::string("/");
@@ -6,7 +6,6 @@ std::string lug::System::PathLinux::getRoot() const {
 
 std::string lug::System::PathLinux::getHome() const {
     struct passwd *pw = getpwuid(getuid());
-
     if (pw == NULL) {
         return std::string("");
     }

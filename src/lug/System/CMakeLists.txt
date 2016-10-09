@@ -4,6 +4,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/System)
 # all source files
 set(SRC
     ${SRCROOT}/Exception.cpp
+    ${SRCROOT}/Path.cpp
 )
 source_group("src" FILES ${SRC})
 
@@ -12,6 +13,7 @@ set(INC
     ${INCROOT}/Debug.hpp
     ${INCROOT}/Exception.hpp
     ${INCROOT}/Export.hpp
+    ${INCROOT}/Path.hpp
 )
 source_group("inc" FILES ${INC})
 
