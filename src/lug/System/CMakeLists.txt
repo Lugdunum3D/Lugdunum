@@ -6,7 +6,6 @@ set(SRC
     ${SRCROOT}/Exception.cpp
     ${SRCROOT}/Path.cpp
 )
-
 source_group("src" FILES ${SRC})
 
 # all header files
@@ -16,7 +15,6 @@ set(INC
     ${INCROOT}/Export.hpp
     ${INCROOT}/Path.hpp
 )
-
 source_group("inc" FILES ${INC})
 
 if(LUG_OS_LINUX)
@@ -33,6 +31,3 @@ endif()
 lug_add_library(lug-system
                 SOURCES ${SRC} ${INC}
 )
-
-set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Window)
-set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Window)
