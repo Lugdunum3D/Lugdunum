@@ -17,7 +17,7 @@ set(INC
 )
 source_group("inc" FILES ${INC})
 
-if(LUG_OS_LINUX)
+if(LUG_OS_LINUX OR LUG_SYSTEM_ANDROID)
 	list(APPEND INC ${SRCROOT}/Unix/PathImplUnix.hpp)
 	list(APPEND SRC ${SRCROOT}/Unix/PathImplUnix.cpp)
 elseif(LUG_OS_WINDOWS)

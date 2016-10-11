@@ -1,35 +1,28 @@
 #include <lug/System/Win32/PathImplWin32.hpp>
 
-std::string lug::System::priv::PathImpl::getRoot() const {
-    char *homeDrive = nullptr;
-    homeDrive = getEnv("HOMEDRIVE");
-
-    if (homeDrive == nullptr) {
+std::string lug::System::Path::getRoot() const {
+    char* driveLetter = getEnv("HOMEDRIVE");
+    if (driveLetter == nullptr) {
         return std::string("");
     }
-
-    std::string rootString;
-    rootString += homeDrive;
-    return rootString;
+    std::string rootPath;
+    rootPath += driveLetter;
+    return rootPath;
 }
 
-std::string lug::System::priv::PathImpl::getHome() const {
-    char *homeDrive = nullptr;
-    homeDrive = getEnv("HOMEDRIVE");
-    char *homePath = nullptr;
-    homePath = getEnv("HOMEPATH");
-
-    if (homeDrive == nullptr || homePath == nullptr) {
+std::string lug::System::Path::getHome() const {
+    char* driveLetter =  getEnv("HOMEDRIVE");
+    char* homeDirectory = getEnv("HOMEPATH");
+    if (driveLetter == nullptr || homeDirectory == nullptr) {
         return std::string("");
     }
-
-    std::string homeString;
-    homeString += homeDrive;
-    homeString += homePath;
-    return homeString;
+    std::string homePath;
+    homePath += driveLetter;
+    homePath += homeDirectory;
+    return homePath;
 }
 
-std::string lug::System::priv::PathImpl::getCwd() const {
+std::string lug::System::Path::getCwd() const {
     TCHAR cwd[MAX_PATH_SIZE];
     if (FAILED(GetCurrentDirectory(MAX_PATH_SIZE, cwd))) {
         return std::string("");
@@ -37,16 +30,23 @@ std::string lug::System::priv::PathImpl::getCwd() const {
     return cwd;
 }
 
-std::string lug::System::priv::PathImpl::getSave() const {
+std::string lug::System::Path::getSave(std::string folderName) const {
     TCHAR appDataPath[MAX_PATH_SIZE];
     if (FAILED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, appDataPath))) {
+        return std::string("");
+    }
+    std::wstring appData(&appDataPath[0]);
+    std::string savePath(appData.begin(), appData.end());
+    savePath += "\\";
+    savePath += folderName;
+    if (!CreateDirectory((TCHAR*)plop.c_str(), NULL)) {
         return std::string("");
     }
     return appDataPath;
 }
 
-char *lug::System::priv::PathImpl::getEnv(char * variable) const {
-    char *buffer = nullptr;
+char* lug::System::Path::getEnv(char * variable) const {
+    char* buffer = nullptr;
     size_t bufferSize = 0;
     if (_dupenv_s(&buffer, &bufferSize, variable) != 0 || buffer == nullptr) {
         return nullptr;

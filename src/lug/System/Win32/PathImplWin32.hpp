@@ -1,25 +1,18 @@
 #pragma once
 
-#include <lug/System/Path.hpp>
-#include <windows.h>
 #include <Shlobj.h>
+#include <windows.h>
+
+#define MAX_PATH_SIZE 4096
 
 namespace lug {
 namespace System {
-namespace priv {
-class PathImpl {
-public:
-    PathImpl() = default;
-    ~PathImpl() = default;
-    PathImpl(PathImpl const &) = default;
-    PathImpl &operator=(const PathImpl &) = default;
+namespace Path {
     std::string getRoot() const;
     std::string getHome() const;
     std::string getCwd() const;
-    std::string getSave() const;
-private:
-    char *getEnv(char *variable) const;
-};
+    std::string getSave(std::string folderName) const;
+    char* getEnv(char* variable) const;
 };
 };
 };
