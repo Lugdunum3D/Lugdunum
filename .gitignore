@@ -1,4 +1,4 @@
-# CMake Build Directory
+# CMake Build Directory
 build/
 
 # Prerequisites
@@ -33,3 +33,6 @@ build/
 *.exe
 *.out
 *.app
+
+# Emacs temporary file
+*~
