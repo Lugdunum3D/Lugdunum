@@ -1,5 +1,4 @@
-//#include <lug/System/Unix/PathImplUnix.hpp>
-#include "PathImplUnix.hpp"
+#include <lug/System/Unix/PathImplUnix.hpp>
 
 std::string lug::System::Path::getRoot() {
     return std::string("/");
