@@ -1,6 +1,8 @@
 #pragma once
 
 #include <pwd.h>
+#include <stdlib.h>
+#include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -10,11 +12,11 @@
 namespace lug {
 namespace System {
 namespace Path {
-    std::string getRoot() const;
-    std::string getHome() const;
-    std::string getCwd() const;
-    std::string getSave(std::string folderName) const;
-    char* getEnv(char* variable) const;
+    std::string getRoot();
+    std::string getHome();
+    std::string getCwd();
+    std::string getSave(std::string folderName);
+    char* getEnv(char* variable);
 };
 };
 };

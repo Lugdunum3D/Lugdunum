@@ -1,10 +1,11 @@
-#include <lug/System/Unix/PathImplUnix.hpp>
+//#include <lug/System/Unix/PathImplUnix.hpp>
+#include "PathImplUnix.hpp"
 
-std::string lug::System::Path::getRoot() const {
+std::string lug::System::Path::getRoot() {
     return std::string("/");
 }
 
-std::string lug::System::Path::getHome() const {
+std::string lug::System::Path::getHome() {
     struct passwd* pw = getpwuid(getuid());
     if (pw == NULL) {
         return std::string("");
@@ -12,11 +13,11 @@ std::string lug::System::Path::getHome() const {
     return pw->pw_dir;
 }
 
-std::string lug::System::Path::getCwd() const {
+std::string lug::System::Path::getCwd() {
     return get_current_dir_name();
 }
 
-std::string lug::System::Path::getSave(std::string folderName) const {
+std::string lug::System::Path::getSave(std::string folderName) {
     char *basePath = get_current_dir_name();
     struct passwd* pw = getpwuid(getuid());
     if (pw != NULL) {
@@ -32,6 +33,6 @@ std::string lug::System::Path::getSave(std::string folderName) const {
     return savePath;
 }
 
-char* lug::System::Path::getEnv(char* variable) const {
+char* lug::System::Path::getEnv(char* variable) {
     return getenv(variable);
 }
