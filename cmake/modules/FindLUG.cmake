@@ -50,6 +50,7 @@ endif()
 set(FIND_LUG_PATHS
     ${LUG_ROOT}
     $ENV{LUG_ROOT}
+    $ENV{ANDROID_NDK}/sources/lugdunum
     /usr/local
     /usr
     /opt/local
@@ -165,6 +166,7 @@ endforeach()
 
 if (LUG_FOUND)
     message(STATUS "Found Lugdunum in ${LUG_INCLUDE_DIR}")
+    message(STATUS "Found Lugdunum in ${LUG_LIBRARIES}")
 else()
     # include directory or library not found
     set(FIND_LUG_ERROR "Could NOT find Lugdunum (missing: ${FIND_LUG_MISSING})")

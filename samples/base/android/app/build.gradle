@@ -1,0 +1,30 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.2"
+    defaultConfig {
+        applicationId "com.lugdunum.sample"
+        minSdkVersion 23
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+        externalNativeBuild {
+            cmake {
+                abiFilters 'arm64-v8a'
+                arguments '-DANDROID_TOOLCHAIN=clang'
+                arguments '-DANDROID_STL=c++_static'
+                arguments '-DANDROID_DISABLE_FORMAT_STRING_CHECKS=true'
+                cppFlags "-std=c++11 -frtti -fexceptions -Werror,-Wformat-security"
+            }
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "../../CMakeLists.txt"
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'src/main/jniLibs/arm64-v8a', include: ['*.jar'])
+}

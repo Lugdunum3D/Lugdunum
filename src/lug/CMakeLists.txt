@@ -17,7 +17,7 @@ add_definitions(-D_USE_MATH_DEFINES)
 set(CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
 
-# add the librairies subdirectories
+# add the librairies subdirectories
 add_subdirectory(Core)
 add_subdirectory(Graphics)
 add_subdirectory(System)
