@@ -26,8 +26,8 @@ namespace Maths {
 
 		Matrix<T, dimensionY, dimensionX>& operator=(const Matrix<T, dimensionY, dimensionX>& rightOperand);
 		
-		Matrix<T, dimensionY, dimensionX>& operator+(const Matrix<T, dimensionY, dimensionX>& rightOperand);
-		Matrix<T, dimensionY, dimensionX>& operator-(const Matrix<T, dimensionY, dimensionX>& rightOperand);
+		Matrix<T, dimensionY, dimensionX> operator+(const Matrix<T, dimensionY, dimensionX>& rightOperand);
+		Matrix<T, dimensionY, dimensionX> operator-(const Matrix<T, dimensionY, dimensionX>& rightOperand);
 		Matrix<T, dimensionY, dimensionX>& operator+=(const Matrix<T, dimensionY, dimensionX>& rightOperand);
 		Matrix<T, dimensionY, dimensionX>& operator-=(const Matrix<T, dimensionY, dimensionX>& rightOperand);
 		Matrix<T, dimensionY, dimensionX> operator*(const Matrix<T, dimensionY, dimensionX>& rightOperand);
@@ -46,7 +46,7 @@ namespace Maths {
 
 		T det(lug::Maths::Matrix<T, dimensionY, dimensionX> matrix, uint8_t dimension);
 
-		static Matrix<T, dimensionY, dimensionX>& identity();
+		static Matrix<T, dimensionY, dimensionX> identity();
 
 		uint8_t getRows() const;
 		uint8_t getCols() const;

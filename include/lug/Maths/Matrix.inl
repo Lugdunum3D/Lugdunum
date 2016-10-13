@@ -38,6 +38,146 @@ inline lug::Maths::Matrix<T, dimensionY, dimensionX>& lug::Maths::Matrix<T, dime
 }
 
 template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator+(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+{
+	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
+
+	for (uint8_t i = 0; i < dimensionY; ++i) {
+		for (uint8_t j = 0; j < dimensionX; ++j) {
+			result(i, j) = _values[i][j] + rightOperand(i, j);
+		}
+	}
+	return result;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator-(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+{
+	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
+
+	for (uint8_t i = 0; i < dimensionY; ++i) {
+		for (uint8_t j = 0; j < dimensionX; ++j) {
+			result(i, j) = _values[i][j] - rightOperand(i, j);
+		}
+	}
+	return result;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX>& lug::Maths::Matrix<T, dimensionY, dimensionX>::operator+=(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+{
+	lug::Maths::Matrix<T, dimensionY, dimensionX> result = (*this) + rhs;
+	(*this) = result;
+	return *this;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX>& lug::Maths::Matrix<T, dimensionY, dimensionX>::operator-=(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+{
+	lug::Maths::Matrix<T, dimensionY, dimensionX> result = (*this) - rhs;
+	(*this) = result;
+	return *this;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator*(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+{
+	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
+
+	for (uint8_t i = 0; i < dimensionY; ++i) {
+		for (uint8_t j = 0; j < dimensionX; ++j) {
+			result(i, j) = _values[i][j] * rightOperand(i, j);
+		}
+	}
+	return result;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX>& lug::Maths::Matrix<T, dimensionY, dimensionX>::operator*=(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+{
+	lug::Maths::Matrix<T, dimensionY, dimensionX> result = (*this) * rhs;
+	(*this) = result;
+	return *this;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::transpose()
+{
+	lug::Maths::Matrix<T, dimensionX, dimensionY> transposeMatrix(0);
+
+	for (uint8_t i = 0; i < dimensionY; i++) {
+		for (uint8_t j = 0; j < dimensionX; j++) {
+			transposeMatrix(j, i) = _values[i][j];
+		}
+	}
+	return transposeMatrix;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator+(const T & scalar)
+{
+	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
+
+	for (uint8_t i = 0; i < dimensionY; ++i) {
+		for (uint8_t j = 0; j < dimensionX; ++j) {
+			result(i, j) = _values[i][j] + scalar;
+		}
+	}
+	return result;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator-(const T & scalar)
+{
+	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
+
+	for (uint8_t i = 0; i < dimensionY; ++i) {
+		for (uint8_t j = 0; j < dimensionX; ++j) {
+			result(i, j) = _values[i][j] - scalar;
+		}
+	}
+	return result;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator*(const T & scalar)
+{
+	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
+
+	for (uint8_t i = 0; i < dimensionY; ++i) {
+		for (uint8_t j = 0; j < dimensionX; ++j) {
+			result(i, j) = _values[i][j] * scalar;
+		}
+	}
+	return result;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline  lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator/(const T & scalar)
+{
+	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
+
+	for (uint8_t i = 0; i < dimensionY; ++i) {
+		for (uint8_t j = 0; j < dimensionX; ++j) {
+			result(i, j) = _values[i][j] / scalar;
+		}
+	}
+	return result;
+}
+
+
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::identity()
+{
+	Matrix<T, dimensionY, dimensionX> identityMatrix(0);
+	for (uint8_t i = 0; i < dimensionY; ++i) {
+		identityMatrix(i, i) = 1;
+	}
+	return identityMatrix;
+}
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
 inline uint8_t lug::Maths::Matrix<T, dimensionY, dimensionX>::getRows() const
 {
 	return _rows;
