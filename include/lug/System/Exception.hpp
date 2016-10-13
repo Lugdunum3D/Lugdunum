@@ -9,7 +9,7 @@
 namespace lug {
 namespace System {
 
-class LUG_SYSTEM_API Exception: public std::exception  {
+class LUG_SYSTEM_API Exception: public std::exception {
 public:
     Exception(const char *typeName, const std::string &description, const char* file, const char* function, uint32_t line) noexcept;
     Exception(Exception&& other) = default;
