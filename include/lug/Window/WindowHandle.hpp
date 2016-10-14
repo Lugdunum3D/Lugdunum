@@ -18,7 +18,7 @@ namespace Window {
 #elif defined(LUG_SYSTEM_ANDROID)
 
     using WindowHandle = void*;
-	
+
 #endif
 
 } // Window

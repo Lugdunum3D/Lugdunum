@@ -3,7 +3,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Window)
 
 # all source files
 set(SRC
-	${SRCROOT}/Window.cpp
+    ${SRCROOT}/Window.cpp
 )
 source_group("src" FILES ${SRC})
 
@@ -17,13 +17,13 @@ set(INC
 source_group("inc" FILES ${INC})
 
 if(LUG_OS_LINUX)
-	list(APPEND INC ${SRCROOT}/Unix/WindowImplX11.hpp)
-	list(APPEND SRC ${SRCROOT}/Unix/WindowImplX11.cpp)
+    list(APPEND INC ${SRCROOT}/Unix/WindowImplX11.hpp)
+    list(APPEND SRC ${SRCROOT}/Unix/WindowImplX11.cpp)
 elseif(LUG_OS_WINDOWS)
-	list(APPEND INC ${SRCROOT}/Win32/WindowImplWin32.hpp)
-	list(APPEND SRC ${SRCROOT}/Win32/WindowImplWin32.cpp)
+    list(APPEND INC ${SRCROOT}/Win32/WindowImplWin32.hpp)
+    list(APPEND SRC ${SRCROOT}/Win32/WindowImplWin32.cpp)
 else()
-	message(FATAL_ERROR "No window implementation for this platform")
+    message(FATAL_ERROR "No window implementation for this platform")
 endif()
 
 # define the target

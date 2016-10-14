@@ -2,22 +2,24 @@
 #include <lug/Window/Window.hpp>
 
 int main() {
-    auto window = lug::Window::Window::create(800, 600, "Lug window", lug::Window::Style::Default);
+    auto window = lug::Window::Window::create(800, 600, "Default Window", lug::Window::Style::Default);
     
     if (!window) {
         return 1;
     }
-    
-    while (window->isOpen()) { // While window is open execute the following
+
+    // While window is open execute the following
+    while (window->isOpen()) {
         lug::Window::Event event;
         while (window->pollEvent(event)) {
-            // Handle events here
+            if (event.type == lug::Window::EventType::CLOSE) {
+                window->close();
+            }
+
         }
     
         // ...
     }
-    
-    window->close();
     
     return 0;
 }
