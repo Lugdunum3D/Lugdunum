@@ -3,7 +3,7 @@
     package="com.lugdunum.sample">
 
     <!-- This is the platform API where NativeActivity was introduced. -->
-    <uses-sdk android:minSdkVersion="23" />
+    <uses-sdk android:minSdkVersion="24" />
 
 
     <!-- This .apk has no Java code itself, so set hasCode to false. -->

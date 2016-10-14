@@ -50,7 +50,7 @@ endif()
 set(FIND_LUG_PATHS
     ${LUG_ROOT}
     $ENV{LUG_ROOT}
-    $ENV{ANDROID_NDK}/sources/lugdunum
+    ${ANDROID_NDK}/sources/lugdunum
     /usr/local
     /usr
     /opt/local
@@ -61,6 +61,7 @@ set(FIND_LUG_PATHS
 find_path(LUG_INCLUDE_DIR lug/Config.hpp
           PATH_SUFFIXES include
           PATHS ${FIND_LUG_PATHS}
+          CMAKE_FIND_ROOT_PATH_BOTH
 )
 
 set(LUG_FOUND TRUE) # will be set to false if one of the required modules is not found
@@ -75,29 +76,33 @@ foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
     # static release library
     find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_STATIC_RELEASE
                  NAMES ${FIND_LUG_COMPONENT_NAME}-s
-                 PATH_SUFFIXES lib64 lib
+                 PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
                  PATHS ${FIND_LUG_PATHS}
+CMAKE_FIND_ROOT_PATH_BOTH
     )
 
     # static debug library
     find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_STATIC_DEBUG
                  NAMES ${FIND_LUG_COMPONENT_NAME}-s-d
-                 PATH_SUFFIXES lib64 lib
+                 PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
                  PATHS ${FIND_LUG_PATHS}
+CMAKE_FIND_ROOT_PATH_BOTH
     )
 
     # dynamic release library
     find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DYNAMIC_RELEASE
                  NAMES ${FIND_LUG_COMPONENT_NAME}
-                 PATH_SUFFIXES lib64 lib
+                 PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
                  PATHS ${FIND_LUG_PATHS}
+CMAKE_FIND_ROOT_PATH_BOTH
     )
 
     # dynamic debug library
     find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DYNAMIC_DEBUG
                  NAMES ${FIND_LUG_COMPONENT_NAME}-d
-                 PATH_SUFFIXES lib64 lib
+                 PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
                  PATHS ${FIND_LUG_PATHS}
+CMAKE_FIND_ROOT_PATH_BOTH
     )
 
     # choose the entries that fit the requested link type
@@ -165,8 +170,8 @@ foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
 endforeach()
 
 if (LUG_FOUND)
-    message(STATUS "Found Lugdunum in ${LUG_INCLUDE_DIR}")
-    message(STATUS "Found Lugdunum in ${LUG_LIBRARIES}")
+    message(STATUS "Found Lugdunum headers in ${LUG_INCLUDE_DIR}")
+    message(STATUS "Found Lugdunum libraries in ${LUG_LIBRARIES}")
 else()
     # include directory or library not found
     set(FIND_LUG_ERROR "Could NOT find Lugdunum (missing: ${FIND_LUG_MISSING})")
