@@ -21,7 +21,7 @@ public:
     ~Linear() = default;
 
     void* allocate(size_t size, size_t alignment, size_t offset);
-    void free(void *ptr) const;
+    void free(void* ptr) const;
     void reset();
 
 private:

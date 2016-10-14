@@ -14,13 +14,13 @@ template <typename T, class Arena>
 void delete_one(T* object, Arena& arena);
 
 template <typename T, class Arena, typename std::enable_if<!std::is_pod<T>::value, int>::type = 0>
-T* new_array(size_t alignment, Arena& arena, size_t nb, const char* file, int line);
+T* new_array(size_t alignment, Arena& arena, size_t nb, const char* file, size_t line);
 
 template <typename T, class Arena, typename std::enable_if<!std::is_pod<T>::value, int>::type = 0>
 void delete_array(T* ptr, Arena& arena);
 
 template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type = 0>
-T* new_array(size_t alignment, Arena& arena, size_t nb, const char* file, int line);
+T* new_array(size_t alignment, Arena& arena, size_t nb, const char* file, size_t line);
 
 template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type = 0>
 void delete_array(T* ptr, Arena& arena);

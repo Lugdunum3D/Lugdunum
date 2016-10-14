@@ -9,10 +9,10 @@ namespace Area {
 
 // A page of memory with end include in the page
 struct LUG_SYSTEM_API Page {
-    void *start;
-    void *end;
+    void* start;
+    void* end;
 
-    Page *next;
+    Page* next;
 };
 
 class LUG_SYSTEM_API IArea {

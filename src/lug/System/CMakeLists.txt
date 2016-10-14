@@ -16,13 +16,13 @@ set(INC
     ${INCROOT}/Export.hpp
     ${INCROOT}/Memory.hpp
     ${INCROOT}/Memory.inl
-    ${INCROOT}/Memory/Arena.hpp
-    ${INCROOT}/Memory/Arena.inl
     ${INCROOT}/Memory/Allocator/Basic.hpp
     ${INCROOT}/Memory/Allocator/Linear.hpp
     ${INCROOT}/Memory/Area/IArea.hpp
     ${INCROOT}/Memory/Area/Stack.hpp
     ${INCROOT}/Memory/Area/Stack.inl
+    ${INCROOT}/Memory/Arena.hpp
+    ${INCROOT}/Memory/Arena.inl
 )
 source_group("inc" FILES ${INC})
 

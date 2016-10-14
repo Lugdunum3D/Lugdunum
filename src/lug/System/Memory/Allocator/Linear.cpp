@@ -38,7 +38,7 @@ void* lug::System::Memory::Allocator::Linear::allocate(size_t size, size_t align
     return nullptr;
 }
 
-void lug::System::Memory::Allocator::Linear::free(void *ptr) const {
+void lug::System::Memory::Allocator::Linear::free(void* ptr) const {
     // Do nothing here
 }
 

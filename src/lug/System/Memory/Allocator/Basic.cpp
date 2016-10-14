@@ -6,7 +6,7 @@ void* lug::System::Memory::Allocator::Basic::allocate(size_t size, size_t alignm
     return aligned_alloc(alignment + offset, size);
 }
 
-void lug::System::Memory::Allocator::Basic::free(void *ptr) const {
+void lug::System::Memory::Allocator::Basic::free(void* ptr) const {
     std::free(ptr);
 }
 

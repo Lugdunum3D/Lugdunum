@@ -1,10 +1,8 @@
 template<class Allocator>
-Arena<Allocator>::Arena(lug::System::Memory::Area::IArea* area) : _allocator{area} {
-
-}
+Arena<Allocator>::Arena(lug::System::Memory::Area::IArea* area) : _allocator{area} {}
 
 template<class Allocator>
-void* Arena<Allocator>::allocate(size_t size, size_t alignment, const char* file, int line) {
+void* Arena<Allocator>::allocate(size_t size, size_t alignment, const char* file, size_t line) {
     return _allocator.allocate(size, alignment, 0);
 }
 
