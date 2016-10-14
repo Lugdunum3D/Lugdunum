@@ -1,7 +1,7 @@
 #include "../Maths/Matrix.hpp"
 
 template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX>::Matrix(const T & unitialValue)
+inline lug::Maths::Matrix<T, dimensionY, dimensionX>::Matrix(const T & unitialValue) : _rows(dimensionY), _colums(dimensionX)
 {
 	_values.resize(dimensionY);
 	for (auto itY = begin(_values); itY != end(_values); ++itY) {
@@ -170,6 +170,8 @@ inline  lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dime
 template<typename T, uint8_t dimensionY, uint8_t dimensionX>
 inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::identity()
 {
+	static_assert(dimensionY == dimensionX, "Determinant only on square matrix");
+
 	Matrix<T, dimensionY, dimensionX> identityMatrix(0);
 	for (uint8_t i = 0; i < dimensionY; ++i) {
 		identityMatrix(i, i) = 1;
@@ -199,20 +201,23 @@ inline const T & lug::Maths::Matrix<T, dimensionY, dimensionX>::operator()(const
 {
 	return _values[row][col];
 }
-/*template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline T lug::Maths::Matrix<T, dimensionY, dimensionX>::det(lug::Maths::Matrix<T, dimensionY, dimensionX> matrix, uint8_t dimension)
+
+template<typename T, uint8_t dimensionY, uint8_t dimensionX>
+inline T  det(lug::Maths::Matrix<T, dimensionY, dimensionX> matrix, uint8_t dimension)
 {
-	lug::Maths::Matrix<T, dimensionY - 1, dimensionX - 1> minor = lug::Maths::Matrix<T, dimensionY - 1, dimensionX - 1>();
+	static_assert(dimensionY == dimensionX, "Determinant only on square matrix");
+	
+	lug::Maths::Matrix<T, dimensionY, dimensionX> minorMatrix(0);
 	uint8_t indexMinorX = 0;
 	uint8_t indexMinorY = 0;
 	uint8_t indexRowMatrix = 0;
-	T det = { 0 };
+	T detResult = 0;
 
 	if (dimensionX == 1) {
-		return matrix.values[0][0];
+		return matrix(0, 0);
 	}
 	else if (dimension == 2) {
-		return matrix.values[0][0] * matrix.values[1][1] - matrix.values[0][1] * matrix.values[1][0];
+		return matrix(0,0) * matrix(1,1) - matrix(0, 1) * matrix(1, 0);
 	}
 	else {
 		for (uint8_t indexRowMatrix = 0; indexRowMatrix < dimension; indexRowMatrix++) {
@@ -223,7 +228,7 @@ inline T lug::Maths::Matrix<T, dimensionY, dimensionX>::det(lug::Maths::Matrix<T
 					if (indexMatrixX == indexRowMatrix) {
 						continue;
 					}
-					minor.values[indexMinorY][indexMinorX] = matrix.values[indexMatrixY][indexMatrixX];
+					minorMatrix(indexMinorY, indexMinorX) = matrix(indexMatrixY, indexMatrixX);
 					indexMinorX++;
 					if (indexMinorX == dimension - 1) {
 						indexMinorY++;
@@ -231,12 +236,14 @@ inline T lug::Maths::Matrix<T, dimensionY, dimensionX>::det(lug::Maths::Matrix<T
 					}
 				}
 			}
-			det = det + matrix.values[0][indexRowMatrix] * std::pow<T, T>(-1, indexRowMatrix);//* det(minor, dimension - 1);
+			detResult = detResult + matrix(0, indexRowMatrix) * std::pow(-1, indexRowMatrix) * det(minorMatrix, dimension - 1);
 		}
+		return detResult;
 	}
-	return det;
+	
 }
-*/
+	
+
 
 
 

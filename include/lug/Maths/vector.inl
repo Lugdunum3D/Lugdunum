@@ -1,5 +1,5 @@
 #include "..\..\..\include\lug\Maths\vector.hpp"
-
+/*
 template<typename T, uint8_t dimensions>
 inline lug::Maths::Vector<T, dimensions>::Vector()
 {
@@ -77,3 +77,4 @@ T& lug::Maths::Vector<T, dimensions>::dot(const lug::Maths::Vector<T, dimensions
 
 
 
+*/

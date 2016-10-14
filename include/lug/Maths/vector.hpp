@@ -1,8 +1,7 @@
 #pragma once
 
 #include <cstdint> 
-
-namespace lug {
+/*namespace lug {
 namespace Maths {
 	template <typename T, uint8_t dimensions>
 	class Vector
@@ -55,5 +54,5 @@ namespace Maths {
 		};
 	};
 }
-}
+}*/
 
