@@ -9,6 +9,7 @@ source_group("src" FILES ${SRC})
 
 # all header files
 set(INC
+    ${INCROOT}/Debug.hpp
     ${INCROOT}/Exception.hpp
     ${INCROOT}/Export.hpp
 )
