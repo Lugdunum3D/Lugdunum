@@ -23,7 +23,7 @@ public:
     const std::string& getDescription() const;
     const std::string& getFile() const;
     const std::string& getFunction() const;
-    const uint32_t getLine() const;
+    uint32_t getLine() const;
 
     const char* what() const noexcept override;
 
