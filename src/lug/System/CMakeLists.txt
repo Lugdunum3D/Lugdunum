@@ -23,6 +23,10 @@ set(INC
     ${INCROOT}/Memory/Area/Stack.inl
     ${INCROOT}/Memory/Arena.hpp
     ${INCROOT}/Memory/Arena.inl
+    ${INCROOT}/Memory/Policies/Thread.hpp
+    ${INCROOT}/Memory/Policies/Thread.inl
+    ${INCROOT}/Memory/Policies/BoundsChecker.hpp
+    ${INCROOT}/Memory/Policies/BoundsChecker.inl
 )
 source_group("inc" FILES ${INC})
 

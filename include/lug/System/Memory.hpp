@@ -5,6 +5,8 @@
 #include <new>
 
 #include <lug/System/Memory/Arena.hpp>
+#include <lug/System/Memory/Policies/Thread.hpp>
+#include <lug/System/Memory/Policies/BoundsChecker.hpp>
 
 namespace lug {
 namespace System {

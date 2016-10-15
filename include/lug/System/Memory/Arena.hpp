@@ -8,7 +8,7 @@ namespace lug {
 namespace System {
 namespace Memory {
 
-template<class Allocator>
+template<class Allocator, class ThreadPolicy, class BoundsCheckingPolicy>
 class LUG_SYSTEM_API Arena {
 public:
     Arena() = default;
@@ -28,6 +28,8 @@ public:
 
 private:
     Allocator _allocator;
+    ThreadPolicy _threadGuard;
+    BoundsCheckingPolicy _boundsChecker;
 };
 
 #include <lug/System/Memory/Arena.inl>

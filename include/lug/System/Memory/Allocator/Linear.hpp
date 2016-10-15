@@ -24,6 +24,8 @@ public:
     void free(void* ptr) const;
     void reset();
 
+    size_t getSize(void* ptr) const;
+
 private:
     lug::System::Memory::Area::IArea* _area;
 
