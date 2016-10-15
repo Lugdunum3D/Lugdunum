@@ -28,7 +28,7 @@ std::string lug::System::Path::priv::cwd() {
 }
 
 std::string lug::System::Path::priv::save(const std::string& folderName) {
-    char* basePath = lug::System::Path::priv::cwd().c_str();
+    std::string basePath = lug::System::Path::priv::cwd();
 
     struct passwd* pw = getpwuid(getuid());
     if (pw != nullptr) {

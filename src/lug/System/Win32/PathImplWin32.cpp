@@ -10,8 +10,7 @@ std::string lug::System::Path::priv::root() {
         return std::string("");
     }
 
-    std::string rootPath;
-    rootPath += driveLetter;
+    const std::string rootPath(driveLetter);
 
     free(driveLetter);
 
@@ -28,8 +27,7 @@ std::string lug::System::Path::priv::home() {
         return std::string("");
     }
 
-    std::string homePath;
-    homePath += driveLetter;
+    std::string homePath(driveLetter);
     homePath += homeDirectory;
 
     free(driveLetter);
