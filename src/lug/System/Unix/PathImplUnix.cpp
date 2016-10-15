@@ -6,11 +6,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-std::string lug::System::Path::priv::getRoot() {
+std::string lug::System::Path::priv::root() {
     return std::string("/");
 }
 
-std::string lug::System::Path::priv::getHome() {
+std::string lug::System::Path::priv::home() {
     struct passwd* pw = getpwuid(getuid());
     if (pw == nullptr) {
         return std::string("");
@@ -18,12 +18,16 @@ std::string lug::System::Path::priv::getHome() {
     return pw->pw_dir;
 }
 
-std::string lug::System::Path::priv::getCwd() {
-    return get_current_dir_name();
+std::string lug::System::Path::priv::cwd() {
+    char* cwd = get_current_dir_name()
+    if (cwd == nullptr) {
+        return std::string("");
+    }
+    return cwd;
 }
 
-std::string lug::System::Path::priv::getSave(std::string folderName) {
-    char* basePath = get_current_dir_name();
+std::string lug::System::Path::priv::save(const std::string& folderName) {
+    char* basePath = lug::System::Path::priv::cwd().c_str();
 
     struct passwd* pw = getpwuid(getuid());
     if (pw != nullptr) {
@@ -34,14 +38,5 @@ std::string lug::System::Path::priv::getSave(std::string folderName) {
     savePath += "/";
     savePath += folderName;
 
-    struct stat st;
-    if (stat(savePath.c_str(), &st) != 0) {
-        mkdir(savePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-    }
-
     return savePath;
-}
-
-char* lug::System::Path::priv::getEnv(char* variable) {
-    return getenv(variable);
 }

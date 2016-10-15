@@ -14,18 +14,18 @@
 
 #endif
 
-std::string lug::System::Path::getRoot() {
-    return lug::System::Path::priv::getRoot();
+std::string lug::System::Path::root() {
+    return lug::System::Path::priv::root();
 }
 
-std::string lug::System::Path::getHome() {
-    return lug::System::Path::priv::getHome();
+std::string lug::System::Path::home() {
+    return lug::System::Path::priv::home();
 }
 
-std::string lug::System::Path::getCwd() {
-    return lug::System::Path::priv::getCwd();
+std::string lug::System::Path::cwd() {
+    return lug::System::Path::priv::cwd();
 }
 
-std::string lug::System::Path::getSave(std::string folderName) {
-    return lug::System::Path::priv::getSave(folderName);
+std::string lug::System::Path::save(const std::string& folderName) {
+    return lug::System::Path::priv::save(folderName);
 }

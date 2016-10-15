@@ -3,7 +3,7 @@
 #include <Shlobj.h>
 #include <windows.h>
 
-std::string lug::System::Path::priv::getRoot() {
+std::string lug::System::Path::priv::root() {
     char* driveLetter = getEnv("HOMEDRIVE");
     if (driveLetter == nullptr) {
         return std::string("");
@@ -17,7 +17,7 @@ std::string lug::System::Path::priv::getRoot() {
     return rootPath;
 }
 
-std::string lug::System::Path::priv::getHome() {
+std::string lug::System::Path::priv::home() {
     char* driveLetter = getEnv("HOMEDRIVE");
     char* homeDirectory = getEnv("HOMEPATH");
 
@@ -35,9 +35,9 @@ std::string lug::System::Path::priv::getHome() {
     return homePath;
 }
 
-std::string lug::System::Path::priv::getCwd() {
-    TCHAR cwd[MAX_PATH_SIZE];
-    if (FAILED(GetCurrentDirectory(MAX_PATH_SIZE, cwd))) {
+std::string lug::System::Path::priv::cwd() {
+    TCHAR cwd[MAX_PATH];
+    if (FAILED(GetCurrentDirectory(MAX_PATH, cwd))) {
         return std::string("");
     }
 
@@ -47,26 +47,21 @@ std::string lug::System::Path::priv::getCwd() {
     return cwdPath;
 }
 
-std::string lug::System::Path::priv::getSave(std::string folderName) {
-    TCHAR appDataPath[MAX_PATH_SIZE];
+std::string lug::System::Path::priv::save(const std::string& folderName) {
+    TCHAR appDataPath[MAX_PATH];
     if (FAILED(SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, appDataPath))) {
         return std::string("");
     }
 
     std::basic_string<TCHAR> appData(appDataPath);
     std::string savePath(appData);
-    std::string basePath(savePath);
     savePath += "\\";
     savePath += folderName;
-
-    if (!CreateDirectory((TCHAR*)savePath.c_str(), nullptr)) {
-        return basePath;
-    }
 
     return savePath;
 }
 
-char* lug::System::Path::priv::getEnv(char* variable) {
+char* lug::System::Path::priv::getEnv(const char* variable) {
     char* buffer = nullptr;
     size_t bufferSize = 0;
     if (_dupenv_s(&buffer, &bufferSize, variable) != 0 || buffer == nullptr) {

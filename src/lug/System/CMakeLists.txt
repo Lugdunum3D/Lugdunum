@@ -1,6 +1,3 @@
-set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/System)
-set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/System)
-
 # all source files
 set(SRC
     ${SRCROOT}/Exception.cpp
@@ -31,3 +28,6 @@ endif()
 lug_add_library(lug-system
                 SOURCES ${SRC} ${INC}
 )
+
+set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/System)
+set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/System)

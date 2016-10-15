@@ -1,17 +1,19 @@
 #pragma once
 
-#include <lug/System/Path.hpp>
+#include <string>
 
 namespace lug {
 namespace System {
 namespace Path {
 namespace priv {
-std::string getRoot();
-std::string getHome();
-std::string getCwd();
-std::string getSave(std::string folderName);
-char* getEnv(char* variable);
-};
-};
-};
-};
+
+std::string root();
+std::string home();
+std::string cwd();
+std::string save(const std::string& folderName);
+char* getEnv(const char* variable);
+
+}
+}
+}
+}
