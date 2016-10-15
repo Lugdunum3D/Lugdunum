@@ -14,6 +14,21 @@ add_executable(${EXECUTABLE_NAME} main.cpp)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/modules")
 
+include("${CMAKE_SOURCE_DIR}/../../cmake/Config.cmake")
+
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 14)
+
+if(LUG_COMPILER_MSVC)
+    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    else()
+        list(APPEND CMAKE_CXX_FLAGS "/W4")
+    endif()
+elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
+    list(APPEND CMAKE_CXX_FLAGS "-Wall -Wextra -Werror")
+endif()
+
 # find Lugdunum and link with it
 find_package(LUG REQUIRED system)
 if(LUG_FOUND)

@@ -20,7 +20,7 @@ const std::string& lug::System::Exception::getFunction() const {
     return _function;
 }
 
-const uint32_t lug::System::Exception::getLine() const {
+uint32_t lug::System::Exception::getLine() const {
     return _line;
 }
 
