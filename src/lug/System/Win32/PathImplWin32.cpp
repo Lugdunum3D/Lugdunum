@@ -44,8 +44,8 @@ std::string lug::System::Path::priv::cwd() {
         return std::string("");
     }
 
-    std::basic_string<TCHAR> cwdString(cwd);
-    std::string cwdPath(cwdString);
+    std::wstring cwdString(&cwd[0]);
+    std::string cwdPath(cwdString.begin(), cwdString.end());
 
     return std::move(cwdPath);
 }
@@ -56,8 +56,8 @@ std::string lug::System::Path::priv::save(const std::string& folderName) {
         return std::string("");
     }
 
-    std::basic_string<TCHAR> appData(appDataPath);
-    std::string savePath(appData);
+    std::wstring appData(&appDataPath[0]);
+    std::string savePath(appData.begin(), appData.end());
     savePath += "\\";
     savePath += folderName;
 
