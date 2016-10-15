@@ -4,6 +4,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/System)
 # all source files
 set(SRC
     ${SRCROOT}/Exception.cpp
+    ${SRCROOT}/Logger/Logger.cpp
     ${SRCROOT}/Memory/Allocator/Basic.cpp
     ${SRCROOT}/Memory/Allocator/Linear.cpp
     ${SRCROOT}/Memory/Allocator/Stack.cpp
@@ -11,11 +12,23 @@ set(SRC
 )
 source_group("src" FILES ${SRC})
 
+# Include Logger cpp files depending on user os
+if(LUG_OS_LINUX)
+    list(APPEND SRC ${SRCROOT}/Logger/LoggerImplLinux.cpp)
+elseif(LUG_OS_WINDOWS)
+    list(APPEND SRC ${SRCROOT}/Logger/LoggerImplWindows.cpp)
+elseif(LUG_OS_ANDROID)
+    list(APPEND SRC ${SRCROOT}/Logger/LoggerImplAndroid.cpp)
+else()
+    message(FATAL_ERROR "No Logger implementation for this platform")
+endif()
+
 # all header files
 set(INC
     ${INCROOT}/Debug.hpp
     ${INCROOT}/Exception.hpp
     ${INCROOT}/Export.hpp
+    ${INCROOT}/Logger.hpp
     ${INCROOT}/Memory.hpp
     ${INCROOT}/Memory.inl
     ${INCROOT}/Memory/Allocator/Basic.hpp
