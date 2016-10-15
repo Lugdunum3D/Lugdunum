@@ -14,7 +14,7 @@ public:
 };
 
 template<class SynchronizationPrimitive>
-class LUG_SYSTEM_API MultiThreadPolicy {
+class MultiThreadPolicy {
 public:
     void enter();
     void leave();

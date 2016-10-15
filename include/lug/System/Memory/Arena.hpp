@@ -9,7 +9,7 @@ namespace System {
 namespace Memory {
 
 template<class Allocator, class ThreadPolicy, class BoundsCheckingPolicy>
-class LUG_SYSTEM_API Arena {
+class Arena {
 public:
     Arena() = default;
     explicit Arena(lug::System::Memory::Area::IArea* area);

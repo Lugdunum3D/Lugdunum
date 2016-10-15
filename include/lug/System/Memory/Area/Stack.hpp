@@ -9,7 +9,7 @@ namespace Memory {
 namespace Area {
 
 template <size_t size>
-class LUG_SYSTEM_API Stack : public IArea {
+class Stack : public IArea {
 public:
     Stack() = default;
     Stack(const Stack&) = delete;
