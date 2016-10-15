@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <utility>
 #include <unistd.h>
 
 std::string lug::System::Path::priv::root() {
@@ -19,7 +20,7 @@ std::string lug::System::Path::priv::home() {
 }
 
 std::string lug::System::Path::priv::cwd() {
-    char* cwd = get_current_dir_name()
+    char* cwd = get_current_dir_name();
     if (cwd == nullptr) {
         return std::string("");
     }
@@ -38,5 +39,5 @@ std::string lug::System::Path::priv::save(const std::string& folderName) {
     savePath += "/";
     savePath += folderName;
 
-    return savePath;
+    return std::move(savePath);
 }

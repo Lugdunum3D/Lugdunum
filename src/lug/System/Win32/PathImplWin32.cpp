@@ -1,6 +1,7 @@
 #include <lug/System/Win32/PathImplWin32.hpp>
 
 #include <Shlobj.h>
+#include <utility>
 #include <windows.h>
 
 std::string lug::System::Path::priv::root() {
@@ -14,7 +15,7 @@ std::string lug::System::Path::priv::root() {
 
     free(driveLetter);
 
-    return rootPath;
+    return std::move(rootPath);
 }
 
 std::string lug::System::Path::priv::home() {
@@ -22,6 +23,8 @@ std::string lug::System::Path::priv::home() {
     char* homeDirectory = getEnv("HOMEPATH");
 
     if (driveLetter == nullptr || homeDirectory == nullptr) {
+        free(driveLetter);
+        free(homeDirectory);
         return std::string("");
     }
 
@@ -32,7 +35,7 @@ std::string lug::System::Path::priv::home() {
     free(driveLetter);
     free(homeDirectory);
 
-    return homePath;
+    return std::move(homePath);
 }
 
 std::string lug::System::Path::priv::cwd() {
@@ -44,7 +47,7 @@ std::string lug::System::Path::priv::cwd() {
     std::basic_string<TCHAR> cwdString(cwd);
     std::string cwdPath(cwdString);
 
-    return cwdPath;
+    return std::move(cwdPath);
 }
 
 std::string lug::System::Path::priv::save(const std::string& folderName) {
@@ -58,7 +61,7 @@ std::string lug::System::Path::priv::save(const std::string& folderName) {
     savePath += "\\";
     savePath += folderName;
 
-    return savePath;
+    return std::move(savePath);
 }
 
 char* lug::System::Path::priv::getEnv(const char* variable) {
