@@ -8,10 +8,6 @@
 
     #include <lug/System/Unix/PathImplUnix.hpp>
 
-#elif defined(LUG_SYSTEM_ANDROID)
-
-    #include <lug/System/Unix/PathImplUnix.hpp>
-
 #endif
 
 std::string lug::System::Path::root() {
