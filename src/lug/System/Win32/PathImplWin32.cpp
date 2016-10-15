@@ -4,6 +4,10 @@
 #include <utility>
 #include <windows.h>
 
+/*
+    Return Win32 root
+    Example: C:
+*/
 std::string lug::System::Path::priv::root() {
     char* driveLetter = getEnv("HOMEDRIVE");
     if (driveLetter == nullptr) {
@@ -17,6 +21,10 @@ std::string lug::System::Path::priv::root() {
     return std::move(rootPath);
 }
 
+/*
+    Return Win32 home
+    Example: C:\Users\{USERNAME}
+*/
 std::string lug::System::Path::priv::home() {
     char* driveLetter = getEnv("HOMEDRIVE");
     char* homeDirectory = getEnv("HOMEPATH");
@@ -36,6 +44,10 @@ std::string lug::System::Path::priv::home() {
     return std::move(homePath);
 }
 
+/*
+    Return the current working directory
+    Example:  D:\Vulkan\Lugdunum\Test
+*/
 std::string lug::System::Path::priv::cwd() {
     TCHAR cwd[MAX_PATH];
     if (FAILED(GetCurrentDirectory(MAX_PATH, cwd))) {
@@ -48,6 +60,10 @@ std::string lug::System::Path::priv::cwd() {
     return std::move(cwdPath);
 }
 
+/*
+    Return the path of saves folder
+    Example: C:\Users\{USERNAME}\AppData\Roaming\lugdunum
+*/
 std::string lug::System::Path::priv::save(const std::string& folderName) {
     TCHAR appDataPath[MAX_PATH];
     if (FAILED(SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, appDataPath))) {
@@ -62,6 +78,9 @@ std::string lug::System::Path::priv::save(const std::string& folderName) {
     return std::move(savePath);
 }
 
+/*
+    Get Win32 variable from environnement
+*/
 char* lug::System::Path::priv::getEnv(const char* variable) {
     char* buffer = nullptr;
     size_t bufferSize = 0;

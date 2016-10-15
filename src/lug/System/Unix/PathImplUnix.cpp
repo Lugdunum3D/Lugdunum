@@ -7,10 +7,18 @@
 #include <utility>
 #include <unistd.h>
 
+/*
+    Return Unix root
+    Example: /
+*/
 std::string lug::System::Path::priv::root() {
     return std::string("/");
 }
 
+/*
+    Return Unix home
+    Example: /home/${USER}
+*/
 std::string lug::System::Path::priv::home() {
     struct passwd* pw = getpwuid(getuid());
     if (pw == nullptr) {
@@ -19,6 +27,10 @@ std::string lug::System::Path::priv::home() {
     return pw->pw_dir;
 }
 
+/*
+    Return the current working directory
+    Example: /home/${USER}/vulkan/lugdunum
+*/
 std::string lug::System::Path::priv::cwd() {
     char* cwd = get_current_dir_name();
     if (cwd == nullptr) {
@@ -27,6 +39,10 @@ std::string lug::System::Path::priv::cwd() {
     return cwd;
 }
 
+/*
+    Return the path of saves folder
+    Example: /home/${USER}/.lug
+*/
 std::string lug::System::Path::priv::save(const std::string& folderName) {
     std::string basePath = lug::System::Path::priv::cwd();
 
@@ -35,9 +51,5 @@ std::string lug::System::Path::priv::save(const std::string& folderName) {
         basePath = pw->pw_dir;
     }
 
-    std::string savePath(basePath);
-    savePath += "/";
-    savePath += folderName;
-
-    return std::move(savePath);
+    return basePath + "/" + folderName;
 }
