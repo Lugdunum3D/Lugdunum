@@ -1,0 +1,7 @@
+deployment:
+  feature:
+    branch: feature-travis-ci
+    command:
+      - mkdir build
+      - cd build
+      - cmake ../ && make
