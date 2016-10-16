@@ -15,18 +15,18 @@ set(INC
 source_group("inc" FILES ${INC})
 
 if(LUG_OS_LINUX)
-	list(APPEND INC ${SRCROOT}/Unix/PathImplUnix.hpp)
-	list(APPEND SRC ${SRCROOT}/Unix/PathImplUnix.cpp)
+    list(APPEND INC ${SRCROOT}/Unix/PathImplUnix.hpp)
+    list(APPEND SRC ${SRCROOT}/Unix/PathImplUnix.cpp)
 elseif(LUG_OS_WINDOWS)
-	list(APPEND INC ${SRCROOT}/Win32/PathImplWin32.hpp)
-	list(APPEND SRC ${SRCROOT}/Win32/PathImplWin32.cpp)
+    list(APPEND INC ${SRCROOT}/Win32/PathImplWin32.hpp)
+    list(APPEND SRC ${SRCROOT}/Win32/PathImplWin32.cpp)
 else()
-	message(FATAL_ERROR "No path implementation for this platform")
+    message(FATAL_ERROR "No path implementation for this platform")
 endif()
 
 # define the target
 lug_add_library(lug-system
-                SOURCES ${SRC} ${INC}
+    SOURCES ${SRC} ${INC}
 )
 
 set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/System)
