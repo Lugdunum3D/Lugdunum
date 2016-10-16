@@ -32,11 +32,15 @@ std::string lug::System::Path::priv::home() {
     Example: /home/${USER}/vulkan/lugdunum
 */
 std::string lug::System::Path::priv::cwd() {
-    char* cwd = get_current_dir_name();
+    const char* cwd = get_current_dir_name();
     if (cwd == nullptr) {
         return std::string("");
     }
-    return cwd;
+
+    std::string cwdPath(cwd);
+    free(cwd);
+
+    return std::move(cwdPath);
 }
 
 /*
