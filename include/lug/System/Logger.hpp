@@ -134,11 +134,64 @@ struct LUG_SYSTEM_API FileWriterPolicy {
 };
 
 
-#define LUG_LOG(logger, channel, type, verbosity, format, ...)\
+#define LUG_LOG(logger, channel, type, verbosity, ...)\
 do {\
-    logger->log(channel, type, verbosity, { __FILE__, LUG_SYSTEM_FUNCTION_NAME, __LINE__}, format, __VA_ARGS__); \
+    logger->log(channel, type, verbosity, { __FILE__, LUG_SYSTEM_FUNCTION_NAME, __LINE__}, __VA_ARGS__); \
 } while (0)
 
+// Define each type as its own macro to facilitate calling
+#define LUG_LOG_INFO(logger, channel, verbosity, ...)\
+    LUG_LOG(logger, channel, lug::System::Logger::Type::Info, verbosity, __VA_ARGS__)
 
-}
-}
+#define LUG_LOG_WARNING(logger, channel, verbosity, ...)\
+    LUG_LOG(logger, channel, lug::System::Logger::Type::Warning, verbosity, __VA_ARGS__)
+
+#define LUG_LOG_ERROR(logger, channel, verbosity, ...)\
+    LUG_LOG(logger, channel, lug::System::Logger::Type::Error, verbosity, __VA_ARGS__)
+
+#define LUG_LOG_FATAL(logger, channel, verbosity, ...)\
+    LUG_LOG(logger, channel, lug::System::Logger::Type::Fatal, verbosity, __VA_ARGS__)
+
+#define LUG_LOG_ASSERT(logger, channel, verbosity, ...)\
+    LUG_LOG(logger, channel, lug::System::Logger::Type::Assert, verbosity, __VA_ARGS__)
+
+} // namespace System
+
+#if !defined(LUG_NO_SHORT_LOG)
+
+    lug::System::Logger &getLogger();
+
+    #define LOGINF(...)\
+    do {\
+        lug::System::Logger *logger = &lug::getLogger(); \
+        LUG_LOG(logger, lug::System::Logger::Channel::User, lug::System::Logger::Type::Info, 1, __VA_ARGS__); \
+    } while (0)
+
+    #define LOGWRN(...)\
+    do {\
+        lug::System::Logger *logger = &lug::getLogger(); \
+        LUG_LOG(logger, lug::System::Logger::Channel::User, lug::System::Logger::Type::Warning, 1, __VA_ARGS__); \
+    } while (0)
+
+    #define LOGERR(...)\
+    do {\
+        lug::System::Logger *logger = &lug::getLogger(); \
+        LUG_LOG(logger, lug::System::Logger::Channel::User, lug::System::Logger::Type::Error, 1, __VA_ARGS__); \
+    } while (0)
+
+    #define LOGFAT(...)\
+    do {\
+        lug::System::Logger *logger = &lug::getLogger(); \
+        LUG_LOG(logger, lug::System::Logger::Channel::User, lug::System::Logger::Type::Fatal, 1, __VA_ARGS__); \
+    } while (0)
+
+    #define LOGASR(...)\
+    do {\
+        lug::System::Logger *logger = &lug::getLogger(); \
+        LUG_LOG(logger, lug::System::Logger::Channel::User, lug::System::Logger::Type::Assert, 1, __VA_ARGS__); \
+    } while (0)
+
+#endif
+
+} // namespace lug
+

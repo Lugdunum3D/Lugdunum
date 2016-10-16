@@ -6,6 +6,14 @@
 #include <iomanip>
 
 namespace lug {
+
+
+LUG_SYSTEM_API System::Logger &getLogger() {
+    static lug::System::LoggerImpl<lug::System::NoFilterPolicy, lug::System::ConsoleFormatPolicy, lug::System::ConsoleWriterPolicy> logger;
+    return logger;
+}
+
+
 namespace System {
 
 
