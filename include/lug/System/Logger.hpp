@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <lug/System/Export.hpp>
 #include <lug/System/SourceInfo.hpp>
+#include <lug/System/Utils.hpp>
 
 
 namespace lug {
@@ -14,23 +15,23 @@ namespace System {
 // enum: RENDER_API, RENDER_ENGINE, PHYSICS_ENGINE, etc...
 // map pair: { RENDER_API, "RENDER_API" }, { RENDER_ENGINE, "RENDER_ENGINE" }, etc...
 #define LUG_LOG_CHANNELS(PROCESS)   \
-    PROCESS(VULKAN),                \
-    PROCESS(RENDER),                \
-    PROCESS(PHYSICS),               \
-    PROCESS(SCRIPT),                \
-    PROCESS(NETWORK),               \
-    PROCESS(SOUND),                 \
-    PROCESS(MEMORY),                \
-    PROCESS(WINDOW),                \
-    PROCESS(MATH),                  \
-    PROCESS(USER),                  \
+    PROCESS(Vulkan),                \
+    PROCESS(Render),                \
+    PROCESS(Physics),               \
+    PROCESS(Script),                \
+    PROCESS(Network),               \
+    PROCESS(Sound),                 \
+    PROCESS(Memory),                \
+    PROCESS(Window),                \
+    PROCESS(Math),                  \
+    PROCESS(User),                  \
 
 #define LUG_LOG_TYPES(PROCESS)      \
-    PROCESS(INFO),                  \
-    PROCESS(WARNING),               \
-    PROCESS(ERROR),                 \
-    PROCESS(FATAL),                 \
-    PROCESS(ASSERT),                \
+    PROCESS(Info),                  \
+    PROCESS(Warning),               \
+    PROCESS(Error),                 \
+    PROCESS(Fatal),                 \
+    PROCESS(Assert),                \
 
 #define LUG_LOG_ENUM(CHANNEL) CHANNEL
 #define LUG_LOG_MAP_PAIR_C(CHANNEL) { Logger::Channel::CHANNEL, #CHANNEL }
@@ -41,11 +42,11 @@ class LUG_SYSTEM_API Logger {
 public:
     using Buffer = std::string;
 
-    enum class Channel : char {
+    enum class Channel : uint8_t {
         LUG_LOG_CHANNELS(LUG_LOG_ENUM)
     };
 
-    enum class Type : char {
+    enum class Type : uint8_t {
         LUG_LOG_TYPES(LUG_LOG_ENUM)
     };
 
@@ -63,8 +64,8 @@ public:
     virtual void log(Channel channel, Type type, std::size_t verbosity,
         const SourceInfo& SourceInfo, const char* format, ...) const = 0;
 
-    static const char* getChannelName(Channel c);
-    static const char* getTypeName(Type t);
+    static std::string getChannelName(Channel c);
+    static std::string getTypeName(Type t);
 
 private:
     static std::unordered_map<Channel, const char*> _channelNames;
