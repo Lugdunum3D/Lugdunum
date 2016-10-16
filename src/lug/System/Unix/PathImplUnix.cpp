@@ -17,7 +17,7 @@ std::string lug::System::Path::priv::root() {
 
 /*
     Return Unix home
-    Example: /home/${USER}
+    Example: /home/{USER}
 */
 std::string lug::System::Path::priv::home() {
     struct passwd* pw = getpwuid(getuid());
@@ -29,7 +29,7 @@ std::string lug::System::Path::priv::home() {
 
 /*
     Return the current working directory
-    Example: /home/${USER}/vulkan/lugdunum
+    Example: /home/{USER}/vulkan/lugdunum
 */
 std::string lug::System::Path::priv::cwd() {
     const char* cwd = get_current_dir_name();
@@ -45,7 +45,7 @@ std::string lug::System::Path::priv::cwd() {
 
 /*
     Return the path of saves folder
-    Example: /home/${USER}/.lug
+    Example: /home/{USER}/{FOLDER_NAME}
 */
 std::string lug::System::Path::priv::save(const std::string& folderName) {
     std::string basePath = lug::System::Path::priv::cwd();
