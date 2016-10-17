@@ -9,7 +9,7 @@ namespace System {
 namespace Memory {
 namespace Policies {
 
-class LUG_SYSTEM_API NoBoundsChecking {
+class NoBoundsChecking {
 public:
     static constexpr size_t SizeFront = 0;
     static constexpr size_t SizeBack = 0;
@@ -21,7 +21,7 @@ public:
     void checkBack(void* ptr, size_t size) const;
 };
 
-class LUG_SYSTEM_API SimpleBoundsChecking {
+class SimpleBoundsChecking {
 public:
     static constexpr size_t SizeFront = 4;
     static constexpr size_t SizeBack = 4;

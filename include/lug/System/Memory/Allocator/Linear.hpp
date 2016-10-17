@@ -37,7 +37,7 @@ public:
     size_t getSize(void* ptr) const;
 
 private:
-    lug::System::Memory::Area::IArea* _area;
+    lug::System::Memory::Area::IArea* const _area;
 
     void* _current{nullptr};
     lug::System::Memory::Area::Page* _currentPage{nullptr};

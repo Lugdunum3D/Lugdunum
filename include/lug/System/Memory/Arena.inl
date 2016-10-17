@@ -1,8 +1,18 @@
-template<class Allocator, class ThreadPolicy, class BoundsCheckingPolicy>
-Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::Arena(lug::System::Memory::Area::IArea* area) : _allocator{area} {}
+template<
+    class Allocator,
+    class ThreadPolicy,
+    class BoundsCheckingPolicy,
+    class MemoryMarkingPolicy
+>
+Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::Arena(lug::System::Memory::Area::IArea* area) : _allocator{area} {}
 
-template<class Allocator, class ThreadPolicy, class BoundsCheckingPolicy>
-void* Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::allocate(size_t size, size_t alignment, const char* file, size_t line) {
+template<
+    class Allocator,
+    class ThreadPolicy,
+    class BoundsCheckingPolicy,
+    class MemoryMarkingPolicy
+>
+void* Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::allocate(size_t size, size_t alignment, const char* file, size_t line) {
     const size_t newSize = size + BoundsCheckingPolicy::SizeFront + BoundsCheckingPolicy::SizeBack;
 
     _threadGuard.enter();
@@ -11,6 +21,7 @@ void* Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::allocate(size_t size
     const size_t allocatedSize = _allocator.getSize(ptr);
 
     _boundsChecker.guardFront(ptr, allocatedSize);
+    _memoryMarker.markAllocation(ptr + BoundsCheckingPolicy::SizeFront, allocatedSize - BoundsCheckingPolicy::SizeFront - BoundsCheckingPolicy::SizeBack);
     _boundsChecker.guardBack(ptr, allocatedSize);
 
     _threadGuard.leave();
@@ -18,8 +29,13 @@ void* Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::allocate(size_t size
     return (ptr + BoundsCheckingPolicy::SizeFront);
 }
 
-template<class Allocator, class ThreadPolicy, class BoundsCheckingPolicy>
-void Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::free(void* ptr) {
+template<
+    class Allocator,
+    class ThreadPolicy,
+    class BoundsCheckingPolicy,
+    class MemoryMarkingPolicy
+>
+void Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::free(void* ptr) {
     if (!ptr) {
         return;
     }
@@ -32,13 +48,20 @@ void Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::free(void* ptr) {
     _boundsChecker.checkFront(originalMemory, allocatedSize);
     _boundsChecker.checkBack(originalMemory, allocatedSize);
 
+    _memoryMarker.markDeallocation(originalMemory, allocatedSize);
+
     _allocator.free(originalMemory);
 
     _threadGuard.leave();
 }
 
-template<class Allocator, class ThreadPolicy, class BoundsCheckingPolicy>
-void Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::reset() {
+template<
+    class Allocator,
+    class ThreadPolicy,
+    class BoundsCheckingPolicy,
+    class MemoryMarkingPolicy
+>
+void Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::reset() {
     _threadGuard.enter();
 
     _boundsChecker.checkReset();
@@ -47,12 +70,22 @@ void Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::reset() {
     _threadGuard.leave();
 }
 
-template<class Allocator, class ThreadPolicy, class BoundsCheckingPolicy>
-Allocator& Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::allocator() {
+template<
+    class Allocator,
+    class ThreadPolicy,
+    class BoundsCheckingPolicy,
+    class MemoryMarkingPolicy
+>
+Allocator& Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::allocator() {
     return _allocator;
 }
 
-template<class Allocator, class ThreadPolicy, class BoundsCheckingPolicy>
-const Allocator& Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::allocator() const {
+template<
+    class Allocator,
+    class ThreadPolicy,
+    class BoundsCheckingPolicy,
+    class MemoryMarkingPolicy
+>
+const Allocator& Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::allocator() const {
     return _allocator;
 }

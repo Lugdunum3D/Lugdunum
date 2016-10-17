@@ -7,7 +7,7 @@ namespace System {
 namespace Memory {
 namespace Policies {
 
-class LUG_SYSTEM_API SingleThreadPolicy {
+class SingleThreadPolicy {
 public:
     void enter() const;
     void leave() const;

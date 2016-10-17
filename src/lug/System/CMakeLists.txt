@@ -27,6 +27,8 @@ set(INC
     ${INCROOT}/Memory/Policies/Thread.inl
     ${INCROOT}/Memory/Policies/BoundsChecker.hpp
     ${INCROOT}/Memory/Policies/BoundsChecker.inl
+    ${INCROOT}/Memory/Policies/MemoryMarker.hpp
+    ${INCROOT}/Memory/Policies/MemoryMarker.inl
 )
 source_group("inc" FILES ${INC})
 

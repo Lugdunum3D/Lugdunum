@@ -25,8 +25,8 @@ public:
 private:
     char _data[size];
 
-    Page _page = {&_data[0], &_data[size - 1], nullptr};
-    bool _nextPage = true;
+    Page _page{&_data[0], &_data[size - 1], nullptr};
+    bool _nextPage{true};
 };
 
 #include <lug/System/Memory/Area/Stack.inl>

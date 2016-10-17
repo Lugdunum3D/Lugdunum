@@ -7,6 +7,7 @@
 #include <lug/System/Memory/Arena.hpp>
 #include <lug/System/Memory/Policies/Thread.hpp>
 #include <lug/System/Memory/Policies/BoundsChecker.hpp>
+#include <lug/System/Memory/Policies/MemoryMarker.hpp>
 
 namespace lug {
 namespace System {
