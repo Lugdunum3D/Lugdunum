@@ -46,3 +46,13 @@ void Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::reset() {
 
     _threadGuard.leave();
 }
+
+template<class Allocator, class ThreadPolicy, class BoundsCheckingPolicy>
+Allocator& Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::allocator() {
+    return _allocator;
+}
+
+template<class Allocator, class ThreadPolicy, class BoundsCheckingPolicy>
+const Allocator& Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy>::allocator() const {
+    return _allocator;
+}

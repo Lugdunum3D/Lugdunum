@@ -26,6 +26,9 @@ public:
     void free(void* ptr);
     void reset();
 
+    Allocator& allocator();
+    const Allocator& allocator() const;
+
 private:
     Allocator _allocator;
     ThreadPolicy _threadGuard;

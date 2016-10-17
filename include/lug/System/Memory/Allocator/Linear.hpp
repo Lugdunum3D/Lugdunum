@@ -11,6 +11,12 @@ namespace Allocator {
 
 class LUG_SYSTEM_API Linear {
 public:
+    struct Mark {
+        void* current{nullptr};
+        lug::System::Memory::Area::Page* currentPage{nullptr};
+    };
+
+public:
     Linear(lug::System::Memory::Area::IArea* area);
     Linear(const Linear&) = delete;
     Linear(Linear&&) = default;
@@ -24,14 +30,18 @@ public:
     void free(void* ptr) const;
     void reset();
 
+    // Dangerous operations
+    Mark getMark() const;
+    void rewind(const Mark& mark);
+
     size_t getSize(void* ptr) const;
 
 private:
     lug::System::Memory::Area::IArea* _area;
 
-    void* _current = nullptr;
-    lug::System::Memory::Area::Page* _currentPage;
-    lug::System::Memory::Area::Page* _firstPage;
+    void* _current{nullptr};
+    lug::System::Memory::Area::Page* _currentPage{nullptr};
+    lug::System::Memory::Area::Page* _firstPage{nullptr};
 };
 
 }

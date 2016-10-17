@@ -32,7 +32,7 @@ void* lug::System::Memory::Allocator::Linear::allocate(size_t size, size_t align
         }
 
         // Out of memory on this page, just request a new one and try to reallocate
-        _currentPage = _area->requestNextPage();
+        _currentPage = _currentPage->next = _currentPage->next ? _currentPage->next : _area->requestNextPage();
         _current = _currentPage ? _currentPage->start : nullptr;
     }
 
@@ -49,6 +49,15 @@ void lug::System::Memory::Allocator::Linear::reset() {
     if (_currentPage) {
         _current = _currentPage->start;
     }
+}
+
+lug::System::Memory::Allocator::Linear::Mark lug::System::Memory::Allocator::Linear::getMark() const {
+    return {_current, _currentPage};
+}
+
+void lug::System::Memory::Allocator::Linear::rewind(const lug::System::Memory::Allocator::Linear::Mark& mark) {
+    _current = mark.current;
+    _currentPage = mark.currentPage;
 }
 
 size_t lug::System::Memory::Allocator::Linear::getSize(void *ptr) const {
