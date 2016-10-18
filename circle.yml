@@ -1,6 +1,6 @@
 dependencies:
   pre:
-    - apt-get install -y clang
+    - sudo apt-get install -y clang
   override:
     - mkdir build
     - cd build && cmake ../ && make
