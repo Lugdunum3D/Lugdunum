@@ -34,7 +34,7 @@ public:
 
 private:
     static constexpr char* MagicFront = "\xDE\xAD";
-    static constexpr char* MagicBack = "\xDE\xAD";
+    static constexpr char* MagicBack = "\xBE\xEF";
 };
 
 #include <lug/System/Memory/Policies/BoundsChecker.inl>
