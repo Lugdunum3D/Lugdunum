@@ -1,7 +1,6 @@
-deployment:
-  feature:
-    branch: feature-travis-ci
-    command:
-      - mkdir build
-      - cd build
-      - cmake ../ && make
+dependencies:
+  pre:
+    - apt-get install -y clang
+  override:
+    - mkdir build
+    - cd build && cmake ../ && make
