@@ -40,4 +40,3 @@ add_subdirectory(Window)
 if(LUG_OS_ANDROID)
     add_subdirectory(Main)
 endif()
-
