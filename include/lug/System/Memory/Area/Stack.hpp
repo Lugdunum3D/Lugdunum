@@ -25,7 +25,7 @@ public:
 private:
     char _data[size];
 
-    Page _page{&_data[0], &_data[size - 1], nullptr};
+    Page _page{&_data[0], &_data[size - 1], nullptr, nullptr};
     bool _nextPage{true};
 };
 

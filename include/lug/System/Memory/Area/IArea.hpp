@@ -8,11 +8,13 @@ namespace Memory {
 namespace Area {
 
 // A page of memory with end include in the page
+// The areas had to set prev to the previous page and next to nullptr
 struct LUG_SYSTEM_API Page {
-    void* start;
-    void* end;
+    void* start{nullptr};
+    void* end{nullptr};
 
-    Page* next;
+    Page* prev{nullptr};
+    Page* next{nullptr};
 };
 
 class LUG_SYSTEM_API IArea {

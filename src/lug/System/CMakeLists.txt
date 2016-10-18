@@ -6,6 +6,7 @@ set(SRC
     ${SRCROOT}/Exception.cpp
     ${SRCROOT}/Memory/Allocator/Basic.cpp
     ${SRCROOT}/Memory/Allocator/Linear.cpp
+    ${SRCROOT}/Memory/Allocator/Stack.cpp
 )
 source_group("src" FILES ${SRC})
 
@@ -18,6 +19,7 @@ set(INC
     ${INCROOT}/Memory.inl
     ${INCROOT}/Memory/Allocator/Basic.hpp
     ${INCROOT}/Memory/Allocator/Linear.hpp
+    ${INCROOT}/Memory/Allocator/Stack.hpp
     ${INCROOT}/Memory/Area/IArea.hpp
     ${INCROOT}/Memory/Area/Stack.hpp
     ${INCROOT}/Memory/Area/Stack.inl
