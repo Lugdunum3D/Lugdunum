@@ -34,7 +34,7 @@ void delete_array(T* ptr, Arena& arena);
 }
 }
 
-#define LUG_NEW_ALIGN(T, alignment, arena) new (arena.allocate(sizeof(T), alignment, __FILE__, __LINE__)) T
+#define LUG_NEW_ALIGN(T, alignment, arena) new (arena.allocate(sizeof(T), alignment, 0, __FILE__, __LINE__)) T
 #define LUG_NEW_ARRAY_ALIGN(T, alignment, arena) lug::System::Memory::new_array<std::remove_all_extents<T>::type>(alignof(T), arena, std::extent<T>::value, __FILE__, __LINE__)
 
 #define LUG_NEW(T, arena) LUG_NEW_ALIGN(T, alignof(T), arena)

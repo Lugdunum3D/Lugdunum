@@ -12,12 +12,12 @@ template<
     class BoundsCheckingPolicy,
     class MemoryMarkingPolicy
 >
-void* Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::allocate(size_t size, size_t alignment, const char* file, size_t line) {
+void* Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::allocate(size_t size, size_t alignment, size_t offset, const char* file, size_t line) {
     const size_t newSize = size + BoundsCheckingPolicy::SizeFront + BoundsCheckingPolicy::SizeBack;
 
     _threadGuard.enter();
 
-    char* const ptr = static_cast<char*>(_allocator.allocate(newSize, alignment, BoundsCheckingPolicy::SizeFront));
+    char* const ptr = static_cast<char*>(_allocator.allocate(newSize, alignment, offset + BoundsCheckingPolicy::SizeFront));
     const size_t allocatedSize = _allocator.getSize(ptr);
 
     _boundsChecker.guardFront(ptr, allocatedSize);

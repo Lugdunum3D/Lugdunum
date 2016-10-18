@@ -27,7 +27,7 @@ public:
 
     ~Arena() = default;
 
-    void* allocate(size_t size, size_t alignment, const char* file, size_t line);
+    void* allocate(size_t size, size_t alignment, size_t offset, const char* file, size_t line);
     void free(void* ptr);
     void reset();
 

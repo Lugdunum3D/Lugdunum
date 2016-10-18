@@ -6,13 +6,7 @@ inline void delete_one(T* object, Arena& arena) {
 
 template <typename T, class Arena, typename std::enable_if<!std::is_pod<T>::value, int>::type = 0>
 inline T* new_array(size_t alignment, Arena& arena, size_t nb, const char* file, size_t line) {
-    void* ptr = nullptr;
-
-    if (alignment > alignof(size_t)) {
-        ptr = arena.allocate(sizeof(T) * nb + sizeof(size_t), alignment - alignof(size_t), file, line);
-    } else {
-        ptr = arena.allocate(sizeof(T) * nb + sizeof(size_t), alignof(size_t), file, line);
-    }
+    void* const ptr = arena.allocate(sizeof(T) * nb + sizeof(size_t), alignment, alignof(size_t), file, line);
 
     if (!ptr) {
         return nullptr;
@@ -49,7 +43,7 @@ inline void delete_array(T* ptr, Arena& arena) {
 
 template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type = 0>
 inline T* new_array(size_t alignment, Arena& arena, size_t nb, const char* file, size_t line) {
-    return static_cast<T*>(arena.allocate(sizeof(T) * nb, alignment, file, line));
+    return static_cast<T*>(arena.allocate(sizeof(T) * nb, alignment, 0, file, line));
 }
 
 template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type = 0>
