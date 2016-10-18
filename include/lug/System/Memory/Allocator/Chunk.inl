@@ -17,8 +17,8 @@ void* Chunk<MaxSize, MaxAlignment, Offset>::allocate(size_t size, size_t alignme
         return nullptr;
     }
 
-    _currentPage = _currentPage->next = _currentPage->next ? _currentPage->next : _area->requestNextPage();
-    allocate(size, alignment, offset);
+    _currentPage = _currentPage->next = (_currentPage->next ? _currentPage->next : _area->requestNextPage());
+    return allocate(size, alignment, offset);
 }
 
 template<size_t MaxSize, size_t MaxAlignment, size_t Offset>
