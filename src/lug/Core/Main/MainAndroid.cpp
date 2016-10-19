@@ -1,4 +1,4 @@
-#include "MainAndroid.hpp"
+#include <lug/Core/Main/MainAndroid.hpp>
 
 namespace lug {
 namespace Core {
@@ -13,17 +13,13 @@ static void shutdown_application(struct lug_android_app *app) {
     pthread_mutex_unlock(&app->mutex);
 }
 
-static void *start_application(struct lug_android_app *app) {
+static void *start_application(void *_app) {
+    struct lug_android_app*  app = static_cast<struct lug_android_app *>(_app);
     main(0, nullptr);
     shutdown_application(app);
+    return nullptr;
 }
 
-} // Core
-} // lug
-
-/*
- * Main Thread
- */
 static struct lug_android_app *lug_app_create(ANativeActivity *activity, void *savedState, size_t savedStateSize) {
     struct lug_android_app *app = (struct lug_android_app *) malloc(sizeof(struct lug_android_app));
 
@@ -38,9 +34,12 @@ static struct lug_android_app *lug_app_create(ANativeActivity *activity, void *s
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    pthread_create(&app->thread, &attr, lug::Core::start_application, app);
+    pthread_create(&app->thread, &attr, start_application, app);
     return (app);
 }
+
+} // Core
+} // lug
 
 static void onStart(ANativeActivity *activity) {
 
@@ -51,7 +50,7 @@ static void onResume(ANativeActivity *activity) {
 }
 
 static void *onSaveInstanceState(ANativeActivity *activity, size_t *outSize) {
-
+    return nullptr;
 }
 
 static void onPause(ANativeActivity *activity) {
