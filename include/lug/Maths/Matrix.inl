@@ -1,28 +1,28 @@
 #include "../Maths/Matrix.hpp"
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX>::Matrix(const T & unitialValue) : _rows(dimensionY), _colums(dimensionX)
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns>::Matrix(const T & unitialValue) : _rows(rows), _colums(columns)
 {
-	_values.resize(dimensionY);
+	_values.resize(rows);
 	for (auto itY = begin(_values); itY != end(_values); ++itY) {
-		itY->resize(dimensionX);
+		itY->resize(columns);
 		for (auto itX = begin(*itY); itX !=end(*itY); itX++) {
 			*itX = unitialValue;
 		}
 	}
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX>::Matrix(const Matrix<T, dimensionY, dimensionX>& matrix) : _rows(matrix.getRows()), _colums(matrix.getCols()), _values(matrix._values)
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns>::Matrix(const Matrix<T, rows, columns>& matrix) : _rows(matrix.getRows()), _colums(matrix.getCols()), _values(matrix._values)
 {
 	
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX>::~Matrix(){}
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns>::~Matrix(){}
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX>& lug::Maths::Matrix<T, dimensionY, dimensionX>::operator=(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator=(const Matrix<T, rows, columns>& rightOperand)
 {
 	if (this == &rightOperand){
 		return *this;
@@ -37,183 +37,207 @@ inline lug::Maths::Matrix<T, dimensionY, dimensionX>& lug::Maths::Matrix<T, dime
 	return *this;
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator+(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+template<typename T, uint8_t rowsLeft, uint8_t columnsLeft, uint8_t rowsRight, uint8_t columnsRight>
+lug::Maths::Matrix<T, rows, columns> lug::Maths::operator+(const lug::Maths::Matrix<T, rowsLeft, columnsLeft>& leftOperand, const lug::Maths::Matrix<T, rowsRight, columnsRight>& rightOperand)
 {
-	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
+	if (rowsLeft == rowsRight && columnsLeft == columnsRight) {
+		lug::Maths::Matrix<T, rowsLeft, columnsLeft> result = lug::Maths::Matrix<T, rowsLeft, columnsLeft>(0);
+		for (uint8_t i = 0; i < rowsLeft; ++i) {
+			for (uint8_t j = 0; j < columnsLeft; ++j) {
+				result(i, j) = leftOperand(i,j) - rightOperand(i, j);
+			}
+		}
+		return std::move(result);
+	}
+	else {
+		uint8_t newRows = rowsLeft + rowsRight;
+		uint8_t newColums = columnsLeft + columnsRight;
+		lug::Maths::Matrix<T, newRows, newColums> result = lug::Maths::Matrix<T, newRows, newColums>(0);
+		for (uint8_t i = 0; i < rowsLeft; ++i) {
+			for (uint8_t j = 0; j < columnsLeft; ++j) {
+				result(i, j) = leftOperand(i, j);
+			}
+		}
+		for (uint8_t i = rowsLeft; i < newRows; ++i) {
+			for (uint8_t j = columnsLeft; j < newColums; ++j) {
+				result(i, j) = rightOperand(i, j);
+			}
+		}
+		return std::move(result)
+	}
+}
 
-	for (uint8_t i = 0; i < dimensionY; ++i) {
-		for (uint8_t j = 0; j < dimensionX; ++j) {
-			result(i, j) = _values[i][j] + rightOperand(i, j);
+template<typename T, uint8_t rows, uint8_t columns>
+lug::Maths::Matrix<T, rows, columns> lug::Maths::operator-(const lug::Maths::Matrix<T, rows, columns>& leftOperand, const lug::Maths::Matrix<T, rows, columns>& rightOperand)
+{
+	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
+
+	for (uint8_t i = 0; i < rows; ++i) {
+		for (uint8_t j = 0; j < columns; ++j) {
+			result(i, j) =leftOperand(i,j) + rightOperand(i, j);
 		}
 	}
 	return result;
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator-(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+template<typename T, uint8_t rowsLeft, uint8_t columnsLeft, uint8_t rowsRight, uint8_t columnsRight>
+lug::Maths::Matrix<T, rows, columns> lug::Maths::operator*(const lug::Maths::Matrix<T, rowsLeft, columnsLeft>& leftOperand, const lug::Maths::Matrix<T, rowsRight, columnsRight>& rightOperand)
 {
-	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
+	static_assert(columnsLeft == rowsRight || columnsRight == rowsLeft, "operation * on Matrices dimension error");
+	if (columnsRight == rowsLeft)
+	{
+		return std::move(rightOperand * leftOperand);
+	} 
+	lug::Maths::Matrix<T, rowsLeft, columnsRight> result = lug::Maths::Matrix<T, rowsLeft, columnsRight>(0);
+	for (uint8_t i = 0; i < rowsleft; ++i) {
+			for (uint8_t j = 0; j < columnsRight; ++j) {
+				for (uint8_t k = 0; k < columnsLeft; k++) {
+					result(i, j) += leftOperand(i,k) * rightOperand(k, j);
+				}
+				
+			}
+		}
+	return std::move(result);
+}
 
-	for (uint8_t i = 0; i < dimensionY; ++i) {
-		for (uint8_t j = 0; j < dimensionX; ++j) {
-			result(i, j) = _values[i][j] - rightOperand(i, j);
+template<typename T, uint8_t rows, uint8_t columns>
+lug::Maths::Matrix<T, rows, columns> lug::Maths::operator+(const lug::Maths::Matrix<T, rowsLeft, columnsLeft>& matrix, const T & scalar)
+{
+	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
+
+	for (uint8_t i = 0; i < rows; ++i) {
+		for (uint8_t j = 0; j < columns; ++j) {
+			result(i, j) = matrix(i,j) + scalar;
 		}
 	}
-	return result;
+	return std::move(result);
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX>& lug::Maths::Matrix<T, dimensionY, dimensionX>::operator+=(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+template<typename T, uint8_t rows, uint8_t columns>
+Matrix<T, rows, columns> lug::Maths::operator-(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T & scalar)
 {
-	lug::Maths::Matrix<T, dimensionY, dimensionX> result = (*this) + rhs;
-	(*this) = result;
-	return *this;
-}
+	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX>& lug::Maths::Matrix<T, dimensionY, dimensionX>::operator-=(const Matrix<T, dimensionY, dimensionX>& rightOperand)
-{
-	lug::Maths::Matrix<T, dimensionY, dimensionX> result = (*this) - rhs;
-	(*this) = result;
-	return *this;
-}
-
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator*(const Matrix<T, dimensionY, dimensionX>& rightOperand)
-{
-	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
-
-	for (uint8_t i = 0; i < dimensionY; ++i) {
-		for (uint8_t j = 0; j < dimensionX; ++j) {
-			result(i, j) = _values[i][j] * rightOperand(i, j);
+	for (uint8_t i = 0; i < rows; ++i) {
+		for (uint8_t j = 0; j < columns; ++j) {
+			result(i, j) = matrix(i, j) - scalar;
 		}
 	}
-	return result;
+	return std::move(result);
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX>& lug::Maths::Matrix<T, dimensionY, dimensionX>::operator*=(const Matrix<T, dimensionY, dimensionX>& rightOperand)
+template<typename T, uint8_t rows, uint8_t columns>
+Matrix<T, rows, columns> lug::Maths::operator*(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T & scalar)
 {
-	lug::Maths::Matrix<T, dimensionY, dimensionX> result = (*this) * rhs;
+	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
+
+	for (uint8_t i = 0; i < rows; ++i) {
+		for (uint8_t j = 0; j < columns; ++j) {
+			result(i, j) = matrix(i, j) * scalar;
+		}
+	}
+	return std::move(result);
+}
+
+template<typename T, uint8_t rows, uint8_t columns>
+Matrix<T, rows, columns> lug::Maths::operator/(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T & scalar)
+{
+	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
+
+	for (uint8_t i = 0; i < rows; ++i) {
+		for (uint8_t j = 0; j < columns; ++j) {
+			result(i, j) = matrix(i, j) / scalar;
+		}
+	}
+	return std::move(result);
+}
+
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator+=(const Matrix<T, rows, columns>& rightOperand)
+{
+	lug::Maths::Matrix<T, rows, columns> result = (*this) + rhs;
 	(*this) = result;
 	return *this;
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::transpose()
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator-=(const Matrix<T, rows, columns>& rightOperand)
 {
-	lug::Maths::Matrix<T, dimensionX, dimensionY> transposeMatrix(0);
+	lug::Maths::Matrix<T, rows, columns> result = (*this) - rhs;
+	(*this) = result;
+	return *this;
+}
 
-	for (uint8_t i = 0; i < dimensionY; i++) {
-		for (uint8_t j = 0; j < dimensionX; j++) {
+
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator*=(const Matrix<T, rows, columns>& rightOperand)
+{
+	lug::Maths::Matrix<T, rows, columns> result = (*this) * rhs;
+	(*this) = result;
+	return *this;
+}
+
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns> lug::Maths::Matrix<T, rows, columns>::transpose()
+{
+	lug::Maths::Matrix<T, columns, rows> transposeMatrix(0);
+
+	for (uint8_t i = 0; i < rows; i++) {
+		for (uint8_t j = 0; j < columns; j++) {
 			transposeMatrix(j, i) = _values[i][j];
 		}
 	}
 	return transposeMatrix;
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator+(const T & scalar)
+
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns> lug::Maths::Matrix<T, rows, columns>::identity()
 {
-	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
+	static_assert(rows == columns, "Determinant only on square matrix");
 
-	for (uint8_t i = 0; i < dimensionY; ++i) {
-		for (uint8_t j = 0; j < dimensionX; ++j) {
-			result(i, j) = _values[i][j] + scalar;
-		}
-	}
-	return result;
-}
-
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator-(const T & scalar)
-{
-	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
-
-	for (uint8_t i = 0; i < dimensionY; ++i) {
-		for (uint8_t j = 0; j < dimensionX; ++j) {
-			result(i, j) = _values[i][j] - scalar;
-		}
-	}
-	return result;
-}
-
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator*(const T & scalar)
-{
-	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
-
-	for (uint8_t i = 0; i < dimensionY; ++i) {
-		for (uint8_t j = 0; j < dimensionX; ++j) {
-			result(i, j) = _values[i][j] * scalar;
-		}
-	}
-	return result;
-}
-
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline  lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::operator/(const T & scalar)
-{
-	lug::Maths::Matrix<T, dimensionY, dimensionX> result = lug::Maths::Matrix<T, dimensionY, dimensionX>(0);
-
-	for (uint8_t i = 0; i < dimensionY; ++i) {
-		for (uint8_t j = 0; j < dimensionX; ++j) {
-			result(i, j) = _values[i][j] / scalar;
-		}
-	}
-	return result;
-}
-
-
-
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline lug::Maths::Matrix<T, dimensionY, dimensionX> lug::Maths::Matrix<T, dimensionY, dimensionX>::identity()
-{
-	static_assert(dimensionY == dimensionX, "Determinant only on square matrix");
-
-	Matrix<T, dimensionY, dimensionX> identityMatrix(0);
-	for (uint8_t i = 0; i < dimensionY; ++i) {
+	Matrix<T, rows, columns> identityMatrix(0);
+	for (uint8_t i = 0; i < rows; ++i) {
 		identityMatrix(i, i) = 1;
 	}
 	return identityMatrix;
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline uint8_t lug::Maths::Matrix<T, dimensionY, dimensionX>::getRows() const
+template<typename T, uint8_t rows, uint8_t columns>
+inline uint8_t lug::Maths::Matrix<T, rows, columns>::getRows() const
 {
 	return _rows;
 }
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline uint8_t lug::Maths::Matrix<T, dimensionY, dimensionX>::getCols() const
+template<typename T, uint8_t rows, uint8_t columns>
+inline uint8_t lug::Maths::Matrix<T, rows, columns>::getCols() const
 {
 	return _colums;
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline T& lug::Maths::Matrix<T, dimensionY, dimensionX>::operator()(const uint8_t & row, const uint8_t & col)
+template<typename T, uint8_t rows, uint8_t columns>
+inline T& lug::Maths::Matrix<T, rows, columns>::operator()(const uint8_t & row, const uint8_t & col)
 {
 	return _values[row][col];
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline const T & lug::Maths::Matrix<T, dimensionY, dimensionX>::operator()(const unsigned & row, const unsigned & col) const
+template<typename T, uint8_t rows, uint8_t columns>
+inline const T & lug::Maths::Matrix<T, rows, columns>::operator()(const unsigned & row, const unsigned & col) const
 {
 	return _values[row][col];
 }
 
-template<typename T, uint8_t dimensionY, uint8_t dimensionX>
-inline T  det(lug::Maths::Matrix<T, dimensionY, dimensionX> matrix, uint8_t dimension)
+template<typename T, uint8_t rows, uint8_t columns>
+inline T  det(lug::Maths::Matrix<T, rows, columns> matrix, uint8_t dimension)
 {
-	static_assert(dimensionY == dimensionX, "Determinant only on square matrix");
+	static_assert(rows == columns, "Determinant only on square matrix");
 	
-	lug::Maths::Matrix<T, dimensionY, dimensionX> minorMatrix(0);
+	lug::Maths::Matrix<T, rows, columns> minorMatrix(0);
 	uint8_t indexMinorX = 0;
 	uint8_t indexMinorY = 0;
 	uint8_t indexRowMatrix = 0;
 	T detResult = 0;
 
-	if (dimensionX == 1) {
+	if (columns == 1) {
 		return matrix(0, 0);
 	}
 	else if (dimension == 2) {
