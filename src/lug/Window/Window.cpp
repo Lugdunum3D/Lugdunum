@@ -14,16 +14,15 @@
 
 #endif
 
-lug::Window::Window::Window() : _impl{new lug::Window::priv::WindowImpl()} {
+lug::Window::Window::Window() : _impl{new lug::Window::priv::WindowImpl(this)} {
 }
 
-lug::Window::Window::Window(Window&& rhs) : _impl{rhs._impl}, _events{std::move(rhs._events)} {
+lug::Window::Window::Window(Window&& rhs) : _impl{rhs._impl} {
     rhs._impl = nullptr;
 }
 
 lug::Window::Window& lug::Window::Window::operator=(Window&& rhs) {
     _impl = rhs._impl;
-    _events = std::move(rhs._events);
     rhs._impl = nullptr;
 
     return *this;
@@ -40,33 +39,37 @@ std::unique_ptr<lug::Window::Window> lug::Window::Window::create(uint16_t width,
         return nullptr;
     }
 
-    return std::move(win);
+    return win;
 }
 
 bool lug::Window::Window::createWindow(uint16_t width, uint16_t height, const std::string& title, Style style) {
     if (_impl != nullptr) {
-        return _impl->create(width, height, title, style);
+
+        // Specifiy the width and height of our window, for now it's the only thing we can specify along with the title and style that is
+        _mode.width = width;
+        _mode.height = height;
+
+        return _impl->create(title, style);
     }
 
     return false;
 }
 
 bool lug::Window::Window::isOpen() const {
-    return _impl != nullptr ? true : false;
+    return _impl != nullptr;
 }
 
-bool lug::Window::Window::pollEvent(Event& event) {
-    if (_events.empty() && _impl != nullptr) {
-        _impl->processEvents(_events);
+bool lug::Window::Window::pollEvent(lug::Window::Event& event) {
+    if (_impl != nullptr) {
+        const bool value = _impl->pollEvent(event);
+
+        // If we've receive DESTROY even just close window without returning the event to the user
+        if (value && event.type == lug::Window::EventType::DESTROY) {
+            close();
+            return false;
+        }
+        return value;
     }
-
-    if (!_events.empty()) {
-        event = _events.front();
-        _events.pop();
-
-        return true;
-    }
-
     return false;
 }
 
