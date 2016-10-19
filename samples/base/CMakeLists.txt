@@ -25,14 +25,14 @@ endif()
 
 # find Lugdunum and link with it
 find_package(LUG REQUIRED system)
-if(LUG_FOUND)
-    include_directories(${LUG_INCLUDE_DIR})
-    target_link_libraries(${EXECUTABLE_NAME} ${LUG_LIBRARIES})
+if(NOT LUG_FOUND)
+    message(FATAL_ERROR "Can't find Lugdunum libraries")
 endif()
 
+include_directories(${LUG_INCLUDE_DIR})
+
 if(LUG_OS_ANDROID)
-    add_library(# name defined in AndroidManifest.xml
-                ${EXECUTABLE_NAME}
+    add_library(${EXECUTABLE_NAME}
                 SHARED
                 main.cpp
     )
@@ -44,4 +44,5 @@ if(LUG_OS_ANDROID)
     )
 else()
     add_executable(${EXECUTABLE_NAME} main.cpp)
+    target_link_libraries(${EXECUTABLE_NAME} ${LUG_LIBRARIES})
 endif()
