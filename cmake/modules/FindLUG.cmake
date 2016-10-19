@@ -70,7 +70,7 @@ if(LUG_OS_ANDROID OR LUG_OS_WINDOWS)
     # this will append `lug-main` to the components to find if we are on WINDOWS or ANDROID
     # lug-main provides a wrapper for the main functions of Android and Windows to provide
     # an uniform int main(int ac, char *[]av) across platforms
-    list(APPEND ${LUG_FIND_COMPONENTS} "main")
+    list(APPEND LUG_FIND_COMPONENTS "main")
 endif()
 
 # find the requested modules

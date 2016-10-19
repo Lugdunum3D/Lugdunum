@@ -1,4 +1,4 @@
-#include <lug/Core/Main/MainAndroid.hpp>
+#include <lug/Main/MainAndroid.hpp>
 
 namespace lug {
 namespace Core {

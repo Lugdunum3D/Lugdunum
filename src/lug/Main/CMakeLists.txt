@@ -1,5 +1,5 @@
-set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Core)
-set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Core)
+set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Main)
+set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Main)
 
 # all source files
 set(SRC

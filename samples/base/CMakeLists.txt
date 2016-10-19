@@ -24,7 +24,7 @@ endif()
 
 
 # find Lugdunum and link with it
-find_package(LUG REQUIRED system)
+find_package(LUG REQUIRED system core)
 if(NOT LUG_FOUND)
     message(FATAL_ERROR "Can't find Lugdunum libraries")
 endif()
