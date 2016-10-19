@@ -36,3 +36,6 @@ build/
 
 # Emacs temporary file
 *~
+
+# Clion
+.idea
