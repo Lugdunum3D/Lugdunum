@@ -66,6 +66,13 @@ find_path(LUG_INCLUDE_DIR lug/Config.hpp
 
 set(LUG_FOUND TRUE) # will be set to false if one of the required modules is not found
 
+if(LUG_OS_ANDROID OR LUG_OS_WINDOWS)
+    # this will append `lug-main` to the components to find if we are on WINDOWS or ANDROID
+    # lug-main provides a wrapper for the main functions of Android and Windows to provide
+    # an uniform int main(int ac, char *[]av) across platforms
+    list(APPEND ${LUG_FIND_COMPONENTS} "main")
+endif()
+
 # find the requested modules
 foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
     string(TOLOWER ${FIND_LUG_COMPONENT} FIND_LUG_COMPONENT_LOWER)
@@ -78,7 +85,7 @@ foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
                  NAMES ${FIND_LUG_COMPONENT_NAME}-s
                  PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
                  PATHS ${FIND_LUG_PATHS}
-CMAKE_FIND_ROOT_PATH_BOTH
+                 CMAKE_FIND_ROOT_PATH_BOTH
     )
 
     # static debug library
@@ -86,7 +93,7 @@ CMAKE_FIND_ROOT_PATH_BOTH
                  NAMES ${FIND_LUG_COMPONENT_NAME}-s-d
                  PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
                  PATHS ${FIND_LUG_PATHS}
-CMAKE_FIND_ROOT_PATH_BOTH
+                 CMAKE_FIND_ROOT_PATH_BOTH
     )
 
     # dynamic release library
@@ -94,7 +101,7 @@ CMAKE_FIND_ROOT_PATH_BOTH
                  NAMES ${FIND_LUG_COMPONENT_NAME}
                  PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
                  PATHS ${FIND_LUG_PATHS}
-CMAKE_FIND_ROOT_PATH_BOTH
+                 CMAKE_FIND_ROOT_PATH_BOTH
     )
 
     # dynamic debug library
@@ -102,7 +109,7 @@ CMAKE_FIND_ROOT_PATH_BOTH
                  NAMES ${FIND_LUG_COMPONENT_NAME}-d
                  PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
                  PATHS ${FIND_LUG_PATHS}
-CMAKE_FIND_ROOT_PATH_BOTH
+                 CMAKE_FIND_ROOT_PATH_BOTH
     )
 
     # choose the entries that fit the requested link type

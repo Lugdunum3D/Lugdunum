@@ -32,3 +32,10 @@ add_subdirectory(Core)
 add_subdirectory(Graphics)
 add_subdirectory(System)
 add_subdirectory(Window)
+
+if(LUG_OS_ANDROID OR LUG_OS_WINDOWS)
+    # todo: change that
+    set(BUILD_SHARED_LIBS OFF)
+    add_subdirectory(Main)
+    set(BUILD_SHARED_LIBS ON)
+endif()
