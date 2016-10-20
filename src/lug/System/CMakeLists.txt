@@ -27,6 +27,8 @@ set(INC
     ${INCROOT}/Memory/Area/IArea.hpp
     ${INCROOT}/Memory/Area/Heap.hpp
     ${INCROOT}/Memory/Area/Heap.inl
+    ${INCROOT}/Memory/Area/GrowingHeap.hpp
+    ${INCROOT}/Memory/Area/GrowingHeap.inl
     ${INCROOT}/Memory/Area/Stack.hpp
     ${INCROOT}/Memory/Area/Stack.inl
     ${INCROOT}/Memory/Arena.hpp
