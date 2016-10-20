@@ -106,7 +106,7 @@ static void onLowMemory(ANativeActivity *activity) {
 
 }
 
-void LUG_MAIN_API ANativeActivity_onCreate(ANativeActivity *activity, void *savedState, size_t savedStateSize) {
+void  ANativeActivity_onCreate(ANativeActivity *activity, void *savedState, size_t savedStateSize) {
     activity->callbacks->onInputQueueCreated = onInputQueueCreated;
     activity->callbacks->onInputQueueDestroyed = onInputQueueDestroyed;
 

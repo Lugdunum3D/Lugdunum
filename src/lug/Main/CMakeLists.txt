@@ -21,9 +21,14 @@ elseif(LUG_OS_ANDROID)
 endif()
 
 # define the target
-lug_add_library(lug-main
-                SOURCES ${SRC} ${INC}
-                DEPENDS lug-window lug-graphics lug-system
-                EXTERNAL_LIBS ""
-                FORCE_STATIC TRUE
-)
+add_library(lug-main STATIC ${SRC} ${INC})
+set_target_properties(lug-main PROPERTIES LINKER_LANGUAGE CXX)
+
+set_target_properties(lug-main PROPERTIES DEBUG_POSTFIX -d)
+
+# set the target's folder (for IDEs that support it, e.g. Visual Studio)
+set_target_properties(lug-main PROPERTIES FOLDER "lug")
+
+# setup the install of the library
+install(TARGETS lug-main
+        ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT devel)
