@@ -13,7 +13,7 @@ public:
     void leave() const;
 };
 
-template<class SynchronizationPrimitive>
+template <class SynchronizationPrimitive>
 class MultiThreadPolicy {
 public:
     void enter();

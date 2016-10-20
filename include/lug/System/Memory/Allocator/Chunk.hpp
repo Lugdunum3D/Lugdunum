@@ -24,7 +24,7 @@ constexpr int32_t ceil(float num)
 
 }
 
-template<size_t MaxSize, size_t MaxAlignment = MaxSize, size_t Offset = 0>
+template <size_t MaxSize, size_t MaxAlignment = MaxSize, size_t Offset = 0>
 class Chunk {
 public:
     Chunk(lug::System::Memory::Area::IArea* area);

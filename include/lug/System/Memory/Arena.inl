@@ -1,4 +1,4 @@
-template<
+template <
     class Allocator,
     class ThreadPolicy,
     class BoundsCheckingPolicy,
@@ -6,7 +6,7 @@ template<
 >
 Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::Arena(lug::System::Memory::Area::IArea* area) : _allocator{area} {}
 
-template<
+template <
     class Allocator,
     class ThreadPolicy,
     class BoundsCheckingPolicy,
@@ -29,7 +29,7 @@ void* Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>:
     return (ptr + BoundsCheckingPolicy::SizeFront);
 }
 
-template<
+template <
     class Allocator,
     class ThreadPolicy,
     class BoundsCheckingPolicy,
@@ -55,7 +55,7 @@ void Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::
     _threadGuard.leave();
 }
 
-template<
+template <
     class Allocator,
     class ThreadPolicy,
     class BoundsCheckingPolicy,
@@ -70,7 +70,7 @@ void Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::
     _threadGuard.leave();
 }
 
-template<
+template <
     class Allocator,
     class ThreadPolicy,
     class BoundsCheckingPolicy,
@@ -80,7 +80,7 @@ Allocator& Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPol
     return _allocator;
 }
 
-template<
+template <
     class Allocator,
     class ThreadPolicy,
     class BoundsCheckingPolicy,

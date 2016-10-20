@@ -8,7 +8,7 @@ namespace lug {
 namespace System {
 namespace Memory {
 
-template<
+template <
     class Allocator,
     class ThreadPolicy,
     class BoundsCheckingPolicy,
