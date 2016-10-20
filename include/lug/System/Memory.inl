@@ -46,12 +46,109 @@ inline void delete_array(T* ptr, Arena& arena) {
     arena.free(&size_ptr[-1]);
 }
 
-template <typename T, class Arena, class ...Args, typename std::enable_if<std::is_pod<T>::value, int>::type>
-inline T* new_array(size_t alignment, size_t nb, const char* file, size_t line, Arena& arena, Args&&... args) {
-    return new(arena.allocate(sizeof(T) * nb, alignment, 0, file, line)) T{std::forward<Args>(args)...};
+template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type>
+inline T* new_array(size_t alignment, size_t nb, const char* file, size_t line, Arena& arena) {
+    return new(arena.allocate(sizeof(T) * nb, alignment, 0, file, line)) T{};
 }
 
 template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type>
 inline void delete_array(T* ptr, Arena& arena) {
     arena.free(ptr);
+}
+
+
+// make_unique of single object
+template <typename T, class Arena, typename ...Args>
+inline typename priv::make_unique_if<T>::SingleObject make_unique(Arena& arena, Args&&... args) {
+    return make_unique_align<T>(arena, alignof(T), std::forward<Args>(args)...);
+}
+
+template <typename T, class Arena, typename ...Args>
+typename priv::make_unique_if<T>::SingleObject make_unique_align(Arena& arena, size_t alignment, Args&&... args) {
+    auto deleter = [&arena](T* ptr) {
+        LUG_DELETE(ptr, arena);
+    };
+
+    return typename priv::make_unique_if<T>::SingleObject(
+        LUG_NEW_ALIGN(T, alignment, arena, std::forward<Args>(args)...),
+        deleter
+    );
+}
+
+// make_unique of dynamic array (args only for non POD types)
+template <typename T, class Arena, typename ...Args, typename std::enable_if<!std::is_pod<T>::value, int>::type>
+inline typename priv::make_unique_if<T>::UnknownBound make_unique(Arena& arena, size_t size, Args&&... args) {
+    return make_unique_align<T>(arena, alignof(T), size, std::forward<Args>(args)...);
+}
+
+template <typename T, class Arena, typename ...Args, typename std::enable_if<!std::is_pod<T>::value, int>::type>
+typename priv::make_unique_if<T>::UnknownBound make_unique_align(Arena& arena, size_t alignment, size_t size, Args&&... args) {
+    using U = typename std::remove_all_extents<T>::type;
+
+    auto deleter = [&arena](U* ptr) {
+        LUG_DELETE_ARRAY(ptr, arena);
+    };
+
+    return typename priv::make_unique_if<T>::UnknownBound(
+        LUG_NEW_ARRAY_ALIGN_SIZE(T, alignment, size, arena, std::forward<Args>(args)...),
+        deleter
+    );
+}
+
+template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type>
+inline typename priv::make_unique_if<T>::UnknownBound make_unique(Arena& arena, size_t size) {
+    return make_unique_align<T>(arena, alignof(T), size);
+}
+
+template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type>
+typename priv::make_unique_if<T>::UnknownBound make_unique_align(Arena& arena, size_t alignment, size_t size) {
+    using U = typename std::remove_all_extents<T>::type;
+
+    auto deleter = [&arena](U* ptr) {
+        LUG_DELETE_ARRAY(ptr, arena);
+    };
+
+    return typename priv::make_unique_if<T>::UnknownBound(
+        LUG_NEW_ARRAY_ALIGN_SIZE(T, alignment, size, arena),
+        deleter
+    );
+}
+
+// make_unique of static array (args only for non POD types)
+template <typename T, class Arena, typename ...Args, typename std::enable_if<!std::is_pod<T>::value, int>::type>
+inline typename priv::make_unique_if<T>::KnownBound make_unique(Arena& arena, Args&&... args) {
+    return make_unique_align<T>(arena, alignof(T), std::forward<Args>(args)...);
+}
+
+template <typename T, class Arena, typename ...Args, typename std::enable_if<!std::is_pod<T>::value, int>::type>
+typename priv::make_unique_if<T>::KnownBound make_unique_align(Arena& arena, size_t alignment, Args&&... args) {
+    using U = typename std::remove_all_extents<T>::type;
+
+    auto deleter = [&arena](U* ptr) {
+        LUG_DELETE_ARRAY(ptr, arena);
+    };
+
+    return typename priv::make_unique_if<T>::KnownBound(
+        LUG_NEW_ARRAY_ALIGN(T, alignment, arena, std::forward<Args>(args)...),
+        deleter
+    );
+}
+
+template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type>
+typename priv::make_unique_if<T>::KnownBound make_unique(Arena& arena) {
+    return make_unique_align<T>(arena, alignof(T));
+}
+
+template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type>
+typename priv::make_unique_if<T>::KnownBound make_unique_align(Arena& arena, size_t alignment) {
+    using U = typename std::remove_all_extents<T>::type;
+
+    auto deleter = [&arena](U* ptr) {
+        LUG_DELETE_ARRAY(ptr, arena);
+    };
+
+    return typename priv::make_unique_if<T>::KnownBound(
+        LUG_NEW_ARRAY_ALIGN(T, alignment, arena),
+        deleter
+    );
 }
