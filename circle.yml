@@ -5,4 +5,4 @@ dependencies:
     - sudo apt-get install cmake
   override:
     - mkdir build
-    - cd build && cmake ../ && make
+    - cd build && cmake ../ -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ && make
