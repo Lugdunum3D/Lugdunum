@@ -25,6 +25,8 @@ set(INC
     ${INCROOT}/Memory/Allocator/Pool.hpp
     ${INCROOT}/Memory/Allocator/Stack.hpp
     ${INCROOT}/Memory/Area/IArea.hpp
+    ${INCROOT}/Memory/Area/Heap.hpp
+    ${INCROOT}/Memory/Area/Heap.inl
     ${INCROOT}/Memory/Area/Stack.hpp
     ${INCROOT}/Memory/Area/Stack.inl
     ${INCROOT}/Memory/Arena.hpp
