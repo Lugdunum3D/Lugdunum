@@ -84,12 +84,13 @@ Matrix<T, rows, columns> operator+(const Matrix<T, rowsLeft, columnsLeft>& matri
 template<typename T, uint8_t rows, uint8_t columns>
 Matrix<T, rows, columns> operator-(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T& scalar);
 
-
 template<typename T, uint8_t rows, uint8_t columns>
 Matrix<T, rows, columns> operator*(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T& scalar);
 
 template<typename T, uint8_t rows, uint8_t columns>
 Matrix<T, rows, columns> operator/(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T& scalar);
+
+// TODO ==operator and != operator
 
 }
 }
