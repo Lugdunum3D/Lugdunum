@@ -79,38 +79,55 @@ foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
     string(TOUPPER ${FIND_LUG_COMPONENT} FIND_LUG_COMPONENT_UPPER)
     set(FIND_LUG_COMPONENT_NAME lug-${FIND_LUG_COMPONENT_LOWER})
 
+    if(FIND_LUG_COMPONENT_LOWER STREQUAL "main")
+        # release library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_RELEASE
+                NAMES ${FIND_LUG_COMPONENT_NAME}-s
+                PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                PATHS ${FIND_LUG_PATHS}
+                CMAKE_FIND_ROOT_PATH_BOTH
+        )
 
-    # static release library
-    find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_STATIC_RELEASE
-                 NAMES ${FIND_LUG_COMPONENT_NAME}-s
-                 PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
-                 PATHS ${FIND_LUG_PATHS}
-                 CMAKE_FIND_ROOT_PATH_BOTH
-    )
+        # debug library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DEBUG
+                NAMES ${FIND_LUG_COMPONENT_NAME}-s-d
+                PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                PATHS ${FIND_LUG_PATHS}
+                CMAKE_FIND_ROOT_PATH_BOTH
+        )
+    else()
+        # static release library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_STATIC_RELEASE
+                     NAMES ${FIND_LUG_COMPONENT_NAME}-s
+                     PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                     PATHS ${FIND_LUG_PATHS}
+                     CMAKE_FIND_ROOT_PATH_BOTH
+        )
 
-    # static debug library
-    find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_STATIC_DEBUG
-                 NAMES ${FIND_LUG_COMPONENT_NAME}-s-d
-                 PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
-                 PATHS ${FIND_LUG_PATHS}
-                 CMAKE_FIND_ROOT_PATH_BOTH
-    )
+        # static debug library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_STATIC_DEBUG
+                     NAMES ${FIND_LUG_COMPONENT_NAME}-s-d
+                     PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                     PATHS ${FIND_LUG_PATHS}
+                     CMAKE_FIND_ROOT_PATH_BOTH
+        )
 
-    # dynamic release library
-    find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DYNAMIC_RELEASE
-                 NAMES ${FIND_LUG_COMPONENT_NAME}
-                 PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
-                 PATHS ${FIND_LUG_PATHS}
-                 CMAKE_FIND_ROOT_PATH_BOTH
-    )
+        # dynamic release library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DYNAMIC_RELEASE
+                     NAMES ${FIND_LUG_COMPONENT_NAME}
+                     PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                     PATHS ${FIND_LUG_PATHS}
+                     CMAKE_FIND_ROOT_PATH_BOTH
+        )
 
-    # dynamic debug library
-    find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DYNAMIC_DEBUG
-                 NAMES ${FIND_LUG_COMPONENT_NAME}-d
-                 PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
-                 PATHS ${FIND_LUG_PATHS}
-                 CMAKE_FIND_ROOT_PATH_BOTH
-    )
+        # dynamic debug library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DYNAMIC_DEBUG
+                     NAMES ${FIND_LUG_COMPONENT_NAME}-d
+                     PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                     PATHS ${FIND_LUG_PATHS}
+                     CMAKE_FIND_ROOT_PATH_BOTH
+        )
+    endif()
 
     # choose the entries that fit the requested link type
     if(LUG_STATIC_LIBRARIES)
@@ -172,7 +189,11 @@ foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
     )
 
     # add to the global list of libraries
-    list(APPEND LUG_LIBRARIES "${LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY}")
+    if(FIND_LUG_COMPONENT_LOWER STREQUAL "main")
+        list(APPEND LUG_LIBRARIES "-Wl,--whole-archive ${LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY} -Wl,--no-whole-archive")
+    else()
+        list(APPEND LUG_LIBRARIES "${LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY}")
+    endif()
 
 endforeach()
 

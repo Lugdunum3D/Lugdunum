@@ -18,13 +18,11 @@ include("${CMAKE_SOURCE_DIR}/../../cmake/Config.cmake")
 set(CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 14)
 
-if(ANDROID_NATIVE_API_LEVEL EQUAL 23)
     set(LUG_STATIC_LIBRARIES true)
-endif()
 
 
 # find Lugdunum and link with it
-find_package(LUG REQUIRED system core)
+find_package(LUG REQUIRED system )
 if(NOT LUG_FOUND)
     message(FATAL_ERROR "Can't find Lugdunum libraries")
 endif()

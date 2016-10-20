@@ -1,7 +1,7 @@
 #include <lug/Main/MainAndroid.hpp>
 
 namespace lug {
-namespace Core {
+namespace Main {
 
 static void shutdown_application(struct lug_android_app *app) {
     pthread_mutex_lock(&app->mutex);
@@ -14,7 +14,7 @@ static void shutdown_application(struct lug_android_app *app) {
 }
 
 static void *start_application(void *_app) {
-    struct lug_android_app*  app = static_cast<struct lug_android_app *>(_app);
+    struct lug_android_app* app = static_cast<struct lug_android_app *>(_app);
     main(0, nullptr);
     shutdown_application(app);
     return nullptr;
@@ -38,7 +38,7 @@ static struct lug_android_app *lug_app_create(ANativeActivity *activity, void *s
     return (app);
 }
 
-} // Core
+} // Main
 } // lug
 
 static void onStart(ANativeActivity *activity) {
@@ -106,7 +106,7 @@ static void onLowMemory(ANativeActivity *activity) {
 
 }
 
-void ANativeActivity_onCreate(ANativeActivity *activity, void *savedState, size_t savedStateSize) {
+void LUG_MAIN_API ANativeActivity_onCreate(ANativeActivity *activity, void *savedState, size_t savedStateSize) {
     activity->callbacks->onInputQueueCreated = onInputQueueCreated;
     activity->callbacks->onInputQueueDestroyed = onInputQueueDestroyed;
 
@@ -126,5 +126,5 @@ void ANativeActivity_onCreate(ANativeActivity *activity, void *savedState, size_
     activity->callbacks->onStop = onStop;
     activity->callbacks->onDestroy = onDestroy;
 
-    activity->instance = lug::Core::lug_app_create(activity, savedState, savedStateSize);
+    activity->instance = lug::Main::lug_app_create(activity, savedState, savedStateSize);
 }

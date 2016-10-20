@@ -3,12 +3,12 @@
 #include <android/native_activity.h>
 #include <android/configuration.h>
 #include <pthread.h>
-#include <lug/Core/Export.hpp>
+#include <lug/Main/Export.hpp>
 
-extern int main(int argc, char *argv[]);
+extern int main(int argc, const char *argv[]);
 
 namespace lug {
-namespace Core {
+namespace Main {
 
 struct lug_android_app {
     ANativeActivity *activity;
@@ -29,5 +29,5 @@ struct lug_android_app {
     ANativeWindow *pendingWindow;
 };
 
-} // Core
+} // Main
 } // lug
