@@ -50,7 +50,26 @@ template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value
 void delete_array(T* ptr, Arena& arena);
 
 // unique_ptr
-template<typename T, class Deleter = std::function<void (T*)>>
+namespace priv {
+
+template <typename T>
+struct make_unique_deleter {
+    using Deleter = std::function<void (T*)>;
+};
+
+template <typename T>
+struct make_unique_deleter<T[]> {
+    using Deleter = std::function<void (T*)>;
+};
+
+template <typename T, size_t Count>
+struct make_unique_deleter<T[Count]> {
+    using Deleter = std::function<void (T*)>;
+};
+
+}
+
+template<typename T, typename Deleter = typename priv::make_unique_deleter<T>::Deleter>
 using unique_ptr = std::unique_ptr<T, Deleter>;
 
 namespace priv {
@@ -62,12 +81,12 @@ struct make_unique_if {
 
 template <typename T>
 struct make_unique_if<T[]> {
-    using UnknownBound = lug::System::Memory::unique_ptr<T[], std::function<void (T*)>>;
+    using UnknownBound = lug::System::Memory::unique_ptr<T[]>;
 };
 
 template <typename T, size_t Count>
 struct make_unique_if<T[Count]> {
-    using KnownBound = lug::System::Memory::unique_ptr<T[], std::function<void (T*)>>;
+    using KnownBound = lug::System::Memory::unique_ptr<T[]>;
 };
 
 }
