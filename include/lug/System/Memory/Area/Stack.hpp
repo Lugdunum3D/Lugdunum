@@ -8,7 +8,7 @@ namespace System {
 namespace Memory {
 namespace Area {
 
-template <size_t size>
+template <size_t Size>
 class Stack : public IArea {
 public:
     Stack() = default;
@@ -23,9 +23,9 @@ public:
     Page* requestNextPage() override;
 
 private:
-    char _data[size];
+    char _data[Size];
 
-    Page _page{&_data[0], &_data[size - 1], nullptr, nullptr};
+    Page _page{&_data[0], &_data[Size - 1], nullptr, nullptr};
     bool _nextPage{true};
 };
 

@@ -1,5 +1,5 @@
-template <size_t size>
-inline Page* lug::System::Memory::Area::Stack<size>::requestNextPage() {
+template <size_t Size>
+inline Page* lug::System::Memory::Area::Stack<Size>::requestNextPage() {
     if (_nextPage) {
         _nextPage = false;
         return &_page;

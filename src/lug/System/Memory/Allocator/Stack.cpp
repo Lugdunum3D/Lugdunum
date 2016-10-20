@@ -16,9 +16,9 @@ void* lug::System::Memory::Allocator::Stack::allocate(size_t size, size_t alignm
     const size_t newSize = size + sizeof(size_t) + sizeof(void*);
     const size_t newOffset = offset + sizeof(size_t) + sizeof(void*);
 
-    while (_current) {
-        void* const oldCurrent = _current;
+    void* const oldCurrent = _current;
 
+    while (_current) {
         // Try to allocate memory on the current page
         _current = static_cast<char*>(_current) + newOffset;
         if (_current <= _currentPage->end) {

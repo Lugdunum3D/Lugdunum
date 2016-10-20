@@ -136,6 +136,8 @@ typename priv::make_unique_if<T>::KnownBound make_unique(Arena& arena, Args&&...
 template <typename T, class Arena, typename ...Args, typename std::enable_if<std::is_pod<T>::value, int>::type = 0>
 typename priv::make_unique_if<T>::KnownBound make_unique_align(Arena& arena, size_t alignment, Args&&... args) = delete;
 
+// TODO: Develop shared_ptr too
+
 #include <lug/System/Memory.inl>
 
 }
