@@ -56,7 +56,7 @@ else()
     target_link_libraries(${EXECUTABLE_NAME} ${LUG_LIBRARIES})
 endif()
 
-if (test)
+if(ENABLE_TEST)
     # This adds another subdirectory, which has 'project(gtest)'.
     add_subdirectory(googletest)
 
@@ -65,7 +65,6 @@ if (test)
     # Include the gtest library. gtest_SOURCE_DIR is available due to
     # 'project(gtest)' above.
     include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
-
     ##############
     # Unit Tests
     ##############
@@ -75,9 +74,9 @@ if (test)
     target_link_libraries(runUnitTests gtest gtest_main)
 
     # Extra linking for the project.
-    # target_link_libraries(runUnitTests project1_lib)
+    target_link_libraries(runUnitTests ${LUG_LIBRARIES})
 
     # This is so you can do 'make test' to see all your tests run, instead of
     # manually running the executable runUnitTests to see those specific tests.
-    add_test(NAME that-test-I-made COMMAND runUnitTests)
+    add_test(NAME ExcepetionReturnValues COMMAND runUnitTests)
 endif()
