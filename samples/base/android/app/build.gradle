@@ -4,7 +4,7 @@ android {
     buildToolsVersion "24.0.2"
     defaultConfig {
         applicationId "com.lugdunum.sample"
-        minSdkVersion 24
+        minSdkVersion 23
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
@@ -14,7 +14,7 @@ android {
                 arguments '-DANDROID_TOOLCHAIN=clang'
                 arguments '-DANDROID_STL=c++_static'
                 arguments '-DANDROID_DISABLE_FORMAT_STRING_CHECKS=true'
-                cppFlags "-std=c++11 -frtti -fexceptions -Werror,-Wformat-security"
+                cppFlags "-Wall -Wextra -Werror -frtti -fexceptions -std=c++14"
             }
         }
     }
