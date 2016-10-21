@@ -34,8 +34,6 @@ private:
     void shutdowApplication();
     void startApplication();
 
-    ANativeActivity* _activity;
-
     void* _savedState;
     size_t _savedStateSize;
 };

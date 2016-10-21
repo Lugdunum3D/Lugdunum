@@ -50,6 +50,7 @@ endif()
 set(FIND_LUG_PATHS
     ${LUG_ROOT}
     $ENV{LUG_ROOT}
+    $ENV{ANDROID_NDK}/sources/lugdunum
     ${ANDROID_NDK}/sources/lugdunum
     /usr/local
     /usr
@@ -66,7 +67,7 @@ find_path(LUG_INCLUDE_DIR lug/Config.hpp
 
 set(LUG_FOUND TRUE) # will be set to false if one of the required modules is not found
 
-if(LUG_OS_ANDROID OR LUG_OS_WINDOWS)
+if(LUG_OS_ANDROID)
     # this will append `lug-main` to the components to find if we are on WINDOWS or ANDROID
     # lug-main provides a wrapper for the main functions of Android and Windows to provide
     # an uniform int main(int ac, char *[]av) across platforms

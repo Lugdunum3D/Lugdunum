@@ -1,7 +1,7 @@
 #include <lug/System/Exception.hpp>
 #include <sstream>
 
-lug::System::Exception::Exception(const char *typeName, const std::string &description, const char* file, const char* function, uint32_t line) noexcept
+lug::System::Exception::Exception(const char *typeName, const std::string &description, const char* file, const char* function, uint32_t line)
     : _typeName{typeName}, _description{description}, _file{file}, _function{function}, _line{line} {}
 
 const std::string& lug::System::Exception::getTypeName() const {

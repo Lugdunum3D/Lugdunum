@@ -12,7 +12,7 @@ namespace System {
 
 class LUG_SYSTEM_API Exception: public std::exception {
 public:
-    Exception(const char *typeName, const std::string &description, const char* file, const char* function, uint32_t line) noexcept;
+    Exception(const char *typeName, const std::string &description, const char* file, const char* function, uint32_t line);
     Exception(Exception&& other) = default;
     Exception(const Exception& other) = default;
     Exception& operator=(const Exception& other) = default;
