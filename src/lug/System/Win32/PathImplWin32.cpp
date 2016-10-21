@@ -18,7 +18,7 @@ std::string lug::System::Path::priv::root() {
 
     free(driveLetter);
 
-    return std::move(rootPath);
+    return rootPath;
 }
 
 /*
@@ -41,7 +41,7 @@ std::string lug::System::Path::priv::home() {
     free(driveLetter);
     free(homeDirectory);
 
-    return std::move(homePath);
+    return homePath;
 }
 
 /*
@@ -49,15 +49,11 @@ std::string lug::System::Path::priv::home() {
     Example:  D:\Vulkan\Lugdunum\Test
 */
 std::string lug::System::Path::priv::cwd() {
-    TCHAR cwd[MAX_PATH];
+    char cwd[MAX_PATH];
     if (FAILED(GetCurrentDirectory(MAX_PATH, cwd))) {
         return std::string("");
     }
-
-    std::wstring cwdString(&cwd[0]);
-    std::string cwdPath(cwdString.begin(), cwdString.end());
-
-    return std::move(cwdPath);
+    return std::string(cwd);
 }
 
 /*
@@ -65,17 +61,16 @@ std::string lug::System::Path::priv::cwd() {
     Example: C:\Users\{USERNAME}\AppData\Roaming\lugdunum
 */
 std::string lug::System::Path::priv::save(const std::string& folderName) {
-    TCHAR appDataPath[MAX_PATH];
+    char appDataPath[MAX_PATH];
     if (FAILED(SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, appDataPath))) {
         return std::string("");
     }
 
-    std::wstring appData(&appDataPath[0]);
-    std::string savePath(appData.begin(), appData.end());
+    std::string savePath(appDataPath);
     savePath += "\\";
     savePath += folderName;
 
-    return std::move(savePath);
+    return savePath;
 }
 
 /*
