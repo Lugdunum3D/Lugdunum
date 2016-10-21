@@ -38,10 +38,7 @@ endif()
 
 
 # find Lugdunum and link with it
-find_package(LUG REQUIRED system )
-if(NOT LUG_FOUND)
-    message(FATAL_ERROR "Can't find Lugdunum libraries")
-endif()
+find_package(LUG REQUIRED)
 
 include_directories(${LUG_INCLUDE_DIR})
 

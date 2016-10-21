@@ -9,14 +9,12 @@ source_group("src" FILES ${SRC})
 
 # all header files
 set(INC
-    ${INCROOT}/Export.hpp
+
 )
 source_group("inc" FILES ${INC})
 
 # Include Main cpp files depending on user os
-if(LUG_OS_WINDOWS)
-    list(APPEND SRC ${SRCROOT}/MainWindows.cpp)
-elseif(LUG_OS_ANDROID)
+if(LUG_OS_ANDROID)
     list(APPEND SRC ${SRCROOT}/MainAndroid.cpp)
 endif()
 

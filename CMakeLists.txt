@@ -21,7 +21,7 @@ if(ANDROID)
     message(STATUS "ANDROID_ABI : ${ANDROID_ABI}")
 
     set(ANDROID_TOOLCHAIN clang)
-    message(STATUS "ANDROID_TOOLCHAIN : ${ANDROID_TOOLCHAIN} ")
+    message(STATUS "ANDROID_TOOLCHAIN : ${ANDROID_TOOLCHAIN}")
 
     lug_set_option(ANDROID_PLATFORM android-24 STRING "Target specific android version target (default : android-24)")
     if(NOT ANDROID_PLATFORM MATCHES android-2[3-9])
