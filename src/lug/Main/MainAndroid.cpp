@@ -93,7 +93,6 @@ void LugAndroidApp::onNativeWindowDestroyed(ANativeActivity* activity, ANativeWi
 
 }
 
-
 void LugAndroidApp::onInputQueueCreated(ANativeActivity* activity, AInputQueue* queue) {
 
 }

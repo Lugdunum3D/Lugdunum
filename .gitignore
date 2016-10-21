@@ -39,3 +39,6 @@ build/
 
 # Clion
 .idea
+
+# Android Studio
+*.iml
