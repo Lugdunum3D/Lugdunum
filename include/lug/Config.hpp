@@ -11,6 +11,10 @@
 
         #define LUG_SYSTEM_LINUX
 
+    #elif defined(__android__)
+
+        #define LUG_SYSTEM_ANDROID
+
     #else
 
         #error This UNIX operating system is not supported yet

@@ -25,10 +25,19 @@ if(LUG_COMPILER_MSVC)
     endif()
 elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
     list(APPEND CMAKE_CXX_FLAGS "-Wall -Wextra -Werror")
+    if(LUG_OS_ANDROID)
+        list(APPEND CMAKE_CXX_FLAGS "-std=c++14")
+        string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
+    endif()
 endif()
 
-# add the librairies subdirectories
+# add the librairies subdirectories
 add_subdirectory(Core)
 add_subdirectory(Graphics)
 add_subdirectory(System)
 add_subdirectory(Window)
+
+if(LUG_OS_ANDROID)
+    add_subdirectory(Main)
+endif()
+

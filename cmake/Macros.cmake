@@ -5,7 +5,7 @@ macro(lug_add_library target)
     # parse the arguments
     cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;EXTERNAL_LIBS" ${ARGN})
 
-    # create the target
+    # create the target
     add_library(${target} ${THIS_SOURCES})
     set_target_properties(${target} PROPERTIES LINKER_LANGUAGE CXX)
 

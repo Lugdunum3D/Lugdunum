@@ -7,7 +7,7 @@ set(SRC
 )
 source_group("src" FILES ${SRC})
 
-# all header files
+# all header files
 set(INC
     ${INCROOT}/Export.hpp
 )
