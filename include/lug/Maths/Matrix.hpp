@@ -67,30 +67,35 @@ std::ostream & operator<<(std::ostream & os, const Matrix<T, rows, columns>& mat
 }
 
 // Matrix/Matrix operation
-template <typename T, uint8_t rowsLeft, uint8_t columnsLeft, uint8_t rowsRight, uint8_t columnsRight>
-Matrix<T, rows, columns> operator+(const Matrix<T, rowsLeft, columnsLeft>& leftOperand, const Matrix<T, rowsRight, columnsRight>& rightOperand);
+template <typename T, uint8_t rows, uint8_t columns>
+Matrix<T, rows, columns> operator+(const Matrix<T, rows, columns>& leftOperand, const Matrix<T, rows, columns>& rightOperand);
 
 template <typename T, uint8_t rows, uint8_t columns>
 Matrix<T, rows, columns> operator-(const Matrix<T, rows, columns>& leftOperand, const Matrix<T, rows, columns>& rightOperand);
 
 template <typename T, uint8_t rowsLeft, uint8_t columnsLeft, uint8_t rowsRight, uint8_t columnsRight>
-Matrix<T, rows, columns> operator*(const Matrix<T, rowsLeft, columnsLeft>& leftOperand, const Matrix<T, rowsRight, columnsRight>& rightOperand);
+Matrix<T, rowsLeft, columnsRight> operator*(const Matrix<T, rowsLeft, columnsLeft>& leftOperand, const Matrix<T, rowsRight, columnsRight>& rightOperand);
 
 
 // Matrix/scalar operations
 template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> operator+(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T& scalar);
+Matrix<T, rows, columns> operator+(const Matrix<T, rows, columns>& matrix, const T& scalar);
 
 template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> operator-(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T& scalar);
+Matrix<T, rows, columns> operator-(const Matrix<T, rows, columns>& matrix, const T& scalar);
 
 template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> operator*(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T& scalar);
+Matrix<T, rows, columns> operator*(const Matrix<T, rows, columns>& matrix, const T& scalar);
 
 template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> operator/(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T& scalar);
+Matrix<T, rows, columns> operator/(const Matrix<T, rows, columns>& matrix, const T& scalar);
 
 // TODO ==operator and != operator
+template <typename T, uint8_t rows, uint8_t columns>
+bool operator==( Matrix<T, rows, columns> leftOperand, Matrix<T, rows, columns> rightOperand);
+
+template <typename T, uint8_t rows, uint8_t columns>
+const bool& operator!=(const Matrix<T, rows, columns>& leftOperand, const Matrix<T, rows, columns>& rightOperand);
 
 }
 }

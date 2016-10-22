@@ -12,7 +12,7 @@ template <typename T, uint8_t columns>
 class Vector : public Matrix<T, 1, columns> {
 public:
 	Vector(const T& unitialValue) : Matrix<T, 1, columns>(unitialValue) {};
-	Vector(const Vector& otherVector) : Matrix<T, 1, columns>(otherVector) {};
+	Vector(const  Matrix<T, 1, columns>& otherMatrix) : Matrix<T, 1, columns>(otherMatrix) {};
 };
 
 template <typename T>
@@ -25,7 +25,7 @@ public:
 	Vector2(const T& unitialValue) : Vector<T, 2>(unitialValue) {};
 	Vector2(const T& newX, const T& newY);
 	Vector2(const Vector2& otherVector) : Vector<T, 2>(otherVector) {};
-	Vector2(const Vector& otherVector) : Matrix<T, 1, 2>(otherVector) {};
+	Vector2(const  Matrix<T, 1, 2>& otherMatrix) : Matrix<T, 1, 2>(otherMatrix) {};
 
 	 T getX() const;
 	 T getY() const;

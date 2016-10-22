@@ -83,7 +83,6 @@ inline lug::Maths::Vector3<T> lug::Maths::Vector3<T>::wedge(const lug::Maths::Ve
 template<typename T, uint8_t columns>
 inline lug::Maths::Vector<T, columns> lug::Maths::reflection(lug::Maths::Vector<T, columns> v, lug::Maths::Vector<T, columns> normal)
 {
-
 	return v - normal *((v * normal) * 2);
 }
 

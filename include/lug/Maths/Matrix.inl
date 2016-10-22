@@ -37,38 +37,20 @@ inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns
 	return *this;
 }
 
-template<typename T, uint8_t rowsLeft, uint8_t columnsLeft, uint8_t rowsRight, uint8_t columnsRight>
-lug::Maths::Matrix<T, rows, columns> lug::Maths::operator+(const lug::Maths::Matrix<T, rowsLeft, columnsLeft>& leftOperand, const lug::Maths::Matrix<T, rowsRight, columnsRight>& rightOperand)
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator+(const lug::Maths::Matrix<T, rows, columns>& leftOperand, const lug::Maths::Matrix<T, rows, columns>& rightOperand)
 {
-	if (rowsLeft == rowsRight && columnsLeft == columnsRight) {
-		lug::Maths::Matrix<T, rowsLeft, columnsLeft> result = lug::Maths::Matrix<T, rowsLeft, columnsLeft>(0);
-		for (uint8_t i = 0; i < rowsLeft; ++i) {
-			for (uint8_t j = 0; j < columnsLeft; ++j) {
-				result(i, j) = leftOperand(i,j) - rightOperand(i, j);
+		lug::Maths::Matrix<T, rows, columns> result(0);
+		for (uint8_t i = 0; i < rows; ++i) {
+			for (uint8_t j = 0; j < columns; ++j) {
+				result(i, j) = leftOperand(i,j) + rightOperand(i, j);
 			}
 		}
 		return std::move(result);
-	}
-	else {
-		uint8_t newRows = rowsLeft + rowsRight;
-		uint8_t newColums = columnsLeft + columnsRight;
-		lug::Maths::Matrix<T, newRows, newColums> result = lug::Maths::Matrix<T, newRows, newColums>(0);
-		for (uint8_t i = 0; i < rowsLeft; ++i) {
-			for (uint8_t j = 0; j < columnsLeft; ++j) {
-				result(i, j) = leftOperand(i, j);
-			}
-		}
-		for (uint8_t i = rowsLeft; i < newRows; ++i) {
-			for (uint8_t j = columnsLeft; j < newColums; ++j) {
-				result(i, j) = rightOperand(i, j);
-			}
-		}
-		return std::move(result)
-	}
 }
 
 template<typename T, uint8_t rows, uint8_t columns>
-lug::Maths::Matrix<T, rows, columns> lug::Maths::operator-(const lug::Maths::Matrix<T, rows, columns>& leftOperand, const lug::Maths::Matrix<T, rows, columns>& rightOperand)
+inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator-(const lug::Maths::Matrix<T, rows, columns>& leftOperand, const lug::Maths::Matrix<T, rows, columns>& rightOperand)
 {
 	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
 
@@ -81,17 +63,17 @@ lug::Maths::Matrix<T, rows, columns> lug::Maths::operator-(const lug::Maths::Mat
 }
 
 template<typename T, uint8_t rowsLeft, uint8_t columnsLeft, uint8_t rowsRight, uint8_t columnsRight>
-lug::Maths::Matrix<T, rows, columns> lug::Maths::operator*(const lug::Maths::Matrix<T, rowsLeft, columnsLeft>& leftOperand, const lug::Maths::Matrix<T, rowsRight, columnsRight>& rightOperand)
+inline lug::Maths::Matrix<T, rowsLeft, columnsRight> lug::Maths::operator*(const lug::Maths::Matrix<T, rowsLeft, columnsLeft>& leftOperand, const lug::Maths::Matrix<T, rowsRight, columnsRight>& rightOperand)
 {
-	static_assert(columnsLeft == rowsRight || columnsRight == rowsLeft, "operation * on Matrices dimension error");
-	if (columnsRight == rowsLeft)
+	static_assert(columnsLeft == columnsRight || columnsLeft == rowsRight || columnsRight == rowsLeft, "operation * on Matrices dimension error");
+	if (columnsRight == rowsLeft && columnsLeft != columnsRight)
 	{
 		return std::move(rightOperand * leftOperand);
 	} 
 	lug::Maths::Matrix<T, rowsLeft, columnsRight> result = lug::Maths::Matrix<T, rowsLeft, columnsRight>(0);
-	for (uint8_t i = 0; i < rowsleft; ++i) {
+	for (uint8_t i = 0; i < rowsLeft; ++i) {
 			for (uint8_t j = 0; j < columnsRight; ++j) {
-				for (uint8_t k = 0; k < columnsLeft; k++) {
+				for (uint8_t k = 0; k < rowsRight; k++) {
 					result(i, j) += leftOperand(i,k) * rightOperand(k, j);
 				}
 				
@@ -101,7 +83,7 @@ lug::Maths::Matrix<T, rows, columns> lug::Maths::operator*(const lug::Maths::Mat
 }
 
 template<typename T, uint8_t rows, uint8_t columns>
-lug::Maths::Matrix<T, rows, columns> lug::Maths::operator+(const lug::Maths::Matrix<T, rowsLeft, columnsLeft>& matrix, const T & scalar)
+inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator+(const lug::Maths::Matrix<T, rows, columns>& matrix, const T & scalar)
 {
 	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
 
@@ -114,7 +96,7 @@ lug::Maths::Matrix<T, rows, columns> lug::Maths::operator+(const lug::Maths::Mat
 }
 
 template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> lug::Maths::operator-(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T & scalar)
+inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator-(const Matrix<T, rows, columns>& matrix, const T & scalar)
 {
 	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
 
@@ -127,7 +109,7 @@ Matrix<T, rows, columns> lug::Maths::operator-(const Matrix<T, rowsLeft, columns
 }
 
 template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> lug::Maths::operator*(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T & scalar)
+inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator*(const Matrix<T, rows, columns>& matrix, const T & scalar)
 {
 	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
 
@@ -140,7 +122,7 @@ Matrix<T, rows, columns> lug::Maths::operator*(const Matrix<T, rowsLeft, columns
 }
 
 template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> lug::Maths::operator/(const Matrix<T, rowsLeft, columnsLeft>& matrix, const T & scalar)
+inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator/(const Matrix<T, rows, columns>& matrix, const T & scalar)
 {
 	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
 
@@ -153,7 +135,25 @@ Matrix<T, rows, columns> lug::Maths::operator/(const Matrix<T, rowsLeft, columns
 }
 
 template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator+=(const Matrix<T, rows, columns>& rightOperand)
+bool lug::Maths::operator==(lug::Maths::Matrix<T, rows, columns> leftOperand, lug::Maths::Matrix<T, rows, columns> rightOperand)
+{
+	for (uint8_t i = 0; i < rows; ++i) {
+		for (uint8_t j = 0; j < columns; ++j) {
+			if (leftOperand(i, j) != rightOperand(i, j))
+				return false;
+		}
+	}
+	return true;
+}
+
+	template<typename T, uint8_t rows, uint8_t columns>
+	const bool & lug::Maths::operator!=(const lug::Maths::Matrix<T, rows, columns>& leftOperand, const lug::Maths::Matrix<T, rows, columns>& rightOperand)
+	{
+		return !(leftOperand == rightOperand);
+	}
+
+template<typename T, uint8_t rows, uint8_t columns>
+inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator+=(const lug::Maths::Matrix<T, rows, columns>& rightOperand)
 {
 	lug::Maths::Matrix<T, rows, columns> result = (*this) + rhs;
 	(*this) = result;
@@ -161,7 +161,7 @@ inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns
 }
 
 template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator-=(const Matrix<T, rows, columns>& rightOperand)
+inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator-=(const lug::Maths::Matrix<T, rows, columns>& rightOperand)
 {
 	lug::Maths::Matrix<T, rows, columns> result = (*this) - rhs;
 	(*this) = result;
@@ -170,7 +170,7 @@ inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns
 
 
 template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator*=(const Matrix<T, rows, columns>& rightOperand)
+inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator*=(const lug::Maths::Matrix<T, rows, columns>& rightOperand)
 {
 	lug::Maths::Matrix<T, rows, columns> result = (*this) * rhs;
 	(*this) = result;
