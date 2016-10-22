@@ -11,12 +11,8 @@ int main() {
     while (window->isOpen()) { // While window is open execute the following
         lug::Window::Event event;
         while (window->pollEvent(event)) {
-            // Handle events here
         }
-    
-        // ...
     }
-    
     window->close();
     
     return 0;
