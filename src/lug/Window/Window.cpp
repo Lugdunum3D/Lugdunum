@@ -1,3 +1,6 @@
+#include <memory>
+#include <string>
+#include <utility>
 #include <lug/Window/Window.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
