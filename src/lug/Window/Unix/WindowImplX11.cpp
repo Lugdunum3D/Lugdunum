@@ -29,13 +29,19 @@ bool lug::Window::priv::WindowImpl::create(uint16_t width, uint16_t height, cons
     XStoreName(_display, _window, title.c_str());
     XMapWindow(_display, _window);
 
+    wmProtocols = XInternAtom(_display, "WM_PROTOCOLS", False);
+    wmDeleteWindow = XInternAtom(_display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(_display, _window, &wmDeleteWindow, 1);
+
     return true;
 }
 
 void lug::Window::priv::WindowImpl::close() {
     if (_display != nullptr) {
         XCloseDisplay(_display);
+        XDestroyWindow(_display, _window);
         _display = nullptr;
+        _window = 0;
     }
 }
 
@@ -45,18 +51,12 @@ void lug::Window::priv::WindowImpl::processEvents(std::queue<lug::Window::Event>
     XNextEvent(_display, &event);
 
     switch (event.type) {
-    case KeyPress:
-        switch (event.xkey.keycode) {
-        case 0x09:
-            events.push({lug::Window::EventType::CLOSE});
+        case ClientMessage:
+            if (event.xclient.message_type == wmProtocols && event.xclient.data.l[0] == wmDeleteWindow) {
+                events.push({lug::Window::EventType::CLOSE});
+            }
             break;
-
         default:
             break;
-            }
-        break;
-
-    default:
-        break;
     }
 }
