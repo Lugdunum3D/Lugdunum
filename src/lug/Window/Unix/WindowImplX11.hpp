@@ -24,6 +24,8 @@ public:
 private:
 	Display *_display;
 	::Window  _window;
+    Atom wmProtocols;
+    Atom wmDeleteWindow;
 };
 
 } // namespace priv
