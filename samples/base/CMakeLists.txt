@@ -10,13 +10,44 @@ project(base)
 
 # define the executable
 set(EXECUTABLE_NAME "base")
-add_executable(${EXECUTABLE_NAME} main.cpp)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/modules")
 
+include("${CMAKE_SOURCE_DIR}/../../cmake/Config.cmake")
+
+if(LUG_COMPILER_MSVC)
+    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    else()
+        list(APPEND CMAKE_CXX_FLAGS "/W4")
+    endif()
+elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
+    list(APPEND CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -std=c++14")
+    string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
+endif()
+
+if(ANDROID_NATIVE_API_LEVEL EQUAL 23)
+    set(LUG_STATIC_LIBRARIES true)
+endif()
+
+
 # find Lugdunum and link with it
 find_package(LUG REQUIRED system)
-if(LUG_FOUND)
-    include_directories(${LUG_INCLUDE_DIR})
+
+include_directories(${LUG_INCLUDE_DIR})
+
+if(LUG_OS_ANDROID)
+    add_library(${EXECUTABLE_NAME}
+                SHARED
+                main.cpp
+    )
+
+    target_link_libraries(${EXECUTABLE_NAME}
+                          log
+                          android
+                          ${LUG_LIBRARIES}
+    )
+else()
+    add_executable(${EXECUTABLE_NAME} main.cpp)
     target_link_libraries(${EXECUTABLE_NAME} ${LUG_LIBRARIES})
 endif()

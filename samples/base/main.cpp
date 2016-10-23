@@ -1,5 +1,4 @@
-#include <lug/Config.hpp>
-
-int main() {
+int main(int, const char*[])
+{
     return 0;
 }
