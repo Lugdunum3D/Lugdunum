@@ -2,11 +2,15 @@
 #include <memory>
 #include <lug/System/Debug.hpp>
 
-lug::System::Memory::FreeList::FreeList(size_t size) : _size(size) {
-    LUG_ASSERT(_size > sizeof(lug::System::Memory::FreeList::Element*), "The size is not enough for this implementation of freelist");
+namespace lug {
+namespace System {
+namespace Memory {
+
+FreeList::FreeList(size_t size) : _size(size) {
+    LUG_ASSERT(_size > sizeof(FreeList::Element*), "The size is not enough for this implementation of freelist");
 }
 
-bool lug::System::Memory::FreeList::grow(void* start, void *end, size_t alignment, size_t offset) {
+bool FreeList::grow(void* start, void* end, size_t alignment, size_t offset) {
     // First, align the start pointer
     {
         start = static_cast<char*>(start) + offset;
@@ -25,7 +29,7 @@ bool lug::System::Memory::FreeList::grow(void* start, void *end, size_t alignmen
 
     // Second create the linked list
     {
-        Element *it = static_cast<Element*>(start);
+        Element* it = static_cast<Element*>(start);
         _nextFree = it;
 
         size_t size = static_cast<char*>(end) - static_cast<char*>(start) + 1;
@@ -42,7 +46,7 @@ bool lug::System::Memory::FreeList::grow(void* start, void *end, size_t alignmen
     return true;
 }
 
-void* lug::System::Memory::FreeList::allocate() {
+void* FreeList::allocate() {
     if (!_nextFree) {
         return nullptr;
     }
@@ -52,12 +56,16 @@ void* lug::System::Memory::FreeList::allocate() {
     return head;
 }
 
-void lug::System::Memory::FreeList::free(void *ptr) {
+void FreeList::free(void* ptr) {
     Element* const head = static_cast<Element*>(ptr);
     head->next = _nextFree;
     _nextFree = head;
 }
 
-void lug::System::Memory::FreeList::reset() {
+void FreeList::reset() {
     _nextFree = nullptr;
+}
+
+}
+}
 }

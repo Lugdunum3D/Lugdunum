@@ -23,7 +23,7 @@ public:
     void free(void* ptr) const;
     void reset() const;
 
-    size_t getSize(void *ptr) const;
+    size_t getSize(void* ptr) const;
 };
 
 }

@@ -7,7 +7,6 @@ lug::System::Memory::Area::Heap<PageSize, PageCount>::Heap() {
         _pages[i] = {
             tmpPtr + PageSize * i,
             tmpPtr + PageSize * (i + 1) - 1,
-
             i == 0 ? nullptr : &_pages[i - 1],
             nullptr
         };

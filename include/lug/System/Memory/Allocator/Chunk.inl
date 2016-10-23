@@ -4,8 +4,8 @@ Chunk<MaxSize, MaxAlignment, Offset>::Chunk(lug::System::Memory::Area::IArea* ar
 template <size_t MaxSize, size_t MaxAlignment, size_t Offset>
 void* Chunk<MaxSize, MaxAlignment, Offset>::allocate(size_t size, size_t alignment, size_t offset) {
     LUG_ASSERT(offset == Offset, "Chunk allocator doesn't support multiple offset");
-    LUG_ASSERT(MaxSize >= size, "Size of the allocation is greater than the chunk max size");
-    LUG_ASSERT(MaxAlignment >= alignment, "Alignment of the allocation is greater than the chunk max alignment");
+    LUG_ASSERT(MaxSize >= size, "Size of the allocation is greater than the chunk's max size");
+    LUG_ASSERT(MaxAlignment >= alignment, "Alignment of the allocation is greater than the chunk's max alignment");
 
     void* const ptr = _freeList.allocate();
 

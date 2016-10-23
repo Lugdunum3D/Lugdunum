@@ -67,7 +67,7 @@ struct make_unique_deleter<T[Count]> {
     using Deleter = std::function<void (T*)>;
 };
 
-}
+} // namespace priv
 
 template<typename T, typename Deleter = typename priv::make_unique_deleter<T>::Deleter>
 using unique_ptr = std::unique_ptr<T, Deleter>;
@@ -89,7 +89,7 @@ struct make_unique_if<T[Count]> {
     using KnownBound = lug::System::Memory::unique_ptr<T[]>;
 };
 
-}
+} // namespace priv
 
 // Single object
 template <typename T, class Arena, typename ...Args>

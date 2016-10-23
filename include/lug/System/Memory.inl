@@ -23,8 +23,9 @@ inline T* new_array(size_t alignment, size_t nb, const char* file, size_t line, 
 
     // Call the constructors
     T* const user_ptr = reinterpret_cast<T*>(size_ptr + 1);
-    for (size_t i = 0; i < nb; ++i)
+    for (size_t i = 0; i < nb; ++i) {
         new (&user_ptr[i]) T{std::forward<Args>(args)...};
+    }
 
     return user_ptr;
 }
@@ -40,8 +41,9 @@ inline void delete_array(T* ptr, Arena& arena) {
     const size_t nb = size_ptr[-1];
 
     // Call the destructors in reverse order
-    for (size_t i = nb; i > 0; --i)
+    for (size_t i = nb; i > 0; --i) {
         ptr[i - 1].~T();
+    }
 
     arena.free(&size_ptr[-1]);
 }

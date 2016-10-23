@@ -3,13 +3,18 @@
 #include <memory>
 #include <lug/System/Debug.hpp>
 
-lug::System::Memory::Allocator::Linear::Linear(lug::System::Memory::Area::IArea* area) : _area{area}, _currentPage{_area->requestNextPage()}, _firstPage{_currentPage} {
+namespace lug {
+namespace System {
+namespace Memory {
+namespace Allocator {
+
+Linear::Linear(lug::System::Memory::Area::IArea* area) : _area{area}, _currentPage{_area->requestNextPage()}, _firstPage{_currentPage} {
     if (_currentPage) {
         _current = _currentPage->start;
     }
 }
 
-void* lug::System::Memory::Allocator::Linear::allocate(size_t size, size_t alignment, size_t offset) {
+void* Linear::allocate(size_t size, size_t alignment, size_t offset) {
     LUG_ASSERT(size > offset, "The size must be greater than the offset");
 
     // Adapt the size to store the size at the beginning of the block
@@ -39,11 +44,11 @@ void* lug::System::Memory::Allocator::Linear::allocate(size_t size, size_t align
     return nullptr;
 }
 
-void lug::System::Memory::Allocator::Linear::free(void*) const {
+void Linear::free(void*) const {
     // Do nothing here
 }
 
-void lug::System::Memory::Allocator::Linear::reset() {
+void Linear::reset() {
     _currentPage = _firstPage;
 
     if (_currentPage) {
@@ -51,15 +56,20 @@ void lug::System::Memory::Allocator::Linear::reset() {
     }
 }
 
-lug::System::Memory::Allocator::Linear::Mark lug::System::Memory::Allocator::Linear::getMark() const {
+Linear::Mark Linear::getMark() const {
     return {_current, _currentPage};
 }
 
-void lug::System::Memory::Allocator::Linear::rewind(const lug::System::Memory::Allocator::Linear::Mark& mark) {
+void Linear::rewind(const Linear::Mark& mark) {
     _current = mark.current;
     _currentPage = mark.currentPage;
 }
 
-size_t lug::System::Memory::Allocator::Linear::getSize(void *ptr) const {
+size_t Linear::getSize(void* ptr) const {
     return static_cast<size_t*>(ptr)[-1];
+}
+
+}
+}
+}
 }

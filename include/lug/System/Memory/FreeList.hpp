@@ -19,10 +19,10 @@ public:
 
     ~FreeList() = default;
 
-    bool grow(void* start, void *end, size_t alignment, size_t offset);
+    bool grow(void* start, void* end, size_t alignment, size_t offset);
 
     void* allocate();
-    void free(void *ptr);
+    void free(void* ptr);
     void reset();
 
 private:

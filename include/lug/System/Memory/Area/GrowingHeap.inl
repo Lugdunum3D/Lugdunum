@@ -26,7 +26,6 @@ inline Page* lug::System::Memory::Area::GrowingHeap<PageSize, MaxPageCount>::req
     _pages[_current] = {
         _data[_current],
         static_cast<char*>(_data[_current]) + PageSize,
-
         _current == 0 ? nullptr : &_pages[_current - 1],
         nullptr
     };

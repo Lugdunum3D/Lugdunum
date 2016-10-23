@@ -17,7 +17,7 @@ template <
 class Arena {
 public:
     Arena() = default;
-    explicit Arena(lug::System::Memory::Area::IArea* area);
+    explicit Arena(Area::IArea* area);
 
     Arena(const Arena&) = delete;
     Arena(Arena&&) = default;

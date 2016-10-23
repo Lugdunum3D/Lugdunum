@@ -31,6 +31,7 @@ public:
     void reset();
 
     // Dangerous operations
+    // Don't free previously allocated pointer after this mark !
     Mark getMark() const;
     void rewind(const Mark& mark);
 

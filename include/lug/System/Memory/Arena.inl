@@ -4,7 +4,7 @@ template <
     class BoundsCheckingPolicy,
     class MemoryMarkingPolicy
 >
-Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::Arena(lug::System::Memory::Area::IArea* area) : _allocator{area} {}
+Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::Arena(Area::IArea* area) : _allocator{area} {}
 
 template <
     class Allocator,

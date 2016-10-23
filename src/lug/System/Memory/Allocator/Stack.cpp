@@ -3,13 +3,18 @@
 #include <memory>
 #include <lug/System/Debug.hpp>
 
-lug::System::Memory::Allocator::Stack::Stack(lug::System::Memory::Area::IArea* area) : _area{area}, _currentPage{_area->requestNextPage()}, _firstPage{_currentPage} {
+namespace lug {
+namespace System {
+namespace Memory {
+namespace Allocator {
+
+Stack::Stack(lug::System::Memory::Area::IArea* area) : _area{area}, _currentPage{_area->requestNextPage()}, _firstPage{_currentPage} {
     if (_currentPage) {
         _current = _currentPage->start;
     }
 }
 
-void* lug::System::Memory::Allocator::Stack::allocate(size_t size, size_t alignment, size_t offset) {
+void* Stack::allocate(size_t size, size_t alignment, size_t offset) {
     LUG_ASSERT(size > offset, "The size must be greater than the offset");
 
     // Adapt the size to store the size and the current pointer at the beginning of the block
@@ -42,7 +47,7 @@ void* lug::System::Memory::Allocator::Stack::allocate(size_t size, size_t alignm
     return nullptr;
 }
 
-void lug::System::Memory::Allocator::Stack::free(void* ptr) {
+void Stack::free(void* ptr) {
     LUG_ASSERT(static_cast<char*>(ptr) + getSize(ptr) == _current, "Deallocation with stack allocator not in LIFO order");
 
     void* const oldCurrent = reinterpret_cast<void**>(static_cast<char*>(ptr) - sizeof(size_t))[-1];
@@ -57,7 +62,7 @@ void lug::System::Memory::Allocator::Stack::free(void* ptr) {
     _current = oldCurrent;
 }
 
-void lug::System::Memory::Allocator::Stack::reset() {
+void Stack::reset() {
     _currentPage = _firstPage;
 
     if (_currentPage) {
@@ -65,15 +70,20 @@ void lug::System::Memory::Allocator::Stack::reset() {
     }
 }
 
-lug::System::Memory::Allocator::Stack::Mark lug::System::Memory::Allocator::Stack::getMark() const {
+Stack::Mark Stack::getMark() const {
     return {_current, _currentPage};
 }
 
-void lug::System::Memory::Allocator::Stack::rewind(const lug::System::Memory::Allocator::Stack::Mark& mark) {
+void Stack::rewind(const Stack::Mark& mark) {
     _current = mark.current;
     _currentPage = mark.currentPage;
 }
 
-size_t lug::System::Memory::Allocator::Stack::getSize(void *ptr) const {
+size_t Stack::getSize(void* ptr) const {
     return static_cast<size_t*>(ptr)[-1];
+}
+
+}
+}
+}
 }
