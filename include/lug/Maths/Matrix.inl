@@ -1,273 +1,295 @@
-#include "../Maths/Matrix.hpp"
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline constexpr lug::Maths::Matrix<Rows, Columns, T>::Matrix(T value) : _values(Rows * Columns) {
+    static_assert(std::is_arithmetic<T>::value, "Can't construct matrix with non integral type");
 
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns>::Matrix(const T & unitialValue) : _rows(rows), _colums(columns)
-{
-	_values.resize(rows);
-	for (auto itY = begin(_values); itY != end(_values); ++itY) {
-		itY->resize(columns);
-		for (auto itX = begin(*itY); itX !=end(*itY); itX++) {
-			*itX = unitialValue;
-		}
-	}
+    for (uint8_t row = 0; row < Rows; ++row) {
+        for (uint8_t col = 0; col < Columns; col++) {
+            (*this)(row, col) = value;
+        }
+    }
 }
 
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns>::Matrix(const Matrix<T, rows, columns>& matrix) : _rows(matrix.getRows()), _colums(matrix.getCols()), _values(matrix._values)
-{
-	
-}
-
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns>::~Matrix(){}
-
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator=(const Matrix<T, rows, columns>& rightOperand)
-{
-	if (this == &rightOperand){
-		return *this;
-	}
-	uint8_t newDimensionY = rightOperand.getRows();
-	uint8_t newDimensionX = rightOperand.getCols();
-
-
-	_colums = newDimensionX;
-	_rows = newDimensionY;
-	_values = MatrixValarray<T>(rightOperand._values);
-	return *this;
-}
-
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator+(const lug::Maths::Matrix<T, rows, columns>& leftOperand, const lug::Maths::Matrix<T, rows, columns>& rightOperand)
-{
-		lug::Maths::Matrix<T, rows, columns> result(0);
-		for (uint8_t i = 0; i < rows; ++i) {
-			for (uint8_t j = 0; j < columns; ++j) {
-				result(i, j) = leftOperand(i,j) + rightOperand(i, j);
-			}
-		}
-		return std::move(result);
-}
-
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator-(const lug::Maths::Matrix<T, rows, columns>& leftOperand, const lug::Maths::Matrix<T, rows, columns>& rightOperand)
-{
-	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
-
-	for (uint8_t i = 0; i < rows; ++i) {
-		for (uint8_t j = 0; j < columns; ++j) {
-			result(i, j) =leftOperand(i,j) + rightOperand(i, j);
-		}
-	}
-	return result;
-}
-
-template<typename T, uint8_t rowsLeft, uint8_t columnsLeft, uint8_t rowsRight, uint8_t columnsRight>
-inline lug::Maths::Matrix<T, rowsLeft, columnsRight> lug::Maths::operator*(const lug::Maths::Matrix<T, rowsLeft, columnsLeft>& leftOperand, const lug::Maths::Matrix<T, rowsRight, columnsRight>& rightOperand)
-{
-	static_assert(columnsLeft == columnsRight || columnsLeft == rowsRight || columnsRight == rowsLeft, "operation * on Matrices dimension error");
-	if (columnsRight == rowsLeft && columnsLeft != columnsRight)
-	{
-		return std::move(rightOperand * leftOperand);
-	} 
-	lug::Maths::Matrix<T, rowsLeft, columnsRight> result = lug::Maths::Matrix<T, rowsLeft, columnsRight>(0);
-	for (uint8_t i = 0; i < rowsLeft; ++i) {
-			for (uint8_t j = 0; j < columnsRight; ++j) {
-				for (uint8_t k = 0; k < rowsRight; k++) {
-					result(i, j) += leftOperand(i,k) * rightOperand(k, j);
-				}
-				
-			}
-		}
-	return std::move(result);
-}
-
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator+(const lug::Maths::Matrix<T, rows, columns>& matrix, const T & scalar)
-{
-	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
-
-	for (uint8_t i = 0; i < rows; ++i) {
-		for (uint8_t j = 0; j < columns; ++j) {
-			result(i, j) = matrix(i,j) + scalar;
-		}
-	}
-	return std::move(result);
-}
-
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator-(const Matrix<T, rows, columns>& matrix, const T & scalar)
-{
-	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
-
-	for (uint8_t i = 0; i < rows; ++i) {
-		for (uint8_t j = 0; j < columns; ++j) {
-			result(i, j) = matrix(i, j) - scalar;
-		}
-	}
-	return std::move(result);
-}
-
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator*(const Matrix<T, rows, columns>& matrix, const T & scalar)
-{
-	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
-
-	for (uint8_t i = 0; i < rows; ++i) {
-		for (uint8_t j = 0; j < columns; ++j) {
-			result(i, j) = matrix(i, j) * scalar;
-		}
-	}
-	return std::move(result);
-}
-
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns> lug::Maths::operator/(const Matrix<T, rows, columns>& matrix, const T & scalar)
-{
-	lug::Maths::Matrix<T, rows, columns> result = lug::Maths::Matrix<T, rows, columns>(0);
-
-	for (uint8_t i = 0; i < rows; ++i) {
-		for (uint8_t j = 0; j < columns; ++j) {
-			result(i, j) = matrix(i, j) / scalar;
-		}
-	}
-	return std::move(result);
-}
-
-template<typename T, uint8_t rows, uint8_t columns>
-bool lug::Maths::operator==(lug::Maths::Matrix<T, rows, columns> leftOperand, lug::Maths::Matrix<T, rows, columns> rightOperand)
-{
-	for (uint8_t i = 0; i < rows; ++i) {
-		for (uint8_t j = 0; j < columns; ++j) {
-			if (leftOperand(i, j) != rightOperand(i, j))
-				return false;
-		}
-	}
-	return true;
-}
-
-	template<typename T, uint8_t rows, uint8_t columns>
-	const bool & lug::Maths::operator!=(const lug::Maths::Matrix<T, rows, columns>& leftOperand, const lug::Maths::Matrix<T, rows, columns>& rightOperand)
-	{
-		return !(leftOperand == rightOperand);
-	}
-
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator+=(const lug::Maths::Matrix<T, rows, columns>& rightOperand)
-{
-	lug::Maths::Matrix<T, rows, columns> result = (*this) + rhs;
-	(*this) = result;
-	return *this;
-}
-
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator-=(const lug::Maths::Matrix<T, rows, columns>& rightOperand)
-{
-	lug::Maths::Matrix<T, rows, columns> result = (*this) - rhs;
-	(*this) = result;
-	return *this;
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline lug::Maths::Matrix<Rows, Columns, T>::Matrix(std::initializer_list<T> list) : _values(list) {
+    LUG_ASSERT(list.size() == Rows * Columns, "Matrix construct with bad size initializer list");
 }
 
 
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns>& lug::Maths::Matrix<T, rows, columns>::operator*=(const lug::Maths::Matrix<T, rows, columns>& rightOperand)
-{
-	lug::Maths::Matrix<T, rows, columns> result = (*this) * rhs;
-	(*this) = result;
-	return *this;
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline constexpr uint8_t Matrix<Rows, Columns, T>::getRows() const {
+    return Rows;
 }
 
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns> lug::Maths::Matrix<T, rows, columns>::transpose()
-{
-	lug::Maths::Matrix<T, columns, rows> transposeMatrix(0);
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline constexpr uint8_t Matrix<Rows, Columns, T>::getColumns() const {
+    return Columns;
+}
 
-	for (uint8_t i = 0; i < rows; i++) {
-		for (uint8_t j = 0; j < columns; j++) {
-			transposeMatrix(j, i) = _values[i][j];
-		}
-	}
-	return transposeMatrix;
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getValues() {
+    return _values;
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline constexpr const typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getValues() const {
+    return _values;
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) {
+    return _values[row * Columns + col];
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline constexpr const T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) const {
+    return _values[row * Columns + col];
 }
 
 
-template<typename T, uint8_t rows, uint8_t columns>
-inline lug::Maths::Matrix<T, rows, columns> lug::Maths::Matrix<T, rows, columns>::identity()
-{
-	static_assert(rows == columns, "Determinant only on square matrix");
-
-	Matrix<T, rows, columns> identityMatrix(0);
-	for (uint8_t i = 0; i < rows; ++i) {
-		identityMatrix(i, i) = 1;
-	}
-	return identityMatrix;
+// Matrix/Scalar operations
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator+=(T rhs) {
+    _values += rhs;
+    return *this;
 }
 
-template<typename T, uint8_t rows, uint8_t columns>
-inline uint8_t lug::Maths::Matrix<T, rows, columns>::getRows() const
-{
-	return _rows;
-}
-template<typename T, uint8_t rows, uint8_t columns>
-inline uint8_t lug::Maths::Matrix<T, rows, columns>::getCols() const
-{
-	return _colums;
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator-=(T rhs) {
+    _values -= rhs;
+    return *this;
 }
 
-template<typename T, uint8_t rows, uint8_t columns>
-inline T& lug::Maths::Matrix<T, rows, columns>::operator()(const uint8_t & row, const uint8_t & col)
-{
-	return _values[row][col];
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator*=(T rhs) {
+    _values *= rhs;
+    return *this;
 }
 
-template<typename T, uint8_t rows, uint8_t columns>
-inline const T & lug::Maths::Matrix<T, rows, columns>::operator()(const unsigned & row, const unsigned & col) const
-{
-	return _values[row][col];
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator/=(T rhs) {
+    _values /= rhs;
+    return *this;
 }
 
-template<typename T, uint8_t rows, uint8_t columns>
-inline T  det(lug::Maths::Matrix<T, rows, columns> matrix, uint8_t dimension)
-{
-	static_assert(rows == columns, "Determinant only on square matrix");
-	
-	lug::Maths::Matrix<T, rows, columns> minorMatrix(0);
-	uint8_t indexMinorX = 0;
-	uint8_t indexMinorY = 0;
-	uint8_t indexRowMatrix = 0;
-	T detResult = 0;
 
-	if (columns == 1) {
-		return matrix(0, 0);
-	}
-	else if (dimension == 2) {
-		return matrix(0,0) * matrix(1,1) - matrix(0, 1) * matrix(1, 0);
-	}
-	else {
-		for (uint8_t indexRowMatrix = 0; indexRowMatrix < dimension; indexRowMatrix++) {
-			indexMinorX = 0;
-			indexMinorY = 0;
-			for (uint8_t indexMatrixY = 0; indexMatrixY < dimension; indexMatrixY++) {
-				for (uint8_t indexMatrixX = 0; indexMatrixX < dimension; indexMatrixX++) {
-					if (indexMatrixX == indexRowMatrix) {
-						continue;
-					}
-					minorMatrix(indexMinorY, indexMinorX) = matrix(indexMatrixY, indexMatrixX);
-					indexMinorX++;
-					if (indexMinorX == dimension - 1) {
-						indexMinorY++;
-						indexMinorX = 0;
-					}
-				}
-			}
-			detResult = detResult + matrix(0, indexRowMatrix) * std::pow(-1, indexRowMatrix) * det(minorMatrix, dimension - 1);
-		}
-		return detResult;
-	}
-	
+// Matrix/Matrix operations
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator+=(const Matrix<Rows, Columns, T>& rhs) {
+    _values += rhs._values;
+    return *this;
 }
-	
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator-=(const Matrix<Rows, Columns, T>& rhs) {
+    _values -= rhs._values;
+    return *this;
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator*=(const Matrix<Rows, Columns, T>& rhs) {
+    static_assert(Rows == Columns, "Operator *= is only available for square matrices");
+
+    *this = *this * rhs;
+
+    return *this;
+}
 
 
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Columns, Rows, T> Matrix<Rows, Columns, T>::transpose() const {
+    Matrix<Columns, Rows, T> transposeMatrix;
+
+    for (uint8_t row = 0; row < Rows; ++row) {
+        for (uint8_t col = 0; col < Columns; col++) {
+            transposeMatrix(col, row) = (*this)(row, col);
+        }
+    }
+
+    return transposeMatrix;
+}
 
 
+template <uint8_t Rows, uint8_t Columns, typename T>
+template <bool EnableBool>
+inline constexpr typename std::enable_if<Rows == 1 && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const {
+    static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
+    return (*this)(0, 0);
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+template <bool EnableBool>
+inline constexpr typename std::enable_if<Rows == 2 && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const {
+    static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
+    return (
+        (*this)(0, 0) * (*this)(1, 1)
+        - (*this)(0, 1) * (*this)(1, 0)
+    );
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+template <bool EnableBool>
+inline constexpr typename std::enable_if<Rows == 3 && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const {
+    static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
+    return (
+        (*this)(0, 0) * (*this)(1, 1) * (*this)(2, 2)
+        + (*this)(0, 1) * (*this)(1, 2) * (*this)(2, 0)
+        + (*this)(0, 2) * (*this)(1, 0) * (*this)(2, 1)
+        - (*this)(0, 2) * (*this)(1, 1) * (*this)(2, 0)
+        - (*this)(0, 1) * (*this)(1, 0) * (*this)(2, 2)
+        - (*this)(0, 0) * (*this)(1, 2) * (*this)(2, 1)
+    );
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+template <bool EnableBool>
+typename std::enable_if<(Rows > 3) && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const {
+    static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
+
+    T determinant = 0;
+    Matrix<Rows - 1, Columns - 1, T> minorMatrix;
+
+    constexpr uint8_t k = 0;
+    for (uint8_t i = 0; i < Rows; ++i) {
+        for (uint8_t row = 0; row < Rows; ++row) {
+            if (row == k) {
+                continue;
+            }
+
+            const uint8_t indexRow = row + (row > k ? -1 : 0);
+            for (uint8_t column = 0; column < Columns; ++column) {
+                if (column == i) {
+                    continue;
+                }
+
+                const uint8_t indexColumn = column + (column > i ? -1 : 0);
+                minorMatrix(indexRow, indexColumn) = (*this)(row, column);
+            }
+        }
+
+        determinant += (*this)(i, k) * ((i + k) % 2 ? 1 : -1) * minorMatrix.det();
+    }
+
+    return determinant;
+}
+
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> Matrix<Rows, Columns, T>::identity() {
+    static_assert(Rows == Columns, "The identity matrix had to be a square matrix");
+
+    Matrix<Rows, Columns, T> matrix;
+
+    for (uint8_t i = 0; i < Rows; ++i) {
+        matrix(i, i) = 1;
+    }
+
+    return matrix;
+}
+
+// Matrix/Scalar operations
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> operator+(const Matrix<Rows, Columns, T>& lhs, T rhs) {
+    Matrix<Rows, Columns, T> matrix{lhs};
+
+    matrix.getValues() += rhs;
+
+    return matrix;
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> operator-(const Matrix<Rows, Columns, T>& lhs, T rhs) {
+    Matrix<Rows, Columns, T> matrix{lhs};
+
+    matrix.getValues() -= rhs;
+
+    return matrix;
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> operator*(const Matrix<Rows, Columns, T>& lhs, T rhs) {
+    Matrix<Rows, Columns, T> matrix{lhs};
+
+    matrix.getValues() *= rhs;
+
+    return matrix;
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> operator/(const Matrix<Rows, Columns, T>& lhs, T rhs) {
+    Matrix<Rows, Columns, T> matrix{lhs};
+
+    matrix.getValues() /= rhs;
+
+    return matrix;
+}
+
+// Matrix/Matrix operations
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> operator+(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs) {
+    Matrix<Rows, Columns, T> matrix{lhs};
+
+    matrix += rhs;
+
+    return matrix;
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> operator-(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs) {
+    Matrix<Rows, Columns, T> matrix{lhs};
+
+    matrix -= rhs;
+
+    return matrix;
+}
+
+template <uint8_t RowsLeft, uint8_t ColumnsLeft, uint8_t RowsRight, uint8_t ColumnsRight, typename T>
+inline Matrix<RowsLeft, ColumnsRight, T> operator*(const Matrix<RowsLeft, ColumnsLeft, T>& lhs, const Matrix<RowsRight, ColumnsRight, T>& rhs) {
+    static_assert(ColumnsLeft == RowsRight, "Columns of the right operand and Rows of the left operand must be of the same size to multiply matrices");
+
+    Matrix<RowsLeft, ColumnsRight, T> matrix;
+
+    for (uint8_t i = 0; i < RowsLeft; ++i) {
+        for (uint8_t j = 0; j < ColumnsRight; ++j) {
+            for (uint8_t k = 0; k < RowsRight; k++) {
+                matrix(i, j) += lhs(i, k) * rhs(k, j);
+            }
+        }
+    }
+
+    return matrix;
+}
+
+// Comparaison operators
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline bool operator==(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs) {
+    return lhs.getValues() == rhs.getValues();
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline bool operator!=(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs) {
+    return lhs.getValues() != rhs.getValues();
+}
+
+// TODO: Handle alignment of values
+template <uint8_t Rows, uint8_t Columns, typename T>
+std::ostream& operator<<(std::ostream& os, const Matrix<Rows, Columns, T>& matrix) {
+    os << "{\n";
+
+    for (uint8_t i = 0; i < Rows; i++) {
+        os << "  ";
+
+        for (uint8_t j = 0; j < Columns; j++) {
+            if (j != 0) {
+                os << ", ";
+            }
+
+            os << matrix(i, j);
+        }
+
+        os << "\n";
+    }
+
+    os << "}";
+
+    return os;
+}

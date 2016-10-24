@@ -1,102 +1,108 @@
 #pragma once
+
 #include <cstdint>
-#include <cmath>
-#include <valarray> 
-#include <iostream>
+#include <valarray>
+#include <lug/System/Debug.hpp>
 
 namespace lug {
 namespace Maths {
 
-
-template <typename T>
-using MatrixValarray = std::valarray<std::valarray<T>>;
-
-template <typename T, uint8_t rows, uint8_t columns>
-class Matrix;
-
-template <typename T, uint8_t rows, uint8_t columns>
-std::ostream& operator<<(std::ostream& os, const Matrix<T, rows, columns>& matrix);
-
-
-
-
-template <typename T, uint8_t rows, uint8_t columns>
+template <uint8_t Rows, uint8_t Columns, typename T = float>
 class Matrix
 {
 public:
-	Matrix(const T& unitialValue);
-	Matrix(const Matrix<T, rows, columns>& matrix);
-	virtual ~Matrix();
+    using Values = std::valarray<T>;
 
-	Matrix<T, rows, columns>& operator=(const Matrix<T, rows, columns>& rightOperand);
-	Matrix<T, rows, columns>& operator+=(const Matrix<T, rows, columns>& rightOperand);
-	Matrix<T, rows, columns>& operator-=(const Matrix<T, rows, columns>& rightOperand);
-	Matrix<T, rows, columns>& operator*=(const Matrix<T, rows, columns>& rightOperand);
-	
-	Matrix<T, rows, columns> transpose();
+public:
+    explicit constexpr Matrix(T value = 0);
+    explicit Matrix(std::initializer_list<T> list);
+    Matrix(const Matrix<Rows, Columns, T>& matrix) = default;
+    Matrix(Matrix<Rows, Columns, T>&& matrix) = default;
 
-	T& operator()(const uint8_t& row, const uint8_t& col);
-	const T& operator()(const unsigned& row, const unsigned& col) const;
+    Matrix<Rows, Columns, T>& operator=(const Matrix<Rows, Columns, T>& rhs) = default;
+    Matrix<Rows, Columns, T>& operator=(Matrix<Rows, Columns, T>&& rhs) = default;
 
-	static Matrix<T, rows, columns> identity();
+    virtual ~Matrix() = default;
 
-	uint8_t getRows() const;
-	uint8_t getCols() const;
+    constexpr uint8_t getRows() const;
+    constexpr uint8_t getColumns() const;
 
+    Matrix<Rows, Columns, T>::Values& getValues();
+    constexpr const Matrix<Rows, Columns, T>::Values& getValues() const;
+
+    T& operator()(uint8_t row, uint8_t col = 0);
+    constexpr const T& operator()(uint8_t row, uint8_t col = 0) const;
+
+    // Matrix/Scalar operations
+    Matrix<Rows, Columns, T>& operator+=(T rhs);
+    Matrix<Rows, Columns, T>& operator-=(T rhs);
+    Matrix<Rows, Columns, T>& operator*=(T rhs);
+    Matrix<Rows, Columns, T>& operator/=(T rhs);
+
+    // Matrix/Matrix operations
+    Matrix<Rows, Columns, T>& operator+=(const Matrix<Rows, Columns, T>& rhs);
+    Matrix<Rows, Columns, T>& operator-=(const Matrix<Rows, Columns, T>& rhs);
+    Matrix<Rows, Columns, T>& operator*=(const Matrix<Rows, Columns, T>& rhs);
+    Matrix<Rows, Columns, T>& operator/=(const Matrix<Rows, Columns, T>& rhs) = delete;
+
+    // TODO: Add the invert function
+    Matrix<Columns, Rows, T> transpose() const;
+
+    template <bool EnableBool = true>
+    constexpr typename std::enable_if<Rows == 1 && EnableBool, T>::type det() const;
+
+    template <bool EnableBool = true>
+    constexpr typename std::enable_if<Rows == 2 && EnableBool, T>::type det() const;
+
+    template <bool EnableBool = true>
+    constexpr typename std::enable_if<Rows == 3 && EnableBool, T>::type det() const;
+
+    template <bool EnableBool = true>
+    typename std::enable_if<(Rows > 3) && EnableBool, T>::type det() const;
+
+    static Matrix<Rows, Columns, T> identity();
 
 protected:
-	MatrixValarray<T> _values;
-	uint8_t _rows;
-	uint8_t _colums;
-
-	Matrix<T, rows, columns>& operationOnMatrices(
-		const Matrix<T, rows, columns>& rightOperand,
-		Matrix<T, rows, columns>& (*operationFunction)(const T, const T));
+    Values _values;
 };
 
-template<typename T, uint8_t rows, uint8_t columns>
-std::ostream & operator<<(std::ostream & os, const Matrix<T, rows, columns>& matrix)
-{
-	for (uint8_t i = 0; i < rows; i++) {
-		for (uint8_t j = 0; j < columns; j++) {
-			os << matrix(i, j);
-		}
-		os << std::endl;
-	}
-	return os;
-}
+// Matrix/Scalar operations
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator+(const Matrix<Rows, Columns, T>& lhs, T rhs);
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator-(const Matrix<Rows, Columns, T>& lhs, T rhs);
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator*(const Matrix<Rows, Columns, T>& lhs, T rhs);
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator/(const Matrix<Rows, Columns, T>& lhs, T rhs);
 
 // Matrix/Matrix operation
-template <typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> operator+(const Matrix<T, rows, columns>& leftOperand, const Matrix<T, rows, columns>& rightOperand);
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator+(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs);
 
-template <typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> operator-(const Matrix<T, rows, columns>& leftOperand, const Matrix<T, rows, columns>& rightOperand);
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator-(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs);
 
-template <typename T, uint8_t rowsLeft, uint8_t columnsLeft, uint8_t rowsRight, uint8_t columnsRight>
-Matrix<T, rowsLeft, columnsRight> operator*(const Matrix<T, rowsLeft, columnsLeft>& leftOperand, const Matrix<T, rowsRight, columnsRight>& rightOperand);
+template <uint8_t RowsLeft, uint8_t ColumnsLeft, uint8_t RowsRight, uint8_t ColumnsRight, typename T>
+Matrix<RowsLeft, ColumnsRight, T> operator*(const Matrix<RowsLeft, ColumnsLeft, T>& lhs, const Matrix<RowsRight, ColumnsRight, T>& rhs);
 
+template <uint8_t RowsLeft, uint8_t ColumnsLeft, uint8_t RowsRight, uint8_t ColumnsRight, typename T>
+Matrix<RowsLeft, ColumnsRight, T> operator/(const Matrix<RowsLeft, ColumnsLeft, T>& lhs, const Matrix<RowsRight, ColumnsRight, T>& rhs) = delete;
 
-// Matrix/scalar operations
-template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> operator+(const Matrix<T, rows, columns>& matrix, const T& scalar);
+// Comparaison operators
+template <uint8_t Rows, uint8_t Columns, typename T>
+bool operator==(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs);
 
-template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> operator-(const Matrix<T, rows, columns>& matrix, const T& scalar);
+template <uint8_t Rows, uint8_t Columns, typename T>
+bool operator!=(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs);
 
-template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> operator*(const Matrix<T, rows, columns>& matrix, const T& scalar);
+template <uint8_t Rows, uint8_t Columns, typename T>
+std::ostream& operator<<(std::ostream& os, const Matrix<Rows, Columns, T>& matrix);
 
-template<typename T, uint8_t rows, uint8_t columns>
-Matrix<T, rows, columns> operator/(const Matrix<T, rows, columns>& matrix, const T& scalar);
-
-// TODO ==operator and != operator
-template <typename T, uint8_t rows, uint8_t columns>
-bool operator==( Matrix<T, rows, columns> leftOperand, Matrix<T, rows, columns> rightOperand);
-
-template <typename T, uint8_t rows, uint8_t columns>
-const bool& operator!=(const Matrix<T, rows, columns>& leftOperand, const Matrix<T, rows, columns>& rightOperand);
+#include <lug/Maths/Matrix.inl>
 
 }
 }
-

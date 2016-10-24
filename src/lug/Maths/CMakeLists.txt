@@ -3,7 +3,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Maths)
 
 # all source files
  set(SRC
-    ${INCROOT}/Matrix.inl
+
  )
 source_group("src" FILES ${SRC})
 
@@ -11,6 +11,9 @@ source_group("src" FILES ${SRC})
 set(INC
     ${INCROOT}/Export.hpp
     ${INCROOT}/Matrix.hpp
+    ${INCROOT}/Matrix.inl
+    ${INCROOT}/Vector.hpp
+    ${INCROOT}/Vector.inl
 )
 source_group("inc" FILES ${INC})
 
