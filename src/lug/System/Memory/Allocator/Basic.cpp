@@ -8,7 +8,17 @@ namespace Memory {
 namespace Allocator {
 
 void* Basic::allocate(size_t size, size_t alignment, size_t offset) const {
+#if defined(LUG_SYSTEM_LINUX)
     return aligned_alloc(alignment + offset, size);
+#elif defined(LUG_SYSTEM_ANDROID)
+    void* ret = nullptr;
+    if (!posix_memalign(&ret, alignment + offset, size)) {
+        return ret;
+    }
+    return nullptr;
+#elif defined(LUG_SYSTEM_WINDOWS)
+    return _aligned_alloc(alignment + offset, size);
+#endif
 }
 
 void Basic::free(void* ptr) const {

@@ -9,7 +9,12 @@
 
     #if defined(LUG_COMPILER_GCC) || defined(LUG_COMPILER_CLANG)
 
-        #define LUG_DEBUG_BREAK() __asm__("int $3")
+        #if defined(LUG_SYSTEM_ANDROID)
+            // see https://github.com/scottt/debugbreak/blob/master/debugbreak.h#L90
+            #define LUG_DEBUG_BREAK() __asm__ volatile(".inst 0xe7f001f0");
+        #else
+            #define LUG_DEBUG_BREAK() __asm__("int $3")
+        #endif
 
     #elif defined(LUG_COMPILER_MSVC)
 
