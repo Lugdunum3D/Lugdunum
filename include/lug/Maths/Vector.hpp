@@ -12,7 +12,7 @@ public:
     using BaseMatrix = Matrix<Rows, 1, T>;
 
     explicit constexpr Vector(T value = 0);
-    explicit Vector(std::initializer_list<T> list);
+    Vector(std::initializer_list<T> list);
 
     // Convert from matrix (we want non explicit conversion)
     Vector(const BaseMatrix& matrix);
@@ -53,17 +53,15 @@ public:
 
 #undef DEFINE_ACCESS
 
-    template <bool EnableBool>
-    constexpr typename std::enable_if<Rows == 3 && EnableBool, Vector<Rows, T>&>::type operator^=(const Vector<Rows, T>& rhs);
-
     constexpr T norme() const;
     constexpr void normalize();
-
-    // TODO: Dot product
 };
 
 template <typename T>
-constexpr Vector<3, T> operator^(const Vector<3, T>& lhs, const Vector<3, T>& rhs);
+constexpr Vector<3, T> cross(const Vector<3, T>& lhs, const Vector<3, T>& rhs);
+
+template <uint8_t Rows, typename T>
+constexpr T dot(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs);
 
 #define DEFINE_LENGTH_VECTOR(length)                \
     template <typename T = float>                   \

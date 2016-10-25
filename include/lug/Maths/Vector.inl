@@ -20,13 +20,6 @@ inline Vector<Rows, T>::Vector(const Vector<Rows - 1, T>& vector, T value) {
 }
 
 template <uint8_t Rows, typename T>
-template <bool EnableBool>
-inline constexpr typename std::enable_if<Rows == 3 && EnableBool, Vector<Rows, T>&>::type Vector<Rows, T>::operator^=(const Vector<Rows, T>& rhs) {
-    *this = *this ^ rhs;
-    return *this;
-}
-
-template <uint8_t Rows, typename T>
 inline constexpr T Vector<Rows, T>::norme() const {
     return std::sqrt((BaseMatrix::_values * BaseMatrix::_values).sum());
 }
@@ -37,10 +30,15 @@ inline constexpr void Vector<Rows, T>::normalize() {
 }
 
 template <typename T>
-inline constexpr Vector<3, T> operator^(const Vector<3, T>& lhs, const Vector<3, T>& rhs) {
-    return Vector<3, T>(
+inline constexpr Vector<3, T> cross(const Vector<3, T>& lhs, const Vector<3, T>& rhs) {
+    return {
         lhs.y() * rhs.z() - lhs.z() * rhs.y(),
         lhs.z() * rhs.x() - lhs.x() * rhs.z(),
         lhs.x() * rhs.y() - lhs.y() * rhs.x()
-    );
+    };
+}
+
+template <uint8_t Rows, typename T>
+inline constexpr T dot(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs) {
+    return (lhs.getValues() * rhs.getValues()).sum();
 }

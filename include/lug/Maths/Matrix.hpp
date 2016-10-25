@@ -15,7 +15,7 @@ public:
 
 public:
     explicit constexpr Matrix(T value = 0);
-    explicit Matrix(std::initializer_list<T> list);
+    Matrix(std::initializer_list<T> list);
     Matrix(const Matrix<Rows, Columns, T>& matrix) = default;
     Matrix(Matrix<Rows, Columns, T>&& matrix) = default;
 
