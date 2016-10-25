@@ -63,6 +63,9 @@ constexpr Vector<3, T> cross(const Vector<3, T>& lhs, const Vector<3, T>& rhs);
 template <uint8_t Rows, typename T>
 constexpr T dot(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs);
 
+template <uint8_t Rows, uint8_t Columns, typename T>
+constexpr Matrix<Rows, Columns, T> outer(const Vector<Rows, T>& lhs, const Vector<Columns, T>& rhs);
+
 #define DEFINE_LENGTH_VECTOR(length)                \
     template <typename T = float>                   \
     using Vec##length = Vector<length, T>;          \

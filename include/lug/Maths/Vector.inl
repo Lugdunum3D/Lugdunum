@@ -42,3 +42,8 @@ template <uint8_t Rows, typename T>
 inline constexpr T dot(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs) {
     return (lhs.getValues() * rhs.getValues()).sum();
 }
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline constexpr Matrix<Rows, Columns, T> outer(const Vector<Rows, T>& lhs, const Vector<Columns, T>& rhs) {
+    return lhs * rhs.transpose();
+}
