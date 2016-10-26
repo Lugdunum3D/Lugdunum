@@ -26,7 +26,7 @@ inline constexpr uint8_t Matrix<Rows, Columns, T>::getColumns() const {
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getValues() {
+inline constexpr typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getValues() {
     return _values;
 }
 
@@ -36,7 +36,7 @@ inline constexpr const typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, C
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) {
+inline constexpr T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) {
     return _values[row * Columns + col];
 }
 

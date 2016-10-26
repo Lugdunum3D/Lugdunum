@@ -54,7 +54,7 @@ public:
 #undef DEFINE_ACCESS
 
     constexpr T norme() const;
-    constexpr void normalize();
+    void normalize();
 };
 
 template <typename T>

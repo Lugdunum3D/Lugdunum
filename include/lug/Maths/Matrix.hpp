@@ -27,10 +27,10 @@ public:
     constexpr uint8_t getRows() const;
     constexpr uint8_t getColumns() const;
 
-    Matrix<Rows, Columns, T>::Values& getValues();
-    constexpr const Matrix<Rows, Columns, T>::Values& getValues() const;
+    constexpr typename Matrix<Rows, Columns, T>::Values& getValues();
+    constexpr const typename Matrix<Rows, Columns, T>::Values& getValues() const;
 
-    T& operator()(uint8_t row, uint8_t col = 0);
+    constexpr T& operator()(uint8_t row, uint8_t col = 0);
     constexpr const T& operator()(uint8_t row, uint8_t col = 0) const;
 
     // Matrix/Scalar operations
