@@ -1,18 +1,16 @@
-#include <lug/System/Logger.hpp>
-#include <iostream>
-#include <cstdio>
 #include <cstdarg>
-#include <sstream>
+#include <cstdio>
 #include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <lug/System/Logger.hpp>
 
 namespace lug {
 
-
-LUG_SYSTEM_API System::Logger &getLogger() {
+LUG_SYSTEM_API System::Logger& getLogger() {
     static lug::System::LoggerImpl<lug::System::NoFilterPolicy, lug::System::ConsoleFormatPolicy, lug::System::ConsoleWriterPolicy> logger;
     return logger;
 }
-
 
 namespace System {
 
@@ -41,8 +39,7 @@ int _vscprintf(const char* format, std::va_list args) {
 }
 
 // Format policies
-void ConsoleFormatPolicy::format(Logger::Buffer& buffer, const Logger::Criteria& criteria) const
-{
+void ConsoleFormatPolicy::format(Logger::Buffer& buffer, const Logger::Criteria& criteria) const {
     std::stringstream ss;
 
     // [TIME] [LOG_LEVEL] [SOURCE] msg
@@ -69,5 +66,5 @@ void ConsoleWriterPolicy::write(const Logger::Buffer& buffer) const {
 
 void FileWriterPolicy::write(const Logger::Buffer& /*buffer*/) const {}
 
-}
-}
+} // namespace System
+} // namespace lug

@@ -30,5 +30,5 @@ void ConsoleWriterPolicy::write(const Logger::Buffer& /*buffer*/) const {}
 
 void FileWriterPolicy::write(const Logger::Buffer& /*buffer*/) const {}
 
-}
-}
+} // namespace System
+} // namespace lug
