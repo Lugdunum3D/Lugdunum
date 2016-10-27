@@ -1,15 +1,13 @@
-#include "Quaternion.h"
+#include <lug\Maths\Quaternion.hpp>
 
 
-
-Quaternion::Quaternion() {}
 
 
 lug::Maths::Quaternion::Quaternion(double x, double y, double z, double w) : _X(x), _Y(y), _Z(z), _W(w) {
 
 }
 
-lug::Maths::Quaternion::Quaternion(lug::Maths::Vector3D v, double w) : _X(v.getX()), _Y(v.getY()), _Z(v.getZ()), _W(w) {}
+lug::Maths::Quaternion::Quaternion(lug::Maths::Vec3d v, double w) : _X(v.getX()), _Y(v.getY()), _Z(v.getZ()), _W(w) {}
 
 lug::Maths::Quaternion::Quaternion(const Quaternion & otherQuaternion) : _X(otherQuaternion.getX()), _Y(otherQuaternion.getY()), _Z(otherQuaternion.getZ()), _W(otherQuaternion.getW()) {}
 
@@ -19,7 +17,7 @@ lug::Maths::Quaternion & lug::Maths::Quaternion::operator=(const lug::Maths::Qua
     _Y = leftOperand.getY();
     _Z = leftOperand.getZ();
     _Z = leftOperand.getW();
-    return *(this)
+    return *(this);
 
 }
 
@@ -43,7 +41,7 @@ lug::Maths::Quaternion lug::Maths::Quaternion::normalize() {
 
     lug::Maths::Quaternion normalizeQuaternion(_X / numerator, _Y / numerator, _Z / numerator, _W / numerator);
 
-    return std::move(normalize);
+    return std::move(normalizeQuaternion);
 }
 
 const double lug::Maths::Quaternion::angleWith(const Quaternion & otherQuaternion) {

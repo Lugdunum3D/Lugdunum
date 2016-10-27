@@ -3,7 +3,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Maths)
 
 # all source files
  set(SRC
-
+	${SRCROOT}/Quaternion.cpp
  )
 source_group("src" FILES ${SRC})
 
@@ -14,6 +14,7 @@ set(INC
     ${INCROOT}/Matrix.inl
     ${INCROOT}/Vector.hpp
     ${INCROOT}/Vector.inl
+    ${INCROOT}/Quaternion.hpp
 )
 source_group("inc" FILES ${INC})
 
