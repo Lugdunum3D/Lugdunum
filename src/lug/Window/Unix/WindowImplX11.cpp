@@ -1,4 +1,3 @@
-#include <iostream>
 #include <queue>
 #include <string>
 #include <lug/Window/Unix/WindowImplX11.hpp>
