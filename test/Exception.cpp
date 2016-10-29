@@ -1,14 +1,13 @@
 #include <lug/Config.hpp>
 #include <lug/System/Exception.hpp>
-#include <iostream>
 #include <gtest/gtest.h>
 
-TEST(ExcepetionReturnValues, ReturnLine) {
+TEST(ExceptionReturnValues, ReturnLine) {
     try {
         LUG_EXCEPT(IOException, "My exception worked");
     }
     catch (const lug::System::IOException &e) {
-        EXPECT_EQ(e.getLine(), 8);
+        EXPECT_EQ(e.getLine(), 7);
     }
 }
 
