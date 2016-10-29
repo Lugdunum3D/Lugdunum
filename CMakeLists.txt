@@ -95,16 +95,18 @@ install(FILES cmake/modules/FindLUG.cmake DESTINATION ${INSTALL_MISC_DIR}/cmake/
 
 # Unit test
 if(ENABLE_TEST)
-    set(GTEST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/lib/googletest)
+    set(GTEST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/lib/googletest/googletest)
+    set(GTEST_LIBRARY ${GTEST_ROOT}/build-aux/Debug/gtest.lib)
+    set(GTEST_MAIN_LIBRARY ${GTEST_ROOT}/build-aux/Debug/gtest_main.lib)
 
     enable_testing()
     find_package(GTest REQUIRED)
-    include_directories(${GTEST_INCLUDE_DIRS})
+    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/googletest/googletest/include/gtest)
 
-    add_executable(runUnitTests src/lug/*/tests/*.cpp)
-    target_link_libraries(runUnitTests ${GTEST_BOTH_LIBRARIES})
+    add_executable(runSystemUnitTests ${CMAKE_CURRENT_SOURCE_DIR}/src/lug/System/tests/exception.cpp)
+    target_link_libraries(runSystemUnitTests ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY})
 
-    add_test(allTests runUnitTests)
+    add_test(allTests runSystemUnitTests)
 endif()
 
 # TODO: setup the install for license
