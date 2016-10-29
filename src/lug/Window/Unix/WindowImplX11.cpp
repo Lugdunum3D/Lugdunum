@@ -1,8 +1,11 @@
+#include <iostream>
 #include <queue>
 #include <string>
 #include <lug/Window/Unix/WindowImplX11.hpp>
 
-bool lug::Window::priv::WindowImpl::create(uint16_t width, uint16_t height, const std::string& title, Style style) {
+lug::Window::priv::WindowImpl::WindowImpl(Window* win): _parent{win} {}
+
+bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style) {
     uint32_t blackColor = 0;
     uint8_t screen = 0;
     GC _graphic_context;
@@ -18,7 +21,7 @@ bool lug::Window::priv::WindowImpl::create(uint16_t width, uint16_t height, cons
 
     blackColor = BlackPixel(_display, DefaultScreen(_display));
 
-    _window = XCreateSimpleWindow(_display, parent, 0, 0, width, height, 90, 2, blackColor);
+    _window = XCreateSimpleWindow(_display, parent, 0, 0, _parent->_mode.width, _parent->_mode.height, 90, 2, blackColor);
 
     if (!_window) {
         XCloseDisplay(_display);
@@ -45,18 +48,29 @@ void lug::Window::priv::WindowImpl::close() {
     }
 }
 
-void lug::Window::priv::WindowImpl::processEvents(std::queue<lug::Window::Event>& events) {
-    XEvent      event;
+Bool selectEvents(Display* display, XEvent* event, XPointer arg)
+{
+    if (event->type == ClientMessage)
+        return True;
+    else
+        return False;
+}
 
-    XNextEvent(_display, &event);
+bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
+    XEvent xEvent;
 
-    switch (event.type) {
-        case ClientMessage:
-            if (event.xclient.message_type == wmProtocols && event.xclient.data.l[0] == wmDeleteWindow) {
-                events.push({lug::Window::EventType::CLOSE});
-            }
-            break;
-        default:
-            break;
+    if (XCheckIfEvent(_display, &xEvent, selectEvents, nullptr) == True)
+    {
+        switch (xEvent.type) {
+            case ClientMessage:
+                if (xEvent.xclient.message_type == wmProtocols && xEvent.xclient.data.l[0] == wmDeleteWindow) {
+                    event.type = lug::Window::EventType::CLOSE;
+                }
+                break;
+            default:
+                return false;
+        }
     }
+
+    return false;
 }

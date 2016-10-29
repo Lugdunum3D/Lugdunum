@@ -6,12 +6,13 @@ namespace lug {
 namespace Window {
 
 enum class LUG_WINDOW_API EventType : uint32_t {
-    CLOSE
+    CLOSE,
+    DESTROY,
 };
 
 struct LUG_WINDOW_API Event {
     EventType type;
 };
-    
+
 }
 }

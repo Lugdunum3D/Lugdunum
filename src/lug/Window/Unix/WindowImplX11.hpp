@@ -9,7 +9,7 @@ namespace priv {
 
 class WindowImpl {
 public:
-    WindowImpl() = default;
+    WindowImpl(Window*);
     ~WindowImpl() = default;
 
     WindowImpl(const WindowImpl&) = delete;
@@ -17,12 +17,15 @@ public:
     WindowImpl& operator=(const WindowImpl&) = delete;
     WindowImpl& operator=(WindowImpl&&) = delete;
 
-    bool create(uint16_t width, uint16_t height, const std::string& title, Style style);
+    bool create(const std::string& title, Style style);
     void close();
-    void processEvents(std::queue<lug::Window::Event>& events);
+
+    bool pollEvent(lug::Window::Event& event);
 
 private:
-	Display *_display;
+    Window* _parent{nullptr};
+
+	Display* _display;
 	::Window  _window;
     Atom wmProtocols;
     Atom wmDeleteWindow;
