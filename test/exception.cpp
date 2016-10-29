@@ -1,7 +1,7 @@
 #include <lug/Config.hpp>
 #include <lug/System/Exception.hpp>
 #include <iostream>
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 TEST(ExcepetionReturnValues, ReturnLine) {
     try {

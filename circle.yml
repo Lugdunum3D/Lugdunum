@@ -1,11 +1,17 @@
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init # use submodules
+
 dependencies:
   pre:
+    - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
+    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     - sudo apt-get update
-    - sudo apt-get dist-upgrade
-    - sudo apt-get install -y clang
-    - sudo apt-get install -y cmake
-    - sudo apt-get install -y libc++
+    - sudo apt-get install -y clang make gcc-6 g++-6
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6
 
+test:
   override:
     - mkdir build
-    - cd build && cmake ../ -DCMAKE_CXX_COMPILER=clang++ && make
+    - cd build && cmake ../ -DENABLE_TEST=true && make all test
