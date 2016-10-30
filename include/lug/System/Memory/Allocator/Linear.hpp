@@ -12,8 +12,8 @@ namespace Allocator {
 class LUG_SYSTEM_API Linear {
 public:
     struct Mark {
-        void* current{nullptr};
-        lug::System::Memory::Area::Page* currentPage{nullptr};
+        void* current;
+        lug::System::Memory::Area::Page* currentPage;
     };
 
 public:
