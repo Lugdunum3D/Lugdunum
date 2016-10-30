@@ -1,20 +1,12 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 # project name
 project(test)
 
 include("${CMAKE_SOURCE_DIR}/cmake/Config.cmake")
 
-if(LUG_COMPILER_MSVC)
-    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    else()
-        list(APPEND CMAKE_CXX_FLAGS "/W4")
-    endif()
-elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
-    list(APPEND CMAKE_CXX_FLAGS "-std=c++14")
-    string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
-endif()
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 14)
 
 include_directories(${gtest_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/include)
