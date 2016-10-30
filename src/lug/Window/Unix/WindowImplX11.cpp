@@ -49,7 +49,7 @@ void lug::Window::priv::WindowImpl::close() {
 
 Bool selectEvents(Display* display, XEvent* event, XPointer arg)
 {
-    if (event->type == ClientMessage)
+    if (event->type == ClientMessage || event->type == DestroyNotify)
         return True;
     else
         return False;
@@ -66,10 +66,15 @@ bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
                     event.type = lug::Window::EventType::CLOSE;
                 }
                 break;
+            case DestroyNotify:
+                event.type = lug::Window::EventType::DESTROY;
+                break;
             default:
                 return false;
         }
     }
+    else
+        return false;
 
-    return false;
+    return true;
 }
