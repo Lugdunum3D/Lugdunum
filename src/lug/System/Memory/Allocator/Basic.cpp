@@ -17,7 +17,7 @@ void* Basic::allocate(size_t size, size_t alignment, size_t offset) const {
     }
     return nullptr;
 #elif defined(LUG_SYSTEM_WINDOWS)
-    return _aligned_alloc(alignment + offset, size);
+    return _aligned_malloc(alignment + offset, size);
 #endif
 }
 
