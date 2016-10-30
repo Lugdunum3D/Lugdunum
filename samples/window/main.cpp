@@ -15,7 +15,11 @@ int main() {
             if (event.type == lug::Window::EventType::CLOSE) {
                 window->close();
             }
+
         }
+
+        // ...
     }
+    
     return 0;
 }

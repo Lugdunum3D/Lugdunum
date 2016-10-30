@@ -23,12 +23,17 @@ public:
     bool pollEvent(lug::Window::Event& event);
 
 private:
+    void setWindowDecorations(Style style);
+
+private:
     Window* _parent{nullptr};
 
-	Display* _display;
-	::Window  _window;
-    Atom wmProtocols;
-    Atom wmDeleteWindow;
+    Display* _display{nullptr};
+    ::Window  _window{0};
+
+    Atom _wmProtocols;
+    Atom _wmDeleteWindow;
+    Atom _wmHints;
 };
 
 } // namespace priv
