@@ -9,8 +9,46 @@ macro(lug_set_option var default type docstring)
     set(${var} ${${var}} CACHE ${type} ${docstring} FORCE)
 endmacro()
 
-# determine the build type
+if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
+endif()
+
+# determine the build type
 lug_set_option(CMAKE_BUILD_TYPE Release STRING "Choose the type of build (Debug or Release)")
+
+if(ANDROID)
+    set(ANDROID_ABI arm64-v8a)
+    message(STATUS "ANDROID_ABI : ${ANDROID_ABI}")
+
+    set(ANDROID_TOOLCHAIN clang)
+    message(STATUS "ANDROID_TOOLCHAIN : ${ANDROID_TOOLCHAIN}")
+
+    lug_set_option(ANDROID_PLATFORM android-24 STRING "Target specific android version target (default : android-24)")
+    if(NOT ANDROID_PLATFORM MATCHES android-2[3-9])
+        message(FATAL_ERROR "Invalid android version target : ${ANDROID_PLATFORM}")
+    endif()
+    message(STATUS "ANDROID_PLATFORM : ${ANDROID_PLATFORM}")
+
+    if(ANDROID_PLATFORM MATCHES android-23)
+        message(STATUS "target android-23, forcing static lib")
+        set(BUILD_SHARED_LIBS false)
+    endif()
+    lug_set_option(ANDROID_STL c++_shared STRING "Choose which Android STL to use (default : c++_shared)")
+    if(NOT ANDROID_STL STREQUAL c++_static AND NOT ANDROID_STL STREQUAL c++_shared)
+        message(FATAL_ERROR "Invalid STL : ${ANDROID_STL}")
+    endif()
+
+    if(ANDROID_PLATFORM STREQUAL android-23 AND ANDROID_STL STREQUAL c++_shared)
+        message(FATAL_ERROR "android-23 and c++_shared are mutually exclusive")
+    endif()
+    message(STATUS "ANDROID_STL : ${ANDROID_STL}")
+
+    set(ANDROID_CPP_FEATURES "rtti exceptions")
+    message(STATUS "ANDROID_CPP_FEATURES : ${ANDROID_CPP_FEATURES}")
+
+    set(LIB_SUFFIX "/${ANDROID_ABI}")
+endif()
+
 
 # project name
 project(Lugdunum CXX)
@@ -43,14 +81,15 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
 # add the subdirectories
 add_subdirectory(src/lug/)
 
-# setup the install of headers
+# setup the install of headers
 install(DIRECTORY include
         DESTINATION .
         COMPONENT devel
         FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl"
 )
 
-# setup the install of misc files
+# setup the install of misc files
 install(FILES README.md DESTINATION ${INSTALL_MISC_DIR})
+install(FILES cmake/modules/FindLUG.cmake DESTINATION ${INSTALL_MISC_DIR}/cmake/modules)
 
-# TODO: setup the install for license and FindLUG.cmake
+# TODO: setup the install for license

@@ -7,7 +7,11 @@
 
 #elif defined(__unix__)
 
-    #if defined(__linux__)
+    #if defined(__ANDROID__)
+
+        #define LUG_SYSTEM_ANDROID
+
+    #elif defined(__linux__)
 
         #define LUG_SYSTEM_LINUX
 
@@ -30,6 +34,22 @@
 
 #endif
 
+
+#if defined(__clang__)
+
+    #define LUG_COMPILER_CLANG
+
+#elif defined(__GNUC__)
+
+    #define LUG_COMPILER_GCC
+
+#elif defined(_MSC_VER)
+
+    #define LUG_COMPILER_MSVC
+
+#endif
+
+
 // Define macros for import / export
 #if !defined(LUG_STATIC)
 
@@ -37,6 +57,12 @@
 
         #define LUG_API_EXPORT __declspec(dllexport)
         #define LUG_API_IMPORT __declspec(dllimport)
+
+        // Disable C4251 and C4275 warnings for Visual C++ compilers
+        #if defined(LUG_COMPILER_MSVC)
+            #pragma warning(disable:4251)
+            #pragma warning(disable:4275)
+        #endif
 
     #else
 
