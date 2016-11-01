@@ -408,7 +408,7 @@ deploy: off
 #         notifications           #
 #---------------------------------#
 
-notifications:
+# notifications:
 
   # # Email
   # - provider: Email
