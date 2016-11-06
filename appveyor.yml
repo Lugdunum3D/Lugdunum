@@ -227,7 +227,7 @@ build_script:
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE -GTEST_OUTPUT=xml:.\XML_UnitTest_Report.xml ..
+    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE -DGTEST_OUTPUT=xml:.\XML_UnitTest_Report.xml ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
