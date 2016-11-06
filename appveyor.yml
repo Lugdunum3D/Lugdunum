@@ -144,7 +144,8 @@ matrix:
 #   - mongodb             # start MongoDB
 
 # scripts that run after cloning repository
-# install:
+install:
+  - git submodule update --init --recursive
   # # by default, all script lines are interpreted as batch
   # - echo This is batch
   # # to run script as a PowerShell command prepend it with ps:
