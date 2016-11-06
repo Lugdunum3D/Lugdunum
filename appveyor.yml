@@ -205,7 +205,7 @@ build:
   # include_nuget_references: true  # add -IncludeReferencedProjects option while packaging NuGet artifacts
 
   # MSBuild verbosity level
-  verbosity: normal
+  verbosity: minimal
 
 # scripts to run before build
 before_build:
@@ -290,6 +290,10 @@ test_script:
 #---------------------------------#
 #      artifacts configuration    #
 #---------------------------------#
+
+artifacts:
+  - path: 'build/Testing/Temporary/*'
+    name: test_results
 
 # artifacts:
 #
