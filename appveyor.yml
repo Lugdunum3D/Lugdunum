@@ -237,10 +237,11 @@ build_script:
     }
 
 # scripts to run after build
-# after_build:
-# - ps: |
-#     $wc = New-Object 'System.Net.WebClient'
-#     $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\UnitTest_Report.xml))
+after_build:
+- ps: |
+    Copy-Item .\lib\googletest\googletest\$env:CONFIGURATION\gtest.dll .\test\$env:CONFIGURATION\
+    Copy-Item .\lib\googletest\googletest\$env:CONFIGURATION\gtest_main.dll .\test\$env:CONFIGURATION\
+    Copy-Item .\lib\$env:CONFIGURATION\*.dll .\test\$env:CONFIGURATION\
 
 test_script:
 - ps: |
