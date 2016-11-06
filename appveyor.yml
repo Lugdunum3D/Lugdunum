@@ -237,10 +237,17 @@ build_script:
     }
 
 # scripts to run after build
-after_build:
+# after_build:
+# - ps: |
+#     $wc = New-Object 'System.Net.WebClient'
+#     $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\XML_UnitTest_Report.xml))
+
+test_script:
 - ps: |
-    $wc = New-Object 'System.Net.WebClient'
-    $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\XML_UnitTest_Report.xml))
+    & ctest --output-on-failure
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
 
 # to disable automatic builds
 #build: off
@@ -286,7 +293,6 @@ after_build:
 #---------------------------------#
 
 artifacts:
-  path: 'build/Testing/Temporary/*'
   name: runSystemUnitTests
 
 # artifacts:
