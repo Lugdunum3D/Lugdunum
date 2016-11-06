@@ -227,7 +227,7 @@ build_script:
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE -DGTEST_OUTPUT=xml:.\XML_UnitTest_Report.xml ..
+    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
@@ -240,11 +240,11 @@ build_script:
 # after_build:
 # - ps: |
 #     $wc = New-Object 'System.Net.WebClient'
-#     $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\XML_UnitTest_Report.xml))
+#     $wc.UploadFile("https://ci.appveyor.com/api/testresults/xunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\UnitTest_Report.xml))
 
 test_script:
 - ps: |
-    & ctest --output-on-failure
+    & ctest -C $env:CONFIGURATION --output-on-failure --no-compress-output -T UnitTest_Report
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
