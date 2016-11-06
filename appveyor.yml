@@ -287,13 +287,9 @@ test_script:
 # to disable automatic tests
 #test: off
 
-
 #---------------------------------#
 #      artifacts configuration    #
 #---------------------------------#
-
-artifacts:
-  name: runSystemUnitTests
 
 # artifacts:
 #
