@@ -13,7 +13,7 @@ class Quaternion {
     Quaternion &operator=(const Quaternion &leftOperand);
     virtual ~Quaternion();
 
-    Quaternion conjugate();
+    Quaternion conjugate() const;
     Quaternion invert();
     Quaternion normalize();
     const double angleWith(const Quaternion &otherQuaternion);
@@ -37,19 +37,6 @@ class Quaternion {
     const Vec3d &getAxis() const;
     void setAxis(const Vec3d &);
 
-#define DEFINE_ACCESS(name)                                                                                        \
-        constexpr inline double name() const { \
-              return _##name##;                \                                                              \
-    }                                          \                                                                             \
-
-
-    DEFINE_ACCESS(x)
-    DEFINE_ACCESS(y)
-    DEFINE_ACCESS(z)
-    DEFINE_ACCESS(w)
-
-
-#undef DEFINE_ACCESS
 
 
 
@@ -85,6 +72,7 @@ Quaternion reflection(const Quaternion &inputePoint, const Vec3d & rotationAxis)
 Quaternion reflection(const Quaternion &inputePoint, const Quaternion &reflectionPlan);
 Quaternion rotation(const Quaternion &inputePoint, const double &angle, const Vec3d & rotationAxis);
 Quaternion rotation(const Quaternion &inputePoint, const Quaternion &q);
+
 
 }
 }
