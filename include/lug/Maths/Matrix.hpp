@@ -14,7 +14,7 @@ public:
     using Values = std::valarray<T>;
 
 public:
-    explicit constexpr Matrix(T value = 0);
+    explicit Matrix(T value = 0);
     Matrix(std::initializer_list<T> list);
     Matrix(const Matrix<Rows, Columns, T>& matrix) = default;
     Matrix(Matrix<Rows, Columns, T>&& matrix) = default;
@@ -27,11 +27,11 @@ public:
     constexpr uint8_t getRows() const;
     constexpr uint8_t getColumns() const;
 
-    constexpr typename Matrix<Rows, Columns, T>::Values& getValues();
-    constexpr const typename Matrix<Rows, Columns, T>::Values& getValues() const;
+    Values& getValues();
+    const Values& getValues() const;
 
-    constexpr T& operator()(uint8_t row, uint8_t col = 0);
-    constexpr const T& operator()(uint8_t row, uint8_t col = 0) const;
+    T& operator()(uint8_t row, uint8_t col = 0);
+    const T& operator()(uint8_t row, uint8_t col = 0) const;
 
     // Matrix/Scalar operations
     Matrix<Rows, Columns, T>& operator+=(T rhs);
@@ -48,17 +48,35 @@ public:
     // TODO: Add the invert function
     Matrix<Columns, Rows, T> transpose() const;
 
-    template <bool EnableBool = true>
-    constexpr typename std::enable_if<Rows == 1 && EnableBool, T>::type det() const;
+#if defined(LUG_COMPILER_MSVC)
+
+    template <typename = typename std::enable_if<(Rows == 1)>::type>
+    T det() const;
+
+    template <typename = typename std::enable_if<(Rows == 2)>::type, typename = void>
+    T det() const;
+
+    template <typename = typename std::enable_if<(Rows == 3)>::type, typename = void, typename = void>
+    T det() const;
+
+    template <typename = typename std::enable_if<(Rows > 3)>::type, typename = void, typename = void, typename = void>
+    T det() const;
+
+#else
 
     template <bool EnableBool = true>
-    constexpr typename std::enable_if<Rows == 2 && EnableBool, T>::type det() const;
+    typename std::enable_if<(Rows == 1) && EnableBool, T>::type det() const;
 
     template <bool EnableBool = true>
-    constexpr typename std::enable_if<Rows == 3 && EnableBool, T>::type det() const;
+    typename std::enable_if<(Rows == 2) && EnableBool, T>::type det() const;
+
+    template <bool EnableBool = true>
+    typename std::enable_if<(Rows == 3) && EnableBool, T>::type det() const;
 
     template <bool EnableBool = true>
     typename std::enable_if<(Rows > 3) && EnableBool, T>::type det() const;
+
+#endif
 
     static Matrix<Rows, Columns, T> identity();
 

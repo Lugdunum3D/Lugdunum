@@ -1,5 +1,5 @@
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline constexpr lug::Maths::Matrix<Rows, Columns, T>::Matrix(T value) : _values(Rows * Columns) {
+inline lug::Maths::Matrix<Rows, Columns, T>::Matrix(T value) : _values(Rows * Columns) {
     static_assert(std::is_arithmetic<T>::value, "Can't construct matrix with non integral type");
 
     for (uint8_t row = 0; row < Rows; ++row) {
@@ -26,22 +26,22 @@ inline constexpr uint8_t Matrix<Rows, Columns, T>::getColumns() const {
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline constexpr typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getValues() {
+inline typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getValues() {
     return _values;
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline constexpr const typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getValues() const {
+inline const typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getValues() const {
     return _values;
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline constexpr T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) {
+inline T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) {
     return _values[row * Columns + col];
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline constexpr const T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) const {
+inline const T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) const {
     return _values[row * Columns + col];
 }
 
@@ -110,15 +110,27 @@ inline Matrix<Columns, Rows, T> Matrix<Rows, Columns, T>::transpose() const {
 
 
 template <uint8_t Rows, uint8_t Columns, typename T>
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows == 1)>::type>
+inline T Matrix<Rows, Columns, T>::det() const
+#else
 template <bool EnableBool>
-inline constexpr typename std::enable_if<Rows == 1 && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const {
+inline typename std::enable_if<(Rows == 1) && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const
+#endif
+{
     static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
     return (*this)(0, 0);
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows == 2)>::type, typename = void>
+inline T Matrix<Rows, Columns, T>::det() const
+#else
 template <bool EnableBool>
-inline constexpr typename std::enable_if<Rows == 2 && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const {
+inline typename std::enable_if<(Rows == 2) && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const
+#endif
+{
     static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
     return (
         (*this)(0, 0) * (*this)(1, 1)
@@ -127,8 +139,14 @@ inline constexpr typename std::enable_if<Rows == 2 && EnableBool, T>::type Matri
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows == 3)>::type, typename = void, typename = void>
+inline T Matrix<Rows, Columns, T>::det() const
+#else
 template <bool EnableBool>
-inline constexpr typename std::enable_if<Rows == 3 && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const {
+inline typename std::enable_if<(Rows == 3) && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const
+#endif
+{
     static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
     return (
         (*this)(0, 0) * (*this)(1, 1) * (*this)(2, 2)
@@ -141,8 +159,14 @@ inline constexpr typename std::enable_if<Rows == 3 && EnableBool, T>::type Matri
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows > 3)>::type, typename = void, typename = void, typename = void>
+T Matrix<Rows, Columns, T>::det() const
+#else
 template <bool EnableBool>
-typename std::enable_if<(Rows > 3) && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const {
+typename std::enable_if<(Rows > 3) && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const
+#endif
+{
     static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
 
     T determinant = 0;

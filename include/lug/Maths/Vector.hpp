@@ -28,15 +28,15 @@ public:
 
     ~Vector() = default;
 
-#define DEFINE_ACCESS(name, minimum_rows)                                                                           \
-    template <bool EnableBool = true>                                                                               \
-    constexpr inline typename std::enable_if<(Rows >= minimum_rows) && EnableBool, const T&>::type name() const {   \
-        return (*this)(minimum_rows - 1);                                                                           \
-    }                                                                                                               \
-                                                                                                                    \
-    template <bool EnableBool = true>                                                                               \
-    constexpr inline typename std::enable_if<(Rows >= minimum_rows) && EnableBool, T&>::type name() {               \
-        return (*this)(minimum_rows - 1);                                                                           \
+#define DEFINE_ACCESS(name, minimum_rows)                                                                               \
+    template <bool EnableBool = true, typename = typename std::enable_if<(Rows >= minimum_rows) && EnableBool>::type>   \
+    const T& name() const {                                                                                             \
+        return (*this)(minimum_rows - 1);                                                                               \
+    }                                                                                                                   \
+                                                                                                                        \
+    template <bool EnableBool = true, typename = typename std::enable_if<(Rows >= minimum_rows) && EnableBool>::type>   \
+    T& name() {                                                                                                         \
+        return (*this)(minimum_rows - 1);                                                                               \
     }
 
     DEFINE_ACCESS(x, 1)
