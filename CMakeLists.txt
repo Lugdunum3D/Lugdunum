@@ -69,6 +69,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 lug_set_option(BUILD_SHARED_LIBS TRUE BOOL "TRUE to build Lugdunum as shared libraries, FALSE to build it as static libraries")
+lug_set_option(ENABLE_TEST FALSE BOOL "TRUE to enable unit tests, FALSE to disable unit tests")
 
 if(NOT BUILD_SHARED_LIBS)
     add_definitions(-DLUG_STATIC)
@@ -91,5 +92,13 @@ install(DIRECTORY include
 # setup the install of misc files
 install(FILES README.md DESTINATION ${INSTALL_MISC_DIR})
 install(FILES cmake/modules/FindLUG.cmake DESTINATION ${INSTALL_MISC_DIR}/cmake/modules)
+
+# Unit test
+if(ENABLE_TEST)
+    # Note: enable_testing() MUST be on the top level CMakeLists.txt
+    enable_testing()
+    add_subdirectory(lib/googletest/googletest)
+    add_subdirectory(test/)
+endif()
 
 # TODO: setup the install for license
