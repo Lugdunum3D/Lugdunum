@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lug\Maths\Vector.hpp>
+#include <lug/Maths/Vector.hpp>
 
 namespace lug {
 namespace Maths {
@@ -16,25 +16,25 @@ class Quaternion {
     Quaternion conjugate() const;
     Quaternion invert();
     Quaternion normalize();
-    const double angleWith(const Quaternion &otherQuaternion);
+    double angleWith(const Quaternion &otherQuaternion);
     Quaternion slerp(const Quaternion &otherQuaternion, double t);
 
-    const double &getAngle() const;
-    void setAngle(const double & angle);
+    double getAngle() const;
+    void setAngle(double angle);
 
-    const double &getX() const;
-    void setX(const double &);
+    double getX() const;
+    void setX(double x);
 
-    const double &getY() const;
-    void setY(const double &);
+    double getY() const;
+    void setY(double y);
 
-    const double &getZ( )const;
-    void setZ(const double &);
+    double getZ( )const;
+    void setZ(double z);
 
-    const double &getW() const;
-    void setW(const double &);
+    double getW() const;
+    void setW(double w);
 
-    const Vec3d &getAxis() const;
+    const Vec3d& getAxis() const;
     void setAxis(const Vec3d &);
 
 
@@ -49,28 +49,28 @@ class Quaternion {
     Quaternion *_identity;
     bool _isIdentity;
     bool _isNormalized;
-    double _x, _y, _z, _w; // TO DO Transformer en tableau 
+    double _x, _y, _z, _w; // TO DO Transformer en tableau
 
-   
+
 };
 //Quaternion/Quaternion operator
 Quaternion operator+(const Quaternion &leftOperand, const Quaternion &rightOperand);
 Quaternion operator-(const Quaternion &leftOperand, const Quaternion &rightOperand);
 Quaternion operator*(const Quaternion &leftOperand, const Quaternion &rightOperand);
 Quaternion operator/(const Quaternion &leftOperand, const Quaternion &rightOperand);
-const bool operator==(const Quaternion &leftOperand, const Quaternion &rightOperand);
+bool operator==(const Quaternion &leftOperand, const Quaternion &rightOperand);
 
 //Quaternion/real operator
-Quaternion operator*(const Quaternion &leftOperand, const double scalar);
-Quaternion operator+(const Quaternion &leftOperand, const double scalar);
-Quaternion operator-(const Quaternion &leftOperand, const double scalar);
-Quaternion operator/(const Quaternion &leftOperand, const double scalar);
+Quaternion operator*(const Quaternion &leftOperand, double scalar);
+Quaternion operator+(const Quaternion &leftOperand, double scalar);
+Quaternion operator-(const Quaternion &leftOperand, double scalar);
+Quaternion operator/(const Quaternion &leftOperand, double scalar);
 
 
 //Formula
 Quaternion reflection(const Quaternion &inputePoint, const Vec3d & rotationAxis);
 Quaternion reflection(const Quaternion &inputePoint, const Quaternion &reflectionPlan);
-Quaternion rotation(const Quaternion &inputePoint, const double &angle, const Vec3d & rotationAxis);
+Quaternion rotation(const Quaternion &inputePoint, double angle, const Vec3d & rotationAxis);
 Quaternion rotation(const Quaternion &inputePoint, const Quaternion &q);
 
 

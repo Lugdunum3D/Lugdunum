@@ -35,7 +35,7 @@ public:
     }                                                                                                               \
                                                                                                                     \
     template <bool EnableBool = true>                                                                               \
-    constexpr inline typename std::enable_if<(Rows >= minimum_rows) && EnableBool, T&>::type name(){                \
+    constexpr inline typename std::enable_if<(Rows >= minimum_rows) && EnableBool, T&>::type name() {               \
         return (*this)(minimum_rows - 1);                                                                           \
     }
 

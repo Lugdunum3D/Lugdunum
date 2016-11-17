@@ -44,6 +44,6 @@ inline constexpr T dot(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs) {
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline constexpr Matrix<Rows, Columns, T> outer(const Vector<Rows, T>& lhs, const Vector<Columns, T>& rhs) {
+inline constexpr Matrix<Rows, Columns, T> outer(const Vector<Rows, T>& lhs, const Vector<Columns, T>& rhs) {
     return lhs * rhs.transpose();
 }
