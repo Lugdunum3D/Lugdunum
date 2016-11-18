@@ -7,7 +7,10 @@ A game engine built with Vulkan API in mind from scratch
 ### master
 
 [![CircleCI](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/master.svg?style=shield)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/master)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/sbtif9ybs1elbhqv/branch/master?svg=true)](https://ci.appveyor.com/project/Lugdunum/lugdunum/branch/master)
+
 
 ### dev
 
 [![CircleCI](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/dev.svg?style=shield)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/dev)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/sbtif9ybs1elbhqv/branch/dev?svg=true)](https://ci.appveyor.com/project/Lugdunum/lugdunum/branch/dev)
