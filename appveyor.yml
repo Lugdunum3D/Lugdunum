@@ -82,7 +82,7 @@ build_script:
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -T"${env:Toolset}_clang_c2" -DENABLE_TEST=TRUE ..
+    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -T"LLVM-vs2014" -DENABLE_TEST=TRUE ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
