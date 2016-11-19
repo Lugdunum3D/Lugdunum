@@ -21,3 +21,4 @@ if(NOT DEFINED TEST_OUTPUT)
 endif()
 
 add_subdirectory(System)
+add_subdirectory(Math)
