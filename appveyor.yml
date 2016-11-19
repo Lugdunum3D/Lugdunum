@@ -112,15 +112,6 @@ environment:
 # this is how to allow failing jobs in the matrix
 matrix:
   fast_finish: true     # set this flag to immediately finish build once one of the jobs fails.
-  allow_failures:
-    - platform: x86
-      configuration: Debug
-    - platform: x86
-      configuration: Release
-    - platform: x64
-      configuration: Debug
-    - platform: x64
-      configuration: Release
 
 # build cache to preserve files/folders between builds
 # cache:

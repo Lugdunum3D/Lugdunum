@@ -63,3 +63,28 @@ macro(lug_add_library target)
     )
 
 endmacro()
+
+macro(lug_add_test name)
+
+    set(target run${name}UnitTests)
+
+    # parse the arguments
+    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;EXTERNAL_LIBS" ${ARGN})
+
+    add_executable(${target} ${THIS_SOURCES})
+
+    # link the target to its lug dependencies
+    if(THIS_DEPENDS)
+        target_link_libraries(${target} ${THIS_DEPENDS})
+    endif()
+
+    # link the target to its external dependencies
+    if(THIS_EXTERNAL_LIBS)
+        target_link_libraries(${target} ${THIS_EXTERNAL_LIBS})
+    endif()
+
+    target_link_libraries(${target} gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
+
+    add_test(NAME ${name}UnitTests COMMAND ${target} --gtest_output=xml:${TEST_OUTPUT}/${name}UnitTests.xml)
+
+endmacro()
