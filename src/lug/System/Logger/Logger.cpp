@@ -7,7 +7,7 @@ namespace System {
 
 //std::unordered_map<Channel::enumChannel, const char*> Logger::_channelNames = { LUG_LOG_CHANNELS(LUG_LOG_MAP_PAIR_C) };
 //std::unordered_map<Level::enumLevel, const char*> Logger::_typeNames = { LUG_LOG_LEVELS(LUG_LOG_MAP_PAIR_T) };
-
+std::unordered_map<std::string, LoggerPtr> LoggerFacility::_loggers{};
 
 // ctor with handlers as init list
 Logger::Logger(const std::string &loggerName, HandlerInitList initList) :

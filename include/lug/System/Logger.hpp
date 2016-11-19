@@ -205,7 +205,7 @@ private:
 };
 
 
-/*class LoggerFacility {
+class LUG_SYSTEM_API LoggerFacility {
 public:
     static void registerLogger(const std::string& loggerName, LoggerPtr logger) {
         _loggers[loggerName] = logger;
@@ -216,7 +216,7 @@ public:
 
 private:
     static std::unordered_map<std::string, LoggerPtr> _loggers;
-};*/
+};
 
 
 template<typename T, typename... Args>
@@ -224,7 +224,7 @@ inline LoggerPtr makeLogger(const std::string &loggerName, Args... args) {
     static_assert(std::is_base_of<priv::Handler, T>::value, "T must derive from Handler");
     HandlerPtr handler = std::make_shared<T>(args...);
     LoggerPtr logger = std::make_shared<Logger>(loggerName, handler);
-//    LoggerFacility::registerLogger(loggerName, logger);
+    LoggerFacility::registerLogger(loggerName, logger);
     return logger;
 }
 
