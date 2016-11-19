@@ -236,11 +236,14 @@ after_build:
 
 test_script:
 - ps: |
-    & ctest -C $env:CONFIGURATION -O "Testing/Temporary/Test.xml" --output-on-failure
+    & ctest -C $env:CONFIGURATION -O "Testing/Temporary/Test.output" --output-on-failure
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
-    & dir "Testing/**/*"
+
+on_finish:
+- ps : |
+    dir "test"
 
 # to disable automatic builds
 #build: off
