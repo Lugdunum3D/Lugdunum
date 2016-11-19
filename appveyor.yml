@@ -240,7 +240,7 @@ test_script:
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
-    & dir "build/Testing/**/*"
+    & dir "Testing/**/*" /s
 
 # to disable automatic builds
 #build: off

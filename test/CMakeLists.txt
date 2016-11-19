@@ -5,6 +5,7 @@ project(test)
 
 include("${CMAKE_SOURCE_DIR}/cmake/Config.cmake")
 include("${CMAKE_SOURCE_DIR}/cmake/Macros.cmake")
+include (Dart)
 
 set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}")
 
