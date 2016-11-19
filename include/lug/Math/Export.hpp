@@ -2,7 +2,7 @@
 
 #include <lug/Config.hpp>
 
-#if defined(LUG_MATH_API)
+#if defined(LUG_MATH_EXPORT)
 
     #define LUG_MATH_API LUG_API_EXPORT
 

@@ -1,11 +1,12 @@
 #pragma once
 
+#include <lug/Math/Export.hpp>
 #include <lug/Math/Vector.hpp>
 
 namespace lug {
 namespace Math {
 
-class Quaternion {
+class LUG_MATH_API Quaternion {
     public:
     Quaternion(double x, double y, double z, double w);
     Quaternion(Vec3d v);
@@ -54,24 +55,24 @@ class Quaternion {
 
 };
 //Quaternion/Quaternion operator
-Quaternion operator+(const Quaternion &leftOperand, const Quaternion &rightOperand);
-Quaternion operator-(const Quaternion &leftOperand, const Quaternion &rightOperand);
-Quaternion operator*(const Quaternion &leftOperand, const Quaternion &rightOperand);
-Quaternion operator/(const Quaternion &leftOperand, const Quaternion &rightOperand);
-bool operator==(const Quaternion &leftOperand, const Quaternion &rightOperand);
+Quaternion LUG_MATH_API operator+(const Quaternion &leftOperand, const Quaternion &rightOperand);
+Quaternion LUG_MATH_API operator-(const Quaternion &leftOperand, const Quaternion &rightOperand);
+Quaternion LUG_MATH_API operator*(const Quaternion &leftOperand, const Quaternion &rightOperand);
+Quaternion LUG_MATH_API operator/(const Quaternion &leftOperand, const Quaternion &rightOperand);
+bool LUG_MATH_API operator==(const Quaternion &leftOperand, const Quaternion &rightOperand);
 
 //Quaternion/real operator
-Quaternion operator*(const Quaternion &leftOperand, double scalar);
-Quaternion operator+(const Quaternion &leftOperand, double scalar);
-Quaternion operator-(const Quaternion &leftOperand, double scalar);
-Quaternion operator/(const Quaternion &leftOperand, double scalar);
+Quaternion LUG_MATH_API operator*(const Quaternion &leftOperand, double scalar);
+Quaternion LUG_MATH_API operator+(const Quaternion &leftOperand, double scalar);
+Quaternion LUG_MATH_API operator-(const Quaternion &leftOperand, double scalar);
+Quaternion LUG_MATH_API operator/(const Quaternion &leftOperand, double scalar);
 
 
 //Formula
-Quaternion reflection(const Quaternion &inputePoint, const Vec3d & rotationAxis);
-Quaternion reflection(const Quaternion &inputePoint, const Quaternion &reflectionPlan);
-Quaternion rotation(const Quaternion &inputePoint, double angle, const Vec3d & rotationAxis);
-Quaternion rotation(const Quaternion &inputePoint, const Quaternion &q);
+Quaternion LUG_MATH_API reflection(const Quaternion &inputePoint, const Vec3d & rotationAxis);
+Quaternion LUG_MATH_API reflection(const Quaternion &inputePoint, const Quaternion &reflectionPlan);
+Quaternion LUG_MATH_API rotation(const Quaternion &inputePoint, double angle, const Vec3d & rotationAxis);
+Quaternion LUG_MATH_API rotation(const Quaternion &inputePoint, const Quaternion &q);
 
 
 }
