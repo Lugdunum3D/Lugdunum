@@ -38,7 +38,7 @@ add_subdirectory(Core)
 add_subdirectory(Graphics)
 add_subdirectory(System)
 add_subdirectory(Window)
-add_subdirectory(Maths)
+add_subdirectory(Math)
 
 if(LUG_OS_ANDROID)
     add_subdirectory(Main)

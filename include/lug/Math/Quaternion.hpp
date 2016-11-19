@@ -1,9 +1,9 @@
 #pragma once
 
-#include <lug/Maths/Vector.hpp>
+#include <lug/Math/Vector.hpp>
 
 namespace lug {
-namespace Maths {
+namespace Math {
 
 class Quaternion {
     public:

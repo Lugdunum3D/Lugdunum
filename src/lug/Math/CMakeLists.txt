@@ -1,5 +1,5 @@
-﻿set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Maths)
-set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Maths)
+﻿set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Math)
+set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Math)
 
 # all source files
  set(SRC
@@ -19,6 +19,6 @@ set(INC
 source_group("inc" FILES ${INC})
 
 # define the target
-lug_add_library(lug-maths
+lug_add_library(lug-math
                 SOURCES ${SRC} ${INC}
 )

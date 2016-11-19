@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <lug/Maths/Matrix.hpp>
+#include <lug/Math/Matrix.hpp>
 
 namespace lug {
-namespace Maths {
+namespace Math {
 
 template <uint8_t Rows, typename T = float>
 class Vector : public Matrix<Rows, 1, T> {
@@ -81,7 +81,7 @@ DEFINE_LENGTH_VECTOR(4)
 
 #undef DEFINE_LENGTH_VECTOR
 
-#include <lug/Maths/Vector.inl>
+#include <lug/Math/Vector.inl>
 
 }
 }

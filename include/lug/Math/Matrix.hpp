@@ -5,7 +5,7 @@
 #include <lug/System/Debug.hpp>
 
 namespace lug {
-namespace Maths {
+namespace Math {
 
 template <uint8_t Rows, uint8_t Columns, typename T = float>
 class Matrix
@@ -120,7 +120,7 @@ bool operator!=(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns,
 template <uint8_t Rows, uint8_t Columns, typename T>
 std::ostream& operator<<(std::ostream& os, const Matrix<Rows, Columns, T>& matrix);
 
-#include <lug/Maths/Matrix.inl>
+#include <lug/Math/Matrix.inl>
 
 }
 }
