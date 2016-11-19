@@ -86,7 +86,7 @@ add_subdirectory(src/lug/)
 install(DIRECTORY include
         DESTINATION .
         COMPONENT devel
-        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl"
+        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl" PATTERN "*.h" PATTERN "*.cc"
 )
 
 # setup the install of misc files

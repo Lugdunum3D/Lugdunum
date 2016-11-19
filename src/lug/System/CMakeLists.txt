@@ -4,6 +4,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/System)
 # all source files
 set(SRC
     ${SRCROOT}/Exception.cpp
+    ${SRCROOT}/Logger/DefaultFormatter.cpp
     ${SRCROOT}/Logger/Logger.cpp
     ${SRCROOT}/Memory/Allocator/Basic.cpp
     ${SRCROOT}/Memory/Allocator/Linear.cpp
