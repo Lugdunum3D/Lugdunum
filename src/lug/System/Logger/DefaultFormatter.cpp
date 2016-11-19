@@ -4,7 +4,7 @@ namespace lug {
 namespace System {
 
 void DefaultFormatter::format(priv::Message &msg) {
-    msg.formatted.write(msg.raw.str());
+    msg.formatted << msg.raw.str();
 }
 
 } // namespace System

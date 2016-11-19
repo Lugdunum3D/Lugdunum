@@ -17,6 +17,8 @@
 #include <lug/System/Logger/FileHandler.hpp>
 #include <lug/System/Logger/StdoutHandler.hpp>
 
+#include <lug/System/Debug.hpp>
+
 
 namespace lug {
 namespace System {
