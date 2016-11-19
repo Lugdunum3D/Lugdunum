@@ -236,11 +236,11 @@ after_build:
 
 test_script:
 - ps: |
-    & ctest -C $env:CONFIGURATION -O "test_results" --output-on-failure
+    & ctest -C $env:CONFIGURATION --output-on-failure --no-compress-output -T Test || verify > NUL
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
-    & dir
+    & dir "build/Testing/**/*"
 
 # to disable automatic builds
 #build: off
@@ -285,8 +285,7 @@ test_script:
 #---------------------------------#
 
 artifacts:
-  - path: 'build/Testing/Temporary/*'
-    name: test_results
+  - path: 'build/Testing/**/*'
 
 # artifacts:
 #
