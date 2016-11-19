@@ -243,7 +243,7 @@ test_script:
 
 on_finish:
 - ps : |
-    dir "test"
+    dir "test\$env:CONFIGURATION\*"
 
 # to disable automatic builds
 #build: off
