@@ -236,7 +236,7 @@ after_build:
 
 test_script:
 - ps: |
-    & ctest -C $env:CONFIGURATION --output-on-failure --no-compress-output -T Test
+    & ctest -C $env:CONFIGURATION --output-on-failure --no-compress-output --dashboard "ExperimentalTest"
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
