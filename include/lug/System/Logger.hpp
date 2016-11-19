@@ -198,10 +198,10 @@ private:
     const std::string _name;
     std::vector<HandlerPtr> _handlers;
     FormatterPtr _formatter;
-    priv::LevelAtomic _flushLevel;
+    //priv::LevelAtomic _flushLevel;
     priv::LevelAtomic _level;
     //log_err_handler _err_handler;
-    std::atomic<time_t> _lastErrTime;
+    //std::atomic<time_t> _lastErrTime;
 };
 
 
