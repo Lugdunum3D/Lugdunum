@@ -50,6 +50,8 @@ endif()
 set(FIND_LUG_PATHS
     ${LUG_ROOT}
     $ENV{LUG_ROOT}
+    $ENV{ANDROID_NDK}/sources/lugdunum
+    ${ANDROID_NDK}/sources/lugdunum
     /usr/local
     /usr
     /opt/local
@@ -60,9 +62,17 @@ set(FIND_LUG_PATHS
 find_path(LUG_INCLUDE_DIR lug/Config.hpp
           PATH_SUFFIXES include
           PATHS ${FIND_LUG_PATHS}
+          CMAKE_FIND_ROOT_PATH_BOTH
 )
 
 set(LUG_FOUND TRUE) # will be set to false if one of the required modules is not found
+
+if(LUG_OS_ANDROID)
+    # this will append `lug-main` to the components to find if we are on WINDOWS or ANDROID
+    # lug-main provides a wrapper for the main functions of Android and Windows to provide
+    # an uniform int main(int ac, char *[]av) across platforms
+    list(APPEND LUG_FIND_COMPONENTS "main")
+endif()
 
 # find the requested modules
 foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
@@ -70,34 +80,55 @@ foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
     string(TOUPPER ${FIND_LUG_COMPONENT} FIND_LUG_COMPONENT_UPPER)
     set(FIND_LUG_COMPONENT_NAME lug-${FIND_LUG_COMPONENT_LOWER})
 
+    if(FIND_LUG_COMPONENT_LOWER STREQUAL "main")
+        # release library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_RELEASE
+                NAMES ${FIND_LUG_COMPONENT_NAME}
+                PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                PATHS ${FIND_LUG_PATHS}
+                CMAKE_FIND_ROOT_PATH_BOTH
+        )
 
-    # static release library
-    find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_STATIC_RELEASE
-                 NAMES ${FIND_LUG_COMPONENT_NAME}-s
-                 PATH_SUFFIXES lib64 lib
-                 PATHS ${FIND_LUG_PATHS}
-    )
+        # debug library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DEBUG
+                NAMES ${FIND_LUG_COMPONENT_NAME}-d
+                PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                PATHS ${FIND_LUG_PATHS}
+                CMAKE_FIND_ROOT_PATH_BOTH
+        )
+    else()
+        # static release library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_STATIC_RELEASE
+                     NAMES ${FIND_LUG_COMPONENT_NAME}-s
+                     PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                     PATHS ${FIND_LUG_PATHS}
+                     CMAKE_FIND_ROOT_PATH_BOTH
+        )
 
-    # static debug library
-    find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_STATIC_DEBUG
-                 NAMES ${FIND_LUG_COMPONENT_NAME}-s-d
-                 PATH_SUFFIXES lib64 lib
-                 PATHS ${FIND_LUG_PATHS}
-    )
+        # static debug library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_STATIC_DEBUG
+                     NAMES ${FIND_LUG_COMPONENT_NAME}-s-d
+                     PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                     PATHS ${FIND_LUG_PATHS}
+                     CMAKE_FIND_ROOT_PATH_BOTH
+        )
 
-    # dynamic release library
-    find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DYNAMIC_RELEASE
-                 NAMES ${FIND_LUG_COMPONENT_NAME}
-                 PATH_SUFFIXES lib64 lib
-                 PATHS ${FIND_LUG_PATHS}
-    )
+        # dynamic release library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DYNAMIC_RELEASE
+                     NAMES ${FIND_LUG_COMPONENT_NAME}
+                     PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                     PATHS ${FIND_LUG_PATHS}
+                     CMAKE_FIND_ROOT_PATH_BOTH
+        )
 
-    # dynamic debug library
-    find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DYNAMIC_DEBUG
-                 NAMES ${FIND_LUG_COMPONENT_NAME}-d
-                 PATH_SUFFIXES lib64 lib
-                 PATHS ${FIND_LUG_PATHS}
-    )
+        # dynamic debug library
+        find_library(LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY_DYNAMIC_DEBUG
+                     NAMES ${FIND_LUG_COMPONENT_NAME}-d
+                     PATH_SUFFIXES lib64 lib/${ANDROID_ABI}
+                     PATHS ${FIND_LUG_PATHS}
+                     CMAKE_FIND_ROOT_PATH_BOTH
+        )
+    endif()
 
     # choose the entries that fit the requested link type
     if(LUG_STATIC_LIBRARIES)
@@ -159,12 +190,17 @@ foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
     )
 
     # add to the global list of libraries
-    list(APPEND LUG_LIBRARIES "${LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY}")
+    if(FIND_LUG_COMPONENT_LOWER STREQUAL "main")
+        list(APPEND LUG_LIBRARIES "-Wl,--whole-archive ${LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY} -Wl,--no-whole-archive")
+    else()
+        list(APPEND LUG_LIBRARIES "${LUG_${FIND_LUG_COMPONENT_UPPER}_LIBRARY}")
+    endif()
 
 endforeach()
 
 if (LUG_FOUND)
-    message(STATUS "Found Lugdunum in ${LUG_INCLUDE_DIR}")
+    message(STATUS "Found Lugdunum headers in ${LUG_INCLUDE_DIR}")
+    message(STATUS "Found Lugdunum libraries in ${LUG_LIBRARIES}")
 else()
     # include directory or library not found
     set(FIND_LUG_ERROR "Could NOT find Lugdunum (missing: ${FIND_LUG_MISSING})")
