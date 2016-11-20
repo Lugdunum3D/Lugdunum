@@ -1,5 +1,5 @@
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline lug::Math::Matrix<Rows, Columns, T>::Matrix(T value) : _values(Rows * Columns) {
+inline Matrix<Rows, Columns, T>::Matrix(T value) : _values(Rows * Columns) {
     static_assert(std::is_arithmetic<T>::value, "Can't construct matrix with non integral type");
 
     for (uint8_t row = 0; row < Rows; ++row) {
@@ -10,7 +10,7 @@ inline lug::Math::Matrix<Rows, Columns, T>::Matrix(T value) : _values(Rows * Col
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline lug::Math::Matrix<Rows, Columns, T>::Matrix(std::initializer_list<T> list) : _values(list) {
+inline Matrix<Rows, Columns, T>::Matrix(std::initializer_list<T> list) : _values(list) {
     LUG_ASSERT(list.size() == Rows * Columns, "Matrix construct with bad size initializer list");
 }
 
