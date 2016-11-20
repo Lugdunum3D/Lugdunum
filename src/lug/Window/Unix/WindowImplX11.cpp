@@ -14,7 +14,6 @@ bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style
     }
 
     int screen = DefaultScreen(_display);
-    GC graphicContext = DefaultGC(_display, screen);
     ::Window parent = RootWindow(_display, screen);
 
     uint32_t blackColor = BlackPixel(_display, DefaultScreen(_display));
@@ -50,7 +49,7 @@ void lug::Window::priv::WindowImpl::close() {
     }
 }
 
-Bool selectEvents(Display* display, XEvent* event, XPointer arg) {
+Bool selectEvents(Display*, XEvent* event, XPointer) {
     if (event->type == ClientMessage || event->type == DestroyNotify) {
         return True;
     } else {
@@ -67,7 +66,7 @@ bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
 
     switch (xEvent.type) {
         case ClientMessage:
-            if (xEvent.xclient.message_type == _wmProtocols && xEvent.xclient.data.l[0] == _wmDeleteWindow) {
+            if (xEvent.xclient.message_type == _wmProtocols && static_cast<Atom>(xEvent.xclient.data.l[0]) == _wmDeleteWindow) {
                 event.type = lug::Window::EventType::CLOSE;
             }
             break;
