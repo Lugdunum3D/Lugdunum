@@ -15,6 +15,7 @@ public:
 
 public:
     explicit Matrix(T value = 0);
+    Matrix(const Values& values);
     Matrix(std::initializer_list<T> list);
     Matrix(const Matrix<Rows, Columns, T>& matrix) = default;
     Matrix(Matrix<Rows, Columns, T>&& matrix) = default;
@@ -96,6 +97,18 @@ Matrix<Rows, Columns, T> operator*(const Matrix<Rows, Columns, T>& lhs, T rhs);
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 Matrix<Rows, Columns, T> operator/(const Matrix<Rows, Columns, T>& lhs, T rhs);
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator+(T lhs, const Matrix<Rows, Columns, T>& rhs);
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator-(T lhs, const Matrix<Rows, Columns, T>& rhs);
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator*(T lhs, const Matrix<Rows, Columns, T>& rhs);
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator/(T lhs, const Matrix<Rows, Columns, T>& rhs);
 
 // Matrix/Matrix operation
 template <uint8_t Rows, uint8_t Columns, typename T>

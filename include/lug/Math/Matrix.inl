@@ -10,6 +10,11 @@ inline Matrix<Rows, Columns, T>::Matrix(T value) : _values(Rows * Columns) {
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T>::Matrix(const Values& values) : _values{values} {
+    LUG_ASSERT(values.size() == Rows * Columns, "Matrix construct with bad size initializer list");
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
 inline Matrix<Rows, Columns, T>::Matrix(std::initializer_list<T> list) : _values(list) {
     LUG_ASSERT(list.size() == Rows * Columns, "Matrix construct with bad size initializer list");
 }
@@ -213,38 +218,42 @@ inline Matrix<Rows, Columns, T> Matrix<Rows, Columns, T>::identity() {
 // Matrix/Scalar operations
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline Matrix<Rows, Columns, T> operator+(const Matrix<Rows, Columns, T>& lhs, T rhs) {
-    Matrix<Rows, Columns, T> matrix{lhs};
-
-    matrix.getValues() += rhs;
-
-    return matrix;
+    return Matrix<Rows, Columns, T>(lhs.getValues() + rhs);
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline Matrix<Rows, Columns, T> operator-(const Matrix<Rows, Columns, T>& lhs, T rhs) {
-    Matrix<Rows, Columns, T> matrix{lhs};
-
-    matrix.getValues() -= rhs;
-
-    return matrix;
+    return Matrix<Rows, Columns, T>(lhs.getValues() - rhs);
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline Matrix<Rows, Columns, T> operator*(const Matrix<Rows, Columns, T>& lhs, T rhs) {
-    Matrix<Rows, Columns, T> matrix{lhs};
-
-    matrix.getValues() *= rhs;
-
-    return matrix;
+    return Matrix<Rows, Columns, T>(lhs.getValues() * rhs);
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline Matrix<Rows, Columns, T> operator/(const Matrix<Rows, Columns, T>& lhs, T rhs) {
-    Matrix<Rows, Columns, T> matrix{lhs};
+inline  Matrix<Rows, Columns, T> operator/(const Matrix<Rows, Columns, T>& lhs, T rhs) {
+    return Matrix<Rows, Columns, T>(lhs.getValues() / rhs);
+}
 
-    matrix.getValues() /= rhs;
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> operator+(T lhs, const Matrix<Rows, Columns, T>& rhs) {
+    return Matrix<Rows, Columns, T>(lhs + rhs.getValues());
+}
 
-    return matrix;
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> operator-(T lhs, const Matrix<Rows, Columns, T>& rhs) {
+    return Matrix<Rows, Columns, T>(lhs - rhs.getValues());
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> operator*(T lhs, const Matrix<Rows, Columns, T>& rhs) {
+    return Matrix<Rows, Columns, T>(lhs * rhs.getValues());
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+inline Matrix<Rows, Columns, T> operator/(T lhs, const Matrix<Rows, Columns, T>& rhs) {
+    return Matrix<Rows, Columns, T>(lhs / rhs.getValues());
 }
 
 // Matrix/Matrix operations
