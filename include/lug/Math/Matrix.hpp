@@ -85,6 +85,21 @@ protected:
     Values _values;
 };
 
+#define DEFINE_LENGTH_MATRIX(length)                                    \
+    template <typename T = float>                                       \
+    using Mat##length##x##length= Matrix<length, length, T>;            \
+                                                                        \
+    using Mat##length##x##length##f = Mat##length##x##length<float>;    \
+    using Mat##length##x##length##d = Mat##length##x##length<double>;   \
+    using Mat##length##x##length##i = Mat##length##x##length<int32_t>;  \
+    using Mat##length##x##length##u = Mat##length##x##length<uint32_t>;
+
+DEFINE_LENGTH_MATRIX(2)
+DEFINE_LENGTH_MATRIX(3)
+DEFINE_LENGTH_MATRIX(4)
+
+#undef DEFINE_LENGTH_MATRIX
+
 // Matrix/Scalar operations
 template <uint8_t Rows, uint8_t Columns, typename T>
 Matrix<Rows, Columns, T> operator+(const Matrix<Rows, Columns, T>& lhs, T rhs);
