@@ -93,7 +93,7 @@ public:
     template <typename = typename std::enable_if<(Rows == 4)>::type, typename = void, typename = void, typename = void>
     T det() const;
 
-    template <typename = typename std::enable_if<(Rows > 4)>::type, typename = void, typename = void, typename = void>
+    template <typename = typename std::enable_if<(Rows > 4)>::type, typename = void, typename = void, typename = void, typename = void>
     T det() const;
 
 #else

@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <lug/Math/Matrix.hpp>
 #include <lug/Math/Vector.hpp>
-#include <Math/MatrixUtils.hpp>
 
 // TODO: Really test all operators and values
 // TODO: Test the determinant
@@ -45,14 +44,26 @@ TEST(Matrix2x2, InverseOperators) {
         const lug::Math::Mat2x2f inverse = matrix.inverse();
         const lug::Math::Mat2x2f identity = matrix * inverse;
 
-        ASSERT_MATRIX_NEAR(2, 2, identity, goodIdentity, 0.01f);
+        for (uint8_t row = 0; row < matrix.getRows(); ++row) {
+            for (uint8_t col = 0; col < matrix.getColumns(); ++col) {
+                ASSERT_NEAR(identity(row, col), goodIdentity(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
+        }
     }
 
     {
         const lug::Math::Mat2x2f matrix{1, 2, 3, 4};
         const lug::Math::Mat2x2f identity = matrix / matrix;
 
-        ASSERT_MATRIX_NEAR(2, 2, identity, goodIdentity, 0.01f);
+        for (uint8_t row = 0; row < matrix.getRows(); ++row) {
+            for (uint8_t col = 0; col < matrix.getColumns(); ++col) {
+                ASSERT_NEAR(identity(row, col), goodIdentity(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
+        }
     }
 }
 

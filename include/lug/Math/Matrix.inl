@@ -370,7 +370,7 @@ inline typename std::enable_if<(Rows == 3) && EnableBool, T>::type Matrix<Rows, 
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 #if defined(LUG_COMPILER_MSVC)
-template <typename = typename std::enable_if<(Rows == 4)>::type, typename = void, typename = void>
+template <typename = typename std::enable_if<(Rows == 4)>::type, typename = void, typename = void, typename = void>
 inline T Matrix<Rows, Columns, T>::det() const
 #else
 template <bool EnableBool>
@@ -415,7 +415,7 @@ inline typename std::enable_if<(Rows == 4) && EnableBool, T>::type Matrix<Rows, 
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 #if defined(LUG_COMPILER_MSVC)
-template <typename = typename std::enable_if<(Rows > 4)>::type, typename = void, typename = void, typename = void>
+template <typename = typename std::enable_if<(Rows > 4)>::type, typename = void, typename = void, typename = void, typename = void>
 T Matrix<Rows, Columns, T>::det() const
 #else
 template <bool EnableBool>
