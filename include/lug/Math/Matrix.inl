@@ -99,6 +99,211 @@ Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator*=(const Matrix<Rows
     return *this;
 }
 
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator/=(const Matrix<Rows, Columns, T>& rhs) {
+    static_assert(Rows == Columns, "Operator /= is only available for square matrices");
+
+    *this *= rhs.inverse();
+
+    return *this;
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows == 1)>::type>
+inline Matrix<Rows, Columns, T> Matrix<Rows, Columns, T>::inverse() const
+#else
+template <bool EnableBool>
+inline typename std::enable_if<(Rows == 1) && EnableBool, Matrix<Rows, Columns, T>>::type Matrix<Rows, Columns, T>::inverse() const
+#endif
+{
+    static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the inverse");
+    return Matrix<Rows, Columns, T>(*this);
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows == 2)>::type, typename = void>
+inline Matrix<Rows, Columns, T> Matrix<Rows, Columns, T>::inverse() const
+#else
+template <bool EnableBool>
+inline typename std::enable_if<(Rows == 2) && EnableBool, Matrix<Rows, Columns, T>>::type Matrix<Rows, Columns, T>::inverse() const
+#endif
+{
+    static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the inverse");
+    return (1 / det()) * Matrix<Rows, Columns, T>{
+        (*this)(1, 1),
+        -(*this)(0, 1),
+        -(*this)(1, 0),
+        (*this)(0, 0)
+    };
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows == 3)>::type, typename = void, typename = void>
+inline Matrix<Rows, Columns, T> Matrix<Rows, Columns, T>::inverse() const
+#else
+template <bool EnableBool>
+inline typename std::enable_if<(Rows == 3) && EnableBool, Matrix<Rows, Columns, T>>::type Matrix<Rows, Columns, T>::inverse() const
+#endif
+{
+    static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the inverse");
+    return (1 / det()) * Matrix<Rows, Columns, T>{
+        (*this)(1, 1) * (*this)(2, 2) - (*this)(1, 2) * (*this)(2, 1),
+        (*this)(0, 2) * (*this)(2, 1) - (*this)(0, 1) * (*this)(2, 2),
+        (*this)(0, 1) * (*this)(1, 2) - (*this)(0, 2) * (*this)(1, 1),
+
+        (*this)(1, 2) * (*this)(2, 0) - (*this)(1, 0) * (*this)(2, 2),
+        (*this)(0, 0) * (*this)(2, 2) - (*this)(0, 2) * (*this)(2, 0),
+        (*this)(0, 2) * (*this)(1, 0) - (*this)(0, 0) * (*this)(1, 2),
+
+        (*this)(1, 0) * (*this)(2, 1) - (*this)(1, 1) * (*this)(2, 0),
+        (*this)(0, 1) * (*this)(2, 0) - (*this)(0, 0) * (*this)(2, 1),
+        (*this)(0, 0) * (*this)(1, 1) - (*this)(0, 1) * (*this)(1, 0)
+    };
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows == 4)>::type, typename = void, typename = void, typename = void>
+inline Matrix<Rows, Columns, T> Matrix<Rows, Columns, T>::inverse() const
+#else
+template <bool EnableBool>
+inline typename std::enable_if<(Rows == 4) && EnableBool, Matrix<Rows, Columns, T>>::type Matrix<Rows, Columns, T>::inverse() const
+#endif
+{
+    static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the inverse");
+    return (1 / det()) * Matrix<Rows, Columns, T>{
+        // 11
+          (*this)(1, 1) * (*this)(2, 2) * (*this)(3, 3)
+        + (*this)(1, 2) * (*this)(2, 3) * (*this)(3, 1)
+        + (*this)(1, 3) * (*this)(2, 1) * (*this)(3, 2)
+        - (*this)(1, 1) * (*this)(2, 3) * (*this)(3, 2)
+        - (*this)(1, 2) * (*this)(2, 1) * (*this)(3, 3)
+        - (*this)(1, 3) * (*this)(2, 2) * (*this)(3, 1),
+
+        // 12
+          (*this)(0, 1) * (*this)(2, 3) * (*this)(3, 2)
+        + (*this)(0, 2) * (*this)(2, 1) * (*this)(3, 3)
+        + (*this)(0, 3) * (*this)(2, 2) * (*this)(3, 1)
+        - (*this)(0, 1) * (*this)(2, 2) * (*this)(3, 3)
+        - (*this)(0, 2) * (*this)(2, 3) * (*this)(3, 1)
+        - (*this)(0, 3) * (*this)(2, 1) * (*this)(3, 2),
+
+        // 13
+          (*this)(0, 1) * (*this)(1, 2) * (*this)(3, 3)
+        + (*this)(0, 2) * (*this)(1, 3) * (*this)(3, 1)
+        + (*this)(0, 3) * (*this)(1, 1) * (*this)(3, 2)
+        - (*this)(0, 1) * (*this)(1, 3) * (*this)(3, 2)
+        - (*this)(0, 2) * (*this)(1, 1) * (*this)(3, 3)
+        - (*this)(0, 3) * (*this)(1, 2) * (*this)(3, 1),
+
+        // 14
+          (*this)(0, 1) * (*this)(1, 3) * (*this)(2, 2)
+        + (*this)(0, 2) * (*this)(1, 1) * (*this)(2, 3)
+        + (*this)(0, 3) * (*this)(1, 2) * (*this)(2, 1)
+        - (*this)(0, 1) * (*this)(1, 2) * (*this)(2, 3)
+        - (*this)(0, 2) * (*this)(1, 3) * (*this)(2, 1)
+        - (*this)(0, 3) * (*this)(1, 1) * (*this)(2, 2),
+
+        // 21
+          (*this)(1, 0) * (*this)(2, 3) * (*this)(3, 2)
+        + (*this)(1, 2) * (*this)(2, 0) * (*this)(3, 3)
+        + (*this)(1, 3) * (*this)(2, 2) * (*this)(3, 0)
+        - (*this)(1, 0) * (*this)(2, 2) * (*this)(3, 3)
+        - (*this)(1, 2) * (*this)(2, 3) * (*this)(3, 0)
+        - (*this)(1, 3) * (*this)(2, 0) * (*this)(3, 2),
+
+        // 22
+          (*this)(0, 0) * (*this)(2, 2) * (*this)(3, 3)
+        + (*this)(0, 2) * (*this)(2, 3) * (*this)(3, 0)
+        + (*this)(0, 3) * (*this)(2, 0) * (*this)(3, 2)
+        - (*this)(0, 0) * (*this)(2, 3) * (*this)(3, 2)
+        - (*this)(0, 2) * (*this)(2, 0) * (*this)(3, 3)
+        - (*this)(0, 3) * (*this)(2, 2) * (*this)(3, 0),
+
+        // 23
+          (*this)(0, 0) * (*this)(1, 3) * (*this)(3, 2)
+        + (*this)(0, 2) * (*this)(1, 0) * (*this)(3, 3)
+        + (*this)(0, 3) * (*this)(1, 2) * (*this)(3, 0)
+        - (*this)(0, 0) * (*this)(1, 2) * (*this)(3, 3)
+        - (*this)(0, 2) * (*this)(1, 3) * (*this)(3, 0)
+        - (*this)(0, 3) * (*this)(1, 0) * (*this)(3, 2),
+
+        // 24
+          (*this)(0, 0) * (*this)(1, 2) * (*this)(2, 3)
+        + (*this)(0, 2) * (*this)(1, 3) * (*this)(2, 0)
+        + (*this)(0, 3) * (*this)(1, 0) * (*this)(2, 2)
+        - (*this)(0, 0) * (*this)(1, 3) * (*this)(2, 2)
+        - (*this)(0, 2) * (*this)(1, 0) * (*this)(2, 3)
+        - (*this)(0, 3) * (*this)(1, 2) * (*this)(2, 0),
+
+        // 31
+          (*this)(1, 0) * (*this)(2, 1) * (*this)(3, 3)
+        + (*this)(1, 1) * (*this)(2, 3) * (*this)(3, 0)
+        + (*this)(1, 3) * (*this)(2, 0) * (*this)(3, 1)
+        - (*this)(1, 0) * (*this)(2, 3) * (*this)(3, 1)
+        - (*this)(1, 1) * (*this)(2, 0) * (*this)(3, 3)
+        - (*this)(1, 3) * (*this)(2, 1) * (*this)(3, 0),
+
+        // 32
+          (*this)(0, 0) * (*this)(2, 3) * (*this)(3, 1)
+        + (*this)(0, 1) * (*this)(2, 0) * (*this)(3, 3)
+        + (*this)(0, 3) * (*this)(2, 1) * (*this)(3, 0)
+        - (*this)(0, 0) * (*this)(2, 1) * (*this)(3, 3)
+        - (*this)(0, 1) * (*this)(2, 3) * (*this)(3, 0)
+        - (*this)(0, 3) * (*this)(2, 0) * (*this)(3, 1),
+
+        // 33
+          (*this)(0, 0) * (*this)(1, 1) * (*this)(3, 3)
+        + (*this)(0, 1) * (*this)(1, 3) * (*this)(3, 0)
+        + (*this)(0, 3) * (*this)(1, 0) * (*this)(3, 1)
+        - (*this)(0, 0) * (*this)(1, 3) * (*this)(3, 1)
+        - (*this)(0, 1) * (*this)(1, 0) * (*this)(3, 3)
+        - (*this)(0, 3) * (*this)(1, 1) * (*this)(3, 0),
+
+        // 34
+          (*this)(0, 0) * (*this)(1, 3) * (*this)(2, 1)
+        + (*this)(0, 1) * (*this)(1, 0) * (*this)(2, 3)
+        + (*this)(0, 3) * (*this)(1, 1) * (*this)(2, 0)
+        - (*this)(0, 0) * (*this)(1, 1) * (*this)(2, 3)
+        - (*this)(0, 1) * (*this)(1, 3) * (*this)(2, 0)
+        - (*this)(0, 3) * (*this)(1, 0) * (*this)(2, 1),
+
+        // 41
+          (*this)(1, 0) * (*this)(2, 2) * (*this)(3, 1)
+        + (*this)(1, 1) * (*this)(2, 0) * (*this)(3, 2)
+        + (*this)(1, 2) * (*this)(2, 1) * (*this)(3, 0)
+        - (*this)(1, 0) * (*this)(2, 1) * (*this)(3, 2)
+        - (*this)(1, 1) * (*this)(2, 2) * (*this)(3, 0)
+        - (*this)(1, 2) * (*this)(2, 0) * (*this)(3, 1),
+
+        // 42
+          (*this)(0, 0) * (*this)(2, 1) * (*this)(3, 2)
+        + (*this)(0, 1) * (*this)(2, 2) * (*this)(3, 0)
+        + (*this)(0, 2) * (*this)(2, 0) * (*this)(3, 1)
+        - (*this)(0, 0) * (*this)(2, 2) * (*this)(3, 1)
+        - (*this)(0, 1) * (*this)(2, 0) * (*this)(3, 2)
+        - (*this)(0, 2) * (*this)(2, 1) * (*this)(3, 0),
+
+        // 43
+          (*this)(0, 0) * (*this)(1, 2) * (*this)(3, 1)
+        + (*this)(0, 1) * (*this)(1, 0) * (*this)(3, 2)
+        + (*this)(0, 2) * (*this)(1, 1) * (*this)(3, 0)
+        - (*this)(0, 0) * (*this)(1, 1) * (*this)(3, 2)
+        - (*this)(0, 1) * (*this)(1, 2) * (*this)(3, 0)
+        - (*this)(0, 2) * (*this)(1, 0) * (*this)(3, 1),
+
+        // 44
+          (*this)(0, 0) * (*this)(1, 1) * (*this)(2, 2)
+        + (*this)(0, 1) * (*this)(1, 2) * (*this)(2, 0)
+        + (*this)(0, 2) * (*this)(1, 0) * (*this)(2, 1)
+        - (*this)(0, 0) * (*this)(1, 2) * (*this)(2, 1)
+        - (*this)(0, 1) * (*this)(1, 0) * (*this)(2, 2)
+        - (*this)(0, 2) * (*this)(1, 1) * (*this)(2, 0)
+    };
+}
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline Matrix<Columns, Rows, T> Matrix<Rows, Columns, T>::transpose() const {
@@ -155,21 +360,66 @@ inline typename std::enable_if<(Rows == 3) && EnableBool, T>::type Matrix<Rows, 
     static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
     return (
         (*this)(0, 0) * (*this)(1, 1) * (*this)(2, 2)
-        + (*this)(0, 1) * (*this)(1, 2) * (*this)(2, 0)
-        + (*this)(0, 2) * (*this)(1, 0) * (*this)(2, 1)
-        - (*this)(0, 2) * (*this)(1, 1) * (*this)(2, 0)
-        - (*this)(0, 1) * (*this)(1, 0) * (*this)(2, 2)
-        - (*this)(0, 0) * (*this)(1, 2) * (*this)(2, 1)
+        + (*this)(1, 0) * (*this)(2, 1) * (*this)(0, 2)
+        + (*this)(2, 0) * (*this)(0, 1) * (*this)(1, 2)
+        - (*this)(0, 0) * (*this)(2, 1) * (*this)(1, 2)
+        - (*this)(2, 0) * (*this)(1, 1) * (*this)(0, 2)
+        - (*this)(1, 0) * (*this)(0, 1) * (*this)(2, 2)
     );
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 #if defined(LUG_COMPILER_MSVC)
-template <typename = typename std::enable_if<(Rows > 3)>::type, typename = void, typename = void, typename = void>
+template <typename = typename std::enable_if<(Rows == 4)>::type, typename = void, typename = void>
+inline T Matrix<Rows, Columns, T>::det() const
+#else
+template <bool EnableBool>
+inline typename std::enable_if<(Rows == 4) && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const
+#endif
+{
+    static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
+    return (
+        (*this)(0, 0) * (*this)(1, 1) * (*this)(2, 2) * (*this)(3, 3)
+        + (*this)(0, 0) * (*this)(1, 2) * (*this)(2, 3) * (*this)(3, 1)
+        + (*this)(0, 0) * (*this)(1, 3) * (*this)(2, 1) * (*this)(3, 2)
+
+        + (*this)(0, 1) * (*this)(1, 0) * (*this)(2, 3) * (*this)(3, 2)
+        + (*this)(0, 1) * (*this)(1, 2) * (*this)(2, 0) * (*this)(3, 3)
+        + (*this)(0, 1) * (*this)(1, 3) * (*this)(2, 2) * (*this)(3, 0)
+
+        + (*this)(0, 2) * (*this)(1, 0) * (*this)(2, 1) * (*this)(3, 3)
+        + (*this)(0, 2) * (*this)(1, 1) * (*this)(2, 3) * (*this)(3, 0)
+        + (*this)(0, 2) * (*this)(1, 3) * (*this)(2, 0) * (*this)(3, 1)
+
+        + (*this)(0, 3) * (*this)(1, 0) * (*this)(2, 2) * (*this)(3, 1)
+        + (*this)(0, 3) * (*this)(1, 1) * (*this)(2, 0) * (*this)(3, 2)
+        + (*this)(0, 3) * (*this)(1, 2) * (*this)(2, 1) * (*this)(3, 0)
+
+        - (*this)(0, 0) * (*this)(1, 1) * (*this)(2, 3) * (*this)(3, 2)
+        - (*this)(0, 0) * (*this)(1, 2) * (*this)(2, 1) * (*this)(3, 3)
+        - (*this)(0, 0) * (*this)(1, 3) * (*this)(2, 2) * (*this)(3, 1)
+
+        - (*this)(0, 1) * (*this)(1, 0) * (*this)(2, 2) * (*this)(3, 3)
+        - (*this)(0, 1) * (*this)(1, 2) * (*this)(2, 3) * (*this)(3, 0)
+        - (*this)(0, 1) * (*this)(1, 3) * (*this)(2, 0) * (*this)(3, 2)
+
+        - (*this)(0, 2) * (*this)(1, 0) * (*this)(2, 3) * (*this)(3, 1)
+        - (*this)(0, 2) * (*this)(1, 1) * (*this)(2, 0) * (*this)(3, 3)
+        - (*this)(0, 2) * (*this)(1, 3) * (*this)(2, 1) * (*this)(3, 0)
+
+        - (*this)(0, 3) * (*this)(1, 0) * (*this)(2, 1) * (*this)(3, 2)
+        - (*this)(0, 3) * (*this)(1, 1) * (*this)(2, 2) * (*this)(3, 0)
+        - (*this)(0, 3) * (*this)(1, 2) * (*this)(2, 0) * (*this)(3, 1)
+    );
+}
+
+template <uint8_t Rows, uint8_t Columns, typename T>
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows > 4)>::type, typename = void, typename = void, typename = void>
 T Matrix<Rows, Columns, T>::det() const
 #else
 template <bool EnableBool>
-typename std::enable_if<(Rows > 3) && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const
+typename std::enable_if<(Rows > 4) && EnableBool, T>::type Matrix<Rows, Columns, T>::det() const
 #endif
 {
     static_assert(Rows == Columns, "The matrix had to be a square matrix to calculate the determinant");
@@ -292,15 +542,25 @@ inline Matrix<RowsLeft, ColumnsRight, T> operator*(const Matrix<RowsLeft, Column
     return matrix;
 }
 
+template <uint8_t RowsLeft, uint8_t ColumnsLeft, uint8_t RowsRight, uint8_t ColumnsRight, typename T>
+inline Matrix<RowsLeft, ColumnsRight, T> operator/(const Matrix<RowsLeft, ColumnsLeft, T>& lhs, const Matrix<RowsRight, ColumnsRight, T>& rhs) {
+    static_assert(RowsLeft == ColumnsLeft, "Matrix division can only happen with square matrix");
+    static_assert(RowsRight == ColumnsRight, "Matrix division can only happen with square matrix");
+    static_assert(RowsLeft == RowsRight, "Matrix division can only happen with matrices of the same size");
+
+    return lhs * rhs.inverse();
+}
+
+
 // Comparaison operators
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline bool operator==(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs) {
-    return lhs.getValues() == rhs.getValues();
+    return (lhs.getValues() == rhs.getValues()).min();
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline bool operator!=(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs) {
-    return lhs.getValues() != rhs.getValues();
+    return (lhs.getValues() != rhs.getValues()).min();
 }
 
 // TODO: Handle alignment of values

@@ -11,6 +11,7 @@ template <uint8_t Rows, uint8_t Columns, typename T = float>
 class Matrix
 {
 public:
+    // TODO: Use custom valarray with compile time size
     using Values = std::valarray<T>;
 
 public:
@@ -44,9 +45,38 @@ public:
     Matrix<Rows, Columns, T>& operator+=(const Matrix<Rows, Columns, T>& rhs);
     Matrix<Rows, Columns, T>& operator-=(const Matrix<Rows, Columns, T>& rhs);
     Matrix<Rows, Columns, T>& operator*=(const Matrix<Rows, Columns, T>& rhs);
-    Matrix<Rows, Columns, T>& operator/=(const Matrix<Rows, Columns, T>& rhs) = delete;
+    Matrix<Rows, Columns, T>& operator/=(const Matrix<Rows, Columns, T>& rhs);
 
-    // TODO: Add the invert function
+#if defined(LUG_COMPILER_MSVC)
+
+    template <typename = typename std::enable_if<(Rows == 1)>::type>
+    Matrix<Rows, Columns, T> inverse() const;
+
+    template <typename = typename std::enable_if<(Rows == 2)>::type, typename = void>
+    Matrix<Rows, Columns, T> inverse() const;
+
+    template <typename = typename std::enable_if<(Rows == 3)>::type, typename = void, typename = void>
+    Matrix<Rows, Columns, T> inverse() const;
+
+    template <typename = typename std::enable_if<(Rows == 4)>::type, typename = void, typename = void, typename = void>
+    Matrix<Rows, Columns, T> inverse() const;
+
+#else
+
+    template <bool EnableBool = true>
+    typename std::enable_if<(Rows == 1) && EnableBool, Matrix<Rows, Columns, T>>::type inverse() const;
+
+    template <bool EnableBool = true>
+    typename std::enable_if<(Rows == 2) && EnableBool, Matrix<Rows, Columns, T>>::type inverse() const;
+
+    template <bool EnableBool = true>
+    typename std::enable_if<(Rows == 3) && EnableBool, Matrix<Rows, Columns, T>>::type inverse() const;
+
+    template <bool EnableBool = true>
+    typename std::enable_if<(Rows == 4) && EnableBool, Matrix<Rows, Columns, T>>::type inverse() const;
+
+#endif
+
     Matrix<Columns, Rows, T> transpose() const;
 
 #if defined(LUG_COMPILER_MSVC)
@@ -60,7 +90,10 @@ public:
     template <typename = typename std::enable_if<(Rows == 3)>::type, typename = void, typename = void>
     T det() const;
 
-    template <typename = typename std::enable_if<(Rows > 3)>::type, typename = void, typename = void, typename = void>
+    template <typename = typename std::enable_if<(Rows == 4)>::type, typename = void, typename = void, typename = void>
+    T det() const;
+
+    template <typename = typename std::enable_if<(Rows > 4)>::type, typename = void, typename = void, typename = void>
     T det() const;
 
 #else
@@ -75,7 +108,10 @@ public:
     typename std::enable_if<(Rows == 3) && EnableBool, T>::type det() const;
 
     template <bool EnableBool = true>
-    typename std::enable_if<(Rows > 3) && EnableBool, T>::type det() const;
+    typename std::enable_if<(Rows == 4) && EnableBool, T>::type det() const;
+
+    template <bool EnableBool = true>
+    typename std::enable_if<(Rows > 4) && EnableBool, T>::type det() const;
 
 #endif
 
@@ -136,7 +172,7 @@ template <uint8_t RowsLeft, uint8_t ColumnsLeft, uint8_t RowsRight, uint8_t Colu
 Matrix<RowsLeft, ColumnsRight, T> operator*(const Matrix<RowsLeft, ColumnsLeft, T>& lhs, const Matrix<RowsRight, ColumnsRight, T>& rhs);
 
 template <uint8_t RowsLeft, uint8_t ColumnsLeft, uint8_t RowsRight, uint8_t ColumnsRight, typename T>
-Matrix<RowsLeft, ColumnsRight, T> operator/(const Matrix<RowsLeft, ColumnsLeft, T>& lhs, const Matrix<RowsRight, ColumnsRight, T>& rhs) = delete;
+Matrix<RowsLeft, ColumnsRight, T> operator/(const Matrix<RowsLeft, ColumnsLeft, T>& lhs, const Matrix<RowsRight, ColumnsRight, T>& rhs);
 
 // Comparaison operators
 template <uint8_t Rows, uint8_t Columns, typename T>
