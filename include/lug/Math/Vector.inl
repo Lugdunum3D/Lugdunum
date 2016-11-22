@@ -20,6 +20,21 @@ inline Vector<Rows, T>::Vector(const Vector<Rows - 1, T>& vector, T value) {
 }
 
 template <uint8_t Rows, typename T>
+inline Vector<Rows, T> Vector<Rows, T>::operator*=(const Matrix<Rows, Rows, T>& rhs) {
+    Vector<Rows, T> tmp{};
+
+    for (uint8_t row = 0; row < Rows; ++row) {
+        for (uint8_t col = 0; col < Rows; ++col) {
+            tmp(row) += (*this)(col) * rhs(row, col);
+        }
+    }
+
+    *this = std::move(tmp);
+
+    return *this;
+}
+
+template <uint8_t Rows, typename T>
 inline constexpr T Vector<Rows, T>::norme() const {
     return std::sqrt((BaseMatrix::_values * BaseMatrix::_values).sum());
 }
@@ -46,4 +61,22 @@ inline constexpr T dot(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs) {
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline constexpr Matrix<Rows, Columns, T> outer(const Vector<Rows, T>& lhs, const Vector<Columns, T>& rhs) {
     return lhs * rhs.transpose();
+}
+
+template <uint8_t Rows, typename T>
+inline Vector<Rows, T> operator*(const Vector<Rows, T>& lhs, const Matrix<Rows, Rows, T>& rhs) {
+    Vector<Rows, T> vector{lhs};
+
+    vector *= rhs;
+
+    return vector;
+}
+
+template <uint8_t Rows, typename T>
+inline Vector<Rows, T> operator*(const Matrix<Rows, Rows, T>& lhs, const Vector<Rows, T>& rhs) {
+    Vector<Rows, T> vector{rhs};
+
+    vector *= lhs;
+
+    return vector;
 }

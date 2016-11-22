@@ -28,6 +28,8 @@ public:
 
     ~Vector() = default;
 
+    Vector<Rows, T> operator*=(const Matrix<Rows, Rows, T>& rhs);
+
 #define DEFINE_ACCESS(name, minimum_rows)                                                                               \
     template <bool EnableBool = true, typename = typename std::enable_if<(Rows >= minimum_rows) && EnableBool>::type>   \
     const T& name() const {                                                                                             \
@@ -80,6 +82,12 @@ DEFINE_LENGTH_VECTOR(3)
 DEFINE_LENGTH_VECTOR(4)
 
 #undef DEFINE_LENGTH_VECTOR
+
+template <uint8_t Rows, typename T>
+Vector<Rows, T> operator*(const Vector<Rows, T>& lhs, const Matrix<Rows, Rows, T>& rhs);
+
+template <uint8_t Rows, typename T>
+Vector<Rows, T> operator*(const Matrix<Rows, Rows, T>& lhs, const Vector<Rows, T>& rhs);
 
 #include <lug/Math/Vector.inl>
 
