@@ -1,11 +1,20 @@
 template <typename T, class Arena, class ...Args>
 inline T* new_one(size_t alignment, const char* file, size_t line, Arena& arena, Args&&... args) {
-    return new (arena.allocate(sizeof(T), alignment, 0, file, line)) T{std::forward<Args>(args)...};
+    void* ptr = arena.allocate(sizeof(T), alignment, 0, file, line);
+
+    if (!ptr) {
+        return nullptr;
+    }
+
+    return new (ptr) T{std::forward<Args>(args)...};
 }
 
 template <typename T, class Arena>
 inline void delete_one(T* object, Arena& arena) {
-    object->~T();
+    if (object) {
+        object->~T();
+    }
+
     arena.free(object);
 }
 
