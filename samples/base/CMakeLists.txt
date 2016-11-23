@@ -21,10 +21,13 @@ if(LUG_COMPILER_MSVC)
     else()
         list(APPEND CMAKE_CXX_FLAGS "/W4")
     endif()
+
+    list(APPEND CMAKE_CXX_FLAGS "/WX")
 elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
     list(APPEND CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -std=c++14")
-    string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
 endif()
+
+string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
 
 if(ANDROID_NATIVE_API_LEVEL EQUAL 23)
     set(LUG_STATIC_LIBRARIES true)
