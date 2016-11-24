@@ -42,8 +42,8 @@ bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style
 
     // Compute position and size
     HDC screenDC = GetDC(nullptr);
-    const uint16_t left = (GetDeviceCaps(screenDC, HORZRES) - _parent->_mode.width) / 2;
-    const uint16_t top = (GetDeviceCaps(screenDC, VERTRES) - _parent->_mode.height) / 2;
+    const uint16_t left = static_cast<uint16_t>(GetDeviceCaps(screenDC, HORZRES) - _parent->_mode.width) / 2;
+    const uint16_t top = static_cast<uint16_t>(GetDeviceCaps(screenDC, VERTRES) - _parent->_mode.height) / 2;
     ReleaseDC(nullptr, screenDC);
 
     // Choose the window style according to the Style parameter
@@ -51,28 +51,31 @@ bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style
     if (style == Style::None) {
         win32Style |= WS_POPUP;
     } else {
-        if (static_cast<bool>(style & Style::Titlebar)) {
+        if ((style & Style::Titlebar) == Style::Titlebar) {
             win32Style |= WS_CAPTION | WS_MINIMIZEBOX;
         }
 
-        if (static_cast<bool>(style & Style::Resize)) {
+        if ((style & Style::Resize) == Style::Resize) {
             win32Style |= WS_THICKFRAME | WS_MAXIMIZEBOX;
         }
 
-        if (static_cast<bool>(style & Style::Close)) {
+        if ((style & Style::Close) == Style::Close) {
             win32Style |= WS_SYSMENU;
         }
     }
 
-    _fullscreen = static_cast<bool>(style & Style::Fullscreen);
+    _fullscreen = (style & Style::Fullscreen) == Style::Fullscreen ? true : false;
     // In windowed mode, adjust width and height so that window will have the requested client area
     RECT rectangle = { 0, 0, _parent->_mode.width, _parent->_mode.height };
     if (!_fullscreen) {
         AdjustWindowRect(&rectangle, win32Style, false);
     }
 
+#pragma warning ( push )
+#pragma warning (disable : 4996 )
     std::vector<wchar_t> realTitle(title.length() + 1); // Convert a const char * to a wchar_t
     mbstowcs(&realTitle[0], title.c_str(), title.length() + 1);
+#pragma warning ( pop )
 
     _handle = CreateWindowW(className, &realTitle[0], win32Style, left, top, rectangle.right - rectangle.left, rectangle.bottom - rectangle.top, nullptr, nullptr, GetModuleHandleW(nullptr), this);
 
@@ -118,7 +121,7 @@ bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
     return false;
 }
 
-void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam) {
+void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM /*wParam*/, LPARAM /*lParam*/) {
     lug::Window::Event e;
 
     switch (message) {
@@ -187,6 +190,7 @@ bool lug::Window::priv::WindowImpl::activateFullscreen() {
 
     // Set "this" as the current fullscreen window
     fullscreenWindow = this;
+    return true;
 }
 
 ////////////////////////////////////////////////////////////
