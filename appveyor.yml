@@ -236,10 +236,23 @@ after_build:
 
 test_script:
 - ps: |
-    & ctest -C $env:CONFIGURATION --output-on-failure
+    & ctest -C $env:CONFIGURATION -O "Testing/Temporary/TestOutput.txt" --output-on-failure
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
+
+on_finish:
+- ps : |
+    $wc = New-Object 'System.Net.WebClient'
+    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\System\SystemUnitTests.xml))
+
+# TO DO : Uncomment after PR
+#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\Core\CoreUnitTests.xml))
+#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\Graphics\GraphicsUnitTests.xml))
+#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\Main\MainUnitTests.xml))
+#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\Math\MathUnitTests.xml))
+#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\System\SystemUnitTests.xml))
+#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\Window\WindowUnitTests.xml))
 
 # to disable automatic builds
 #build: off
@@ -284,8 +297,7 @@ test_script:
 #---------------------------------#
 
 artifacts:
-  - path: 'build/Testing/Temporary/*'
-    name: test_results
+  - path: 'build/Testing/**/*'
 
 # artifacts:
 #
