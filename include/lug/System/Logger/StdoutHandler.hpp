@@ -16,7 +16,7 @@ public:
 
 protected:
     virtual void handle(const priv::Message& msg) {
-        std::cout << msg.formatted.c_str() << "\n";
+        std::cout << msg.formatted.c_str();
     }
     virtual void flush() {
         std::cout << std::flush;

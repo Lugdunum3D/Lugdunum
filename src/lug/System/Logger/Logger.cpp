@@ -18,19 +18,18 @@ Logger::Logger(const std::string &loggerName, HandlerInitList initList) :
 Logger::Logger(const std::string &loggerName, HandlerPtr sink) :
         Logger(loggerName, {sink}) {}
 
-
-inline void Logger::setFormatter(FormatterPtr formatter) {
+void Logger::setFormatter(FormatterPtr formatter) {
     _formatter = formatter;
 }
 
-inline void Logger::setPattern(const std::string &pattern) {
-    (void)pattern;
+void Logger::setPattern(const std::string &pattern) {
+    _formatter = std::make_shared<Formatter>(pattern);
 }
 
 
 
 
-const std::string &Logger::getName() const {
+const std::string& Logger::getName() const {
     return _name;
 }
 

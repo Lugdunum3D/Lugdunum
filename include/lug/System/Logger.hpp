@@ -13,7 +13,6 @@
 #include <lug/System/Logger/Formatter.hpp>
 #include <lug/System/Logger/Message.hpp>
 #include <lug/System/Logger/Handler.hpp>
-#include <lug/System/Logger/DefaultFormatter.hpp>
 #include <lug/System/Logger/FileHandler.hpp>
 #include <lug/System/Logger/StdoutHandler.hpp>
 
@@ -41,7 +40,7 @@ public:
     inline Logger(const std::string &loggerName, const It &begin, const It &end):
             _name(loggerName),
             _handlers(begin, end),
-            _formatter(std::make_shared<DefaultFormatter>()) {
+            _formatter(std::make_shared<Formatter>("%v\n")) {
 
         /*_errHandler = [this](const std::string &msg) {
             this->_defaultErrHandler(msg);

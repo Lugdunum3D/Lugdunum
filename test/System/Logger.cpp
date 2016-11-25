@@ -64,3 +64,23 @@ TEST(Logger, Fmt) {
     EXPECT_EQ(output, "Hello world!\n");
     Util::stopCapture();
 }
+
+TEST(Logger, BasicPattern) {
+    auto logger = lug::System::makeStdoutLogger("myLogger");
+    Util::captureStdout();
+    logger->setPattern("%v\n");
+    logger->info("Hello world!");
+    std::string output = Util::getCaptured();
+    EXPECT_EQ(output, "Hello world!\n");
+    Util::stopCapture();
+}
+
+TEST(Logger, MediumPattern) {
+    auto logger = lug::System::makeStdoutLogger("myLogger");
+    Util::captureStdout();
+    logger->setPattern("[%v]\n");
+    logger->info("Hello world!");
+    std::string output = Util::getCaptured();
+    EXPECT_EQ(output, "[Hello world!]\n");
+    Util::stopCapture();
+}
