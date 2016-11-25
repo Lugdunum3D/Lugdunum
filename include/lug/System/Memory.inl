@@ -59,7 +59,13 @@ inline void delete_array(T* ptr, Arena& arena) {
 
 template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type>
 inline T* new_array(size_t alignment, size_t nb, const char* file, size_t line, Arena& arena) {
-    return new(arena.allocate(sizeof(T) * nb, alignment, 0, file, line)) T{};
+    void* ptr = arena.allocate(sizeof(T) * nb, alignment, 0, file, line);
+
+    if (!ptr) {
+        return nullptr;
+    }
+
+    return new(ptr) T{};
 }
 
 template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type>
