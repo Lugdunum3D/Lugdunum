@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <vector>
 #include <memory>
 #include <lug/System/Logger/Message.hpp>
@@ -9,7 +10,7 @@ namespace System {
 
 class Formatter;
 
-using FlagHandlerPointer = std::string (Formatter::*)();
+using FlagHandlerPointer = std::string (Formatter::*)(const struct tm& now);
 
 namespace priv {
 
@@ -47,6 +48,14 @@ public:
 private:
     void handleFlag(char c);
     void compilePattern(const std::string& pattern);
+
+    std::string handleFlagy(const struct tm& now); // Year 2 digits
+    std::string handleFlagY(const struct tm& now); // Year 4 digits
+    std::string handleFlagm(const struct tm& now); // Month from 1 to 12
+    std::string handleFlagd(const struct tm& now); // Day from 1 to 31
+    std::string handleFlagH(const struct tm& now); // Hour from 0 to 24
+    std::string handleFlagM(const struct tm& now); // Minute from 0 to 59
+    std::string handleFlagS(const struct tm& now); // Sec from 0 to 61
 
     std::vector<priv::Token> _formatChain;
 };
