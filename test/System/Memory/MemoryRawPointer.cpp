@@ -146,3 +146,103 @@ TEST(MemoryRawPointer, ArrayPOD) {
     TEST_MULTIPLE_ALIGNMENTS(TEST_RAW_POINTER_ARRAY_POD);
     TEST_MULTIPLE_ALIGNMENTS(TEST_RAW_POINTER_ARRAY_POD_NULL);
 }
+
+TEST(MemoryRawPointer, ArrayNonPOD) {
+    struct FakeNonPOD {
+        FakeNonPOD(int foo) : bar{foo} {};
+
+        int bar;
+    };
+
+     #define TEST_RAW_POINTER_ARRAY_NON_POD(alignment)                                                              \
+        {                                                                                                           \
+            const char* file = "Test";                                                                              \
+            const size_t line = 42;                                                                                 \
+                                                                                                                    \
+            MockArena arena;                                                                                        \
+            char buffer[4096];                                                                                      \
+                                                                                                                    \
+            {                                                                                                       \
+                EXPECT_CALL(arena, allocate(_, alignment, _, file, line))                                           \
+                    .Times(1)                                                                                       \
+                    .WillRepeatedly(Return(&(buffer)));                                                             \
+                                                                                                                    \
+                EXPECT_CALL(arena, free(&(buffer)))                                                                 \
+                    .Times(1);                                                                                      \
+                                                                                                                    \
+                FakeNonPOD* ptr = lug::System::Memory::new_array<FakeNonPOD>(alignment, 5, file, line, arena, 42);  \
+                                                                                                                    \
+                ASSERT_NE(ptr, nullptr);                                                                            \
+                for (uint8_t i = 0; i < 5; ++i)                                                                     \
+                    ASSERT_EQ(ptr[i].bar, 42);                                                                      \
+                                                                                                                    \
+                lug::System::Memory::delete_array(ptr, arena);                                                      \
+            }                                                                                                       \
+                                                                                                                    \
+            {                                                                                                       \
+                EXPECT_CALL(arena, allocate(_, alignment, _, file, line))                                           \
+                    .Times(0);                                                                                      \
+                                                                                                                    \
+                EXPECT_CALL(arena, free(nullptr))                                                                   \
+                    .Times(1);                                                                                      \
+                                                                                                                    \
+                FakeNonPOD* ptr = lug::System::Memory::new_array<FakeNonPOD>(alignment, 0, file, line, arena, 42);  \
+                ASSERT_EQ(ptr, nullptr);                                                                            \
+                lug::System::Memory::delete_array(ptr, arena);                                                      \
+            }                                                                                                       \
+                                                                                                                    \
+        }
+
+    #define TEST_RAW_POINTER_ARRAY_NON_POD_NULL(alignment)                                                          \
+        {                                                                                                           \
+            const char* file = "Test";                                                                              \
+            const size_t line = 42;                                                                                 \
+                                                                                                                    \
+            NullArena arena;                                                                                        \
+                                                                                                                    \
+            {                                                                                                       \
+                FakeNonPOD* ptr = lug::System::Memory::new_array<FakeNonPOD>(alignment, 5, file, line, arena, 42);  \
+                ASSERT_EQ(ptr, nullptr);                                                                            \
+                lug::System::Memory::delete_one(ptr, arena);                                                        \
+            }                                                                                                       \
+                                                                                                                    \
+            {                                                                                                       \
+                FakeNonPOD* ptr = lug::System::Memory::new_array<FakeNonPOD>(alignment, 0, file, line, arena, 42);  \
+                ASSERT_EQ(ptr, nullptr);                                                                            \
+                lug::System::Memory::delete_one(ptr, arena);                                                        \
+            }                                                                                                       \
+                                                                                                                    \
+        }
+
+    #define TEST_RAW_POINTER_ARRAY_NON_POD_DTR(alignment)                                                   \
+        {                                                                                                   \
+            const char* file = "Test";                                                                      \
+            const size_t line = 42;                                                                         \
+                                                                                                            \
+            MockArena arena;                                                                                \
+            char buffer[4096];                                                                              \
+                                                                                                            \
+            EXPECT_CALL(arena, allocate(_, alignment, _, file, line))                                       \
+                .Times(1)                                                                                   \
+                .WillRepeatedly(Return(&(buffer)));                                                         \
+                                                                                                            \
+            EXPECT_CALL(arena, free(&(buffer)))                                                             \
+                .Times(1);                                                                                  \
+                                                                                                            \
+            MockObject* ptr = lug::System::Memory::new_array<MockObject>(alignment, 5, file, line, arena);  \
+                                                                                                            \
+            ASSERT_NE(ptr, nullptr);                                                                        \
+                                                                                                            \
+            for (uint8_t i = 0; i < 5; ++i)                                                                 \
+            {                                                                                               \
+                EXPECT_CALL(ptr[i], destructor())                                                           \
+                    .Times(1);                                                                              \
+            }                                                                                               \
+                                                                                                            \
+            lug::System::Memory::delete_array(ptr, arena);                                                  \
+        }
+
+    TEST_MULTIPLE_ALIGNMENTS(TEST_RAW_POINTER_ARRAY_NON_POD);
+    TEST_MULTIPLE_ALIGNMENTS(TEST_RAW_POINTER_ARRAY_NON_POD_NULL);
+    TEST_MULTIPLE_ALIGNMENTS(TEST_RAW_POINTER_ARRAY_NON_POD_DTR);
+}
