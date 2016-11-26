@@ -246,7 +246,7 @@ on_finish:
 - ps : |
     echo $env:TEST_OUTPUT
     Get-ChildItem -Recurse -Directory $env:TEST_OUTPUT | ForEach-Object {
-        if (Test-Path (Resolve-Path $env:TEST_OUTPUT\$_\$_UnitTests.xml)) {
+        if (Test-Path $env:TEST_OUTPUT\$_\$_UnitTests.xml) {
             $wc = New-Object 'System.Net.WebClient'
             $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $env:TEST_OUTPUT\$_\$_UnitTests.xml))
         }
