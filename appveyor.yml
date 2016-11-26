@@ -86,6 +86,7 @@ init:
 
 environment:
     Toolset: v140
+    TEST_OUTPUT: '.'
 
 # environment variables
 # environment:
@@ -222,7 +223,7 @@ build_script:
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
-    & cmake --build . --config $env:CONFIGURATION
+    & cmake --build . --config $env:CONFIGURATION -DTEST_OUTPUT=$env:TEST_OUTPUT
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
