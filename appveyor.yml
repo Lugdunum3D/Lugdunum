@@ -244,10 +244,10 @@ test_script:
 
 on_finish:
 - ps : |
-    Get-ChildItem -Recurse -Directory $env:TEST_OUTPUT
-        | ForEach-Object {
-            echo "$_.FullName"
-        }
+    echo $env:TEST_OUTPUT
+    Get-ChildItem -Recurse -Directory $env:TEST_OUTPUT | ForEach-Object {
+        echo "$_.FullName"
+    }
     $wc = New-Object 'System.Net.WebClient'
     $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\System\SystemUnitTests.xml))
 
