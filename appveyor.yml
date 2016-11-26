@@ -246,18 +246,11 @@ on_finish:
 - ps : |
     echo $env:TEST_OUTPUT
     Get-ChildItem -Recurse -Directory $env:TEST_OUTPUT | ForEach-Object {
-        echo "$_.FullName"
+        if (Test-Path (Resolve-Path $env:TEST_OUTPUT\$_\$_UnitTests.xml)) {
+            $wc = New-Object 'System.Net.WebClient'
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path $env:TEST_OUTPUT\$_\$_UnitTests.xml))
+        }
     }
-    $wc = New-Object 'System.Net.WebClient'
-    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\System\SystemUnitTests.xml))
-
-# TO DO : Uncomment after PR
-#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\Core\CoreUnitTests.xml))
-#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\Graphics\GraphicsUnitTests.xml))
-#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\Main\MainUnitTests.xml))
-#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\Math\MathUnitTests.xml))
-#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\System\SystemUnitTests.xml))
-#    $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\Window\WindowUnitTests.xml))
 
 # to disable automatic builds
 #build: off
