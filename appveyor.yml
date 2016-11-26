@@ -86,7 +86,7 @@ init:
 
 environment:
     Toolset: v140
-    TEST_OUTPUT: '.'
+    TEST_OUTPUT: '.\test'
 
 # environment variables
 # environment:
@@ -219,7 +219,7 @@ build_script:
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE -DTEST_OUTPUT=$env:TEST_OUTPUT ..
+    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
@@ -244,6 +244,10 @@ test_script:
 
 on_finish:
 - ps : |
+    Get-ChildItem -Recurse -Directory $env:TEST_OUTPUT
+        | ForEach-Object {
+            echo "$_.FullName"
+        }
     $wc = New-Object 'System.Net.WebClient'
     $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\test\System\SystemUnitTests.xml))
 
