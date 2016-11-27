@@ -62,9 +62,6 @@ TEST(Matrix4x4, InverseOperators) {
         const lug::Math::Mat4x4d inverse = matrix.inverse();
         const lug::Math::Mat4x4d identity = matrix * inverse;
 
-        std::cout << inverse << std::endl;
-        std::cout << identity << std::endl;
-
         for (uint8_t row = 0; row < matrix.getRows(); ++row) {
             for (uint8_t col = 0; col < matrix.getColumns(); ++col) {
                 ASSERT_NEAR(identity(row, col), goodIdentity(row, col), 0.01f)
