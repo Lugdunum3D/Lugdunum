@@ -4,6 +4,7 @@ set(SRC
     ${SRC_ROOT}/Matrix2x2.cpp
     ${SRC_ROOT}/Matrix3x3.cpp
     ${SRC_ROOT}/Matrix4x4.cpp
+    ${SRC_ROOT}/Geometry/Transform.cpp
 )
 source_group("src" FILES ${SRC})
 

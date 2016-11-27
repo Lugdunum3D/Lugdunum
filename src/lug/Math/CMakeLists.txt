@@ -9,7 +9,13 @@ source_group("src" FILES ${SRC})
 
 # all header files
 set(INC
+    ${INCROOT}/Constant.hpp
+    ${INCROOT}/Constant.inl
     ${INCROOT}/Export.hpp
+    ${INCROOT}/Geometry/Transform.hpp
+    ${INCROOT}/Geometry/Transform.inl
+    ${INCROOT}/Geometry/Trigonometry.hpp
+    ${INCROOT}/Geometry/Trigonometry.inl
     ${INCROOT}/Matrix.hpp
     ${INCROOT}/Matrix.inl
     ${INCROOT}/Vector.hpp
