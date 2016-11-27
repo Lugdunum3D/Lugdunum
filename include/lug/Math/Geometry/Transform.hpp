@@ -1,5 +1,6 @@
 #pragma once
 
+#include <lug/Math/Geometry/Trigonometry.hpp>
 #include <lug/Math/Matrix.hpp>
 #include <lug/Math/Vector.hpp>
 

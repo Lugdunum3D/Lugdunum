@@ -11,8 +11,8 @@ inline Matrix<4, 4, T> translate(const Vector<3, T> &direction) {
 
 template <typename T>
 inline Matrix<4, 4, T> rotate(T angle, const Vector<3, T> &a) {
-    T const c = cos(angle);
-    T const s = sin(angle);
+    T const c = ::lug::Math::Geometry::cos(angle);
+    T const s = ::lug::Math::Geometry::sin(angle);
 
     Vector<3, T> axis(a);
     axis.normalize();
