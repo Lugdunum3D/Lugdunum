@@ -7,50 +7,67 @@ namespace lug {
 namespace Math {
 
 class LUG_MATH_API Quaternion {
+
+
     public:
     Quaternion(double x, double y, double z, double w);
-    Quaternion(Vec3d v);
-    Quaternion(const Quaternion &otherQuaternion);
+    Quaternion(double valueArray[4]);
+    Quaternion(Vec3d normalizedVector, double angle);
+
+    Quaternion(const Quaternion &otherQuaternion); 
     Quaternion &operator=(const Quaternion &leftOperand);
     virtual ~Quaternion();
 
-    Quaternion conjugate() const;
-    Quaternion invert();
-    Quaternion normalize();
-    double angleWith(const Quaternion &otherQuaternion);
-    Quaternion slerp(const Quaternion &otherQuaternion, double t);
+    double&  operator[](std::size_t idx);
+    const double&  operator[](std::size_t idx) const;
 
-    double getAngle() const;
-    void setAngle(double angle);
+//    Quaternion conjugate() const;
+//    Quaternion invert();
+//    Quaternion normalize();
+//    double angleWith(const Quaternion &otherQuaternion);
+//    Quaternion slerp(const Quaternion &otherQuaternion, double t);
 
-    double getX() const;
-    void setX(double x);
+ //   double getAngle() const;
+//    void setAngle(double angle);
 
-    double getY() const;
-    void setY(double y);
+#define DEFINE_QUATERNION_ACCESS(name, rows)                                                                               \
+    const double& name() const {                                                                                             \
+        return (*this)[rows];                                                                               \
+    }                                                                                                                   \
+                                                                                                                        \
+    double& name() {                                                                                                         \
+        return (*this)[rows];                                                                               \
+    }
 
-    double getZ( )const;
-    void setZ(double z);
+        DEFINE_QUATERNION_ACCESS(w, 0)
+        DEFINE_QUATERNION_ACCESS(i, 0)
 
-    double getW() const;
-    void setW(double w);
+        DEFINE_QUATERNION_ACCESS(x, 1)
+        DEFINE_QUATERNION_ACCESS(j, 1)
 
-    const Vec3d& getAxis() const;
-    void setAxis(const Vec3d &);
+        DEFINE_QUATERNION_ACCESS(y, 2)
+        DEFINE_QUATERNION_ACCESS(k, 2)
+
+        DEFINE_QUATERNION_ACCESS(z, 3)
+        DEFINE_QUATERNION_ACCESS(l, 3)
+
+
+#undef DEFINE_QUATERNION_ACCESS
 
 
 
 
 
-    const Quaternion &getIdentity() const;
+
+
+//    const Quaternion &getIdentity() const;
 
     protected:
-    double _angle;
-    Vec3d _Axis;
-    Quaternion *_identity;
-    bool _isIdentity;
-    bool _isNormalized;
-    double _x, _y, _z, _w; // TO DO Transformer en tableau
+//    double _angle;
+//    Quaternion *_identity;
+//    bool _isIdentity;
+//    bool _isNormalized;
+   double _valuesArray[4]; // TO DO Transformer en tableau
 
 
 };
