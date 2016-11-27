@@ -2,6 +2,8 @@
 #include <lug/Math/Geometry/Transform.hpp>
 #include <lug/Math/Geometry/Trigonometry.hpp>
 
+// TODO: Add tests for lookAt, ortho and perspective
+
 TEST(Transform, Translate) {
     const lug::Math::Vec3i translateVector{1, 2, 3};
     const lug::Math::Mat4x4i translateMatrix = lug::Math::Geometry::translate(translateVector);

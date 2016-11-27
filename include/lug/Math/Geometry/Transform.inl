@@ -76,3 +76,32 @@ inline Matrix<4, 4, T> lookAt(const Vector<3, T> &eye, const Vector<3, T> &cente
         1,
     };
 }
+
+template <typename T>
+inline Matrix<4, 4, T> ortho(T left, T right, T bottom, T top, T zNear, T zFar) {
+    Matrix<4, 4, T> matrix = Matrix<4, 4, T>::identity();
+
+    matrix(0, 0) = T(2) / (right - left);
+    matrix(0, 3) = -(right + left) / (right - left);
+    matrix(1, 1) = T(2) / (top - bottom);
+    matrix(1, 3) = -(top + bottom) / (top - bottom);
+    matrix(2, 2) = -T(1) / (zFar - zNear);
+    matrix(2, 3) = -zNear / (zFar - zNear);
+
+    return matrix;
+}
+
+template <typename T>
+inline Matrix<4, 4, T> perspective (T fovy, T aspect, T zNear, T zFar) {
+    const T tanHalfFovy = ::lug::Math::Geometry::tan(fovy / T(2));
+
+    Matrix<4, 4, T> matrix(0);
+
+    matrix(0, 0) = T(1) / (aspect * tanHalfFovy);
+    matrix(1, 1) = T(1) / (tanHalfFovy);
+    matrix(2, 2) = zFar / (zNear - zFar);
+    matrix(2, 3) = -(zFar * zNear) / (zFar - zNear);
+    matrix(3, 2) = -T(1);
+
+    return matrix;
+}
