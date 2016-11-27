@@ -14,8 +14,7 @@ inline Matrix<4, 4, T> rotate(T angle, const Vector<3, T> &a) {
     T const c = ::lug::Math::Geometry::cos(angle);
     T const s = ::lug::Math::Geometry::sin(angle);
 
-    Vector<3, T> axis(a);
-    axis.normalize();
+    Vector<3, T> axis(normalize(a));
     Vector<3, T> tmp((T(1) - c) * axis);
 
     return Matrix<4, 4, T> {
@@ -47,4 +46,33 @@ inline Matrix<4, 4, T> scale(const Vector<3, T> &factors) {
     matrix(2, 2) = factors(2);
 
     return matrix;
+}
+
+template <typename T>
+inline Matrix<4, 4, T> lookAt(const Vector<3, T> &eye, const Vector<3, T> &center, const Vector<3, T> &up) {
+    const Vector<3, T> direction(normalize(static_cast<Vector<3, T>>(center - eye)));
+    const Vector<3, T> right(normalize(cross(direction, up)));
+    const Vector<3, T> newUp(cross(right, direction));
+
+    return Matrix<4, 4, T> {
+        right.x(),
+        right.y(),
+        right.z(),
+        0,
+
+        newUp.x(),
+        newUp.y(),
+        newUp.z(),
+        0,
+
+        -direction.x(),
+        -direction.y(),
+        -direction.z(),
+        0,
+
+        0,
+        0,
+        0,
+        1,
+    } * translate(static_cast<Vector<3, T>>(-eye));
 }

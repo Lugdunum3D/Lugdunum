@@ -465,6 +465,12 @@ inline Matrix<Rows, Columns, T> Matrix<Rows, Columns, T>::identity() {
     return matrix;
 }
 
+// Unary operations
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator-(const Matrix<Rows, Columns, T>& lhs) {
+    return T(0) - lhs;
+}
+
 // Matrix/Scalar operations
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline Matrix<Rows, Columns, T> operator+(const Matrix<Rows, Columns, T>& lhs, T rhs) {

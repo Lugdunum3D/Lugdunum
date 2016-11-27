@@ -17,6 +17,9 @@ Matrix<4, 4, T> rotate(T angle, const Vector<3, T> &axis);
 template <typename T>
 Matrix<4, 4, T> scale(const Vector<3, T> &factors);
 
+template <typename T>
+Matrix<4, 4, T> lookAt(const Vector<3, T> &eye, const Vector<3, T> &center, const Vector<3, T> &up);
+
 #include <lug/Math/Geometry/Transform.inl>
 
 }

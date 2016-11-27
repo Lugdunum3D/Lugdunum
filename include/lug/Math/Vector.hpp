@@ -6,6 +6,8 @@
 namespace lug {
 namespace Math {
 
+// TODO: Redefine all operations on Matrix for Vector
+
 template <uint8_t Rows, typename T = float>
 class Vector : public Matrix<Rows, 1, T> {
 public:
@@ -67,6 +69,9 @@ constexpr T dot(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs);
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 constexpr Matrix<Rows, Columns, T> outer(const Vector<Rows, T>& lhs, const Vector<Columns, T>& rhs);
+
+template <uint8_t Rows, typename T>
+constexpr Vector<Rows, T> normalize(const Vector<Rows, T>& lhs);
 
 #define DEFINE_LENGTH_VECTOR(length)                \
     template <typename T = float>                   \

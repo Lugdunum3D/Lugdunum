@@ -136,6 +136,10 @@ DEFINE_LENGTH_MATRIX(4)
 
 #undef DEFINE_LENGTH_MATRIX
 
+// Unary operations
+template <uint8_t Rows, uint8_t Columns, typename T>
+Matrix<Rows, Columns, T> operator-(const Matrix<Rows, Columns, T>& lhs);
+
 // Matrix/Scalar operations
 template <uint8_t Rows, uint8_t Columns, typename T>
 Matrix<Rows, Columns, T> operator+(const Matrix<Rows, Columns, T>& lhs, T rhs);
