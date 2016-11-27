@@ -50,29 +50,29 @@ inline Matrix<4, 4, T> scale(const Vector<3, T> &factors) {
 
 template <typename T>
 inline Matrix<4, 4, T> lookAt(const Vector<3, T> &eye, const Vector<3, T> &center, const Vector<3, T> &up) {
-    const Vector<3, T> direction(normalize(static_cast<Vector<3, T>>(center - eye)));
-    const Vector<3, T> right(normalize(cross(direction, up)));
-    const Vector<3, T> newUp(cross(right, direction));
+    const Vector<3, T> direction(normalize(static_cast<Vector<3, T>>(eye - center)));
+    const Vector<3, T> right(normalize(cross(up, direction)));
+    const Vector<3, T> newUp(cross(direction, right));
 
     return Matrix<4, 4, T> {
         right.x(),
         right.y(),
         right.z(),
-        0,
+        -dot(right, eye),
 
         newUp.x(),
         newUp.y(),
         newUp.z(),
-        0,
+        -dot(newUp, eye),
 
-        -direction.x(),
-        -direction.y(),
-        -direction.z(),
-        0,
+        direction.x(),
+        direction.y(),
+        direction.z(),
+        -dot(direction, eye),
 
         0,
         0,
         0,
         1,
-    } * translate(static_cast<Vector<3, T>>(-eye));
+    };
 }
