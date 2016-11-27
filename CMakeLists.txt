@@ -51,7 +51,7 @@ endif()
 
 
 # project name
-project(Lugdunum CXX)
+project(Lugdunum C CXX)
 
 # version
 set(VERSION_MAJOR 0)

@@ -86,6 +86,7 @@ init:
 
 environment:
     Toolset: v140
+    TEST_OUTPUT: '.\test'
 
 # environment variables
 # environment:
@@ -236,9 +237,18 @@ after_build:
 
 test_script:
 - ps: |
-    & ctest -C $env:CONFIGURATION -O "Testing/Temporary/Test.output.txt" --output-on-failure
+    & ctest -C $env:CONFIGURATION -O "Testing/Temporary/TestOutput.txt" --output-on-failure
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
+    }
+
+on_finish:
+- ps : |
+    Get-ChildItem -Recurse -Directory $env:TEST_OUTPUT | ForEach-Object {
+        if (Test-Path "$env:TEST_OUTPUT\${_}\${_}UnitTests.xml") {
+            $wc = New-Object 'System.Net.WebClient'
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "$env:TEST_OUTPUT\${_}\${_}UnitTests.xml"))
+        }
     }
 
 # to disable automatic builds
