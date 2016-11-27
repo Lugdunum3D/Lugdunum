@@ -86,7 +86,7 @@ init:
 
 environment:
     Toolset: v140
-    TEST_OUTPUT: '.\test'
+    TEST_OUTPUT: '%APPVEYOR_BUILD_FOLDER%\build\test'
 
 # environment variables
 # environment:
