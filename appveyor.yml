@@ -219,7 +219,7 @@ build_script:
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE ..
+    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE -DTEST_OUTPUT="$env:TEST_OUTPUT" ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
@@ -244,10 +244,10 @@ test_script:
 
 on_finish:
 - ps : |
-    Get-ChildItem -Recurse -Directory $env:TEST_OUTPUT | ForEach-Object {
-        if (Test-Path "$env:TEST_OUTPUT\${_}\${_}UnitTests.xml") {
+    Get-ChildItem -Directory $env:TEST_OUTPUT | ForEach-Object {
+        if (Test-Path "$env:TEST_OUTPUT\${_}UnitTests.xml") {
             $wc = New-Object 'System.Net.WebClient'
-            $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "$env:TEST_OUTPUT\${_}\${_}UnitTests.xml"))
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "$env:TEST_OUTPUT\${_}UnitTests.xml"))
         }
     }
 
