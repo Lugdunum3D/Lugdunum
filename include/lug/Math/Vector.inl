@@ -5,10 +5,10 @@ template <uint8_t Rows, typename T>
 inline Vector<Rows, T>::Vector(std::initializer_list<T> list) : Matrix<Rows, 1, T>(list) {}
 
 template <uint8_t Rows, typename T>
-inline Vector<Rows, T>::Vector(const Vector<Rows, T>::BaseMatrix& matrix) : Matrix<Rows, 1, T>(matrix) {}
+inline Vector<Rows, T>::Vector(const typename Vector<Rows, T>::BaseMatrix& matrix) : Matrix<Rows, 1, T>(matrix) {}
 
 template <uint8_t Rows, typename T>
-inline Vector<Rows, T>::Vector(Vector<Rows, T>::BaseMatrix&& matrix) : Matrix<Rows, 1, T>(std::move(matrix)) {}
+inline Vector<Rows, T>::Vector(typename Vector<Rows, T>::BaseMatrix&& matrix) : Matrix<Rows, 1, T>(std::move(matrix)) {}
 
 template <uint8_t Rows, typename T>
 inline Vector<Rows, T>::Vector(const Vector<Rows - 1, T>& vector, T value) {
