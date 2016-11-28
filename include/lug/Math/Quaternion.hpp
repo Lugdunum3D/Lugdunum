@@ -6,36 +6,37 @@
 namespace lug {
 namespace Math {
 
+template <typename T = T>
 class LUG_MATH_API Quaternion {
 
 
     public:
-    Quaternion(double x, double y, double z, double w);
-    Quaternion(double valueArray[4]);
-    Quaternion(Vec3d normalizedVector, double angle);
+    Quaternion(T x, T y, T z, T w);
+    Quaternion(T valueArray[4]);
+    Quaternion(Vec3d normalizedVector, T angle);
 
     Quaternion(const Quaternion &otherQuaternion); 
     Quaternion &operator=(const Quaternion &leftOperand);
     virtual ~Quaternion();
 
-    double&  operator[](std::size_t idx);
-    const double&  operator[](std::size_t idx) const;
+    T&  operator[](std::size_t idx);
+    const T&  operator[](std::size_t idx) const;
 
 //    Quaternion conjugate() const;
 //    Quaternion invert();
 //    Quaternion normalize();
-//    double angleWith(const Quaternion &otherQuaternion);
-//    Quaternion slerp(const Quaternion &otherQuaternion, double t);
+//    T angleWith(const Quaternion &otherQuaternion);
+//    Quaternion slerp(const Quaternion &otherQuaternion, T t);
 
- //   double getAngle() const;
-//    void setAngle(double angle);
+ //   T getAngle() const;
+//    void setAngle(T angle);
 
 #define DEFINE_QUATERNION_ACCESS(name, rows)                                                                               \
-    const double& name() const {                                                                                             \
+    const T& name() const {                                                                                             \
         return (*this)[rows];                                                                               \
     }                                                                                                                   \
                                                                                                                         \
-    double& name() {                                                                                                         \
+    T& name() {                                                                                                         \
         return (*this)[rows];                                                                               \
     }
 
@@ -56,42 +57,63 @@ class LUG_MATH_API Quaternion {
 
 
 
-
-
-
-
-//    const Quaternion &getIdentity() const;
-
     protected:
-//    double _angle;
+//    T _angle;
 //    Quaternion *_identity;
 //    bool _isIdentity;
 //    bool _isNormalized;
-   double _valuesArray[4]; // TO DO Transformer en tableau
+   T _valuesArray[4]; // TO DO Transformer en tableau
 
 
 };
 //Quaternion/Quaternion operator
+template <typename T = T>
 Quaternion LUG_MATH_API operator+(const Quaternion &leftOperand, const Quaternion &rightOperand);
+
+template <typename T = T>
 Quaternion LUG_MATH_API operator-(const Quaternion &leftOperand, const Quaternion &rightOperand);
+
+template <typename T = T>
 Quaternion LUG_MATH_API operator*(const Quaternion &leftOperand, const Quaternion &rightOperand);
+
+template <typename T = T>
 Quaternion LUG_MATH_API operator/(const Quaternion &leftOperand, const Quaternion &rightOperand);
+
+template <typename T = T>
 bool LUG_MATH_API operator==(const Quaternion &leftOperand, const Quaternion &rightOperand);
 
 //Quaternion/real operator
-Quaternion LUG_MATH_API operator*(const Quaternion &leftOperand, double scalar);
-Quaternion LUG_MATH_API operator+(const Quaternion &leftOperand, double scalar);
-Quaternion LUG_MATH_API operator-(const Quaternion &leftOperand, double scalar);
-Quaternion LUG_MATH_API operator/(const Quaternion &leftOperand, double scalar);
+
+template <typename T = T>
+Quaternion LUG_MATH_API operator*(const Quaternion &leftOperand, T scalar);
+
+template <typename T = T>
+Quaternion LUG_MATH_API operator+(const Quaternion &leftOperand, T scalar);
+
+template <typename T = T>
+Quaternion LUG_MATH_API operator-(const Quaternion &leftOperand, T scalar);
+
+template <typename T = T>
+Quaternion LUG_MATH_API operator/(const Quaternion &leftOperand, T scalar);
 
 
 //Formula
+
+template <typename T = T>
 Quaternion LUG_MATH_API reflection(const Quaternion &inputePoint, const Vec3d & rotationAxis);
+
+template <typename T = T>
 Quaternion LUG_MATH_API reflection(const Quaternion &inputePoint, const Quaternion &reflectionPlan);
-Quaternion LUG_MATH_API rotation(const Quaternion &inputePoint, double angle, const Vec3d & rotationAxis);
+
+template <typename T = T>
+Quaternion LUG_MATH_API rotation(const Quaternion &inputePoint, T angle, const Vec3d & rotationAxis);
+
+template <typename T = T>
 Quaternion LUG_MATH_API rotation(const Quaternion &inputePoint, const Quaternion &q);
 
 
 }
 }
+
+#include  <lug/Math/Quaternion.inl>
 
