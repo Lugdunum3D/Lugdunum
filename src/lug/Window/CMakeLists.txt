@@ -26,6 +26,10 @@ if(LUG_OS_LINUX)
 elseif(LUG_OS_WINDOWS)
     list(APPEND INC ${SRCROOT}/Win32/WindowImplWin32.hpp)
     list(APPEND SRC ${SRCROOT}/Win32/WindowImplWin32.cpp)
+elseif(LUG_OS_ANDROID)
+    include_directories(${CMAKE_SYSROOT}/usr/include)
+    list(APPEND INC ${SRCROOT}/Android/WindowImplAndroid.hpp)
+    list(APPEND SRC ${SRCROOT}/Android/WindowImplAndroid.cpp)
 else()
     message(FATAL_ERROR "No window implementation for this platform")
 endif()
@@ -34,5 +38,5 @@ endif()
 lug_add_library(lug-window
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-system
-                EXTERNAL_LIBS ${X11_LIBRARIES}
+                EXTERNAL_LIBS ${X11_LIBRARIES} android log
 )

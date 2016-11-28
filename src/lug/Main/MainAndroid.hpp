@@ -3,7 +3,11 @@
 #include <android/configuration.h>
 #include <android/native_activity.h>
 
+#include <lug/Window/Android/WindowImplAndroid.hpp>
+extern struct androidApp androidEventQueue;
+
 extern int main(int argc, const char* argv[]);
+
 
 namespace lug {
 namespace Main {
