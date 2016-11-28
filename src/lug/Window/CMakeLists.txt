@@ -19,17 +19,16 @@ source_group("inc" FILES ${INC})
 if(LUG_OS_LINUX)
     list(APPEND INC ${SRCROOT}/Unix/WindowImplX11.hpp)
     list(APPEND SRC ${SRCROOT}/Unix/WindowImplX11.cpp)
-
     find_package(X11 REQUIRED)
-    set(LUG_WINDOW_LIBRARIES ${X11_LIBRARIES})
+    set(EXT_LIBRARIES ${X11_LIBRARIES})
 
 elseif(LUG_OS_WINDOWS)
     list(APPEND INC ${SRCROOT}/Win32/WindowImplWin32.hpp)
     list(APPEND SRC ${SRCROOT}/Win32/WindowImplWin32.cpp)
 elseif(LUG_OS_ANDROID)
     include_directories(${CMAKE_SYSROOT}/usr/include)
-    set(ANDROID_LIB android)
-    set(ANDROID_LOG log)
+    set(EXT_LIBRARIES android)
+    list(APPEND ${EXT_LIBRARIES} log)
     list(APPEND INC ${SRCROOT}/Android/WindowImplAndroid.hpp)
     list(APPEND SRC ${SRCROOT}/Android/WindowImplAndroid.cpp)
 else()
@@ -40,5 +39,5 @@ endif()
 lug_add_library(lug-window
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-system
-                EXTERNAL_LIBS ${X11_LIBRARIES} ${ANDROID_LIB} ${ANDROID_LOG}
+                EXTERNAL_LIBS ${X11_LIBRARIES} ${EXT_LIBRARIES}
 )
