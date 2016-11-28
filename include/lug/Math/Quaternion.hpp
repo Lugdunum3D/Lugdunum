@@ -6,7 +6,7 @@
 namespace lug {
 namespace Math {
 
-template <typename T = T>
+template <typename T = double>
 class LUG_MATH_API Quaternion {
 
 
@@ -67,48 +67,48 @@ class LUG_MATH_API Quaternion {
 
 };
 //Quaternion/Quaternion operator
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API operator+(const Quaternion &leftOperand, const Quaternion &rightOperand);
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API operator-(const Quaternion &leftOperand, const Quaternion &rightOperand);
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API operator*(const Quaternion &leftOperand, const Quaternion &rightOperand);
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API operator/(const Quaternion &leftOperand, const Quaternion &rightOperand);
 
-template <typename T = T>
+template <typename T >
 bool LUG_MATH_API operator==(const Quaternion &leftOperand, const Quaternion &rightOperand);
 
 //Quaternion/real operator
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API operator*(const Quaternion &leftOperand, T scalar);
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API operator+(const Quaternion &leftOperand, T scalar);
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API operator-(const Quaternion &leftOperand, T scalar);
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API operator/(const Quaternion &leftOperand, T scalar);
 
 
 //Formula
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API reflection(const Quaternion &inputePoint, const Vec3d & rotationAxis);
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API reflection(const Quaternion &inputePoint, const Quaternion &reflectionPlan);
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API rotation(const Quaternion &inputePoint, T angle, const Vec3d & rotationAxis);
 
-template <typename T = T>
+template <typename T >
 Quaternion LUG_MATH_API rotation(const Quaternion &inputePoint, const Quaternion &q);
 
 
