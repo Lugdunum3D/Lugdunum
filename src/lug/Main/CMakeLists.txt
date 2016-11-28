@@ -20,8 +20,6 @@ if(LUG_OS_ANDROID)
     list(APPEND INC ${SRCROOT}/MainAndroid.hpp)
 endif()
 
-#//include_directories(/Users/sumenia/Library/Android/sdk/ndk-bundle/platforms/android-24/arch-arm64/usr/include)
-
 # define the target
 add_library(lug-main STATIC ${SRC} ${INC})
 

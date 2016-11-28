@@ -28,6 +28,8 @@ elseif(LUG_OS_WINDOWS)
     list(APPEND SRC ${SRCROOT}/Win32/WindowImplWin32.cpp)
 elseif(LUG_OS_ANDROID)
     include_directories(${CMAKE_SYSROOT}/usr/include)
+    set(ANDROID_LIB android)
+    set(ANDROID_LOG log)
     list(APPEND INC ${SRCROOT}/Android/WindowImplAndroid.hpp)
     list(APPEND SRC ${SRCROOT}/Android/WindowImplAndroid.cpp)
 else()
@@ -38,5 +40,5 @@ endif()
 lug_add_library(lug-window
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-system
-                EXTERNAL_LIBS ${X11_LIBRARIES} android log
+                EXTERNAL_LIBS ${X11_LIBRARIES} ${ANDROID_LIB} ${ANDROID_LOG}
 )
