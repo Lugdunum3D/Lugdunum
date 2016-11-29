@@ -91,7 +91,14 @@ Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator-=(const Matrix<Rows
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator*=(const Matrix<Rows, Columns, T>& rhs) {
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows == Columns)>::type>
+Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator*=(const Matrix<Rows, Columns, T>& rhs)
+#else
+template <bool EnableBool>
+inline typename std::enable_if<(Rows == Columns) && EnableBool, Matrix<Rows, Columns, T>>::type& Matrix<Rows, Columns, T>::operator*=(const Matrix<Rows, Columns, T>& rhs)
+#endif
+{
     static_assert(Rows == Columns, "Operator *= is only available for square matrices");
 
     *this = *this * rhs;
@@ -100,7 +107,14 @@ Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator*=(const Matrix<Rows
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator/=(const Matrix<Rows, Columns, T>& rhs) {
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows == Columns)>::type>
+Matrix<Rows, Columns, T>& Matrix<Rows, Columns, T>::operator/=(const Matrix<Rows, Columns, T>& rhs)
+#else
+template <bool EnableBool>
+inline typename std::enable_if<(Rows == Columns) && EnableBool, Matrix<Rows, Columns, T>>::type& Matrix<Rows, Columns, T>::operator/=(const Matrix<Rows, Columns, T>& rhs)
+#endif
+{
     static_assert(Rows == Columns, "Operator /= is only available for square matrices");
 
     *this *= rhs.inverse();
@@ -453,7 +467,14 @@ typename std::enable_if<(Rows > 4) && EnableBool, T>::type Matrix<Rows, Columns,
 
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline Matrix<Rows, Columns, T> Matrix<Rows, Columns, T>::identity() {
+#if defined(LUG_COMPILER_MSVC)
+template <typename = typename std::enable_if<(Rows == Columns)>::type>
+inline Matrix<Rows, Columns, T> Matrix<Rows, Columns, T>::identity()
+#else
+template <bool EnableBool>
+inline typename std::enable_if<(Rows == Columns) && EnableBool, Matrix<Rows, Columns, T>>::type Matrix<Rows, Columns, T>::identity()
+#endif
+{
     static_assert(Rows == Columns, "The identity matrix had to be a square matrix");
 
     Matrix<Rows, Columns, T> matrix;

@@ -45,8 +45,24 @@ public:
     // Matrix/Matrix operations
     Matrix<Rows, Columns, T>& operator+=(const Matrix<Rows, Columns, T>& rhs);
     Matrix<Rows, Columns, T>& operator-=(const Matrix<Rows, Columns, T>& rhs);
+
+#if defined(LUG_COMPILER_MSVC)
+
+    template <typename = typename std::enable_if<(Rows == Columns)>::type>
     Matrix<Rows, Columns, T>& operator*=(const Matrix<Rows, Columns, T>& rhs);
+
+    template <typename = typename std::enable_if<(Rows == Columns)>::type>
     Matrix<Rows, Columns, T>& operator/=(const Matrix<Rows, Columns, T>& rhs);
+
+#else
+
+    template <bool EnableBool = true>
+    typename std::enable_if<(Rows == Columns) && EnableBool, Matrix<Rows, Columns, T>>::type& operator*=(const Matrix<Rows, Columns, T>& rhs);
+
+    template <bool EnableBool = true>
+    typename std::enable_if<(Rows == Columns) && EnableBool, Matrix<Rows, Columns, T>>::type& operator/=(const Matrix<Rows, Columns, T>& rhs);
+
+#endif
 
 #if defined(LUG_COMPILER_MSVC)
 
@@ -116,7 +132,17 @@ public:
 
 #endif
 
+#if defined(LUG_COMPILER_MSVC)
+
+    template <typename = typename std::enable_if<(Rows == Columns)>::type>
     static Matrix<Rows, Columns, T> identity();
+
+#else
+
+    template <bool EnableBool = true>
+    static typename std::enable_if<(Rows == Columns) && EnableBool, Matrix<Rows, Columns, T>>::type identity();
+
+#endif
 
 protected:
     Values _values;
