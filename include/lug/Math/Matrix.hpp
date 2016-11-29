@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <valarray>
+#include <lug/Math/Export.hpp>
 #include <lug/System/Debug.hpp>
 
 namespace lug {
@@ -121,18 +122,31 @@ protected:
     Values _values;
 };
 
-#define DEFINE_LENGTH_MATRIX(length)                                    \
+#define DEFINE_LENGTH_MATRIX(rows, columns)                             \
     template <typename T = float>                                       \
-    using Mat##length##x##length= Matrix<length, length, T>;            \
+    using Mat##rows##x##columns= Matrix<rows, columns, T>;              \
                                                                         \
-    using Mat##length##x##length##f = Mat##length##x##length<float>;    \
-    using Mat##length##x##length##d = Mat##length##x##length<double>;   \
-    using Mat##length##x##length##i = Mat##length##x##length<int32_t>;  \
-    using Mat##length##x##length##u = Mat##length##x##length<uint32_t>;
+    template class LUG_MATH_API Matrix<rows, columns, float>;           \
+    using Mat##rows##x##columns##f = Mat##rows##x##columns<float>;      \
+                                                                        \
+    template class LUG_MATH_API Matrix<rows, columns, double>;          \
+    using Mat##rows##x##columns##d = Mat##rows##x##columns<double>;     \
+                                                                        \
+    template class LUG_MATH_API Matrix<rows, columns, int32_t>;         \
+    using Mat##rows##x##columns##i = Mat##rows##x##columns<int32_t>;    \
+                                                                        \
+    template class LUG_MATH_API Matrix<rows, columns, uint32_t>;        \
+    using Mat##rows##x##columns##u = Mat##rows##x##columns<uint32_t>;
 
-DEFINE_LENGTH_MATRIX(2)
-DEFINE_LENGTH_MATRIX(3)
-DEFINE_LENGTH_MATRIX(4)
+DEFINE_LENGTH_MATRIX(2, 2)
+DEFINE_LENGTH_MATRIX(2, 3)
+DEFINE_LENGTH_MATRIX(2, 4)
+DEFINE_LENGTH_MATRIX(3, 2)
+DEFINE_LENGTH_MATRIX(3, 3)
+DEFINE_LENGTH_MATRIX(3, 4)
+DEFINE_LENGTH_MATRIX(4, 2)
+DEFINE_LENGTH_MATRIX(4, 3)
+DEFINE_LENGTH_MATRIX(4, 4)
 
 #undef DEFINE_LENGTH_MATRIX
 

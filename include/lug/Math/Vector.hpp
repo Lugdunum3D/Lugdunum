@@ -73,13 +73,20 @@ constexpr Matrix<Rows, Columns, T> outer(const Vector<Rows, T>& lhs, const Vecto
 template <uint8_t Rows, typename T>
 constexpr Vector<Rows, T> normalize(const Vector<Rows, T>& lhs);
 
-#define DEFINE_LENGTH_VECTOR(length)                \
-    template <typename T = float>                   \
-    using Vec##length = Vector<length, T>;          \
-                                                    \
-    using Vec##length##f = Vec##length<float>;      \
-    using Vec##length##d = Vec##length<double>;     \
-    using Vec##length##i = Vec##length<int32_t>;    \
+#define DEFINE_LENGTH_VECTOR(length)                    \
+    template <typename T = float>                       \
+    using Vec##length = Vector<length, T>;              \
+                                                        \
+    template class LUG_MATH_API Vector<length, float>;  \
+    using Vec##length##f = Vec##length<float>;          \
+                                                        \
+    template class LUG_MATH_API Vector<length, double>;  \
+    using Vec##length##d = Vec##length<double>;         \
+                                                        \
+    template class LUG_MATH_API Vector<length, int32_t>;  \
+    using Vec##length##i = Vec##length<int32_t>;        \
+                                                        \
+    template class LUG_MATH_API Vector<length, uint32_t>;  \
     using Vec##length##u = Vec##length<uint32_t>;
 
 DEFINE_LENGTH_VECTOR(2)
