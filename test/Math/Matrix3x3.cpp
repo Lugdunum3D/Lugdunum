@@ -84,3 +84,118 @@ TEST(Matrix3x3, Size) {
     ASSERT_EQ(lug::Math::Mat3x3f().getRows(), 3);
     ASSERT_EQ(lug::Math::Mat3x3f().getColumns(), 3);
 }
+
+TEST(Matrix3x3, Addition) {
+    const lug::Math::Mat3x3f matrixA{
+        2, -6, 8,
+        7,  8, 2,
+        4,  3, 7
+    };
+    const lug::Math::Mat3x3f matrixB{
+         1, 5, 4,
+        -7, 3, 6,
+         5, 2, 8
+    };
+    const lug::Math::Mat3x3f result = matrixA + matrixB;
+
+    const lug::Math::Mat3x3f correctResult{
+        3, -1,  12,
+        0,  11, 8,
+        9,  5,  15
+    };
+
+    for (uint8_t row = 0; row < result.getRows(); ++row) {
+        for (uint8_t col = 0; col < result.getColumns(); ++col) {
+            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                << "row = " << static_cast<int>(row) << "\n"
+                << "col = " << static_cast<int>(col);
+        }
+    }
+}
+
+TEST(Matrix3x3, Substraction) {
+    const lug::Math::Mat3x3f matrixA{
+        2, -6, 8,
+        7,  8, 2,
+        4,  3, 7
+    };
+    const lug::Math::Mat3x3f matrixB{
+         1, 5, 4,
+        -7, 3, 6,
+         5, 2, 8
+    };
+    const lug::Math::Mat3x3f result = matrixA - matrixB;
+
+    const lug::Math::Mat3x3f correctResult{
+         1, -11,  4,
+         14,  5, -4,
+        -1,   1, -1
+    };
+
+
+    for (uint8_t row = 0; row < result.getRows(); ++row) {
+        for (uint8_t col = 0; col < result.getColumns(); ++col) {
+            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                << "row = " << static_cast<int>(row) << "\n"
+                << "col = " << static_cast<int>(col);
+        }
+    }
+}
+
+TEST(Matrix3x3, Multiplication) {
+    const lug::Math::Mat3x3f matrixA{
+        2, -6, 8,
+        7,  8, 2,
+        4,  3, 7
+    };
+    const lug::Math::Mat3x3f matrixB{
+         1, 5, 4,
+        -7, 3, 6,
+         5, 2, 8
+    };
+    const lug::Math::Mat3x3f result = matrixA * matrixB;
+
+    const lug::Math::Mat3x3f correctResult{
+         84, 8,  36,
+        -39, 63, 92,
+         18, 43, 90
+    };
+
+
+    for (uint8_t row = 0; row < result.getRows(); ++row) {
+        for (uint8_t col = 0; col < result.getColumns(); ++col) {
+            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                << "row = " << static_cast<int>(row) << "\n"
+                << "col = " << static_cast<int>(col);
+        }
+    }
+}
+
+TEST(Matrix3x3, Division) {
+    const lug::Math::Mat3x3f matrixA{
+        2, -6, 8,
+        7,  8, 2,
+        4,  3, 7
+    };
+    const lug::Math::Mat3x3f matrixB{
+        1, 5, 4,
+        -7, 3, 6,
+        5, 2, 8
+    };
+    const lug::Math::Mat3x3f result = matrixA / matrixB;
+
+    const lug::Math::Mat3x3f correctResult{
+        -362.f/163.f,  96.f/163.f,   272.f/163.f,
+         357.f/163.f, -137.f/163.f, -35.f/163.f,
+         103.f/326.f, -3.f/326.f,    118.f/163.f
+    };
+
+    for (uint8_t row = 0; row < result.getRows(); ++row) {
+        for (uint8_t col = 0; col < result.getColumns(); ++col) {
+            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                << "row = " << static_cast<int>(row) << "\n"
+                << "col = " << static_cast<int>(col);
+        }
+    }
+}
+

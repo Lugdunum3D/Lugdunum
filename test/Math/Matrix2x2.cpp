@@ -7,7 +7,7 @@
 // TODO: Test the transpose
 
 TEST(Matrix2x2, Constructors) {
-    lug::Math::Mat2x2i matrix{1, 2, 3, 4};
+    lug::Math::Mat2x2i matrix{ 1, 2, 3, 4 };
 
     ASSERT_EQ(matrix(0, 0), 1);
     ASSERT_EQ(matrix(0, 1), 2);
@@ -40,7 +40,7 @@ TEST(Matrix2x2, InverseOperators) {
     const lug::Math::Mat2x2f goodIdentity = lug::Math::Mat2x2f::identity();
 
     {
-        const lug::Math::Mat2x2f matrix{1, 2, 3, 4};
+        const lug::Math::Mat2x2f matrix{ 1, 2, 3, 4 };
         const lug::Math::Mat2x2f inverse = matrix.inverse();
         const lug::Math::Mat2x2f identity = matrix * inverse;
 
@@ -54,7 +54,7 @@ TEST(Matrix2x2, InverseOperators) {
     }
 
     {
-        const lug::Math::Mat2x2f matrix{1, 2, 3, 4};
+        const lug::Math::Mat2x2f matrix{ 1, 2, 3, 4 };
         const lug::Math::Mat2x2f identity = matrix / matrix;
 
         for (uint8_t row = 0; row < matrix.getRows(); ++row) {
@@ -70,4 +70,104 @@ TEST(Matrix2x2, InverseOperators) {
 TEST(Matrix2x2, Size) {
     ASSERT_EQ(lug::Math::Mat2x2f().getRows(), 2);
     ASSERT_EQ(lug::Math::Mat2x2f().getColumns(), 2);
+}
+
+TEST(Matrix2x2, Addition) {
+    const lug::Math::Mat2x2f matrixA{
+        2.f, -6.f,
+        7.f,  8.f
+    };
+    const lug::Math::Mat2x2f matrixB{
+         1.f, 5.f,
+        -7.f, 3.f
+    };
+    const lug::Math::Mat2x2f result = matrixA + matrixB;
+
+    const lug::Math::Mat2x2f correctResult{
+        3.f, -1.f,
+        0.f,  11.f
+    };
+
+    for (uint8_t row = 0; row < result.getRows(); ++row) {
+        for (uint8_t col = 0; col < result.getColumns(); ++col) {
+            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                << "row = " << static_cast<int>(row) << "\n"
+                << "col = " << static_cast<int>(col);
+        }
+    }
+}
+
+TEST(Matrix2x2, Substraction) {
+    const lug::Math::Mat2x2f matrixA{
+        2.f, -6.f,
+        7.f,  8.f
+    };
+    const lug::Math::Mat2x2f matrixB{
+         1.f, 5.f,
+        -7.f, 3.f
+    };
+    const lug::Math::Mat2x2f result = matrixA - matrixB;
+
+    const lug::Math::Mat2x2f correctResult{
+        1.f, -11.f,
+        14.f, 5.f
+    };
+
+    for (uint8_t row = 0; row < result.getRows(); ++row) {
+        for (uint8_t col = 0; col < result.getColumns(); ++col) {
+            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                << "row = " << static_cast<int>(row) << "\n"
+                << "col = " << static_cast<int>(col);
+        }
+    }
+}
+
+TEST(Matrix2x2, Multiplication) {
+    const lug::Math::Mat2x2f matrixA{
+        2.f, -6.f,
+        7.f,  8.f
+    };
+    const lug::Math::Mat2x2f matrixB{
+         1.f, 5.f,
+        -7.f, 3.f
+    };
+    const lug::Math::Mat2x2f result = matrixA * matrixB;
+
+    const lug::Math::Mat2x2f correctResult{
+         44.f, -8.f,
+        -49.f,  59.f
+    };
+
+    for (uint8_t row = 0; row < result.getRows(); ++row) {
+        for (uint8_t col = 0; col < result.getColumns(); ++col) {
+            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                << "row = " << static_cast<int>(row) << "\n"
+                << "col = " << static_cast<int>(col);
+        }
+    }
+}
+
+TEST(Matrix2x2, Division) {
+    const lug::Math::Mat2x2f matrixA{
+        2.f, -6.f,
+        7.f,  8.f
+    };
+    const lug::Math::Mat2x2f matrixB{
+         1.f, 5.f,
+        -7.f, 3.f
+    };
+    const lug::Math::Mat2x2f result = matrixA / matrixB;
+
+    const lug::Math::Mat2x2f correctResult{
+        -18.f/19.f, -8.f/19.f,
+         77.f/38.f, -27.f/38.f
+    };
+
+    for (uint8_t row = 0; row < result.getRows(); ++row) {
+        for (uint8_t col = 0; col < result.getColumns(); ++col) {
+            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                << "row = " << static_cast<int>(row) << "\n"
+                << "col = " << static_cast<int>(col);
+        }
+    }
 }
