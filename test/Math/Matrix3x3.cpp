@@ -7,7 +7,7 @@
 // TODO: Test the transpose
 
 TEST(Matrix3x3, Constructors) {
-    lug::Math::Mat3x3i matrix{1, 2, 3, 4, 5, 6, 7, 8, 9};
+    lug::Math::Mat3x3i matrix{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
     ASSERT_EQ(matrix(0, 0), 1);
     ASSERT_EQ(matrix(0, 1), 2);
@@ -86,115 +86,247 @@ TEST(Matrix3x3, Size) {
 }
 
 TEST(Matrix3x3, Addition) {
-    const lug::Math::Mat3x3f matrixA{
-        2, -6, 8,
-        7,  8, 2,
-        4,  3, 7
+    lug::Math::Mat3x3f matrixA{
+        2.f, -6.f, 8.f,
+        7.f,  8.f, 2.f,
+        4.f,  3.f, 7.f
     };
-    const lug::Math::Mat3x3f matrixB{
-         1, 5, 4,
-        -7, 3, 6,
-         5, 2, 8
-    };
-    const lug::Math::Mat3x3f result = matrixA + matrixB;
-
-    const lug::Math::Mat3x3f correctResult{
-        3, -1,  12,
-        0,  11, 8,
-        9,  5,  15
+    lug::Math::Mat3x3f matrixB{
+         1.f, 5.f, 4.f,
+        -7.f, 3.f, 6.f,
+         5.f, 2.f, 8.f
     };
 
-    for (uint8_t row = 0; row < result.getRows(); ++row) {
-        for (uint8_t col = 0; col < result.getColumns(); ++col) {
-            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
-                << "row = " << static_cast<int>(row) << "\n"
-                << "col = " << static_cast<int>(col);
+    // Operator Tests
+    {
+        const lug::Math::Mat3x3f result = matrixA + matrixB;
+
+        const lug::Math::Mat3x3f correctResult{
+            3.f, -1.f,  12.f,
+            0.f,  11.f, 8.f,
+            9.f,  5.f,  15.f
+        };
+
+        for (uint8_t row = 0; row < result.getRows(); ++row) {
+            for (uint8_t col = 0; col < result.getColumns(); ++col) {
+                ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
         }
+
+        matrixA += matrixB;
+
+        for (uint8_t row = 0; row < matrixA.getRows(); ++row) {
+            for (uint8_t col = 0; col < matrixA.getColumns(); ++col) {
+                ASSERT_NEAR(matrixA(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
+        }
+    }
+
+    // Scalar test
+    {
+        const lug::Math::Mat3x3f result = matrixB + 1.0f;
+
+        const lug::Math::Mat3x3f correctResult{
+            1.f + 1.0f,  5.f + 1.0f, 4.f + 1.0f,
+           -7.f + 1.0f,  3.f + 1.0f, 6.f + 1.0f,
+            5.f + 1.0f,  2.f + 1.0f, 8.f + 1.0f
+        };
+
+        for (uint8_t row = 0; row < result.getRows(); ++row) {
+            for (uint8_t col = 0; col < result.getColumns(); ++col) {
+                ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
+        }
+
     }
 }
 
 TEST(Matrix3x3, Substraction) {
-    const lug::Math::Mat3x3f matrixA{
-        2, -6, 8,
-        7,  8, 2,
-        4,  3, 7
+    lug::Math::Mat3x3f matrixA{
+        2.f, -6.f, 8.f,
+        7.f,  8.f, 2.f,
+        4.f,  3.f, 7.f
     };
-    const lug::Math::Mat3x3f matrixB{
-         1, 5, 4,
-        -7, 3, 6,
-         5, 2, 8
-    };
-    const lug::Math::Mat3x3f result = matrixA - matrixB;
-
-    const lug::Math::Mat3x3f correctResult{
-         1, -11,  4,
-         14,  5, -4,
-        -1,   1, -1
+    lug::Math::Mat3x3f matrixB{
+         1.f, 5.f, 4.f,
+        -7.f, 3.f, 6.f,
+         5.f, 2.f, 8.f
     };
 
+    // Operator Tests
+    {
+        const lug::Math::Mat3x3f result = matrixA - matrixB;
 
-    for (uint8_t row = 0; row < result.getRows(); ++row) {
-        for (uint8_t col = 0; col < result.getColumns(); ++col) {
-            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
-                << "row = " << static_cast<int>(row) << "\n"
-                << "col = " << static_cast<int>(col);
+        const lug::Math::Mat3x3f correctResult{
+             1.f, -11.f, 4.f,
+             14.f, 5.f, -4.f,
+            -1.f,  1.f, -1.f
+        };
+
+        for (uint8_t row = 0; row < result.getRows(); ++row) {
+            for (uint8_t col = 0; col < result.getColumns(); ++col) {
+                ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
+        }
+
+        matrixA -= matrixB;
+
+        for (uint8_t row = 0; row < matrixA.getRows(); ++row) {
+            for (uint8_t col = 0; col < matrixA.getColumns(); ++col) {
+                ASSERT_NEAR(matrixA(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
         }
     }
+
+    // Scalar Tests
+    {
+        const lug::Math::Mat3x3f result = matrixB - 1.f;
+
+        const lug::Math::Mat3x3f correctResult{
+            1.f - 1.f,  5.f - 1.f, 4.f - 1.f,
+            -7.f - 1.f,  3.f - 1.f, 6.f - 1.f,
+            5.f - 1.f,  2.f - 1.f, 8.f - 1.f
+        };
+
+        for (uint8_t row = 0; row < result.getRows(); ++row) {
+            for (uint8_t col = 0; col < result.getColumns(); ++col) {
+                ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
+        }
+    }
+
 }
 
 TEST(Matrix3x3, Multiplication) {
-    const lug::Math::Mat3x3f matrixA{
-        2, -6, 8,
-        7,  8, 2,
-        4,  3, 7
+    lug::Math::Mat3x3f matrixA{
+        2.f, -6.f, 8.f,
+        7.f,  8.f, 2.f,
+        4.f,  3.f, 7.f
     };
-    const lug::Math::Mat3x3f matrixB{
-         1, 5, 4,
-        -7, 3, 6,
-         5, 2, 8
-    };
-    const lug::Math::Mat3x3f result = matrixA * matrixB;
-
-    const lug::Math::Mat3x3f correctResult{
-         84, 8,  36,
-        -39, 63, 92,
-         18, 43, 90
+    lug::Math::Mat3x3f matrixB{
+         1.f, 5.f, 4.f,
+        -7.f, 3.f, 6.f,
+         5.f, 2.f, 8.f
     };
 
+    // Operator Tests
+    {
+        const lug::Math::Mat3x3f result = matrixA * matrixB;
 
-    for (uint8_t row = 0; row < result.getRows(); ++row) {
-        for (uint8_t col = 0; col < result.getColumns(); ++col) {
-            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
-                << "row = " << static_cast<int>(row) << "\n"
-                << "col = " << static_cast<int>(col);
+        const lug::Math::Mat3x3f correctResult{
+             84.f,  8.f, 36.f,
+            -39.f, 63.f, 92.f,
+             18.f, 43.f, 90.f
+        };
+
+        for (uint8_t row = 0; row < result.getRows(); ++row) {
+            for (uint8_t col = 0; col < result.getColumns(); ++col) {
+                ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
+        }
+
+        matrixA *= matrixB;
+
+        for (uint8_t row = 0; row < matrixA.getRows(); ++row) {
+            for (uint8_t col = 0; col < matrixA.getColumns(); ++col) {
+                ASSERT_NEAR(matrixA(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
+        }
+    }
+
+    // Scalar Test
+    {
+        const lug::Math::Mat3x3f result = matrixB * 2.f;
+
+        const lug::Math::Mat3x3f correctResult{
+            1.f * 2.f,  5.f * 2.f, 4.f * 2.f,
+            -7.f * 2.f,  3.f * 2.f, 6.f * 2.f,
+            5.f * 2.f,  2.f * 2.f, 8.f * 2.f
+        };
+
+        for (uint8_t row = 0; row < result.getRows(); ++row) {
+            for (uint8_t col = 0; col < result.getColumns(); ++col) {
+                ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
         }
     }
 }
 
 TEST(Matrix3x3, Division) {
-    const lug::Math::Mat3x3f matrixA{
+    lug::Math::Mat3x3f matrixA{
         2, -6, 8,
         7,  8, 2,
         4,  3, 7
     };
-    const lug::Math::Mat3x3f matrixB{
+    lug::Math::Mat3x3f matrixB{
         1, 5, 4,
         -7, 3, 6,
         5, 2, 8
     };
-    const lug::Math::Mat3x3f result = matrixA / matrixB;
 
-    const lug::Math::Mat3x3f correctResult{
-        -362.f/163.f,  96.f/163.f,   272.f/163.f,
-         357.f/163.f, -137.f/163.f, -35.f/163.f,
-         103.f/326.f, -3.f/326.f,    118.f/163.f
-    };
+    // Operator Tests
+    {
+        const lug::Math::Mat3x3f result = matrixA / matrixB;
 
-    for (uint8_t row = 0; row < result.getRows(); ++row) {
-        for (uint8_t col = 0; col < result.getColumns(); ++col) {
-            ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
-                << "row = " << static_cast<int>(row) << "\n"
-                << "col = " << static_cast<int>(col);
+        const lug::Math::Mat3x3f correctResult{
+            -362.f / 163.f,  96.f / 163.f,   272.f / 163.f,
+            357.f / 163.f, -137.f / 163.f, -35.f / 163.f,
+            103.f / 326.f, -3.f / 326.f,    118.f / 163.f
+        };
+
+        for (uint8_t row = 0; row < result.getRows(); ++row) {
+            for (uint8_t col = 0; col < result.getColumns(); ++col) {
+                ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
+        }
+
+        matrixA /= matrixB;
+
+        for (uint8_t row = 0; row < matrixA.getRows(); ++row) {
+            for (uint8_t col = 0; col < matrixA.getColumns(); ++col) {
+                ASSERT_NEAR(matrixA(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
+        }
+    }
+
+    // Scalar Test
+    {
+        const lug::Math::Mat3x3f result = matrixB / 2.0f;
+
+        const lug::Math::Mat3x3f correctResult{
+            1.f / 2.f,  5.f / 2.f, 4.f / 2.f,
+            -7.f / 2.f,  3.f / 2.f, 6.f / 2.f,
+            5.f / 2.f,  2.f / 2.f, 8.f / 2.f
+        };
+
+        for (uint8_t row = 0; row < result.getRows(); ++row) {
+            for (uint8_t col = 0; col < result.getColumns(); ++col) {
+                ASSERT_NEAR(result(row, col), correctResult(row, col), 0.01f)
+                    << "row = " << static_cast<int>(row) << "\n"
+                    << "col = " << static_cast<int>(col);
+            }
         }
     }
 }
