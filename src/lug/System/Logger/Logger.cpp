@@ -1,12 +1,12 @@
-#include <algorithm>
 #include <lug/System/Logger.hpp>
+#include <algorithm>
 #include <ctime>
 
 namespace lug {
 namespace System {
 
-std::unordered_map<const char*, std::unique_ptr<Logger>> LoggerFacility::_loggers{};
-std::unordered_map<const char*, std::unique_ptr<Handler>> LoggerFacility::_handlers{};
+std::unordered_map<std::string, std::unique_ptr<Logger>> LoggerFacility::_loggers{};
+std::unordered_map<std::string, std::unique_ptr<Handler>> LoggerFacility::_handlers{};
 
 Logger::Logger(const std::string &loggerName) : _name(loggerName) {}
 
@@ -45,10 +45,6 @@ void Logger::flush() {
         handler->flush();
     }
 }
-
-// const std::vector<HandlerPtr> &Logger::handlers() const {
-//     return _handlers;
-// }
 
 void Logger::logMessage(priv::Message &message) {
     (void)message;

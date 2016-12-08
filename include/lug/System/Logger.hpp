@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <string>
 
 #include <lug/System/Debug.hpp>
 #include <lug/System/Export.hpp>
@@ -26,23 +27,23 @@ class Logger;
 
 class LUG_SYSTEM_API LoggerFacility {
 public:
-    static inline void registerLogger(const char* loggerName, std::unique_ptr<Logger> logger) {
+    static inline void registerLogger(const std::string& loggerName, std::unique_ptr<Logger> logger) {
         _loggers[loggerName] = std::move(logger);
     }
-    static inline Logger* getLogger(const char* loggerName) {
+    static inline Logger* getLogger(const std::string& loggerName) {
         return _loggers[loggerName].get();
     }
 
-    static inline void registerHandler(const char* handlerName, std::unique_ptr<Handler> handler) {
+    static inline void registerHandler(const std::string& handlerName, std::unique_ptr<Handler> handler) {
         _handlers[handlerName] = std::move(handler);
     }
-    static inline Handler* getHandler(const char* handlerName) {
+    static inline Handler* getHandler(const std::string& handlerName) {
         return _handlers[handlerName].get();
     }
 
 private:
-    static std::unordered_map<const char*, std::unique_ptr<Logger>> _loggers;
-    static std::unordered_map<const char*, std::unique_ptr<Handler>> _handlers;
+    static std::unordered_map<std::string, std::unique_ptr<Logger>> _loggers;
+    static std::unordered_map<std::string, std::unique_ptr<Handler>> _handlers;
 };
 
 
@@ -56,14 +57,8 @@ public:
         _handlers.push_back(handler);
     }
 
-    void addHandler(const char* name) {
+    void addHandler(const std::string& name) {
         _handlers.push_back(LoggerFacility::getHandler(name));
-    }
-
-    template<typename T, typename... Args>
-    void addHandler(Args... args) {
-        Handler* handler = std::make_shared<T>(args...);
-        _handlers.push_back(handler);
     }
 
     void defaultErrHandler(const std::string& msg) {
@@ -73,9 +68,6 @@ public:
 
     template<typename... Args>
     inline void log(Level::enumLevel lvl, const char *fmt, const Args &... args) {
-    /*    if (!shouldLog(lvl))
-            return;*/
-
         try {
             priv::Message logMsg(_name, lvl);
             logMsg.raw.write(fmt, args...);
@@ -91,8 +83,6 @@ public:
 
     template<typename... Args>
     inline void log(Level::enumLevel lvl, const char *msg) {
-        /*if (!shouldLog(lvl))
-            return;*/
         try {
             priv::Message logMsg(_name, lvl);
             logMsg.raw << msg;
@@ -174,9 +164,6 @@ public:
         log(Level::Fatal, msg);
     }
 
-    /*static std::string getChannelName(Channel::enumChannel c);
-    static std::string getLevelName(Level::enumLevel t);
-*/
     bool shouldLog(Level::enumLevel) const;
 
     void setLevel(Level::enumLevel);
@@ -184,36 +171,20 @@ public:
     const std::string &getName() const;
     void setPattern(const std::string &);
 
-    // automatically call flush() if message level >= log_level
-    //void flushOn(Level::enumLevel log_level);
-
     void handle(priv::Message& msg);
 
     void flush();
 
-    // const std::vector<HandlerPtr> &handlers() const;
-
 private:
     virtual void logMessage(priv::Message &message);
-    //virtual void _set_pattern(const std::string &);
-    //virtual void _set_formatter(formatter_ptr);
-
-    // default error handler: print the error to stderr with the max rate of 1 message/minute
-    //virtual void _default_err_handler(const std::string &msg);
-
-    // return true if the given message level should trigger a flush
-    //bool _should_flush_on(const priv::Message &);
 
     const std::string _name;
     std::vector<Handler*> _handlers;
-    //priv::LevelAtomic _flushLevel;
     std::atomic_int _level;
-    //log_err_handler _err_handler;
-    //std::atomic<time_t> _lastErrTime;
 };
 
 
-inline Logger* makeLogger(const char* loggerName) {
+inline Logger* makeLogger(const std::string& loggerName) {
     std::unique_ptr<Logger> logger = std::make_unique<Logger>(loggerName);
     Logger* loggerRawPtr = logger.get();
     LoggerFacility::registerLogger(loggerName, std::move(logger));
@@ -221,7 +192,7 @@ inline Logger* makeLogger(const char* loggerName) {
 }
 
 template<typename T, typename... Args>
-inline T* makeHandler(const char* handlerName, Args... args) {
+inline T* makeHandler(const std::string& handlerName, Args... args) {
     std::unique_ptr<T> handler = std::make_unique<T>(handlerName, args...);
     T* handlerRawPtr = handler.get();
     LoggerFacility::registerHandler(handlerName, std::move(handler));
