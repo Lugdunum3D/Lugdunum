@@ -222,7 +222,7 @@ inline Logger* makeLogger(const char* loggerName) {
 
 template<typename T, typename... Args>
 inline T* makeHandler(const char* handlerName, Args... args) {
-    std::unique_ptr<T> handler = std::make_unique<T>(handlerName);
+    std::unique_ptr<T> handler = std::make_unique<T>(handlerName, args...);
     T* handlerRawPtr = handler.get();
     LoggerFacility::registerHandler(handlerName, std::move(handler));
     return handlerRawPtr;
