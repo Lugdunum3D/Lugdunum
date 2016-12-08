@@ -65,10 +65,5 @@ typedef enum {
 } enumLevel;
 };
 
-namespace priv {
-
-using LevelAtomic = std::atomic_int;
-
-} // namespace priv
 } // namespace lug
 } // namespace system

@@ -1,22 +1,22 @@
 #pragma once
 
-#include <memory>
 #include <cstdarg>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+#include <lug/System/Debug.hpp>
 #include <lug/System/Export.hpp>
+#include <lug/System/Logger/Common.hpp>
+#include <lug/System/Logger/FileHandler.hpp>
+#include <lug/System/Logger/FileHandler.hpp>
+#include <lug/System/Logger/Formatter.hpp>
+#include <lug/System/Logger/Handler.hpp>
+#include <lug/System/Logger/Message.hpp>
+#include <lug/System/Logger/StdoutHandler.hpp>
 #include <lug/System/SourceInfo.hpp>
 #include <lug/System/Utils.hpp>
-#include <lug/System/Logger/Common.hpp>
-#include <lug/System/Logger/Formatter.hpp>
-#include <lug/System/Logger/Message.hpp>
-#include <lug/System/Logger/Handler.hpp>
-#include <lug/System/Logger/FileHandler.hpp>
-#include <lug/System/Logger/StdoutHandler.hpp>
-
-#include <lug/System/Debug.hpp>
 
 
 namespace lug {
@@ -24,30 +24,47 @@ namespace System {
 
 class Logger;
 
-using HandlerPtr = std::shared_ptr<priv::Handler>;
-using LoggerPtr = std::shared_ptr<Logger>;
-using HandlerInitList = std::initializer_list <HandlerPtr>;
-using FormatterPtr = std::shared_ptr<Formatter>;
+class LUG_SYSTEM_API LoggerFacility {
+public:
+    static inline void registerLogger(const char* loggerName, std::unique_ptr<Logger> logger) {
+        _loggers[loggerName] = std::move(logger);
+    }
+    static inline Logger* getLogger(const char* loggerName) {
+        return _loggers[loggerName].get();
+    }
+
+    static inline void registerHandler(const char* handlerName, std::unique_ptr<Handler> handler) {
+        _handlers[handlerName] = std::move(handler);
+    }
+    static inline Handler* getHandler(const char* handlerName) {
+        return _handlers[handlerName].get();
+    }
+
+private:
+    static std::unordered_map<const char*, std::unique_ptr<Logger>> _loggers;
+    static std::unordered_map<const char*, std::unique_ptr<Handler>> _handlers;
+};
+
 
 class LUG_SYSTEM_API Logger {
 public:
-    Logger(const std::string& loggerName, HandlerPtr single_sink);
-    Logger(const std::string& name, HandlerInitList initList);
-
-    // create logger with given name, handlers and the default pattern formatter
-    // all other ctors will call this one
-    template<class It>
-    inline Logger(const std::string &loggerName, const It &begin, const It &end):
-            _name(loggerName),
-            _handlers(begin, end),
-            _formatter(std::make_shared<Formatter>("%v\n")) {
-
-        /*_errHandler = [this](const std::string &msg) {
-            this->_defaultErrHandler(msg);
-        };*/
-    }
+    Logger(const std::string& loggerName);
 
     virtual ~Logger(void) {}
+
+    void addHandler(Handler* handler) {
+        _handlers.push_back(handler);
+    }
+
+    void addHandler(const char* name) {
+        _handlers.push_back(LoggerFacility::getHandler(name));
+    }
+
+    template<typename T, typename... Args>
+    void addHandler(Args... args) {
+        Handler* handler = std::make_shared<T>(args...);
+        _handlers.push_back(handler);
+    }
 
     void defaultErrHandler(const std::string& msg) {
         // TODO: Handle error
@@ -117,7 +134,6 @@ public:
         log(Level::Info, fmt, args...);
     }
 
-
     template<typename... Args>
     inline void warn(const char *fmt, const Args &... args) {
         log(Level::Warning, fmt, args...);
@@ -132,7 +148,6 @@ public:
     inline void fatal(const char *fmt, const Args &... args) {
         log(Level::Fatal, fmt, args...);
     }
-
 
     template<typename T>
     inline void debug(const T &msg) {
@@ -168,11 +183,6 @@ public:
     Level::enumLevel getLevel() const;
     const std::string &getName() const;
     void setPattern(const std::string &);
-    void setFormatter(FormatterPtr formatterPtr);
-
-    // error handler
-    // void set_error_handler(log_err_handler);
-    // log_err_handler error_handler();
 
     // automatically call flush() if message level >= log_level
     //void flushOn(Level::enumLevel log_level);
@@ -181,7 +191,7 @@ public:
 
     void flush();
 
-    const std::vector<HandlerPtr> &handlers() const;
+    // const std::vector<HandlerPtr> &handlers() const;
 
 private:
     virtual void logMessage(priv::Message &message);
@@ -195,106 +205,29 @@ private:
     //bool _should_flush_on(const priv::Message &);
 
     const std::string _name;
-    std::vector<HandlerPtr> _handlers;
-    FormatterPtr _formatter;
+    std::vector<Handler*> _handlers;
     //priv::LevelAtomic _flushLevel;
-    priv::LevelAtomic _level;
+    std::atomic_int _level;
     //log_err_handler _err_handler;
     //std::atomic<time_t> _lastErrTime;
 };
 
 
-class LUG_SYSTEM_API LoggerFacility {
-public:
-    static void registerLogger(const std::string& loggerName, LoggerPtr logger) {
-        _loggers[loggerName] = logger;
-    }
-    static LoggerPtr getLogger(const std::string& loggerName) {
-        return _loggers[loggerName];
-    }
-
-private:
-    static std::unordered_map<std::string, LoggerPtr> _loggers;
-};
-
+inline Logger* makeLogger(const char* loggerName) {
+    std::unique_ptr<Logger> logger = std::make_unique<Logger>(loggerName);
+    Logger* loggerRawPtr = logger.get();
+    LoggerFacility::registerLogger(loggerName, std::move(logger));
+    return loggerRawPtr;
+}
 
 template<typename T, typename... Args>
-inline LoggerPtr makeLogger(const std::string &loggerName, Args... args) {
-    static_assert(std::is_base_of<priv::Handler, T>::value, "T must derive from Handler");
-    HandlerPtr handler = std::make_shared<T>(args...);
-    LoggerPtr logger = std::make_shared<Logger>(loggerName, handler);
-    LoggerFacility::registerLogger(loggerName, logger);
-    return logger;
+inline T* makeHandler(const char* handlerName, Args... args) {
+    std::unique_ptr<T> handler = std::make_unique<T>(handlerName);
+    T* handlerRawPtr = handler.get();
+    LoggerFacility::registerHandler(handlerName, std::move(handler));
+    return handlerRawPtr;
 }
 
-inline LoggerPtr makeBasicLogger(const std::string &loggerName, const filename_t &filename, bool truncate) {
-    return makeLogger<FileHandler>(loggerName, filename, truncate);
-}
-
-inline LoggerPtr makeStdoutLogger(const std::string &loggerName) {
-    return makeLogger<StdoutHandler>(loggerName);
-}
-
-/*
-#define LUG_LOG(logger, channel, type, verbosity, ...)\
-do {\
-    logger->log(channel, type, verbosity, { __FILE__, LUG_SYSTEM_FUNCTION_NAME, __LINE__}, __VA_ARGS__); \
-} while (0)
-
-// Define each type as its own macro to facilitate calling
-#define LUG_LOG_INFO(logger, channel, verbosity, ...)\
-    LUG_LOG(logger, channel, lug::System::Level::Info, verbosity, __VA_ARGS__)
-
-#define LUG_LOG_WARNING(logger, channel, verbosity, ...)\
-    LUG_LOG(logger, channel, lug::System::Level::Warning, verbosity, __VA_ARGS__)
-
-#define LUG_LOG_ERROR(logger, channel, verbosity, ...)\
-    LUG_LOG(logger, channel, lug::System::Level::Error, verbosity, __VA_ARGS__)
-
-#define LUG_LOG_FATAL(logger, channel, verbosity, ...)\
-    LUG_LOG(logger, channel, lug::System::Level::Fatal, verbosity, __VA_ARGS__)
-
-#define LUG_LOG_ASSERT(logger, channel, verbosity, ...)\
-    LUG_LOG(logger, channel, lug::System::Level::Assert, verbosity, __VA_ARGS__)
-
-} // namespace System
-
-#if !defined(LUG_NO_SHORT_LOG)
-
-    lug::System::Logger &getLogger();
-
-    #define LOGINF(...)\
-    do {\
-        lug::System::Logger *logger = &lug::getLogger(); \
-        LUG_LOG(logger, lug::System::Logger::Channel::User, lug::System::Level::Info, 1, __VA_ARGS__); \
-    } while (0)
-
-    #define LOGWRN(...)\
-    do {\
-        lug::System::Logger *logger = &lug::getLogger(); \
-        LUG_LOG(logger, lug::System::Logger::Channel::User, lug::System::Level::Warning, 1, __VA_ARGS__); \
-    } while (0)
-
-    #define LOGERR(...)\
-    do {\
-        lug::System::Logger *logger = &lug::getLogger(); \
-        LUG_LOG(logger, lug::System::Logger::Channel::User, lug::System::Level::Error, 1, __VA_ARGS__); \
-    } while (0)
-
-    #define LOGFAT(...)\
-    do {\
-        lug::System::Logger *logger = &lug::getLogger(); \
-        LUG_LOG(logger, lug::System::Logger::Channel::User, lug::System::Level::Fatal, 1, __VA_ARGS__); \
-    } while (0)
-
-    #define LOGASR(...)\
-    do {\
-        lug::System::Logger *logger = &lug::getLogger(); \
-        LUG_LOG(logger, lug::System::Logger::Channel::User, lug::System::Level::Assert, 1, __VA_ARGS__); \
-    } while (0)
-
-#endif
-*/
 } // namespace lug
 } // namespace system
 

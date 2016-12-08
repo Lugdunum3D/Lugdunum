@@ -8,7 +8,7 @@ namespace priv {
 
 struct Message {
     Message() = default;
-    Message(const std::string& loggerName, Level::enumLevel level): loggerName(loggerName), level(level) {
+    Message(const std::string& _loggerName, Level::enumLevel _level): loggerName(_loggerName), level(_level) {
 
     }
 

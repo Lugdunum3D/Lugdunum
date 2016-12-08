@@ -129,6 +129,8 @@ void Formatter::format(priv::Message &msg) {
     time_t tt = std::chrono::system_clock::to_time_t(now);
     struct tm timeInfo;
 
+    msg.formatted.clear();
+
     #if defined(LUG_SYSTEM_WINDOWS)
     // Use windows secure versions of localtime
         localtime_s(&timeInfo, &tt);

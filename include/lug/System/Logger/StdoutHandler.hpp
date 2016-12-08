@@ -7,9 +7,9 @@
 namespace lug {
 namespace System {
 
-class StdoutHandler : public priv::Handler {
+class StdoutHandler : public Handler {
 public:
-    StdoutHandler() {
+    StdoutHandler(const std::string& name) : Handler(name) {
     }
     virtual ~StdoutHandler() {
     }
