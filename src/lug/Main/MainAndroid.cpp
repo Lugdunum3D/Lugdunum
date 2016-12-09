@@ -1,10 +1,6 @@
 #include <thread>
 #include <lug/Main/MainAndroid.hpp>
 
-/* todo : to remove once we have the logger */
-#include <android/log.h>
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "lugdunum", __VA_ARGS__))
-
 namespace lug {
 namespace Main {
 
@@ -52,117 +48,53 @@ void AndroidApp::shutdowApplication() {
 }
 
 void AndroidApp::startApplication() {
-    LOGI("startApplication");
-
     main(0, nullptr);
     shutdowApplication();
 }
 
-void AndroidApp::onStart(ANativeActivity*) {
-    LOGI("onStart");
+void AndroidApp::onStart(ANativeActivity*) {}
 
-    lug::Window::Event e;
-    e.type = lug::Window::EventType::START;
-    events.push(std::move(e));
-
-}
-
-void AndroidApp::onResume(ANativeActivity*) {
-    LOGI("onResume");
-
-    lug::Window::Event e;
-    e.type = lug::Window::EventType::RESUME;
-    events.push(std::move(e));
-
-}
+void AndroidApp::onResume(ANativeActivity*) {}
 
 void *AndroidApp::onSaveInstanceState(ANativeActivity*, size_t*) {
-    LOGI("onSaveInstanceState");
-
     return nullptr;
 }
 
-void AndroidApp::onPause(ANativeActivity*) {
-    LOGI("onPause");
+void AndroidApp::onPause(ANativeActivity*) {}
 
-
-    lug::Window::Event e;
-    e.type = lug::Window::EventType::PAUSE;
-    events.push(std::move(e));
-}
-
-void AndroidApp::onStop(ANativeActivity*) {
-    LOGI("onStop");
-
-    lug::Window::Event e;
-    e.type = lug::Window::EventType::STOP;
-    events.push(std::move(e));
-
-}
+void AndroidApp::onStop(ANativeActivity*) {}
 
 void AndroidApp::onDestroy(ANativeActivity*) {
-    LOGI("onDestroy");
     lug::Window::Event e;
-    e.type = lug::Window::EventType::DESTROY;
+    e.type = lug::Window::EventType::CLOSE;
     events.push(std::move(e));
-
 }
 
-void AndroidApp::onWindowFocusChanged(ANativeActivity*, int focus) {
-    LOGI("onWindowFocusChanged");
-    LOGI(focus ? "APP_CMD_GAINED_FOCUS" : "APP_CMD_LOST_FOCUS");
+void AndroidApp::onWindowFocusChanged(ANativeActivity*, int) {}
 
-    lug::Window::Event e;
-    e.type = focus ? lug::Window::EventType::FOCUS_GAINED : lug::Window::EventType::FOCUS_LOST;
-    events.push(std::move(e));
+void AndroidApp::onNativeWindowCreated(ANativeActivity*, ANativeWindow* ) {}
 
-}
+void AndroidApp::onNativeWindowResized(ANativeActivity*, ANativeWindow* ) {}
 
-void AndroidApp::onNativeWindowCreated(ANativeActivity*, ANativeWindow* ) {
-    LOGI("onNativeWindowCreated");
+void AndroidApp::onNativeWindowRedrawNeeded(ANativeActivity*, ANativeWindow*) {}
 
-//    MyandroidEventQueue.window = window;
-}
-
-void AndroidApp::onNativeWindowResized(ANativeActivity*, ANativeWindow* ) {
-    LOGI("onNativeWindowResized");
-}
-
-void AndroidApp::onNativeWindowRedrawNeeded(ANativeActivity*, ANativeWindow*) {
-    LOGI("onNativeWindowRedrawNeeded");
-}
-
-void AndroidApp::onNativeWindowDestroyed(ANativeActivity*, ANativeWindow* ) {
-    LOGI("onNativeWindowDestroyed");
-}
+void AndroidApp::onNativeWindowDestroyed(ANativeActivity*, ANativeWindow* ) {}
 
 void AndroidApp::onInputQueueCreated(ANativeActivity*, AInputQueue* input) {
-    LOGI("onInputQueueCreated");
-
     inputQueue = input;
 }
 
-void AndroidApp::onInputQueueDestroyed(ANativeActivity*, AInputQueue*) {
-    LOGI("onInputQueueDestroyed");
-}
+void AndroidApp::onInputQueueDestroyed(ANativeActivity*, AInputQueue*) {}
 
-void AndroidApp::onContentRectChanged(ANativeActivity*, const ARect*) {
-    LOGI("onContentRectChanged");
-}
+void AndroidApp::onContentRectChanged(ANativeActivity*, const ARect*) {}
 
-void AndroidApp::onConfigurationChanged(ANativeActivity*) {
-    LOGI("onConfigurationChanged");
-}
+void AndroidApp::onConfigurationChanged(ANativeActivity*) {}
 
-void AndroidApp::onLowMemory(ANativeActivity*) {
-    LOGI("onLowMemory");
-
-}
+void AndroidApp::onLowMemory(ANativeActivity*) {}
 
 } // Main
 } // lug
 
 void  ANativeActivity_onCreate(ANativeActivity* activity, void* savedState, size_t savedStateSize) {
-    LOGI("ANativeActivity_onCreate");
     activity->instance = new lug::Main::AndroidApp(activity, savedState, savedStateSize);
 }
