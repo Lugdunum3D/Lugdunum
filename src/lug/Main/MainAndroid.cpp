@@ -8,26 +8,29 @@
 namespace lug {
 namespace Main {
 
-LugAndroidApp::LugAndroidApp(ANativeActivity* activity, void* savedState, size_t savedStateSize)
+std::queue<lug::Window::Event> events;
+AInputQueue* inputQueue;
+
+AndroidApp::AndroidApp(ANativeActivity* activity, void* savedState, size_t savedStateSize)
     : _savedState{}, _savedStateSize{} {
-    activity->callbacks->onInputQueueCreated = &LugAndroidApp::onInputQueueCreated;
-    activity->callbacks->onInputQueueDestroyed = &LugAndroidApp::onInputQueueDestroyed;
+    activity->callbacks->onInputQueueCreated = &AndroidApp::onInputQueueCreated;
+    activity->callbacks->onInputQueueDestroyed = &AndroidApp::onInputQueueDestroyed;
 
-    activity->callbacks->onNativeWindowCreated = &LugAndroidApp::onNativeWindowCreated;
-    activity->callbacks->onNativeWindowDestroyed = &LugAndroidApp::onNativeWindowDestroyed;
-    activity->callbacks->onNativeWindowResized = &LugAndroidApp::onNativeWindowResized;
-    activity->callbacks->onNativeWindowRedrawNeeded = &LugAndroidApp::onNativeWindowRedrawNeeded;
-    activity->callbacks->onContentRectChanged = &LugAndroidApp::onContentRectChanged;
+    activity->callbacks->onNativeWindowCreated = &AndroidApp::onNativeWindowCreated;
+    activity->callbacks->onNativeWindowDestroyed = &AndroidApp::onNativeWindowDestroyed;
+    activity->callbacks->onNativeWindowResized = &AndroidApp::onNativeWindowResized;
+    activity->callbacks->onNativeWindowRedrawNeeded = &AndroidApp::onNativeWindowRedrawNeeded;
+    activity->callbacks->onContentRectChanged = &AndroidApp::onContentRectChanged;
 
-    activity->callbacks->onWindowFocusChanged = &LugAndroidApp::onWindowFocusChanged;
-    activity->callbacks->onConfigurationChanged = &LugAndroidApp::onConfigurationChanged;
-    activity->callbacks->onLowMemory = &LugAndroidApp::onLowMemory;
-    activity->callbacks->onStart = &LugAndroidApp::onStart;
-    activity->callbacks->onResume = &LugAndroidApp::onResume;
-    activity->callbacks->onSaveInstanceState = &LugAndroidApp::onSaveInstanceState;
-    activity->callbacks->onPause = &LugAndroidApp::onPause;
-    activity->callbacks->onStop = &LugAndroidApp::onStop;
-    activity->callbacks->onDestroy = &LugAndroidApp::onDestroy;
+    activity->callbacks->onWindowFocusChanged = &AndroidApp::onWindowFocusChanged;
+    activity->callbacks->onConfigurationChanged = &AndroidApp::onConfigurationChanged;
+    activity->callbacks->onLowMemory = &AndroidApp::onLowMemory;
+    activity->callbacks->onStart = &AndroidApp::onStart;
+    activity->callbacks->onResume = &AndroidApp::onResume;
+    activity->callbacks->onSaveInstanceState = &AndroidApp::onSaveInstanceState;
+    activity->callbacks->onPause = &AndroidApp::onPause;
+    activity->callbacks->onStop = &AndroidApp::onStop;
+    activity->callbacks->onDestroy = &AndroidApp::onDestroy;
 
     if (savedState != nullptr) {
         _savedState = ::operator new(savedStateSize);
@@ -35,11 +38,11 @@ LugAndroidApp::LugAndroidApp(ANativeActivity* activity, void* savedState, size_t
         std::memcpy(_savedState, savedState, savedStateSize);
     }
 
-    std::thread t(&LugAndroidApp::startApplication, this);
+    std::thread t(&AndroidApp::startApplication, this);
     t.detach();
 }
 
-void LugAndroidApp::shutdowApplication() {
+void AndroidApp::shutdowApplication() {
     if (_savedState != nullptr) {
         ::operator delete(_savedState);
         _savedState = nullptr;
@@ -48,110 +51,110 @@ void LugAndroidApp::shutdowApplication() {
     delete this;
 }
 
-void LugAndroidApp::startApplication() {
+void AndroidApp::startApplication() {
     LOGI("startApplication");
 
     main(0, nullptr);
     shutdowApplication();
 }
 
-void LugAndroidApp::onStart(ANativeActivity*) {
+void AndroidApp::onStart(ANativeActivity*) {
     LOGI("onStart");
 
     lug::Window::Event e;
     e.type = lug::Window::EventType::START;
-    androidEventQueue.events.push(std::move(e));
+    events.push(std::move(e));
 
 }
 
-void LugAndroidApp::onResume(ANativeActivity*) {
+void AndroidApp::onResume(ANativeActivity*) {
     LOGI("onResume");
 
     lug::Window::Event e;
     e.type = lug::Window::EventType::RESUME;
-    androidEventQueue.events.push(std::move(e));
+    events.push(std::move(e));
 
 }
 
-void *LugAndroidApp::onSaveInstanceState(ANativeActivity*, size_t*) {
+void *AndroidApp::onSaveInstanceState(ANativeActivity*, size_t*) {
     LOGI("onSaveInstanceState");
 
     return nullptr;
 }
 
-void LugAndroidApp::onPause(ANativeActivity*) {
+void AndroidApp::onPause(ANativeActivity*) {
     LOGI("onPause");
 
 
     lug::Window::Event e;
     e.type = lug::Window::EventType::PAUSE;
-    androidEventQueue.events.push(std::move(e));
+    events.push(std::move(e));
 }
 
-void LugAndroidApp::onStop(ANativeActivity*) {
+void AndroidApp::onStop(ANativeActivity*) {
     LOGI("onStop");
 
     lug::Window::Event e;
     e.type = lug::Window::EventType::STOP;
-    androidEventQueue.events.push(std::move(e));
+    events.push(std::move(e));
 
 }
 
-void LugAndroidApp::onDestroy(ANativeActivity*) {
+void AndroidApp::onDestroy(ANativeActivity*) {
     LOGI("onDestroy");
     lug::Window::Event e;
     e.type = lug::Window::EventType::DESTROY;
-    androidEventQueue.events.push(std::move(e));
+    events.push(std::move(e));
 
 }
 
-void LugAndroidApp::onWindowFocusChanged(ANativeActivity*, int focus) {
+void AndroidApp::onWindowFocusChanged(ANativeActivity*, int focus) {
     LOGI("onWindowFocusChanged");
     LOGI(focus ? "APP_CMD_GAINED_FOCUS" : "APP_CMD_LOST_FOCUS");
 
     lug::Window::Event e;
     e.type = focus ? lug::Window::EventType::FOCUS_GAINED : lug::Window::EventType::FOCUS_LOST;
-    androidEventQueue.events.push(std::move(e));
+    events.push(std::move(e));
 
 }
 
-void LugAndroidApp::onNativeWindowCreated(ANativeActivity*, ANativeWindow* ) {
+void AndroidApp::onNativeWindowCreated(ANativeActivity*, ANativeWindow* ) {
     LOGI("onNativeWindowCreated");
 
 //    MyandroidEventQueue.window = window;
 }
 
-void LugAndroidApp::onNativeWindowResized(ANativeActivity*, ANativeWindow* ) {
+void AndroidApp::onNativeWindowResized(ANativeActivity*, ANativeWindow* ) {
     LOGI("onNativeWindowResized");
 }
 
-void LugAndroidApp::onNativeWindowRedrawNeeded(ANativeActivity*, ANativeWindow*) {
+void AndroidApp::onNativeWindowRedrawNeeded(ANativeActivity*, ANativeWindow*) {
     LOGI("onNativeWindowRedrawNeeded");
 }
 
-void LugAndroidApp::onNativeWindowDestroyed(ANativeActivity*, ANativeWindow* ) {
+void AndroidApp::onNativeWindowDestroyed(ANativeActivity*, ANativeWindow* ) {
     LOGI("onNativeWindowDestroyed");
 }
 
-void LugAndroidApp::onInputQueueCreated(ANativeActivity*, AInputQueue* input) {
+void AndroidApp::onInputQueueCreated(ANativeActivity*, AInputQueue* input) {
     LOGI("onInputQueueCreated");
 
-    androidEventQueue.inputQueue = input;
+    inputQueue = input;
 }
 
-void LugAndroidApp::onInputQueueDestroyed(ANativeActivity*, AInputQueue*) {
+void AndroidApp::onInputQueueDestroyed(ANativeActivity*, AInputQueue*) {
     LOGI("onInputQueueDestroyed");
 }
 
-void LugAndroidApp::onContentRectChanged(ANativeActivity*, const ARect*) {
+void AndroidApp::onContentRectChanged(ANativeActivity*, const ARect*) {
     LOGI("onContentRectChanged");
 }
 
-void LugAndroidApp::onConfigurationChanged(ANativeActivity*) {
+void AndroidApp::onConfigurationChanged(ANativeActivity*) {
     LOGI("onConfigurationChanged");
 }
 
-void LugAndroidApp::onLowMemory(ANativeActivity*) {
+void AndroidApp::onLowMemory(ANativeActivity*) {
     LOGI("onLowMemory");
 
 }
@@ -161,5 +164,5 @@ void LugAndroidApp::onLowMemory(ANativeActivity*) {
 
 void  ANativeActivity_onCreate(ANativeActivity* activity, void* savedState, size_t savedStateSize) {
     LOGI("ANativeActivity_onCreate");
-    activity->instance = new lug::Main::LugAndroidApp(activity, savedState, savedStateSize);
+    activity->instance = new lug::Main::AndroidApp(activity, savedState, savedStateSize);
 }

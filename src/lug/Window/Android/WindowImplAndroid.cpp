@@ -1,11 +1,13 @@
 #include <lug/Window/Android/WindowImplAndroid.hpp>
-#include <android/input.h>
 
 /* todo : to remove once we have the logger */
 #include <android/log.h>
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "lugdunum", __VA_ARGS__))
 
-struct androidApp androidEventQueue;
+
+namespace lug {
+namespace Window {
+namespace priv {
 
 lug::Window::priv::WindowImpl::WindowImpl(Window*) {}
 
@@ -17,28 +19,32 @@ void lug::Window::priv::WindowImpl::close() {}
 
 bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
 
-    if (androidEventQueue.inputQueue != nullptr) {
+    if (lug::Main::inputQueue != nullptr) {
         AInputEvent *androidEvent = nullptr;
-        while (AInputQueue_getEvent(androidEventQueue.inputQueue, &androidEvent) >= 0) {
+        while (AInputQueue_getEvent(lug::Main::inputQueue, &androidEvent) >= 0) {
             LOGI("New input event: type=%d\n", AInputEvent_getType(androidEvent));
 
             lug::Window::Event e;
             e.type = lug::Window::EventType::INPUT;
-            androidEventQueue.events.push(std::move(e));
+            lug::Main::events.push(std::move(e));
 
-            if (AInputQueue_preDispatchEvent(androidEventQueue.inputQueue, androidEvent)) {
+            if (AInputQueue_preDispatchEvent(lug::Main::inputQueue, androidEvent)) {
                 continue;
             }
             int32_t handled = 0;
-            AInputQueue_finishEvent(androidEventQueue.inputQueue, androidEvent, handled);
+            AInputQueue_finishEvent(lug::Main::inputQueue, androidEvent, handled);
         }
     }
 
-    if (!androidEventQueue.events.empty()) {
-        event = androidEventQueue.events.front();
-        androidEventQueue.events.pop();
+    if (!lug::Main::events.empty()) {
+        event = lug::Main::events.front();
+        lug::Main::events.pop();
         return true;
     }
 
     return false;
 }
+
+} // namespace priv
+} // namespace Window
+} // namespace lug

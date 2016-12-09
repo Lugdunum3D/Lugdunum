@@ -1,18 +1,11 @@
 #pragma once
 
 #include <lug/Window/Window.hpp>
-#include <android/input.h>
-
-struct androidApp
-{
-    std::queue<lug::Window::Event> events;
-    AInputQueue* inputQueue;
-};
+#include <lug/Main/MainAndroid.hpp>
 
 namespace lug {
 namespace Window {
 namespace priv {
-
 
 class WindowImpl {
 public:

@@ -2,19 +2,19 @@
 
 #include <android/configuration.h>
 #include <android/native_activity.h>
-
-#include <lug/Window/Android/WindowImplAndroid.hpp>
-extern struct androidApp androidEventQueue;
+#include <lug/Window/Window.hpp>
 
 extern int main(int argc, const char* argv[]);
-
 
 namespace lug {
 namespace Main {
 
-class LugAndroidApp {
+extern std::queue<lug::Window::Event> events;
+extern AInputQueue* inputQueue;
+
+class AndroidApp {
 public:
-    LugAndroidApp(ANativeActivity* activity, void* savedState, size_t savedStateSize);
+    AndroidApp(ANativeActivity* activity, void* savedState, size_t savedStateSize);
 
     // Callback functions as defined in android/native_activity.h, must be public
     static void onStart(ANativeActivity* activity);
