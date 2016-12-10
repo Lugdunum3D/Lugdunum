@@ -1,10 +1,5 @@
 #include <gmock/gmock.h>
 
-using ::testing::_;
-using ::testing::Ge;
-using ::testing::Return;
-using ::testing::Invoke;
-
 namespace {
 
 class NullArena {
@@ -33,16 +28,17 @@ public:
     MOCK_METHOD0(destructor, void());
 };
 
+inline void testMultipleAlignments(const std::function<void(size_t alignment)> &function) {
+    function(1);
+    function(2);
+    function(4);
+    function(8);
+    function(16);
+    function(32);
+    function(64);
+    function(128);
+    function(256);
+    function(512);
 }
 
-#define TEST_MULTIPLE_ALIGNMENTS(macro) \
-    macro(1) \
-    macro(2) \
-    macro(4) \
-    macro(8) \
-    macro(16) \
-    macro(32) \
-    macro(64) \
-    macro(128) \
-    macro(256) \
-    macro(512)
+}
