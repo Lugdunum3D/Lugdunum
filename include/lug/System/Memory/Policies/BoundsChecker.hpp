@@ -33,8 +33,8 @@ public:
     void checkBack(void* ptr, size_t size) const;
 
 private:
-    static constexpr char* MagicFront = "\xDE\xAD";
-    static constexpr char* MagicBack = "\xBE\xEF";
+    static constexpr const char* MagicFront = "\xDE\xAD";
+    static constexpr const char* MagicBack = "\xBE\xEF";
 };
 
 #include <lug/System/Memory/Policies/BoundsChecker.inl>

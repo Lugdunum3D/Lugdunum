@@ -231,8 +231,8 @@ build_script:
 # scripts to run after build
 after_build:
 - ps: |
-    Copy-Item .\lib\googletest\googletest\$env:CONFIGURATION\gtest.dll .\test\$env:CONFIGURATION\
-    Copy-Item .\lib\googletest\googletest\$env:CONFIGURATION\gtest_main.dll .\test\$env:CONFIGURATION\
+    Copy-Item .\lib\googletest\googlemock\gtest\$env:CONFIGURATION\gtest.dll .\test\$env:CONFIGURATION\
+    Copy-Item .\lib\googletest\googlemock\$env:CONFIGURATION\gmock.dll .\test\$env:CONFIGURATION\
     Copy-Item .\lib\$env:CONFIGURATION\*.dll .\test\$env:CONFIGURATION\
 
 test_script:

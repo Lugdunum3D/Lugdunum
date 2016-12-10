@@ -1,17 +1,30 @@
 template <typename T, class Arena, class ...Args>
 inline T* new_one(size_t alignment, const char* file, size_t line, Arena& arena, Args&&... args) {
-    return new (arena.allocate(sizeof(T), alignment, 0, file, line)) T{std::forward<Args>(args)...};
+    void* ptr = arena.allocate(sizeof(T), alignment, 0, file, line);
+
+    if (!ptr) {
+        return nullptr;
+    }
+
+    return new (ptr) T{std::forward<Args>(args)...};
 }
 
 template <typename T, class Arena>
 inline void delete_one(T* object, Arena& arena) {
-    object->~T();
+    if (object) {
+        object->~T();
+    }
+
     arena.free(object);
 }
 
 template <typename T, class Arena, class ...Args, typename std::enable_if<!std::is_pod<T>::value, int>::type>
 inline T* new_array(size_t alignment, size_t nb, const char* file, size_t line, Arena& arena, Args&&... args) {
-    void* const ptr = arena.allocate(sizeof(T) * nb + sizeof(size_t), alignment, alignof(size_t), file, line);
+    if (nb == 0) {
+        return nullptr;
+    }
+
+    void* const ptr = arena.allocate(sizeof(T) * nb + sizeof(size_t), alignment, sizeof(size_t), file, line);
 
     if (!ptr) {
         return nullptr;
@@ -33,6 +46,7 @@ inline T* new_array(size_t alignment, size_t nb, const char* file, size_t line, 
 template <typename T, class Arena, typename std::enable_if<!std::is_pod<T>::value, int>::type>
 inline void delete_array(T* ptr, Arena& arena) {
     if (!ptr) {
+        arena.free(ptr);
         return;
     }
 
@@ -45,12 +59,18 @@ inline void delete_array(T* ptr, Arena& arena) {
         ptr[i - 1].~T();
     }
 
-    arena.free(&size_ptr[-1]);
+    arena.free(&(size_ptr[-1]));
 }
 
 template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type>
 inline T* new_array(size_t alignment, size_t nb, const char* file, size_t line, Arena& arena) {
-    return new(arena.allocate(sizeof(T) * nb, alignment, 0, file, line)) T{};
+    void* ptr = arena.allocate(sizeof(T) * nb, alignment, 0, file, line);
+
+    if (!ptr) {
+        return nullptr;
+    }
+
+    return new(ptr) T{};
 }
 
 template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type>
