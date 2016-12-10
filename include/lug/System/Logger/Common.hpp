@@ -12,8 +12,10 @@
 #define FMT_HEADER_ONLY
 #if defined(LUG_FMT_EXTERNAL)
     #include <fmt/format.h>
+    #include <fmt/ostream.h>
 #else
     #include <lug/Ext/fmt/format.h>
+    #include <lug/Ext/fmt/ostream.h>
 #endif
 
 namespace lug {
