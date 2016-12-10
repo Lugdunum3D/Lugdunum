@@ -5,8 +5,6 @@
 namespace lug {
 namespace System {
 
-std::unordered_map<std::string, std::unique_ptr<Logger>> LoggerFacility::_loggers{};
-std::unordered_map<std::string, std::unique_ptr<Handler>> LoggerFacility::_handlers{};
 
 Logger::Logger(const std::string &loggerName) : _name(loggerName) {}
 

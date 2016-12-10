@@ -2,8 +2,7 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
-#include <vector>
+#include <set>
 #include <string>
 
 #include <lug/System/Debug.hpp>
@@ -11,36 +10,13 @@
 #include <lug/System/Logger/Common.hpp>
 #include <lug/System/Logger/Formatter.hpp>
 #include <lug/System/Logger/Handler.hpp>
+#include <lug/System/Logger/LoggingFacility.hpp>
 #include <lug/System/Logger/Message.hpp>
 #include <lug/System/SourceInfo.hpp>
 #include <lug/System/Utils.hpp>
 
 namespace lug {
 namespace System {
-
-class Logger;
-
-class LUG_SYSTEM_API LoggerFacility {
-public:
-    static inline void registerLogger(const std::string& loggerName, std::unique_ptr<Logger> logger) {
-        _loggers[loggerName] = std::move(logger);
-    }
-    static inline Logger* getLogger(const std::string& loggerName) {
-        return _loggers[loggerName].get();
-    }
-
-    static inline void registerHandler(const std::string& handlerName, std::unique_ptr<Handler> handler) {
-        _handlers[handlerName] = std::move(handler);
-    }
-    static inline Handler* getHandler(const std::string& handlerName) {
-        return _handlers[handlerName].get();
-    }
-
-private:
-    static std::unordered_map<std::string, std::unique_ptr<Logger>> _loggers;
-    static std::unordered_map<std::string, std::unique_ptr<Handler>> _handlers;
-};
-
 
 class LUG_SYSTEM_API Logger {
 public:
@@ -51,8 +27,8 @@ public:
         _handlers.insert(handler);
     }
 
-    void addHandler(const std::string& name) {
-        _handlers.push_back(LoggerFacility::getHandler(name));
+    virtual void addHandler(const std::string& name) {
+        _handlers.insert(LoggingFacility::getHandler(name));
     }
 
     virtual void defaultErrHandler(const std::string& msg) {
@@ -133,7 +109,7 @@ public:
 
 protected:
     const std::string _name;
-    std::vector<Handler*> _handlers;
+    std::set<Handler*> _handlers;
     std::atomic_int _level;
 };
 
@@ -141,16 +117,8 @@ protected:
 inline Logger* makeLogger(const std::string& loggerName) {
     std::unique_ptr<Logger> logger = std::make_unique<Logger>(loggerName);
     Logger* loggerRawPtr = logger.get();
-    LoggerFacility::registerLogger(loggerName, std::move(logger));
+    LoggingFacility::registerLogger(loggerName, std::move(logger));
     return loggerRawPtr;
-}
-
-template<typename T, typename... Args>
-inline T* makeHandler(const std::string& handlerName, Args... args) {
-    std::unique_ptr<T> handler = std::make_unique<T>(handlerName, args...);
-    T* handlerRawPtr = handler.get();
-    LoggerFacility::registerHandler(handlerName, std::move(handler));
-    return handlerRawPtr;
 }
 
 } // namespace lug

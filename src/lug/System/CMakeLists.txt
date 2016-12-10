@@ -6,6 +6,7 @@ set(SRC
     ${SRCROOT}/Exception.cpp
     ${SRCROOT}/Logger/Formatter.cpp
     ${SRCROOT}/Logger/Logger.cpp
+    ${SRCROOT}/Logger/LoggingFacility.cpp
     ${SRCROOT}/Memory/Allocator/Basic.cpp
     ${SRCROOT}/Memory/Allocator/Linear.cpp
     ${SRCROOT}/Memory/Allocator/Stack.cpp
