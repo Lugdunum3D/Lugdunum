@@ -91,8 +91,7 @@ inline void Formatter::handleFlag(char flag) {
     }
 }
 
-inline void Formatter::compilePattern(const std::string& pattern)
-{
+inline void Formatter::compilePattern(const std::string& pattern) {
     std::shared_ptr<priv::UserChars> chars;
 
     auto end = pattern.end();
@@ -124,7 +123,7 @@ Formatter::Formatter(const std::string& pattern) {
     compilePattern(pattern);
 }
 
-void Formatter::format(priv::Message &msg) {
+void Formatter::format(priv::Message& msg) {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     time_t tt = std::chrono::system_clock::to_time_t(now);
     struct tm timeInfo;

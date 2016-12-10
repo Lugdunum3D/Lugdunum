@@ -9,7 +9,7 @@ namespace System {
 
 class FileHandler : public Handler {
 public:
-    FileHandler(const std::string& name, const filename_t &filename, bool truncate) : Handler(name) {
+    FileHandler(const std::string& name, const filename_t& filename, bool truncate) : Handler(name) {
         _ofs.open(filename, std::ofstream::out);
         if (!_ofs.good()) {
             // TODO: add file to lug except when it handles variadic args

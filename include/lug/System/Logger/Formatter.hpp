@@ -43,7 +43,7 @@ public:
     Formatter(const std::string& pattern);
     virtual ~Formatter () {};
 
-    void format(priv::Message &msqg);
+    void format(priv::Message& msg);
 
 private:
     void handleFlag(char c);

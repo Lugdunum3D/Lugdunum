@@ -5,10 +5,15 @@
 namespace lug {
 namespace System {
 
+Logger::Logger(const std::string& loggerName) : _name(loggerName) {}
 
-Logger::Logger(const std::string &loggerName) : _name(loggerName) {}
-
-void Logger::setPattern(const std::string &pattern) {
+/**
+ * Sets a given pattern on all the handlers of the Logger.
+ * Warning: this will effectively modify the handlers, and it will change
+ * handlers that might be used somewhere else, like in an other Logger instance.
+ * @param pattern The new pattern
+ */
+void Logger::setPattern(const std::string& pattern) {
     for (auto& handler : _handlers) {
         handler->setFormatter(std::make_unique<Formatter>(pattern));
     }
@@ -21,7 +26,6 @@ const std::string& Logger::getName() const {
 void Logger::setLevel(Level::enumLevel level) {
     _level.store(level);
 }
-
 
 Level::enumLevel Logger::getLevel() const {
     return static_cast<Level::enumLevel>(_level.load(std::memory_order_relaxed));
