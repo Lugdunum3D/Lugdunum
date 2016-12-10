@@ -32,8 +32,7 @@ public:
     }
 
     virtual void defaultErrHandler(const std::string& msg) {
-        // TODO: Handle error
-        (void)msg;
+        log(Level::Fatal, "Exception in logger {}: {}", _name, msg);
     }
 
     template<typename T>
