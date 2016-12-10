@@ -46,10 +46,5 @@ void Logger::flush() {
     }
 }
 
-void Logger::logMessage(priv::Message &message) {
-    (void)message;
-}
-
-
 } // namespace System
 } // namespace lug
