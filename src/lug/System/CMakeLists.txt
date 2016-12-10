@@ -31,6 +31,13 @@ set(INC
     ${INCROOT}/Exception.hpp
     ${INCROOT}/Export.hpp
     ${INCROOT}/Logger.hpp
+    ${INCROOT}/Logger/Common.hpp
+    ${INCROOT}/Logger/FileHandler.hpp
+    ${INCROOT}/Logger/Formatter.hpp
+    ${INCROOT}/Logger/Handler.hpp
+    ${INCROOT}/Logger/LoggingFacility.hpp
+    ${INCROOT}/Logger/Message.hpp
+    ${INCROOT}/Logger/OstreamHandler.hpp
     ${INCROOT}/Memory.hpp
     ${INCROOT}/Memory.inl
     ${INCROOT}/Memory/Allocator/Basic.hpp
