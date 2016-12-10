@@ -87,6 +87,8 @@ TEST(Matrix4x4, InverseOperators) {
 TEST(Matrix4x4, Size) {
     ASSERT_EQ(lug::Math::Mat4x4f().getRows(), 4);
     ASSERT_EQ(lug::Math::Mat4x4f().getColumns(), 4);
+
+    ASSERT_EQ(sizeof(lug::Math::Mat4x4f), 16 * sizeof(float));
 }
 
 TEST(Matrix4x4, Addition) {

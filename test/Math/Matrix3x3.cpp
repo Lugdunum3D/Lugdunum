@@ -83,6 +83,8 @@ TEST(Matrix3x3, InverseOperators) {
 TEST(Matrix3x3, Size) {
     ASSERT_EQ(lug::Math::Mat3x3f().getRows(), 3);
     ASSERT_EQ(lug::Math::Mat3x3f().getColumns(), 3);
+
+    ASSERT_EQ(sizeof(lug::Math::Mat3x3f), 9 * sizeof(float));
 }
 
 TEST(Matrix3x3, Addition) {
