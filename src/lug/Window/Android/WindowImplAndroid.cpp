@@ -4,30 +4,33 @@ namespace lug {
 namespace Window {
 namespace priv {
 
-lug::Window::priv::WindowImpl::WindowImpl(Window*) {}
+std::queue<Event> WindowImpl::events;
+AInputQueue *WindowImpl::inputQueue;
 
-bool lug::Window::priv::WindowImpl::create(const std::string&, Style) {
+WindowImpl::WindowImpl(Window*) {}
+
+bool WindowImpl::create(const std::string&, Style) {
     return true;
 }
 
-void lug::Window::priv::WindowImpl::close() {}
+void WindowImpl::close() {}
 
-bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
+bool WindowImpl::pollEvent(lug::Window::Event& event) {
 
-    if (lug::Main::inputQueue != nullptr) {
+    if (inputQueue != nullptr) {
         AInputEvent *androidEvent = nullptr;
-        while (AInputQueue_getEvent(lug::Main::inputQueue, &androidEvent) >= 0) {
-            if (AInputQueue_preDispatchEvent(lug::Main::inputQueue, androidEvent)) {
+        while (AInputQueue_getEvent(inputQueue, &androidEvent) >= 0) {
+            if (AInputQueue_preDispatchEvent(inputQueue, androidEvent)) {
                 continue;
             }
-            int32_t handled = 0;
-            AInputQueue_finishEvent(lug::Main::inputQueue, androidEvent, handled);
+
+            AInputQueue_finishEvent(inputQueue, androidEvent, 0);
         }
     }
 
-    if (!lug::Main::events.empty()) {
-        event = lug::Main::events.front();
-        lug::Main::events.pop();
+    if (!events.empty()) {
+        event = events.front();
+        events.pop();
         return true;
     }
 

@@ -2,15 +2,11 @@
 
 #include <android/configuration.h>
 #include <android/native_activity.h>
-#include <lug/Window/Window.hpp>
 
 extern int main(int argc, const char* argv[]);
 
 namespace lug {
 namespace Main {
-
-extern std::queue<lug::Window::Event> events;
-extern AInputQueue* inputQueue;
 
 class AndroidApp {
 public:
@@ -33,6 +29,10 @@ public:
     static void onContentRectChanged(ANativeActivity* activity, const ARect* rect);
     static void onConfigurationChanged(ANativeActivity* activity);
     static void onLowMemory(ANativeActivity* activity);
+
+//    static std::queue<lug::Window::Event> events;
+//    static AInputQueue *inputQueue;
+
 
 private:
     void shutdowApplication();

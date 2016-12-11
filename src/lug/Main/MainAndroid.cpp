@@ -1,11 +1,10 @@
 #include <thread>
 #include <lug/Main/MainAndroid.hpp>
+#include <lug/Window/Android/WindowImplAndroid.hpp>
 
 namespace lug {
 namespace Main {
 
-std::queue<lug::Window::Event> events;
-AInputQueue* inputQueue;
 
 AndroidApp::AndroidApp(ANativeActivity* activity, void* savedState, size_t savedStateSize)
     : _savedState{}, _savedStateSize{} {
@@ -67,7 +66,7 @@ void AndroidApp::onStop(ANativeActivity*) {}
 void AndroidApp::onDestroy(ANativeActivity*) {
     lug::Window::Event e;
     e.type = lug::Window::EventType::CLOSE;
-    events.push(std::move(e));
+    lug::Window::priv::WindowImpl::events.push(std::move(e));
 }
 
 void AndroidApp::onWindowFocusChanged(ANativeActivity*, int) {}
@@ -81,7 +80,7 @@ void AndroidApp::onNativeWindowRedrawNeeded(ANativeActivity*, ANativeWindow*) {}
 void AndroidApp::onNativeWindowDestroyed(ANativeActivity*, ANativeWindow* ) {}
 
 void AndroidApp::onInputQueueCreated(ANativeActivity*, AInputQueue* input) {
-    inputQueue = input;
+    lug::Window::priv::WindowImpl::inputQueue = input;
 }
 
 void AndroidApp::onInputQueueDestroyed(ANativeActivity*, AInputQueue*) {}

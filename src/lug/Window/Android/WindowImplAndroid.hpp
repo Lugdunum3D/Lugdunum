@@ -15,7 +15,9 @@ public:
     bool create(const std::string& title, Style style);
     void close();
     bool pollEvent(lug::Window::Event& event);
-private:
+
+    LUG_WINDOW_API static std::queue<lug::Window::Event> events;
+    LUG_WINDOW_API static AInputQueue *inputQueue;
 };
 
 } // namespace priv
