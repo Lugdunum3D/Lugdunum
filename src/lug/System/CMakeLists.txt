@@ -21,6 +21,8 @@ set(INC
     ${INCROOT}/Debug.hpp
     ${INCROOT}/Exception.hpp
     ${INCROOT}/Export.hpp
+    ${INCROOT}/Library.hpp
+    ${INCROOT}/Library.inl
     ${INCROOT}/Logger.hpp
     ${INCROOT}/Logger/Common.hpp
     ${INCROOT}/Logger/FileHandler.hpp

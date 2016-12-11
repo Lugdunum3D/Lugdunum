@@ -37,7 +37,7 @@ string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
 
 # add the librairies subdirectories
 add_subdirectory(Core)
-add_subdirectory(Graphics)
+add_subdirectory(Graphic)
 add_subdirectory(System)
 add_subdirectory(Window)
 
