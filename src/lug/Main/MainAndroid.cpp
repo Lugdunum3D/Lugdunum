@@ -5,7 +5,6 @@
 namespace lug {
 namespace Main {
 
-
 AndroidApp::AndroidApp(ANativeActivity* activity, void* savedState, size_t savedStateSize)
     : _savedState{}, _savedStateSize{} {
     activity->callbacks->onInputQueueCreated = &AndroidApp::onInputQueueCreated;
@@ -63,7 +62,7 @@ void AndroidApp::onPause(ANativeActivity*) {}
 
 void AndroidApp::onStop(ANativeActivity*) {}
 
-void AndroidApp::onDestroy(ANativeActivity*) {
+void AndroidApp::onDestroy(ANativeActivity* ) {
     lug::Window::Event e;
     e.type = lug::Window::EventType::CLOSE;
     lug::Window::priv::WindowImpl::events.push(std::move(e));
@@ -83,7 +82,9 @@ void AndroidApp::onInputQueueCreated(ANativeActivity*, AInputQueue* input) {
     lug::Window::priv::WindowImpl::inputQueue = input;
 }
 
-void AndroidApp::onInputQueueDestroyed(ANativeActivity*, AInputQueue*) {}
+void AndroidApp::onInputQueueDestroyed(ANativeActivity*, AInputQueue*) {
+    lug::Window::priv::WindowImpl::inputQueue = nullptr;
+}
 
 void AndroidApp::onContentRectChanged(ANativeActivity*, const ARect*) {}
 

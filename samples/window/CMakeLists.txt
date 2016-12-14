@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
 
+# determine the build type
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
+endif()
+
 # project name
 project(window)
 
@@ -16,8 +21,6 @@ if(LUG_COMPILER_MSVC)
     else()
         list(APPEND CMAKE_CXX_FLAGS "/W4")
     endif()
-
-    list(APPEND CMAKE_CXX_FLAGS "/WX")
 elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
     list(APPEND CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -std=c++14")
 endif()
@@ -43,7 +46,7 @@ if(LUG_OS_ANDROID)
                           log
                           android
                           ${LUG_LIBRARIES}
-     )
+    )
 else()
     add_executable(${EXECUTABLE_NAME} main.cpp)
     target_link_libraries(${EXECUTABLE_NAME} ${LUG_LIBRARIES})

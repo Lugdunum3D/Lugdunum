@@ -30,10 +30,6 @@ public:
     static void onConfigurationChanged(ANativeActivity* activity);
     static void onLowMemory(ANativeActivity* activity);
 
-//    static std::queue<lug::Window::Event> events;
-//    static AInputQueue *inputQueue;
-
-
 private:
     void shutdowApplication();
     void startApplication();

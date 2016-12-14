@@ -13,7 +13,6 @@ android {
                 abiFilters 'arm64-v8a'
                 arguments '-DANDROID_TOOLCHAIN=clang'
                 arguments '-DANDROID_STL=c++_shared'
-                arguments '-DANDROID_DISABLE_FORMAT_STRING_CHECKS=true'
                 cppFlags "-Wall -Wextra -frtti -fexceptions -std=c++14"
             }
         }

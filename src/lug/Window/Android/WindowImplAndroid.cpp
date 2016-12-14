@@ -4,8 +4,8 @@ namespace lug {
 namespace Window {
 namespace priv {
 
-std::queue<Event> WindowImpl::events;
-AInputQueue *WindowImpl::inputQueue;
+std::queue<lug::Window::Event> lug::Window::priv::WindowImpl::events;
+AInputQueue *lug::Window::priv::WindowImpl::inputQueue = nullptr;
 
 WindowImpl::WindowImpl(Window*) {}
 

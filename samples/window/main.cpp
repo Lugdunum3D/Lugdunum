@@ -2,7 +2,7 @@
 #include <string>
 
 int main() {
-    auto window = lug::Window::Window::create(800, 600, std::string("Default Window"), lug::Window::Style::Default);
+    auto window = lug::Window::Window::create(800, 600, "Default Window", lug::Window::Style::Default);
     
     if (!window) {
         return 1;
