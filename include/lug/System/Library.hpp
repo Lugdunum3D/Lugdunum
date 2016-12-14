@@ -3,7 +3,10 @@
 #include <lug/System/Export.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
-#include <Winbase.h>
+#ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+#endif
+#include <Windows.h>
 #else
 #include <dlfcn.h>
 #endif

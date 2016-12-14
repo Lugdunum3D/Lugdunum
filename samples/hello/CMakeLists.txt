@@ -15,6 +15,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/modules")
 
 include("${CMAKE_SOURCE_DIR}/../../cmake/Config.cmake")
 
+find_package(Vulkan)
+include_directories(${VULKAN_INCLUDE_DIR})
+
 if(LUG_COMPILER_MSVC)
     if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
         string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
