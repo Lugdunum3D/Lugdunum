@@ -1,6 +1,6 @@
 
 template <typename T >
-lug::Math::Quaternion::Quaternion(T w, T x, T y, T z){
+inline lug::Math::Quaternion<T>::Quaternion(T w, T x, T y, T z) {
     _valuesArray[0] = w;
     _valuesArray[1] = x;
     _valuesArray[2] = y;
@@ -9,7 +9,7 @@ lug::Math::Quaternion::Quaternion(T w, T x, T y, T z){
 
 
 template <typename T >
-lug::Math::Quaternion::Quaternion(T valueArray[4]) {
+inline lug::Math::Quaternion<T>::Quaternion(T valueArray[4]) {
     _valuesArray[0] = valueArray[0];
     _valuesArray[1] = valueArray[1];
     _valuesArray[2] = valueArray[2];
@@ -17,12 +17,12 @@ lug::Math::Quaternion::Quaternion(T valueArray[4]) {
 }
 
 template <typename T >
-lug::Math::Quaternion::Quaternion(Vec3d normalizedVector, T degreeAngle){
-    LUG_ASSERT((normalizedVector(0,0) * normalizedVector(0, 0) + normalizedVector(0, 1) * normalizedVector(0, 1) + normalizedVector(0, 2) * normalizedVector(0, 2)) != 1, "Quaternion construct with not normalized vector");
-    
+inline lug::Math::Quaternion<T>::Quaternion(lug::Math::Vector<3, T> normalizedVector, T degreeAngle) {
+    LUG_ASSERT((normalizedVector(0, 0) * normalizedVector(0, 0) + normalizedVector(0, 1) * normalizedVector(0, 1) + normalizedVector(0, 2) * normalizedVector(0, 2)) != 1, "Quaternion construct with not normalized vector");
+
     T halfAngleRadian = (degreeAngle / 2) * M_PI / 180.0;
     T sinHalfAngle = sin(halfAngleRadian);
-  
+
     _valuesArray[0] = cos(halfAngleRadian);
     _valuesArray[1] = normalizedVector(0, 0) * sinHalfAngle;
     _valuesArray[2] = normalizedVector(0, 1) * sinHalfAngle;
@@ -31,13 +31,13 @@ lug::Math::Quaternion::Quaternion(Vec3d normalizedVector, T degreeAngle){
 
 
 template <typename T >
-lug::Math::Quaternion::Quaternion(const Quaternion & otherQuaternion){
+inline lug::Math::Quaternion<T>::Quaternion(const lug::Math::Quaternion<T> & otherQuaternion) {
     *(this) = otherQuaternion;
 }
 
 
 template <typename T >
-lug::Math::Quaternion & lug::Math::Quaternion::operator=(const lug::Math::Quaternion & leftOperand) {
+inline  lug::Math::Quaternion<T>& lug::Math::Quaternion<T>::operator=(const  lug::Math::Quaternion<T>& leftOperand) {
 
     _valuesArray[0] = leftOperand[0];
     _valuesArray[1] = leftOperand[1];
@@ -48,45 +48,45 @@ lug::Math::Quaternion & lug::Math::Quaternion::operator=(const lug::Math::Quater
 
 
 template <typename T >
-lug::Math::Quaternion::~Quaternion() {}
+inline lug::Math::Quaternion<T>::~Quaternion() {}
 
 
 template <typename T >
-T & lug::Math::Quaternion::operator[](std::size_t idx) {
+inline T & lug::Math::Quaternion<T>::operator[](std::size_t idx) {
     return _valuesArray[idx];
 }
 
 
 template <typename T >
-const T & lug::Math::Quaternion::operator[](std::size_t idx) const {
+inline const T & lug::Math::Quaternion<T>::operator[](std::size_t idx) const {
     return _valuesArray[idx];
 }
 
-//lug::Math::Quaternion lug::Math::Quaternion::conjugate() const {
+// lug::Math::Quaternion<T>lug::Math::Quaternion::conjugate() const {
 //    return lug::Math::Quaternion{_x, -_y, -_z, -_w};
 //}
 
-//lug::Math::Quaternion lug::Math::Quaternion::invert() {
+// lug::Math::Quaternion<T>lug::Math::Quaternion::invert() {
 //    const T numerator = std::pow(_x, 2) + std::pow(_y, 2) + std::pow(_z, 2) + std::pow(_w, 2);
 //    return lug::Math::Quaternion{_x / numerator, _y / numerator, _z / numerator, _w / numerator};
 //}
 
-//lug::Math::Quaternion lug::Math::Quaternion::normalize() {
+// lug::Math::Quaternion<T>lug::Math::Quaternion::normalize() {
 //    const T numerator = std::sqrt(std::pow(_x, 2) + std::pow(_y, 2) + std::pow(_z, 2) + std::pow(_w, 2));
 //    return lug::Math::Quaternion{_x / numerator, _y / numerator, _z / numerator, _w / numerator};
 //}
 //
-//T lug::Math::Quaternion::angleWith(const Quaternion & otherQuaternion) {
-//    lug::Math::Quaternion resQuaternion = otherQuaternion * invert();
+//T lug::Math::Quaternion::angleWith(const lug::Math::Quaternion<T> & otherQuaternion) {
+//     lug::Math::Quaternion<T>resQuaternion = otherQuaternion * invert();
 //
 //
 //    return std::move(std::acos(resQuaternion._w) * 2.0);
 //}
 //
-//lug::Math::Quaternion lug::Math::Quaternion::slerp(const Quaternion &otherQuaternion, T t) {
+// lug::Math::Quaternion<T>lug::Math::Quaternion::slerp(const lug::Math::Quaternion<T> &otherQuaternion, T t) {
 //
 //    T angle = angleWith(otherQuaternion) / 2;
-//    lug::Math::Quaternion qm = ((*this) * std::sin(1.0 - t) * angle + otherQuaternion * std::sin(t * angle)) / std::sin(angle);
+//     lug::Math::Quaternion<T>qm = ((*this) * std::sin(1.0 - t) * angle + otherQuaternion * std::sin(t * angle)) / std::sin(angle);
 //    return qm;
 //}
 //
@@ -101,90 +101,91 @@ const T & lug::Math::Quaternion::operator[](std::size_t idx) const {
 
 
 template <typename T >
-lug::Math::Quaternion lug::Math::operator+(const lug::Math::Quaternion & leftOperand, const lug::Math::Quaternion & rightOperand) {
+inline  lug::Math::Quaternion<T> lug::Math::operator+(const  lug::Math::Quaternion<T>& leftOperand, const  lug::Math::Quaternion<T>& rightOperand) {
     return std::move(lug::Math::Quaternion(leftOperand[0] + rightOperand[0], leftOperand[1] + rightOperand[1], leftOperand[2] + rightOperand[2], leftOperand[3] + rightOperand[3]));
 }
 
 template <typename T >
-lug::Math::Quaternion lug::Math::operator-(const lug::Math::Quaternion & leftOperand, const lug::Math::Quaternion & rightOperand) {
+inline  lug::Math::Quaternion<T> lug::Math::operator-(const  lug::Math::Quaternion<T>& leftOperand, const  lug::Math::Quaternion<T>& rightOperand) {
     return std::move(lug::Math::Quaternion(leftOperand[0] - rightOperand[0], leftOperand[1] - rightOperand[1], leftOperand[2] - rightOperand[2], leftOperand[3] - rightOperand[3]));
 }
 
 template <typename T >
-lug::Math::Quaternion lug::Math::operator*(const lug::Math::Quaternion & leftOperand, const lug::Math::Quaternion & rightOperand) {
+inline  lug::Math::Quaternion<T> lug::Math::operator*(const  lug::Math::Quaternion<T>& leftOperand, const  lug::Math::Quaternion<T>& rightOperand) {
     return std::move(lug::Math::Quaternion(leftOperand[0] * rightOperand[0] - leftOperand[1] * rightOperand[1] - leftOperand[2] * rightOperand[2] - leftOperand[3] * rightOperand[3],
-                                            leftOperand[0] * rightOperand[0] + leftOperand[1] * rightOperand[1] + leftOperand[2] * rightOperand[2] - leftOperand[3] * rightOperand[3],
-                                            leftOperand[0] * rightOperand[0] - leftOperand[1] * rightOperand[1] + leftOperand[2] * rightOperand[2] + leftOperand[3] * rightOperand[3],
-                                            leftOperand[0] * rightOperand[0] + leftOperand[1] * rightOperand[1] - leftOperand[2] * rightOperand[2] + leftOperand[3] * rightOperand[3]));
+        leftOperand[0] * rightOperand[0] + leftOperand[1] * rightOperand[1] + leftOperand[2] * rightOperand[2] - leftOperand[3] * rightOperand[3],
+        leftOperand[0] * rightOperand[0] - leftOperand[1] * rightOperand[1] + leftOperand[2] * rightOperand[2] + leftOperand[3] * rightOperand[3],
+        leftOperand[0] * rightOperand[0] + leftOperand[1] * rightOperand[1] - leftOperand[2] * rightOperand[2] + leftOperand[3] * rightOperand[3]));
 }
 
-//lug::Math::Quaternion operator/(const lug::Math::Quaternion &leftOperand, const lug::Math::Quaternion &rightOperand) {
+// lug::Math::Quaternion<T>operator/(const  lug::Math::Quaternion<T>&leftOperand, const  lug::Math::Quaternion<T>&rightOperand) {
 //    return std::move(leftOperand * rightOperand.conjugate());
 //}
 
 
 template <typename T >
-bool lug::Math::operator==(const lug::Math::Quaternion & leftOperand, const lug::Math::Quaternion & rightOperand) {
+inline bool lug::Math::operator==(const  lug::Math::Quaternion<T>& leftOperand, const  lug::Math::Quaternion<T>& rightOperand) {
     if ((leftOperand[0] == rightOperand[0])
         && (leftOperand[1] == rightOperand[1])
         && (leftOperand[2] == rightOperand[2])
         && (leftOperand[3] == rightOperand[3])) {
         return true;
-    } else { return false; }
+    }
+    else { return false; }
 }
 
 template <typename T >
-lug::Math::Quaternion lug::Math::operator*(const lug::Math::Quaternion & leftOperand, T scalar) {
-    lug::Math::Quaternion result(leftOperand);
+inline  lug::Math::Quaternion<T> lug::Math::operator*(const  lug::Math::Quaternion<T>& leftOperand, T scalar) {
+    lug::Math::Quaternion<T>result(leftOperand);
     result[0] = (result[0] * scalar);
     return result;
 }
 
 template <typename T >
-lug::Math::Quaternion lug::Math::operator+(const lug::Math::Quaternion & leftOperand, T scalar) {
-    lug::Math::Quaternion result(leftOperand);
+inline  lug::Math::Quaternion<T>lug::Math::operator+(const  lug::Math::Quaternion<T>& leftOperand, T scalar) {
+    lug::Math::Quaternion<T>result(leftOperand);
     result[0] = (result[0] + scalar);
     return result;
 }
 
 template <typename T >
-lug::Math::Quaternion lug::Math::operator-(const lug::Math::Quaternion & leftOperand, T scalar) {
-    lug::Math::Quaternion result(leftOperand);
+inline  lug::Math::Quaternion<T> lug::Math::operator-(const  lug::Math::Quaternion<T>& leftOperand, T scalar) {
+    lug::Math::Quaternion<T>result(leftOperand);
     result[0] = (result[0] - scalar);
     return result;
 }
 
 template <typename T >
-lug::Math::Quaternion lug::Math::operator/(const lug::Math::Quaternion & leftOperand, T scalar) {
-    lug::Math::Quaternion result(leftOperand);
+inline  lug::Math::Quaternion<T> lug::Math::operator/(const  lug::Math::Quaternion<T>& leftOperand, T scalar) {
+    lug::Math::Quaternion<T>result(leftOperand);
     result[0] = (result[0] / scalar);
     return result;
 }
 
-//lug::Math::Quaternion lug::Math::reflection(const lug::Math::Quaternion & inputePoint, const Vec3d & rotationAxis) {
-//    lug::Math::Quaternion in(0, inputePoint.w, inputePoint.x, inputePoint.y);
-//    lug::Math::Quaternion q(rotationAxis);
+// lug::Math::Quaternion<T>lug::Math::reflection(const  lug::Math::Quaternion<T>& inputePoint, const Vec3d & rotationAxis) {
+//     lug::Math::Quaternion<T>in(0, inputePoint.w, inputePoint.x, inputePoint.y);
+//     lug::Math::Quaternion<T>q(rotationAxis);
 //
 //    return std::move(q * in * q);
 //}
 //
-//lug::Math::Quaternion lug::Math::reflection(const lug::Math::Quaternion & inputePoint, const lug::Math::Quaternion & reflectionPlan) {
-//    lug::Math::Quaternion in(0, inputePoint.w, inputePoint.x, inputePoint.y);
+// lug::Math::Quaternion<T>lug::Math::reflection(const  lug::Math::Quaternion<T>& inputePoint, const  lug::Math::Quaternion<T>& reflectionPlan) {
+//     lug::Math::Quaternion<T>in(0, inputePoint.w, inputePoint.x, inputePoint.y);
 //
-//    lug::Math::Quaternion q(reflectionPlan);
+//     lug::Math::Quaternion<T>q(reflectionPlan);
 //    q.normalize();
 //    q.setX(0.0);
 //    return std::move(q * in * q);
 //}
 
-/*lug::Math::Quaternion lug::Math::rotation(const Quaternion & inputePoint, T angle, const Vec3d & rotationAxis) {
-    T halfAngle = angle / 2.0;
-    T sinHalfAngle = std::sin(halfAngle);
-    lug::Math::Quaternion q(std::cos(halfAngle), sinHalfAngle * rotationAxis.w, sinHalfAngle * rotationAxis.x, sinHalfAngle * rotationAxis.y);
+/* lug::Math::Quaternion<T>lug::Math::rotation(const lug::Math::Quaternion<T> & inputePoint, T angle, const Vec3d & rotationAxis) {
+T halfAngle = angle / 2.0;
+T sinHalfAngle = std::sin(halfAngle);
+lug::Math::Quaternion<T>q(std::cos(halfAngle), sinHalfAngle * rotationAxis.w, sinHalfAngle * rotationAxis.x, sinHalfAngle * rotationAxis.y);
 
-    return std::move(q * inputePoint * q.conjugate());
+return std::move(q * inputePoint * q.conjugate());
 }*/
 //
-//lug::Math::Quaternion lug::Math::rotation(const lug::Math::Quaternion & inputePoint, const lug::Math::Quaternion & q) {
+// lug::Math::Quaternion<T>lug::Math::rotation(const  lug::Math::Quaternion<T>& inputePoint, const  lug::Math::Quaternion<T>& q) {
 //    return std::move(q * inputePoint * q.conjugate());
 //}
