@@ -36,7 +36,7 @@ inline typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getV
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline const typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getValues() const {
+inline constexpr const typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, Columns, T>::getValues() const {
     return _values;
 }
 
@@ -46,7 +46,7 @@ inline T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) {
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline const T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) const {
+inline constexpr const T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) const {
     return _values[row * Columns + col];
 }
 
@@ -582,12 +582,12 @@ inline Matrix<RowsLeft, ColumnsRight, T> operator/(const Matrix<RowsLeft, Column
 // Comparaison operators
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline bool operator==(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs) {
-    return (lhs.getValues() == rhs.getValues()).min();
+    return (lhs.getValues() == rhs.getValues());
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline bool operator!=(const Matrix<Rows, Columns, T>& lhs, const Matrix<Rows, Columns, T>& rhs) {
-    return (lhs.getValues() != rhs.getValues()).min();
+    return (lhs.getValues() != rhs.getValues());
 }
 
 // TODO: Handle alignment of values

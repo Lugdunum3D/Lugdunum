@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <valarray>
 #include <lug/Math/Export.hpp>
+#include <lug/Math/ValArray.hpp>
 #include <lug/System/Debug.hpp>
 
 namespace lug {
@@ -13,7 +14,7 @@ class Matrix
 {
 public:
     // TODO: Use custom valarray with compile time size
-    using Values = std::valarray<T>;
+    using Values = ValArray<Rows * Columns, T>;
 
 public:
     explicit Matrix(T value = 0);
@@ -25,16 +26,16 @@ public:
     Matrix<Rows, Columns, T>& operator=(const Matrix<Rows, Columns, T>& rhs) = default;
     Matrix<Rows, Columns, T>& operator=(Matrix<Rows, Columns, T>&& rhs) = default;
 
-    virtual ~Matrix() = default;
+    ~Matrix() = default;
 
     constexpr uint8_t getRows() const;
     constexpr uint8_t getColumns() const;
 
     Values& getValues();
-    const Values& getValues() const;
+    constexpr const Values& getValues() const;
 
     T& operator()(uint8_t row, uint8_t col = 0);
-    const T& operator()(uint8_t row, uint8_t col = 0) const;
+    constexpr const T& operator()(uint8_t row, uint8_t col = 0) const;
 
     // Matrix/Scalar operations
     Matrix<Rows, Columns, T>& operator+=(T rhs);

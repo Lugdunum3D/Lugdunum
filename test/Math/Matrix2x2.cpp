@@ -70,6 +70,8 @@ TEST(Matrix2x2, InverseOperators) {
 TEST(Matrix2x2, Size) {
     ASSERT_EQ(lug::Math::Mat2x2f().getRows(), 2);
     ASSERT_EQ(lug::Math::Mat2x2f().getColumns(), 2);
+
+    ASSERT_EQ(sizeof(lug::Math::Mat2x2f), 4 * sizeof(float));
 }
 
 TEST(Matrix2x2, Addition) {
