@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lug/Window/Window.hpp>
-#include <lug/Main/MainAndroid.hpp>
+#include <android/input.h>
 
 namespace lug {
 namespace Window {
