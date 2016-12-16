@@ -2,13 +2,14 @@
 
 #include <memory>
 #include <queue>
+#include <string>
 #include <lug/Window/Event.hpp>
 #include <lug/Window/Export.hpp>
 #include <lug/Window/WindowHandle.hpp>
 
 namespace lug {
 namespace Window {
-    
+
 namespace priv {
     class WindowImpl;
 } // namespace priv
@@ -44,7 +45,7 @@ public:
     Window& operator=(const Window&) = delete;
     Window& operator=(Window&&);
     ~Window();
-    
+
     static std::unique_ptr<Window> create(uint16_t width, uint16_t height, const std::string& title, Style style);
 
     bool isOpen() const;
@@ -53,12 +54,12 @@ public:
 
 private:
     Window();
-    
+
     bool createWindow(uint16_t width, uint16_t height, const std::string& title, Style style);
 
     priv::WindowImpl* _impl{nullptr};
     VideoMode _mode{800, 600, 8, 8, 8, 60};
-    
+
     friend lug::Window::priv::WindowImpl;
 };
 
