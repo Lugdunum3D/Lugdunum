@@ -1,9 +1,9 @@
 apply plugin: 'com.android.application'
 android {
     compileSdkVersion 24
-    buildToolsVersion "25.0.0"
+    buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "com.lugdunum.samples.base"
+        applicationId "com.lugdunum.samples.window"
         minSdkVersion 24
         targetSdkVersion 24
         versionCode 1
@@ -25,7 +25,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            path "../../../base/CMakeLists.txt"
+            path "../../../window/CMakeLists.txt"
         }
     }
 }
