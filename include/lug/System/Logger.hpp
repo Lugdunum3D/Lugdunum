@@ -101,6 +101,8 @@ public:
 
     virtual void flush();
 
+    static System::Logger logger;
+
 protected:
     const std::string _name;
     std::set<Handler*> _handlers;

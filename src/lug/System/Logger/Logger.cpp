@@ -5,6 +5,8 @@
 namespace lug {
 namespace System {
 
+Logger Logger::logger("internal");
+
 Logger::Logger(const std::string& loggerName) : _name(loggerName) {}
 
 const std::string& Logger::getName() const {
