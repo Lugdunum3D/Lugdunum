@@ -14,17 +14,6 @@ set(SRC
 )
 source_group("src" FILES ${SRC})
 
-# Include Logger cpp files depending on user os
-if(LUG_OS_LINUX)
-    list(APPEND SRC ${SRCROOT}/Logger/LoggerImplLinux.cpp)
-elseif(LUG_OS_WINDOWS)
-    list(APPEND SRC ${SRCROOT}/Logger/LoggerImplWindows.cpp)
-elseif(LUG_OS_ANDROID)
-    list(APPEND SRC ${SRCROOT}/Logger/LoggerImplAndroid.cpp)
-else()
-    message(FATAL_ERROR "No Logger implementation for this platform")
-endif()
-
 # all header files
 set(INC
     ${INCROOT}/Debug.hpp
