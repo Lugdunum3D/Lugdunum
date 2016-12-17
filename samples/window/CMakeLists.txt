@@ -32,7 +32,7 @@ if(ANDROID_NATIVE_API_LEVEL EQUAL 23)
 endif()
 
 # find Lugdunum and link with it
-find_package(LUG REQUIRED window)
+find_package(LUG REQUIRED window system)
 
 include_directories(${LUG_INCLUDE_DIR})
 

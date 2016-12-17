@@ -38,6 +38,7 @@ set(INC
     ${INCROOT}/Logger/LoggingFacility.hpp
     ${INCROOT}/Logger/Message.hpp
     ${INCROOT}/Logger/OstreamHandler.hpp
+    ${INCROOT}/Logger/LogCatHandler.hpp
     ${INCROOT}/Memory.hpp
     ${INCROOT}/Memory.inl
     ${INCROOT}/Memory/Allocator/Basic.hpp
