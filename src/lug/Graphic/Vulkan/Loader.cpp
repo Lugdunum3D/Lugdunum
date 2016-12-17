@@ -1,27 +1,44 @@
 #include <lug/Graphic/Vulkan/Loader.hpp>
-#include <lug/Graphic/Vulkan/Vulkan.hpp>
-#include <lug/System/Library.hpp>
 
 namespace lug {
 namespace Graphic {
 namespace Vulkan {
-namespace Loader {
 
-void loadCore() {
-#if defined(LUG_SYSTEM_WINDOWS)
-    System::Library::Handle handle = System::Library::open("vulkan-1.dll");
+// TODO: Handle errors
+Loader::Loader() {
+    #if defined(LUG_SYSTEM_WINDOWS)
+    _handle = System::Library::open("vulkan-1.dll");
 #else
-    System::Library::Handle handle = System::Library::open("libvulkan.so.1");
+    _handle = System::Library::open("libvulkan.so.1");
 #endif
 
-    #define LUG_LOAD_VULKAN_FUNCTIONS(name) name = System::Library::sym<PFN_##name>(handle, #name);
-    LUG_CORE_VULKAN_FUNCTIONS(LUG_LOAD_VULKAN_FUNCTIONS);
+    #define LUG_LOAD_VULKAN_FUNCTIONS(name) name = System::Library::sym<PFN_##name>(_handle, #name);
+    LUG_EXPORTED_VULKAN_FUNCTIONS(LUG_LOAD_VULKAN_FUNCTIONS);
     #undef LUG_LOAD_VULKAN_FUNCTIONS
 
-    System::Library::close(handle);
+    #define LUG_LOAD_VULKAN_FUNCTIONS(name) name = reinterpret_cast<PFN_##name>(vkGetInstanceProcAddr(nullptr, #name));
+    LUG_CORE_VULKAN_FUNCTIONS(LUG_LOAD_VULKAN_FUNCTIONS);
+    #undef LUG_LOAD_VULKAN_FUNCTIONS
 }
 
+Loader::~Loader() {
+    #define LUG_UNLOAD_VULKAN_FUNCTIONS(name) name = nullptr;
+    LUG_EXPORTED_VULKAN_FUNCTIONS(LUG_UNLOAD_VULKAN_FUNCTIONS);
+    LUG_CORE_VULKAN_FUNCTIONS(LUG_UNLOAD_VULKAN_FUNCTIONS);
+    LUG_INSTANCE_VULKAN_FUNCTIONS(LUG_UNLOAD_VULKAN_FUNCTIONS);
+    LUG_DEVICE_VULKAN_FUNCTIONS(LUG_UNLOAD_VULKAN_FUNCTIONS);
+    #undef LUG_UNLOAD_VULKAN_FUNCTIONS
+
+    System::Library::close(_handle);
 }
+
+// TODO: Handle errors
+void Loader::loadInstanceFunctions(VkInstance instance) {
+    #define LUG_LOAD_VULKAN_FUNCTIONS(name) name = reinterpret_cast<PFN_##name>(vkGetInstanceProcAddr(instance, #name));
+    LUG_INSTANCE_VULKAN_FUNCTIONS(LUG_LOAD_VULKAN_FUNCTIONS);
+    #undef LUG_LOAD_VULKAN_FUNCTIONS
 }
-}
-}
+
+} // Vulkan
+} // Graphic
+} // lug

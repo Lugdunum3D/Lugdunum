@@ -58,10 +58,6 @@ set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
 set(VERSION_PATCH 0)
 
-add_definitions(-DLUG_VERSION_MAJOR=${VERSION_MAJOR})
-add_definitions(-DLUG_VERSION_MINOR=${VERSION_MINOR})
-add_definitions(-DLUG_VERSION_PATCH=${VERSION_PATCH})
-
 # include the configuration file
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake)
 
