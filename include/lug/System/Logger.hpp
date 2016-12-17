@@ -96,7 +96,6 @@ public:
     }
 
     virtual const std::string& getName() const;
-    virtual void setPattern(const std::string&);
 
     virtual void handle(priv::Message& msg);
 
@@ -115,7 +114,5 @@ inline Logger* makeLogger(const std::string& loggerName) {
     return loggerRawPtr;
 }
 
+} // namespace System
 } // namespace lug
-} // namespace system
-
-#include <lug/System/Logger.inl>

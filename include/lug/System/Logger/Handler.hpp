@@ -14,6 +14,7 @@ public:
     virtual ~Handler();
 
     void setFormatter(std::unique_ptr<Formatter> formatter);
+    void setPattern(const std::string& pattern);
     void format(priv::Message& msg);
 
     virtual void flush() = 0;

@@ -1,8 +1,11 @@
 #include <lug/System/Logger/OstreamHandler.hpp>
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 namespace lug {
 namespace System {
+
+using namespace ::testing;
 
 namespace {
 
@@ -109,6 +112,29 @@ TEST(OstreamHandler, StringStream) {
     EXPECT_EQ(Util::getCaptured(), "Hello world!");
     Util::stopCapture();
 }
+
+TEST(OstreamHandler, CallsFormat) {
+    class MockFormatter : public Formatter {
+    public:
+        using Formatter::Formatter;
+        MOCK_METHOD1(format, void(priv::Message& msg));
+    };
+
+    std::unique_ptr<MockFormatter> formatter = std::make_unique<MockFormatter>("");
+
+    EXPECT_CALL(*(formatter.get()), format(AllOf(
+        Field(&priv::Message::loggerName, StrEq("Test")),
+        Field(&priv::Message::level, Level::Info),
+        Field(&priv::Message::raw, Property(&fmt::MemoryWriter::c_str, StrEq("Hello world!")))
+    ))).Times(1);
+
+    Handler* handler = makeHandler<StdoutHandler>(handlerName);
+    handler->setFormatter(std::move(formatter));
+    priv::Message msg("Test", Level::Info);
+    msg.raw << "Hello world!";
+    handler->format(msg);
+}
+
 
 }
 }

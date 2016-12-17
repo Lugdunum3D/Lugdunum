@@ -15,6 +15,10 @@ void Handler::setFormatter(std::unique_ptr<Formatter> formatter) {
     _formatter = std::move(formatter);
 }
 
+void Handler::setPattern(const std::string& formatter) {
+    _formatter = std::make_unique<Formatter>(formatter);
+}
+
 void Handler::format(priv::Message& msg) {
     _formatter->format(msg);
 }
