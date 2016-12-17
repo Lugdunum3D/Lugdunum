@@ -59,11 +59,11 @@ TEST(Logger, Fmt) {
     EXPECT_CALL(*handler, handle(AllOf(
         Field(&priv::Message::loggerName, StrEq(loggerName)),
         Field(&priv::Message::level, Level::Info),
-        Field(&priv::Message::raw, Property(&fmt::MemoryWriter::c_str, StrEq("abracadabra")))
+        Field(&priv::Message::raw, Property(&fmt::MemoryWriter::c_str, StrEq("abracadabra 101010")))
     ))).Times(1);
 
     logger->addHandler(handler);
-    logger->info("{0}{1}{0}", "abra", "cad");
+    logger->info("{0}{1}{0} {2:b}", "abra", "cad", 42);
 }
 
 
