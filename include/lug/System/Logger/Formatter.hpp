@@ -1,7 +1,6 @@
 #pragma once
 
 #include <chrono>
-#include <vector>
 #include <memory>
 #include <lug/System/Logger/Message.hpp>
 

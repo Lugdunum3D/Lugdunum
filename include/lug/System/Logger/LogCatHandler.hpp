@@ -2,7 +2,6 @@
 
 #include <android/log.h>
 #include <lug/System/Logger/Handler.hpp>
-#include <lug/System/Exception.hpp>
 
 namespace lug {
 namespace System {
@@ -19,7 +18,7 @@ protected:
         __android_log_write(lugLevelToLogCatPrio(msg.level), msg.loggerName.c_str(), msg.formatted.c_str());
     }
     virtual void flush() {
-        // std::cout << std::flush;
+        // Not applicable
     }
 
 private:

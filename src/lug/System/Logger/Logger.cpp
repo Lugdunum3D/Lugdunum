@@ -1,6 +1,4 @@
 #include <lug/System/Logger.hpp>
-#include <algorithm>
-#include <ctime>
 
 namespace lug {
 namespace System {

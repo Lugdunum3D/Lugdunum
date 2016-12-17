@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <lug/System/Logger/Handler.hpp>
 #include <gmock/gmock.h>
 

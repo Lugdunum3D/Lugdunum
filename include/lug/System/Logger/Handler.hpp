@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <memory>
 #include <lug/System/Logger/Message.hpp>
 #include <lug/System/Logger/Formatter.hpp>

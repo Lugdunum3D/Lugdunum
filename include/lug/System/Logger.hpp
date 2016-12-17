@@ -1,18 +1,14 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <set>
 #include <string>
 
-#include <lug/System/Debug.hpp>
 #include <lug/System/Export.hpp>
 #include <lug/System/Logger/Common.hpp>
-#include <lug/System/Logger/Formatter.hpp>
 #include <lug/System/Logger/Handler.hpp>
 #include <lug/System/Logger/LoggingFacility.hpp>
 #include <lug/System/Logger/Message.hpp>
-#include <lug/System/SourceInfo.hpp>
 #include <lug/System/Utils.hpp>
 
 namespace lug {
