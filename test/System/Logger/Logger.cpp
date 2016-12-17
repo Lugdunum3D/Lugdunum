@@ -1,5 +1,6 @@
 #include <lug/System/Logger.hpp>
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "MockHandler.hpp"
 
@@ -234,12 +235,21 @@ TEST(Logger, ExceptionHandler) {
     logger->info(custom);
 }
 
-} // namespace ExceptionHandler
+TEST(Logger, LogsExceptionWhenParseFails) {
 
+    Logger* logger = makeLogger(loggerName);
+    MockHandler* handler = makeHandler<MockHandler>(handlerName);
 
-TEST(Logger, TimePattern) {
-    // TODO
+    EXPECT_CALL(*handler, handle(Field(&priv::Message::raw,
+                                       Property(&fmt::MemoryWriter::c_str,
+                                       HasSubstr("cannot switch from manual to automatic argument indexing"))))
+    ).Times(1);
+
+    logger->addHandler(handler);
+    logger->info("{0} {:%d}", 42, 84);  // unsupported format
 }
+
+} // namespace ExceptionHandler
 
 
 }
