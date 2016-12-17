@@ -219,7 +219,7 @@ build_script:
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE -DTEST_OUTPUT="$env:TEST_OUTPUT" ..
+    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE -DTEST_OUTPUT="$env:TEST_OUTPUT" -DENABLE_CI=true ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }

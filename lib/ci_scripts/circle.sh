@@ -3,12 +3,12 @@
 case $CIRCLE_NODE_INDEX in
   0)  export CXX=clang++
       mkdir build && cd build
-      cmake ../ -DENABLE_TEST=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS
+      cmake ../ -DENABLE_TEST=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DENABLE_CI=true
       make all test
       ;;
   1)  export CXX=g++
       mkdir build && cd build
-      cmake ../ -DENABLE_TEST=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS
+      cmake ../ -DENABLE_TEST=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DENABLE_CI=true
       make all test
       ;;
 esac

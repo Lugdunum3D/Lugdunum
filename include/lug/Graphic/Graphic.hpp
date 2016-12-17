@@ -26,12 +26,12 @@ public:
 
     // TODO: optionnal modules
     // TODO: addModule, removeModule, isModuleLoaded
-    constexpr const std::vector<Module::Type>& getModulesLoaded() const;
+    const std::vector<Module::Type>& getModulesLoaded() const;
 
     // TODO: setRendererType, getRendererType
     // TODO: getRenderer
 
-    constexpr const Core::Application::Info& getAppInfo() const;
+    const Core::Application::Info& getAppInfo() const;
 
 private:
     Core::Application::Info _appInfo;

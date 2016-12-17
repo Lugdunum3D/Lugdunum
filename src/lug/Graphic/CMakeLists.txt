@@ -26,8 +26,10 @@ set(INC
 )
 source_group("inc" FILES ${INC})
 
-find_package(Vulkan)
-include_directories(${VULKAN_INCLUDE_DIR})
+if (NOT ENABLE_CI)
+    find_package(Vulkan)
+    include_directories(${VULKAN_INCLUDE_DIR})
+endif()
 
 # define the target
 lug_add_library(lug-graphic

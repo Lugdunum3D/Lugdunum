@@ -70,25 +70,25 @@ void Renderer::init() {
 
         // Create the application information for vkCreateInstance
         VkApplicationInfo applicationInfo{
-            .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-            .pNext = nullptr,
-            .pApplicationName = _graphic.getAppInfo().name,
-            .applicationVersion = _graphic.getAppInfo().version,
-            .pEngineName = "Lugdunum3D",
-            .engineVersion = VK_MAKE_VERSION(LUG_VERSION_MAJOR, LUG_VERSION_MINOR, LUG_VERSION_PATCH),
-            .apiVersion = 0
+            applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+            applicationInfo.pNext = nullptr,
+            applicationInfo.pApplicationName = _graphic.getAppInfo().name,
+            applicationInfo.applicationVersion = _graphic.getAppInfo().version,
+            applicationInfo.pEngineName = "Lugdunum3D",
+            applicationInfo.engineVersion = VK_MAKE_VERSION(LUG_VERSION_MAJOR, LUG_VERSION_MINOR, LUG_VERSION_PATCH),
+            applicationInfo.apiVersion = 0
         };
 
         // Create the instance creation information for vkCreateInstance
         VkInstanceCreateInfo createInfo{
-            .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            .pNext = nullptr,
-            .flags = 0,
-            .pApplicationInfo = &applicationInfo,
-            .enabledLayerCount = static_cast<uint32_t>(layers.size()),
-            .ppEnabledLayerNames = &layers[0],
-            .enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
-            .ppEnabledExtensionNames = &extensions[0]
+            createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+            createInfo.pNext = nullptr,
+            createInfo.flags = 0,
+            createInfo.pApplicationInfo = &applicationInfo,
+            createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size()),
+            createInfo.ppEnabledLayerNames = &layers[0],
+            createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
+            createInfo.ppEnabledExtensionNames = &extensions[0]
         };
 
         VkInstance instance{VK_NULL_HANDLE};
