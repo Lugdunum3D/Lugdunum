@@ -37,13 +37,13 @@ namespace System {
     PROCESS(User),                  \
 
 #define LUG_LOG_LEVELS(PROCESS)     \
-    PROCESS(Off),                   \
     PROCESS(Debug),                 \
     PROCESS(Info),                  \
     PROCESS(Warning),               \
     PROCESS(Error),                 \
     PROCESS(Fatal),                 \
     PROCESS(Assert),                \
+    PROCESS(Off),                   \
 
 #define LUG_LOG_ENUM(CHANNEL) CHANNEL
 #define LUG_LOG_MAP_PAIR_C(CHANNEL) { Logger::Channel::CHANNEL, #CHANNEL }

@@ -124,6 +124,30 @@ TEST(Logger, LevelsImplicit) {
 }
 
 
+TEST(Logger, LevelsFilter) {
+    Logger* logger = makeLogger(loggerName);
+    MockHandler* handler = makeHandler<MockHandler>(handlerName);
+    logger->addHandler(handler);
+
+    auto testOneLevel = [&](Level::enumLevel level, Level::enumLevel levelPlusOne) {
+        handler->setLevel(levelPlusOne);
+        EXPECT_CALL(*handler, handle(_)).Times(0);
+        logger->log(level, helloWorld);
+
+        handler->setLevel(level);
+        EXPECT_CALL(*handler, handle(_)).Times(1);
+        logger->log(level, helloWorld);
+    };
+
+    testOneLevel(Level::Debug, Level::Info);
+    testOneLevel(Level::Info, Level::Warning);
+    testOneLevel(Level::Warning, Level::Error);
+    testOneLevel(Level::Error, Level::Fatal);
+    testOneLevel(Level::Fatal, Level::Assert);
+    testOneLevel(Level::Assert, Level::Off);
+}
+
+
 TEST(Logger, Handlers) {
     class MockLogger : public Logger {
     public:

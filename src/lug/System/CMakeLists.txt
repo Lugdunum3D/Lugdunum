@@ -5,6 +5,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/System)
 set(SRC
     ${SRCROOT}/Exception.cpp
     ${SRCROOT}/Logger/Formatter.cpp
+    ${SRCROOT}/Logger/Handler.cpp
     ${SRCROOT}/Logger/Logger.cpp
     ${SRCROOT}/Logger/LoggingFacility.cpp
     ${SRCROOT}/Memory/Allocator/Basic.cpp

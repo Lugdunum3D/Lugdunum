@@ -8,25 +8,25 @@
 namespace lug {
 namespace System {
 
-class Handler {
+class LUG_SYSTEM_API Handler {
 public:
-    Handler(const std::string& name) : _name(name), _formatter(std::make_unique<Formatter>("%v\n")) {}
-    virtual ~Handler() {};
+    Handler(const std::string& name);
+    virtual ~Handler();
 
-    void setFormatter(std::unique_ptr<Formatter> formatter) {
-        _formatter = std::move(formatter);
-    }
-
-    void format(priv::Message& msg) {
-      _formatter->format(msg);
-    }
+    void setFormatter(std::unique_ptr<Formatter> formatter);
+    void format(priv::Message& msg);
 
     virtual void flush() = 0;
     virtual void handle(const priv::Message& msg) = 0;
 
+    bool shouldLog(Level::enumLevel level) const;
+    void setLevel(Level::enumLevel level);
+    Level::enumLevel getLevel() const;
+
 protected:
     std::string _name;
     std::unique_ptr<Formatter> _formatter;
+    std::atomic_int _level;
 };
 
 template<typename T, typename... Args>

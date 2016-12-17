@@ -95,10 +95,6 @@ public:
         log(Level::Assert, fmt, args...);
     }
 
-    virtual bool shouldLog(Level::enumLevel) const;
-
-    virtual void setLevel(Level::enumLevel);
-    virtual Level::enumLevel getLevel() const;
     virtual const std::string& getName() const;
     virtual void setPattern(const std::string&);
 
@@ -109,7 +105,6 @@ public:
 protected:
     const std::string _name;
     std::set<Handler*> _handlers;
-    std::atomic_int _level;
 };
 
 
