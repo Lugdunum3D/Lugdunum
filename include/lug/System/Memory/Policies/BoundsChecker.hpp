@@ -39,7 +39,7 @@ private:
 
 #include <lug/System/Memory/Policies/BoundsChecker.inl>
 
-}
-}
-}
-}
+} // Policies
+} // Memory
+} // System
+} // lug

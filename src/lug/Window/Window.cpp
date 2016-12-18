@@ -14,6 +14,9 @@
 
 #endif
 
+namespace lug {
+namespace Window {
+
 lug::Window::Window::Window() : _impl{new lug::Window::priv::WindowImpl(this)} {
 }
 
@@ -80,3 +83,6 @@ void lug::Window::Window::close() {
         _impl = nullptr;
     }
 }
+
+} // Window
+} // lug

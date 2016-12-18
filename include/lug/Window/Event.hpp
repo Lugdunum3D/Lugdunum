@@ -14,5 +14,5 @@ struct LUG_WINDOW_API Event {
     EventType type;
 };
 
-}
-}
+} // Window
+} // lug

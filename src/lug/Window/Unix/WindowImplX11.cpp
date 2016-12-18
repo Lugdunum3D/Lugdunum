@@ -4,6 +4,9 @@
 #include <queue>
 #include <lug/Window/Unix/WmHints.hpp>
 
+namespace lug {
+namespace Window {
+namespace priv {
 
 lug::Window::priv::WindowImpl::WindowImpl(Window* win): _parent{win} {}
 
@@ -109,3 +112,7 @@ void lug::Window::priv::WindowImpl::setWindowDecorations(Style style) {
                     reinterpret_cast<const unsigned char*>(&hints),
                     5);
 }
+
+} // namespace priv
+} // namespace Window
+} // namespace lug

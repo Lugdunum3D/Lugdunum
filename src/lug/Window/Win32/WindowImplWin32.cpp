@@ -1,6 +1,10 @@
 #include <cstdlib>
 #include <lug/Window/Win32/WindowImplWin32.hpp>
 
+namespace lug {
+namespace Window {
+namespace priv {
+
 uint8_t lug::Window::priv::WindowImpl::windowCount = 0;
 lug::Window::priv::WindowImpl* lug::Window::priv::WindowImpl::fullscreenWindow = nullptr;
 
@@ -228,3 +232,7 @@ LRESULT CALLBACK lug::Window::priv::WindowImpl::onEvent(HWND handle, UINT messag
 
     return DefWindowProcW(handle, message, wParam, lParam);
 }
+
+} // namespace priv
+} // namespace Window
+} // namespace lug

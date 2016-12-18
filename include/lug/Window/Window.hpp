@@ -63,5 +63,5 @@ private:
     friend lug::Window::priv::WindowImpl;
 };
 
-} // namespace Window
-} // namespace lug
+} // Window
+} // lug

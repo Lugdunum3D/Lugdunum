@@ -6,7 +6,6 @@
 #include <lug/System/Export.hpp>
 #include <lug/System/Utils.hpp>
 
-
 namespace lug {
 namespace System {
 
@@ -92,5 +91,5 @@ do {\
     throw lug::System::type(desc, __FILE__, LUG_SYSTEM_FUNCTION_NAME, __LINE__);\
 } while (0)
 
-}
-}
+} // System
+} // lug

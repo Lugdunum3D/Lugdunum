@@ -25,7 +25,7 @@ private:
 
 #include <lug/System/Memory/Policies/Thread.inl>
 
-}
-}
-}
-}
+} // Policies
+} // Memory
+} // System
+} // lug

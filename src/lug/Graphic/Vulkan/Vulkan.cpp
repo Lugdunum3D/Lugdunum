@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <cstring>
 
-
 inline namespace Vulkan {
 
 #define LUG_DEFINE_DEFINITION_VULKAN_FUNCTIONS(name) PFN_##name name = nullptr;
@@ -12,7 +11,7 @@ LUG_INSTANCE_VULKAN_FUNCTIONS(LUG_DEFINE_DEFINITION_VULKAN_FUNCTIONS);
 LUG_DEVICE_VULKAN_FUNCTIONS(LUG_DEFINE_DEFINITION_VULKAN_FUNCTIONS);
 #undef LUG_DEFINE_DEFINITION_VULKAN_FUNCTIONS
 
-}
+} // Vulkan
 
 namespace lug {
 namespace Graphic {

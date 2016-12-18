@@ -3,12 +3,12 @@
 #include <lug/System/Export.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
-#ifndef WIN32_LEAN_AND_MEAN
-    #define WIN32_LEAN_AND_MEAN
-#endif
-#include <Windows.h>
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
+    #include <Windows.h>
 #else
-#include <dlfcn.h>
+    #include <dlfcn.h>
 #endif
 
 namespace lug {
@@ -29,6 +29,6 @@ Function sym(Handle handle, const char *name);
 
 #include <lug/System/Library.inl>
 
-}
-}
-}
+} // Library
+} // System
+} // lug

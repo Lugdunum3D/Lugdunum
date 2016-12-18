@@ -45,7 +45,7 @@ private:
     lug::System::Memory::Area::Page* _firstPage{nullptr};
 };
 
-}
-}
-}
-}
+} // Allocator
+} // Memory
+} // System
+} // lug
