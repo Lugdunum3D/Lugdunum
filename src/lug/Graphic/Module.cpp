@@ -8,8 +8,7 @@ const std::unordered_map<Module::Type, Module> modules = {
     {                                       \
         Module::Type::name, {               \
             #name,                          \
-            Module::Type::name,             \
-            name##Requirements              \
+            Module::Type::name              \
         }                                   \
     },
 

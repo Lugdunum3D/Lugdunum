@@ -5,6 +5,9 @@
 int main() {
     lug::Graphic::Graphic graphic{{"hello", {0, 1, 0}}};
 
+    //graphic.setRendererType(Renderer::Type::Vulkan);
+    //graphic.addModule(...);
+
     // Add or remove modules
     // Set the renderer type
 

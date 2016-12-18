@@ -6,6 +6,17 @@ namespace lug {
 namespace Graphic {
 namespace Vulkan {
 
+const std::unordered_map<Module::Type, Renderer::Requirements> Renderer::modulesRequirements = {
+    #define LUG_INIT_GRAPHIC_MODULES_REQUIREMENTS(name) \
+    {                                                   \
+        Module::Type::name, name##Requirements          \
+    },
+
+    LUG_GRAPHIC_MODULES(LUG_INIT_GRAPHIC_MODULES_REQUIREMENTS)
+
+    #undef LUG_INIT_GRAPHIC_MODULES_REQUIREMENTS
+};
+
 Renderer::Renderer(Graphic& graphic) : _graphic(graphic) {}
 
 void Renderer::init() {
@@ -37,9 +48,9 @@ void Renderer::init() {
 
         // Check which layers / extensions to load
         for (const auto moduleType : _graphic.getModulesLoaded()) {
-            const auto& module = ::lug::Graphic::modules.at(moduleType);
+            const auto& requirements = modulesRequirements.at(moduleType);
 
-            for (const auto& layerName : module.requirements.mandatoryInstanceLayers) {
+            for (const auto& layerName : requirements.mandatoryInstanceLayers) {
                 if (_instanceInfo.containsLayer(layerName)) {
                     layers.push_back(layerName);
                 } else {
@@ -47,7 +58,7 @@ void Renderer::init() {
                 }
             }
 
-            for (const auto& extensionName : module.requirements.mandatoryInstanceExtensions) {
+            for (const auto& extensionName : requirements.mandatoryInstanceExtensions) {
                 if (_instanceInfo.containsExtension(extensionName)) {
                     extensions.push_back(extensionName);
                 } else {
@@ -55,13 +66,13 @@ void Renderer::init() {
                 }
             }
 
-            for (const auto& layerName : module.requirements.optionnalInstanceLayers) {
+            for (const auto& layerName : requirements.optionnalInstanceLayers) {
                 if (_instanceInfo.containsLayer(layerName)) {
                     layers.push_back(layerName);
                 }
             }
 
-            for (const auto& extensionName : module.requirements.optionnalInstanceExtensions) {
+            for (const auto& extensionName : requirements.optionnalInstanceExtensions) {
                 if (_instanceInfo.containsExtension(extensionName)) {
                     extensions.push_back(extensionName);
                 }
