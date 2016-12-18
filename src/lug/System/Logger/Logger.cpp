@@ -7,6 +7,18 @@ Logger Logger::logger("internal");
 
 Logger::Logger(const std::string& loggerName) : _name(loggerName) {}
 
+void Logger::addHandler(Handler* handler) {
+    _handlers.insert(handler);
+}
+
+void Logger::addHandler(const std::string& name) {
+    _handlers.insert(LoggingFacility::getHandler(name));
+}
+
+void Logger::defaultErrHandler(const std::string& msg) {
+    log(Level::Fatal, "Exception in logger {}: {}", _name, msg);
+}
+
 const std::string& Logger::getName() const {
     return _name;
 }

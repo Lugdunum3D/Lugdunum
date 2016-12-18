@@ -17,79 +17,37 @@ namespace System {
 class LUG_SYSTEM_API Logger {
 public:
     Logger(const std::string& loggerName);
-    virtual ~Logger() {}
+    virtual ~Logger() = default;
 
-    virtual void addHandler(Handler* handler) {
-        _handlers.insert(handler);
-    }
+    void addHandler(Handler* handler);
 
-    virtual void addHandler(const std::string& name) {
-        _handlers.insert(LoggingFacility::getHandler(name));
-    }
+    void addHandler(const std::string& name);
 
-    virtual void defaultErrHandler(const std::string& msg) {
-        log(Level::Fatal, "Exception in logger {}: {}", _name, msg);
-    }
+    void defaultErrHandler(const std::string& msg);
 
     template<typename T>
-    inline void log(Level::enumLevel lvl, const T& msg) {
-        try {
-            priv::Message logMsg(_name, lvl);
-            logMsg.raw.write("{}", msg);
-            handle(logMsg);
-        }
-        catch (const std::exception& ex) {
-            defaultErrHandler(ex.what());
-        }
-        catch (...) {
-            defaultErrHandler("Unknown exception");
-        }
-    }
+    void log(Level::enumLevel lvl, const T& msg);
 
     template<typename... Args, typename T>
-    inline void log(Level::enumLevel lvl, const T& fmt, const Args &... args) {
-        try {
-            priv::Message logMsg(_name, lvl);
-            logMsg.raw.write(fmt, args...);
-            handle(logMsg);
-        }
-        catch (const std::exception& ex) {
-            defaultErrHandler(ex.what());
-        }
-        catch (...) {
-            defaultErrHandler("Unknown exception");
-        }
-    }
+    void log(Level::enumLevel lvl, const T& fmt, const Args &... args);
 
     template<typename T, typename... Args>
-    inline void debug(const T& fmt, const Args&... args) {
-        log(Level::Debug, fmt, args...);
-    }
+    void debug(const T& fmt, const Args&... args);
 
     template<typename T, typename... Args>
-    inline void info(const T& fmt, const Args&... args) {
-        log(Level::Info, fmt, args...);
-    }
+    void info(const T& fmt, const Args&... args);
 
     template<typename T, typename... Args>
-    inline void warn(const T& fmt, const Args&... args) {
-        log(Level::Warning, fmt, args...);
-    }
+    void warn(const T& fmt, const Args&... args);
 
     template<typename T, typename... Args>
-    inline void error(const T& fmt, const Args&... args) {
-        log(Level::Error, fmt, args...);
-    }
+    void error(const T& fmt, const Args&... args);
 
     template<typename T, typename... Args>
-    inline void fatal(const T& fmt, const Args&... args) {
-        log(Level::Fatal, fmt, args...);
-    }
+    void fatal(const T& fmt, const Args&... args);
 
     template<typename T, typename... Args>
-    inline void assrt(const T& fmt, const Args&... args) {
-        log(Level::Assert, fmt, args...);
-    }
+    void assrt(const T& fmt, const Args&... args);
 
     const std::string& getName() const;
 
@@ -104,13 +62,7 @@ protected:
     std::set<Handler*> _handlers;
 };
 
-
-inline Logger* makeLogger(const std::string& loggerName) {
-    std::unique_ptr<Logger> logger = std::make_unique<Logger>(loggerName);
-    Logger* loggerRawPtr = logger.get();
-    LoggingFacility::registerLogger(loggerName, std::move(logger));
-    return loggerRawPtr;
-}
+#include <lug/System/Logger.inl>
 
 } // namespace System
 } // namespace lug
