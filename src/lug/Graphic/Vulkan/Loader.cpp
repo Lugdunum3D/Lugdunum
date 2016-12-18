@@ -6,8 +6,10 @@ namespace Vulkan {
 
 // TODO: Handle errors
 Loader::Loader() {
-    #if defined(LUG_SYSTEM_WINDOWS)
+#if defined(LUG_SYSTEM_WINDOWS)
     _handle = System::Library::open("vulkan-1.dll");
+#elsif defined(LUG_SYSTEM_ANDROID)
+    _handle = System::Library::open("libvulkan.so");
 #else
     _handle = System::Library::open("libvulkan.so.1");
 #endif
