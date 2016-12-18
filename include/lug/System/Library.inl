@@ -1,13 +1,9 @@
 inline Handle open(const char* name) { // TODO: Handle errors
-    Handle handle;
-
 #if defined(LUG_SYSTEM_WINDOWS)
-    handle = LoadLibraryA(name);
+    return LoadLibraryA(name);
 #else
-    handle = dlopen(name, RTLD_LAZY | RTLD_LOCAL);
+    return dlopen(name, RTLD_LAZY | RTLD_LOCAL);
 #endif
-
-    return handle;
 }
 
 inline void close(Handle handle) {

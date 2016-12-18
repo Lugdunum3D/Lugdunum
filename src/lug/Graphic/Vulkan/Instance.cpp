@@ -19,6 +19,10 @@ Instance& Instance::operator=(Instance&& instance) {
 }
 
 Instance::~Instance() {
+    destroy();
+}
+
+void Instance::destroy() {
     if (_instance != VK_NULL_HANDLE) {
         vkDestroyInstance(_instance, nullptr);
         _instance = VK_NULL_HANDLE;

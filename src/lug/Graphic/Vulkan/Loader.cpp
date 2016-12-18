@@ -41,6 +41,13 @@ void Loader::loadInstanceFunctions(VkInstance instance) {
     #undef LUG_LOAD_VULKAN_FUNCTIONS
 }
 
+// TODO: Handle errors
+void Loader::loadDeviceFunctions(VkDevice device) {
+    #define LUG_LOAD_VULKAN_FUNCTIONS(name) name = reinterpret_cast<PFN_##name>(vkGetDeviceProcAddr(device, #name));
+    LUG_DEVICE_VULKAN_FUNCTIONS(LUG_LOAD_VULKAN_FUNCTIONS);
+    #undef LUG_LOAD_VULKAN_FUNCTIONS
+}
+
 } // Vulkan
 } // Graphic
 } // lug

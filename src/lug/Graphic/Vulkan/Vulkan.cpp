@@ -22,7 +22,7 @@ bool InstanceInfo::containsExtension(const char* extensionName) const {
         return std::strcmp(extension.extensionName, extensionName) == 0;
     };
 
-    return std::find_if(extensions.begin(), extensions.end(), compareExtensions) != extensions.end();
+    return std::find_if(extensions.cbegin(), extensions.cend(), compareExtensions) != extensions.cend();
 }
 
 bool InstanceInfo::containsLayer(const char* layerName) const {
@@ -30,7 +30,29 @@ bool InstanceInfo::containsLayer(const char* layerName) const {
         return std::strcmp(layer.layerName, layerName) == 0;
     };
 
-    return std::find_if(layers.begin(), layers.end(), compareLayers) != layers.end();
+    return std::find_if(layers.cbegin(), layers.cend(), compareLayers) != layers.cend();
+}
+
+bool PhysicalDeviceInfo::containsExtension(const char* extensionName) const {
+    auto compareExtensions = [&extensionName](const VkExtensionProperties& extension) {
+        return std::strcmp(extension.extensionName, extensionName) == 0;
+    };
+
+    return std::find_if(extensions.cbegin(), extensions.cend(), compareExtensions) != extensions.cend();
+}
+
+bool PhysicalDeviceInfo::containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const {
+    idx = -1;
+
+    for (uint8_t i = 0; i < queueFamilies.size(); ++i) {
+        if (queueFamilies[i].queueCount && (queueFamilies[i].queueFlags & queueFlags) == queueFlags) {
+            if (idx == -1 || queueFamilies[i].queueFlags == queueFlags) {
+                idx = i;
+            }
+        }
+    }
+
+    return idx != -1;
 }
 
 } // Vulkan

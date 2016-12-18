@@ -66,6 +66,7 @@
     macro(vkDestroySwapchainKHR)                            \
 
 #define LUG_DEVICE_VULKAN_FUNCTIONS(macro)              \
+    macro(vkQueueWaitIdle)                              \
     macro(vkGetDeviceQueue)                             \
     macro(vkDeviceWaitIdle)                             \
     macro(vkDestroyDevice)                              \
@@ -153,7 +154,15 @@ struct InstanceInfo {
 };
 
 struct PhysicalDeviceInfo {
+    VkPhysicalDevice handle;
+    VkPhysicalDeviceProperties properties;
+    VkPhysicalDeviceFeatures features;
+    std::vector<VkQueueFamilyProperties> queueFamilies;
+    VkPhysicalDeviceMemoryProperties memoryProperties;
 
+    std::vector<VkExtensionProperties> extensions;
+    bool containsExtension(const char* extensionName) const;
+    bool containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const;
 };
 
 } // Vulkan

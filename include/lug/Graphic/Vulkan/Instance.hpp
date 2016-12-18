@@ -23,9 +23,16 @@ public:
         return _instance;
     }
 
+    template <typename Function>
+    Function getProcAddr(const char* name);
+
+    void destroy();
+
 private:
     VkInstance _instance{VK_NULL_HANDLE};
 };
+
+#include <lug/Graphic/Vulkan/Instance.inl>
 
 } // Vulkan
 } // Graphic

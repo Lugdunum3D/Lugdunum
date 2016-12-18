@@ -5,9 +5,13 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphic)
 set(SRC
     ${SRCROOT}/Graphic.cpp
     ${SRCROOT}/Module.cpp
+    ${SRCROOT}/Vulkan/Device.cpp
     ${SRCROOT}/Vulkan/Instance.cpp
     ${SRCROOT}/Vulkan/Loader.cpp
+    ${SRCROOT}/Vulkan/Queue.cpp
     ${SRCROOT}/Vulkan/Renderer.cpp
+    ${SRCROOT}/Vulkan/Requirements/Core.hpp
+    ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
     ${SRCROOT}/Vulkan/Vulkan.cpp
 )
 source_group("src" FILES ${SRC})
@@ -19,9 +23,14 @@ set(INC
     ${INCROOT}/Graphic.inl
     ${INCROOT}/Module.hpp
     ${INCROOT}/Renderer.hpp
+    ${INCROOT}/Vulkan/Device.hpp
+    ${INCROOT}/Vulkan/Device.inl
     ${INCROOT}/Vulkan/Instance.hpp
+    ${INCROOT}/Vulkan/Instance.inl
     ${INCROOT}/Vulkan/Loader.hpp
     ${INCROOT}/Vulkan/Renderer.hpp
+    ${INCROOT}/Vulkan/Renderer.inl
+    ${INCROOT}/Vulkan/Queue.hpp
     ${INCROOT}/Vulkan/Vulkan.hpp
 )
 source_group("inc" FILES ${INC})

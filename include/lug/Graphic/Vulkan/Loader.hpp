@@ -21,6 +21,7 @@ public:
     ~Loader();
 
     void loadInstanceFunctions(VkInstance instance);
+    void loadDeviceFunctions(VkDevice device);
 
 private:
     System::Library::Handle _handle{nullptr};
