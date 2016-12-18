@@ -74,7 +74,7 @@ find_package(Doxygen)
 
 lug_set_option(BUILD_SHARED_LIBS TRUE BOOL "TRUE to build Lugdunum as shared libraries, FALSE to build it as static libraries")
 lug_set_option(ENABLE_TEST FALSE BOOL "TRUE to enable unit tests, FALSE to disable unit tests")
-lug_set_option(BUILD_DOCUMENTATION TRUE BOOL "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
+lug_set_option(BUILD_DOCUMENTATION FALSE BOOL "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
 
 if(NOT BUILD_SHARED_LIBS)
     add_definitions(-DLUG_STATIC)
