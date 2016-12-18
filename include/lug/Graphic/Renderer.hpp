@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <set>
+#include <lug/Graphic/Module.hpp>
 
 namespace lug {
 namespace Graphic {
@@ -22,7 +24,7 @@ public:
 
     virtual ~Renderer() = default;
 
-    virtual void init() = 0;
+    virtual std::set<Module::Type> init() = 0;
 };
 
 } // Graphic

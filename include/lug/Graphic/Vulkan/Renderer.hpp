@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 #include <lug/Graphic/Export.hpp>
-#include <lug/Graphic/Module.hpp>
 #include <lug/Graphic/Renderer.hpp>
 #include <lug/Graphic/Vulkan/Instance.hpp>
 #include <lug/Graphic/Vulkan/Loader.hpp>
@@ -36,7 +35,10 @@ public:
 
     ~Renderer() = default;
 
-    void init() override final;
+    std::set<Module::Type> init() override final;
+
+private:
+    void checkRequirementsInstance(const std::set<Module::Type> &modules, std::set<Module::Type> &loadedModules, bool optionnal);
 
 private:
     Loader _loader; // Need to be at the beginning, we don't want to unload Vulkan functions too early
@@ -44,6 +46,9 @@ private:
 
     Instance _instance;
     InstanceInfo _instanceInfo;
+
+    std::vector<const char*> _loadedLayers;
+    std::vector<const char*> _loadedExtensions;
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;

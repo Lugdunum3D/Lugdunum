@@ -1,7 +1,8 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
-#include <vector>
+#include <set>
 #include <lug/Core/Application.hpp>
 #include <lug/Graphic/Export.hpp>
 #include <lug/Graphic/Module.hpp>
@@ -24,9 +25,17 @@ public:
 
     void init();
 
-    // TODO: optionnal modules
-    // TODO: addModule, removeModule, isModuleLoaded
-    const std::vector<Module::Type>& getModulesLoaded() const;
+    void addModule(Module::Type type);
+    void addOptionnalModule(Module::Type type);
+
+    void removeModule(Module::Type type);
+    void removeOptionnalModule(Module::Type type);
+
+    const std::set<Module::Type>& getMandatoryModules() const;
+    const std::set<Module::Type>& getOptionnalModules() const;
+
+    bool isModuleLoaded(Module::Type type) const;
+    const std::set<Module::Type>& getLoadedModules() const;
 
     // TODO: setRendererType, getRendererType
     // TODO: getRenderer
@@ -36,7 +45,9 @@ public:
 private:
     Core::Application::Info _appInfo;
 
-    std::vector<Module::Type> _modules{Module::Type::Core};
+    std::set<Module::Type> _mandatoryModules{Module::Type::Core};
+    std::set<Module::Type> _optionnalModules{};
+    std::set<Module::Type> _loadedModules{};
 
     Renderer::Type _rendererType{Renderer::Type::Vulkan};
     std::unique_ptr<Renderer> _renderer{nullptr};

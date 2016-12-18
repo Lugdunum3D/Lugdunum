@@ -19,7 +19,9 @@ const std::unordered_map<Module::Type, Renderer::Requirements> Renderer::modules
 
 Renderer::Renderer(Graphic& graphic) : _graphic(graphic) {}
 
-void Renderer::init() {
+std::set<Module::Type> Renderer::init() {
+    std::set<Module::Type> loadedModules{};
+
     // Load instance properties
     {
         // Load instance extensions
@@ -43,41 +45,9 @@ void Renderer::init() {
 
     // Create instance
     {
-        std::vector<const char*> layers;
-        std::vector<const char*> extensions;
-
-        // Check which layers / extensions to load
-        for (const auto moduleType : _graphic.getModulesLoaded()) {
-            const auto& requirements = modulesRequirements.at(moduleType);
-
-            for (const auto& layerName : requirements.mandatoryInstanceLayers) {
-                if (_instanceInfo.containsLayer(layerName)) {
-                    layers.push_back(layerName);
-                } else {
-                    // TODO: Handle error
-                }
-            }
-
-            for (const auto& extensionName : requirements.mandatoryInstanceExtensions) {
-                if (_instanceInfo.containsExtension(extensionName)) {
-                    extensions.push_back(extensionName);
-                } else {
-                    // TODO: Handle error
-                }
-            }
-
-            for (const auto& layerName : requirements.optionnalInstanceLayers) {
-                if (_instanceInfo.containsLayer(layerName)) {
-                    layers.push_back(layerName);
-                }
-            }
-
-            for (const auto& extensionName : requirements.optionnalInstanceExtensions) {
-                if (_instanceInfo.containsExtension(extensionName)) {
-                    extensions.push_back(extensionName);
-                }
-            }
-        }
+        // Check which layers / extensions to load for modules
+        checkRequirementsInstance(_graphic.getMandatoryModules(), loadedModules, false);
+        checkRequirementsInstance(_graphic.getOptionnalModules(), loadedModules, true);
 
         // Create the application information for vkCreateInstance
         VkApplicationInfo applicationInfo{
@@ -96,10 +66,10 @@ void Renderer::init() {
             createInfo.pNext = nullptr,
             createInfo.flags = 0,
             createInfo.pApplicationInfo = &applicationInfo,
-            createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size()),
-            createInfo.ppEnabledLayerNames = &layers[0],
-            createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size()),
-            createInfo.ppEnabledExtensionNames = &extensions[0]
+            createInfo.enabledLayerCount = static_cast<uint32_t>(_loadedLayers.size()),
+            createInfo.ppEnabledLayerNames = &_loadedLayers[0],
+            createInfo.enabledExtensionCount = static_cast<uint32_t>(_loadedExtensions.size()),
+            createInfo.ppEnabledExtensionNames = &_loadedExtensions[0]
         };
 
         VkInstance instance{VK_NULL_HANDLE};
@@ -107,6 +77,58 @@ void Renderer::init() {
 
         _instance = Instance(instance);
         _loader.loadInstanceFunctions(_instance);
+    }
+
+    return loadedModules;
+}
+
+void Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool optionnal) {
+    for (const auto moduleType : modulesToCheck) {
+        const auto& requirements = modulesRequirements.at(moduleType);
+
+        std::vector<const char*> layers;
+        std::vector<const char*> extensions;
+
+        for (const auto& layerName : requirements.mandatoryInstanceLayers) {
+            if (_instanceInfo.containsLayer(layerName)) {
+                layers.push_back(layerName);
+            } else {
+                if (!optionnal) {
+                    // TODO: Handle error
+                }
+
+                break;
+            }
+        }
+
+        for (const auto& extensionName : requirements.mandatoryInstanceExtensions) {
+            if (_instanceInfo.containsExtension(extensionName)) {
+                extensions.push_back(extensionName);
+            } else {
+                if (!optionnal) {
+                    // TODO: Handle error
+                }
+
+                break;
+            }
+        }
+
+        for (const auto& layerName : requirements.optionnalInstanceLayers) {
+            if (_instanceInfo.containsLayer(layerName)) {
+                layers.push_back(layerName);
+            }
+        }
+
+        for (const auto& extensionName : requirements.optionnalInstanceExtensions) {
+            if (_instanceInfo.containsExtension(extensionName)) {
+                extensions.push_back(extensionName);
+            }
+        }
+
+        loadedModules.insert(moduleType);
+
+        _loadedLayers.insert(_loadedLayers.end(), layers.begin(), layers.end());
+        _loadedExtensions.insert(_loadedExtensions.end(), extensions.begin(), extensions.end());
     }
 }
 
