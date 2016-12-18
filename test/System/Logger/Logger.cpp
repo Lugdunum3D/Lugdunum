@@ -69,17 +69,13 @@ TEST(Logger, Fmt) {
 
 
 TEST(Logger, LevelsExplicit) {
-    class MockLogger : public Logger {
-    public:
-        using Logger::Logger;
-        MOCK_METHOD1(handle, void(priv::Message& msg));
-    };
-
-    std::unique_ptr<MockLogger> logger = std::make_unique<MockLogger>(loggerName);
+    Logger logger = Logger(loggerName);
+    MockHandler* handler = makeHandler<MockHandler>(handlerName);
+    logger.addHandler(handler);
 
     auto testOneLevel = [&](Level::enumLevel level) {
-        EXPECT_CALL(*(logger.get()), handle(Field(&priv::Message::level, level))).Times(1);
-        logger->log(level, helloWorld);
+        EXPECT_CALL(*handler, handle(Field(&priv::Message::level, level))).Times(1);
+        logger.log(level, helloWorld);
     };
 
     testOneLevel(Level::Off);
@@ -93,35 +89,31 @@ TEST(Logger, LevelsExplicit) {
 
 
 TEST(Logger, LevelsImplicit) {
-    class MockLogger : public Logger {
-    public:
-        using Logger::Logger;
-        MOCK_METHOD1(handle, void(priv::Message& msg));
-    };
-
-    std::unique_ptr<MockLogger> logger = std::make_unique<MockLogger>(loggerName);
+    Logger logger = Logger(loggerName);
+    MockHandler* handler = makeHandler<MockHandler>(handlerName);
+    logger.addHandler(handler);
 
     // We can't make a lambda as earlier because we would have to pass functions like `logger->debug` as a
     // member pointer but it's not possible because they are templated.
     // You can try, go ahead, but it won't work.
 
-    EXPECT_CALL(*(logger.get()), handle(Field(&priv::Message::level, Level::Debug))).Times(1);
-    logger->debug(helloWorld);
+    EXPECT_CALL(*handler, handle(Field(&priv::Message::level, Level::Debug))).Times(1);
+    logger.debug(helloWorld);
 
-    EXPECT_CALL(*(logger.get()), handle(Field(&priv::Message::level, Level::Info))).Times(1);
-    logger->info(helloWorld);
+    EXPECT_CALL(*handler, handle(Field(&priv::Message::level, Level::Info))).Times(1);
+    logger.info(helloWorld);
 
-    EXPECT_CALL(*(logger.get()), handle(Field(&priv::Message::level, Level::Warning))).Times(1);
-    logger->warn(helloWorld);
+    EXPECT_CALL(*handler, handle(Field(&priv::Message::level, Level::Warning))).Times(1);
+    logger.warn(helloWorld);
 
-    EXPECT_CALL(*(logger.get()), handle(Field(&priv::Message::level, Level::Error))).Times(1);
-    logger->error(helloWorld);
+    EXPECT_CALL(*handler, handle(Field(&priv::Message::level, Level::Error))).Times(1);
+    logger.error(helloWorld);
 
-    EXPECT_CALL(*(logger.get()), handle(Field(&priv::Message::level, Level::Fatal))).Times(1);
-    logger->fatal(helloWorld);
+    EXPECT_CALL(*handler, handle(Field(&priv::Message::level, Level::Fatal))).Times(1);
+    logger.fatal(helloWorld);
 
-    EXPECT_CALL(*(logger.get()), handle(Field(&priv::Message::level, Level::Assert))).Times(1);
-    logger->assrt(helloWorld);
+    EXPECT_CALL(*handler, handle(Field(&priv::Message::level, Level::Assert))).Times(1);
+    logger.assrt(helloWorld);
 }
 
 

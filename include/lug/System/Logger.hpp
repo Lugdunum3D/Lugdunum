@@ -91,11 +91,11 @@ public:
         log(Level::Assert, fmt, args...);
     }
 
-    virtual const std::string& getName() const;
+    const std::string& getName() const;
 
-    virtual void handle(priv::Message& msg);
+    void handle(priv::Message& msg);
 
-    virtual void flush();
+    void flush();
 
     static System::Logger logger;
 
