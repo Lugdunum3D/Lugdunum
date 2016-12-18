@@ -29,25 +29,25 @@ public:
     void log(Level::enumLevel lvl, const T& msg);
 
     template<typename... Args, typename T>
-    void log(Level::enumLevel lvl, const T& fmt, const Args &... args);
+    void log(Level::enumLevel lvl, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void debug(const T& fmt, const Args&... args);
+    void debug(const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void info(const T& fmt, const Args&... args);
+    void info(const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void warn(const T& fmt, const Args&... args);
+    void warn(const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void error(const T& fmt, const Args&... args);
+    void error(const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void fatal(const T& fmt, const Args&... args);
+    void fatal(const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void assrt(const T& fmt, const Args&... args);
+    void assrt(const T& fmt, Args&&... args);
 
     const std::string& getName() const;
 
