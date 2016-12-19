@@ -336,7 +336,7 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
             createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
             createInfo.pNext = nullptr,
             createInfo.flags = 0,
-            createInfo.queueCreateInfoCount = queueCreateInfo.size(),
+            createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfo.size()),
             createInfo.pQueueCreateInfos = queueCreateInfo.data(),
             createInfo.enabledLayerCount = 0, // Deprecated
             createInfo.ppEnabledLayerNames = nullptr, // Deprecated
