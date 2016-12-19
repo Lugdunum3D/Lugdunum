@@ -69,6 +69,6 @@ protected:
 
 #include <lug/System/Logger.inl>
 
-} // namespace System
-} // namespace lug
+} // System
+} // lug
 

@@ -29,5 +29,5 @@ private:
     std::ofstream _ofs;
 };
 
-} // namespace lug
-} // namespace System
+} // lug
+} // System

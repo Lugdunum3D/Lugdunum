@@ -38,11 +38,11 @@ struct Token {
     Token(FlagHandlerPointer flagHandle) : basic(flagHandle) {}
     Token(std::unique_ptr<Formattable> formattableHandle) : advanced(std::move(formattableHandle)) {}
 
-    FlagHandlerPointer basic = nullptr;
-    std::unique_ptr<Formattable> advanced = nullptr;
+    FlagHandlerPointer basic{nullptr};
+    std::unique_ptr<Formattable> advanced{nullptr};
 };
 
-} // namespace priv
+} // priv
 
 class LUG_SYSTEM_API Formatter {
 public:
@@ -73,5 +73,5 @@ private:
     std::vector<priv::Token> _formatChain;
 };
 
-} // namespace lug
-} // namespace System
+} // lug
+} // System

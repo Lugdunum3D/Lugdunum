@@ -25,5 +25,5 @@ private:
     android_LogPriority lugLevelToLogCatPrio(Level level);
 };
 
-} // namespace lug
-} // namespace System
+} // lug
+} // System

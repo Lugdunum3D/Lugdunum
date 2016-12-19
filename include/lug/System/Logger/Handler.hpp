@@ -45,6 +45,6 @@ T* makeHandler(const std::string& handlerName, Args&&... args);
 
 #include <lug/System/Logger/Handler.inl>
 
-} // namespace lug
-} // namespace System
+} // lug
+} // System
 

@@ -52,5 +52,5 @@ public:
     ~StderrHandler() = default;
 };
 
-} // namespace lug
-} // namespace System
+} // lug
+} // System

@@ -27,5 +27,5 @@ enum class Level : uint8_t {
 };
 #undef LUG_LOG_ENUM
 
-} // namespace System
-} // namespace priv
+} // System
+} // priv
