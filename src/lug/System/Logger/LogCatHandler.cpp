@@ -13,7 +13,7 @@ void LogCatHandler::flush() {
     // Not applicable
 }
 
-android_LogPriority LogCatHandler::lugLevelToLogCatPrio(int level) {
+android_LogPriority LogCatHandler::lugLevelToLogCatPrio(Level level) {
     switch (level) {
         case lug::System::Level::Off:       return ANDROID_LOG_SILENT;
         case lug::System::Level::Debug:     return ANDROID_LOG_DEBUG;

@@ -22,7 +22,7 @@ private:
     void handle(const priv::Message& msg);
     void flush();
 
-    android_LogPriority lugLevelToLogCatPrio(int level);
+    android_LogPriority lugLevelToLogCatPrio(Level level);
 };
 
 } // namespace lug

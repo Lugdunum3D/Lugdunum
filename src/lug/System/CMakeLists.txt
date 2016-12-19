@@ -55,6 +55,11 @@ set(INC
     ${INCROOT}/Memory/Policies/MemoryMarker.inl
 )
 
+set(EXT_LIBRARIES)
+if(LUG_OS_ANDROID)
+    list(APPEND EXT_LIBRARIES log)
+endif()
+
 if(LUG_OS_ANDROID)
     list(APPEND SRC ${SRCROOT}/Logger/LogCatHandler.cpp)
     list(APPEND INC ${INCROOT}/Logger/LogCatHandler.hpp)
@@ -66,4 +71,5 @@ source_group("inc" FILES ${INC})
 # define the target
 lug_add_library(lug-system
                 SOURCES ${SRC} ${INC}
+                EXTERNAL_LIBS ${EXT_LIBRARIES}
 )

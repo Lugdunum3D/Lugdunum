@@ -3,6 +3,7 @@
 #include <chrono>
 #include <memory>
 #include <vector>
+#include <string>
 #include <lug/System/Export.hpp>
 
 namespace lug {
