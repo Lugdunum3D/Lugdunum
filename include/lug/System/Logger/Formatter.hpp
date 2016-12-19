@@ -2,11 +2,15 @@
 
 #include <chrono>
 #include <memory>
-#include <lug/System/Logger/Message.hpp>
+#include <vector>
+#include <lug/System/Export.hpp>
 
 namespace lug {
 namespace System {
 
+namespace priv {
+class Message;
+}
 class Formatter;
 
 using FlagHandlerPointer = std::string (Formatter::*)(const struct tm& now);

@@ -1,4 +1,5 @@
 #include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Handler.hpp>
 
 namespace lug {
 namespace System {

@@ -1,5 +1,5 @@
 template<typename T>
-inline void Logger::log(Level::enumLevel lvl, const T& msg) {
+inline void Logger::log(Level lvl, const T& msg) {
     try {
         priv::Message logMsg(_name, lvl);
         logMsg.raw.write("{}", msg);
@@ -14,7 +14,7 @@ inline void Logger::log(Level::enumLevel lvl, const T& msg) {
 }
 
 template<typename... Args, typename T>
-inline void Logger::log(Level::enumLevel lvl, const T& fmt, Args&&... args) {
+inline void Logger::log(Level lvl, const T& fmt, Args&&... args) {
     try {
         priv::Message logMsg(_name, lvl);
         logMsg.raw.write(fmt, std::forward<Args>(args)...);

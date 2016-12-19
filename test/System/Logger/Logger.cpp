@@ -73,7 +73,7 @@ TEST(Logger, LevelsExplicit) {
     MockHandler* handler = makeHandler<MockHandler>(handlerName);
     logger.addHandler(handler);
 
-    auto testOneLevel = [&](Level::enumLevel level) {
+    auto testOneLevel = [&](Level level) {
         EXPECT_CALL(*handler, handle(Field(&priv::Message::level, level))).Times(1);
         logger.log(level, helloWorld);
     };
@@ -122,7 +122,7 @@ TEST(Logger, LevelsFilter) {
     MockHandler* handler = makeHandler<MockHandler>(handlerName);
     logger->addHandler(handler);
 
-    auto testOneLevel = [&](Level::enumLevel level, Level::enumLevel levelPlusOne) {
+    auto testOneLevel = [&](Level level, Level levelPlusOne) {
         handler->setLevel(levelPlusOne);
         EXPECT_CALL(*handler, handle(_)).Times(0);
         logger->log(level, helloWorld);

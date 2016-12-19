@@ -1,4 +1,6 @@
 #include <lug/System/Logger/OstreamHandler.hpp>
+#include <lug/System/Logger/Message.hpp>
+#include <lug/System/Logger/Formatter.hpp>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 

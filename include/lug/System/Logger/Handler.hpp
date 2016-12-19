@@ -2,12 +2,17 @@
 
 #include <atomic>
 #include <memory>
-#include <lug/System/Logger/Message.hpp>
-#include <lug/System/Logger/Formatter.hpp>
+#include <lug/System/Export.hpp>
+#include <lug/System/Logger/Common.hpp>
 #include <lug/System/Logger/LoggingFacility.hpp>
 
 namespace lug {
 namespace System {
+
+namespace priv {
+class Message;
+}
+class Formatter;
 
 class LUG_SYSTEM_API Handler {
 public:
@@ -21,9 +26,9 @@ public:
     virtual void flush() = 0;
     virtual void handle(const priv::Message& msg) = 0;
 
-    bool shouldLog(Level::enumLevel level) const;
-    void setLevel(Level::enumLevel level);
-    Level::enumLevel getLevel() const;
+    bool shouldLog(Level level) const;
+    void setLevel(Level level);
+    Level getLevel() const;
 
 protected:
     std::string _name;
@@ -31,13 +36,8 @@ protected:
     std::atomic_int _level;
 };
 
-template<typename T, typename... Args>
-inline T* makeHandler(const std::string& handlerName, Args&... args) {
-    std::unique_ptr<T> handler = std::make_unique<T>(handlerName, args...);
-    T* handlerRawPtr = handler.get();
-    LoggingFacility::registerHandler(handlerName, std::move(handler));
-    return handlerRawPtr;
-}
+#include <lug/System/Logger/Handler.inl>
 
 } // namespace lug
 } // namespace System
+

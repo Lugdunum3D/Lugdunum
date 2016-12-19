@@ -6,13 +6,16 @@
 
 #include <lug/System/Export.hpp>
 #include <lug/System/Logger/Common.hpp>
-#include <lug/System/Logger/Handler.hpp>
 #include <lug/System/Logger/LoggingFacility.hpp>
 #include <lug/System/Logger/Message.hpp>
-#include <lug/System/Utils.hpp>
 
 namespace lug {
 namespace System {
+
+namespace priv {
+class Message;
+}
+class LUG_SYSTEM_API Handler;
 
 class LUG_SYSTEM_API Logger {
 public:
@@ -20,16 +23,14 @@ public:
     virtual ~Logger() = default;
 
     void addHandler(Handler* handler);
-
     void addHandler(const std::string& name);
-
     void defaultErrHandler(const std::string& msg);
 
     template<typename T>
-    void log(Level::enumLevel lvl, const T& msg);
+    void log(Level lvl, const T& msg);
 
     template<typename... Args, typename T>
-    void log(Level::enumLevel lvl, const T& fmt, Args&&... args);
+    void log(Level lvl, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
     void debug(const T& fmt, Args&&... args);
@@ -50,9 +51,7 @@ public:
     void assrt(const T& fmt, Args&&... args);
 
     const std::string& getName() const;
-
     void handle(priv::Message& msg);
-
     void flush();
 
     static System::Logger logger;
@@ -66,3 +65,4 @@ protected:
 
 } // namespace System
 } // namespace lug
+

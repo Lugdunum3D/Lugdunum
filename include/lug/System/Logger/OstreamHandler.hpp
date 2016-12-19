@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <lug/System/Logger/Handler.hpp>
+#include <lug/System/Logger/Message.hpp>
 
 namespace lug {
 namespace System {

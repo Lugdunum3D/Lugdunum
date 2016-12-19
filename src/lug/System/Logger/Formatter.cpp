@@ -1,5 +1,5 @@
 #include <lug/System/Logger/Formatter.hpp>
-#include <chrono>
+#include <lug/System/Logger/Message.hpp>
 #include <sstream>
 
 namespace lug {

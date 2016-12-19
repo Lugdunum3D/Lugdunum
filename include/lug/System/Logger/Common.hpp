@@ -1,9 +1,5 @@
 #pragma once
 
-#include <string>
-#include <lug/System/Export.hpp>
-#include <lug/System/Utils.hpp>
-
 #define FMT_HEADER_ONLY
 #if defined(LUG_FMT_EXTERNAL)
     #include <fmt/format.h>
@@ -12,24 +8,6 @@
     #include <lug/Ext/fmt/format.h>
     #include <lug/Ext/fmt/ostream.h>
 #endif
-
-namespace lug {
-namespace System {
-
-// Generate channels list
-// enum: RENDER_API, RENDER_ENGINE, PHYSICS_ENGINE, etc...
-// map pair: { RENDER_API, "RENDER_API" }, { RENDER_ENGINE, "RENDER_ENGINE" }, etc...
-#define LUG_LOG_CHANNELS(PROCESS)   \
-    PROCESS(Vulkan),                \
-    PROCESS(Render),                \
-    PROCESS(Physics),               \
-    PROCESS(Script),                \
-    PROCESS(Network),               \
-    PROCESS(Sound),                 \
-    PROCESS(Memory),                \
-    PROCESS(Window),                \
-    PROCESS(Math),                  \
-    PROCESS(User),                  \
 
 #define LUG_LOG_LEVELS(PROCESS)     \
     PROCESS(Debug),                 \
@@ -41,8 +19,6 @@ namespace System {
     PROCESS(Off),                   \
 
 #define LUG_LOG_ENUM(CHANNEL) CHANNEL
-#define LUG_LOG_MAP_PAIR_C(CHANNEL) { Logger::Channel::CHANNEL, #CHANNEL }
-#define LUG_LOG_MAP_PAIR_T(CHANNEL) { Level::CHANNEL, #CHANNEL }
 
 #if defined(LUG_SYSTEM_WINDOWS)
     using filename_t = std::wstring;
@@ -50,17 +26,12 @@ namespace System {
     using filename_t = std::string;
 #endif
 
-namespace Channel {
-typedef enum {
-    LUG_LOG_CHANNELS(LUG_LOG_ENUM)
-} enumChannel;
-}
+namespace lug {
+namespace System {
 
-namespace Level {
-typedef enum {
+enum class Level {
     LUG_LOG_LEVELS(LUG_LOG_ENUM)
-} enumLevel;
-}
+};
 
-} // namespace lug
-} // namespace system
+} // namespace System
+} // namespace priv

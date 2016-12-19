@@ -6,14 +6,13 @@ namespace lug {
 namespace System {
 namespace priv {
 
-struct Message {
+class Message {
+public:
     Message() = default;
-    Message(const std::string& _loggerName, Level::enumLevel _level): loggerName(_loggerName), level(_level) {
-
-    }
+    Message(const std::string& _loggerName, Level _level): loggerName(_loggerName), level(_level) {}
 
     const std::string loggerName;
-    Level::enumLevel level;
+    Level level;
     fmt::MemoryWriter raw;
     fmt::MemoryWriter formatted;
 };
