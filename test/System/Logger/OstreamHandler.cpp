@@ -71,6 +71,8 @@ TEST(OstreamHandler, Stdout) {
     handler->handle(msg);
     EXPECT_EQ(Util::getCaptured(), "Hello world!");
     Util::stopCapture();
+
+    LoggingFacility::clear();
 }
 
 TEST(OstreamHandler, Stderr) {
@@ -81,6 +83,8 @@ TEST(OstreamHandler, Stderr) {
     handler->handle(msg);
     EXPECT_EQ(Util::getCaptured(), "Hello world!");
     Util::stopCapture();
+
+    LoggingFacility::clear();
 }
 
 TEST(OstreamHandler, StdoutHandler) {
@@ -91,6 +95,8 @@ TEST(OstreamHandler, StdoutHandler) {
     handler->handle(msg);
     EXPECT_EQ(Util::getCaptured(), "Hello world!");
     Util::stopCapture();
+
+    LoggingFacility::clear();
 }
 
 TEST(OstreamHandler, StderrHandler) {
@@ -101,6 +107,8 @@ TEST(OstreamHandler, StderrHandler) {
     handler->handle(msg);
     EXPECT_EQ(Util::getCaptured(), "Hello world!");
     Util::stopCapture();
+
+    LoggingFacility::clear();
 }
 
 TEST(OstreamHandler, StringStream) {
@@ -113,6 +121,8 @@ TEST(OstreamHandler, StringStream) {
     handler->handle(msg);
     EXPECT_EQ(Util::getCaptured(), "Hello world!");
     Util::stopCapture();
+
+    LoggingFacility::clear();
 }
 
 TEST(OstreamHandler, CallsFormat) {
@@ -135,6 +145,8 @@ TEST(OstreamHandler, CallsFormat) {
     priv::Message msg("Test", Level::Info);
     msg.raw << "Hello world!";
     handler->format(msg);
+
+    LoggingFacility::clear();
 }
 
 

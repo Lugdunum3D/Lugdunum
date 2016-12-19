@@ -27,6 +27,8 @@ TEST(Logger, OneHandler) {
 
     logger->addHandler(handler);
     logger->info(helloWorld);
+
+    LoggingFacility::clear();
 }
 
 
@@ -50,6 +52,8 @@ TEST(Logger, TwoHandlers) {
     logger->addHandler(handler);
     logger->addHandler(handler2);
     logger->info(helloWorld);
+
+    LoggingFacility::clear();
 }
 
 
@@ -65,6 +69,8 @@ TEST(Logger, Fmt) {
 
     logger->addHandler(handler);
     logger->info("{0}{1}{0} {2:b}", "abra", "cad", 42);
+
+    LoggingFacility::clear();
 }
 
 
@@ -85,6 +91,8 @@ TEST(Logger, LevelsExplicit) {
     testOneLevel(Level::Error);
     testOneLevel(Level::Fatal);
     testOneLevel(Level::Assert);
+
+    LoggingFacility::clear();
 }
 
 
@@ -114,6 +122,8 @@ TEST(Logger, LevelsImplicit) {
 
     EXPECT_CALL(*handler, handle(Field(&priv::Message::level, Level::Assert))).Times(1);
     logger.assrt(helloWorld);
+
+    LoggingFacility::clear();
 }
 
 
@@ -138,6 +148,8 @@ TEST(Logger, LevelsFilter) {
     testOneLevel(Level::Error, Level::Fatal);
     testOneLevel(Level::Fatal, Level::Assert);
     testOneLevel(Level::Assert, Level::Off);
+
+    LoggingFacility::clear();
 }
 
 
@@ -175,6 +187,8 @@ TEST(Logger, Handlers) {
     // Check that we can't add the same handler by name twice
     logger->addHandler(handlerName2);
     ASSERT_THAT(logger->getHandlers(), UnorderedElementsAre(handler, handler2));
+
+    LoggingFacility::clear();
 }
 
 
@@ -199,6 +213,8 @@ TEST(Logger, OstreamCustomClass) {
     logger->addHandler(handler);
     logger->info("{}", custom);
     logger->info(custom);
+
+    LoggingFacility::clear();
 }
 
 } // namespace OstreamCustomClass
@@ -225,6 +241,8 @@ TEST(Logger, ExceptionHandler) {
 
     logger->addHandler(handler);
     logger->info(custom);
+
+    LoggingFacility::clear();
 }
 
 TEST(Logger, LogsExceptionWhenParseFails) {
@@ -239,6 +257,8 @@ TEST(Logger, LogsExceptionWhenParseFails) {
 
     logger->addHandler(handler);
     logger->info("{0} {:%d}", 42, 84);  // unsupported format
+
+    LoggingFacility::clear();
 }
 
 } // namespace ExceptionHandler

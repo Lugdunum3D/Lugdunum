@@ -33,6 +33,8 @@ TEST(FileHandler, CallsFormat) {
     priv::Message msg("Test", Level::Info);
     msg.raw << "Hello world!";
     handler->format(msg);
+
+    LoggingFacility::clear();
 }
 
 TEST(FileHandler, Test) {
@@ -54,6 +56,8 @@ TEST(FileHandler, Test) {
     }
 
     remove(fileName.c_str());
+
+    LoggingFacility::clear();
 }
 
 

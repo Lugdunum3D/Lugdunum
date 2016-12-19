@@ -24,5 +24,10 @@ Handler* LoggingFacility::getHandler(const std::string& handlerName) {
     return _handlers[handlerName].get();
 }
 
+void LoggingFacility::clear() {
+    _handlers.clear();
+    _loggers.clear();
+}
+
 }
 }

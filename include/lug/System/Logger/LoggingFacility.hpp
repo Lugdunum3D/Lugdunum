@@ -23,6 +23,8 @@ public:
     static void registerHandler(const std::string& handlerName, std::unique_ptr<Handler> handler);
     static Handler* getHandler(const std::string& handlerName);
 
+    static void clear();
+
 private:
     static std::unordered_map<std::string, std::unique_ptr<Logger>> _loggers;
     static std::unordered_map<std::string, std::unique_ptr<Handler>> _handlers;
