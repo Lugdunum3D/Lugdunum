@@ -35,10 +35,10 @@ private:
 struct Token {
     Token() = default;
     Token(FlagHandlerPointer flagHandle) : basic(flagHandle) {}
-    Token(std::shared_ptr<Formattable> formattableHandle) : advanced(formattableHandle) {}
+    Token(std::unique_ptr<Formattable> formattableHandle) : advanced(std::move(formattableHandle)) {}
 
     FlagHandlerPointer basic = nullptr;
-    std::shared_ptr<Formattable> advanced = nullptr;
+    std::unique_ptr<Formattable> advanced = nullptr;
 };
 
 } // namespace priv

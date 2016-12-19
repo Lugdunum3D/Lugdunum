@@ -92,13 +92,13 @@ inline void Formatter::handleFlag(char flag) {
 }
 
 inline void Formatter::compilePattern(const std::string& pattern) {
-    std::shared_ptr<priv::UserChars> chars;
+    std::unique_ptr<priv::UserChars> chars;
 
     auto end = pattern.end();
     for (auto it = pattern.begin(); it != end; ++it) {
         if (*it == '%') {
             if (chars) { //append raw chars found so far
-                _formatChain.push_back(priv::Token(chars));
+                _formatChain.push_back(priv::Token(std::move(chars)));
                 chars = nullptr;
             }
 
@@ -110,15 +110,14 @@ inline void Formatter::compilePattern(const std::string& pattern) {
         } else {
             // chars not following the % sign should be displayed as is
             if (!chars) {
-                chars = std::make_shared<priv::UserChars>();
+                chars = std::make_unique<priv::UserChars>();
             }
-
             chars->addChar(*it);
         }
     }
 
     if (chars) { //append raw chars found so far
-        _formatChain.push_back(priv::Token(chars));
+        _formatChain.push_back(priv::Token(std::move(chars)));
     }
 
 }
@@ -146,7 +145,7 @@ void Formatter::format(priv::Message& msg) {
         localtime_r(&tt, &timeInfo);
     #endif
 
-    for (priv::Token elem : _formatChain) {
+    for (priv::Token& elem : _formatChain) {
         if (!elem.basic && !elem.advanced) {
             msg.formatted << msg.raw.str();
         } else if (elem.basic) {
