@@ -20,6 +20,10 @@ void Logger::defaultErrHandler(const std::string& msg) {
     log(Level::Fatal, "Exception in logger {}: {}", _name, msg);
 }
 
+void Logger::defaultErrHandler(const std::exception& ex) {
+    defaultErrHandler(ex.what());
+}
+
 const std::string& Logger::getName() const {
     return _name;
 }

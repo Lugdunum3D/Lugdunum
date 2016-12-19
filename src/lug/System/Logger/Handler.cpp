@@ -8,9 +8,7 @@ namespace System {
 Handler::Handler(const std::string& name):
     _name(name),
     _formatter(std::make_unique<Formatter>("%v\n")),
-    _level(static_cast<int>(Level::Debug)) {}
-
-Handler::~Handler() = default;
+    _level(Level::Debug) {}
 
 void Handler::setFormatter(std::unique_ptr<Formatter> formatter) {
     _formatter = std::move(formatter);
@@ -25,15 +23,15 @@ void Handler::format(priv::Message& msg) {
 }
 
 void Handler::setLevel(Level level) {
-    _level.store(static_cast<int>(level));
+    _level = level;
 }
 
 Level Handler::getLevel() const {
-    return static_cast<Level>(_level.load(std::memory_order_relaxed));
+    return _level;
 }
 
 bool Handler::shouldLog(Level level) const {
-    return static_cast<int>(level) >= _level.load(std::memory_order_relaxed);
+    return level >= _level;
 }
 
 } // namespace System

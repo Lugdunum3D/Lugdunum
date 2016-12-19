@@ -10,7 +10,8 @@ namespace System {
 
 namespace priv {
 class Message;
-}
+} // priv
+
 class Formatter;
 
 using FlagHandlerPointer = std::string (Formatter::*)(const struct tm& now);
@@ -26,14 +27,15 @@ class UserChars : public Formattable {
 public:
     void addChar(char c);
     virtual std::string format() const;
+
 private:
     std::string _chars;
 };
 
 struct Token {
     Token() = default;
-    Token(FlagHandlerPointer flagHandle): basic(flagHandle) {}
-    Token(std::shared_ptr<Formattable> formattableHandle): advanced(formattableHandle) {}
+    Token(FlagHandlerPointer flagHandle) : basic(flagHandle) {}
+    Token(std::shared_ptr<Formattable> formattableHandle) : advanced(formattableHandle) {}
 
     FlagHandlerPointer basic = nullptr;
     std::shared_ptr<Formattable> advanced = nullptr;
@@ -44,6 +46,13 @@ struct Token {
 class LUG_SYSTEM_API Formatter {
 public:
     Formatter(const std::string& pattern);
+
+    Formatter(const Formatter&) = delete;
+    Formatter(Formatter&&) = delete;
+
+    Formatter& operator=(const Formatter&) = delete;
+    Formatter& operator=(Formatter&&) = delete;
+
     virtual ~Formatter ();
 
     virtual void format(priv::Message& msg);

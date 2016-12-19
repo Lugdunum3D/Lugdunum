@@ -4,12 +4,8 @@ inline void Logger::log(Level lvl, const T& msg) {
         priv::Message logMsg(_name, lvl);
         logMsg.raw.write("{}", msg);
         handle(logMsg);
-    }
-    catch (const std::exception& ex) {
-        defaultErrHandler(ex.what());
-    }
-    catch (...) {
-        defaultErrHandler("Unknown exception");
+    } catch (const std::exception& ex) {
+        defaultErrHandler(ex);
     }
 }
 
@@ -19,12 +15,8 @@ inline void Logger::log(Level lvl, const T& fmt, Args&&... args) {
         priv::Message logMsg(_name, lvl);
         logMsg.raw.write(fmt, std::forward<Args>(args)...);
         handle(logMsg);
-    }
-    catch (const std::exception& ex) {
-        defaultErrHandler(ex.what());
-    }
-    catch (...) {
-        defaultErrHandler("Unknown exception");
+    } catch (const std::exception& ex) {
+        defaultErrHandler(ex);
     }
 }
 

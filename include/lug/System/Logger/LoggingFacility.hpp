@@ -13,6 +13,10 @@ class Handler;
 
 class LUG_SYSTEM_API LoggingFacility {
 public:
+    LoggingFacility() = delete;
+    ~LoggingFacility() = delete;
+
+public:
     static void registerLogger(const std::string& loggerName, std::unique_ptr<Logger> logger);
     static Logger* getLogger(const std::string& loggerName);
 

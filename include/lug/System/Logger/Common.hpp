@@ -10,28 +10,22 @@
 #endif
 
 #define LUG_LOG_LEVELS(PROCESS)     \
-    PROCESS(Debug),                 \
-    PROCESS(Info),                  \
-    PROCESS(Warning),               \
-    PROCESS(Error),                 \
-    PROCESS(Fatal),                 \
-    PROCESS(Assert),                \
-    PROCESS(Off),                   \
-
-#define LUG_LOG_ENUM(CHANNEL) CHANNEL
-
-#if defined(LUG_SYSTEM_WINDOWS)
-    using filename_t = std::wstring;
-#else
-    using filename_t = std::string;
-#endif
+    PROCESS(Debug)                  \
+    PROCESS(Info)                   \
+    PROCESS(Warning)                \
+    PROCESS(Error)                  \
+    PROCESS(Fatal)                  \
+    PROCESS(Assert)                 \
+    PROCESS(Off)                    \
 
 namespace lug {
 namespace System {
 
-enum class Level {
+#define LUG_LOG_ENUM(CHANNEL) CHANNEL,
+enum class Level : uint8_t {
     LUG_LOG_LEVELS(LUG_LOG_ENUM)
 };
+#undef LUG_LOG_ENUM
 
 } // namespace System
 } // namespace priv

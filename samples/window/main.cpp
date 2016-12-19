@@ -1,12 +1,22 @@
 #include <lug/Window/Window.hpp>
 #include <lug/System/Logger.hpp>
-#include <lug/System/Logger/LogCatHandler.hpp>
+
+#if defined(LUG_SYSTEM_ANDROID)
+    #include <lug/System/Logger/LogCatHandler.hpp>
+#else
+    #include <lug/System/Logger/OstreamHandler.hpp>
+#endif
 
 int main() {
     auto window = lug::Window::Window::create(800, 600, "Default Window", lug::Window::Style::Default);
 
     auto logger = lug::System::makeLogger("LugdunumSamples");
+
+#if defined(LUG_SYSTEM_ANDROID)
     auto handler = lug::System::makeHandler<lug::System::LogCatHandler>("LogCat");
+#else
+    auto handler = lug::System::makeHandler<lug::System::StdoutHandler>("Stdout");
+#endif
 
     logger->addHandler(handler);
 

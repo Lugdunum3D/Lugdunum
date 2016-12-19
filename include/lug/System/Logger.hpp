@@ -12,10 +12,7 @@
 namespace lug {
 namespace System {
 
-namespace priv {
-class Message;
-}
-class LUG_SYSTEM_API Handler;
+class Handler;
 
 class LUG_SYSTEM_API Logger {
 public:
@@ -31,7 +28,9 @@ public:
 
     void addHandler(Handler* handler);
     void addHandler(const std::string& name);
+
     void defaultErrHandler(const std::string& msg);
+    void defaultErrHandler(const std::exception& ex);
 
     template<typename T>
     void log(Level lvl, const T& msg);

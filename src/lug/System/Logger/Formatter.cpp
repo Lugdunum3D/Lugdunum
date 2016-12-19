@@ -102,17 +102,21 @@ inline void Formatter::compilePattern(const std::string& pattern) {
                 chars = nullptr;
             }
 
-            if (++it != end)
+            if (++it != end) {
                 handleFlag(*it);
-            else
+            } else {
                 break;
+            }
         } else {
             // chars not following the % sign should be displayed as is
-            if (!chars)
+            if (!chars) {
                 chars = std::make_shared<priv::UserChars>();
+            }
+
             chars->addChar(*it);
         }
     }
+
     if (chars) { //append raw chars found so far
         _formatChain.push_back(priv::Token(chars));
     }

@@ -4,20 +4,24 @@
 #include <memory>
 #include <lug/System/Export.hpp>
 #include <lug/System/Logger/Common.hpp>
+#include <lug/System/Logger/Formatter.hpp>
 #include <lug/System/Logger/LoggingFacility.hpp>
+#include <lug/System/Logger/Message.hpp>
 
 namespace lug {
 namespace System {
 
-namespace priv {
-class Message;
-}
-class Formatter;
-
 class LUG_SYSTEM_API Handler {
 public:
     Handler(const std::string& name);
-    virtual ~Handler();
+
+    Handler(const Handler&) = delete;
+    Handler(Handler&&) = delete;
+
+    Handler& operator=(const Handler&) = delete;
+    Handler& operator=(Handler&&) = delete;
+
+    virtual ~Handler() = default;
 
     void setFormatter(std::unique_ptr<Formatter> formatter);
     void setPattern(const std::string& pattern);
@@ -33,8 +37,11 @@ public:
 protected:
     std::string _name;
     std::unique_ptr<Formatter> _formatter;
-    std::atomic_int _level;
+    Level _level;
 };
+
+template<typename T, typename... Args>
+T* makeHandler(const std::string& handlerName, Args&&... args);
 
 #include <lug/System/Logger/Handler.inl>
 
