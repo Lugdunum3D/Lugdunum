@@ -8,10 +8,9 @@ namespace System {
 Handler::Handler(const std::string& name):
     _name(name),
     _formatter(std::make_unique<Formatter>("%v\n")),
-    _level(static_cast<int>(Level::Debug))
-{}
+    _level(static_cast<int>(Level::Debug)) {}
 
-Handler::~Handler() {}
+Handler::~Handler() = default;
 
 void Handler::setFormatter(std::unique_ptr<Formatter> formatter) {
     _formatter = std::move(formatter);

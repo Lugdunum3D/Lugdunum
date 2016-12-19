@@ -106,8 +106,8 @@ inline void Formatter::compilePattern(const std::string& pattern) {
                 handleFlag(*it);
             else
                 break;
-        }
-        else { // chars not following the % sign should be displayed as is
+        } else {
+            // chars not following the % sign should be displayed as is
             if (!chars)
                 chars = std::make_shared<priv::UserChars>();
             chars->addChar(*it);
@@ -123,6 +123,8 @@ Formatter::Formatter(const std::string& pattern) {
     compilePattern(pattern);
 }
 
+Formatter::~Formatter () = default;
+
 void Formatter::format(priv::Message& msg) {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     time_t tt = std::chrono::system_clock::to_time_t(now);
@@ -131,23 +133,21 @@ void Formatter::format(priv::Message& msg) {
     msg.formatted.clear();
 
     #if defined(LUG_SYSTEM_WINDOWS)
-    // Use windows secure versions of localtime
+        // Use windows secure versions of localtime
         localtime_s(&timeInfo, &tt);
     #else
-    // Use linux secure versions of localtime
-    // TODO: test on android
-    // It could not work (what is the localtime secure version for android ?)
+        // Use linux secure versions of localtime
+        // TODO: test on android
+        // It could not work (what is the localtime secure version for android ?)
         localtime_r(&tt, &timeInfo);
     #endif
 
     for (priv::Token elem : _formatChain) {
         if (!elem.basic && !elem.advanced) {
             msg.formatted << msg.raw.str();
-        }
-        else if (elem.basic) {
+        } else if (elem.basic) {
             msg.formatted << (this->*elem.basic)(timeInfo);
-        }
-        else if (elem.advanced) {
+        } else if (elem.advanced) {
             msg.formatted << elem.advanced->format();
         }
     }

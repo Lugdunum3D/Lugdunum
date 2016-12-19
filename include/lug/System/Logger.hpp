@@ -19,7 +19,14 @@ class LUG_SYSTEM_API Handler;
 
 class LUG_SYSTEM_API Logger {
 public:
-    Logger(const std::string& loggerName);
+    explicit Logger(const std::string& loggerName);
+
+    Logger(const Logger&) = delete;
+    Logger(Logger&&) = default;
+
+    Logger& operator=(const Logger&) = delete;
+    Logger& operator=(Logger&&) = default;
+
     virtual ~Logger() = default;
 
     void addHandler(Handler* handler);

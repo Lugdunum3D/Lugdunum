@@ -6,18 +6,16 @@
 namespace lug {
 namespace System {
 
-class LogCatHandler : public Handler {
+class LUG_SYSTEM_API LogCatHandler : public Handler {
 public:
-    LogCatHandler(const std::string& name) : Handler(name) {
-    }
-    virtual ~LogCatHandler() {
-    }
+    LogCatHandler(const std::string& name) : Handler(name) {}
+    ~LogCatHandler() = default;
 
 protected:
-    virtual void handle(const priv::Message& msg) {
+    void handle(const priv::Message& msg) {
         __android_log_write(lugLevelToLogCatPrio(msg.level), msg.loggerName.c_str(), msg.formatted.c_str());
     }
-    virtual void flush() {
+    void flush() {
         // Not applicable
     }
 

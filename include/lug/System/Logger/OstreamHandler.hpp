@@ -9,12 +9,9 @@ namespace System {
 
 class OstreamHandler : public Handler {
 public:
-    OstreamHandler(const std::string& name, std::ostream& out) : Handler(name), _os(out) {
-    }
-    virtual ~OstreamHandler() {
-    }
+    OstreamHandler(const std::string& name, std::ostream& out) : Handler(name), _os(out) {}
+    virtual ~OstreamHandler() = default;
 
-protected:
     virtual void handle(const priv::Message& msg) {
         _os << msg.formatted.c_str();
     }
@@ -22,6 +19,7 @@ protected:
         _os << std::flush;
     }
 
+private:
     std::ostream& _os;
 };
 

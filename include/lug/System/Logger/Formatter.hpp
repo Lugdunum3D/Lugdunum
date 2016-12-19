@@ -44,7 +44,7 @@ struct Token {
 class LUG_SYSTEM_API Formatter {
 public:
     Formatter(const std::string& pattern);
-    virtual ~Formatter () {};
+    virtual ~Formatter ();
 
     virtual void format(priv::Message& msg);
 
@@ -62,7 +62,6 @@ private:
 
     std::vector<priv::Token> _formatChain;
 };
-
 
 } // namespace lug
 } // namespace System
