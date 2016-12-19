@@ -10,7 +10,9 @@ namespace System {
 
 class LUG_SYSTEM_API FileHandler : public Handler {
 public:
-    FileHandler(const std::string& name, const filename_t& filename, bool truncate) : Handler(name) {
+    // TODO: handle windows's wstring for filenames, had a nasty compiler error and this can be
+    // fixed later
+    FileHandler(const std::string& name, const std::string& filename, bool truncate) : Handler(name) {
         std::ios_base::openmode mode = std::ofstream::out;
         if (truncate)
             mode |= std::ofstream::trunc;

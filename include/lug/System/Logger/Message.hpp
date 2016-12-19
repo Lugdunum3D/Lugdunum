@@ -17,6 +17,6 @@ public:
     fmt::MemoryWriter formatted;
 };
 
-}
-}
-}
+} // namespace priv
+} // namespace System
+} // namespace lug

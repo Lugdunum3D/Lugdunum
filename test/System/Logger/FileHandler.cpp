@@ -11,7 +11,7 @@ namespace System {
 using namespace ::testing;
 
 constexpr const char* handlerName = "MyTestHandler";
-constexpr const char* fileName = "LugdunumTestFile.txt";
+const std::string fileName = "LugdunumTestFile.txt";
 
 TEST(FileHandler, CallsFormat) {
     class MockFormatter : public Formatter {
@@ -53,7 +53,7 @@ TEST(FileHandler, Test) {
         FAIL();
     }
 
-    remove(fileName);
+    remove(fileName.c_str());
 }
 
 
