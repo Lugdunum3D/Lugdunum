@@ -41,6 +41,7 @@ TEST(FileHandler, Test) {
     Handler* handler = makeHandler<FileHandler>(handlerName, fileName, true);
     priv::Message msg("Test", Level::Info);
     msg.raw << "Hello world!";
+    handler->setPattern("%v\n");
     handler->format(msg);
     handler->handle(msg);
     handler->flush();

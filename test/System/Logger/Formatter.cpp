@@ -32,14 +32,14 @@ TEST(Formatter, FormatsWithLevel) {
         ASSERT_STREQ(msg.formatted.c_str(), ("[" + stringified + "][Hello world!]\n").c_str());
     };
 
-    testOneLevel(Level::Debug, "Debug");
-    testOneLevel(Level::Info, "Info");
-    testOneLevel(Level::Warning, "Warning");
-    testOneLevel(Level::Error, "Error");
-    testOneLevel(Level::Fatal, "Fatal");
-    testOneLevel(Level::Assert, "Assert");
-    testOneLevel(Level::Off, "Off");
-    testOneLevel(static_cast<Level>(42), "Unknown");
+    testOneLevel(Level::Debug,   "DEBUG  ");
+    testOneLevel(Level::Info,    "INFO   ");
+    testOneLevel(Level::Warning, "WARNING");
+    testOneLevel(Level::Error,   "ERROR  ");
+    testOneLevel(Level::Fatal,   "FATAL  ");
+    testOneLevel(Level::Assert,  "ASSERT ");
+    testOneLevel(Level::Off,     "OFF    ");
+    testOneLevel(static_cast<Level>(42), "UNKNOWN");
 }
 
 TEST(Formatter, FormatsTime) {

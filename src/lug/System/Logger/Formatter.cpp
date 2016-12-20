@@ -1,7 +1,8 @@
 #include <lug/System/Logger/Formatter.hpp>
-#include <lug/System/Logger/Message.hpp>
-#include <sstream>
+#include <algorithm>
 #include <iomanip>
+#include <sstream>
+#include <lug/System/Logger/Message.hpp>
 
 namespace lug {
 namespace System {
@@ -20,8 +21,10 @@ std::string LevelFlag::format(Message* message) const {
         return "NoMsg!";
     }
     std::stringstream ss;
-    ss << message->level;
-    return ss.str();
+    ss << std::left << std::setfill(' ') << std::setw(7) << message->level;
+    std::string tmp(ss.str());
+    std::transform(tmp.begin(), tmp.end(), tmp.begin(), toupper);
+    return tmp;
 }
 
 std::string MessageFlag::format(Message* message) const {
