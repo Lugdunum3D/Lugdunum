@@ -1,5 +1,7 @@
 #pragma once
 
+#include <lug/System/Export.hpp>
+
 #define FMT_HEADER_ONLY
 #if defined(LUG_FMT_EXTERNAL)
     #include <fmt/format.h>
@@ -27,5 +29,7 @@ enum class Level : uint8_t {
 };
 #undef LUG_LOG_ENUM
 
+LUG_SYSTEM_API std::ostream& operator<<(std::ostream& os, Level level);
+
 } // System
-} // priv
+} // lug

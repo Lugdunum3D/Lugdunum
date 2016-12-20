@@ -1,12 +1,13 @@
 #include <lug/System/Logger/Formatter.hpp>
 #include <lug/System/Logger/Message.hpp>
 #include <sstream>
+#include <iomanip>
 
 namespace lug {
 namespace System {
 namespace priv {
 
-std::string UserChars::format() const {
+std::string UserChars::format(Message*) const {
     return _chars;
 }
 
@@ -14,81 +15,99 @@ void UserChars::addChar(char c) {
     _chars += c;
 }
 
+std::string LevelFlag::format(Message* message) const {
+    if (!message) {
+        return "NoMsg!";
+    }
+    std::stringstream ss;
+    ss << message->level;
+    return ss.str();
+}
+
+std::string MessageFlag::format(Message* message) const {
+    if (!message) {
+        return "NoMsg!";
+    }
+    return message->raw.str();
+}
+
 } // namespace priv
 
 
-std::string Formatter::handleFlagy(const struct tm& now) {
+std::string Formatter::handleFlagy(const std::tm* now) {
     std::stringstream ss;
-    // tm_year is the number of years since 1900
-    ss << now.tm_year + 1900;
-    return ss.str().substr(2, 2);
-}
-
-std::string Formatter::handleFlagY(const struct tm& now) {
-    std::stringstream ss;
-    // tm_year is the number of years since 1900
-    ss << now.tm_year + 1900;
+    ss << std::put_time(now, "%y");
     return ss.str();
 }
 
-std::string Formatter::handleFlagm(const struct tm& now) {
+std::string Formatter::handleFlagY(const std::tm* now) {
     std::stringstream ss;
-    // tm_mon is the month of year from 0 to 11
-    ss << now.tm_mon + 1;
+    ss << std::put_time(now, "%Y");
     return ss.str();
 }
 
-std::string Formatter::handleFlagd(const struct tm& now) {
+std::string Formatter::handleFlagm(const std::tm* now) {
     std::stringstream ss;
-    ss << now.tm_mday;
+    ss << std::put_time(now, "%m");
     return ss.str();
 }
 
-std::string Formatter::handleFlagH(const struct tm& now) {
+std::string Formatter::handleFlagd(const std::tm* now) {
     std::stringstream ss;
-    ss << now.tm_hour;
+    ss << std::put_time(now, "%d");
     return ss.str();
 }
 
-std::string Formatter::handleFlagM(const struct tm& now) {
+std::string Formatter::handleFlagH(const std::tm* now) {
     std::stringstream ss;
-    ss << now.tm_min;
+    ss << std::put_time(now, "%H");
     return ss.str();
 }
 
-std::string Formatter::handleFlagS(const struct tm& now) {
+std::string Formatter::handleFlagM(const std::tm* now) {
     std::stringstream ss;
-    ss << now.tm_sec;
+    ss << std::put_time(now, "%M");
+    return ss.str();
+}
+
+std::string Formatter::handleFlagS(const std::tm* now) {
+    std::stringstream ss;
+    ss << std::put_time(now, "%S");
     return ss.str();
 }
 
 inline void Formatter::handleFlag(char flag) {
+    priv::Token token;
     switch (flag) {
-    case 'v':
-        _formatChain.push_back(priv::Token());
-    break;
     case 'y':
-        _formatChain.push_back(priv::Token(&Formatter::handleFlagy));
+        token.basic = &Formatter::handleFlagy;
     break;
     case 'Y':
-        _formatChain.push_back(priv::Token(&Formatter::handleFlagY));
+        token.basic = &Formatter::handleFlagY;
     break;
     case 'm':
-        _formatChain.push_back(priv::Token(&Formatter::handleFlagm));
+        token.basic = &Formatter::handleFlagm;
     break;
     case 'd':
-        _formatChain.push_back(priv::Token(&Formatter::handleFlagd));
+        token.basic = &Formatter::handleFlagd;
     break;
     case 'H':
-        _formatChain.push_back(priv::Token(&Formatter::handleFlagH));
+        token.basic = &Formatter::handleFlagH;
     break;
     case 'M':
-        _formatChain.push_back(priv::Token(&Formatter::handleFlagM));
+        token.basic = &Formatter::handleFlagM;
     break;
     case 'S':
-        _formatChain.push_back(priv::Token(&Formatter::handleFlagS));
+        token.basic = &Formatter::handleFlagS;
+    break;
+    case 'v':
+        token.advanced = std::make_unique<priv::MessageFlag>();
+    break;
+    case 'l':
+        token.advanced = std::make_unique<priv::LevelFlag>();
     break;
     }
+    _formatChain.push_back(std::move(token));
 }
 
 inline void Formatter::compilePattern(const std::string& pattern) {
@@ -97,7 +116,8 @@ inline void Formatter::compilePattern(const std::string& pattern) {
     auto end = pattern.end();
     for (auto it = pattern.begin(); it != end; ++it) {
         if (*it == '%') {
-            if (chars) { //append raw chars found so far
+            if (chars) {
+                // Append raw chars found so far
                 _formatChain.push_back(priv::Token(std::move(chars)));
                 chars = nullptr;
             }
@@ -108,7 +128,7 @@ inline void Formatter::compilePattern(const std::string& pattern) {
                 break;
             }
         } else {
-            // chars not following the % sign should be displayed as is
+            // Chars not following the % sign should be displayed as is
             if (!chars) {
                 chars = std::make_unique<priv::UserChars>();
             }
@@ -116,7 +136,8 @@ inline void Formatter::compilePattern(const std::string& pattern) {
         }
     }
 
-    if (chars) { //append raw chars found so far
+    if (chars) {
+        // Append raw chars found so far
         _formatChain.push_back(priv::Token(std::move(chars)));
     }
 
@@ -130,28 +151,30 @@ Formatter::~Formatter () = default;
 
 void Formatter::format(priv::Message& msg) {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-    time_t tt = std::chrono::system_clock::to_time_t(now);
-    struct tm timeInfo;
-
-    msg.formatted.clear();
+    std::time_t tt = std::chrono::system_clock::to_time_t(now);
+    std::tm tf;
 
     #if defined(LUG_SYSTEM_WINDOWS)
         // Use windows secure versions of localtime
-        localtime_s(&timeInfo, &tt);
+        localtime_s(&tf, &tt);
     #else
         // Use linux secure versions of localtime
         // TODO: test on android
         // It could not work (what is the localtime secure version for android ?)
-        localtime_r(&tt, &timeInfo);
+        localtime_r(&tt, &tf);
     #endif
 
+    format(msg, &tf);
+}
+
+void Formatter::format(priv::Message& msg, const std::tm* now) {
+    msg.formatted.clear();
+
     for (priv::Token& elem : _formatChain) {
-        if (!elem.basic && !elem.advanced) {
-            msg.formatted << msg.raw.str();
-        } else if (elem.basic) {
-            msg.formatted << (this->*elem.basic)(timeInfo);
+        if (elem.basic) {
+            msg.formatted << (this->*elem.basic)(now);
         } else if (elem.advanced) {
-            msg.formatted << elem.advanced->format();
+            msg.formatted << elem.advanced->format(&msg);
         }
     }
 }
