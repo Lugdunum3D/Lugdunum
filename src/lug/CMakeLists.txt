@@ -36,7 +36,7 @@ endif()
 string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
 
 if(ENABLE_CI)
-    include_directories(${PROJECT_SOURCE_DIR}/ci_include)
+    include_directories(${PROJECT_SOURCE_DIR}/lib/ci_include)
 endif()
 
 # add the librairies subdirectories
