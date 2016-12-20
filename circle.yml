@@ -4,17 +4,16 @@ checkout:
     - git submodule update --init # use submodules
 
 dependencies:
+  override:
+    - /bin/true
+
+  cache_directories:
+    - "~/.local"
+
   pre:
-    - sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
-    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-    - sudo apt-get update
-    - sudo apt-get install -y clang-3.8 cmake gcc-6 g++-6
-    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6
-    - sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 60 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-3.8
-    - sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100
-    - sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
+    - ./lib/ci_scripts/circle_dependencies.sh
 
 test:
   override:
-    - ./circle.sh:
+    - ./lib/ci_scripts/circle.sh:
         parallel: true
