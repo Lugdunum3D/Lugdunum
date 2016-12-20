@@ -1,13 +1,13 @@
 #pragma once
 
-#include <lug/Graphic/Export.hpp>
-#include <lug/Graphic/Vulkan/Vulkan.hpp>
+#include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
-class LUG_GRAPHIC_API Queue {
+class LUG_GRAPHICS_API Queue {
 public:
     Queue(int8_t idx = -1, VkQueue queue = VK_NULL_HANDLE, VkQueueFlags flags = 0);
 
@@ -34,8 +34,8 @@ private:
     VkQueueFlags _flags{0};
 };
 
-#include <lug/Graphic/Vulkan/Queue.inl>
+#include <lug/Graphics/Vulkan/Queue.inl>
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

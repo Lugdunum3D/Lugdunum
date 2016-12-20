@@ -18,5 +18,5 @@ source_group("inc" FILES ${INC})
 # define the target
 lug_add_library(lug-core
                 SOURCES ${SRC} ${INC}
-                DEPENDS lug-window lug-graphic lug-system
+                DEPENDS lug-window lug-graphics lug-system
 )

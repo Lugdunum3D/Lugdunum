@@ -1,14 +1,14 @@
 #include <iterator>
-#include <lug/Graphic/Graphic.hpp>
-#include <lug/Graphic/Module.hpp>
-#include <lug/Graphic/Vulkan/Renderer.hpp>
+#include <lug/Graphics/Graphics.hpp>
+#include <lug/Graphics/Module.hpp>
+#include <lug/Graphics/Vulkan/Renderer.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 
-Graphic::Graphic(const Core::Application::Info& appInfo) : _appInfo(appInfo) {}
+Graphics::Graphics(const Core::Application::Info& appInfo) : _appInfo(appInfo) {}
 
-void Graphic::init() {
+void Graphics::init() {
     switch(_rendererType) {
         case Renderer::Type::Vulkan:
             _renderer = std::make_unique<Vulkan::Renderer>(*this);
@@ -28,5 +28,5 @@ void Graphic::init() {
     }
 }
 
-} // Graphic
+} // Graphics
 } // lug

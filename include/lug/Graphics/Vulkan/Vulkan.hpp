@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <lug/Graphic/Export.hpp>
+#include <lug/Graphics/Export.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
     #define VK_USE_PLATFORM_WIN32_KHR
@@ -132,7 +132,7 @@
 
 inline namespace Vulkan {
 
-#define LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS(name) extern PFN_##name LUG_GRAPHIC_API name;
+#define LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS(name) extern PFN_##name LUG_GRAPHICS_API name;
 LUG_EXPORTED_VULKAN_FUNCTIONS(LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS);
 LUG_CORE_VULKAN_FUNCTIONS(LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS);
 LUG_INSTANCE_VULKAN_FUNCTIONS(LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS);
@@ -142,7 +142,7 @@ LUG_DEVICE_VULKAN_FUNCTIONS(LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS);
 } // Vulkan
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
 struct InstanceInfo {
@@ -166,5 +166,5 @@ struct PhysicalDeviceInfo {
 };
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

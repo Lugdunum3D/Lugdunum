@@ -2,22 +2,22 @@
 
 #include <algorithm>
 #include <unordered_map>
-#include <lug/Graphic/Export.hpp>
-#include <lug/Graphic/Renderer.hpp>
-#include <lug/Graphic/Vulkan/Device.hpp>
-#include <lug/Graphic/Vulkan/Instance.hpp>
-#include <lug/Graphic/Vulkan/Loader.hpp>
-#include <lug/Graphic/Vulkan/Vulkan.hpp>
-#include <lug/Graphic/Vulkan/Queue.hpp>
+#include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Renderer.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/Instance.hpp>
+#include <lug/Graphics/Vulkan/Loader.hpp>
+#include <lug/Graphics/Vulkan/Vulkan.hpp>
+#include <lug/Graphics/Vulkan/Queue.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 
-class Graphic;
+class Graphics;
 
 namespace Vulkan {
 
-class LUG_GRAPHIC_API Renderer final : public ::lug::Graphic::Renderer {
+class LUG_GRAPHICS_API Renderer final : public ::lug::Graphics::Renderer {
 public:
     struct Requirements {
         const std::vector<const char*> mandatoryInstanceExtensions;
@@ -40,7 +40,7 @@ public:
     };
 
 public:
-    Renderer(Graphic&);
+    Renderer(Graphics&);
 
     Renderer(const Renderer&) = delete;
     Renderer(Renderer&&) = delete;
@@ -64,7 +64,7 @@ private:
 
 private:
     Loader _loader; // Need to be at the beginning, we don't want to unload Vulkan functions too early
-    Graphic& _graphic;
+    Graphics& _graphic;
 
     Instance _instance{};
     Device _device{};
@@ -86,8 +86,8 @@ private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;
 };
 
-#include <lug/Graphic/Vulkan/Renderer.inl>
+#include <lug/Graphics/Vulkan/Renderer.inl>
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

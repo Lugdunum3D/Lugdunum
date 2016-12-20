@@ -1,7 +1,7 @@
-#include <lug/Graphic/Vulkan/Loader.hpp>
+#include <lug/Graphics/Vulkan/Loader.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
 // TODO: Handle errors
@@ -49,5 +49,5 @@ void Loader::loadDeviceFunctions(VkDevice device) {
 }
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

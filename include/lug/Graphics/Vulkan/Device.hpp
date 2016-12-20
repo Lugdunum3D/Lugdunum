@@ -1,13 +1,13 @@
 #pragma once
 
-#include <lug/Graphic/Export.hpp>
-#include <lug/Graphic/Vulkan/Vulkan.hpp>
+#include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
-class LUG_GRAPHIC_API Device {
+class LUG_GRAPHICS_API Device {
 public:
     explicit Device(VkDevice device = VK_NULL_HANDLE);
 
@@ -32,8 +32,8 @@ private:
     VkDevice _device{VK_NULL_HANDLE};
 };
 
-#include <lug/Graphic/Vulkan/Device.inl>
+#include <lug/Graphics/Vulkan/Device.inl>
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

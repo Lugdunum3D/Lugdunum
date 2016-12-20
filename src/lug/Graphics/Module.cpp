@@ -1,10 +1,10 @@
-#include <lug/Graphic/Module.hpp>
+#include <lug/Graphics/Module.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 
 const std::unordered_map<Module::Type, Module> modules = {
-    #define LUG_INIT_GRAPHIC_MODULES(name)  \
+    #define LUG_INIT_GRAPHICS_MODULES(name)  \
     {                                       \
         Module::Type::name, {               \
             #name,                          \
@@ -12,10 +12,10 @@ const std::unordered_map<Module::Type, Module> modules = {
         }                                   \
     },
 
-    LUG_GRAPHIC_MODULES(LUG_INIT_GRAPHIC_MODULES)
+    LUG_GRAPHICS_MODULES(LUG_INIT_GRAPHICS_MODULES)
 
-    #undef LUG_INIT_GRAPHIC_MODULES
+    #undef LUG_INIT_GRAPHICS_MODULES
 };
 
-} // Graphic
+} // Graphics
 } // lug

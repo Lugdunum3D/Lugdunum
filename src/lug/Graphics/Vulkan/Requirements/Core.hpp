@@ -3,7 +3,7 @@
 #include <lug/Config.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 namespace Requirements {
 namespace Core {
@@ -170,5 +170,5 @@ const Renderer::Requirements requirements{
 } // Core
 } // Requirements
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

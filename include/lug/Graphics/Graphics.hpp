@@ -4,24 +4,24 @@
 #include <memory>
 #include <set>
 #include <lug/Core/Application.hpp>
-#include <lug/Graphic/Export.hpp>
-#include <lug/Graphic/Module.hpp>
-#include <lug/Graphic/Renderer.hpp>
+#include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Module.hpp>
+#include <lug/Graphics/Renderer.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 
-class LUG_GRAPHIC_API Graphic {
+class LUG_GRAPHICS_API Graphics {
 public:
-    explicit Graphic(const Core::Application::Info& appInfo);
+    explicit Graphics(const Core::Application::Info& appInfo);
 
-    Graphic(const Graphic&) = delete;
-    Graphic(Graphic&&) = delete;
+    Graphics(const Graphics&) = delete;
+    Graphics(Graphics&&) = delete;
 
-    Graphic& operator=(const Graphic&) = delete;
-    Graphic& operator=(Graphic&&) = delete;
+    Graphics& operator=(const Graphics&) = delete;
+    Graphics& operator=(Graphics&&) = delete;
 
-    ~Graphic() = default;
+    ~Graphics() = default;
 
     void init();
 
@@ -53,7 +53,7 @@ private:
     std::unique_ptr<Renderer> _renderer{nullptr};
 };
 
-#include <lug/Graphic/Graphic.inl>
+#include <lug/Graphics/Graphics.inl>
 
-} // Graphic
+} // Graphics
 } // lug

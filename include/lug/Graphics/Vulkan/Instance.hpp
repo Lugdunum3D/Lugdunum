@@ -1,13 +1,13 @@
 #pragma once
 
-#include <lug/Graphic/Export.hpp>
-#include <lug/Graphic/Vulkan/Vulkan.hpp>
+#include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
-class LUG_GRAPHIC_API Instance {
+class LUG_GRAPHICS_API Instance {
 public:
     explicit Instance(VkInstance instance = VK_NULL_HANDLE);
 
@@ -32,8 +32,8 @@ private:
     VkInstance _instance{VK_NULL_HANDLE};
 };
 
-#include <lug/Graphic/Vulkan/Instance.inl>
+#include <lug/Graphics/Vulkan/Instance.inl>
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

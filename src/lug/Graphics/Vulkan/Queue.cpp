@@ -1,7 +1,7 @@
-#include <lug/Graphic/Vulkan/Queue.hpp>
+#include <lug/Graphics/Vulkan/Queue.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
 Queue::Queue(int8_t idx, VkQueue queue, VkQueueFlags flags) : _idx(idx), _queue(queue), _flags(flags) {}
@@ -36,5 +36,5 @@ void Queue::destroy() {
 }
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

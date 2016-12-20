@@ -2,12 +2,12 @@
 
 #include <cstdint>
 #include <set>
-#include <lug/Graphic/Module.hpp>
+#include <lug/Graphics/Module.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 
-class LUG_GRAPHIC_API Renderer {
+class LUG_GRAPHICS_API Renderer {
 public:
     enum class Type : uint8_t {
         Vulkan
@@ -27,5 +27,5 @@ public:
     virtual std::set<Module::Type> init() = 0;
 };
 
-} // Graphic
+} // Graphics
 } // lug

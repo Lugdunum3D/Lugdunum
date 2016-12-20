@@ -1,14 +1,14 @@
 #pragma once
 
-#include <lug/Graphic/Export.hpp>
-#include <lug/Graphic/Vulkan/Vulkan.hpp>
+#include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/Vulkan.hpp>
 #include <lug/System/Library.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
-class LUG_GRAPHIC_API Loader {
+class LUG_GRAPHICS_API Loader {
 public:
     Loader();
 
@@ -28,5 +28,5 @@ private:
 };
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

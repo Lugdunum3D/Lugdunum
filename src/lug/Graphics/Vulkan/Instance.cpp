@@ -1,7 +1,7 @@
-#include <lug/Graphic/Vulkan/Instance.hpp>
+#include <lug/Graphics/Vulkan/Instance.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
 Instance::Instance(VkInstance instance) : _instance(instance) {}
@@ -30,5 +30,5 @@ void Instance::destroy() {
 }
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

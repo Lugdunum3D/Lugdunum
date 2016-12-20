@@ -1,4 +1,4 @@
-#include <lug/Graphic/Vulkan/Vulkan.hpp>
+#include <lug/Graphics/Vulkan/Vulkan.hpp>
 #include <algorithm>
 #include <cstring>
 
@@ -14,7 +14,7 @@ LUG_DEVICE_VULKAN_FUNCTIONS(LUG_DEFINE_DEFINITION_VULKAN_FUNCTIONS);
 } // Vulkan
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
 bool InstanceInfo::containsExtension(const char* extensionName) const {
@@ -56,5 +56,5 @@ bool PhysicalDeviceInfo::containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx
 }
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

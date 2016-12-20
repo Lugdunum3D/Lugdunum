@@ -1,24 +1,24 @@
-#include <lug/Graphic/Vulkan/Renderer.hpp>
-#include <lug/Graphic/Graphic.hpp>
-#include <lug/Graphic/Vulkan/Loader.hpp>
-#include <lug/Graphic/Vulkan/Requirements/Core.hpp>
-#include <lug/Graphic/Vulkan/Requirements/Requirements.hpp>
+#include <lug/Graphics/Vulkan/Renderer.hpp>
+#include <lug/Graphics/Graphics.hpp>
+#include <lug/Graphics/Vulkan/Loader.hpp>
+#include <lug/Graphics/Vulkan/Requirements/Core.hpp>
+#include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
 
 #include <iostream> // TO REMOVE
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
 const std::unordered_map<Module::Type, Renderer::Requirements> Renderer::modulesRequirements = {
-    #define LUG_INIT_GRAPHIC_MODULES_REQUIREMENTS(name)                                 \
+    #define LUG_INIT_GRAPHICS_MODULES_REQUIREMENTS(name)                                 \
     {                                                                                   \
-        Module::Type::name, ::lug::Graphic::Vulkan::Requirements::name::requirements    \
+        Module::Type::name, ::lug::Graphics::Vulkan::Requirements::name::requirements    \
     },
 
-    LUG_GRAPHIC_MODULES(LUG_INIT_GRAPHIC_MODULES_REQUIREMENTS)
+    LUG_GRAPHICS_MODULES(LUG_INIT_GRAPHICS_MODULES_REQUIREMENTS)
 
-    #undef LUG_INIT_GRAPHIC_MODULES_REQUIREMENTS
+    #undef LUG_INIT_GRAPHICS_MODULES_REQUIREMENTS
 };
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
@@ -37,7 +37,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
     return VK_FALSE;
 }
 
-Renderer::Renderer(Graphic& graphic) : _graphic(graphic) {}
+Renderer::Renderer(Graphics& graphic) : _graphic(graphic) {}
 
 Renderer::~Renderer() {
     for (auto& queue : _queues) {
@@ -488,5 +488,5 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 }
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

@@ -1,7 +1,7 @@
-#include <lug/Graphic/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
 
 namespace lug {
-namespace Graphic {
+namespace Graphics {
 namespace Vulkan {
 
 Device::Device(VkDevice device) : _device(device) {}
@@ -31,5 +31,5 @@ void Device::destroy() {
 }
 
 } // Vulkan
-} // Graphic
+} // Graphics
 } // lug

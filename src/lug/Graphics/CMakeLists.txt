@@ -1,9 +1,9 @@
-set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Graphic)
-set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphic)
+set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Graphics)
+set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 
 # all source files
 set(SRC
-    ${SRCROOT}/Graphic.cpp
+    ${SRCROOT}/Graphics.cpp
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/Vulkan/Device.cpp
     ${SRCROOT}/Vulkan/Instance.cpp
@@ -19,8 +19,8 @@ source_group("src" FILES ${SRC})
 # all header files
 set(INC
     ${INCROOT}/Export.hpp
-    ${INCROOT}/Graphic.hpp
-    ${INCROOT}/Graphic.inl
+    ${INCROOT}/Graphics.hpp
+    ${INCROOT}/Graphics.inl
     ${INCROOT}/Module.hpp
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/Vulkan/Device.hpp
@@ -41,7 +41,7 @@ if (NOT ENABLE_CI)
 endif()
 
 # define the target
-lug_add_library(lug-graphic
+lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system
 )

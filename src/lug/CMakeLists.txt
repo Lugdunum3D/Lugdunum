@@ -41,7 +41,7 @@ endif()
 
 # add the librairies subdirectories
 add_subdirectory(Core)
-add_subdirectory(Graphic)
+add_subdirectory(Graphics)
 add_subdirectory(System)
 add_subdirectory(Window)
 
