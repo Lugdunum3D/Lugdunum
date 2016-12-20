@@ -65,13 +65,17 @@ std::set<Module::Type> Renderer::init() {
 
     if (!initInstance(loadedModules)) {
         // TODO: Log something
+        std::cout << "Error: Can't load the instance" << std::endl;
         return {};
     }
 
     if (!initDevice(loadedModules)) {
         // TODO: Log something
+        std::cout << "Error: Can't load the device" << std::endl;
         return {};
     }
+
+    std::cout << "Info: Successfully init the Vulkan Renderer" << std::endl;
 
     return loadedModules;
 }
@@ -101,9 +105,11 @@ bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
     // Create instance
     {
         // Check which layers / extensions to load for modules
-        if (!checkRequirementsInstance(_graphic.getMandatoryModules(), loadedModules, false) || !checkRequirementsInstance(_graphic.getOptionnalModules(), loadedModules, true)) {
+        if (!checkRequirementsInstance(_graphic.getMandatoryModules(), loadedModules)) {
             return false;
         }
+
+        checkRequirementsInstance(_graphic.getOptionnalModules(), loadedModules);
 
         // Create the application information for vkCreateInstance
         VkApplicationInfo applicationInfo{
@@ -191,83 +197,6 @@ bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
     return true;
 }
 
-bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool optionnal) {
-    bool requirementsCheck = true;
-
-    for (const auto moduleType : modulesToCheck) {
-        const auto& module = modules.at(moduleType);
-        const auto& requirements = modulesRequirements.at(moduleType);
-
-        std::vector<const char*> layers{};
-        std::vector<const char*> extensions{};
-
-        bool moduleRequirementsCheck = true;
-
-        for (const auto& layerName : requirements.mandatoryInstanceLayers) {
-            if (_instanceInfo.containsLayer(layerName)) {
-                layers.push_back(layerName);
-            } else {
-                if (!optionnal) {
-                    // TODO: Log error
-                    std::cout << "Error: Can't load mandatory layer '" << layerName << "' for mandatory module '" << module.name << "'" << std::endl;
-                } else {
-                    // TODO: Log error
-                    std::cout << "Warning: Can't load mandatory layer '" << layerName << "' for optionnal module '" << module.name << "'" << std::endl;
-                }
-
-                moduleRequirementsCheck = false;
-            }
-        }
-
-        for (const auto& extensionName : requirements.mandatoryInstanceExtensions) {
-            if (_instanceInfo.containsExtension(extensionName)) {
-                extensions.push_back(extensionName);
-            } else {
-                if (!optionnal) {
-                    // TODO: Log error
-                    std::cout << "Error: Can't load mandatory extension '" << extensionName << "' for mandatory module '" << module.name << "'" << std::endl;
-                } else {
-                    // TODO: Log error
-                    std::cout << "Warning: Can't load mandatory extension '" << extensionName << "' for optionnal module '" << module.name << "'" << std::endl;
-                }
-
-                moduleRequirementsCheck = false;
-            }
-        }
-
-        for (const auto& layerName : requirements.optionnalInstanceLayers) {
-            if (_instanceInfo.containsLayer(layerName)) {
-                layers.push_back(layerName);
-            } else {
-                // TODO: Log error
-                std::cout << "Warning: Can't load optionnal layer '" << layerName << "' for module '" << module.name << "'" << std::endl;
-            }
-        }
-
-        for (const auto& extensionName : requirements.optionnalInstanceExtensions) {
-            if (_instanceInfo.containsExtension(extensionName)) {
-                extensions.push_back(extensionName);
-            } else {
-                // TODO: Log error
-                std::cout << "Warning: Can't load optionnal extension '" << extensionName << "' for module '" << module.name << "'" << std::endl;
-            }
-        }
-
-        if (moduleRequirementsCheck) {
-            _loadedInstanceLayers.insert(_loadedInstanceLayers.end(), layers.begin(), layers.end());
-            _loadedInstanceExtensions.insert(_loadedInstanceExtensions.end(), extensions.begin(), extensions.end());
-        } else {
-            loadedModules.erase(moduleType);
-        }
-
-        if (!optionnal) {
-            requirementsCheck = requirementsCheck && moduleRequirementsCheck;
-        }
-    }
-
-    return requirementsCheck;
-}
-
 bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
     // Select device
     {
@@ -276,13 +205,11 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
 
         for (uint8_t idx = 0; idx < _physicalDeviceInfos.size(); ++idx) {
             std::set<Module::Type> tmpLoadedModules;
-            if (!checkRequirementsDevice(_physicalDeviceInfos[idx], _graphic.getMandatoryModules(), tmpLoadedModules, false, false)) {
+            if (!checkRequirementsDevice(_physicalDeviceInfos[idx], _graphic.getMandatoryModules(), tmpLoadedModules, false)) {
                 continue;
             }
 
-            if (!checkRequirementsDevice(_physicalDeviceInfos[idx], _graphic.getOptionnalModules(), tmpLoadedModules, true, false)) {
-                continue;
-            }
+            checkRequirementsDevice(_physicalDeviceInfos[idx], _graphic.getOptionnalModules(), tmpLoadedModules, false);
 
             matchedDevicesIdx.push_back(idx);
         }
@@ -301,17 +228,13 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
             }
         }
 
-        _loadedDeviceExtensions.clear();
-        _loadedDeviceFeatures = VkPhysicalDeviceFeatures{};
-        _loadedQueueFamiliesIdx.clear();
-
         _physicalDeviceInfo = &(_physicalDeviceInfos[matchedDeviceIdx]);
     }
 
     // Set the loaded informations of the matched device
     {
-        checkRequirementsDevice(*_physicalDeviceInfo, _graphic.getMandatoryModules(), loadedModules, false, true);
-        checkRequirementsDevice(*_physicalDeviceInfo, _graphic.getOptionnalModules(), loadedModules, true, true);
+        checkRequirementsDevice(*_physicalDeviceInfo, _graphic.getMandatoryModules(), loadedModules, true);
+        checkRequirementsDevice(*_physicalDeviceInfo, _graphic.getOptionnalModules(), loadedModules, true);
     }
 
     // Create device
@@ -370,7 +293,72 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
     return true;
 }
 
-bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool optionnal, bool quiet) {
+bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules) {
+    bool requirementsCheck = true;
+
+    for (const auto moduleType : modulesToCheck) {
+        const auto& module = modules.at(moduleType);
+        const auto& requirements = modulesRequirements.at(moduleType);
+
+        std::vector<const char*> layers{};
+        std::vector<const char*> extensions{};
+
+        bool moduleRequirementsCheck = true;
+
+        // Check layers
+        {
+            const std::vector<const char*> layersNotFound = checkRequirementsLayers(_instanceInfo, requirements.mandatoryInstanceLayers, layers);
+            moduleRequirementsCheck = moduleRequirementsCheck && layersNotFound.size() == 0;
+
+            for (const char* const layerName : layersNotFound) {
+                // TODO: Log error
+                std::cout << "Warning: Can't load mandatory layer '" << layerName << "' for module '" << module.name << "'" << std::endl;
+            }
+        }
+
+        {
+            const std::vector<const char*> layersNotFound = checkRequirementsLayers(_instanceInfo, requirements.optionnalInstanceLayers, layers);
+
+            for (const char* layerName : layersNotFound) {
+                // TODO: Log error
+                std::cout << "Warning: Can't load optionnal layer '" << layerName << "' for module '" << module.name << "'" << std::endl;
+            }
+        }
+
+        // Check extensions
+        {
+            const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(_instanceInfo, requirements.mandatoryInstanceExtensions, extensions);
+            moduleRequirementsCheck = moduleRequirementsCheck && extensionsNotFound.size() == 0;
+
+            for (const char* const extensionName : extensionsNotFound) {
+                // TODO: Log error
+                std::cout << "Warning: Can't load mandatory extension '" << extensionName << "' for module '" << module.name << "'" << std::endl;
+            }
+        }
+
+        {
+            const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(_instanceInfo, requirements.optionnalInstanceExtensions, extensions);
+
+            for (const char* extensionName : extensionsNotFound) {
+                // TODO: Log error
+                std::cout << "Warning: Can't load optionnal extension '" << extensionName << "' for module '" << module.name << "'" << std::endl;
+            }
+        }
+
+        if (moduleRequirementsCheck) {
+            _loadedInstanceLayers.insert(_loadedInstanceLayers.end(), layers.begin(), layers.end());
+            _loadedInstanceExtensions.insert(_loadedInstanceExtensions.end(), extensions.begin(), extensions.end());
+        } else {
+            loadedModules.erase(moduleType);
+        }
+
+        requirementsCheck = requirementsCheck && moduleRequirementsCheck;
+    }
+
+    return requirementsCheck;
+}
+
+bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool finalization) {
     bool requirementsCheck = true;
 
     for (const auto moduleType : modulesToCheck) {
@@ -383,28 +371,27 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 
         bool moduleRequirementsCheck = true;
 
-        for (const auto& extensionName : requirements.mandatoryDeviceExtensions) {
-            if (physicalDeviceInfo.containsExtension(extensionName)) {
-                extensions.push_back(extensionName);
-            } else if (!quiet) {
-                if (!optionnal) {
-                    // TODO: Log error
-                    std::cout << "Error: Can't load mandatory extension '" << extensionName << "' for mandatory module '" << module.name << "'" << std::endl;
-                } else {
-                    // TODO: Log error
-                    std::cout << "Warning: Can't load mandatory extension '" << extensionName << "' for optionnal module '" << module.name << "'" << std::endl;
-                }
+        // Check extensions
+        {
+            const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(physicalDeviceInfo, requirements.mandatoryDeviceExtensions, extensions);
+            moduleRequirementsCheck = moduleRequirementsCheck && extensionsNotFound.size() == 0;
 
-                moduleRequirementsCheck = false;
+            if (!finalization) {
+                for (const char* const extensionName : extensionsNotFound) {
+                    // TODO: Log error
+                    std::cout << "Warning: Can't load mandatory extension '" << extensionName << "' for module '" << module.name << "'" << std::endl;
+                }
             }
         }
 
-        for (const auto& extensionName : requirements.optionnalDeviceExtensions) {
-            if (physicalDeviceInfo.containsExtension(extensionName)) {
-                extensions.push_back(extensionName);
-            } else if (!quiet) {
-                // TODO: Log error
-                std::cout << "Warning: Can't load optionnal extension '" << extensionName << "' for module '" << module.name << "'" << std::endl;
+        {
+            const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(physicalDeviceInfo, requirements.optionnalDeviceExtensions, extensions);
+
+            if (!finalization) {
+                for (const char* extensionName : extensionsNotFound) {
+                    // TODO: Log error
+                    std::cout << "Warning: Can't load optionnal extension '" << extensionName << "' for module '" << module.name << "'" << std::endl;
+                }
             }
         }
 
@@ -414,10 +401,8 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
                 if (requirements.mandatoryFeatures.featureName == VK_TRUE) {                                                                                \
                     if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                               \
                         features.featureName = VK_TRUE;                                                                                                     \
-                    } else if (!quiet) {                                                                                                                    \
-                        if (!optionnal) {                                                                                                                   \
-                            std::cout << "Error: Can't load mandatory feature '" << #featureName << "' for module '" << module.name << "'" << std::endl;    \
-                        } else {                                                                                                                            \
+                    } else {                                                                                                                                \
+                        if (!finalization) {                                                                                                                \
                             std::cout << "Warning: Can't load mandatory feature '" << #featureName << "' for module '" << module.name << "'" << std::endl;  \
                         }                                                                                                                                   \
                                                                                                                                                             \
@@ -434,7 +419,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
                 if (requirements.optionnalFeatures.featureName == VK_TRUE) {                                                                            \
                     if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                           \
                         features.featureName = VK_TRUE;                                                                                                 \
-                    } else if (!quiet) {                                                                                                                \
+                    } else if (!finalization) {                                                                                                         \
                         std::cout << "Warning: Can't load optionnal feature '" << #featureName << "' for module '" << module.name << "'" << std::endl;  \
                     }                                                                                                                                   \
                 }                                                                                                                                       \
@@ -446,15 +431,12 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
             int8_t idx = 0;
             if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
                 queueFamiliesIdx.insert(idx);
-            } else if (!quiet) {
-                if (!optionnal) {
-                    std::cout << "Error: Can't find mandatory queue type for module '" << module.name << "'" << std::endl;
-                } else {
+            } else {
+                if (!finalization) {
                     std::cout << "Warning: Can't find mandatory queue type for module '" << module.name << "'" << std::endl;
                 }
 
                 moduleRequirementsCheck = false;
-                break;
             }
         }
 
@@ -462,29 +444,59 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
             int8_t idx = 0;
             if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
                 queueFamiliesIdx.insert(idx);
-            } else if (!quiet) {
+            } else if (!finalization) {
                 std::cout << "Warning: Can't find optionnal queue type for module '" << module.name << "'" << std::endl;
             }
         }
 
-        if (moduleRequirementsCheck) {
-            _loadedDeviceExtensions.insert(_loadedDeviceExtensions.end(), extensions.begin(), extensions.end());
+        if (finalization) {
+            if (moduleRequirementsCheck) {
+                _loadedDeviceExtensions.insert(_loadedDeviceExtensions.end(), extensions.begin(), extensions.end());
 
-            #define LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES(featureName) _loadedDeviceFeatures.featureName = _loadedDeviceFeatures.featureName || features.featureName;
-            LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES);
-            #undef LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES
+                #define LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES(featureName) _loadedDeviceFeatures.featureName = _loadedDeviceFeatures.featureName || features.featureName;
+                LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES);
+                #undef LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES
 
-            _loadedQueueFamiliesIdx.insert(queueFamiliesIdx.begin(), queueFamiliesIdx.end());
-        } else {
-            loadedModules.erase(moduleType);
+                _loadedQueueFamiliesIdx.insert(queueFamiliesIdx.begin(), queueFamiliesIdx.end());
+            } else {
+                loadedModules.erase(moduleType);
+            }
         }
 
-        if (!optionnal) {
-            requirementsCheck = requirementsCheck && moduleRequirementsCheck;
-        }
+        requirementsCheck = requirementsCheck && moduleRequirementsCheck;
     }
 
     return requirementsCheck;
+}
+
+template <typename Info>
+inline std::vector<const char*> Renderer::checkRequirementsLayers(const Info& info, const std::vector<const char*>& layers, std::vector<const char*>& layersFound) {
+    std::vector<const char*> layersNotFound{};
+
+    for (const char* layerName : layers) {
+        if (info.containsLayer(layerName)) {
+            layersFound.push_back(layerName);
+        } else {
+            layersNotFound.push_back(layerName);
+        }
+    }
+
+    return layersNotFound;
+}
+
+template <typename Info>
+inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info& info, const std::vector<const char*>& extensions, std::vector<const char*>& extensionsFound) {
+    std::vector<const char*> extensionsNotFound{};
+
+    for (const char* extensionName : extensions) {
+        if (info.containsExtension(extensionName)) {
+            extensionsFound.push_back(extensionName);
+        } else {
+            extensionsNotFound.push_back(extensionName);
+        }
+    }
+
+    return extensionsNotFound;
 }
 
 } // Vulkan

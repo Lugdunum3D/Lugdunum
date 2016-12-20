@@ -58,9 +58,16 @@ public:
 
 private:
     bool initInstance(std::set<Module::Type> &loadedModules);
-    bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool optionnal);
     bool initDevice(std::set<Module::Type> &loadedModules);
-    bool checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool optionnal, bool quiet);
+
+    bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules);
+    bool checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool finalization);
+
+    template <typename Info>
+    std::vector<const char*> checkRequirementsLayers(const Info& info, const std::vector<const char*>& layers, std::vector<const char*>& layersFound);
+
+    template <typename Info>
+    std::vector<const char*> checkRequirementsExtensions(const Info& info, const std::vector<const char*>& extensions, std::vector<const char*>& extensionsFound);
 
 private:
     Loader _loader; // Need to be at the beginning, we don't want to unload Vulkan functions too early
