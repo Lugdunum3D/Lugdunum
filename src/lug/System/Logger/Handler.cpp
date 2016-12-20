@@ -7,7 +7,7 @@ namespace System {
 
 Handler::Handler(const std::string& name):
     _name(name),
-    _formatter(std::make_unique<Formatter>("%v\n")),
+    _formatter(std::make_unique<Formatter>("[%H:%M:%S][%l] %v\n")),
     _level(Level::Debug) {}
 
 void Handler::setFormatter(std::unique_ptr<Formatter> formatter) {

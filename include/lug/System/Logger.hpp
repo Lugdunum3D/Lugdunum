@@ -69,6 +69,8 @@ protected:
 
 #include <lug/System/Logger.inl>
 
+#define LUG_LOG ::lug::System::Logger::logger
+
 } // System
 } // lug
 
