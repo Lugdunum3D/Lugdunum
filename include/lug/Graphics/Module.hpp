@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ostream>
 #include <unordered_map>
 #include <vector>
 #include <lug/Graphics/Export.hpp>
@@ -22,6 +23,11 @@ struct Module {
 };
 
 extern const std::unordered_map<Module::Type, Module> LUG_GRAPHICS_API modules;
+
+std::ostream& operator<<(std::ostream& ss, const Module& module);
+std::ostream& operator<<(std::ostream& ss, const Module::Type& type);
+
+#include <lug/Graphics/Module.inl>
 
 } // Graphics
 } // lug

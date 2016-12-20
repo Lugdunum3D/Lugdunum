@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <ostream>
 
 #include <lug/Graphics/Export.hpp>
 
@@ -164,6 +165,11 @@ struct PhysicalDeviceInfo {
     bool containsExtension(const char* extensionName) const;
     bool containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const;
 };
+
+LUG_GRAPHICS_API const char* resultToStr(VkResult result);
+std::ostream& operator<<(std::ostream& ss, const VkResult& result);
+
+#include <lug/Graphics/Vulkan/Vulkan.inl>
 
 } // Vulkan
 } // Graphics

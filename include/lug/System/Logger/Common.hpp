@@ -3,12 +3,26 @@
 #include <lug/System/Export.hpp>
 
 #define FMT_HEADER_ONLY
-#if defined(LUG_FMT_EXTERNAL)
-    #include <fmt/format.h>
-    #include <fmt/ostream.h>
+#if defined(False)
+    #undef False
+
+    #if defined(LUG_FMT_EXTERNAL)
+        #include <fmt/format.h>
+        #include <fmt/ostream.h>
+    #else
+        #include <lug/Ext/fmt/format.h>
+        #include <lug/Ext/fmt/ostream.h>
+    #endif
+
+    #define False 0
 #else
-    #include <lug/Ext/fmt/format.h>
-    #include <lug/Ext/fmt/ostream.h>
+    #if defined(LUG_FMT_EXTERNAL)
+        #include <fmt/format.h>
+        #include <fmt/ostream.h>
+    #else
+        #include <lug/Ext/fmt/format.h>
+        #include <lug/Ext/fmt/ostream.h>
+    #endif
 #endif
 
 #define LUG_LOG_LEVELS(PROCESS)     \

@@ -23,7 +23,7 @@ public:
 
     ~Graphics() = default;
 
-    void init();
+    bool init();
 
     void addModule(Module::Type type);
     void addOptionnalModule(Module::Type type);

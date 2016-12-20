@@ -4,8 +4,7 @@
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
-
-#include <iostream> // TO REMOVE
+#include <lug/System/Logger.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -23,17 +22,28 @@ const std::unordered_map<Module::Type, Renderer::Requirements> Renderer::modules
 };
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
-    VkDebugReportFlagsEXT /*flags*/,
+    VkDebugReportFlagsEXT flags,
     VkDebugReportObjectTypeEXT /*objType*/,
     uint64_t /*obj*/,
     size_t /*location*/,
     int32_t /*code*/,
-    const char* /*layerPrefix*/,
+    const char* layerPrefix,
     const char* msg,
     void* /*userData*/) {
 
-    // TODO: Log informations
-    std::cerr << "Validation layer: " << msg << std::endl;
+    // Convert VkDebugReportFlagsEXT to System::Level
+    System::Level level = System::Level::Off;
+    if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
+        level = System::Level::Error;
+    } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT || flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
+        level = System::Level::Warning;
+    } else if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
+        level = System::Level::Info;
+    } else {
+        level = System::Level::Debug;
+    }
+
+    LUG_LOG.log(level, "{}: {}", layerPrefix, msg);
 
     return VK_FALSE;
 }
@@ -51,7 +61,7 @@ Renderer::~Renderer() {
     {
         if (isInstanceExtensionLoaded(VK_EXT_DEBUG_REPORT_EXTENSION_NAME)) {
             auto vkDestroyDebugReportCallbackEXT = _instance.getProcAddr<PFN_vkDestroyDebugReportCallbackEXT>("vkDestroyDebugReportCallbackEXT");
-            vkDestroyDebugReportCallbackEXT(_instance, _debugReportCallback, nullptr); // TODO: Check error
+            vkDestroyDebugReportCallbackEXT(_instance, _debugReportCallback, nullptr);
         }
     }
 
@@ -65,41 +75,59 @@ std::set<Module::Type> Renderer::init() {
     loadedModules.insert(_graphic.getOptionnalModules().begin(), _graphic.getOptionnalModules().end());
 
     if (!initInstance(loadedModules)) {
-        // TODO: Log something
-        std::cout << "Error: Can't load the instance" << std::endl;
+        LUG_LOG.error("RendererVulkan: Can't load the instance");
         return {};
     }
 
     if (!initDevice(loadedModules)) {
-        // TODO: Log something
-        std::cout << "Error: Can't load the device" << std::endl;
+        LUG_LOG.error("RendererVulkan: Can't load the device");
         return {};
     }
 
-    std::cout << "Info: Successfully init the Vulkan Renderer" << std::endl;
+#if defined(LUG_DEBUG)
+    LUG_LOG.info("RendererVulkan: Use device {}", _physicalDeviceInfo->properties.deviceName);
+#endif
 
     return loadedModules;
 }
 
 bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
+    VkResult result;
+
     // Load instance properties
     {
         // Load instance extensions
         {
             uint32_t extensionsCount = 0;
-            vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, nullptr); // TODO: Check error
+            result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, nullptr);
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't enumerate instance extensions: {}", result);
+                return false;
+            }
 
             _instanceInfo.extensions.resize(extensionsCount);
-            vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, _instanceInfo.extensions.data()); // TODO: Check error
+            result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, _instanceInfo.extensions.data());
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't enumerate instance extensions: {}", result);
+                return false;
+            }
         }
 
         // Load instance layers
         {
             uint32_t layersCount = 0;
-            vkEnumerateInstanceLayerProperties(&layersCount, nullptr); // TODO: Check error
+            result = vkEnumerateInstanceLayerProperties(&layersCount, nullptr);
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
+                return false;
+            }
 
             _instanceInfo.layers.resize(layersCount);
-            vkEnumerateInstanceLayerProperties(&layersCount, _instanceInfo.layers.data()); // TODO: Check error
+            result = vkEnumerateInstanceLayerProperties(&layersCount, _instanceInfo.layers.data());
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
+                return false;
+            }
         }
     }
 
@@ -136,7 +164,11 @@ bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
         };
 
         VkInstance instance{VK_NULL_HANDLE};
-        vkCreateInstance(&createInfo, nullptr, &instance); // TODO: Check error
+        result = vkCreateInstance(&createInfo, nullptr, &instance);
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Can't create the instance: {}", result);
+            return false;
+        }
 
         _instance = Instance(instance);
         _loader.loadInstanceFunctions(_instance);
@@ -151,44 +183,60 @@ bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
             createInfo.pfnCallback = debugReportCallback;
 
             auto vkCreateDebugReportCallbackEXT = _instance.getProcAddr<PFN_vkCreateDebugReportCallbackEXT>("vkCreateDebugReportCallbackEXT");
-            vkCreateDebugReportCallbackEXT(_instance, &createInfo, nullptr, &_debugReportCallback); // TODO: Check error
+            vkCreateDebugReportCallbackEXT(_instance, &createInfo, nullptr, &_debugReportCallback);
         }
     }
 
     // Load physical devices information
     {
         uint32_t physicalDevicesCount = 0;
-        vkEnumeratePhysicalDevices(_instance, &physicalDevicesCount, nullptr); // TODO: Check error
+        result = vkEnumeratePhysicalDevices(_instance, &physicalDevicesCount, nullptr);
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Can't enumerate physical devices: {}", result);
+            return false;
+        }
 
         _physicalDeviceInfos.resize(physicalDevicesCount);
 
         std::vector<VkPhysicalDevice> physicalDevices(physicalDevicesCount);
-        vkEnumeratePhysicalDevices(_instance, &physicalDevicesCount, physicalDevices.data()); // TODO: Check error
+        result = vkEnumeratePhysicalDevices(_instance, &physicalDevicesCount, physicalDevices.data());
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Can't enumerate physical devices: {}", result);
+            return false;
+        }
 
         for (uint8_t idx = 0; idx < physicalDevicesCount; ++idx) {
             _physicalDeviceInfos[idx].handle = physicalDevices[idx];
 
-            vkGetPhysicalDeviceProperties(physicalDevices[idx], &(_physicalDeviceInfos[idx].properties)); // TODO: Check error
-            vkGetPhysicalDeviceFeatures(physicalDevices[idx], &(_physicalDeviceInfos[idx].features)); // TODO: Check error
+            vkGetPhysicalDeviceProperties(physicalDevices[idx], &(_physicalDeviceInfos[idx].properties));
+            vkGetPhysicalDeviceFeatures(physicalDevices[idx], &(_physicalDeviceInfos[idx].features));
 
             // Load queue families
             {
                 uint32_t queueFamilyCount = 0;
-                vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[idx], &queueFamilyCount, nullptr); // TODO: Check error
+                vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[idx], &queueFamilyCount, nullptr);
 
                 _physicalDeviceInfos[idx].queueFamilies.resize(queueFamilyCount);
-                vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[idx], &queueFamilyCount, _physicalDeviceInfos[idx].queueFamilies.data()); // TODO: Check error
+                vkGetPhysicalDeviceQueueFamilyProperties(physicalDevices[idx], &queueFamilyCount, _physicalDeviceInfos[idx].queueFamilies.data());
             }
 
-            vkGetPhysicalDeviceMemoryProperties(physicalDevices[idx], &(_physicalDeviceInfos[idx].memoryProperties)); // TODO: Check error
+            vkGetPhysicalDeviceMemoryProperties(physicalDevices[idx], &(_physicalDeviceInfos[idx].memoryProperties));
 
             // Load device extensions
             {
                 uint32_t extensionsCount = 0;
-                vkEnumerateDeviceExtensionProperties(physicalDevices[idx], nullptr, &extensionsCount, nullptr); // TODO: Check error
+                result = vkEnumerateDeviceExtensionProperties(physicalDevices[idx], nullptr, &extensionsCount, nullptr);
+                if (result != VK_SUCCESS) {
+                    LUG_LOG.error("RendererVulkan: Can't enumerate device extensions: {}", result);
+                    return false;
+                }
 
                 _physicalDeviceInfos[idx].extensions.resize(extensionsCount);
-                vkEnumerateDeviceExtensionProperties(physicalDevices[idx], nullptr, &extensionsCount, _physicalDeviceInfos[idx].extensions.data()); // TODO: Check error
+                result = vkEnumerateDeviceExtensionProperties(physicalDevices[idx], nullptr, &extensionsCount, _physicalDeviceInfos[idx].extensions.data());
+                if (result != VK_SUCCESS) {
+                    LUG_LOG.error("RendererVulkan: Can't enumerate device extensions: {}", result);
+                    return false;
+                }
             }
 
             // TODO: Get additionnal informations (images properties, etc)
@@ -199,6 +247,8 @@ bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
 }
 
 bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
+    VkResult result;
+
     // Select device
     {
         uint8_t matchedDeviceIdx = 0;
@@ -216,7 +266,7 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
         }
 
         if (matchedDevicesIdx.size() == 0) {
-            // TODO: Log error
+            LUG_LOG.error("RendererVulkan: Can't find a compatible device");
             return false;
         }
 
@@ -270,7 +320,11 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
         };
 
         VkDevice device{VK_NULL_HANDLE};
-        vkCreateDevice(_physicalDeviceInfo->handle, &createInfo, nullptr, &device); // TODO: Check error
+        result = vkCreateDevice(_physicalDeviceInfo->handle, &createInfo, nullptr, &device);
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Can't create the device: {}", result);
+            return false;
+        }
 
         _device = Device(device);
         _loader.loadDeviceFunctions(_device);
@@ -283,7 +337,7 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
         uint8_t i = 0;
         for (auto idx : _loadedQueueFamiliesIdx) {
             VkQueue queue;
-            vkGetDeviceQueue(_device, idx, 0, &queue); // TODO: Check error
+            vkGetDeviceQueue(_device, idx, 0, &queue);
 
             _queues[i] = Queue(idx, queue, _physicalDeviceInfo->queueFamilies[idx].queueFlags);
 
@@ -298,7 +352,6 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
     bool requirementsCheck = true;
 
     for (const auto moduleType : modulesToCheck) {
-        const auto& module = modules.at(moduleType);
         const auto& requirements = modulesRequirements.at(moduleType);
 
         std::vector<const char*> layers{};
@@ -312,8 +365,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
             moduleRequirementsCheck = moduleRequirementsCheck && layersNotFound.size() == 0;
 
             for (const char* const layerName : layersNotFound) {
-                // TODO: Log error
-                std::cout << "Warning: Can't load mandatory layer '" << layerName << "' for module '" << module.name << "'" << std::endl;
+                LUG_LOG.warn("Can't load mandatory layer '{}' for module '{}'", layerName, moduleType);
             }
         }
 
@@ -321,8 +373,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
             const std::vector<const char*> layersNotFound = checkRequirementsLayers(_instanceInfo, requirements.optionnalInstanceLayers, layers);
 
             for (const char* layerName : layersNotFound) {
-                // TODO: Log error
-                std::cout << "Warning: Can't load optionnal layer '" << layerName << "' for module '" << module.name << "'" << std::endl;
+                LUG_LOG.warn("Can't load optionnal layer '{}' for module '{}'", layerName, moduleType);
             }
         }
 
@@ -332,8 +383,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
             moduleRequirementsCheck = moduleRequirementsCheck && extensionsNotFound.size() == 0;
 
             for (const char* const extensionName : extensionsNotFound) {
-                // TODO: Log error
-                std::cout << "Warning: Can't load mandatory extension '" << extensionName << "' for module '" << module.name << "'" << std::endl;
+                LUG_LOG.warn("Can't load mandatory extension '{}' for module '{}'", extensionName, moduleType);
             }
         }
 
@@ -341,8 +391,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
             const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(_instanceInfo, requirements.optionnalInstanceExtensions, extensions);
 
             for (const char* extensionName : extensionsNotFound) {
-                // TODO: Log error
-                std::cout << "Warning: Can't load optionnal extension '" << extensionName << "' for module '" << module.name << "'" << std::endl;
+                LUG_LOG.warn("Can't load optionnal extension '{}' for module '{}'", extensionName, moduleType);
             }
         }
 
@@ -363,7 +412,6 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
     bool requirementsCheck = true;
 
     for (const auto moduleType : modulesToCheck) {
-        const auto& module = modules.at(moduleType);
         const auto& requirements = modulesRequirements.at(moduleType);
 
         std::vector<const char*> extensions{};
@@ -379,8 +427,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 
             if (!finalization) {
                 for (const char* const extensionName : extensionsNotFound) {
-                    // TODO: Log error
-                    std::cout << "Warning: Can't load mandatory extension '" << extensionName << "' for module '" << module.name << "'" << std::endl;
+                    LUG_LOG.warn("Device {}: Can't load mandatory extension '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, extensionName, moduleType);
                 }
             }
         }
@@ -390,8 +437,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 
             if (!finalization) {
                 for (const char* extensionName : extensionsNotFound) {
-                    // TODO: Log error
-                    std::cout << "Warning: Can't load optionnal extension '" << extensionName << "' for module '" << module.name << "'" << std::endl;
+                    LUG_LOG.warn("Device {}: Can't load optionnal extension '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, extensionName, moduleType);
                 }
             }
         }
@@ -404,7 +450,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
                         features.featureName = VK_TRUE;                                                                                                     \
                     } else {                                                                                                                                \
                         if (!finalization) {                                                                                                                \
-                            std::cout << "Warning: Can't load mandatory feature '" << #featureName << "' for module '" << module.name << "'" << std::endl;  \
+                            LUG_LOG.warn("Device {}: Can't load mandatory feature '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, #featureName, moduleType); \
                         }                                                                                                                                   \
                                                                                                                                                             \
                         moduleRequirementsCheck = false;                                                                                                    \
@@ -421,7 +467,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
                     if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                           \
                         features.featureName = VK_TRUE;                                                                                                 \
                     } else if (!finalization) {                                                                                                         \
-                        std::cout << "Warning: Can't load optionnal feature '" << #featureName << "' for module '" << module.name << "'" << std::endl;  \
+                        LUG_LOG.warn("Device {}: Can't load optional feature '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, #featureName, moduleType); \
                     }                                                                                                                                   \
                 }                                                                                                                                       \
             }
@@ -434,7 +480,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
                 queueFamiliesIdx.insert(idx);
             } else {
                 if (!finalization) {
-                    std::cout << "Warning: Can't find mandatory queue type for module '" << module.name << "'" << std::endl;
+                    LUG_LOG.warn("Device {}: Can't find mandatory queue type for module '{}'", physicalDeviceInfo.properties.deviceName, moduleType);
                 }
 
                 moduleRequirementsCheck = false;
@@ -446,7 +492,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
             if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
                 queueFamiliesIdx.insert(idx);
             } else if (!finalization) {
-                std::cout << "Warning: Can't find optionnal queue type for module '" << module.name << "'" << std::endl;
+                LUG_LOG.warn("Device {}: Can't find optionnal queue type for module '{}'", physicalDeviceInfo.properties.deviceName, moduleType);
             }
         }
 

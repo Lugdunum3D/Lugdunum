@@ -23,6 +23,7 @@ set(INC
     ${INCROOT}/Graphics.hpp
     ${INCROOT}/Graphics.inl
     ${INCROOT}/Module.hpp
+    ${INCROOT}/Module.inl
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/RenderWindow.hpp
     ${INCROOT}/Vulkan/Device.hpp
@@ -35,6 +36,7 @@ set(INC
     ${INCROOT}/Vulkan/RenderWindow.hpp
     ${INCROOT}/Vulkan/Queue.hpp
     ${INCROOT}/Vulkan/Vulkan.hpp
+    ${INCROOT}/Vulkan/Vulkan.inl
 )
 source_group("inc" FILES ${INC})
 
