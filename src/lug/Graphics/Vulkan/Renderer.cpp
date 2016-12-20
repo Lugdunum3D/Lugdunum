@@ -550,10 +550,6 @@ std::unique_ptr<::lug::Graphics::RenderWindow> Renderer::createWindow(uint16_t w
     return RenderWindow::create(*this, width, height, title, style);
 }
 
-const Instance& Renderer::getInstance() const {
-    return _instance;
-}
-
 } // Vulkan
 } // Graphics
 } // lug

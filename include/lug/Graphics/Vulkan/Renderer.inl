@@ -9,3 +9,7 @@ inline bool Renderer::isInstanceExtensionLoaded(const char* name) const {
 inline bool Renderer::isDeviceExtensionLoaded(const char* name) const {
     return std::find(_loadedDeviceExtensions.cbegin(), _loadedDeviceExtensions.cend(), name) != _loadedDeviceExtensions.cend();
 }
+
+inline const Instance& Renderer::getInstance() const {
+    return _instance;
+}
