@@ -38,9 +38,10 @@ lug::Window::priv::WindowImpl::~WindowImpl()
 }
 
 bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style) {
-    
+
     // Register the window class at first call
     if (windowCount == 0) {
+        _hinstance = GetModuleHandleW(nullptr);
         registerWindow();
     }
 
@@ -125,6 +126,14 @@ bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
     return false;
 }
 
+HWND lug::Window::priv::WindowImpl::getHandle() const {
+    return _handle;
+}
+
+HINSTANCE lug::Window::priv::WindowImpl::getHinstance() const {
+    return _hinstance;
+}
+
 void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM /*wParam*/, LPARAM /*lParam*/) {
     lug::Window::Event e;
 
@@ -151,7 +160,7 @@ void lug::Window::priv::WindowImpl::registerWindow() const {
     windowClass.lpfnWndProc = &lug::Window::priv::WindowImpl::onEvent;
     windowClass.cbClsExtra = 0;
     windowClass.cbWndExtra = 0;
-    windowClass.hInstance = GetModuleHandleW(nullptr);
+    windowClass.hInstance = _hinstance;
     windowClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
     windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
     windowClass.hbrBackground = 0;

@@ -7,7 +7,7 @@ namespace lug {
 namespace Window {
 namespace priv {
 
-class WindowImpl {
+class LUG_WINDOW_API WindowImpl {
 public:
     WindowImpl(Window*);
     ~WindowImpl() = default;
@@ -21,6 +21,9 @@ public:
     void close();
 
     bool pollEvent(lug::Window::Event& event);
+
+    Display* getDisplay() const;
+    ::Window getWindow() const;
 
 private:
     void setWindowDecorations(Style style);

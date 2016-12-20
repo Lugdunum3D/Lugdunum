@@ -41,10 +41,10 @@ enum class LUG_WINDOW_API Style : uint16_t {
 class LUG_WINDOW_API Window {
 public:
     Window(const Window&) = delete;
-    Window(Window&&);
+    Window(Window&&) = delete;
     Window& operator=(const Window&) = delete;
-    Window& operator=(Window&&);
-    ~Window();
+    Window& operator=(Window&&) = delete;
+    virtual ~Window();
 
     static std::unique_ptr<Window> create(uint16_t width, uint16_t height, const std::string& title, Style style);
 
@@ -52,15 +52,16 @@ public:
     bool pollEvent(lug::Window::Event&);
     void close();
 
-private:
+protected:
     Window();
-
-    bool createWindow(uint16_t width, uint16_t height, const std::string& title, Style style);
 
     priv::WindowImpl* _impl{nullptr};
     VideoMode _mode{800, 600, 8, 8, 8, 60};
 
     friend lug::Window::priv::WindowImpl;
+
+protected:
+    bool createWindow(uint16_t width, uint16_t height, const std::string& title, Style style);
 };
 
 } // Window

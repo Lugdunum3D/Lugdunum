@@ -3,6 +3,7 @@
 #include <lug/Graphics/Vulkan/Loader.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
+#include <lug/Graphics/Vulkan/RenderWindow.hpp>
 
 #include <iostream> // TO REMOVE
 
@@ -497,6 +498,14 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
     }
 
     return extensionsNotFound;
+}
+
+std::unique_ptr<::lug::Graphics::RenderWindow> Renderer::createWindow(uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style) {
+    return RenderWindow::create(*this, width, height, title, style);
+}
+
+const Instance& Renderer::getInstance() const {
+    return _instance;
 }
 
 } // Vulkan

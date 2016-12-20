@@ -7,7 +7,7 @@ namespace lug {
 namespace Window {
 namespace priv {
 
-class WindowImpl {
+class LUG_WINDOW_API WindowImpl {
 public:
     WindowImpl(Window*);
     ~WindowImpl() = default;

@@ -20,17 +20,6 @@ namespace Window {
 lug::Window::Window::Window() : _impl{new lug::Window::priv::WindowImpl(this)} {
 }
 
-lug::Window::Window::Window(Window&& rhs) : _impl{rhs._impl} {
-    rhs._impl = nullptr;
-}
-
-lug::Window::Window& lug::Window::Window::operator=(Window&& rhs) {
-    _impl = rhs._impl;
-    rhs._impl = nullptr;
-
-    return *this;
-}
-
 lug::Window::Window::~Window() {
     close();
 }

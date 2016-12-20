@@ -42,6 +42,8 @@ public:
 
     const Core::Application::Info& getAppInfo() const;
 
+    Renderer* getRenderer() const;
+
 private:
     Core::Application::Info _appInfo;
 

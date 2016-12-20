@@ -83,6 +83,14 @@ bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
     return true;
 }
 
+Display* lug::Window::priv::WindowImpl::getDisplay() const {
+    return _display;
+}
+
+::Window lug::Window::priv::WindowImpl::getWindow() const {
+    return _window;
+}
+
 void lug::Window::priv::WindowImpl::setWindowDecorations(Style style) {
     WMHints hints;
     std::memset(&hints, 0, sizeof(hints));

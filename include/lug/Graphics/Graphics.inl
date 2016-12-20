@@ -33,3 +33,7 @@ inline const std::set<Module::Type>& Graphics::getLoadedModules() const {
 inline const Core::Application::Info& Graphics::getAppInfo() const {
     return _appInfo;
 }
+
+inline Renderer* Graphics::getRenderer() const {
+    return _renderer.get();
+}

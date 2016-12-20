@@ -10,6 +10,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Loader.cpp
     ${SRCROOT}/Vulkan/Queue.cpp
     ${SRCROOT}/Vulkan/Renderer.cpp
+    ${SRCROOT}/Vulkan/RenderWindow.cpp
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
     ${SRCROOT}/Vulkan/Vulkan.cpp
@@ -23,6 +24,7 @@ set(INC
     ${INCROOT}/Graphics.inl
     ${INCROOT}/Module.hpp
     ${INCROOT}/Renderer.hpp
+    ${INCROOT}/RenderWindow.hpp
     ${INCROOT}/Vulkan/Device.hpp
     ${INCROOT}/Vulkan/Device.inl
     ${INCROOT}/Vulkan/Instance.hpp
@@ -30,6 +32,7 @@ set(INC
     ${INCROOT}/Vulkan/Loader.hpp
     ${INCROOT}/Vulkan/Renderer.hpp
     ${INCROOT}/Vulkan/Renderer.inl
+    ${INCROOT}/Vulkan/RenderWindow.hpp
     ${INCROOT}/Vulkan/Queue.hpp
     ${INCROOT}/Vulkan/Vulkan.hpp
 )

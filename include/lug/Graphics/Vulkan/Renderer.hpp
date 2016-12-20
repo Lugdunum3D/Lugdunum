@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <algorithm>
 #include <unordered_map>
 #include <lug/Graphics/Export.hpp>
@@ -55,6 +56,10 @@ public:
     bool isInstanceLayerLoaded(const char* name) const;
     bool isInstanceExtensionLoaded(const char* name) const;
     bool isDeviceExtensionLoaded(const char* name) const;
+
+    std::unique_ptr<::lug::Graphics::RenderWindow> createWindow(uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style) override final;
+
+    const Instance& getInstance() const;
 
 private:
     bool initInstance(std::set<Module::Type> &loadedModules);
