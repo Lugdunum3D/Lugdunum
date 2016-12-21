@@ -13,6 +13,7 @@ set(SRC
     ${SRCROOT}/Vulkan/RenderWindow.cpp
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
+    ${SRCROOT}/Vulkan/Swapchain.cpp
     ${SRCROOT}/Vulkan/Vulkan.cpp
 )
 source_group("src" FILES ${SRC})
@@ -35,6 +36,7 @@ set(INC
     ${INCROOT}/Vulkan/Renderer.inl
     ${INCROOT}/Vulkan/RenderWindow.hpp
     ${INCROOT}/Vulkan/Queue.hpp
+    ${INCROOT}/Vulkan/Swapchain.hpp
     ${INCROOT}/Vulkan/Vulkan.hpp
     ${INCROOT}/Vulkan/Vulkan.inl
 )

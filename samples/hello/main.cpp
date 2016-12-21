@@ -27,7 +27,7 @@ int main() {
 
     auto window = renderer->createWindow(800, 600, "Default Window", lug::Window::Style::Default);
 
-    if (!window->init()) {
+    if (!window) {
         logger->error("Failed to init window");
         return 1;
     }

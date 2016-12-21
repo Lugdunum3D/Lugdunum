@@ -14,6 +14,14 @@ inline const Instance& Renderer::getInstance() const {
     return _instance;
 }
 
+inline const Device& Renderer::getDevice() const {
+    return _device;
+}
+
+inline std::vector<Queue> &Renderer::getQueues() {
+    return _queues;
+}
+
 inline const std::vector<Queue>& Renderer::getQueues() const {
     return _queues;
 }

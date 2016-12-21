@@ -16,8 +16,6 @@ public:
     RenderWindow& operator=(RenderWindow&&) = delete;
 
     virtual ~RenderWindow() = default;
-
-    virtual bool init() = 0;
 };
 
 } // Graphics

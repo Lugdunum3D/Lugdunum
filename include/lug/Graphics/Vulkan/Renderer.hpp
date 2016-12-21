@@ -60,6 +60,8 @@ public:
     std::unique_ptr<::lug::Graphics::RenderWindow> createWindow(uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style) override final;
 
     const Instance& getInstance() const;
+    const Device& getDevice() const;
+    std::vector<Queue>& getQueues();
     const std::vector<Queue>& getQueues() const;
     const Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
 
