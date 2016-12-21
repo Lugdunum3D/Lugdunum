@@ -60,6 +60,16 @@ public:
     std::unique_ptr<::lug::Graphics::RenderWindow> createWindow(uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style) override final;
 
     const Instance& getInstance() const;
+    const std::vector<Queue>& getQueues() const;
+    const Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
+
+    bool isSameQueue(VkQueueFlags flagsA, bool supportPresentationA, VkQueueFlags flagsB, bool supportPresentationB) const;
+
+    InstanceInfo& getInstanceInfo();
+    const InstanceInfo& getInstanceInfo() const;
+
+    PhysicalDeviceInfo* getPhysicalDeviceInfo();
+    const PhysicalDeviceInfo* getPhysicalDeviceInfo() const;
 
 private:
     bool initInstance(std::set<Module::Type> &loadedModules);

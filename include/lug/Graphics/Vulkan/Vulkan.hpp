@@ -156,12 +156,23 @@ struct InstanceInfo {
 
 struct PhysicalDeviceInfo {
     VkPhysicalDevice handle;
+
     VkPhysicalDeviceProperties properties;
     VkPhysicalDeviceFeatures features;
+
     std::vector<VkQueueFamilyProperties> queueFamilies;
+
     VkPhysicalDeviceMemoryProperties memoryProperties;
 
     std::vector<VkExtensionProperties> extensions;
+
+    struct SwapChainInfo {
+        VkSurfaceCapabilitiesKHR capabilities;
+
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    } swapChain;
+
     bool containsExtension(const char* extensionName) const;
     bool containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const;
 };
