@@ -23,21 +23,21 @@ const Renderer::Requirements requirements{
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     },
 
-    // optionnalInstanceExtensions
+    // optionalInstanceExtensions
     {
 #if defined(LUG_DEBUG)
         VK_EXT_DEBUG_REPORT_EXTENSION_NAME
 #endif
     },
 
-    // optionnalInstanceLayers
+    // optionalInstanceLayers
     {
 #if defined(LUG_DEBUG)
         "VK_LAYER_LUNARG_standard_validation"
 #endif
     },
 
-    // optionnalDeviceExtensions
+    // optionalDeviceExtensions
     {},
 
     // mandatoryFeatures
@@ -99,7 +99,7 @@ const Renderer::Requirements requirements{
         VK_FALSE, // inheritedQueries
     },
 
-    // optionnalFeatures
+    // optionalFeatures
     {
         VK_FALSE, // robustBufferAccess
         VK_FALSE, // fullDrawIndexUint32
@@ -163,7 +163,7 @@ const Renderer::Requirements requirements{
         VK_QUEUE_GRAPHICS_BIT
     },
 
-    // optionnalQueueFamilies
+    // optionalQueueFamilies
     {}
 };
 

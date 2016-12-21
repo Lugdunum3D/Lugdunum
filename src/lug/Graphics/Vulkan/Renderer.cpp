@@ -72,7 +72,7 @@ std::set<Module::Type> Renderer::init() {
     std::set<Module::Type> loadedModules;
 
     loadedModules.insert(_graphic.getMandatoryModules().begin(), _graphic.getMandatoryModules().end());
-    loadedModules.insert(_graphic.getOptionnalModules().begin(), _graphic.getOptionnalModules().end());
+    loadedModules.insert(_graphic.getOptionalModules().begin(), _graphic.getOptionalModules().end());
 
     if (!initInstance(loadedModules)) {
         LUG_LOG.error("RendererVulkan: Can't load the instance");
@@ -138,7 +138,7 @@ bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
             return false;
         }
 
-        checkRequirementsInstance(_graphic.getOptionnalModules(), loadedModules);
+        checkRequirementsInstance(_graphic.getOptionalModules(), loadedModules);
 
         // Create the application information for vkCreateInstance
         VkApplicationInfo applicationInfo{
@@ -239,7 +239,7 @@ bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
                 }
             }
 
-            // TODO: Get additionnal informations (images properties, etc)
+            // TODO: Get additional informations (images properties, etc)
         }
     }
 
@@ -260,7 +260,7 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
                 continue;
             }
 
-            checkRequirementsDevice(_physicalDeviceInfos[idx], _graphic.getOptionnalModules(), tmpLoadedModules, false);
+            checkRequirementsDevice(_physicalDeviceInfos[idx], _graphic.getOptionalModules(), tmpLoadedModules, false);
 
             matchedDevicesIdx.push_back(idx);
         }
@@ -285,7 +285,7 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
     // Set the loaded informations of the matched device
     {
         checkRequirementsDevice(*_physicalDeviceInfo, _graphic.getMandatoryModules(), loadedModules, true);
-        checkRequirementsDevice(*_physicalDeviceInfo, _graphic.getOptionnalModules(), loadedModules, true);
+        checkRequirementsDevice(*_physicalDeviceInfo, _graphic.getOptionalModules(), loadedModules, true);
     }
 
     // Create device
@@ -370,10 +370,10 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
         }
 
         {
-            const std::vector<const char*> layersNotFound = checkRequirementsLayers(_instanceInfo, requirements.optionnalInstanceLayers, layers);
+            const std::vector<const char*> layersNotFound = checkRequirementsLayers(_instanceInfo, requirements.optionalInstanceLayers, layers);
 
             for (const char* layerName : layersNotFound) {
-                LUG_LOG.warn("Can't load optionnal layer '{}' for module '{}'", layerName, moduleType);
+                LUG_LOG.warn("Can't load optional layer '{}' for module '{}'", layerName, moduleType);
             }
         }
 
@@ -388,10 +388,10 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
         }
 
         {
-            const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(_instanceInfo, requirements.optionnalInstanceExtensions, extensions);
+            const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(_instanceInfo, requirements.optionalInstanceExtensions, extensions);
 
             for (const char* extensionName : extensionsNotFound) {
-                LUG_LOG.warn("Can't load optionnal extension '{}' for module '{}'", extensionName, moduleType);
+                LUG_LOG.warn("Can't load optional extension '{}' for module '{}'", extensionName, moduleType);
             }
         }
 
@@ -433,11 +433,11 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
         }
 
         {
-            const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(physicalDeviceInfo, requirements.optionnalDeviceExtensions, extensions);
+            const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(physicalDeviceInfo, requirements.optionalDeviceExtensions, extensions);
 
             if (!finalization) {
                 for (const char* extensionName : extensionsNotFound) {
-                    LUG_LOG.warn("Device {}: Can't load optionnal extension '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, extensionName, moduleType);
+                    LUG_LOG.warn("Device {}: Can't load optional extension '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, extensionName, moduleType);
                 }
             }
         }
@@ -463,7 +463,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
         // TODO: Log error
         #define LUG_CHECK_VULKAN_PHYSICAL_DEVICE_OPTIONNAL_FEATURES(featureName)                                                                        \
             {                                                                                                                                           \
-                if (requirements.optionnalFeatures.featureName == VK_TRUE) {                                                                            \
+                if (requirements.optionalFeatures.featureName == VK_TRUE) {                                                                            \
                     if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                           \
                         features.featureName = VK_TRUE;                                                                                                 \
                     } else if (!finalization) {                                                                                                         \
@@ -487,12 +487,12 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
             }
         }
 
-        for (const auto& queueFlags : requirements.optionnalQueueFlags) {
+        for (const auto& queueFlags : requirements.optionalQueueFlags) {
             int8_t idx = 0;
             if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
                 queueFamiliesIdx.insert(idx);
             } else if (!finalization) {
-                LUG_LOG.warn("Device {}: Can't find optionnal queue type for module '{}'", physicalDeviceInfo.properties.deviceName, moduleType);
+                LUG_LOG.warn("Device {}: Can't find optional queue type for module '{}'", physicalDeviceInfo.properties.deviceName, moduleType);
             }
         }
 

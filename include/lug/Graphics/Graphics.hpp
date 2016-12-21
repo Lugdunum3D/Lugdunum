@@ -26,13 +26,13 @@ public:
     bool init();
 
     void addModule(Module::Type type);
-    void addOptionnalModule(Module::Type type);
+    void addOptionalModule(Module::Type type);
 
     void removeModule(Module::Type type);
-    void removeOptionnalModule(Module::Type type);
+    void removeOptionalModule(Module::Type type);
 
     const std::set<Module::Type>& getMandatoryModules() const;
-    const std::set<Module::Type>& getOptionnalModules() const;
+    const std::set<Module::Type>& getOptionalModules() const;
 
     bool isModuleLoaded(Module::Type type) const;
     const std::set<Module::Type>& getLoadedModules() const;
@@ -48,7 +48,7 @@ private:
     Core::Application::Info _appInfo;
 
     std::set<Module::Type> _mandatoryModules{Module::Type::Core};
-    std::set<Module::Type> _optionnalModules{};
+    std::set<Module::Type> _optionalModules{};
     std::set<Module::Type> _loadedModules{};
 
     Renderer::Type _rendererType{Renderer::Type::Vulkan};

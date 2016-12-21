@@ -25,15 +25,15 @@ public:
         const std::vector<const char*> mandatoryInstanceLayers;
         const std::vector<const char*> mandatoryDeviceExtensions;
 
-        const std::vector<const char*> optionnalInstanceExtensions;
-        const std::vector<const char*> optionnalInstanceLayers;
-        const std::vector<const char*> optionnalDeviceExtensions;
+        const std::vector<const char*> optionalInstanceExtensions;
+        const std::vector<const char*> optionalInstanceLayers;
+        const std::vector<const char*> optionalDeviceExtensions;
 
         const VkPhysicalDeviceFeatures mandatoryFeatures;
-        const VkPhysicalDeviceFeatures optionnalFeatures;
+        const VkPhysicalDeviceFeatures optionalFeatures;
 
         const std::vector<VkQueueFlags> mandatoryQueueFlags;
-        const std::vector<VkQueueFlags> optionnalQueueFlags;
+        const std::vector<VkQueueFlags> optionalQueueFlags;
 
         // TODO: PhysicalDeviceLimits / PhysicalDeviceSparseProperties
         // TODO: Memory properties
