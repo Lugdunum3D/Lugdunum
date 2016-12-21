@@ -21,7 +21,7 @@ public:
     RenderWindow& operator=(const RenderWindow&) = delete;
     RenderWindow& operator=(RenderWindow&&) = delete;
 
-    ~RenderWindow() = default;
+    ~RenderWindow();
 
     static std::unique_ptr<RenderWindow> create(Renderer& renderer, uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style);
 
@@ -29,10 +29,11 @@ public:
 
 private:
     bool createSurface();
+    void destroy();
 
 private:
     Renderer& _renderer;
-    VkSurfaceKHR _surface;
+    VkSurfaceKHR _surface{VK_NULL_HANDLE};
 };
 
 } // Vulkan

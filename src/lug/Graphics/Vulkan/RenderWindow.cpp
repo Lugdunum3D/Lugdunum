@@ -20,6 +20,10 @@ namespace Vulkan {
 
 RenderWindow::RenderWindow(Renderer& renderer): _renderer(renderer) {}
 
+RenderWindow::~RenderWindow() {
+    destroy();
+}
+
 std::unique_ptr<RenderWindow> RenderWindow::create(Renderer& renderer, uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style) {
     std::unique_ptr<RenderWindow> win(new RenderWindow(renderer));
 
@@ -52,6 +56,13 @@ bool RenderWindow::createSurface() {
 
 bool RenderWindow::init() {
     return createSurface();
+}
+
+void RenderWindow::destroy() {
+    if (_surface != VK_NULL_HANDLE) {
+        vkDestroySurfaceKHR(_renderer.getInstance(), _surface, nullptr);
+        _surface = VK_NULL_HANDLE;
+    }
 }
 
 } // Vulkan
