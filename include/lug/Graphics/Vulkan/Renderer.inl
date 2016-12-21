@@ -43,10 +43,14 @@ inline const Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentat
 
     for (const auto& queue : _queues) {
         if ((queue.getFlags() & flags) == flags && (!supportPresentation || queue.supportsPresentation())) {
-            if (returnQueue == nullptr || queue.getFlags() == flags) {
+            if (returnQueue == nullptr || queue.getFlags() == flags || (supportPresentation && flags == 0 && queue.getFlags() & VK_QUEUE_GRAPHICS_BIT)) {
                 returnQueue = &queue;
             }
         }
+    }
+
+    if (!returnQueue || flags == VK_QUEUE_TRANSFER_BIT) {
+        return getQueue(VK_QUEUE_GRAPHICS_BIT, supportPresentation);
     }
 
     return returnQueue;
