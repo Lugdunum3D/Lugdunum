@@ -28,6 +28,14 @@ Swapchain::~Swapchain() {
 }
 
 void Swapchain::destroy() {
+    // Delete swapchain images and images views
+    for (VkImageView& imageView: _imagesViews) {
+        vkDestroyImageView(*_device, imageView, nullptr);
+    }
+    _imagesViews.clear();
+    _images.clear();
+
+    // Delete swapchain
     if (_swapchain != VK_NULL_HANDLE) {
         vkDestroySwapchainKHR(*_device, _swapchain, nullptr);
         _swapchain = VK_NULL_HANDLE;
@@ -57,8 +65,7 @@ bool Swapchain::initImages(const VkSurfaceFormatKHR& swapchainFormat) {
 
     // Create image views
     {
-        for (const VkImage& image: _images)
-        {
+        for (const VkImage& image: _images) {
             // Image subresource range
             VkImageSubresourceRange subresourceRange{
                 subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
