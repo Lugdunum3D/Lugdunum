@@ -67,19 +67,20 @@ bool Swapchain::initImages() {
         // Copy VkImage vector to Image vector
         _images.resize(imagesCount);
         for (uint8_t i = 0; i < images.size(); ++i) {
-            _images[i] = Image(images[i], _device);
+            _images[i] = Image(images[i], _device, true);
         }
     }
 
     // Create image views
     {
-        for (const Image& image: _images) {
+        _imagesViews.resize(_images.size());
+        for (uint8_t i = 0; i < _images.size(); ++i) {
             // Image view creation informations
             VkImageViewCreateInfo createInfo{
                 createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
                 createInfo.pNext = nullptr,
                 createInfo.flags = 0,
-                createInfo.image = image,
+                createInfo.image = _images[i],
                 createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D,
                 createInfo.format = _format.format,
                 {}, // createInfo.components
@@ -106,7 +107,7 @@ bool Swapchain::initImages() {
                 return false;
             }
 
-            _imagesViews.push_back(ImageView(imageView, _device));
+            _imagesViews[i] = ImageView(imageView, _device);
         }
     }
 
