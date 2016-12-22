@@ -38,6 +38,24 @@ inline const std::vector<Queue>& Renderer::getQueues() const {
     return _queues;
 }
 
+inline Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentation) {
+    Queue* returnQueue = nullptr;
+
+    for (auto& queue : _queues) {
+        if ((queue.getFlags() & flags) == flags && (!supportPresentation || queue.supportsPresentation())) {
+            if (returnQueue == nullptr || queue.getFlags() == flags || (supportPresentation && flags == 0 && queue.getFlags() & VK_QUEUE_GRAPHICS_BIT)) {
+                returnQueue = &queue;
+            }
+        }
+    }
+
+    if (!returnQueue || flags == VK_QUEUE_TRANSFER_BIT) {
+        return getQueue(VK_QUEUE_GRAPHICS_BIT, supportPresentation);
+    }
+
+    return returnQueue;
+}
+
 inline const Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentation) const {
     const Queue* returnQueue = nullptr;
 

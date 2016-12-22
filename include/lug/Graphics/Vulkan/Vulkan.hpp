@@ -78,8 +78,10 @@
     macro(vkCmdPipelineBarrier)                         \
     macro(vkCmdClearColorImage)                         \
     macro(vkEndCommandBuffer)                           \
+    macro(vkResetCommandBuffer)                         \
     macro(vkQueueSubmit)                                \
     macro(vkFreeCommandBuffers)                         \
+    macro(vkResetCommandPool)                           \
     macro(vkDestroyCommandPool)                         \
     macro(vkDestroySemaphore)                           \
     macro(vkCreateImageView)                            \

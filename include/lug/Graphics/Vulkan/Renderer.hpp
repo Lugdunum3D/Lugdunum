@@ -64,6 +64,7 @@ public:
     const Device& getDevice() const;
     std::vector<Queue>& getQueues();
     const std::vector<Queue>& getQueues() const;
+    Queue* getQueue(VkQueueFlags flags, bool supportPresentation);
     const Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
 
     bool isSameQueue(VkQueueFlags flagsA, bool supportPresentationA, VkQueueFlags flagsB, bool supportPresentationB) const;

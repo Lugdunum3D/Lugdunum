@@ -5,6 +5,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Graphics.cpp
     ${SRCROOT}/Module.cpp
+    ${SRCROOT}/Vulkan/CommandBuffer.cpp
     ${SRCROOT}/Vulkan/CommandPool.cpp
     ${SRCROOT}/Vulkan/Device.cpp
     ${SRCROOT}/Vulkan/Image.cpp
@@ -30,7 +31,9 @@ set(INC
     ${INCROOT}/Module.inl
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/RenderWindow.hpp
+    ${INCROOT}/Vulkan/CommandBuffer.hpp
     ${INCROOT}/Vulkan/CommandPool.hpp
+    ${INCROOT}/Vulkan/CommandPool.inl
     ${INCROOT}/Vulkan/Device.hpp
     ${INCROOT}/Vulkan/Device.inl
     ${INCROOT}/Vulkan/Image.hpp
