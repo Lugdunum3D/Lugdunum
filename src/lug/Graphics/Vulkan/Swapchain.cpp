@@ -32,9 +32,6 @@ Swapchain::~Swapchain() {
 
 void Swapchain::destroy() {
     // Delete swapchain images and images views
-    for (ImageView& imageView: _imagesViews) {
-        imageView.destroy();
-    }
     _imagesViews.clear();
     _images.clear();
 

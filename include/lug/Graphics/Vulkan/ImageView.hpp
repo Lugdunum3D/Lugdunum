@@ -18,7 +18,7 @@ public:
     ImageView& operator=(const ImageView&) = delete;
     ImageView& operator=(ImageView&& ImageView);
 
-    ~ImageView() = default;
+    ~ImageView();
 
     operator VkImageView() const {
         return _imageView;

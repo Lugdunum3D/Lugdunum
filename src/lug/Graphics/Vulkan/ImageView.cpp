@@ -22,8 +22,15 @@ ImageView& ImageView::operator=(ImageView&& imageView) {
     return *this;
 }
 
+ImageView::~ImageView() {
+    destroy();
+}
+
 void ImageView::destroy() {
-    vkDestroyImageView(*_device, _imageView, nullptr);
+    if (_imageView != VK_NULL_HANDLE) {
+        vkDestroyImageView(*_device, _imageView, nullptr);
+        _imageView = VK_NULL_HANDLE;
+    }
 }
 
 } // Vulkan
