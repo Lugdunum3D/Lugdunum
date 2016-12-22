@@ -1,13 +1,25 @@
 inline bool Renderer::isInstanceLayerLoaded(const char* name) const {
-    return std::find(_loadedInstanceLayers.cbegin(), _loadedInstanceLayers.cend(), name) != _loadedInstanceLayers.cend();
+    auto compareLayers = [&name](const char* layerName) {
+        return std::strcmp(layerName, name) == 0;
+    };
+
+    return std::find_if(_loadedInstanceLayers.cbegin(), _loadedInstanceLayers.cend(), compareLayers) != _loadedInstanceLayers.cend();
 }
 
 inline bool Renderer::isInstanceExtensionLoaded(const char* name) const {
-    return std::find(_loadedInstanceExtensions.cbegin(), _loadedInstanceExtensions.cend(), name) != _loadedInstanceExtensions.cend();
+    auto compareExtensions = [&name](const char* extensionName) {
+        return std::strcmp(extensionName, name) == 0;
+    };
+
+    return std::find_if(_loadedInstanceExtensions.cbegin(), _loadedInstanceExtensions.cend(), compareExtensions) != _loadedInstanceExtensions.cend();
 }
 
 inline bool Renderer::isDeviceExtensionLoaded(const char* name) const {
-    return std::find(_loadedDeviceExtensions.cbegin(), _loadedDeviceExtensions.cend(), name) != _loadedDeviceExtensions.cend();
+    auto compareExtensions = [&name](const char* extensionName) {
+        return std::strcmp(extensionName, name) == 0;
+    };
+
+    return std::find_if(_loadedDeviceExtensions.cbegin(), _loadedDeviceExtensions.cend(), compareExtensions) != _loadedDeviceExtensions.cend();
 }
 
 inline const Instance& Renderer::getInstance() const {
