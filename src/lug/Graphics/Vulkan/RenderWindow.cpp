@@ -241,9 +241,9 @@ bool RenderWindow::initSwapchain() {
             return false;
         }
 
-        _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice());
+        _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat);
 
-        if (!_swapchain.initImages(swapchainFormat))
+        if (!_swapchain.initImages())
             return false;
     }
 

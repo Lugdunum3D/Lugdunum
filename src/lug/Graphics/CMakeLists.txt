@@ -6,6 +6,8 @@ set(SRC
     ${SRCROOT}/Graphics.cpp
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/Vulkan/Device.cpp
+    ${SRCROOT}/Vulkan/Image.cpp
+    ${SRCROOT}/Vulkan/ImageView.cpp
     ${SRCROOT}/Vulkan/Instance.cpp
     ${SRCROOT}/Vulkan/Loader.cpp
     ${SRCROOT}/Vulkan/Queue.cpp
@@ -29,6 +31,8 @@ set(INC
     ${INCROOT}/RenderWindow.hpp
     ${INCROOT}/Vulkan/Device.hpp
     ${INCROOT}/Vulkan/Device.inl
+    ${INCROOT}/Vulkan/Image.hpp
+    ${INCROOT}/Vulkan/ImageView.hpp
     ${INCROOT}/Vulkan/Instance.hpp
     ${INCROOT}/Vulkan/Instance.inl
     ${INCROOT}/Vulkan/Loader.hpp

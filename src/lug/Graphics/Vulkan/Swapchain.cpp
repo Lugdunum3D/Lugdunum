@@ -5,11 +5,13 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-Swapchain::Swapchain(VkSwapchainKHR swapchain, const Device* device) : _swapchain(swapchain), _device(device) {}
+Swapchain::Swapchain(VkSwapchainKHR swapchain, const Device* device, const VkSurfaceFormatKHR& swapchainFormat) :
+                    _swapchain(swapchain), _device(device), _format(swapchainFormat) {}
 
 Swapchain::Swapchain(Swapchain&& swapchain) {
     _swapchain = swapchain._swapchain;
     _device = swapchain._device;
+    _format = swapchain._format;
     swapchain._swapchain = VK_NULL_HANDLE;
     swapchain._device = nullptr;
 }
@@ -17,6 +19,7 @@ Swapchain::Swapchain(Swapchain&& swapchain) {
 Swapchain& Swapchain::operator=(Swapchain&& swapchain) {
     _swapchain = swapchain._swapchain;
     _device = swapchain._device;
+    _format = swapchain._format;
     swapchain._swapchain = VK_NULL_HANDLE;
     swapchain._device = nullptr;
 
@@ -29,8 +32,8 @@ Swapchain::~Swapchain() {
 
 void Swapchain::destroy() {
     // Delete swapchain images and images views
-    for (VkImageView& imageView: _imagesViews) {
-        vkDestroyImageView(*_device, imageView, nullptr);
+    for (ImageView& imageView: _imagesViews) {
+        imageView.destroy();
     }
     _imagesViews.clear();
     _images.clear();
@@ -43,29 +46,37 @@ void Swapchain::destroy() {
     }
 }
 
-bool Swapchain::initImages(const VkSurfaceFormatKHR& swapchainFormat) {
+bool Swapchain::initImages() {
     VkResult result;
 
     // Get swapchain images
     {
         uint32_t imagesCount = 0;
+        std::vector<VkImage> images;
+
         result = vkGetSwapchainImagesKHR(*_device, _swapchain, &imagesCount, nullptr);
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate swapchain images: {}", result);
             return false;
         }
 
-        _images.resize(imagesCount);
-        result = vkGetSwapchainImagesKHR(*_device, _swapchain, &imagesCount, _images.data());
+        images.resize(imagesCount);
+        result = vkGetSwapchainImagesKHR(*_device, _swapchain, &imagesCount, images.data());
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate swapchain images: {}", result);
             return false;
+        }
+
+        // Copy VkImage vector to Image vector
+        _images.resize(imagesCount);
+        for (uint8_t i = 0; i < images.size(); ++i) {
+            _images[i] = Image(images[i], _device);
         }
     }
 
     // Create image views
     {
-        for (const VkImage& image: _images) {
+        for (const Image& image: _images) {
             // Image view creation informations
             VkImageViewCreateInfo createInfo{
                 createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -73,7 +84,7 @@ bool Swapchain::initImages(const VkSurfaceFormatKHR& swapchainFormat) {
                 createInfo.flags = 0,
                 createInfo.image = image,
                 createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D,
-                createInfo.format = swapchainFormat.format,
+                createInfo.format = _format.format,
                 {}, // createInfo.components
                 {}, // createInfo.subresourceRange
             };
@@ -98,7 +109,7 @@ bool Swapchain::initImages(const VkSurfaceFormatKHR& swapchainFormat) {
                 return false;
             }
 
-            _imagesViews.push_back(imageView);
+            _imagesViews.push_back(ImageView(imageView, _device));
         }
     }
 

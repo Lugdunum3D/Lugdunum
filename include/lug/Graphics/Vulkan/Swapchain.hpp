@@ -3,6 +3,8 @@
 #include <vector>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/Image.hpp>
+#include <lug/Graphics/Vulkan/ImageView.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -11,7 +13,7 @@ namespace Vulkan {
 
 class LUG_GRAPHICS_API Swapchain {
 public:
-    explicit Swapchain(VkSwapchainKHR swapchain = VK_NULL_HANDLE, const Device* device = nullptr);
+    Swapchain(VkSwapchainKHR swapchain = VK_NULL_HANDLE, const Device* device = nullptr, const VkSurfaceFormatKHR& swapchainFormat = {});
 
     Swapchain(const Swapchain&) = delete;
     Swapchain(Swapchain&& Swapchain);
@@ -27,13 +29,14 @@ public:
 
     void destroy();
 
-    bool initImages(const VkSurfaceFormatKHR& swapchainFormat);
+    bool initImages();
 
 private:
     VkSwapchainKHR _swapchain{ VK_NULL_HANDLE };
     const Device* _device{nullptr};
-    std::vector<VkImage> _images;
-    std::vector<VkImageView> _imagesViews;
+    std::vector<Image> _images;
+    std::vector<ImageView> _imagesViews;
+    VkSurfaceFormatKHR _format;
 };
 
 } // Vulkan
