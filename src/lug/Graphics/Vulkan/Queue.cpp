@@ -11,6 +11,7 @@ Queue::Queue(Queue&& queue) {
     _idx = queue._idx;
     _flags = queue._flags;
     _presentation = queue._presentation;
+    _commandPool = std::move(queue._commandPool);
 
     queue._queue = VK_NULL_HANDLE;
     queue._idx = -1;
@@ -19,10 +20,13 @@ Queue::Queue(Queue&& queue) {
 }
 
 Queue& Queue::operator=(Queue&& queue) {
+    destroy();
+
     _queue = queue._queue;
     _idx = queue._idx;
     _flags = queue._flags;
     _presentation = queue._presentation;
+    _commandPool = std::move(queue._commandPool);
 
     queue._queue = VK_NULL_HANDLE;
     queue._idx = -1;
@@ -37,14 +41,16 @@ Queue::~Queue() {
 }
 
 void Queue::destroy() {
+    _commandPool.destroy();
+
     if (_queue != VK_NULL_HANDLE) {
         vkQueueWaitIdle(_queue);
-
         _queue = VK_NULL_HANDLE;
-        _idx = -1;
-        _flags = 0;
-        _presentation = false;
     }
+
+    _idx = -1;
+    _flags = 0;
+    _presentation = false;
 }
 
 } // Vulkan

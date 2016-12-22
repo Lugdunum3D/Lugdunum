@@ -12,6 +12,8 @@ Instance::Instance(Instance&& instance) {
 }
 
 Instance& Instance::operator=(Instance&& instance) {
+    destroy();
+
     _instance = instance._instance;
     instance._instance = VK_NULL_HANDLE;
 

@@ -13,3 +13,15 @@ inline bool Queue::supportsPresentation() const {
 inline void Queue::supportsPresentation(bool presentation) {
     _presentation = presentation;
 }
+
+inline CommandPool& Queue::getCommandPool() {
+    return _commandPool;
+}
+
+inline const CommandPool& Queue::getCommandPool() const {
+    return _commandPool;
+}
+
+inline void Queue::setCommandPool(CommandPool&& commandPool) {
+    _commandPool = std::move(commandPool);
+}

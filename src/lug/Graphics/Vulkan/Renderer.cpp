@@ -345,6 +345,27 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
         }
     }
 
+    // Create command pools
+    {
+        for (auto& queue : _queues) {
+            VkCommandPoolCreateInfo createInfo{
+                createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+                createInfo.pNext = nullptr,
+                createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, // TODO: Maybe change that
+                createInfo.queueFamilyIndex = queue.getFamilyIdx()
+            };
+
+            VkCommandPool commandPool{VK_NULL_HANDLE};
+            result = vkCreateCommandPool(_device, &createInfo, nullptr, &commandPool);
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't create a command pool: {}", result);
+                return false;
+            }
+
+            queue.setCommandPool(CommandPool(commandPool, &_device, &queue));
+        }
+    }
+
     return true;
 }
 

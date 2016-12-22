@@ -12,6 +12,8 @@ Device::Device(Device&& device) {
 }
 
 Device& Device::operator=(Device&& device) {
+    destroy();
+
     _device = device._device;
     device._device = VK_NULL_HANDLE;
 

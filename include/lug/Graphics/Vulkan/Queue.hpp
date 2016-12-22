@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -29,6 +30,11 @@ public:
     bool supportsPresentation() const;
     void supportsPresentation(bool presentation);
 
+    CommandPool& getCommandPool();
+    const CommandPool& getCommandPool() const;
+
+    void setCommandPool(CommandPool&& commandPool);
+
     void destroy();
 
 private:
@@ -36,6 +42,8 @@ private:
     VkQueue _queue{VK_NULL_HANDLE};
     VkQueueFlags _flags{0};
     bool _presentation{false};
+
+    CommandPool _commandPool{VK_NULL_HANDLE, nullptr, this};
 };
 
 #include <lug/Graphics/Vulkan/Queue.inl>
