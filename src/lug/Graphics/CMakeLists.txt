@@ -15,6 +15,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Queue.cpp
     ${SRCROOT}/Vulkan/Renderer.cpp
     ${SRCROOT}/Vulkan/RenderWindow.cpp
+    ${SRCROOT}/Vulkan/Semaphore.cpp
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
     ${SRCROOT}/Vulkan/Swapchain.cpp
@@ -45,6 +46,7 @@ set(INC
     ${INCROOT}/Vulkan/Renderer.inl
     ${INCROOT}/Vulkan/RenderWindow.hpp
     ${INCROOT}/Vulkan/Queue.hpp
+    ${INCROOT}/Vulkan/Semaphore.hpp
     ${INCROOT}/Vulkan/Swapchain.hpp
     ${INCROOT}/Vulkan/Vulkan.hpp
     ${INCROOT}/Vulkan/Vulkan.inl

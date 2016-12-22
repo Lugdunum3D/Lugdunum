@@ -43,6 +43,10 @@ void Swapchain::destroy() {
     }
 }
 
+bool Swapchain::init() {
+    return initImages();
+}
+
 bool Swapchain::initImages() {
     VkResult result;
 
@@ -111,6 +115,39 @@ bool Swapchain::initImages() {
         }
     }
 
+    return true;
+}
+
+bool Swapchain::getNextImage(uint32_t *imageIndex, VkSemaphore semaphore)
+{
+    // Get next image
+    VkResult result = vkAcquireNextImageKHR(*_device, _swapchain, 0, semaphore, VK_NULL_HANDLE, imageIndex);
+    if (result != VK_SUCCESS) {
+        LUG_LOG.error("RendererVulkan: Can't acquire swapchain next image: {}", result);
+        return false;
+    }
+
+    return true;
+}
+
+bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore) {
+    // Present image
+    VkPresentInfoKHR presentInfo{
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        presentInfo.pNext = nullptr,
+        presentInfo.waitSemaphoreCount = semaphore != VK_NULL_HANDLE ? 1 : 0,
+        presentInfo.pWaitSemaphores = semaphore != VK_NULL_HANDLE ? &semaphore : nullptr,
+        presentInfo.swapchainCount = 1,
+        presentInfo.pSwapchains = &_swapchain,
+        presentInfo.pImageIndices = &imageIndex,
+        presentInfo.pResults = nullptr
+    };
+
+    VkResult result = vkQueuePresentKHR(*presentQueue, &presentInfo);
+    if (result != VK_SUCCESS) {
+        LUG_LOG.error("RendererVulkan: Can't acquire swapchain next image: {}", result);
+        return false;
+    }
     return true;
 }
 

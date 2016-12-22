@@ -41,6 +41,10 @@ int main() {
                 window->close();
             }
         }
+
+        window->beginFrame();
+        // TODO: Render objects
+        window->endFrame();
     }
 
     return 0;

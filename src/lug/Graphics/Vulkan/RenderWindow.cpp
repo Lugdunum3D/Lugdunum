@@ -26,6 +26,14 @@ RenderWindow::~RenderWindow() {
     destroy();
 }
 
+bool RenderWindow::beginFrame() {
+    return _swapchain.getNextImage(&currentImageIndex, _semaphore);
+}
+
+bool RenderWindow::endFrame() {
+    return _swapchain.present(_presentQueue, currentImageIndex, _semaphore);
+}
+
 std::unique_ptr<RenderWindow>
 RenderWindow::create(Renderer &renderer, uint16_t width, uint16_t height, const std::string &title,
                      lug::Window::Style style) {
@@ -213,18 +221,18 @@ bool RenderWindow::initSwapchain() {
 
         std::vector<uint32_t> queueFamilyIndices(1);
 
-        const Queue* presentationQueue = _renderer.getQueue(0, true);
-        if (!presentationQueue) {
+        _presentQueue = _renderer.getQueue(0, true);
+        if (!_presentQueue) {
             LUG_LOG.error("RendererWindow: Can't find presentation queue");
             return false;
         }
-        queueFamilyIndices[0] = presentationQueue->getFamilyIdx();
+        queueFamilyIndices[0] = _presentQueue->getFamilyIdx();
 
         // Check if the presentation and graphics queue are the same
         if (!_renderer.isSameQueue(0, true, VK_QUEUE_GRAPHICS_BIT, false)) {
             const Queue* graphicsQueue = _renderer.getQueue(VK_QUEUE_GRAPHICS_BIT, false);
             if (!graphicsQueue) {
-                LUG_LOG.error("RendererWindow: Can't find presentation queue");
+                LUG_LOG.error("RendererWindow: Can't find graphics queue");
                 return false;
             }
             queueFamilyIndices.push_back(graphicsQueue->getFamilyIdx());
@@ -243,7 +251,7 @@ bool RenderWindow::initSwapchain() {
 
         _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat);
 
-        if (!_swapchain.initImages())
+        if (!_swapchain.init())
             return false;
     }
 
@@ -251,6 +259,23 @@ bool RenderWindow::initSwapchain() {
 }
 
 bool RenderWindow::init() {
+    // Create semaphore
+    {
+        VkSemaphore semaphore;
+        VkSemaphoreCreateInfo createInfo{
+            createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+            createInfo.pNext = nullptr,
+            createInfo.flags = 0
+        };
+        VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+            return false;
+        }
+
+        _semaphore = Semaphore(semaphore, &_renderer.getDevice());
+    }
+
     return initSurface() && initSwapchain();
 }
 

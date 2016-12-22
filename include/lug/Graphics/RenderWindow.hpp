@@ -16,6 +16,9 @@ public:
     RenderWindow& operator=(RenderWindow&&) = delete;
 
     virtual ~RenderWindow() = default;
+
+    virtual bool beginFrame() = 0;
+    virtual bool endFrame() = 0;
 };
 
 } // Graphics

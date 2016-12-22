@@ -5,6 +5,7 @@
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Image.hpp>
 #include <lug/Graphics/Vulkan/ImageView.hpp>
+#include <lug/Graphics/Vulkan/Queue.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -29,6 +30,11 @@ public:
 
     void destroy();
 
+    bool getNextImage(uint32_t *imageIndex, VkSemaphore semaphore);
+    bool present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore = VK_NULL_HANDLE);
+    bool init();
+
+private:
     bool initImages();
 
 private:
