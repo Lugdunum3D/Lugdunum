@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
@@ -26,9 +27,13 @@ public:
 
     void destroy();
 
+    bool initImages(const VkSurfaceFormatKHR& swapchainFormat);
+
 private:
     VkSwapchainKHR _swapchain{ VK_NULL_HANDLE };
     const Device* _device{nullptr};
+    std::vector<VkImage> _images;
+    std::vector<VkImageView> _imagesViews;
 };
 
 } // Vulkan
