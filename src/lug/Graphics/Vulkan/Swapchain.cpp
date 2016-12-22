@@ -75,6 +75,14 @@ bool Swapchain::initImages(const VkSurfaceFormatKHR& swapchainFormat) {
                 subresourceRange.layerCount = 1
             };
 
+            // Image view component mapping
+            VkComponentMapping componentMapping{
+                componentMapping.r = VK_COMPONENT_SWIZZLE_R,
+                componentMapping.g = VK_COMPONENT_SWIZZLE_G,
+                componentMapping.b = VK_COMPONENT_SWIZZLE_B,
+                componentMapping.a = VK_COMPONENT_SWIZZLE_A
+            };
+
             // Image view creation informations
             VkImageViewCreateInfo createInfo{
                 createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -83,16 +91,11 @@ bool Swapchain::initImages(const VkSurfaceFormatKHR& swapchainFormat) {
                 createInfo.image = image,
                 createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D,
                 createInfo.format = swapchainFormat.format,
-                createInfo.components = {
-                    VK_COMPONENT_SWIZZLE_R,
-                    VK_COMPONENT_SWIZZLE_G,
-                    VK_COMPONENT_SWIZZLE_B,
-                    VK_COMPONENT_SWIZZLE_A
-                },
+                createInfo.components = componentMapping,
                 createInfo.subresourceRange = subresourceRange
             };
 
-            VkImageView imageView;
+            VkImageView imageView = VK_NULL_HANDLE;
             result = vkCreateImageView(*_device, &createInfo, nullptr, &imageView);
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain image view: {}", result);
