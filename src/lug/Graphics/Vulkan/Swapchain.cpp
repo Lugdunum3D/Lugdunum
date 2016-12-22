@@ -66,23 +66,6 @@ bool Swapchain::initImages(const VkSurfaceFormatKHR& swapchainFormat) {
     // Create image views
     {
         for (const VkImage& image: _images) {
-            // Image subresource range
-            VkImageSubresourceRange subresourceRange{
-                subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                subresourceRange.baseMipLevel = 0,
-                subresourceRange.levelCount = 1,
-                subresourceRange.baseArrayLayer = 0,
-                subresourceRange.layerCount = 1
-            };
-
-            // Image view component mapping
-            VkComponentMapping componentMapping{
-                componentMapping.r = VK_COMPONENT_SWIZZLE_R,
-                componentMapping.g = VK_COMPONENT_SWIZZLE_G,
-                componentMapping.b = VK_COMPONENT_SWIZZLE_B,
-                componentMapping.a = VK_COMPONENT_SWIZZLE_A
-            };
-
             // Image view creation informations
             VkImageViewCreateInfo createInfo{
                 createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
@@ -91,9 +74,22 @@ bool Swapchain::initImages(const VkSurfaceFormatKHR& swapchainFormat) {
                 createInfo.image = image,
                 createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D,
                 createInfo.format = swapchainFormat.format,
-                createInfo.components = componentMapping,
-                createInfo.subresourceRange = subresourceRange
+                {}, // createInfo.components
+                {}, // createInfo.subresourceRange
             };
+
+            // Image view component mapping
+            createInfo.components.r = VK_COMPONENT_SWIZZLE_R;
+            createInfo.components.g = VK_COMPONENT_SWIZZLE_G;
+            createInfo.components.b = VK_COMPONENT_SWIZZLE_B;
+            createInfo.components.a = VK_COMPONENT_SWIZZLE_A;
+
+            // Image subresource range
+            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            createInfo.subresourceRange.baseMipLevel = 0;
+            createInfo.subresourceRange.levelCount = 1;
+            createInfo.subresourceRange.baseArrayLayer = 0;
+            createInfo.subresourceRange.layerCount = 1;
 
             VkImageView imageView = VK_NULL_HANDLE;
             result = vkCreateImageView(*_device, &createInfo, nullptr, &imageView);
