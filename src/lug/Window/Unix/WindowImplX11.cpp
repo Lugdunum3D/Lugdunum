@@ -45,8 +45,8 @@ bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style
 
 void lug::Window::priv::WindowImpl::close() {
     if (_display != nullptr) {
-        XCloseDisplay(_display);
         XDestroyWindow(_display, _window);
+        XCloseDisplay(_display);
         _display = nullptr;
         _window = 0;
     }
