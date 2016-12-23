@@ -33,6 +33,33 @@ CommandBuffer::~CommandBuffer() {
     destroy();
 }
 
+bool CommandBuffer::begin(VkCommandBufferUsageFlags flags) {
+    VkCommandBufferBeginInfo beginInfo{
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        beginInfo.pNext = nullptr,
+        beginInfo.flags = flags,
+        beginInfo.pInheritanceInfo = nullptr // TODO: handle pInheritanceInfo for secondary command buffers
+    };
+
+    VkResult result = vkBeginCommandBuffer(_commandBuffer, &beginInfo);
+    if (result != VK_SUCCESS) {
+        LUG_LOG.error("CommandBuffer: Can't begin the command buffer: {}", result);
+        return false;
+    }
+
+    return true;
+}
+
+bool CommandBuffer::end() {
+    VkResult result = vkEndCommandBuffer(_commandBuffer);
+    if (result != VK_SUCCESS) {
+        LUG_LOG.error("CommandBuffer: Can't end the command buffer: {}", result);
+        return false;
+    }
+
+    return true;
+}
+
 bool CommandBuffer::reset(bool releaseRessources) {
     VkResult result = vkResetCommandBuffer(_commandBuffer, releaseRessources ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT : 0);
     if (result != VK_SUCCESS) {

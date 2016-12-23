@@ -74,6 +74,10 @@ inline const Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentat
     return returnQueue;
 }
 
+inline std::vector<CommandBuffer>& Renderer::getCommandBuffers() {
+    return _cmdBuffers;
+}
+
 inline bool Renderer::isSameQueue(VkQueueFlags flagsA, bool supportPresentationA, VkQueueFlags flagsB, bool supportPresentationB) const {
     return getQueue(flagsA, supportPresentationA) == getQueue(flagsB, supportPresentationB);
 }

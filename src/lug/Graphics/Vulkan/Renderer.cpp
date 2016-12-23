@@ -73,6 +73,7 @@ std::set<Module::Type> Renderer::init() {
 
     loadedModules.insert(_graphic.getMandatoryModules().begin(), _graphic.getMandatoryModules().end());
     loadedModules.insert(_graphic.getOptionalModules().begin(), _graphic.getOptionalModules().end());
+    _cmdBuffers = getQueue(0, false)->getCommandPool().createCommandBuffers();
 
     if (!initInstance(loadedModules)) {
         LUG_LOG.error("RendererVulkan: Can't load the instance");

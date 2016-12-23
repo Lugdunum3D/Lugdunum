@@ -11,6 +11,7 @@
 #include <lug/Graphics/Vulkan/Loader.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 #include <lug/Graphics/Vulkan/Queue.hpp>
+#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -67,6 +68,8 @@ public:
     Queue* getQueue(VkQueueFlags flags, bool supportPresentation);
     const Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
 
+    std::vector<CommandBuffer>& getCommandBuffers();
+
     bool isSameQueue(VkQueueFlags flagsA, bool supportPresentationA, VkQueueFlags flagsB, bool supportPresentationB) const;
 
     InstanceInfo& getInstanceInfo();
@@ -107,6 +110,8 @@ private:
     std::vector<const char*> _loadedDeviceExtensions{};
     VkPhysicalDeviceFeatures _loadedDeviceFeatures{};
     std::set<int8_t> _loadedQueueFamiliesIdx{};
+
+    std::vector<CommandBuffer> _cmdBuffers;
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;

@@ -26,6 +26,8 @@ public:
     }
 
     // Add begin, end, etc
+    bool begin(VkCommandBufferUsageFlags flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+    bool end();
 
     bool reset(bool releaseRessources = false);
     void destroy();

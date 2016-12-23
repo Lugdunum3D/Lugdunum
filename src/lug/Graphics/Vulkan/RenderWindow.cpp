@@ -27,11 +27,13 @@ RenderWindow::~RenderWindow() {
 }
 
 bool RenderWindow::beginFrame() {
-    return _swapchain.getNextImage(&currentImageIndex, _semaphore);
+    return _renderer.getCommandBuffers()[0].begin() &&
+    _swapchain.getNextImage(&currentImageIndex, _semaphore);
 }
 
 bool RenderWindow::endFrame() {
-    return _swapchain.present(_presentQueue, currentImageIndex, _semaphore);
+    return _renderer.getCommandBuffers()[0].end() &&
+    _swapchain.present(_presentQueue, currentImageIndex, _semaphore);
 }
 
 std::unique_ptr<RenderWindow>
