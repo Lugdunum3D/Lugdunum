@@ -44,7 +44,7 @@ bool RenderWindow::endFrame() {
 void RenderWindow::clearScreen(float color[4]) {
     // Set clear value
     VkClearColorValue colorValue{};
-    std::memcpy(colorValue.float32, color, sizeof(color));
+    std::memcpy(colorValue.float32, color, sizeof(float[4]));
 
     // Get current image
     Image& currentImage = _swapchain.getImages()[_currentImageIndex];
