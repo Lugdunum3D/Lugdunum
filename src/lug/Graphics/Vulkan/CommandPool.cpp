@@ -43,7 +43,7 @@ std::vector<CommandBuffer> CommandPool::createCommandBuffers(VkCommandBufferLeve
         allocateInfo.pNext = nullptr,
         allocateInfo.commandPool = _commandPool,
         allocateInfo.level = level,
-        allocateInfo.commandBufferCount = 1
+        allocateInfo.commandBufferCount = count
     };
 
     std::vector<VkCommandBuffer> commandBuffers(count);
