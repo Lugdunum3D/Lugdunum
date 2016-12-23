@@ -8,6 +8,7 @@ set(SRC
     ${SRCROOT}/Vulkan/CommandBuffer.cpp
     ${SRCROOT}/Vulkan/CommandPool.cpp
     ${SRCROOT}/Vulkan/Device.cpp
+    ${SRCROOT}/Vulkan/Fence.cpp
     ${SRCROOT}/Vulkan/Image.cpp
     ${SRCROOT}/Vulkan/ImageView.cpp
     ${SRCROOT}/Vulkan/Instance.cpp
@@ -37,6 +38,7 @@ set(INC
     ${INCROOT}/Vulkan/CommandPool.inl
     ${INCROOT}/Vulkan/Device.hpp
     ${INCROOT}/Vulkan/Device.inl
+    ${INCROOT}/Vulkan/Fence.hpp
     ${INCROOT}/Vulkan/Image.hpp
     ${INCROOT}/Vulkan/ImageView.hpp
     ${INCROOT}/Vulkan/Instance.hpp

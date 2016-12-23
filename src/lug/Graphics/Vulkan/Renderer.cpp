@@ -51,6 +51,17 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
 Renderer::Renderer(Graphics& graphic) : _graphic(graphic) {}
 
 Renderer::~Renderer() {
+    destroy();
+}
+
+void Renderer::destroy() {
+    for (auto& queue : _queues) {
+        queue.waitIdle();
+    }
+    for (auto& cmdBuffer: _cmdBuffers) {
+        cmdBuffer.destroy();
+    }
+
     for (auto& queue : _queues) {
         queue.destroy();
     }
@@ -73,7 +84,6 @@ std::set<Module::Type> Renderer::init() {
 
     loadedModules.insert(_graphic.getMandatoryModules().begin(), _graphic.getMandatoryModules().end());
     loadedModules.insert(_graphic.getOptionalModules().begin(), _graphic.getOptionalModules().end());
-    _cmdBuffers = getQueue(0, false)->getCommandPool().createCommandBuffers();
 
     if (!initInstance(loadedModules)) {
         LUG_LOG.error("RendererVulkan: Can't load the instance");
@@ -88,6 +98,8 @@ std::set<Module::Type> Renderer::init() {
 #if defined(LUG_DEBUG)
     LUG_LOG.info("RendererVulkan: Use device {}", _physicalDeviceInfo->properties.deviceName);
 #endif
+
+    _cmdBuffers = getQueue(0, false)->getCommandPool().createCommandBuffers();
 
     return loadedModules;
 }

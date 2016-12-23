@@ -43,11 +43,11 @@ void Swapchain::destroy() {
     }
 }
 
-bool Swapchain::init() {
-    return initImages();
+bool Swapchain::init(CommandBuffer& commandBuffer) {
+    return initImages(commandBuffer);
 }
 
-bool Swapchain::initImages() {
+bool Swapchain::initImages(CommandBuffer& commandBuffer) {
     VkResult result;
 
     // Get swapchain images
@@ -77,6 +77,7 @@ bool Swapchain::initImages() {
 
     // Create image views
     {
+        commandBuffer.begin();
         _imagesViews.resize(_images.size());
         for (uint8_t i = 0; i < _images.size(); ++i) {
             // Image view creation informations
@@ -112,7 +113,14 @@ bool Swapchain::initImages() {
             }
 
             _imagesViews[i] = ImageView(imageView, _device);
+
+            _images[i].changeLayout(commandBuffer,
+                            0,
+                            VK_ACCESS_MEMORY_READ_BIT,
+                            VK_IMAGE_LAYOUT_UNDEFINED,
+                            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         }
+            commandBuffer.end();
     }
 
     return true;
@@ -149,6 +157,10 @@ bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaph
         return false;
     }
     return true;
+}
+
+std::vector<Image>& Swapchain::getImages() {
+    return _images;
 }
 
 } // Vulkan

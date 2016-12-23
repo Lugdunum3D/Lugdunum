@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Image.hpp>
 #include <lug/Graphics/Vulkan/ImageView.hpp>
@@ -30,12 +31,14 @@ public:
 
     void destroy();
 
-    bool getNextImage(uint32_t *imageIndex, VkSemaphore semaphore);
+    bool getNextImage(uint32_t *imageIndex, VkSemaphore semaphore = VK_NULL_HANDLE);
     bool present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore = VK_NULL_HANDLE);
-    bool init();
+    bool init(CommandBuffer& commandBuffer);
+
+    std::vector<Image>& getImages();
 
 private:
-    bool initImages();
+    bool initImages(CommandBuffer& commandBuffer);
 
 private:
     VkSwapchainKHR _swapchain{ VK_NULL_HANDLE };

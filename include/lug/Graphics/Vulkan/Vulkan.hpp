@@ -113,6 +113,7 @@
     macro(vkCmdBindVertexBuffers)                       \
     macro(vkWaitForFences)                              \
     macro(vkResetFences)                                \
+    macro(vkGetFenceStatus)                             \
     macro(vkFreeMemory)                                 \
     macro(vkDestroyBuffer)                              \
     macro(vkDestroyFence)                               \

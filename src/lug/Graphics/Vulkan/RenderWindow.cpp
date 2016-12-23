@@ -1,3 +1,4 @@
+#include <cstring>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
 #include <lug/System/Debug.hpp>
 #include <lug/System/Logger.hpp>
@@ -27,13 +28,48 @@ RenderWindow::~RenderWindow() {
 }
 
 bool RenderWindow::beginFrame() {
+    _fence.wait();
+    _fence.reset();
+
     return _renderer.getCommandBuffers()[0].begin() &&
-    _swapchain.getNextImage(&currentImageIndex, _semaphore);
+    _swapchain.getNextImage(&_currentImageIndex, _acquireImageCompleteSemaphore);
 }
 
 bool RenderWindow::endFrame() {
     return _renderer.getCommandBuffers()[0].end() &&
-    _swapchain.present(_presentQueue, currentImageIndex, _semaphore);
+    _presentQueue->submit(_renderer.getCommandBuffers()[0], _submitCompleteSemaphore, _acquireImageCompleteSemaphore, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, _fence) &&
+    _swapchain.present(_presentQueue, _currentImageIndex, _submitCompleteSemaphore);
+}
+
+void RenderWindow::clearScreen(float color[4]) {
+    // Set clear value
+    VkClearColorValue colorValue{};
+    std::memcpy(colorValue.float32, color, sizeof(color));
+
+    // Get current image
+    Image& currentImage = _swapchain.getImages()[_currentImageIndex];
+
+    VkImageSubresourceRange imageSubResourceRange{
+        imageSubResourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        imageSubResourceRange.baseMipLevel = 0,
+        imageSubResourceRange.levelCount = 1,
+        imageSubResourceRange.baseArrayLayer = 0,
+        imageSubResourceRange.layerCount = 1
+    };
+
+    currentImage.changeLayout(_renderer.getCommandBuffers()[0],
+                    VK_ACCESS_MEMORY_READ_BIT,
+                    VK_ACCESS_TRANSFER_WRITE_BIT,
+                    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+   vkCmdClearColorImage(_renderer.getCommandBuffers()[0], currentImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &colorValue, 1, &imageSubResourceRange);
+
+    currentImage.changeLayout(_renderer.getCommandBuffers()[0],
+                    VK_ACCESS_TRANSFER_WRITE_BIT,
+                    VK_ACCESS_MEMORY_READ_BIT,
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 }
 
 std::unique_ptr<RenderWindow>
@@ -253,15 +289,16 @@ bool RenderWindow::initSwapchain() {
 
         _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat);
 
-        if (!_swapchain.init())
+        if (!_swapchain.init(_renderer.getCommandBuffers()[0]))
             return false;
-    }
 
-    return true;
+        _presentQueue->submit(_renderer.getCommandBuffers()[0]);
+        return _presentQueue->waitIdle();
+    }
 }
 
 bool RenderWindow::init() {
-    // Create semaphore
+    // Acquire image semaphore
     {
         VkSemaphore semaphore;
         VkSemaphoreCreateInfo createInfo{
@@ -275,13 +312,48 @@ bool RenderWindow::init() {
             return false;
         }
 
-        _semaphore = Semaphore(semaphore, &_renderer.getDevice());
+        _acquireImageCompleteSemaphore = Semaphore(semaphore, &_renderer.getDevice());
+    }
+
+    // Submit semaphore
+    {
+        VkSemaphore semaphore;
+        VkSemaphoreCreateInfo createInfo{
+            createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+            createInfo.pNext = nullptr,
+            createInfo.flags = 0
+        };
+        VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+            return false;
+        }
+
+        _submitCompleteSemaphore = Semaphore(semaphore, &_renderer.getDevice());
+    }
+
+    // Fence
+    {
+        VkFence fence;
+        VkFenceCreateInfo createInfo{
+            createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+            createInfo.pNext = nullptr,
+            createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT
+        };
+        VkResult result = vkCreateFence(_renderer.getDevice(), &createInfo, nullptr, &fence);
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Can't create swapchain fence: {}", result);
+            return false;
+        }
+
+        _fence = Fence(fence, &_renderer.getDevice());
     }
 
     return initSurface() && initSwapchain();
 }
 
 void RenderWindow::destroy() {
+    _presentQueue->waitIdle();
     _swapchain.destroy();
     if (_surface != VK_NULL_HANDLE) {
         vkDestroySurfaceKHR(_renderer.getInstance(), _surface, nullptr);

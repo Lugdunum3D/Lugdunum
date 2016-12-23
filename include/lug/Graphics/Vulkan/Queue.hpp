@@ -2,6 +2,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -34,6 +35,8 @@ public:
     const CommandPool& getCommandPool() const;
 
     void setCommandPool(CommandPool&& commandPool);
+    bool submit(VkCommandBuffer commandBuffer, VkSemaphore signalSemaphore = VK_NULL_HANDLE, VkSemaphore waitSemaphore = VK_NULL_HANDLE, VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkFence fence = VK_NULL_HANDLE) const;
+    bool waitIdle() const;
 
     void destroy();
 

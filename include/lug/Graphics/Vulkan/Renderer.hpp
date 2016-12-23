@@ -78,6 +78,8 @@ public:
     PhysicalDeviceInfo* getPhysicalDeviceInfo();
     const PhysicalDeviceInfo* getPhysicalDeviceInfo() const;
 
+    void destroy();
+
 private:
     bool initInstance(std::set<Module::Type> &loadedModules);
     bool initDevice(std::set<Module::Type> &loadedModules);

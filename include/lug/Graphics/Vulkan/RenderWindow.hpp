@@ -4,6 +4,7 @@
 #include <lug/Graphics/RenderWindow.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Semaphore.hpp>
+#include <lug/Graphics/Vulkan/Fence.hpp>
 #include <lug/Graphics/Vulkan/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
@@ -28,6 +29,8 @@ public:
     bool beginFrame() override final;
     bool endFrame() override final;
 
+    void clearScreen(float color[4]) override final;
+
     static std::unique_ptr<RenderWindow> create(Renderer& renderer, uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style);
 
 private:
@@ -40,10 +43,12 @@ private:
     Renderer& _renderer;
     VkSurfaceKHR _surface{VK_NULL_HANDLE};
     Swapchain _swapchain{};
-    Semaphore _semaphore{};
+    Semaphore _acquireImageCompleteSemaphore{};
+    Semaphore _submitCompleteSemaphore{};
+    Fence _fence;
 
     const Queue* _presentQueue{nullptr};
-    uint32_t currentImageIndex{0};
+    uint32_t _currentImageIndex{0};
 };
 
 } // Vulkan

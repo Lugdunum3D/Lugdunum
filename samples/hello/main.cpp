@@ -39,10 +39,14 @@ int main() {
             if (event.type == lug::Window::EventType::CLOSE) {
                 logger->info("Closing the app");
                 window->close();
+                return 0;
             }
         }
 
         window->beginFrame();
+
+        float clearColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
+        window->clearScreen(clearColor);
         // TODO: Render objects
         window->endFrame();
     }

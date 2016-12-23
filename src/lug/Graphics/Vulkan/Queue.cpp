@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/Queue.hpp>
+#include <lug/System/Logger.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -40,11 +41,43 @@ Queue::~Queue() {
     destroy();
 }
 
+bool Queue::submit(VkCommandBuffer commandBuffer, VkSemaphore signalSemaphore, VkSemaphore waitSemaphore, VkPipelineStageFlags waitDstStageMask, VkFence fence) const {
+    VkSubmitInfo submitInfo{
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        submitInfo.pNext = nullptr,
+        submitInfo.waitSemaphoreCount = waitSemaphore != VK_NULL_HANDLE ? 1 : 0,
+        submitInfo.pWaitSemaphores = waitSemaphore != VK_NULL_HANDLE ? &waitSemaphore : nullptr,
+        submitInfo.pWaitDstStageMask = waitSemaphore != VK_NULL_HANDLE ? &waitDstStageMask : nullptr,
+        submitInfo.commandBufferCount = 1,
+        submitInfo.pCommandBuffers = &commandBuffer,
+        submitInfo.signalSemaphoreCount = signalSemaphore != VK_NULL_HANDLE ? 1 : 0,
+        submitInfo.pSignalSemaphores = signalSemaphore != VK_NULL_HANDLE ? &signalSemaphore : nullptr
+    };
+
+    VkResult result = vkQueueSubmit(_queue, 1, &submitInfo, fence);
+    if (result != VK_SUCCESS) {
+        LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
+        return false;
+    }
+
+    return true;
+}
+
+bool Queue::waitIdle() const {
+    VkResult result = vkQueueWaitIdle(_queue);
+    if (result != VK_SUCCESS) {
+        LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
+        return false;
+    }
+
+    return true;
+}
+
 void Queue::destroy() {
     _commandPool.destroy();
 
     if (_queue != VK_NULL_HANDLE) {
-        vkQueueWaitIdle(_queue);
+        waitIdle();
         _queue = VK_NULL_HANDLE;
     }
 
