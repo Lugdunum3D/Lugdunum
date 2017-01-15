@@ -48,7 +48,7 @@ std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, cons
     }
 
     shaderCode.seekg(0, shaderCode.end);
-    uint32_t shaderCodeSize = shaderCode.tellg();
+    uint32_t shaderCodeSize = static_cast<uint32_t>(shaderCode.tellg());
     shaderCode.seekg(0, shaderCode.beg);
 
     char* buffer = new char[shaderCodeSize];
