@@ -4,6 +4,7 @@
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
+#include <lug/Graphics/Vulkan/ShaderModule.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {
@@ -100,6 +101,11 @@ std::set<Module::Type> Renderer::init() {
 #endif
 
     _cmdBuffers = getQueue(0, false)->getCommandPool().createCommandBuffers();
+
+    auto vertexShader = ShaderModule::create("shader.vert.spv", &_device);
+    if (vertexShader == nullptr) {
+        return {};
+    }
 
     return loadedModules;
 }
