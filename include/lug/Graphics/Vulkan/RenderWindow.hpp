@@ -37,6 +37,7 @@ private:
     bool init();
     bool initSurface();
     bool initSwapchain();
+    bool initPipeline();
     void destroy();
 
 private:

@@ -182,8 +182,8 @@ bool RenderWindow::initSwapchain() {
 
     VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
     VkSurfaceFormatKHR swapchainFormat{
-            swapchainFormat.format = VK_FORMAT_B8G8R8A8_UNORM,
-            swapchainFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+        swapchainFormat.format = VK_FORMAT_B8G8R8A8_UNORM,
+        swapchainFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
     };
     uint32_t minImageCount = 3;
     VkExtent2D extent{};
@@ -297,6 +297,17 @@ bool RenderWindow::initSwapchain() {
     }
 }
 
+bool RenderWindow::initPipeline() {
+    // Create shader modules
+    {
+
+    }
+
+    
+
+    return true;
+}
+
 bool RenderWindow::init() {
     // Acquire image semaphore
     {
@@ -349,7 +360,7 @@ bool RenderWindow::init() {
         _fence = Fence(fence, &_renderer.getDevice());
     }
 
-    return initSurface() && initSwapchain();
+    return initSurface() && initSwapchain() && initPipeline();
 }
 
 void RenderWindow::destroy() {

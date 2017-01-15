@@ -41,7 +41,7 @@ private:
     bool initImages(CommandBuffer& commandBuffer);
 
 private:
-    VkSwapchainKHR _swapchain{ VK_NULL_HANDLE };
+    VkSwapchainKHR _swapchain{VK_NULL_HANDLE};
     const Device* _device{nullptr};
     std::vector<Image> _images;
     std::vector<ImageView> _imagesViews;

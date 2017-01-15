@@ -13,12 +13,15 @@ set(SRC
     ${SRCROOT}/Vulkan/ImageView.cpp
     ${SRCROOT}/Vulkan/Instance.cpp
     ${SRCROOT}/Vulkan/Loader.cpp
+    ${SRCROOT}/Vulkan/Pipeline.cpp
     ${SRCROOT}/Vulkan/Queue.cpp
     ${SRCROOT}/Vulkan/Renderer.cpp
+    ${SRCROOT}/Vulkan/RenderPass.cpp
     ${SRCROOT}/Vulkan/RenderWindow.cpp
-    ${SRCROOT}/Vulkan/Semaphore.cpp
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
+    ${SRCROOT}/Vulkan/Semaphore.cpp
+    ${SRCROOT}/Vulkan/ShaderModule.cpp
     ${SRCROOT}/Vulkan/Swapchain.cpp
     ${SRCROOT}/Vulkan/Vulkan.cpp
 )
@@ -44,11 +47,14 @@ set(INC
     ${INCROOT}/Vulkan/Instance.hpp
     ${INCROOT}/Vulkan/Instance.inl
     ${INCROOT}/Vulkan/Loader.hpp
+    ${INCROOT}/Vulkan/Pipeline.hpp
+    ${INCROOT}/Vulkan/Queue.hpp
     ${INCROOT}/Vulkan/Renderer.hpp
     ${INCROOT}/Vulkan/Renderer.inl
+    ${INCROOT}/Vulkan/RenderPass.hpp
     ${INCROOT}/Vulkan/RenderWindow.hpp
-    ${INCROOT}/Vulkan/Queue.hpp
     ${INCROOT}/Vulkan/Semaphore.hpp
+    ${INCROOT}/Vulkan/ShaderModule.hpp
     ${INCROOT}/Vulkan/Swapchain.hpp
     ${INCROOT}/Vulkan/Vulkan.hpp
     ${INCROOT}/Vulkan/Vulkan.inl
