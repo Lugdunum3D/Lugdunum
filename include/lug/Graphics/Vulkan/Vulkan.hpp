@@ -181,10 +181,16 @@ struct PhysicalDeviceInfo {
 };
 
 LUG_GRAPHICS_API const char* resultToStr(VkResult result);
-std::ostream& operator<<(std::ostream& ss, const VkResult& result);
-
-#include <lug/Graphics/Vulkan/Vulkan.inl>
 
 } // Vulkan
 } // Graphics
 } // lug
+
+/**
+ * PSA: This is outside of the namespace because VkResult is in the root namespace
+ */
+std::ostream& operator<<(std::ostream& ss, const VkResult& result);
+inline std::ostream& operator<<(std::ostream& ss, const VkResult& result) {
+    ss << ::lug::Graphics::Vulkan::resultToStr(result);
+    return ss;
+}

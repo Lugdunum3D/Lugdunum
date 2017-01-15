@@ -126,12 +126,12 @@ bool Swapchain::initImages(CommandBuffer& commandBuffer) {
     return true;
 }
 
-bool Swapchain::getNextImage(uint32_t *imageIndex, VkSemaphore semaphore)
-{
+bool Swapchain::getNextImage(uint32_t *imageIndex, VkSemaphore semaphore) {
     // Get next image
-    VkResult result = vkAcquireNextImageKHR(*_device, _swapchain, 0, semaphore, VK_NULL_HANDLE, imageIndex);
+    // TODO: remove UINT64_MAX timeout and ask next image later if VK_NOT_READY is returned
+    VkResult result = vkAcquireNextImageKHR(*_device, _swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex);
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't acquire swapchain next image: {}", result);
+        LUG_LOG.error("RendererVulkan: getNextImage(): Can't acquire swapchain next image: {}", result);
         return false;
     }
 
@@ -153,7 +153,7 @@ bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaph
 
     VkResult result = vkQueuePresentKHR(*presentQueue, &presentInfo);
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't acquire swapchain next image: {}", result);
+        LUG_LOG.error("RendererVulkan: present(): Can't acquire swapchain next image: {}", result);
         return false;
     }
     return true;

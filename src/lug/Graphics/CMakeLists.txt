@@ -57,7 +57,6 @@ set(INC
     ${INCROOT}/Vulkan/ShaderModule.hpp
     ${INCROOT}/Vulkan/Swapchain.hpp
     ${INCROOT}/Vulkan/Vulkan.hpp
-    ${INCROOT}/Vulkan/Vulkan.inl
 )
 source_group("inc" FILES ${INC})
 
