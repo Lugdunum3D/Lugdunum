@@ -20,7 +20,9 @@ int main() {
     // graphics.setRendererType(Renderer::Type::Vulkan);
     // graphics.addModule(...);
 
-    graphics.init();
+    if (!graphics.init()) {
+        return 1;
+    }
 
     // Get the render window
     lug::Graphics::Renderer* renderer = graphics.getRenderer();
