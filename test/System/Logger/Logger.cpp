@@ -220,6 +220,46 @@ TEST(Logger, OstreamCustomClass) {
 } // namespace OstreamCustomClass
 
 
+namespace OstreamEnum {
+
+typedef enum TestEnum {
+    TEST_0 = 0,
+    TEST_1 = 1
+} TestEnum;
+
+std::ostream& operator<<(std::ostream& out, const TestEnum& b) {
+    if (b == TEST_0) {
+        return out << "TEST_0";
+    }
+    return out << "TEST_1";
+}
+
+TEST(Logger, OstreamEnum) {
+
+    Logger* logger = makeLogger(loggerName);
+    MockHandler* handler = makeHandler<MockHandler>(handlerName);
+    TestEnum custom = TEST_1;
+
+    EXPECT_CALL(*handler, handle(Field(&priv::Message::raw, Property(&fmt::MemoryWriter::c_str, StrEq("TEST_1"))))).Times(2);
+
+    logger->addHandler(handler);
+    logger->info("{}", custom);
+    logger->info(custom);
+
+    custom = TEST_0;
+
+    EXPECT_CALL(*handler, handle(Field(&priv::Message::raw, Property(&fmt::MemoryWriter::c_str, StrEq("TEST_0"))))).Times(2);
+
+    logger->addHandler(handler);
+    logger->info("{}", custom);
+    logger->info(custom);
+
+    LoggingFacility::clear();
+}
+
+} // namespace OstreamEnum
+
+
 namespace ExceptionHandler {
 
 class Custom {
