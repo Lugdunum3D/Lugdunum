@@ -1,0 +1,19 @@
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init # use submodules
+
+dependencies:
+  override:
+    - /bin/true
+
+  cache_directories:
+    - "~/.local"
+
+  pre:
+    - ./lib/ci_scripts/circle_dependencies.sh
+
+test:
+  override:
+    - ./lib/ci_scripts/circle.sh:
+        parallel: true

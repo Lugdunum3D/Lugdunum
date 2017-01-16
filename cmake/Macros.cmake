@@ -5,7 +5,7 @@ macro(lug_add_library target)
     # parse the arguments
     cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;EXTERNAL_LIBS" ${ARGN})
 
-    # create the target
+    # create the target
     add_library(${target} ${THIS_SOURCES})
     set_target_properties(${target} PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -61,5 +61,30 @@ macro(lug_add_library target)
             ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT devel
             FRAMEWORK DESTINATION ${CMAKE_INSTALL_FRAMEWORK_PREFIX} COMPONENT bin
     )
+
+endmacro()
+
+macro(lug_add_test name)
+
+    set(target run${name}UnitTests)
+
+    # parse the arguments
+    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;EXTERNAL_LIBS" ${ARGN})
+
+    add_executable(${target} ${THIS_SOURCES} ${PROJECT_SOURCE_DIR}/main.cpp)
+
+    # link the target to its lug dependencies
+    if(THIS_DEPENDS)
+        target_link_libraries(${target} ${THIS_DEPENDS})
+    endif()
+
+    # link the target to its external dependencies
+    if(THIS_EXTERNAL_LIBS)
+        target_link_libraries(${target} ${THIS_EXTERNAL_LIBS})
+    endif()
+
+    target_link_libraries(${target} gmock ${CMAKE_THREAD_LIBS_INIT})
+
+    add_test(NAME ${name}UnitTests COMMAND ${target} --gtest_output=xml:${TEST_OUTPUT}/${name}UnitTests.xml)
 
 endmacro()

@@ -7,7 +7,11 @@
 
 #elif defined(__unix__)
 
-    #if defined(__linux__)
+    #if defined(__ANDROID__)
+
+        #define LUG_SYSTEM_ANDROID
+
+    #elif defined(__linux__)
 
         #define LUG_SYSTEM_LINUX
 
