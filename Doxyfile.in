@@ -4,7 +4,8 @@ STRIP_FROM_PATH        = @PROJECT_SOURCE_DIR@ \
                          @PROJECT_BINARY_DIR@
 INPUT                  = @doxy_main_page@ \
                          @PROJECT_SOURCE_DIR@/src \
-                         @PROJECT_SOURCE_DIR@/include
+                         @PROJECT_SOURCE_DIR@/include \
+                         @PROJECT_SOURCE_DIR@/doc
 FILE_PATTERNS          = *.hpp \
                          *.inl \
                          *.cpp \
