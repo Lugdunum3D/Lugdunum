@@ -67,7 +67,10 @@ void Renderer::destroy() {
         queue.destroy();
     }
 
-    _graphicsPipeline->destroy();
+    if (_graphicsPipeline != nullptr) {
+        _graphicsPipeline->destroy();
+    }
+
     _device.destroy();
 
     // Destroy the report callback if necessary
