@@ -1,12 +1,13 @@
 #include <lug/Graphics/Vulkan/Swapchain.hpp>
+#include <lug/Graphics/Vulkan/RenderPass.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-Swapchain::Swapchain(VkSwapchainKHR swapchain, const Device* device, const VkSurfaceFormatKHR& swapchainFormat) :
-                    _swapchain(swapchain), _device(device), _format(swapchainFormat) {}
+Swapchain::Swapchain(VkSwapchainKHR swapchain, const Device* device, const VkSurfaceFormatKHR& swapchainFormat, const VkExtent2D& extent) :
+                    _swapchain(swapchain), _device(device), _format(swapchainFormat), _extent(extent) {}
 
 Swapchain::Swapchain(Swapchain&& swapchain) {
     _swapchain = swapchain._swapchain;
@@ -32,6 +33,7 @@ Swapchain::~Swapchain() {
 
 void Swapchain::destroy() {
     // Delete swapchain images and images views
+    _framebuffers.clear();
     _imagesViews.clear();
     _images.clear();
 
@@ -43,8 +45,43 @@ void Swapchain::destroy() {
     }
 }
 
-bool Swapchain::init(CommandBuffer& commandBuffer) {
-    return initImages(commandBuffer);
+bool Swapchain::init(CommandBuffer& commandBuffer, RenderPass* renderPass) {
+    return initImages(commandBuffer) && initFramebuffers(renderPass);
+}
+
+bool Swapchain::initFramebuffers(RenderPass* renderPass) {
+    if (!renderPass) {
+        LUG_LOG.error("RendererVulkan: initFramebuffers(): renderPass is null");
+        return false;
+    }
+
+    VkResult result;
+    _framebuffers.clear();
+    _framebuffers.resize(_imagesViews.size());
+
+    for (size_t i = 0; i < _imagesViews.size(); i++) {
+        VkImageView attachments[1]{
+            _imagesViews[i]
+        };
+
+        VkFramebufferCreateInfo framebufferInfo = {};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = *renderPass;
+        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.width = _extent.width;
+        framebufferInfo.height = _extent.height;
+        framebufferInfo.layers = 1;
+
+        VkFramebuffer fb;
+        result = vkCreateFramebuffer(*_device, &framebufferInfo, nullptr, &fb);
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Failed to create framebuffer: {}", result);
+            return false;
+        }
+        _framebuffers[i] = Framebuffer(fb, _device);
+    }
+    return true;
 }
 
 bool Swapchain::initImages(CommandBuffer& commandBuffer) {
@@ -162,6 +199,19 @@ bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaph
 std::vector<Image>& Swapchain::getImages() {
     return _images;
 }
+
+const std::vector<Framebuffer>& Swapchain::getFramebuffers() const {
+    return _framebuffers;
+}
+
+const VkSurfaceFormatKHR& Swapchain::getFormat() const {
+    return _format;
+}
+
+const VkExtent2D& Swapchain::getExtent() const {
+    return _extent;
+}
+
 
 } // Vulkan
 } // Graphics

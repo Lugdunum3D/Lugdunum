@@ -67,6 +67,7 @@ void Renderer::destroy() {
         queue.destroy();
     }
 
+    _graphicsPipeline->destroy();
     _device.destroy();
 
     // Destroy the report callback if necessary
@@ -101,11 +102,6 @@ std::set<Module::Type> Renderer::init() {
 #endif
 
     _cmdBuffers = getQueue(0, false)->getCommandPool().createCommandBuffers();
-
-    auto vertexShader = ShaderModule::create("shader.vert.spv", &_device);
-    if (vertexShader == nullptr) {
-        return {};
-    }
 
     return loadedModules;
 }
@@ -503,7 +499,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
         // TODO: Log error
         #define LUG_CHECK_VULKAN_PHYSICAL_DEVICE_OPTIONNAL_FEATURES(featureName)                                                                        \
             {                                                                                                                                           \
-                if (requirements.optionalFeatures.featureName == VK_TRUE) {                                                                            \
+                if (requirements.optionalFeatures.featureName == VK_TRUE) {                                                                             \
                     if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                           \
                         features.featureName = VK_TRUE;                                                                                                 \
                     } else if (!finalization) {                                                                                                         \
@@ -588,6 +584,25 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
 
 std::unique_ptr<::lug::Graphics::RenderWindow> Renderer::createWindow(uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style) {
     return RenderWindow::create(*this, width, height, title, style);
+}
+
+void Renderer::setGraphicsPipeline(std::unique_ptr<Pipeline> graphicsPipeline) {
+    _graphicsPipeline = std::move(graphicsPipeline);
+}
+
+Pipeline* Renderer::getGraphicsPipeline() const {
+    return _graphicsPipeline.get();
+}
+
+bool Renderer::beginFrame(const Swapchain& swapChain, uint32_t currentImageIndex) {
+    _graphicsPipeline->bind(&_cmdBuffers[0]);
+    _graphicsPipeline->getRenderPass()->begin(&_cmdBuffers[0], swapChain.getFramebuffers()[currentImageIndex], swapChain.getExtent());
+    return true;
+}
+
+bool Renderer::endFrame() {
+    _graphicsPipeline->getRenderPass()->end(&_cmdBuffers[0]);
+    return true;
 }
 
 } // Vulkan

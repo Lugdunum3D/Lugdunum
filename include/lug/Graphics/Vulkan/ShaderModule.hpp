@@ -17,10 +17,10 @@ public:
     explicit ShaderModule(VkShaderModule shaderModule = VK_NULL_HANDLE, const Device* device = nullptr);
 
     ShaderModule(const ShaderModule&) = delete;
-    ShaderModule(ShaderModule&& device);
+    ShaderModule(ShaderModule&& shaderModule);
 
     ShaderModule& operator=(const ShaderModule&) = delete;
-    ShaderModule& operator=(ShaderModule&& device);
+    ShaderModule& operator=(ShaderModule&& shaderModule);
 
     ~ShaderModule();
 

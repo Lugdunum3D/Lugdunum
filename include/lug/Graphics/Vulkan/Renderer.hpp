@@ -12,6 +12,7 @@
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 #include <lug/Graphics/Vulkan/Queue.hpp>
 #include <lug/Graphics/Vulkan/CommandBuffer.hpp>
+#include <lug/Graphics/Vulkan/Pipeline.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -80,6 +81,12 @@ public:
 
     void destroy();
 
+    void setGraphicsPipeline(std::unique_ptr<Pipeline> graphicsPipeline);
+    Pipeline* getGraphicsPipeline() const;
+
+    bool beginFrame(const Swapchain& swapChain, uint32_t currentImageIndex);
+    bool endFrame();
+
 private:
     bool initInstance(std::set<Module::Type> &loadedModules);
     bool initDevice(std::set<Module::Type> &loadedModules);
@@ -114,6 +121,7 @@ private:
     std::set<int8_t> _loadedQueueFamiliesIdx{};
 
     std::vector<CommandBuffer> _cmdBuffers;
+    std::unique_ptr<Pipeline> _graphicsPipeline{nullptr};
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;

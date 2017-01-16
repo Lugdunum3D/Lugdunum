@@ -31,12 +31,23 @@ bool RenderWindow::beginFrame() {
     _fence.wait();
     _fence.reset();
 
-    return _renderer.getCommandBuffers()[0].begin() &&
-    _swapchain.getNextImage(&_currentImageIndex, _acquireImageCompleteSemaphore);
+    if (!_renderer.getCommandBuffers()[0].begin() ||
+        !_swapchain.getNextImage(&_currentImageIndex , _acquireImageCompleteSemaphore)) {
+        return false;
+    }
+
+    _swapchain.getImages()[_currentImageIndex].changeLayout(_renderer.getCommandBuffers()[0],
+                    VK_ACCESS_MEMORY_READ_BIT,
+                    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
+                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    return _renderer.beginFrame(_swapchain, _currentImageIndex);
 }
 
 bool RenderWindow::endFrame() {
-    return _renderer.getCommandBuffers()[0].end() &&
+    return _renderer.endFrame() &&
+    _renderer.getCommandBuffers()[0].end() &&
     _presentQueue->submit(_renderer.getCommandBuffers()[0], _submitCompleteSemaphore, _acquireImageCompleteSemaphore, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, _fence) &&
     _swapchain.present(_presentQueue, _currentImageIndex, _submitCompleteSemaphore);
 }
@@ -287,9 +298,12 @@ bool RenderWindow::initSwapchain() {
             return false;
         }
 
-        _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat);
+        _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat, extent);
 
-        if (!_swapchain.init(_renderer.getCommandBuffers()[0]))
+        if (!initPipeline())
+            return false;
+
+        if (!_swapchain.init(_renderer.getCommandBuffers()[0], _renderer.getGraphicsPipeline()->getRenderPass()))
             return false;
 
         _presentQueue->submit(_renderer.getCommandBuffers()[0]);
@@ -298,13 +312,11 @@ bool RenderWindow::initSwapchain() {
 }
 
 bool RenderWindow::initPipeline() {
-    // Create shader modules
-    {
-
+    auto pipeline = Pipeline::createGraphicsPipeline(&_renderer.getDevice(), _swapchain);
+    if (!pipeline) {
+        return false;
     }
-
-    
-
+    _renderer.setGraphicsPipeline(std::move(pipeline));
     return true;
 }
 
@@ -360,7 +372,7 @@ bool RenderWindow::init() {
         _fence = Fence(fence, &_renderer.getDevice());
     }
 
-    return initSurface() && initSwapchain() && initPipeline();
+    return initSurface() && initSwapchain();
 }
 
 void RenderWindow::destroy() {

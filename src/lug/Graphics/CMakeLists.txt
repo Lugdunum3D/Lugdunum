@@ -9,11 +9,13 @@ set(SRC
     ${SRCROOT}/Vulkan/CommandPool.cpp
     ${SRCROOT}/Vulkan/Device.cpp
     ${SRCROOT}/Vulkan/Fence.cpp
+    ${SRCROOT}/Vulkan/Framebuffer.cpp
     ${SRCROOT}/Vulkan/Image.cpp
     ${SRCROOT}/Vulkan/ImageView.cpp
     ${SRCROOT}/Vulkan/Instance.cpp
     ${SRCROOT}/Vulkan/Loader.cpp
     ${SRCROOT}/Vulkan/Pipeline.cpp
+    ${SRCROOT}/Vulkan/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/Queue.cpp
     ${SRCROOT}/Vulkan/Renderer.cpp
     ${SRCROOT}/Vulkan/RenderPass.cpp
@@ -42,12 +44,14 @@ set(INC
     ${INCROOT}/Vulkan/Device.hpp
     ${INCROOT}/Vulkan/Device.inl
     ${INCROOT}/Vulkan/Fence.hpp
+    ${INCROOT}/Vulkan/Framebuffer.hpp
     ${INCROOT}/Vulkan/Image.hpp
     ${INCROOT}/Vulkan/ImageView.hpp
     ${INCROOT}/Vulkan/Instance.hpp
     ${INCROOT}/Vulkan/Instance.inl
     ${INCROOT}/Vulkan/Loader.hpp
     ${INCROOT}/Vulkan/Pipeline.hpp
+    ${INCROOT}/Vulkan/PipelineLayout.hpp
     ${INCROOT}/Vulkan/Queue.hpp
     ${INCROOT}/Vulkan/Renderer.hpp
     ${INCROOT}/Vulkan/Renderer.inl

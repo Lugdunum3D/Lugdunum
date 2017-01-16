@@ -3,6 +3,9 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/Swapchain.hpp>
+
+#include <memory>
 
 namespace lug {
 namespace Graphics {
@@ -26,6 +29,10 @@ public:
 
     void destroy();
 
+    void begin(const CommandBuffer* commandBuffer, const Framebuffer& framebuffer, const VkExtent2D& extent, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
+    void end(const CommandBuffer* commandBuffer);
+
+    static std::unique_ptr<RenderPass> create(const Device* device, const Swapchain& swapChain);
 private:
     VkRenderPass _renderPass{VK_NULL_HANDLE};
     const Device* _device{nullptr};
