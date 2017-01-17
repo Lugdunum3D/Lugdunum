@@ -9,14 +9,18 @@ Device::Device(VkDevice device, PhysicalDeviceInfo* physicalDeviceInfo) : _devic
 
 Device::Device(Device&& device) {
     _device = device._device;
+    _physicalDeviceInfo = device._physicalDeviceInfo;
     device._device = VK_NULL_HANDLE;
+    device._physicalDeviceInfo = nullptr;
 }
 
 Device& Device::operator=(Device&& device) {
     destroy();
 
     _device = device._device;
+    _physicalDeviceInfo = device._physicalDeviceInfo;
     device._device = VK_NULL_HANDLE;
+    device._physicalDeviceInfo = nullptr;
 
     return *this;
 }

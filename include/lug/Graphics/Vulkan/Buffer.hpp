@@ -13,7 +13,7 @@ namespace Vulkan {
 
 class LUG_GRAPHICS_API Buffer {
 public:
-    Buffer(VkBuffer Buffer = VK_NULL_HANDLE, const Device* device = nullptr, std::unique_ptr<DeviceMemory> deviceMemory = nullptr);
+    Buffer(VkBuffer Buffer = VK_NULL_HANDLE, const Device* device = nullptr, DeviceMemory* deviceMemory = nullptr);
 
     Buffer(const Buffer&) = delete;
     Buffer(Buffer&& buffer);
@@ -29,10 +29,12 @@ public:
 
     void destroy();
 
-    void bindMemory(const DeviceMemory& deviceMemory, VkDeviceSize memoryOffset = 0);
+    void bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
     void* mapMemory(VkDeviceSize size, VkDeviceSize offset = 0);
     void unmapMemory();
     void updateData(void *data, uint32_t size, VkDeviceSize memoryOffset = 0);
+
+    const VkMemoryRequirements& getRequirements() const;
 
     static std::unique_ptr<Buffer> create(
         const Device* device,
@@ -47,7 +49,9 @@ public:
 private:
     VkBuffer _buffer{VK_NULL_HANDLE};
     const Device* _device{nullptr};
-    std::unique_ptr<DeviceMemory> _deviceMemory{nullptr};
+    DeviceMemory* _deviceMemory{nullptr};
+
+    VkMemoryRequirements _requirements{};
 };
 
 } // Vulkan

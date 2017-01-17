@@ -125,7 +125,18 @@ bool Renderer::lateInit() {
     };
 
     std::vector<uint32_t> queueFamilyIndices = { (uint32_t)getQueue(0, true)->getFamilyIdx() };
-    _vertexBuffer = Buffer::create(&_device, queueFamilyIndices.size(), queueFamilyIndices.data(), 5, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    _vertexBuffer = Buffer::create(&_device, (uint32_t)queueFamilyIndices.size(), queueFamilyIndices.data(), sizeof(float) * 9, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    if (!_vertexBuffer)
+        return false;
+
+    auto& requirements = _vertexBuffer->getRequirements();
+    uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(&_device, requirements);
+    _deviceMemory = DeviceMemory::allocate(&_device, requirements.size, memoryTypeIndex);
+    if (!_deviceMemory) {
+        return false;
+    }
+
+    _vertexBuffer->bindMemory(_deviceMemory.get());
     _vertexBuffer->updateData((void*)vertices, sizeof(float) * 9);
 
     return true;
@@ -633,9 +644,10 @@ bool Renderer::beginFrame(const Swapchain& swapChain, uint32_t currentImageIndex
     _graphicsPipeline->bind(&_cmdBuffers[0]);
     _graphicsPipeline->getRenderPass()->begin(&_cmdBuffers[0], swapChain.getFramebuffers()[currentImageIndex], swapChain.getExtent());
 
-    //VkBuffer vertexBuffer = *_vertexBuffer;
-    //vkCmdBindVertexBuffers(_cmdBuffers[0], 0, 1, &vertexBuffer, nullptr);
-    //vkCmdDraw(_cmdBuffers[0], 9, 1, 0, 0);
+    VkBuffer vertexBuffer = *_vertexBuffer;
+    VkDeviceSize offset = 0;
+    vkCmdBindVertexBuffers(_cmdBuffers[0], 0, 1, &vertexBuffer, &offset);
+    vkCmdDraw(_cmdBuffers[0], 9, 1, 0, 0);
     return true;
 }
 

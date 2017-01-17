@@ -7,24 +7,30 @@ namespace Vulkan {
 
 Buffer::Buffer(VkBuffer buffer,
     const Device* device,
-    std::unique_ptr<DeviceMemory> deviceMemory) : _buffer(buffer), _device(device), _deviceMemory(std::move(deviceMemory)) {}
+    DeviceMemory* deviceMemory) : _buffer(buffer), _device(device), _deviceMemory(deviceMemory) {
+    vkGetBufferMemoryRequirements(*device, _buffer, &_requirements);
+}
 
 Buffer::Buffer(Buffer&& buffer) {
     _buffer = buffer._buffer;
     _device = buffer._device;
-    _deviceMemory = std::move(buffer._deviceMemory);
+    _deviceMemory = buffer._deviceMemory;
+    _requirements = buffer._requirements;
     buffer._buffer = VK_NULL_HANDLE;
     buffer._device = nullptr;
     buffer._deviceMemory = nullptr;
+    buffer._requirements = {};
 }
 
 Buffer& Buffer::operator=(Buffer&& buffer) {
     _buffer = buffer._buffer;
     _device = buffer._device;
-    _deviceMemory = std::move(buffer._deviceMemory);
+    _deviceMemory = buffer._deviceMemory;
+    _requirements = buffer._requirements;
     buffer._buffer = VK_NULL_HANDLE;
     buffer._device = nullptr;
     buffer._deviceMemory = nullptr;
+    buffer._requirements = {};
 
     return *this;
 }
@@ -45,8 +51,9 @@ void Buffer::destroy() {
     }
 }
 
-void Buffer::bindMemory(const DeviceMemory& deviceMemory, VkDeviceSize memoryOffset) {
-    vkBindBufferMemory(*_device, _buffer, deviceMemory, memoryOffset);
+void Buffer::bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
+    _deviceMemory = deviceMemory;
+    vkBindBufferMemory(*_device, _buffer, *deviceMemory, memoryOffset);
 }
 
 void* Buffer::mapMemory(VkDeviceSize size, VkDeviceSize offset) {
@@ -64,6 +71,10 @@ void Buffer::updateData(void *data, uint32_t size, VkDeviceSize memoryOffset) {
     void *gpuData = mapMemory(size, memoryOffset);
     memcpy(gpuData, data, size);
     unmapMemory();
+}
+
+const VkMemoryRequirements& Buffer::getRequirements() const {
+    return _requirements;
 }
 
 std::unique_ptr<Buffer> Buffer::create(
@@ -95,18 +106,7 @@ std::unique_ptr<Buffer> Buffer::create(
         return nullptr;
     }
 
-
-    // Allocate device memory for buffer
-    VkMemoryRequirements memoryRequirements{};
-    vkGetBufferMemoryRequirements(*device, bufferHandle, &memoryRequirements);
-
-    VkDeviceSize memoryTypeIndex = DeviceMemory::findMemoryType(device, memoryRequirements);
-    auto deviceMemory = DeviceMemory::allocate(device, memoryRequirements.size, memoryTypeIndex);
-
-    auto buffer = std::unique_ptr<Buffer>(new Buffer(bufferHandle, device, std::move(deviceMemory)));
-    buffer->bindMemory(*deviceMemory);
-
-    return buffer;
+    return std::unique_ptr<Buffer>(new Buffer(bufferHandle, device));;
 }
 
 } // Vulkan

@@ -8,6 +8,7 @@
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Buffer.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Instance.hpp>
 #include <lug/Graphics/Vulkan/Loader.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
@@ -124,6 +125,7 @@ private:
 
     std::vector<CommandBuffer> _cmdBuffers;
     std::unique_ptr<Pipeline> _graphicsPipeline{nullptr};
+    std::unique_ptr<DeviceMemory> _deviceMemory{nullptr};
     std::unique_ptr<Buffer> _vertexBuffer{nullptr};
 
 private:

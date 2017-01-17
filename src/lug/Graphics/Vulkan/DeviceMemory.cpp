@@ -34,7 +34,7 @@ void DeviceMemory::destroy() {
     }
 }
 
-std::unique_ptr<DeviceMemory> DeviceMemory::allocate(const Device* device, VkDeviceSize size, VkDeviceSize memoryTypeIndex) {
+std::unique_ptr<DeviceMemory> DeviceMemory::allocate(const Device* device, VkDeviceSize size, uint32_t memoryTypeIndex) {
     VkMemoryAllocateInfo allocateInfo {
         allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
         allocateInfo.pNext = nullptr,
@@ -53,7 +53,7 @@ std::unique_ptr<DeviceMemory> DeviceMemory::allocate(const Device* device, VkDev
     return std::unique_ptr<DeviceMemory>(new DeviceMemory(memory, device));
 }
 
-uint32_t DeviceMemory::findMemoryType(const Device* device, VkMemoryRequirements& memoryRequirements) {
+uint32_t DeviceMemory::findMemoryType(const Device* device, const VkMemoryRequirements& memoryRequirements) {
     const PhysicalDeviceInfo* physicalDeviceInfo = device->getPhysicalDeviceInfo();
     for (uint32_t i = 0; i < physicalDeviceInfo->memoryProperties.memoryTypeCount; i++) {
         if (memoryRequirements.memoryTypeBits & (1 << i)) {
