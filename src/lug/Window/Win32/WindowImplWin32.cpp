@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <lug/Window/Win32/WindowImplWin32.hpp>
+#include <lug/System/Logger.hpp>
 
 namespace lug {
 namespace Window {
@@ -138,6 +139,22 @@ void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM /*w
     lug::Window::Event e;
 
     switch (message) {
+    case WM_SIZE:
+        e.type = EventType::RESIZE;
+
+        // The handle is not set on first call
+        if (!_handle)
+            break;
+
+        RECT rect;
+        if (GetWindowRect(_handle, &rect)) {
+            _parent->_mode.width = static_cast<uint16_t>(rect.right - rect.left);
+            _parent->_mode.height = static_cast<uint16_t>(rect.bottom - rect.top);
+        }
+        else {
+            LUG_LOG.error("WindowImpl::Win32::processWindowEvents Can't get window rect");
+        }
+        break;
     case WM_CLOSE:
         e.type = EventType::CLOSE;
         break;
