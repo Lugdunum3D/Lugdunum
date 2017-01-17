@@ -39,7 +39,7 @@ void ShaderModule::destroy() {
 
 std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, const Device* device) {
     // TODO: replace opening file with something more global
-    std::ifstream shaderCode(file);
+    std::ifstream shaderCode(file, std::ios::binary);
 
     if (!shaderCode.good()) {
         // TODO: use errno to print the correct error
@@ -54,6 +54,7 @@ std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, cons
     char* buffer = new char[shaderCodeSize];
 
     shaderCode.read(buffer, shaderCodeSize);
+    shaderCode.close();
 
     VkShaderModuleCreateInfo createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
@@ -63,13 +64,15 @@ std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, cons
         createInfo.pCode = reinterpret_cast<uint32_t*>(buffer),
     };
 
-    VkShaderModule shaderModule;
+    VkShaderModule shaderModule = VK_NULL_HANDLE;
     VkResult result = vkCreateShaderModule(*device, &createInfo, nullptr, &shaderModule);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create shader module \"{}\": {}", file, result);
         return nullptr;
     }
+
+    delete buffer;
 
     return std::unique_ptr<ShaderModule>(new ShaderModule(shaderModule, device));
 }
