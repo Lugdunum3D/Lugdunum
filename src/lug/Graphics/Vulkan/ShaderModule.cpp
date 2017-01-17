@@ -72,7 +72,7 @@ std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, cons
         return nullptr;
     }
 
-    delete buffer;
+    delete[] buffer;
 
     return std::unique_ptr<ShaderModule>(new ShaderModule(shaderModule, device));
 }
