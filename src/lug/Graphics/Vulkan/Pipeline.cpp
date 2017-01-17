@@ -97,15 +97,28 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
     };
 
 
+    VkVertexInputBindingDescription vertexInputBindingDesc{
+        vertexInputBindingDesc.binding = 0,
+        vertexInputBindingDesc.stride = sizeof(float) * 3,
+        vertexInputBindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
+    };
+
+    VkVertexInputAttributeDescription vertexInputAttributeDesc{
+        vertexInputAttributeDesc.location = 0,
+        vertexInputAttributeDesc.binding = 0,
+        vertexInputAttributeDesc.format = VK_FORMAT_R32G32B32_SFLOAT,
+        vertexInputAttributeDesc.offset = 0
+    };
+
     // Vertex input state
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
         vertexInputInfo.pNext = nullptr,
         vertexInputInfo.flags = 0,
-        vertexInputInfo.vertexBindingDescriptionCount = 0,
-        vertexInputInfo.pVertexBindingDescriptions = 0,
-        vertexInputInfo.vertexAttributeDescriptionCount = 0,
-        vertexInputInfo.pVertexAttributeDescriptions = 0
+        vertexInputInfo.vertexBindingDescriptionCount = 1,
+        vertexInputInfo.pVertexBindingDescriptions = &vertexInputBindingDesc,
+        vertexInputInfo.vertexAttributeDescriptionCount = 1,
+        vertexInputInfo.pVertexAttributeDescriptions = &vertexInputAttributeDesc
    };
 
     // Input assembly state
@@ -208,7 +221,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = 0,
-        createInfo.stageCount = 1,
+        createInfo.stageCount = 2,
         createInfo.pStages = shaderStages,
         createInfo.pVertexInputState = &vertexInputInfo,
         createInfo.pInputAssemblyState = &inputAssemblyInfo,

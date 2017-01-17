@@ -130,7 +130,7 @@ bool Renderer::lateInit() {
         return false;
 
     auto& requirements = _vertexBuffer->getRequirements();
-    uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(&_device, requirements);
+    uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(&_device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
     _deviceMemory = DeviceMemory::allocate(&_device, requirements.size, memoryTypeIndex);
     if (!_deviceMemory) {
         return false;

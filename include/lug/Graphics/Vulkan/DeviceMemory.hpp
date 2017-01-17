@@ -29,7 +29,7 @@ public:
     void destroy();
 
     static std::unique_ptr<DeviceMemory> allocate(const Device* device, VkDeviceSize size, uint32_t memoryTypeIndex);
-    static uint32_t findMemoryType(const Device* device, const VkMemoryRequirements& memoryRequirements);
+    static uint32_t findMemoryType(const Device* device, const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags requiredFlags);
 
 private:
     VkDeviceMemory _deviceMemory{VK_NULL_HANDLE};

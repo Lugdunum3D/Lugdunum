@@ -53,11 +53,14 @@ std::unique_ptr<DeviceMemory> DeviceMemory::allocate(const Device* device, VkDev
     return std::unique_ptr<DeviceMemory>(new DeviceMemory(memory, device));
 }
 
-uint32_t DeviceMemory::findMemoryType(const Device* device, const VkMemoryRequirements& memoryRequirements) {
+uint32_t DeviceMemory::findMemoryType(const Device* device, const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags requiredFlags) {
     const PhysicalDeviceInfo* physicalDeviceInfo = device->getPhysicalDeviceInfo();
     for (uint32_t i = 0; i < physicalDeviceInfo->memoryProperties.memoryTypeCount; i++) {
         if (memoryRequirements.memoryTypeBits & (1 << i)) {
-            return i;
+            const VkMemoryType& type = physicalDeviceInfo->memoryProperties.memoryTypes[i];
+            if (type.propertyFlags & requiredFlags) {
+                return i;
+            }
         }
     }
 
