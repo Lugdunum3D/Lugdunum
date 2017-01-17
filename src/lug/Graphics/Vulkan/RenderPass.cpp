@@ -39,7 +39,7 @@ void RenderPass::destroy() {
 void RenderPass::begin(const CommandBuffer* commandBuffer, const Framebuffer& framebuffer, const VkExtent2D& extent, VkSubpassContents contents)
 {
     VkClearValue clearColor{};
-    clearColor.color = {1.0f, 1.0f, 1.0f, 1.0f};
+    clearColor.color = {{1.0f, 1.0f, 1.0f, 1.0f}};
     clearColor.depthStencil = {};
 
     VkRenderPassBeginInfo beginInfo{
