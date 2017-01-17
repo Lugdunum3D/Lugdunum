@@ -50,9 +50,8 @@ int main() {
             return 1;
         }
 
-        // float clearColor[] = {1.0f, 0.0f, 0.0f, 1.0f};
-        //window->clearScreen(clearColor);
         // TODO: Render objects
+
         if (!window->endFrame()) {
             logger->fatal("beginFrame() failed");
             return 1;
