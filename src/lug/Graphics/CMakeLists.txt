@@ -5,9 +5,11 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Graphics.cpp
     ${SRCROOT}/Module.cpp
+    ${SRCROOT}/Vulkan/Buffer.cpp
     ${SRCROOT}/Vulkan/CommandBuffer.cpp
     ${SRCROOT}/Vulkan/CommandPool.cpp
     ${SRCROOT}/Vulkan/Device.cpp
+    ${SRCROOT}/Vulkan/DeviceMemory.cpp
     ${SRCROOT}/Vulkan/Fence.cpp
     ${SRCROOT}/Vulkan/Framebuffer.cpp
     ${SRCROOT}/Vulkan/Image.cpp
@@ -38,11 +40,13 @@ set(INC
     ${INCROOT}/Module.inl
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/RenderWindow.hpp
+    ${INCROOT}/Vulkan/Buffer.hpp
     ${INCROOT}/Vulkan/CommandBuffer.hpp
     ${INCROOT}/Vulkan/CommandPool.hpp
     ${INCROOT}/Vulkan/CommandPool.inl
     ${INCROOT}/Vulkan/Device.hpp
     ${INCROOT}/Vulkan/Device.inl
+    ${INCROOT}/Vulkan/DeviceMemory.hpp
     ${INCROOT}/Vulkan/Fence.hpp
     ${INCROOT}/Vulkan/Framebuffer.hpp
     ${INCROOT}/Vulkan/Image.hpp

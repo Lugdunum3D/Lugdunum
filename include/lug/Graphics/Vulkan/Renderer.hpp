@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Renderer.hpp>
+#include <lug/Graphics/Vulkan/Buffer.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Instance.hpp>
 #include <lug/Graphics/Vulkan/Loader.hpp>
@@ -55,6 +56,7 @@ public:
     ~Renderer();
 
     std::set<Module::Type> init() override final;
+    bool lateInit();
 
     bool isInstanceLayerLoaded(const char* name) const;
     bool isInstanceExtensionLoaded(const char* name) const;
@@ -122,6 +124,7 @@ private:
 
     std::vector<CommandBuffer> _cmdBuffers;
     std::unique_ptr<Pipeline> _graphicsPipeline{nullptr};
+    std::unique_ptr<Buffer> _vertexBuffer{nullptr};
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;

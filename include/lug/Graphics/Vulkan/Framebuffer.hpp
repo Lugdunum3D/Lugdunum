@@ -1,4 +1,4 @@
-#pragma once
+    #pragma once
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
@@ -27,7 +27,7 @@ public:
     void destroy();
 
 private:
-    VkFramebuffer _framebuffer{ VK_NULL_HANDLE };
+    VkFramebuffer _framebuffer{VK_NULL_HANDLE};
     const Device* _device{nullptr};
 };
 

@@ -1,10 +1,11 @@
 #include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/System/Debug.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-Device::Device(VkDevice device) : _device(device) {}
+Device::Device(VkDevice device, PhysicalDeviceInfo* physicalDeviceInfo) : _device(device), _physicalDeviceInfo(physicalDeviceInfo) {}
 
 Device::Device(Device&& device) {
     _device = device._device;
@@ -30,6 +31,11 @@ void Device::destroy() {
         vkDestroyDevice(_device, nullptr);
         _device = VK_NULL_HANDLE;
     }
+}
+
+const PhysicalDeviceInfo* Device::getPhysicalDeviceInfo() const {
+    LUG_ASSERT(_physicalDeviceInfo != nullptr, "Device::_physicalDeviceInfo should not be null");
+    return _physicalDeviceInfo;
 }
 
 } // Vulkan

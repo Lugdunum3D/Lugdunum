@@ -31,7 +31,7 @@ public:
     void destroy();
 
 private:
-    VkFence _fence{ VK_NULL_HANDLE };
+    VkFence _fence{VK_NULL_HANDLE};
     const Device* _device{nullptr};
 };
 

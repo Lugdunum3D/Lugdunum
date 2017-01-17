@@ -8,7 +8,6 @@ namespace Window {
 enum class LUG_WINDOW_API EventType : uint32_t {
     CLOSE,
     DESTROY,
-    RESIZE
 };
 
 struct LUG_WINDOW_API Event {

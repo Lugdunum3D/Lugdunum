@@ -29,7 +29,7 @@ bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style
         return false;
     }
 
-    XSelectInput(_display, _window, ExposureMask | KeyPress | StructureNotifyMask);
+    XSelectInput(_display, _window, ExposureMask | KeyPress);
     XStoreName(_display, _window, title.c_str());
     XMapWindow(_display, _window);
 
@@ -53,7 +53,7 @@ void lug::Window::priv::WindowImpl::close() {
 }
 
 Bool selectEvents(Display*, XEvent* event, XPointer) {
-    if (event->type == ClientMessage || event->type == DestroyNotify || event->type == ConfigureNotify) {
+    if (event->type == ClientMessage || event->type == DestroyNotify) {
         return True;
     } else {
         return False;
@@ -71,24 +71,10 @@ bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
         case ClientMessage:
             if (xEvent.xclient.message_type == _wmProtocols && static_cast<Atom>(xEvent.xclient.data.l[0]) == _wmDeleteWindow) {
                 event.type = lug::Window::EventType::CLOSE;
-            } else {
-                return false;
             }
-
             break;
         case DestroyNotify:
             event.type = lug::Window::EventType::DESTROY;
-            break;
-        case ConfigureNotify:
-            if (xEvent.xconfigure.width != _parent->_mode.width || xEvent.xconfigure.height != _parent->_mode.height) {
-                _parent->_mode.width = xEvent.xconfigure.width;
-                _parent->_mode.height = xEvent.xconfigure.height;
-
-                event.type = lug::Window::EventType::RESIZE;
-            } else {
-                return false;
-            }
-
             break;
         default:
             return false;

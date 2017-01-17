@@ -372,7 +372,7 @@ bool RenderWindow::init() {
         _fence = Fence(fence, &_renderer.getDevice());
     }
 
-    return initSurface() && initSwapchain();
+    return initSurface() && initSwapchain() && _renderer.lateInit();
 }
 
 void RenderWindow::destroy() {

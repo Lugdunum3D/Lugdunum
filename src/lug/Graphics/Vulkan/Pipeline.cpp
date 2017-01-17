@@ -64,7 +64,8 @@ void Pipeline::bind(const CommandBuffer* commandBuffer) {
 
 std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device, const Swapchain& swapChain) {
     auto vertexShader = ShaderModule::create("shader.vert.spv", device);
-    if (vertexShader == nullptr) {
+    auto fragmentShader = ShaderModule::create("shader.frag.spv", device);
+    if (vertexShader == nullptr || fragmentShader == nullptr) {
         return nullptr;
     }
 
@@ -73,14 +74,26 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         vertexShaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
         vertexShaderStage.pNext = nullptr,
         vertexShaderStage.flags = 0,
-        vertexShaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT ,
+        vertexShaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT,
         vertexShaderStage.module = *vertexShader,
         vertexShaderStage.pName = "main",
         vertexShaderStage.pSpecializationInfo = nullptr
     };
 
+    // Fragment shader stage
+    VkPipelineShaderStageCreateInfo fragmentShaderStage{
+        fragmentShaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        fragmentShaderStage.pNext = nullptr,
+        fragmentShaderStage.flags = 0,
+        fragmentShaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT,
+        fragmentShaderStage.module = *fragmentShader,
+        fragmentShaderStage.pName = "main",
+        fragmentShaderStage.pSpecializationInfo = nullptr
+    };
+
     VkPipelineShaderStageCreateInfo shaderStages[]{
-        vertexShaderStage
+        vertexShaderStage,
+        fragmentShaderStage
     };
 
 

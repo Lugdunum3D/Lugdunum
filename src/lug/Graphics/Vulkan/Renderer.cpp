@@ -71,6 +71,10 @@ void Renderer::destroy() {
         _graphicsPipeline->destroy();
     }
 
+    if (_vertexBuffer != nullptr) {
+        _vertexBuffer->destroy();
+    }
+
     _device.destroy();
 
     // Destroy the report callback if necessary
@@ -109,6 +113,29 @@ std::set<Module::Type> Renderer::init() {
     return loadedModules;
 }
 
+/**
+ * Will be called after the RenderWindow finished its own init
+ * @return Success
+ */
+bool Renderer::lateInit() {
+    const float vertices[3][3] = {
+        {0.0f, -0.5f, 0.0f},
+        {0.5f, 0.5f, 0.0f},
+        {-0.5f, 0.5f, 0.0f}
+    };
+
+    std::vector<uint32_t> queueFamilyIndices = { (uint32_t)getQueue(0, true)->getFamilyIdx() };
+    _vertexBuffer = Buffer::create(&_device, queueFamilyIndices.size(), queueFamilyIndices.data(), 5, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    _vertexBuffer->updateData((void*)vertices, sizeof(float) * 9);
+
+    return true;
+}
+
+/**
+ * Initialize the Vulkan instance
+ * @param  loadedModules Modules to load
+ * @return               Wether the instance was loaded successfully or not
+ */
 bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
     VkResult result;
 
@@ -264,6 +291,11 @@ bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
     return true;
 }
 
+/**
+ * Initialize the Vulkan device
+ * @param  loadedModules Modules to load
+ * @return               Wether the device was loaded successfully or not
+ */
 bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
     VkResult result;
 
@@ -344,7 +376,7 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
             return false;
         }
 
-        _device = Device(device);
+        _device = Device(device, _physicalDeviceInfo);
         _loader.loadDeviceFunctions(_device);
     }
 
@@ -600,6 +632,10 @@ Pipeline* Renderer::getGraphicsPipeline() const {
 bool Renderer::beginFrame(const Swapchain& swapChain, uint32_t currentImageIndex) {
     _graphicsPipeline->bind(&_cmdBuffers[0]);
     _graphicsPipeline->getRenderPass()->begin(&_cmdBuffers[0], swapChain.getFramebuffers()[currentImageIndex], swapChain.getExtent());
+
+    //VkBuffer vertexBuffer = *_vertexBuffer;
+    //vkCmdBindVertexBuffers(_cmdBuffers[0], 0, 1, &vertexBuffer, nullptr);
+    //vkCmdDraw(_cmdBuffers[0], 9, 1, 0, 0);
     return true;
 }
 
