@@ -38,7 +38,9 @@ int main() {
     while (window->isOpen()) {
         lug::Window::Event event;
         while (window->pollEvent(event)) {
-            if (event.type == lug::Window::EventType::CLOSE) {
+            if (event.type == lug::Window::EventType::RESIZE) {
+                logger->info("Resizing the app");
+            } else if (event.type == lug::Window::EventType::CLOSE) {
                 logger->info("Closing the app");
                 window->close();
                 return 0;
