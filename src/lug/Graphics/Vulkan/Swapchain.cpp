@@ -12,7 +12,11 @@ Swapchain::Swapchain(VkSwapchainKHR swapchain, const Device* device, const VkSur
 Swapchain::Swapchain(Swapchain&& swapchain) {
     _swapchain = swapchain._swapchain;
     _device = swapchain._device;
+    _images = std::move(swapchain._images);
+    _imagesViews = std::move(swapchain._imagesViews);
+    _framebuffers = std::move(swapchain._framebuffers);
     _format = swapchain._format;
+    _extent = swapchain._extent;
     swapchain._swapchain = VK_NULL_HANDLE;
     swapchain._device = nullptr;
 }
@@ -20,7 +24,11 @@ Swapchain::Swapchain(Swapchain&& swapchain) {
 Swapchain& Swapchain::operator=(Swapchain&& swapchain) {
     _swapchain = swapchain._swapchain;
     _device = swapchain._device;
+    _images = std::move(swapchain._images);
+    _imagesViews = std::move(swapchain._imagesViews);
+    _framebuffers = std::move(swapchain._framebuffers);
     _format = swapchain._format;
+    _extent = swapchain._extent;
     swapchain._swapchain = VK_NULL_HANDLE;
     swapchain._device = nullptr;
 

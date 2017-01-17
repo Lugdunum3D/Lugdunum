@@ -36,11 +36,9 @@ void RenderPass::destroy() {
     }
 }
 
-void RenderPass::begin(const CommandBuffer* commandBuffer, const Framebuffer& framebuffer, const VkExtent2D& extent, VkSubpassContents contents)
-{
+void RenderPass::begin(const CommandBuffer* commandBuffer, const Framebuffer& framebuffer, const VkExtent2D& extent, VkSubpassContents contents) {
     VkClearValue clearColor{};
-    clearColor.color = {{1.0f, 1.0f, 1.0f, 1.0f}};
-    clearColor.depthStencil = {};
+    clearColor.color = {{1.0f, 0.0f, 0.0f, 1.0f}};
 
     VkRenderPassBeginInfo beginInfo{
         beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -58,8 +56,7 @@ void RenderPass::begin(const CommandBuffer* commandBuffer, const Framebuffer& fr
     vkCmdBeginRenderPass(*commandBuffer, &beginInfo, contents);
 }
 
-void RenderPass::end(const CommandBuffer* commandBuffer)
-{
+void RenderPass::end(const CommandBuffer* commandBuffer) {
     vkCmdEndRenderPass(*commandBuffer);
 }
 
