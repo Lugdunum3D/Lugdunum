@@ -14,6 +14,8 @@ Semaphore::Semaphore(Semaphore&& semaphore) {
 }
 
 Semaphore& Semaphore::operator=(Semaphore&& semaphore) {
+    destroy();
+
     _semaphore = semaphore._semaphore;
     _device = semaphore._device;
     semaphore._semaphore = VK_NULL_HANDLE;

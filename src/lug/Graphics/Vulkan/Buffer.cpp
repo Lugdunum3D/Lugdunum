@@ -23,6 +23,8 @@ Buffer::Buffer(Buffer&& buffer) {
 }
 
 Buffer& Buffer::operator=(Buffer&& buffer) {
+    destroy();
+
     _buffer = buffer._buffer;
     _device = buffer._device;
     _deviceMemory = buffer._deviceMemory;
@@ -85,7 +87,7 @@ std::unique_ptr<Buffer> Buffer::create(
         VkBufferUsageFlags usage,
         VkBufferCreateFlags createFlags,
         VkSharingMode sharingMode
-    ) {
+) {
     // Create buffer
     VkBufferCreateInfo createInfo {
         createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,

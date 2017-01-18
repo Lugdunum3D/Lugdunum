@@ -15,6 +15,8 @@ Fence::Fence(Fence&& fence) {
 }
 
 Fence& Fence::operator=(Fence&& fence) {
+    destroy();
+
     _fence = fence._fence;
     _device = fence._device;
     fence._fence = VK_NULL_HANDLE;

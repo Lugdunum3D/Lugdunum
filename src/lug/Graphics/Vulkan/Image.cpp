@@ -17,6 +17,8 @@ Image::Image(Image&& image) {
 }
 
 Image& Image::operator=(Image&& image) {
+    destroy();
+
     _image = image._image;
     _device = image._device;
     _swapchainImage = image._swapchainImage;

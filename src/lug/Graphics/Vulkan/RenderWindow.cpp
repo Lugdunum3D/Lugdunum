@@ -379,6 +379,7 @@ bool RenderWindow::init() {
 void RenderWindow::destroy() {
     _presentQueue->waitIdle();
     _swapchain.destroy();
+
     if (_surface != VK_NULL_HANDLE) {
         vkDestroySurfaceKHR(_renderer.getInstance(), _surface, nullptr);
         _surface = VK_NULL_HANDLE;

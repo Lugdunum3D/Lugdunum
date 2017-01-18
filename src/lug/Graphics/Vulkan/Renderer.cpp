@@ -255,7 +255,7 @@ bool Renderer::lateInit() {
     std::vector<uint32_t> queueFamilyIndices = { (uint32_t)getQueue(0, true)->getFamilyIdx() };
 
     {
-        _vertexBuffer = Buffer::create(&_device, (uint32_t)queueFamilyIndices.size(), queueFamilyIndices.data(), sizeof(Vertex) * 36, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        _vertexBuffer = Buffer::create(&_device, (uint32_t)queueFamilyIndices.size(), queueFamilyIndices.data(), sizeof(vertices), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
         if (!_vertexBuffer)
             return false;
 
@@ -267,7 +267,7 @@ bool Renderer::lateInit() {
         }
 
         _vertexBuffer->bindMemory(_vertexDeviceMemory.get());
-        _vertexBuffer->updateData((void*)vertices, sizeof(Vertex) * 36);
+        _vertexBuffer->updateData((void*)vertices, sizeof(vertices));
     }
 
     {

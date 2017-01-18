@@ -14,6 +14,8 @@ Framebuffer::Framebuffer(Framebuffer&& framebuffer) {
 }
 
 Framebuffer& Framebuffer::operator=(Framebuffer&& framebuffer) {
+    destroy();
+
     _framebuffer = framebuffer._framebuffer;
     _device = framebuffer._device;
     framebuffer._framebuffer = VK_NULL_HANDLE;

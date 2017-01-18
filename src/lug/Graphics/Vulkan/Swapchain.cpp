@@ -10,8 +10,6 @@ Swapchain::Swapchain(VkSwapchainKHR swapchain, const Device* device, const VkSur
                     _swapchain(swapchain), _device(device), _format(swapchainFormat), _extent(extent) {}
 
 Swapchain::Swapchain(Swapchain&& swapchain) {
-    destroy();
-
     _swapchain = swapchain._swapchain;
     _device = swapchain._device;
     _images = std::move(swapchain._images);
@@ -61,41 +59,6 @@ void Swapchain::destroy() {
 
 bool Swapchain::init(RenderPass* renderPass) {
     return initImages() && initFramebuffers(renderPass);
-}
-
-bool Swapchain::initFramebuffers(RenderPass* renderPass) {
-    if (!renderPass) {
-        LUG_LOG.error("RendererVulkan: initFramebuffers(): renderPass is null");
-        return false;
-    }
-
-    VkResult result;
-    _framebuffers.clear();
-    _framebuffers.resize(_imagesViews.size());
-
-    for (size_t i = 0; i < _imagesViews.size(); i++) {
-        VkImageView attachments[1]{
-            _imagesViews[i]
-        };
-
-        VkFramebufferCreateInfo framebufferInfo = {};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = *renderPass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = _extent.width;
-        framebufferInfo.height = _extent.height;
-        framebufferInfo.layers = 1;
-
-        VkFramebuffer fb;
-        result = vkCreateFramebuffer(*_device, &framebufferInfo, nullptr, &fb);
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Failed to create framebuffer: {}", result);
-            return false;
-        }
-        _framebuffers[i] = Framebuffer(fb, _device);
-    }
-    return true;
 }
 
 bool Swapchain::initImages() {
@@ -166,6 +129,41 @@ bool Swapchain::initImages() {
         }
     }
 
+    return true;
+}
+
+bool Swapchain::initFramebuffers(RenderPass* renderPass) {
+    if (!renderPass) {
+        LUG_LOG.error("RendererVulkan: initFramebuffers(): renderPass is null");
+        return false;
+    }
+
+    VkResult result;
+    _framebuffers.clear();
+    _framebuffers.resize(_imagesViews.size());
+
+    for (size_t i = 0; i < _imagesViews.size(); i++) {
+        VkImageView attachments[1]{
+            _imagesViews[i]
+        };
+
+        VkFramebufferCreateInfo framebufferInfo = {};
+        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebufferInfo.renderPass = *renderPass;
+        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.width = _extent.width;
+        framebufferInfo.height = _extent.height;
+        framebufferInfo.layers = 1;
+
+        VkFramebuffer fb;
+        result = vkCreateFramebuffer(*_device, &framebufferInfo, nullptr, &fb);
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Failed to create framebuffer: {}", result);
+            return false;
+        }
+        _framebuffers[i] = Framebuffer(fb, _device);
+    }
     return true;
 }
 

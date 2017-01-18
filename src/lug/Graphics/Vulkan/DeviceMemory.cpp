@@ -15,6 +15,8 @@ DeviceMemory::DeviceMemory(DeviceMemory&& buffer) {
 }
 
 DeviceMemory& DeviceMemory::operator=(DeviceMemory&& buffer) {
+    destroy();
+
     _deviceMemory = buffer._deviceMemory;
     _device = buffer._device;
     buffer._deviceMemory = VK_NULL_HANDLE;
