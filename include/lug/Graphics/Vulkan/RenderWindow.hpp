@@ -31,8 +31,6 @@ public:
     bool beginFrame() override final;
     bool endFrame() override final;
 
-    void clearScreen(float color[4]) override final;
-
     static std::unique_ptr<RenderWindow> create(Renderer& renderer, uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style);
 
 private:

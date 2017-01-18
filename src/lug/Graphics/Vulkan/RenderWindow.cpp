@@ -70,37 +70,6 @@ bool RenderWindow::endFrame() {
     _swapchain.present(_presentQueue, _currentImageIndex, _submitCompleteSemaphore);
 }
 
-void RenderWindow::clearScreen(float color[4]) {
-    // Set clear value
-    VkClearColorValue colorValue{};
-    std::memcpy(colorValue.float32, color, sizeof(float[4]));
-
-    // Get current image
-    Image& currentImage = _swapchain.getImages()[_currentImageIndex];
-
-    VkImageSubresourceRange imageSubResourceRange{
-        imageSubResourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-        imageSubResourceRange.baseMipLevel = 0,
-        imageSubResourceRange.levelCount = 1,
-        imageSubResourceRange.baseArrayLayer = 0,
-        imageSubResourceRange.layerCount = 1
-    };
-
-    currentImage.changeLayout(_renderer.getCommandBuffers()[0],
-                    VK_ACCESS_MEMORY_READ_BIT,
-                    VK_ACCESS_TRANSFER_WRITE_BIT,
-                    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-   vkCmdClearColorImage(_renderer.getCommandBuffers()[0], currentImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &colorValue, 1, &imageSubResourceRange);
-
-    currentImage.changeLayout(_renderer.getCommandBuffers()[0],
-                    VK_ACCESS_TRANSFER_WRITE_BIT,
-                    VK_ACCESS_MEMORY_READ_BIT,
-                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-}
-
 std::unique_ptr<RenderWindow>
 RenderWindow::create(Renderer &renderer, uint16_t width, uint16_t height, const std::string &title,
                      lug::Window::Style style) {
@@ -336,11 +305,10 @@ bool RenderWindow::initSwapchain() {
 
         _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat, extent);
 
-        if (!_swapchain.init(_renderer.getCommandBuffers()[0], _renderer.getGraphicsPipeline()->getRenderPass()))
+        if (!_swapchain.init(_renderer.getGraphicsPipeline()->getRenderPass()))
             return false;
 
-        _presentQueue->submit(_renderer.getCommandBuffers()[0]);
-        return _presentQueue->waitIdle();
+        return true;
     }
 }
 

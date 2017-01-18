@@ -36,7 +36,7 @@ public:
 
     bool getNextImage(uint32_t *imageIndex, VkSemaphore semaphore = VK_NULL_HANDLE);
     bool present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore = VK_NULL_HANDLE);
-    bool init(CommandBuffer& commandBuffer, RenderPass* renderPass);
+    bool init(RenderPass* renderPass);
 
     std::vector<Image>& getImages();
     const std::vector<Framebuffer>& getFramebuffers() const;
@@ -48,7 +48,7 @@ public:
     bool isOutOfDate() const;
 
 private:
-    bool initImages(CommandBuffer& commandBuffer);
+    bool initImages();
     bool initFramebuffers(RenderPass* renderPass);
 
 private:

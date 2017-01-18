@@ -59,8 +59,8 @@ void Swapchain::destroy() {
     }
 }
 
-bool Swapchain::init(CommandBuffer& commandBuffer, RenderPass* renderPass) {
-    return initImages(commandBuffer) && initFramebuffers(renderPass);
+bool Swapchain::init(RenderPass* renderPass) {
+    return initImages() && initFramebuffers(renderPass);
 }
 
 bool Swapchain::initFramebuffers(RenderPass* renderPass) {
@@ -98,7 +98,7 @@ bool Swapchain::initFramebuffers(RenderPass* renderPass) {
     return true;
 }
 
-bool Swapchain::initImages(CommandBuffer& commandBuffer) {
+bool Swapchain::initImages() {
     VkResult result;
 
     // Get swapchain images
@@ -128,7 +128,6 @@ bool Swapchain::initImages(CommandBuffer& commandBuffer) {
 
     // Create image views
     {
-        commandBuffer.begin();
         _imagesViews.resize(_images.size());
         for (uint8_t i = 0; i < _images.size(); ++i) {
             // Image view creation informations
@@ -164,14 +163,7 @@ bool Swapchain::initImages(CommandBuffer& commandBuffer) {
             }
 
             _imagesViews[i] = ImageView(imageView, _device);
-
-            _images[i].changeLayout(commandBuffer,
-                            0,
-                            VK_ACCESS_MEMORY_READ_BIT,
-                            VK_IMAGE_LAYOUT_UNDEFINED,
-                            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         }
-            commandBuffer.end();
     }
 
     return true;
