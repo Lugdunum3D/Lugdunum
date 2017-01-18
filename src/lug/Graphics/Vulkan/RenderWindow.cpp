@@ -56,12 +56,6 @@ bool RenderWindow::beginFrame() {
         return false;
     }
 
-    _swapchain.getImages()[_currentImageIndex].changeLayout(_renderer.getCommandBuffers()[0],
-                    VK_ACCESS_MEMORY_READ_BIT,
-                    VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                    VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
     if (!_renderer.beginFrame(_swapchain, _currentImageIndex)) {
         return false;
     }
