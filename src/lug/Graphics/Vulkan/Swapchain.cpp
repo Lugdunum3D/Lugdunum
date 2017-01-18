@@ -10,6 +10,8 @@ Swapchain::Swapchain(VkSwapchainKHR swapchain, const Device* device, const VkSur
                     _swapchain(swapchain), _device(device), _format(swapchainFormat), _extent(extent) {}
 
 Swapchain::Swapchain(Swapchain&& swapchain) {
+    destroy();
+
     _swapchain = swapchain._swapchain;
     _device = swapchain._device;
     _images = std::move(swapchain._images);
@@ -22,6 +24,8 @@ Swapchain::Swapchain(Swapchain&& swapchain) {
 }
 
 Swapchain& Swapchain::operator=(Swapchain&& swapchain) {
+    destroy();
+
     _swapchain = swapchain._swapchain;
     _device = swapchain._device;
     _images = std::move(swapchain._images);
@@ -40,6 +44,8 @@ Swapchain::~Swapchain() {
 }
 
 void Swapchain::destroy() {
+    _outOfDate = false;
+
     // Delete swapchain images and images views
     _framebuffers.clear();
     _imagesViews.clear();
@@ -175,7 +181,10 @@ bool Swapchain::getNextImage(uint32_t *imageIndex, VkSemaphore semaphore) {
     // Get next image
     // TODO: remove UINT64_MAX timeout and ask next image later if VK_NOT_READY is returned
     VkResult result = vkAcquireNextImageKHR(*_device, _swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex);
-    if (result != VK_SUCCESS) {
+    if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+        _outOfDate = true;
+        return false;
+    } else if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: getNextImage(): Can't acquire swapchain next image: {}", result);
         return false;
     }
@@ -203,23 +212,6 @@ bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaph
     }
     return true;
 }
-
-std::vector<Image>& Swapchain::getImages() {
-    return _images;
-}
-
-const std::vector<Framebuffer>& Swapchain::getFramebuffers() const {
-    return _framebuffers;
-}
-
-const VkSurfaceFormatKHR& Swapchain::getFormat() const {
-    return _format;
-}
-
-const VkExtent2D& Swapchain::getExtent() const {
-    return _extent;
-}
-
 
 } // Vulkan
 } // Graphics

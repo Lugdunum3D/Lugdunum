@@ -26,6 +26,8 @@ public:
 
     ~RenderWindow();
 
+    bool pollEvent(lug::Window::Event&) override;
+
     bool beginFrame() override final;
     bool endFrame() override final;
 
@@ -36,6 +38,8 @@ public:
 private:
     bool init();
     bool initSurface();
+    bool initSwapchainCapabilities();
+    bool initPresentQueue();
     bool initSwapchain();
     bool initPipeline();
     void destroy();

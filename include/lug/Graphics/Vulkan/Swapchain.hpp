@@ -14,7 +14,7 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-class LUG_GRAPHICS_API RenderPass;
+class RenderPass;
 
 class LUG_GRAPHICS_API Swapchain {
 public:
@@ -44,6 +44,9 @@ public:
     const VkSurfaceFormatKHR& getFormat() const;
     const VkExtent2D& getExtent() const;
 
+    void setOutOfDate(bool outOfDate);
+    bool isOutOfDate() const;
+
 private:
     bool initImages(CommandBuffer& commandBuffer);
     bool initFramebuffers(RenderPass* renderPass);
@@ -56,7 +59,10 @@ private:
     std::vector<Framebuffer> _framebuffers;
     VkSurfaceFormatKHR _format;
     VkExtent2D _extent;
+    bool _outOfDate{false};
 };
+
+#include <lug/Graphics/Vulkan/Swapchain.inl>
 
 } // Vulkan
 } // Graphics

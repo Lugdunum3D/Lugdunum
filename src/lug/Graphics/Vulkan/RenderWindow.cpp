@@ -27,12 +27,32 @@ RenderWindow::~RenderWindow() {
     destroy();
 }
 
+bool RenderWindow::pollEvent(lug::Window::Event& event) {
+    if (lug::Window::Window::pollEvent(event)) {
+        if (event.type == lug::Window::EventType::RESIZE) {
+            _swapchain.setOutOfDate(true);
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 bool RenderWindow::beginFrame() {
     _fence.wait();
     _fence.reset();
 
-    if (!_renderer.getCommandBuffers()[0].begin() ||
-        !_swapchain.getNextImage(&_currentImageIndex , _acquireImageCompleteSemaphore)) {
+    while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex , _acquireImageCompleteSemaphore)) {
+        if (_swapchain.isOutOfDate()) {
+            initSwapchainCapabilities();
+            initSwapchain();
+        } else {
+            return false;
+        }
+    }
+
+    if (!_renderer.getCommandBuffers()[0].begin()) {
         return false;
     }
 
@@ -42,7 +62,11 @@ bool RenderWindow::beginFrame() {
                     VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
                     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-    return _renderer.beginFrame(_swapchain, _currentImageIndex);
+    if (!_renderer.beginFrame(_swapchain, _currentImageIndex)) {
+        return false;
+    }
+
+    return true;
 }
 
 bool RenderWindow::endFrame() {
@@ -135,7 +159,7 @@ bool RenderWindow::initSurface() {
     return true;
 }
 
-bool RenderWindow::initSwapchain() {
+bool RenderWindow::initSwapchainCapabilities() {
     VkResult result;
     PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
 
@@ -178,6 +202,15 @@ bool RenderWindow::initSwapchain() {
         }
     }
 
+    return true;
+}
+
+bool RenderWindow::initPresentQueue() {
+    VkResult result;
+    PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
+
+    LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
+
     // Get present queues
     {
         for (auto& queue : _renderer.getQueues()) {
@@ -190,6 +223,15 @@ bool RenderWindow::initSwapchain() {
             queue.supportsPresentation(!!supported);
         }
     }
+
+    return true;
+}
+
+bool RenderWindow::initSwapchain() {
+    VkResult result;
+    PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
+
+    LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
 
     VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
     VkSurfaceFormatKHR swapchainFormat{
@@ -261,7 +303,7 @@ bool RenderWindow::initSwapchain() {
             createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
             createInfo.presentMode = swapchainPresentMode,
             createInfo.clipped = VK_TRUE,
-            createInfo.oldSwapchain = VK_NULL_HANDLE
+            createInfo.oldSwapchain = _swapchain
         };
 
         // Thank you clang
@@ -300,9 +342,6 @@ bool RenderWindow::initSwapchain() {
 
         _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat, extent);
 
-        if (!initPipeline())
-            return false;
-
         if (!_swapchain.init(_renderer.getCommandBuffers()[0], _renderer.getGraphicsPipeline()->getRenderPass()))
             return false;
 
@@ -312,7 +351,7 @@ bool RenderWindow::initSwapchain() {
 }
 
 bool RenderWindow::initPipeline() {
-    auto pipeline = Pipeline::createGraphicsPipeline(&_renderer.getDevice(), _swapchain);
+    auto pipeline = Pipeline::createGraphicsPipeline(&_renderer.getDevice());
     if (!pipeline) {
         return false;
     }
@@ -372,7 +411,7 @@ bool RenderWindow::init() {
         _fence = Fence(fence, &_renderer.getDevice());
     }
 
-    return initSurface() && initSwapchain() && _renderer.lateInit();
+    return initSurface() && initSwapchainCapabilities() && initPresentQueue() && initPipeline() && initSwapchain() && _renderer.lateInit();
 }
 
 void RenderWindow::destroy() {

@@ -32,7 +32,7 @@ public:
     void begin(const CommandBuffer* commandBuffer, const Framebuffer& framebuffer, const VkExtent2D& extent, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
     void end(const CommandBuffer* commandBuffer);
 
-    static std::unique_ptr<RenderPass> create(const Device* device, const Swapchain& swapChain);
+    static std::unique_ptr<RenderPass> create(const Device* device);
 private:
     VkRenderPass _renderPass{VK_NULL_HANDLE};
     const Device* _device{nullptr};

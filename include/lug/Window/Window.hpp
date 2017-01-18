@@ -49,7 +49,7 @@ public:
     static std::unique_ptr<Window> create(uint16_t width, uint16_t height, const std::string& title, Style style);
 
     bool isOpen() const;
-    bool pollEvent(lug::Window::Event&);
+    virtual bool pollEvent(lug::Window::Event&);
     void close();
 
 protected:

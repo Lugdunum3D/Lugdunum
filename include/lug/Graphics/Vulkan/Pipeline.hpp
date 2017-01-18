@@ -38,7 +38,7 @@ public:
 
     RenderPass* getRenderPass() const;
 
-    static std::unique_ptr<Pipeline> createGraphicsPipeline(const Device* device, const Swapchain& swapChain);
+    static std::unique_ptr<Pipeline> createGraphicsPipeline(const Device* device);
 
 private:
     VkPipeline _pipeline{VK_NULL_HANDLE};

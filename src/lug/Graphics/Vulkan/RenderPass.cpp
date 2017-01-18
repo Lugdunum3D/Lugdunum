@@ -60,11 +60,11 @@ void RenderPass::end(const CommandBuffer* commandBuffer) {
     vkCmdEndRenderPass(*commandBuffer);
 }
 
-std::unique_ptr<RenderPass> RenderPass::create(const Device* device, const Swapchain& swapChain) {
+std::unique_ptr<RenderPass> RenderPass::create(const Device* device) {
 
     VkAttachmentDescription colorAttachment{
         colorAttachment.flags = 0,
-        colorAttachment.format = swapChain.getFormat().format,
+        colorAttachment.format = VK_FORMAT_B8G8R8A8_UNORM,
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT,
         colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE,

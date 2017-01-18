@@ -64,6 +64,7 @@ set(INC
     ${INCROOT}/Vulkan/Semaphore.hpp
     ${INCROOT}/Vulkan/ShaderModule.hpp
     ${INCROOT}/Vulkan/Swapchain.hpp
+    ${INCROOT}/Vulkan/Swapchain.inl
     ${INCROOT}/Vulkan/Vulkan.hpp
 )
 source_group("inc" FILES ${INC})

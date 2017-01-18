@@ -62,7 +62,7 @@ void Pipeline::bind(const CommandBuffer* commandBuffer) {
     vkCmdBindPipeline(*commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 }
 
-std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device, const Swapchain& swapChain) {
+std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device) {
     auto vertexShader = ShaderModule::create("shader.vert.spv", device);
     auto fragmentShader = ShaderModule::create("shader.frag.spv", device);
     if (vertexShader == nullptr || fragmentShader == nullptr) {
@@ -130,31 +130,6 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         inputAssemblyInfo.primitiveRestartEnable = VK_FALSE // because VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST
     };
 
-    auto& extent = swapChain.getExtent();
-
-    VkViewport viewport{
-        viewport.x = 0.0f,
-        viewport.y = 0.0f,
-        viewport.width = static_cast<float>(extent.width),
-        viewport.height = static_cast<float>(extent.height),
-        viewport.minDepth = 0.0f,
-        viewport.maxDepth = 1.0f,
-    };
-
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = extent;
-
-    VkPipelineViewportStateCreateInfo viewportState{
-        viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
-        viewportState.pNext = nullptr,
-        viewportState.flags = 0,
-        viewportState.viewportCount = 1,
-        viewportState.pViewports = &viewport,
-        viewportState.scissorCount = 1,
-        viewportState.pScissors = &scissor
-    };
-
     VkPipelineRasterizationStateCreateInfo rasterizer{
         rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
         rasterizer.pNext = nullptr,
@@ -211,11 +186,47 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
     colorBlending.blendConstants[3] = 0.0f;
 
     auto pipelineLayout = PipelineLayout::create(device);
-    auto renderPass = RenderPass::create(device, swapChain);
+    auto renderPass = RenderPass::create(device);
 
     if (!pipelineLayout || !renderPass) {
         return nullptr;
     }
+
+    VkViewport viewport{
+        viewport.x = 0.0f,
+        viewport.y = 0.0f,
+        viewport.width = 0.0f,
+        viewport.height = 0.0f,
+        viewport.minDepth = 0.0f,
+        viewport.maxDepth = 1.0f,
+    };
+
+    VkRect2D scissor{};
+    scissor.offset = {0, 0};
+    scissor.extent = {0, 0};
+
+    VkPipelineViewportStateCreateInfo viewportState{
+        viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
+        viewportState.pNext = nullptr,
+        viewportState.flags = 0,
+        viewportState.viewportCount = 1,
+        viewportState.pViewports = &viewport,
+        viewportState.scissorCount = 1,
+        viewportState.pScissors = &scissor
+    };
+
+    const VkDynamicState dynamicStates[] = {
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
+    };
+
+    VkPipelineDynamicStateCreateInfo dynamicStateInfo{
+        dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,
+        dynamicStateInfo.pNext = nullptr,
+        dynamicStateInfo.flags = 0,
+        dynamicStateInfo.dynamicStateCount = 2,
+        dynamicStateInfo.pDynamicStates = dynamicStates
+    };
 
     VkGraphicsPipelineCreateInfo createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -225,13 +236,13 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         createInfo.pStages = shaderStages,
         createInfo.pVertexInputState = &vertexInputInfo,
         createInfo.pInputAssemblyState = &inputAssemblyInfo,
-        createInfo.pTessellationState = 0,
+        createInfo.pTessellationState = nullptr,
         createInfo.pViewportState = &viewportState,
         createInfo.pRasterizationState = &rasterizer,
         createInfo.pMultisampleState = &multisampling,
-        createInfo.pDepthStencilState = 0,
+        createInfo.pDepthStencilState = nullptr,
         createInfo.pColorBlendState = &colorBlending,
-        createInfo.pDynamicState = 0,
+        createInfo.pDynamicState = &dynamicStateInfo,
         createInfo.layout = *pipelineLayout,
         createInfo.renderPass = *renderPass,
         createInfo.subpass = 0,
