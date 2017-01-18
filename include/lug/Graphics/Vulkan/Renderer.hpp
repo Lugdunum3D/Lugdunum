@@ -125,8 +125,12 @@ private:
 
     std::vector<CommandBuffer> _cmdBuffers;
     std::unique_ptr<Pipeline> _graphicsPipeline{nullptr};
-    std::unique_ptr<DeviceMemory> _deviceMemory{nullptr};
+
+
+    std::unique_ptr<DeviceMemory> _vertexDeviceMemory{nullptr};
     std::unique_ptr<Buffer> _vertexBuffer{nullptr};
+    std::unique_ptr<DeviceMemory> _indexDeviceMemory{nullptr};
+    std::unique_ptr<Buffer> _indexBuffer{nullptr};
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;

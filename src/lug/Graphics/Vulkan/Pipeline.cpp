@@ -63,6 +63,11 @@ void Pipeline::bind(const CommandBuffer* commandBuffer) {
 }
 
 std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device) {
+    struct Vertex{
+        float pos[3];
+        float normal[3];
+    };
+
     auto vertexShader = ShaderModule::create("shader.vert.spv", device);
     auto fragmentShader = ShaderModule::create("shader.frag.spv", device);
     if (vertexShader == nullptr || fragmentShader == nullptr) {
@@ -99,15 +104,23 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device)
 
     VkVertexInputBindingDescription vertexInputBindingDesc{
         vertexInputBindingDesc.binding = 0,
-        vertexInputBindingDesc.stride = sizeof(float) * 3,
+        vertexInputBindingDesc.stride = sizeof(Vertex),
         vertexInputBindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
     };
 
-    VkVertexInputAttributeDescription vertexInputAttributeDesc{
-        vertexInputAttributeDesc.location = 0,
-        vertexInputAttributeDesc.binding = 0,
-        vertexInputAttributeDesc.format = VK_FORMAT_R32G32B32_SFLOAT,
-        vertexInputAttributeDesc.offset = 0
+    VkVertexInputAttributeDescription vertexInputAttributesDesc[2] = {
+        {
+            vertexInputAttributesDesc[0].location = 0,
+            vertexInputAttributesDesc[0].binding = 0,
+            vertexInputAttributesDesc[0].format = VK_FORMAT_R32G32B32_SFLOAT,
+            vertexInputAttributesDesc[0].offset = 0
+        },
+        {
+            vertexInputAttributesDesc[1].location = 1,
+            vertexInputAttributesDesc[1].binding = 0,
+            vertexInputAttributesDesc[1].format = VK_FORMAT_R32G32B32_SFLOAT,
+            vertexInputAttributesDesc[1].offset = offsetof(Vertex, normal)
+        }
     };
 
     // Vertex input state
@@ -117,8 +130,8 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device)
         vertexInputInfo.flags = 0,
         vertexInputInfo.vertexBindingDescriptionCount = 1,
         vertexInputInfo.pVertexBindingDescriptions = &vertexInputBindingDesc,
-        vertexInputInfo.vertexAttributeDescriptionCount = 1,
-        vertexInputInfo.pVertexAttributeDescriptions = &vertexInputAttributeDesc
+        vertexInputInfo.vertexAttributeDescriptionCount = 2,
+        vertexInputInfo.pVertexAttributeDescriptions = vertexInputAttributesDesc
    };
 
     // Input assembly state
@@ -137,7 +150,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device)
         rasterizer.depthClampEnable = VK_FALSE,
         rasterizer.rasterizerDiscardEnable = VK_FALSE,
         rasterizer.polygonMode = VK_POLYGON_MODE_FILL,
-        rasterizer.cullMode = VK_CULL_MODE_NONE,
+        rasterizer.cullMode = VK_CULL_MODE_BACK_BIT,
         rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE,
         rasterizer.depthBiasEnable = VK_FALSE,
         rasterizer.depthBiasConstantFactor = 0.0f,

@@ -93,6 +93,7 @@
     macro(vkCmdBeginRenderPass)                         \
     macro(vkCmdBindPipeline)                            \
     macro(vkCmdDraw)                                    \
+    macro(vkCmdDrawIndexed)                             \
     macro(vkCmdEndRenderPass)                           \
     macro(vkDestroyShaderModule)                        \
     macro(vkDestroyPipelineLayout)                      \
@@ -111,6 +112,7 @@
     macro(vkCmdSetViewport)                             \
     macro(vkCmdSetScissor)                              \
     macro(vkCmdBindVertexBuffers)                       \
+    macro(vkCmdBindIndexBuffer)                         \
     macro(vkWaitForFences)                              \
     macro(vkResetFences)                                \
     macro(vkGetFenceStatus)                             \
