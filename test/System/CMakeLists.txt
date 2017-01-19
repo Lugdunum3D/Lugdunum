@@ -2,6 +2,7 @@ set(SRC_ROOT ${PROJECT_SOURCE_DIR}/System)
 
 set(SRC
     ${SRC_ROOT}/Exception.cpp
+    ${SRC_ROOT}/Path.cpp
     ${SRC_ROOT}/Logger/Formatter.cpp
     ${SRC_ROOT}/Logger/Logger.cpp
     ${SRC_ROOT}/Logger/OstreamHandler.cpp
