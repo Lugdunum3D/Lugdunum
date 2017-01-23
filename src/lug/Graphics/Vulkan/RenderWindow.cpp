@@ -1,4 +1,5 @@
 #include <cstring>
+#include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
 #include <lug/System/Debug.hpp>
 #include <lug/System/Logger.hpp>
@@ -43,7 +44,7 @@ bool RenderWindow::beginFrame() {
     _fence.wait();
     _fence.reset();
 
-    while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex , _acquireImageCompleteSemaphore)) {
+    while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, _acquireImageCompleteSemaphore)) {
         if (_swapchain.isOutOfDate()) {
             initSwapchainCapabilities();
             initSwapchain();
@@ -52,34 +53,21 @@ bool RenderWindow::beginFrame() {
         }
     }
 
-    if (!_renderer.getCommandBuffers()[0].begin()) {
-        return false;
-    }
-
-    if (!_renderer.beginFrame(_swapchain, _currentImageIndex)) {
-        return false;
-    }
-
     return true;
 }
 
 bool RenderWindow::endFrame() {
-    return _renderer.endFrame() &&
-    _renderer.getCommandBuffers()[0].end() &&
-    _presentQueue->submit(_renderer.getCommandBuffers()[0], _submitCompleteSemaphore, _acquireImageCompleteSemaphore, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, _fence) &&
-    _swapchain.present(_presentQueue, _currentImageIndex, _submitCompleteSemaphore);
+    return (
+        _presentQueue->submit(_renderer.getCommandBuffers()[0], _submitCompleteSemaphore, _acquireImageCompleteSemaphore, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, _fence)
+        && _swapchain.present(_presentQueue, _currentImageIndex, _submitCompleteSemaphore)
+    );
 }
 
 std::unique_ptr<RenderWindow>
-RenderWindow::create(Renderer &renderer, uint16_t width, uint16_t height, const std::string &title,
-                     lug::Window::Style style) {
+RenderWindow::create(Renderer &renderer, const Window::Window::InitInfo& initInfo) {
     std::unique_ptr<RenderWindow> win(new RenderWindow(renderer));
 
-    if (!win->createWindow(width, height, title, style)) {
-        return nullptr;
-    }
-
-    if (!win->init()) {
+    if (!win->init(initInfo)) {
         return nullptr;
     }
 
@@ -321,7 +309,12 @@ bool RenderWindow::initPipeline() {
     return true;
 }
 
-bool RenderWindow::init() {
+bool RenderWindow::init(const Window::Window::InitInfo& initInfo) {
+    // Init the window
+    if (!Window::init(initInfo)) {
+        return false;
+    }
+
     // Acquire image semaphore
     {
         VkSemaphore semaphore;

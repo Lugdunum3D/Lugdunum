@@ -7,20 +7,18 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Buffer.hpp>
+#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Instance.hpp>
 #include <lug/Graphics/Vulkan/Loader.hpp>
-#include <lug/Graphics/Vulkan/Vulkan.hpp>
-#include <lug/Graphics/Vulkan/Queue.hpp>
-#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/Pipeline.hpp>
+#include <lug/Graphics/Vulkan/Queue.hpp>
+#include <lug/Graphics/Vulkan/RenderWindow.hpp>
+#include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
-
-class Graphics;
-
 namespace Vulkan {
 
 class LUG_GRAPHICS_API Renderer final : public ::lug::Graphics::Renderer {
@@ -46,7 +44,7 @@ public:
     };
 
 public:
-    Renderer(Graphics&);
+    Renderer() = default;
 
     Renderer(const Renderer&) = delete;
     Renderer(Renderer&&) = delete;
@@ -56,14 +54,14 @@ public:
 
     ~Renderer();
 
-    std::set<Module::Type> init() override final;
+    std::set<Module::Type> init(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) override final;
     bool lateInit();
 
     bool isInstanceLayerLoaded(const char* name) const;
     bool isInstanceExtensionLoaded(const char* name) const;
     bool isDeviceExtensionLoaded(const char* name) const;
 
-    std::unique_ptr<::lug::Graphics::RenderWindow> createWindow(uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style) override final;
+    ::lug::Graphics::RenderWindow* createWindow(const Window::Window::InitInfo& initInfo) override final;
 
     const Instance& getInstance() const;
     const Device& getDevice() const;
@@ -87,12 +85,12 @@ public:
     void setGraphicsPipeline(std::unique_ptr<Pipeline> graphicsPipeline);
     Pipeline* getGraphicsPipeline() const;
 
-    bool beginFrame(const Swapchain& swapChain, uint32_t currentImageIndex);
-    bool endFrame();
+    bool beginFrame() override final;
+    bool endFrame() override final;
 
 private:
-    bool initInstance(std::set<Module::Type> &loadedModules);
-    bool initDevice(std::set<Module::Type> &loadedModules);
+    bool initInstance(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo, std::set<Module::Type> &loadedModules);
+    bool initDevice(const Renderer::InitInfo& initInfo, std::set<Module::Type> &loadedModules);
 
     bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules);
     bool checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool finalization);
@@ -105,7 +103,6 @@ private:
 
 private:
     Loader _loader; // Need to be at the beginning, we don't want to unload Vulkan functions too early
-    Graphics& _graphic;
 
     Instance _instance{};
     Device _device{};
@@ -116,6 +113,8 @@ private:
     std::vector<PhysicalDeviceInfo> _physicalDeviceInfos{};
 
     VkDebugReportCallbackEXT _debugReportCallback{VK_NULL_HANDLE};
+
+    std::unique_ptr<::lug::Graphics::Vulkan::RenderWindow> _window;
 
     std::vector<const char*> _loadedInstanceLayers{};
     std::vector<const char*> _loadedInstanceExtensions{};

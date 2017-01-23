@@ -38,9 +38,10 @@ endif()
 
 
 # find Lugdunum and link with it
-find_package(LUG REQUIRED graphics system window)
+find_package(LUG REQUIRED core graphics system window)
 
 include_directories(${LUG_INCLUDE_DIR})
+include_directories(include)
 
 if(LUG_OS_ANDROID)
     add_library(${EXECUTABLE_NAME}
@@ -54,6 +55,6 @@ if(LUG_OS_ANDROID)
                           ${LUG_LIBRARIES}
     )
 else()
-    add_executable(${EXECUTABLE_NAME} main.cpp)
+    add_executable(${EXECUTABLE_NAME} include/Application.hpp src/Application.cpp src/main.cpp)
     target_link_libraries(${EXECUTABLE_NAME} ${LUG_LIBRARIES})
 endif()

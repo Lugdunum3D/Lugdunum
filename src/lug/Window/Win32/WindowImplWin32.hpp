@@ -17,7 +17,7 @@ public:
     WindowImpl& operator=(const WindowImpl&) = delete;
     WindowImpl& operator=(WindowImpl&&) = delete;
 
-    bool create(const std::string& title, Style style);
+    bool init(const Window::InitInfo& initInfo);
     void close();
     bool pollEvent(lug::Window::Event&);
 

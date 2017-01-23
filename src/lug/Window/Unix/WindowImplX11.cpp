@@ -10,7 +10,7 @@ namespace priv {
 
 lug::Window::priv::WindowImpl::WindowImpl(Window* win): _parent{win} {}
 
-bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style) {
+bool WindowImpl::init(const Window::InitInfo& initInfo) {
     _display = XOpenDisplay(nullptr);
     if (_display == nullptr) {
         return false;
@@ -21,7 +21,7 @@ bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style
 
     uint32_t blackColor = BlackPixel(_display, DefaultScreen(_display));
 
-    _window = XCreateSimpleWindow(_display, parent, 0, 0, _parent->_mode.width, _parent->_mode.height, 90, 2, blackColor);
+    _window = XCreateSimpleWindow(_display, parent, 0, 0, initInfo.width, initInfo.height, 90, 2, blackColor);
 
     if (!_window) {
         XCloseDisplay(_display);
@@ -29,8 +29,8 @@ bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style
         return false;
     }
 
-    XSelectInput(_display, _window, ExposureMask | KeyPress);
-    XStoreName(_display, _window, title.c_str());
+    XSelectInput(_display, _window, ExposureMask | KeyPress | StructureNotifyMask);
+    XStoreName(_display, _window, initInfo.title.c_str());
     XMapWindow(_display, _window);
 
     _wmProtocols = XInternAtom(_display, "WM_PROTOCOLS", false);
@@ -38,7 +38,7 @@ bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style
     _wmHints = XInternAtom(_display, "_MOTIF_WM_HINTS", false);
 
     XSetWMProtocols(_display, _window, &_wmDeleteWindow, 1);
-    setWindowDecorations(style);
+    setWindowDecorations(initInfo.style);
 
     return true;
 }
@@ -53,7 +53,7 @@ void lug::Window::priv::WindowImpl::close() {
 }
 
 Bool selectEvents(Display*, XEvent* event, XPointer) {
-    if (event->type == ClientMessage || event->type == DestroyNotify) {
+    if (event->type == ClientMessage || event->type == DestroyNotify || event->type == ConfigureNotify) {
         return True;
     } else {
         return False;
@@ -71,10 +71,24 @@ bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
         case ClientMessage:
             if (xEvent.xclient.message_type == _wmProtocols && static_cast<Atom>(xEvent.xclient.data.l[0]) == _wmDeleteWindow) {
                 event.type = lug::Window::EventType::CLOSE;
+            } else {
+                return false;
             }
+
             break;
         case DestroyNotify:
             event.type = lug::Window::EventType::DESTROY;
+            break;
+        case ConfigureNotify:
+            if (xEvent.xconfigure.width != _parent->_mode.width || xEvent.xconfigure.height != _parent->_mode.height) {
+                _parent->_mode.width = xEvent.xconfigure.width;
+                _parent->_mode.height = xEvent.xconfigure.height;
+
+                event.type = lug::Window::EventType::RESIZE;
+            } else {
+                return false;
+            }
+
             break;
         default:
             return false;

@@ -3,7 +3,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Core)
 
 # all source files
 set(SRC
-
+     ${SRCROOT}/Application.cpp
 )
 source_group("src" FILES ${SRC})
 

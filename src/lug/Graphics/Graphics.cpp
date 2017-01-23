@@ -8,23 +8,23 @@
 namespace lug {
 namespace Graphics {
 
-Graphics::Graphics(const Core::Application::Info& appInfo) : _appInfo(appInfo) {}
+Graphics::Graphics(const char* appName, uint32_t appVersion) : _appName{appName}, _appVersion{appVersion} {}
 
-bool Graphics::init() {
-    switch(_rendererType) {
+bool Graphics::init(const InitInfo& initInfo) {
+    switch(initInfo.rendererType) {
         case Renderer::Type::Vulkan:
-            _renderer = std::make_unique<Vulkan::Renderer>(*this);
+            _renderer = std::make_unique<Vulkan::Renderer>();
             break;
     }
 
-    _loadedModules = _renderer->init();
+    _loadedModules = _renderer->init(_appName, _appVersion, initInfo.rendererInitInfo);
 
     // Check if all mandatory modules are loaded
     {
         std::set<Module::Type> intersect{};
-        std::set_intersection(_loadedModules.begin(), _loadedModules.end(), _mandatoryModules.begin(), _mandatoryModules.end(), std::inserter(intersect,intersect.begin()));
+        std::set_intersection(_loadedModules.begin(), _loadedModules.end(), initInfo.rendererInitInfo.mandatoryModules.begin(), initInfo.rendererInitInfo.mandatoryModules.end(), std::inserter(intersect, intersect.begin()));
 
-        if (intersect.size() != _mandatoryModules.size()) {
+        if (intersect.size() != initInfo.rendererInitInfo.mandatoryModules.size()) {
             LUG_LOG.error("Graphics: Can't init the engine with all the mandatory modules");
             return false;
         }

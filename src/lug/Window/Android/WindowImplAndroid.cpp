@@ -9,7 +9,7 @@ AInputQueue *lug::Window::priv::WindowImpl::inputQueue = nullptr;
 
 WindowImpl::WindowImpl(Window*) {}
 
-bool WindowImpl::create(const std::string&, Style) {
+bool WindowImpl::init(const Window::InitInfo& initInfo) {
     return true;
 }
 

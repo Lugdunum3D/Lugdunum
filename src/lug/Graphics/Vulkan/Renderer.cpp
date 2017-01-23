@@ -49,8 +49,6 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
     return VK_FALSE;
 }
 
-Renderer::Renderer(Graphics& graphic) : _graphic(graphic) {}
-
 Renderer::~Renderer() {
     destroy();
 }
@@ -58,13 +56,6 @@ Renderer::~Renderer() {
 void Renderer::destroy() {
     for (auto& queue : _queues) {
         queue.waitIdle();
-    }
-    for (auto& cmdBuffer: _cmdBuffers) {
-        cmdBuffer.destroy();
-    }
-
-    for (auto& queue : _queues) {
-        queue.destroy();
     }
 
     if (_graphicsPipeline != nullptr) {
@@ -77,6 +68,17 @@ void Renderer::destroy() {
 
     if (_indexBuffer != nullptr) {
         _indexBuffer->destroy();
+    }
+
+    // Destroy the window
+    _window = nullptr;
+
+    for (auto& cmdBuffer: _cmdBuffers) {
+        cmdBuffer.destroy();
+    }
+
+    for (auto& queue : _queues) {
+        queue.destroy();
     }
 
     _device.destroy();
@@ -92,18 +94,18 @@ void Renderer::destroy() {
     _instance.destroy();
 }
 
-std::set<Module::Type> Renderer::init() {
+std::set<Module::Type> Renderer::init(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) {
     std::set<Module::Type> loadedModules;
 
-    loadedModules.insert(_graphic.getMandatoryModules().begin(), _graphic.getMandatoryModules().end());
-    loadedModules.insert(_graphic.getOptionalModules().begin(), _graphic.getOptionalModules().end());
+    loadedModules.insert(initInfo.mandatoryModules.begin(), initInfo.mandatoryModules.end());
+    loadedModules.insert(initInfo.optionalModules.begin(), initInfo.optionalModules.end());
 
-    if (!initInstance(loadedModules)) {
+    if (!initInstance(appName, appVersion, initInfo, loadedModules)) {
         LUG_LOG.error("RendererVulkan: Can't load the instance");
         return {};
     }
 
-    if (!initDevice(loadedModules)) {
+    if (!initDevice(initInfo, loadedModules)) {
         LUG_LOG.error("RendererVulkan: Can't load the device");
         return {};
     }
@@ -294,7 +296,7 @@ bool Renderer::lateInit() {
  * @param  loadedModules Modules to load
  * @return               Wether the instance was loaded successfully or not
  */
-bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
+bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo, std::set<Module::Type>& loadedModules) {
     VkResult result;
 
     // Load instance properties
@@ -337,18 +339,18 @@ bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
     // Create instance
     {
         // Check which layers / extensions to load for modules
-        if (!checkRequirementsInstance(_graphic.getMandatoryModules(), loadedModules)) {
+        if (!checkRequirementsInstance(initInfo.mandatoryModules, loadedModules)) {
             return false;
         }
 
-        checkRequirementsInstance(_graphic.getOptionalModules(), loadedModules);
+        checkRequirementsInstance(initInfo.optionalModules, loadedModules);
 
         // Create the application information for vkCreateInstance
         VkApplicationInfo applicationInfo{
             applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
             applicationInfo.pNext = nullptr,
-            applicationInfo.pApplicationName = _graphic.getAppInfo().name,
-            applicationInfo.applicationVersion = _graphic.getAppInfo().version,
+            applicationInfo.pApplicationName = appName,
+            applicationInfo.applicationVersion = appVersion,
             applicationInfo.pEngineName = "Lugdunum3D",
             applicationInfo.engineVersion = VK_MAKE_VERSION(LUG_VERSION_MAJOR, LUG_VERSION_MINOR, LUG_VERSION_PATCH),
             applicationInfo.apiVersion = 0
@@ -454,7 +456,7 @@ bool Renderer::initInstance(std::set<Module::Type>& loadedModules) {
  * @param  loadedModules Modules to load
  * @return               Wether the device was loaded successfully or not
  */
-bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
+bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::Type> &loadedModules) {
     VkResult result;
 
     // Select device
@@ -464,11 +466,11 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
 
         for (uint8_t idx = 0; idx < _physicalDeviceInfos.size(); ++idx) {
             std::set<Module::Type> tmpLoadedModules;
-            if (!checkRequirementsDevice(_physicalDeviceInfos[idx], _graphic.getMandatoryModules(), tmpLoadedModules, false)) {
+            if (!checkRequirementsDevice(_physicalDeviceInfos[idx], initInfo.mandatoryModules, tmpLoadedModules, false)) {
                 continue;
             }
 
-            checkRequirementsDevice(_physicalDeviceInfos[idx], _graphic.getOptionalModules(), tmpLoadedModules, false);
+            checkRequirementsDevice(_physicalDeviceInfos[idx], initInfo.optionalModules, tmpLoadedModules, false);
 
             matchedDevicesIdx.push_back(idx);
         }
@@ -492,8 +494,8 @@ bool Renderer::initDevice(std::set<Module::Type> &loadedModules) {
 
     // Set the loaded informations of the matched device
     {
-        checkRequirementsDevice(*_physicalDeviceInfo, _graphic.getMandatoryModules(), loadedModules, true);
-        checkRequirementsDevice(*_physicalDeviceInfo, _graphic.getOptionalModules(), loadedModules, true);
+        checkRequirementsDevice(*_physicalDeviceInfo, initInfo.mandatoryModules, loadedModules, true);
+        checkRequirementsDevice(*_physicalDeviceInfo, initInfo.optionalModules, loadedModules, true);
     }
 
     // Create device
@@ -775,8 +777,9 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
     return extensionsNotFound;
 }
 
-std::unique_ptr<::lug::Graphics::RenderWindow> Renderer::createWindow(uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style) {
-    return RenderWindow::create(*this, width, height, title, style);
+::lug::Graphics::RenderWindow* Renderer::createWindow(const Window::Window::InitInfo& initInfo) {
+    _window = RenderWindow::create(*this, initInfo);
+    return _window.get();
 }
 
 void Renderer::setGraphicsPipeline(std::unique_ptr<Pipeline> graphicsPipeline) {
@@ -787,10 +790,18 @@ Pipeline* Renderer::getGraphicsPipeline() const {
     return _graphicsPipeline.get();
 }
 
-bool Renderer::beginFrame(const Swapchain& swapChain, uint32_t currentImageIndex) {
+bool Renderer::beginFrame() {
+    if (!_window->beginFrame()) {
+        return false;
+    }
+
+    if (!_cmdBuffers[0].begin()) {
+        return false;
+    }
+
     _graphicsPipeline->bind(&_cmdBuffers[0]);
 
-    auto& extent = swapChain.getExtent();
+    auto& extent = _window->getSwapchain().getExtent();
 
     VkViewport viewport{
         viewport.x = 0.0f,
@@ -808,7 +819,7 @@ bool Renderer::beginFrame(const Swapchain& swapChain, uint32_t currentImageIndex
     vkCmdSetViewport(_cmdBuffers[0], 0, 1, &viewport);
     vkCmdSetScissor(_cmdBuffers[0], 0, 1, &scissor);
 
-    _graphicsPipeline->getRenderPass()->begin(&_cmdBuffers[0], swapChain.getFramebuffers()[currentImageIndex], swapChain.getExtent());
+    _graphicsPipeline->getRenderPass()->begin(&_cmdBuffers[0], _window->getCurrentFramebuffer(), extent);
 
     {
         VkBuffer vertexBuffer = *_vertexBuffer;
@@ -830,7 +841,12 @@ bool Renderer::beginFrame(const Swapchain& swapChain, uint32_t currentImageIndex
 
 bool Renderer::endFrame() {
     _graphicsPipeline->getRenderPass()->end(&_cmdBuffers[0]);
-    return true;
+
+    if (!_cmdBuffers[0].end()) {
+        return false;
+    }
+
+    return _window->endFrame();
 }
 
 } // Vulkan

@@ -40,13 +40,21 @@ enum class LUG_WINDOW_API Style : uint16_t {
 
 class LUG_WINDOW_API Window {
 public:
+    struct InitInfo {
+        uint16_t width;
+        uint16_t height;
+        std::string title;
+        ::lug::Window::Style style;
+    };
+
+public:
     Window(const Window&) = delete;
     Window(Window&&) = delete;
     Window& operator=(const Window&) = delete;
     Window& operator=(Window&&) = delete;
     virtual ~Window();
 
-    static std::unique_ptr<Window> create(uint16_t width, uint16_t height, const std::string& title, Style style);
+    static std::unique_ptr<Window> create(const InitInfo& initInfo);
 
     bool isOpen() const;
     virtual bool pollEvent(lug::Window::Event&);
@@ -61,7 +69,7 @@ protected:
     friend lug::Window::priv::WindowImpl;
 
 protected:
-    bool createWindow(uint16_t width, uint16_t height, const std::string& title, Style style);
+    bool init(const InitInfo& initInfo);
 };
 
 } // Window

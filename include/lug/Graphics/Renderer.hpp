@@ -14,6 +14,11 @@ public:
         Vulkan
     };
 
+    struct InitInfo {
+        std::set<Module::Type> mandatoryModules;
+        std::set<Module::Type> optionalModules;
+    };
+
 public:
     Renderer() = default;
 
@@ -25,9 +30,12 @@ public:
 
     virtual ~Renderer() = default;
 
-    virtual std::set<Module::Type> init() = 0;
+    virtual std::set<Module::Type> init(const char* appName, uint32_t appVersion, const InitInfo& initInfo) = 0;
 
-    virtual std::unique_ptr<RenderWindow> createWindow(uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style) = 0;
+    virtual bool beginFrame() = 0;
+    virtual bool endFrame() = 0;
+
+    virtual RenderWindow* createWindow(const Window::Window::InitInfo& initInfo) = 0;
 };
 
 } // Graphics

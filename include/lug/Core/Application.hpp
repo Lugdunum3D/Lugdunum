@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <lug/Core/Export.hpp>
+#include <lug/Graphics/Graphics.hpp>
+#include <lug/Window/Window.hpp>
 
 namespace lug {
 namespace Core {
@@ -26,7 +28,67 @@ public:
     };
 
 public:
-    // TODO: Define the class Application
+    explicit Application(const Info& info);
+
+    Application(const Application&) = delete;
+    Application(Application&&) = delete;
+
+    Application& operator=(const Application&) = delete;
+    Application& operator=(Application&&) = delete;
+
+    virtual ~Application() = default;
+
+    const Application::Info& getInfo() const;
+
+    lug::Graphics::Graphics& getGraphics();
+    const lug::Graphics::Graphics& getGraphics() const;
+
+    lug::Graphics::RenderWindow* getWindow();
+    const lug::Graphics::RenderWindow* getWindow() const;
+
+    void setWindowInfo(const lug::Window::Window::InitInfo& initInfo);
+    const lug::Window::Window::InitInfo& getWindowInfo() const;
+    lug::Window::Window::InitInfo& getWindowInfo();
+
+    void setGraphicsInfo(const lug::Graphics::Graphics::InitInfo& initInfo);
+    const lug::Graphics::Graphics::InitInfo& getGraphicsInfo() const;
+    lug::Graphics::Graphics::InitInfo& getGraphicsInfo();
+
+    bool init(int argc, char* argv[]);
+    bool run();
+    void close();
+
+    virtual void onEvent(const lug::Window::Event& event) = 0;
+    virtual void onFrame() = 0;
+
+private:
+    bool beginFrame();
+    bool endFrame();
+
+private:
+    Info _info;
+    bool _closed{false};
+
+    // Init infos
+    lug::Graphics::Graphics::InitInfo _graphicsInitInfo{
+        lug::Graphics::Renderer::Type::Vulkan,      // type
+        {                                           // rendererInitInfo
+            {                                       // mandatoryModules
+                lug::Graphics::Module::Type::Core
+            },
+            {}                                      // optionalModules
+        }
+    };
+
+    lug::Window::Window::InitInfo _windowInitInfo{
+        800,                        // width
+        600,                        // height
+        "Lugdunum - Default title", // title
+        lug::Window::Style::Default // style
+    };
+
+    lug::Graphics::Graphics _graphics;
+    lug::Graphics::RenderWindow* _window{nullptr};
 };
 
 #include <lug/Core/Application.inl>

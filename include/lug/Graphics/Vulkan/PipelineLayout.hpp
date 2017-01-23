@@ -1,11 +1,10 @@
 #pragma once
 
-#include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/Vulkan.hpp>
-#include <lug/Graphics/Vulkan/Device.hpp>
-#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
-
 #include <memory>
+#include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {

@@ -24,24 +24,24 @@ lug::Window::Window::~Window() {
     close();
 }
 
-std::unique_ptr<lug::Window::Window> lug::Window::Window::create(uint16_t width, uint16_t height, const std::string& title, Style style) {
+std::unique_ptr<lug::Window::Window> lug::Window::Window::create(const InitInfo& initInfo) {
     std::unique_ptr<Window> win(new Window());
 
-    if (!win->createWindow(width, height, title, style)) {
+    if (!win->init(initInfo)) {
         return nullptr;
     }
 
     return win;
 }
 
-bool lug::Window::Window::createWindow(uint16_t width, uint16_t height, const std::string& title, Style style) {
+bool lug::Window::Window::init(const InitInfo& initInfo) {
     if (_impl != nullptr) {
 
         // Specifiy the width and height of our window, for now it's the only thing we can specify along with the title and style that is
-        _mode.width = width;
-        _mode.height = height;
+        _mode.width = initInfo.width;
+        _mode.height = initInfo.height;
 
-        return _impl->create(title, style);
+        return _impl->init(initInfo);
     }
 
     return false;

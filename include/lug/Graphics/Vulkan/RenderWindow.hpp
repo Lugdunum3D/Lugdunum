@@ -2,15 +2,16 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/RenderWindow.hpp>
-#include <lug/Graphics/Vulkan/Renderer.hpp>
-#include <lug/Graphics/Vulkan/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/Fence.hpp>
+#include <lug/Graphics/Vulkan/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+class Renderer;
 
 class LUG_GRAPHICS_API RenderWindow final : public ::lug::Graphics::RenderWindow {
 public:
@@ -31,10 +32,13 @@ public:
     bool beginFrame() override final;
     bool endFrame() override final;
 
-    static std::unique_ptr<RenderWindow> create(Renderer& renderer, uint16_t width, uint16_t height, const std::string& title, lug::Window::Style style);
+    const Swapchain& getSwapchain() const;
+    const Framebuffer& getCurrentFramebuffer() const;
+
+    static std::unique_ptr<RenderWindow> create(Renderer& renderer, const Window::Window::InitInfo& initInfo);
 
 private:
-    bool init();
+    bool init(const Window::Window::InitInfo& initInfo);
     bool initSurface();
     bool initSwapchainCapabilities();
     bool initPresentQueue();
@@ -53,6 +57,8 @@ private:
     const Queue* _presentQueue{nullptr};
     uint32_t _currentImageIndex{0};
 };
+
+#include <lug/Graphics/Vulkan/RenderWindow.inl>
 
 } // Vulkan
 } // Graphics

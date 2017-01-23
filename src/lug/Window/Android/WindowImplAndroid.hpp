@@ -12,7 +12,7 @@ public:
     WindowImpl(Window*);
     ~WindowImpl() = default;
 
-    bool create(const std::string& title, Style style);
+    bool init(const Window::InitInfo& initInfo);
     void close();
     bool pollEvent(lug::Window::Event& event);
 

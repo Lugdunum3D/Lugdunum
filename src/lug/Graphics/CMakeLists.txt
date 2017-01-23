@@ -61,6 +61,7 @@ set(INC
     ${INCROOT}/Vulkan/Renderer.inl
     ${INCROOT}/Vulkan/RenderPass.hpp
     ${INCROOT}/Vulkan/RenderWindow.hpp
+    ${INCROOT}/Vulkan/RenderWindow.inl
     ${INCROOT}/Vulkan/Semaphore.hpp
     ${INCROOT}/Vulkan/ShaderModule.hpp
     ${INCROOT}/Vulkan/Swapchain.hpp
