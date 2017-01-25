@@ -19,10 +19,10 @@ set(INC
     ${INCROOT}/Geometry/Trigonometry.inl
     ${INCROOT}/Matrix.hpp
     ${INCROOT}/Matrix.inl
+    ${INCROOT}/Quaternion.hpp
+    ${INCROOT}/Quaternion.inl
     ${INCROOT}/Vector.hpp
     ${INCROOT}/Vector.inl
-    ${INCROOT}/Quaternion.hpp
-	${INCROOT}/Quaternion.inl
 )
 source_group("inc" FILES ${INC})
 

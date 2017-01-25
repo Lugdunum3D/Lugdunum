@@ -230,5 +230,5 @@ std::ostream& operator<<(std::ostream& os, const Matrix<Rows, Columns, T>& matri
 
 #include <lug/Math/Matrix.inl>
 
-}
-}
+} // Math
+} // lug

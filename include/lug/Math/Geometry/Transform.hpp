@@ -30,6 +30,6 @@ Matrix<4, 4, T> perspective(T fovy, T aspect, T zNear, T zFar);
 
 #include <lug/Math/Geometry/Transform.inl>
 
-}
-}
-}
+} // Geometry
+} // Math
+} // lug

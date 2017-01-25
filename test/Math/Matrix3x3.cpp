@@ -6,8 +6,11 @@
 // TODO: Test the determinant
 // TODO: Test the transpose
 
+namespace lug {
+namespace Math {
+
 TEST(Matrix3x3, Constructors) {
-    lug::Math::Mat3x3i matrix{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    Mat3x3i matrix{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
     ASSERT_EQ(matrix(0, 0), 1);
     ASSERT_EQ(matrix(0, 1), 2);
@@ -21,37 +24,37 @@ TEST(Matrix3x3, Constructors) {
 }
 
 TEST(Matrix3x3, GeneralOperators) {
-    lug::Math::Mat3x3f matrixL(1.0f);
-    lug::Math::Mat3x3f matrixM(1.0f);
+    Mat3x3f matrixL(1.0f);
+    Mat3x3f matrixM(1.0f);
 
-    lug::Math::Vec3f vectorU(1.0f);
-    lug::Math::Vec3f vectorV(1.0f);
+    Vec3f vectorU(1.0f);
+    Vec3f vectorV(1.0f);
 
     float x = 1.0f;
 
-    lug::Math::Vec3f vectorA = matrixM * vectorU;
-    lug::Math::Vec3f vectorB = vectorV * matrixM;
+    Vec3f vectorA = matrixM * vectorU;
+    Vec3f vectorB = vectorV * matrixM;
 
-    lug::Math::Mat3x3f matrixN = x / matrixM;
-    lug::Math::Mat3x3f matrixO = matrixM / x;
-    lug::Math::Mat3x3f matrixP = x * matrixM;
-    lug::Math::Mat3x3f matrixQ = matrixM * x;
+    Mat3x3f matrixN = x / matrixM;
+    Mat3x3f matrixO = matrixM / x;
+    Mat3x3f matrixP = x * matrixM;
+    Mat3x3f matrixQ = matrixM * x;
 
     EXPECT_TRUE(!(matrixM != matrixQ));
     EXPECT_TRUE(matrixM == matrixL);
 }
 
 TEST(Matrix3x3, InverseOperators) {
-    const lug::Math::Mat3x3f goodIdentity = lug::Math::Mat3x3f::identity();
+    const Mat3x3f goodIdentity = Mat3x3f::identity();
 
     {
-        const lug::Math::Mat3x3f matrix{
+        const Mat3x3f matrix{
             0.6f, 0.2f, 0.3f,
             0.2f, 0.7f, 0.5f,
             0.3f, 0.5f, 0.7f
         };
-        const lug::Math::Mat3x3f inverse = matrix.inverse();
-        const lug::Math::Mat3x3f identity = matrix * inverse;
+        const Mat3x3f inverse = matrix.inverse();
+        const Mat3x3f identity = matrix * inverse;
 
         for (uint8_t row = 0; row < matrix.getRows(); ++row) {
             for (uint8_t col = 0; col < matrix.getColumns(); ++col) {
@@ -63,12 +66,12 @@ TEST(Matrix3x3, InverseOperators) {
     }
 
     {
-        const lug::Math::Mat3x3f matrix{
+        const Mat3x3f matrix{
             0.6f, 0.2f, 0.3f,
             0.2f, 0.7f, 0.5f,
             0.3f, 0.5f, 0.7f
         };
-        const lug::Math::Mat3x3f identity = matrix / matrix;
+        const Mat3x3f identity = matrix / matrix;
 
         for (uint8_t row = 0; row < matrix.getRows(); ++row) {
             for (uint8_t col = 0; col < matrix.getColumns(); ++col) {
@@ -81,19 +84,19 @@ TEST(Matrix3x3, InverseOperators) {
 }
 
 TEST(Matrix3x3, Size) {
-    ASSERT_EQ(lug::Math::Mat3x3f().getRows(), 3);
-    ASSERT_EQ(lug::Math::Mat3x3f().getColumns(), 3);
+    ASSERT_EQ(Mat3x3f().getRows(), 3);
+    ASSERT_EQ(Mat3x3f().getColumns(), 3);
 
-    ASSERT_EQ(sizeof(lug::Math::Mat3x3f), 9 * sizeof(float));
+    ASSERT_EQ(sizeof(Mat3x3f), 9 * sizeof(float));
 }
 
 TEST(Matrix3x3, Addition) {
-    lug::Math::Mat3x3f matrixA{
+    Mat3x3f matrixA{
         2.f, -6.f, 8.f,
         7.f,  8.f, 2.f,
         4.f,  3.f, 7.f
     };
-    lug::Math::Mat3x3f matrixB{
+    Mat3x3f matrixB{
          1.f, 5.f, 4.f,
         -7.f, 3.f, 6.f,
          5.f, 2.f, 8.f
@@ -101,9 +104,9 @@ TEST(Matrix3x3, Addition) {
 
     // Operator Tests
     {
-        const lug::Math::Mat3x3f result = matrixA + matrixB;
+        const Mat3x3f result = matrixA + matrixB;
 
-        const lug::Math::Mat3x3f correctResult{
+        const Mat3x3f correctResult{
             3.f, -1.f,  12.f,
             0.f,  11.f, 8.f,
             9.f,  5.f,  15.f
@@ -130,9 +133,9 @@ TEST(Matrix3x3, Addition) {
 
     // Scalar test
     {
-        const lug::Math::Mat3x3f result = matrixB + 1.0f;
+        const Mat3x3f result = matrixB + 1.0f;
 
-        const lug::Math::Mat3x3f correctResult{
+        const Mat3x3f correctResult{
             1.f + 1.0f,  5.f + 1.0f, 4.f + 1.0f,
            -7.f + 1.0f,  3.f + 1.0f, 6.f + 1.0f,
             5.f + 1.0f,  2.f + 1.0f, 8.f + 1.0f
@@ -150,12 +153,12 @@ TEST(Matrix3x3, Addition) {
 }
 
 TEST(Matrix3x3, Substraction) {
-    lug::Math::Mat3x3f matrixA{
+    Mat3x3f matrixA{
         2.f, -6.f, 8.f,
         7.f,  8.f, 2.f,
         4.f,  3.f, 7.f
     };
-    lug::Math::Mat3x3f matrixB{
+    Mat3x3f matrixB{
          1.f, 5.f, 4.f,
         -7.f, 3.f, 6.f,
          5.f, 2.f, 8.f
@@ -163,9 +166,9 @@ TEST(Matrix3x3, Substraction) {
 
     // Operator Tests
     {
-        const lug::Math::Mat3x3f result = matrixA - matrixB;
+        const Mat3x3f result = matrixA - matrixB;
 
-        const lug::Math::Mat3x3f correctResult{
+        const Mat3x3f correctResult{
              1.f, -11.f, 4.f,
              14.f, 5.f, -4.f,
             -1.f,  1.f, -1.f
@@ -192,9 +195,9 @@ TEST(Matrix3x3, Substraction) {
 
     // Scalar Tests
     {
-        const lug::Math::Mat3x3f result = matrixB - 1.f;
+        const Mat3x3f result = matrixB - 1.f;
 
-        const lug::Math::Mat3x3f correctResult{
+        const Mat3x3f correctResult{
             1.f - 1.f,  5.f - 1.f, 4.f - 1.f,
             -7.f - 1.f,  3.f - 1.f, 6.f - 1.f,
             5.f - 1.f,  2.f - 1.f, 8.f - 1.f
@@ -212,12 +215,12 @@ TEST(Matrix3x3, Substraction) {
 }
 
 TEST(Matrix3x3, Multiplication) {
-    lug::Math::Mat3x3f matrixA{
+    Mat3x3f matrixA{
         2.f, -6.f, 8.f,
         7.f,  8.f, 2.f,
         4.f,  3.f, 7.f
     };
-    lug::Math::Mat3x3f matrixB{
+    Mat3x3f matrixB{
          1.f, 5.f, 4.f,
         -7.f, 3.f, 6.f,
          5.f, 2.f, 8.f
@@ -225,9 +228,9 @@ TEST(Matrix3x3, Multiplication) {
 
     // Operator Tests
     {
-        const lug::Math::Mat3x3f result = matrixA * matrixB;
+        const Mat3x3f result = matrixA * matrixB;
 
-        const lug::Math::Mat3x3f correctResult{
+        const Mat3x3f correctResult{
              84.f,  8.f, 36.f,
             -39.f, 63.f, 92.f,
              18.f, 43.f, 90.f
@@ -254,9 +257,9 @@ TEST(Matrix3x3, Multiplication) {
 
     // Scalar Test
     {
-        const lug::Math::Mat3x3f result = matrixB * 2.f;
+        const Mat3x3f result = matrixB * 2.f;
 
-        const lug::Math::Mat3x3f correctResult{
+        const Mat3x3f correctResult{
             1.f * 2.f,  5.f * 2.f, 4.f * 2.f,
             -7.f * 2.f,  3.f * 2.f, 6.f * 2.f,
             5.f * 2.f,  2.f * 2.f, 8.f * 2.f
@@ -273,12 +276,12 @@ TEST(Matrix3x3, Multiplication) {
 }
 
 TEST(Matrix3x3, Division) {
-    lug::Math::Mat3x3f matrixA{
+    Mat3x3f matrixA{
         2, -6, 8,
         7,  8, 2,
         4,  3, 7
     };
-    lug::Math::Mat3x3f matrixB{
+    Mat3x3f matrixB{
         1, 5, 4,
         -7, 3, 6,
         5, 2, 8
@@ -286,9 +289,9 @@ TEST(Matrix3x3, Division) {
 
     // Operator Tests
     {
-        const lug::Math::Mat3x3f result = matrixA / matrixB;
+        const Mat3x3f result = matrixA / matrixB;
 
-        const lug::Math::Mat3x3f correctResult{
+        const Mat3x3f correctResult{
             -362.f / 163.f,  96.f / 163.f,   272.f / 163.f,
             357.f / 163.f, -137.f / 163.f, -35.f / 163.f,
             103.f / 326.f, -3.f / 326.f,    118.f / 163.f
@@ -315,9 +318,9 @@ TEST(Matrix3x3, Division) {
 
     // Scalar Test
     {
-        const lug::Math::Mat3x3f result = matrixB / 2.0f;
+        const Mat3x3f result = matrixB / 2.0f;
 
-        const lug::Math::Mat3x3f correctResult{
+        const Mat3x3f correctResult{
             1.f / 2.f,  5.f / 2.f, 4.f / 2.f,
             -7.f / 2.f,  3.f / 2.f, 6.f / 2.f,
             5.f / 2.f,  2.f / 2.f, 8.f / 2.f
@@ -333,3 +336,5 @@ TEST(Matrix3x3, Division) {
     }
 }
 
+} // Math
+} // lug

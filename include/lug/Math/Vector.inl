@@ -35,7 +35,7 @@ inline Vector<Rows, T> Vector<Rows, T>::operator*=(const Matrix<Rows, Rows, T>& 
 }
 
 template <uint8_t Rows, typename T>
-inline constexpr T Vector<Rows, T>::norme() const {
+inline constexpr T Vector<Rows, T>::length() const {
     return T(std::sqrt((BaseMatrix::_values * BaseMatrix::_values).sum()));
 }
 
@@ -65,7 +65,7 @@ inline constexpr Matrix<Rows, Columns, T> outer(const Vector<Rows, T>& lhs, cons
 
 template <uint8_t Rows, typename T>
 inline constexpr Vector<Rows, T> normalize(const Vector<Rows, T>& lhs) {
-    return lhs / lhs.norme();
+    return lhs / lhs.length();
 }
 
 template <uint8_t Rows, typename T>

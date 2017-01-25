@@ -36,6 +36,6 @@ T atan2(T y, T x);
 
 #include <lug/Math/Geometry/Trigonometry.inl>
 
-}
-}
-}
+} // Geometry
+} // Math
+} // lug

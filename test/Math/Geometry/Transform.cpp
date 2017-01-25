@@ -4,11 +4,14 @@
 
 // TODO: Add tests for lookAt, ortho and perspective
 
-TEST(Transform, Translate) {
-    const lug::Math::Vec3i translateVector{1, 2, 3};
-    const lug::Math::Mat4x4i translateMatrix = lug::Math::Geometry::translate(translateVector);
+namespace lug {
+namespace Math {
 
-    lug::Math::Vec4i point{1, 2, 3, 1};
+TEST(Transform, Translate) {
+    const Vec3i translateVector{1, 2, 3};
+    const Mat4x4i translateMatrix = Geometry::translate(translateVector);
+
+    Vec4i point{1, 2, 3, 1};
 
     point *= translateMatrix;
 
@@ -20,10 +23,10 @@ TEST(Transform, Translate) {
 TEST(Transform, Rotate) {
     #define TEST_ROTATION(angle, axis_x, axis_y, axis_z, point_x, point_y, point_z, expected_x, expected_y, expected_z, abs_error)  \
     {                                                                                                                               \
-        const lug::Math::Vec3d axis{axis_x, axis_y, axis_z};                                                                        \
-        const lug::Math::Mat4x4d rotateMatrix = lug::Math::Geometry::rotate(lug::Math::Geometry::radians(angle), axis);             \
+        const Vec3d axis{axis_x, axis_y, axis_z};                                                                                   \
+        const Mat4x4d rotateMatrix = Geometry::rotate(Geometry::radians(angle), axis);                                              \
                                                                                                                                     \
-        lug::Math::Vec4d point{point_x, point_y, point_z, 1.0};                                                                     \
+        Vec4d point{point_x, point_y, point_z, 1.0};                                                                                \
                                                                                                                                     \
         point *= rotateMatrix;                                                                                                      \
                                                                                                                                     \
@@ -32,7 +35,7 @@ TEST(Transform, Rotate) {
         ASSERT_NEAR(point.z(), expected_z, abs_error);                                                                              \
     }
 
-    #define TEST_SOME_ROTATIONS(point_x, point_y, point_z, abs_error) \
+    #define TEST_SOME_ROTATIONS(point_x, point_y, point_z, abs_error)                                           \
         TEST_ROTATION(0.0  , 1.0, 0.0, 0.0, point_x, point_y, point_z, point_x, point_y, point_z, abs_error)    \
         TEST_ROTATION(90.0 , 1.0, 0.0, 0.0, point_x, point_y, point_z, point_x, point_z, -point_y, abs_error)   \
         TEST_ROTATION(180.0, 1.0, 0.0, 0.0, point_x, point_y, point_z, point_x, -point_y, -point_z, abs_error)  \
@@ -56,10 +59,10 @@ TEST(Transform, Rotate) {
 }
 
 TEST(Transform, Scale) {
-    const lug::Math::Vec3i factors{1, 2, 3};
-    const lug::Math::Mat4x4i scaleMatrix = lug::Math::Geometry::scale(factors);
+    const Vec3i factors{1, 2, 3};
+    const Mat4x4i scaleMatrix = Geometry::scale(factors);
 
-    lug::Math::Vec4i point{1, 2, 3, 1};
+    Vec4i point{1, 2, 3, 1};
 
     point *= scaleMatrix;
 
@@ -67,3 +70,6 @@ TEST(Transform, Scale) {
     ASSERT_EQ(point.y(), 4);
     ASSERT_EQ(point.z(), 9);
 }
+
+} // Math
+} // lug

@@ -54,7 +54,6 @@ public:
     DEFINE_QUATERNION_ACCESS(z, 3)
     DEFINE_QUATERNION_ACCESS(l, 3)
 
-
 #undef DEFINE_QUATERNION_ACCESS
 
 private:
@@ -106,5 +105,5 @@ bool operator!=(const Quaternion<T>& lhs, const Quaternion<T>& rhs);
 
 #include  <lug/Math/Quaternion.inl>
 
-}
-}
+} // Math
+} // lug

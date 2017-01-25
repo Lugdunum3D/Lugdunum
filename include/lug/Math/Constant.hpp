@@ -84,5 +84,5 @@ T goldenRatio();
 
 #include <lug/Math/Constant.inl>
 
-}
-}
+} // Math
+} // lug

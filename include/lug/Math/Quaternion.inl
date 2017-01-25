@@ -16,12 +16,12 @@ Quaternion<T>::Quaternion(T angle, const Vector<3, T>& axis) {
 }
 
 template <typename T>
-inline T & Quaternion<T>::operator[](std::size_t idx) {
+inline T& Quaternion<T>::operator[](std::size_t idx) {
     return _data[idx];
 }
 
 template <typename T>
-inline const T & Quaternion<T>::operator[](std::size_t idx) const {
+inline const T& Quaternion<T>::operator[](std::size_t idx) const {
     return _data[idx];
 }
 
@@ -98,17 +98,17 @@ inline Quaternion<T> operator-(const Quaternion<T>& lhs) {
 }
 
 template <typename T>
-inline  Quaternion<T> operator+(const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
+inline Quaternion<T> operator+(const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
     return {lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2], lhs[3] + rhs[3]};
 }
 
 template <typename T>
-inline  Quaternion<T> operator-(const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
+inline Quaternion<T> operator-(const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
     return {lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2], lhs[3] - rhs[3]};
 }
 
 template <typename T>
-inline  Quaternion<T> operator*(const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
+inline Quaternion<T> operator*(const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
     return {
         lhs[0] * rhs[0] - lhs[1] * rhs[1] - lhs[2] * rhs[2] - lhs[3] * rhs[3],
         lhs[0] * rhs[1] + lhs[1] * rhs[0] + lhs[2] * rhs[3] - lhs[3] * rhs[2],

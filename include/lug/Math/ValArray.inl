@@ -117,7 +117,6 @@ inline ValArray<Size, T>& ValArray<Size, T>::operator/=(const ValArray<Size, T>&
     return *this;
 }
 
-
 // ValArray/Scalar operations
 template <size_t Size, typename T>
 inline ValArray<Size, T> operator+(const ValArray<Size, T>& lhs, const T& rhs) {
