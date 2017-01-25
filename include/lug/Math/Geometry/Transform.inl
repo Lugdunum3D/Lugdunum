@@ -1,5 +1,5 @@
 template <typename T>
-inline Matrix<4, 4, T> translate(const Vector<3, T> &direction) {
+inline Matrix<4, 4, T> translate(const Vector<3, T>& direction) {
     Matrix<4, 4, T> matrix = Matrix<4, 4, T>::identity();
 
     matrix(0, 3) = direction(0);
@@ -10,7 +10,7 @@ inline Matrix<4, 4, T> translate(const Vector<3, T> &direction) {
 }
 
 template <typename T>
-inline Matrix<4, 4, T> rotate(T angle, const Vector<3, T> &a) {
+inline Matrix<4, 4, T> rotate(T angle, const Vector<3, T>& a) {
     T const c = ::lug::Math::Geometry::cos(angle);
     T const s = ::lug::Math::Geometry::sin(angle);
 
@@ -38,7 +38,7 @@ inline Matrix<4, 4, T> rotate(T angle, const Vector<3, T> &a) {
 }
 
 template <typename T>
-inline Matrix<4, 4, T> scale(const Vector<3, T> &factors) {
+inline Matrix<4, 4, T> scale(const Vector<3, T>& factors) {
     Matrix<4, 4, T> matrix = Matrix<4, 4, T>::identity();
 
     matrix(0, 0) = factors(0);
@@ -49,7 +49,7 @@ inline Matrix<4, 4, T> scale(const Vector<3, T> &factors) {
 }
 
 template <typename T>
-inline Matrix<4, 4, T> lookAt(const Vector<3, T> &eye, const Vector<3, T> &center, const Vector<3, T> &up) {
+inline Matrix<4, 4, T> lookAt(const Vector<3, T>& eye, const Vector<3, T>& center, const Vector<3, T>& up) {
     const Vector<3, T> direction(normalize(static_cast<Vector<3, T>>(eye - center)));
     const Vector<3, T> right(normalize(cross(up, direction)));
     const Vector<3, T> newUp(cross(direction, right));
@@ -92,7 +92,7 @@ inline Matrix<4, 4, T> ortho(T left, T right, T bottom, T top, T zNear, T zFar) 
 }
 
 template <typename T>
-inline Matrix<4, 4, T> perspective (T fovy, T aspect, T zNear, T zFar) {
+inline Matrix<4, 4, T> perspective(T fovy, T aspect, T zNear, T zFar) {
     const T tanHalfFovy = ::lug::Math::Geometry::tan(fovy / T(2));
 
     Matrix<4, 4, T> matrix(0);

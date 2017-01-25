@@ -10,8 +10,7 @@ namespace lug {
 namespace Math {
 
 template <uint8_t Rows, uint8_t Columns, typename T = float>
-class Matrix
-{
+class Matrix {
 public:
     // TODO: Use custom valarray with compile time size
     using Values = ValArray<Rows * Columns, T>;

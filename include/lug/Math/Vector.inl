@@ -41,7 +41,7 @@ inline constexpr T Vector<Rows, T>::norme() const {
 
 template <uint8_t Rows, typename T>
 inline void Vector<Rows, T>::normalize() {
-    *this /= norme();
+    *this = ::lug::Math::normalize(*this);
 }
 
 template <typename T>
