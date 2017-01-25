@@ -15,8 +15,16 @@ inline Matrix<Rows, Columns, T>::Matrix(const Values& values) : _values{values} 
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
-inline Matrix<Rows, Columns, T>::Matrix(std::initializer_list<T> list) : _values(list) {
+inline Matrix<Rows, Columns, T>::Matrix(std::initializer_list<T> list) {
     LUG_ASSERT(list.size() == Rows * Columns, "Matrix construct with bad size initializer list");
+
+    auto it = std::begin(list);
+    for (uint8_t row = 0; row < Rows; ++row) {
+        for (uint8_t col = 0; col < Columns; col++) {
+            (*this)(row, col) = *it;
+            it++;
+        }
+    }
 }
 
 
@@ -42,12 +50,12 @@ inline constexpr const typename Matrix<Rows, Columns, T>::Values& Matrix<Rows, C
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) {
-    return _values[row * Columns + col];
+    return _values[col * Rows + row];
 }
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline constexpr const T& Matrix<Rows, Columns, T>::operator()(uint8_t row, uint8_t col) const {
-    return _values[row * Columns + col];
+    return _values[col * Rows + row];
 }
 
 
