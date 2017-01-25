@@ -51,7 +51,7 @@ endif()
 
 
 # project name
-project(Lugdunum CXX)
+project(Lugdunum C CXX)
 
 # version
 set(VERSION_MAJOR 0)
@@ -86,7 +86,7 @@ add_subdirectory(src/lug/)
 install(DIRECTORY include
         DESTINATION .
         COMPONENT devel
-        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl"
+        FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl" PATTERN "*.h" PATTERN "*.cc"
 )
 
 # setup the install of misc files
@@ -97,7 +97,12 @@ install(FILES cmake/modules/FindLUG.cmake DESTINATION ${INSTALL_MISC_DIR}/cmake/
 if(ENABLE_TEST)
     # Note: enable_testing() MUST be on the top level CMakeLists.txt
     enable_testing()
-    add_subdirectory(lib/googletest/googletest)
+
+    add_definitions(-DGTEST_CREATE_SHARED_LIBRARY=1)
+
+    set(BUILD_GMOCK ON)
+    add_subdirectory(lib/googletest)
+
     add_subdirectory(test/)
 endif()
 

@@ -1,0 +1,31 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 24
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.lugdunum.samples.window"
+        minSdkVersion 24
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+        externalNativeBuild {
+            cmake {
+                abiFilters 'arm64-v8a'
+                arguments '-DANDROID_TOOLCHAIN=clang'
+                arguments '-DANDROID_STL=c++_shared'
+                cppFlags "-Wall -Wextra -frtti -fexceptions -std=c++14"
+            }
+        }
+    }
+    sourceSets{
+        main {
+            jniLibs.srcDirs = [android.ndkDirectory.getPath() + '/sources/lugdunum/lib']
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "../../../window/CMakeLists.txt"
+        }
+    }
+}

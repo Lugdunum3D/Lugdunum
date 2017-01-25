@@ -23,15 +23,17 @@ if(LUG_COMPILER_MSVC)
     else()
         list(APPEND CMAKE_CXX_FLAGS "/W4")
     endif()
+
+    list(APPEND CMAKE_CXX_FLAGS "/WX")
 elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
     list(APPEND CMAKE_CXX_FLAGS "-Wall -Wextra -Werror")
 
     if(LUG_OS_ANDROID)
         list(APPEND CMAKE_CXX_FLAGS "-std=c++14")
     endif()
-
-    string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
 endif()
+
+string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
 
 # add the librairies subdirectories
 add_subdirectory(Core)

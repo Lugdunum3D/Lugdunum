@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <new>
 #include <memory>
+#include <functional>
 
 #include <lug/System/Memory/Arena.hpp>
 #include <lug/System/Memory/Policies/Thread.hpp>
@@ -85,7 +86,7 @@ struct make_unique_if<T[]> {
 };
 
 template <typename T, size_t Count>
-struct make_unique_if<T[Count]> {
+struct make_unique_if<T[Count]> {
     using KnownBound = lug::System::Memory::unique_ptr<T[]>;
 };
 

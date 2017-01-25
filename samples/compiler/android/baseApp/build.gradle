@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.2"
+    buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "com.lugdunum.samples.base"
         minSdkVersion 24
@@ -13,7 +13,6 @@ android {
                 abiFilters 'arm64-v8a'
                 arguments '-DANDROID_TOOLCHAIN=clang'
                 arguments '-DANDROID_STL=c++_shared'
-                arguments '-DANDROID_DISABLE_FORMAT_STRING_CHECKS=true'
                 cppFlags "-Wall -Wextra -frtti -fexceptions -std=c++14"
             }
         }

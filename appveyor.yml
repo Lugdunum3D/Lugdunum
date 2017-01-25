@@ -86,6 +86,7 @@ init:
 
 environment:
     Toolset: v140
+    TEST_OUTPUT: '%APPVEYOR_BUILD_FOLDER%\build\test'
 
 # environment variables
 # environment:
@@ -218,7 +219,7 @@ build_script:
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE ..
+    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE -DTEST_OUTPUT="$env:TEST_OUTPUT" ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
@@ -230,15 +231,24 @@ build_script:
 # scripts to run after build
 after_build:
 - ps: |
-    Copy-Item .\lib\googletest\googletest\$env:CONFIGURATION\gtest.dll .\test\$env:CONFIGURATION\
-    Copy-Item .\lib\googletest\googletest\$env:CONFIGURATION\gtest_main.dll .\test\$env:CONFIGURATION\
+    Copy-Item .\lib\googletest\googlemock\gtest\$env:CONFIGURATION\gtest.dll .\test\$env:CONFIGURATION\
+    Copy-Item .\lib\googletest\googlemock\$env:CONFIGURATION\gmock.dll .\test\$env:CONFIGURATION\
     Copy-Item .\lib\$env:CONFIGURATION\*.dll .\test\$env:CONFIGURATION\
 
 test_script:
 - ps: |
-    & ctest -C $env:CONFIGURATION --output-on-failure
+    & ctest -C $env:CONFIGURATION -O "Testing/Temporary/TestOutput.txt" --output-on-failure
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
+    }
+
+on_finish:
+- ps : |
+    Get-ChildItem -Directory $env:TEST_OUTPUT | ForEach-Object {
+        if (Test-Path "$env:TEST_OUTPUT\${_}UnitTests.xml") {
+            $wc = New-Object 'System.Net.WebClient'
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "$env:TEST_OUTPUT\${_}UnitTests.xml"))
+        }
     }
 
 # to disable automatic builds
@@ -284,8 +294,7 @@ test_script:
 #---------------------------------#
 
 artifacts:
-  - path: 'build/Testing/Temporary/*'
-    name: test_results
+  - path: 'build/Testing/**/*'
 
 # artifacts:
 #

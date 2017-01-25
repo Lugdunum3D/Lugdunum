@@ -15,12 +15,14 @@ source_group("inc" FILES ${INC})
 
 # Include Main cpp files depending on user os
 if(LUG_OS_ANDROID)
+    include_directories(${CMAKE_SYSROOT}/usr/include)
     list(APPEND SRC ${SRCROOT}/MainAndroid.cpp)
     list(APPEND INC ${SRCROOT}/MainAndroid.hpp)
 endif()
 
 # define the target
 add_library(lug-main STATIC ${SRC} ${INC})
+
 set_target_properties(lug-main PROPERTIES LINKER_LANGUAGE CXX)
 
 set_target_properties(lug-main PROPERTIES DEBUG_POSTFIX -d)

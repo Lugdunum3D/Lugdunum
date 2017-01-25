@@ -71,7 +71,7 @@ macro(lug_add_test name)
     # parse the arguments
     cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;EXTERNAL_LIBS" ${ARGN})
 
-    add_executable(${target} ${THIS_SOURCES})
+    add_executable(${target} ${THIS_SOURCES} ${PROJECT_SOURCE_DIR}/main.cpp)
 
     # link the target to its lug dependencies
     if(THIS_DEPENDS)
@@ -83,7 +83,7 @@ macro(lug_add_test name)
         target_link_libraries(${target} ${THIS_EXTERNAL_LIBS})
     endif()
 
-    target_link_libraries(${target} gtest gtest_main ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(${target} gmock ${CMAKE_THREAD_LIBS_INIT})
 
     add_test(NAME ${name}UnitTests COMMAND ${target} --gtest_output=xml:${TEST_OUTPUT}/${name}UnitTests.xml)
 
