@@ -61,7 +61,7 @@ public:
     bool isInstanceExtensionLoaded(const char* name) const;
     bool isDeviceExtensionLoaded(const char* name) const;
 
-    ::lug::Graphics::RenderWindow* createWindow(const Window::Window::InitInfo& initInfo) override final;
+    ::lug::Graphics::RenderWindow* createWindow(RenderWindow::InitInfo& initInfo) override final;
 
     const Instance& getInstance() const;
     const Device& getDevice() const;

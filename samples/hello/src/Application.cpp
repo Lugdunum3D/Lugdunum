@@ -1,7 +1,7 @@
 #include "Application.hpp"
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
-    getWindowInfo().title = "Hello Cube";
+    getRenderWindowInfo().windowInitInfo.title = "Hello Cube";
 }
 
 void Application::onEvent(const lug::Window::Event& event) {

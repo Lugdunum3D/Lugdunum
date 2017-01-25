@@ -16,4 +16,6 @@ public:
 
     void onEvent(const lug::Window::Event& event) override final;
     void onFrame() override final;
+
+private:
 };

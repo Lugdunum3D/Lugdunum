@@ -1,8 +1,10 @@
 #pragma once
 
+#include <memory>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/RenderWindow.hpp>
 #include <lug/Graphics/Vulkan/Fence.hpp>
+#include <lug/Graphics/Vulkan/RenderView.hpp>
 #include <lug/Graphics/Vulkan/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
@@ -35,10 +37,17 @@ public:
     const Swapchain& getSwapchain() const;
     const Framebuffer& getCurrentFramebuffer() const;
 
-    static std::unique_ptr<RenderWindow> create(Renderer& renderer, const Window::Window::InitInfo& initInfo);
+    RenderView* createView(RenderView::InitInfo& initInfo) override final;
+
+    void render() override final;
+
+    uint16_t getWidth() const override final;
+    uint16_t getHeight() const override final;
+
+    static std::unique_ptr<RenderWindow> create(Renderer& renderer, RenderWindow::InitInfo& initInfo);
 
 private:
-    bool init(const Window::Window::InitInfo& initInfo);
+    bool init(RenderWindow::InitInfo& initInfo);
     bool initSurface();
     bool initSwapchainCapabilities();
     bool initPresentQueue();
@@ -56,6 +65,8 @@ private:
 
     const Queue* _presentQueue{nullptr};
     uint32_t _currentImageIndex{0};
+
+    std::vector<std::unique_ptr<RenderView>> _renderViews;
 };
 
 #include <lug/Graphics/Vulkan/RenderWindow.inl>

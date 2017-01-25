@@ -14,7 +14,7 @@ bool Application::init(int argc, char* argv[]) {
         return false;
     }
 
-    _window = _graphics.getRenderer()->createWindow(_windowInitInfo);
+    _window = _graphics.getRenderer()->createWindow(_renderWindowInitInfo);
     if (!_window) {
         return false;
     }
@@ -24,17 +24,17 @@ bool Application::init(int argc, char* argv[]) {
 
 bool Application::run() {
     while (!_closed && _window && _window->isOpen()) {
-    // Poll events
-    {
-        lug::Window::Event event;
-        while (_window->pollEvent(event)) {
-            onEvent(event);
+        // Poll events
+        {
+            lug::Window::Event event;
+            while (_window->pollEvent(event)) {
+                onEvent(event);
+            }
         }
-    }
 
-    beginFrame();
-    onFrame();
-    endFrame();
+        beginFrame();
+        onFrame();
+        endFrame();
     }
 
     return true;

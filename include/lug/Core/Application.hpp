@@ -46,9 +46,9 @@ public:
     lug::Graphics::RenderWindow* getWindow();
     const lug::Graphics::RenderWindow* getWindow() const;
 
-    void setWindowInfo(const lug::Window::Window::InitInfo& initInfo);
-    const lug::Window::Window::InitInfo& getWindowInfo() const;
-    lug::Window::Window::InitInfo& getWindowInfo();
+    void setRenderWindowInfo(lug::Graphics::RenderWindow::InitInfo& initInfo);
+    const lug::Graphics::RenderWindow::InitInfo& getRenderWindowInfo() const;
+    lug::Graphics::RenderWindow::InitInfo& getRenderWindowInfo();
 
     void setGraphicsInfo(const lug::Graphics::Graphics::InitInfo& initInfo);
     const lug::Graphics::Graphics::InitInfo& getGraphicsInfo() const;
@@ -80,11 +80,15 @@ private:
         }
     };
 
-    lug::Window::Window::InitInfo _windowInitInfo{
-        800,                        // width
-        600,                        // height
-        "Lugdunum - Default title", // title
-        lug::Window::Style::Default // style
+    lug::Graphics::RenderWindow::InitInfo _renderWindowInitInfo{
+        {                               // windowInitInfo
+            800,                        // width
+            600,                        // height
+            "Lugdunum - Default title", // title
+            lug::Window::Style::Default // style
+        },
+
+        {}                              // renderViewsInitInfo
     };
 
     lug::Graphics::Graphics _graphics;

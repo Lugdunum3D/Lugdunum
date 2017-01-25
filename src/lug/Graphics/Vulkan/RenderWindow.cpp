@@ -32,6 +32,11 @@ bool RenderWindow::pollEvent(lug::Window::Event& event) {
     if (lug::Window::Window::pollEvent(event)) {
         if (event.type == lug::Window::EventType::RESIZE) {
             _swapchain.setOutOfDate(true);
+
+            // Update the RenderView
+            for (auto& renderView : _renderViews) {
+                renderView->update();
+            }
         }
 
         return true;
@@ -63,12 +68,34 @@ bool RenderWindow::endFrame() {
     );
 }
 
+RenderView* RenderWindow::createView(RenderView::InitInfo& initInfo) {
+    std::unique_ptr<RenderView> renderView = std::make_unique<RenderView>(this);
+
+    renderView->init(initInfo);
+
+    _renderViews.push_back(std::move(renderView));
+
+    return _renderViews.back().get();
+}
+
+void RenderWindow::render() {
+    for (auto &renderView: _renderViews) {
+        renderView->render();
+    }
+}
+
 std::unique_ptr<RenderWindow>
-RenderWindow::create(Renderer &renderer, const Window::Window::InitInfo& initInfo) {
+RenderWindow::create(Renderer &renderer, RenderWindow::InitInfo& initInfo) {
     std::unique_ptr<RenderWindow> win(new RenderWindow(renderer));
 
     if (!win->init(initInfo)) {
         return nullptr;
+    }
+
+    for (auto& renderViewInitInfo : initInfo.renderViewsInitInfo) {
+        if (!win->createView(renderViewInitInfo)) {
+            return nullptr;
+        }
     }
 
     return win;
@@ -309,10 +336,41 @@ bool RenderWindow::initPipeline() {
     return true;
 }
 
-bool RenderWindow::init(const Window::Window::InitInfo& initInfo) {
+bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
     // Init the window
-    if (!Window::init(initInfo)) {
+    if (!Window::init(initInfo.windowInitInfo)) {
         return false;
+    }
+
+    if (initInfo.renderViewsInitInfo.size() == 0) {
+        initInfo.renderViewsInitInfo.push_back({
+            lug::Graphics::RenderTechnique::Type::Forward,  // renderTechniqueType
+            {                                               // viewport
+                {                                           // offset
+                    0.0f,                                   // x
+                    0.0f                                    // y
+                },
+
+                {                                           // extent
+                    1.0f,                                   // width
+                    1.0f                                    // height
+                },
+
+                0.0f,                                       // minDepth
+                1.0f                                        // maxDepth
+            },
+            {                                               // scissor
+                {                                           // offset
+                    0.0f,                                   // x
+                    0.0f                                    // y
+                },
+                {                                           // extent
+                    1.0f,                                   // width
+                    1.0f                                    // height
+                }
+            },
+            nullptr                                         // camera
+        });
     }
 
     // Acquire image semaphore

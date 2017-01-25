@@ -5,12 +5,18 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Graphics.cpp
     ${SRCROOT}/Module.cpp
+    ${SRCROOT}/RenderQueue.cpp
+    ${SRCROOT}/RenderView.cpp
+    ${SRCROOT}/Scene.cpp
+    ${SRCROOT}/SceneNode.cpp
     ${SRCROOT}/Vulkan/Buffer.cpp
+    ${SRCROOT}/Vulkan/Camera.cpp
     ${SRCROOT}/Vulkan/CommandBuffer.cpp
     ${SRCROOT}/Vulkan/CommandPool.cpp
     ${SRCROOT}/Vulkan/Device.cpp
     ${SRCROOT}/Vulkan/DeviceMemory.cpp
     ${SRCROOT}/Vulkan/Fence.cpp
+    ${SRCROOT}/Vulkan/ForwardRenderTechnique.cpp
     ${SRCROOT}/Vulkan/Framebuffer.cpp
     ${SRCROOT}/Vulkan/Image.cpp
     ${SRCROOT}/Vulkan/ImageView.cpp
@@ -20,7 +26,9 @@ set(SRC
     ${SRCROOT}/Vulkan/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/Queue.cpp
     ${SRCROOT}/Vulkan/Renderer.cpp
+    ${SRCROOT}/Vulkan/RenderTechnique.cpp
     ${SRCROOT}/Vulkan/RenderPass.cpp
+    ${SRCROOT}/Vulkan/RenderView.cpp
     ${SRCROOT}/Vulkan/RenderWindow.cpp
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
@@ -33,14 +41,29 @@ source_group("src" FILES ${SRC})
 
 # all header files
 set(INC
+    ${INCROOT}/Camera.hpp
+    ${INCROOT}/Camera.inl
     ${INCROOT}/Export.hpp
     ${INCROOT}/Graphics.hpp
     ${INCROOT}/Graphics.inl
+    ${INCROOT}/Mesh.hpp
+    ${INCROOT}/MeshInstance.hpp
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl
+    ${INCROOT}/MovableObject.hpp
     ${INCROOT}/Renderer.hpp
+    ${INCROOT}/RenderQueue.hpp
+    ${INCROOT}/RenderTarget.hpp
+    ${INCROOT}/RenderTechnique.hpp
+    ${INCROOT}/RenderView.hpp
+    ${INCROOT}/RenderView.inl
     ${INCROOT}/RenderWindow.hpp
+    ${INCROOT}/Scene.hpp
+    ${INCROOT}/Scene.inl
+    ${INCROOT}/SceneNode.hpp
+    ${INCROOT}/SceneNode.inl
     ${INCROOT}/Vulkan/Buffer.hpp
+    ${INCROOT}/Vulkan/Camera.hpp
     ${INCROOT}/Vulkan/CommandBuffer.hpp
     ${INCROOT}/Vulkan/CommandPool.hpp
     ${INCROOT}/Vulkan/CommandPool.inl
@@ -48,6 +71,7 @@ set(INC
     ${INCROOT}/Vulkan/Device.inl
     ${INCROOT}/Vulkan/DeviceMemory.hpp
     ${INCROOT}/Vulkan/Fence.hpp
+    ${INCROOT}/Vulkan/ForwardRenderTechnique.hpp
     ${INCROOT}/Vulkan/Framebuffer.hpp
     ${INCROOT}/Vulkan/Image.hpp
     ${INCROOT}/Vulkan/ImageView.hpp
@@ -60,6 +84,8 @@ set(INC
     ${INCROOT}/Vulkan/Renderer.hpp
     ${INCROOT}/Vulkan/Renderer.inl
     ${INCROOT}/Vulkan/RenderPass.hpp
+    ${INCROOT}/Vulkan/RenderTechnique.hpp
+    ${INCROOT}/Vulkan/RenderView.hpp
     ${INCROOT}/Vulkan/RenderWindow.hpp
     ${INCROOT}/Vulkan/RenderWindow.inl
     ${INCROOT}/Vulkan/Semaphore.hpp

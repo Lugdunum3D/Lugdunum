@@ -777,7 +777,7 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
     return extensionsNotFound;
 }
 
-::lug::Graphics::RenderWindow* Renderer::createWindow(const Window::Window::InitInfo& initInfo) {
+::lug::Graphics::RenderWindow* Renderer::createWindow(RenderWindow::InitInfo& initInfo) {
     _window = RenderWindow::create(*this, initInfo);
     return _window.get();
 }
@@ -845,6 +845,9 @@ bool Renderer::endFrame() {
     if (!_cmdBuffers[0].end()) {
         return false;
     }
+
+    // TODO: Foreach render target that we want to draw
+    _window->render();
 
     return _window->endFrame();
 }
