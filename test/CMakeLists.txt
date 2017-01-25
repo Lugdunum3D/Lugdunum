@@ -16,6 +16,8 @@ include_directories(${gmock_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR})
 
+add_definitions(-DGTEST_LINKED_AS_SHARED_LIBRARY=1)
+
 find_package(Threads REQUIRED)
 
 if(NOT DEFINED TEST_OUTPUT)
