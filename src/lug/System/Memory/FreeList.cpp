@@ -33,7 +33,7 @@ bool FreeList::grow(void* start, void* end, size_t alignment, size_t offset) {
         _nextFree = it;
 
         size_t size = static_cast<char*>(end) - static_cast<char*>(start) + 1;
-        for (size_t i = 1, count = size / _size; i < count; i++) {
+        for (size_t i = 1, count = size / _size; i < count; ++i) {
             void* const next = static_cast<char*>(static_cast<void*>(it)) + _size;
 
             it->next = static_cast<Element*>(next);
