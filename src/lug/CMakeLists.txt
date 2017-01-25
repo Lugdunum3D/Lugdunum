@@ -1,4 +1,4 @@
-# include macros
+﻿# include macros
 include(${PROJECT_SOURCE_DIR}/cmake/Macros.cmake)
 
 # add the sources path
@@ -40,6 +40,7 @@ add_subdirectory(Core)
 add_subdirectory(Graphics)
 add_subdirectory(System)
 add_subdirectory(Window)
+add_subdirectory(Math)
 
 if(LUG_OS_ANDROID)
     add_subdirectory(Main)

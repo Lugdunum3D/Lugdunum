@@ -62,6 +62,7 @@
         #if defined(LUG_COMPILER_MSVC)
             #pragma warning(disable:4251)
             #pragma warning(disable:4275)
+            #pragma warning(disable:4814)
         #endif
 
     #else
