@@ -13,6 +13,7 @@ set(INC
     ${INCROOT}/Export.hpp
     ${INCROOT}/Window.hpp
     ${INCROOT}/WindowHandle.hpp
+    ${INCROOT}/Keyboard.hpp
 )
 source_group("inc" FILES ${INC})
 

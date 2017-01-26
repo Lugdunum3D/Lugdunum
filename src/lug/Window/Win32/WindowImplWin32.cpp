@@ -121,7 +121,7 @@ bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
     return false;
 }
 
-void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM /*wParam*/, LPARAM /*lParam*/) {
+void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM /*lParam*/) {
     lug::Window::Event e;
 
     switch (message) {
@@ -131,6 +131,24 @@ void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM /*w
 
     case WM_DESTROY:
         e.type = EventType::DESTROY;
+        break;
+
+    case WM_KEYDOWN:
+        e.type = EventType::KEY_DOWN;
+        e.key.code = static_cast<Keyboard::Key>(wParam);
+        e.key.alt       = false;
+        e.key.ctrl      = false;
+        e.key.shift     = false;
+        e.key.system    = false;
+        break;
+
+    case WM_KEYUP:
+        e.type = EventType::KEY_UP;
+        e.key.code = static_cast<Keyboard::Key>(wParam);
+        e.key.alt       = false;
+        e.key.ctrl      = false;
+        e.key.shift     = false;
+        e.key.system    = false;
         break;
 
     default:
