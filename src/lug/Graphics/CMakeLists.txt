@@ -104,5 +104,5 @@ endif()
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
-                DEPENDS lug-window lug-system
+                DEPENDS lug-window lug-system lug-math
 )

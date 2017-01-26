@@ -3,24 +3,23 @@
 #include <cstdint>
 #include <vector>
 #include <lug/Graphics/Export.hpp>
+#include <lug/Math/Vector.hpp>
 
 namespace lug {
 namespace Graphics {
 
 class LUG_GRAPHICS_API Mesh {
 public:
-    // TODO: Replace float arrays with math vector
     struct Material {
-        float ambient[3];
-        float diffuse[3];
-        float specular[3];
+        Math::Vector<3, float> ambient;
+        Math::Vector<3, float> diffuse;
+        Math::Vector<3, float> specular;
     };
 
-    // TODO: Replace float arrays with math vector
     struct Vertex{
-        float pos[3];
-        float normal[3];
-        float uv[2];
+        Math::Vector<3, float> pos;
+        Math::Vector<3, float> normal;
+        Math::Vector<2, float> uv;
     };
 
 public:

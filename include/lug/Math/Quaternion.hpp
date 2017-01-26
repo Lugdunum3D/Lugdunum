@@ -9,6 +9,7 @@ namespace Math {
 template <typename T = double>
 class Quaternion {
 public:
+    Quaternion() = default;
     Quaternion(T x, T y, T z, T w);
     Quaternion(T data[4]);
     Quaternion(T angle, const Vector<3, T>& axis);

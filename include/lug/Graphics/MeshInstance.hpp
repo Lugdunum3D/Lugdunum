@@ -2,6 +2,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/MovableObject.hpp>
+#include <lug/Math/Matrix.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -20,7 +21,7 @@ public:
 
 private:
     Mesh::Material _material;
-    // TODO: Transformations
+    Math::Matrix<4, 4, float> _transform;
 };
 
 } // Graphics
