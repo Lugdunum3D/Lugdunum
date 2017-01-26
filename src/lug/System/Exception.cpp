@@ -1,61 +1,30 @@
 #include <lug/System/Exception.hpp>
 #include <sstream>
 
-/**
- * \brief Exception constructor.
- * \param typeName The exception type.
- * \param description The exception description.
- * \param file The file where exception was thrown.
- * \param function The function where exception was thrown.
- * \param line The line where exception was thrown.
- */
 lug::System::Exception::Exception(const char *typeName, const std::string &description, const char* file, const char* function, uint32_t line)
     : _typeName{typeName}, _description{description}, _file{file}, _function{function}, _line{line} {}
 
-/**
- * \brief TypeName getter.
- * \return The typeName of the current exception.
- */
 const std::string& lug::System::Exception::getTypeName() const {
     return _typeName;
 }
 
-/**
- * \brief Description getter.
- * \return The description of the current exception.
- */
+
 const std::string& lug::System::Exception::getDescription() const {
     return _description;
 }
 
-/**
- * \brief File getter.
- * \return The file of the current exception.
- */
 const std::string& lug::System::Exception::getFile() const {
     return _file;
 }
 
-/**
- * \brief Function getter.
- * \return The function of the current exception.
- */
 const std::string& lug::System::Exception::getFunction() const {
     return _function;
 }
 
-/**
- * \brief Line getter.
- * \return The line of the current exception.
- */
 uint32_t lug::System::Exception::getLine() const {
     return _line;
 }
 
-/**
- * \brief Return the full formated exception.
- * \return The full formated exceptionn.
- */
 const char* lug::System::Exception::what() const noexcept {
     std::stringstream msg;
 
