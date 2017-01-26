@@ -25,6 +25,8 @@ private:
     void processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam);
     void registerWindow() const;
     bool activateFullscreen();
+    Keyboard::Key getKeyCode(WPARAM wParam, LPARAM lParam);
+    Event configKeyEvent(WPARAM wParam, LPARAM lParam);
 
     static LRESULT CALLBACK onEvent(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
 

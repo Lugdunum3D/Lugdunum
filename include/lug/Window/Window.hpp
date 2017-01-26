@@ -3,9 +3,11 @@
 #include <memory>
 #include <queue>
 #include <string>
+#include <unordered_map>
 #include <lug/Window/Event.hpp>
 #include <lug/Window/Export.hpp>
 #include <lug/Window/WindowHandle.hpp>
+#include <lug/Window/Keyboard.hpp>
 
 namespace lug {
 namespace Window {
@@ -58,13 +60,17 @@ public:
     bool pollEvent(lug::Window::Event&);
     void close();
 
+    bool isKeyPressed(Keyboard::Key key) const;
+
 private:
     Window();
 
     bool createWindow(uint16_t width, uint16_t height, const std::string& title, Style style);
+    void initKeyState();
 
     priv::WindowImpl* _impl{nullptr};
     VideoMode _mode{800, 600, 8, 8, 8, 60};
+    std::unordered_map<Keyboard::Key, bool> _keyState;
 
     friend lug::Window::priv::WindowImpl;
 };

@@ -121,8 +121,8 @@ bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
     return false;
 }
 
-void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM /*lParam*/) {
-    lug::Window::Event e;
+void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam) {
+    Event e;
 
     switch (message) {
     case WM_CLOSE:
@@ -134,21 +134,15 @@ void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM wPa
         break;
 
     case WM_KEYDOWN:
+    case WM_SYSKEYDOWN:
+        e = configKeyEvent(wParam, lParam);
         e.type = EventType::KEY_DOWN;
-        e.key.code = static_cast<Keyboard::Key>(wParam);
-        e.key.alt       = false;
-        e.key.ctrl      = false;
-        e.key.shift     = false;
-        e.key.system    = false;
         break;
 
     case WM_KEYUP:
+    case WM_SYSKEYUP:
+        e = configKeyEvent(wParam, lParam);
         e.type = EventType::KEY_UP;
-        e.key.code = static_cast<Keyboard::Key>(wParam);
-        e.key.alt       = false;
-        e.key.ctrl      = false;
-        e.key.shift     = false;
-        e.key.system    = false;
         break;
 
     default:
@@ -209,6 +203,42 @@ bool lug::Window::priv::WindowImpl::activateFullscreen() {
     // Set "this" as the current fullscreen window
     fullscreenWindow = this;
     return true;
+}
+
+lug::Window::Keyboard::Key lug::Window::priv::WindowImpl::getKeyCode(WPARAM wParam, LPARAM lParam) {
+    WPARAM new_vk = wParam;
+    UINT scancode = (lParam & 0x00ff0000) >> 16;
+    int extended = (lParam & 0x01000000) != 0;
+
+    switch (wParam) {
+    case VK_SHIFT:
+        new_vk = MapVirtualKey(scancode, MAPVK_VSC_TO_VK_EX);
+        break;
+    case VK_CONTROL:
+        new_vk = extended ? VK_RCONTROL : VK_LCONTROL;
+        break;
+    case VK_MENU:
+        new_vk = extended ? VK_RMENU : VK_LMENU;
+        break;
+    default:
+        // not a key we map from generic to left/right specialized
+        //  just return it.
+        break;
+    }
+
+    return static_cast<Keyboard::Key>(new_vk);
+}
+
+lug::Window::Event lug::Window::priv::WindowImpl::configKeyEvent(WPARAM wParam, LPARAM lParam)
+{
+    Event e;
+
+    e.key.code = getKeyCode(wParam, lParam);
+    e.key.alt = HIWORD(GetAsyncKeyState(VK_MENU)) != 0;
+    e.key.ctrl = HIWORD(GetAsyncKeyState(VK_CONTROL)) != 0;
+    e.key.shift = HIWORD(GetAsyncKeyState(VK_SHIFT)) != 0;
+    e.key.system = HIWORD(GetAsyncKeyState(VK_LWIN)) || HIWORD(GetAsyncKeyState(VK_RWIN));
+    return e;
 }
 
 ////////////////////////////////////////////////////////////
