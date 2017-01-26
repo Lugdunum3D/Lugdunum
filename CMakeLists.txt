@@ -69,9 +69,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake)
 # add the include path
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-# find doxygen
-find_package(Doxygen)
-
 lug_set_option(BUILD_SHARED_LIBS TRUE BOOL "TRUE to build Lugdunum as shared libraries, FALSE to build it as static libraries")
 lug_set_option(ENABLE_TEST FALSE BOOL "TRUE to enable unit tests, FALSE to disable unit tests")
 lug_set_option(BUILD_DOCUMENTATION FALSE BOOL "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
@@ -113,6 +110,10 @@ endif()
 
 # documentation
 if(BUILD_DOCUMENTATION)
+
+    # find doxygen
+    find_package(Doxygen)
+
     if(NOT DOXYGEN_FOUND)
         message(FATAL_ERROR "Doxygen is needed to build the documentation.")
     endif()
