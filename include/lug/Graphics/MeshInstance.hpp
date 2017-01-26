@@ -2,7 +2,6 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/MovableObject.hpp>
-#include <lug/Math/Matrix.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -19,9 +18,11 @@ public:
 
     ~MeshInstance() = default;
 
+    void needUpdate() override final;
+
 private:
-    Mesh::Material _material;
-    Math::Matrix<4, 4, float> _transform;
+    // Mesh* _mesh{nullptr};
+    // Mesh::Material* _material{nullptr};
 };
 
 } // Graphics

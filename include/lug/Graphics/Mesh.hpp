@@ -11,15 +11,15 @@ namespace Graphics {
 class LUG_GRAPHICS_API Mesh {
 public:
     struct Material {
-        Math::Vector<3, float> ambient;
-        Math::Vector<3, float> diffuse;
-        Math::Vector<3, float> specular;
+        Math::Vec3f ambient;
+        Math::Vec3f diffuse;
+        Math::Vec3f specular;
     };
 
     struct Vertex{
-        Math::Vector<3, float> pos;
-        Math::Vector<3, float> normal;
-        Math::Vector<2, float> uv;
+        Math::Vec3f pos;
+        Math::Vec3f normal;
+        Math::Vec2f uv;
     };
 
 public:

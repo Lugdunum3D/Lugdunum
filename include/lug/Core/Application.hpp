@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <lug/Core/Export.hpp>
 #include <lug/Graphics/Graphics.hpp>
-#include <lug/Window/Window.hpp>
+#include <lug/Graphics/RenderWindow.hpp>
 
 namespace lug {
 namespace Core {

@@ -1,4 +1,6 @@
 #include <lug/Graphics/Vulkan/Buffer.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/DeviceMemory.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {
@@ -43,6 +45,7 @@ Buffer::~Buffer() {
 
 void Buffer::destroy() {
     if (_deviceMemory != nullptr) {
+        // TODO: Own the ressource to destroy it
         _deviceMemory->destroy();
         _deviceMemory = nullptr;
     }

@@ -1,5 +1,6 @@
 #include <lug/Graphics/Vulkan/ShaderModule.hpp>
 #include <fstream>
+#include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {

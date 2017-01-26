@@ -21,8 +21,7 @@ void RenderView::render() {
     if (_camera) {
         _camera->update(this);
         _renderTechnique->render(_camera->getRenderQueue());
-    }
-    else {
+    } else {
         LUG_LOG.warn("RenderView: Attempt to render with no camera attached");
     }
 }

@@ -2,7 +2,12 @@ template <typename T>
 Quaternion<T>::Quaternion(T w, T x, T y, T z) : _data{w, x, y, z} {}
 
 template <typename T>
-Quaternion<T>::Quaternion(T data[4]) : _data{data} {}
+Quaternion<T>::Quaternion(T data[4]) {
+    _data[0] = data[0];
+    _data[1] = data[1];
+    _data[2] = data[2];
+    _data[3] = data[3];
+}
 
 template <typename T>
 Quaternion<T>::Quaternion(T angle, const Vector<3, T>& axis) {
@@ -13,6 +18,8 @@ Quaternion<T>::Quaternion(T angle, const Vector<3, T>& axis) {
     _data[1] = axis(0) * sinHalf;
     _data[2] = axis(1) * sinHalf;
     _data[3] = axis(2) * sinHalf;
+
+    normalize();
 }
 
 template <typename T>
@@ -61,6 +68,42 @@ inline Vector<3, T> Quaternion<T>::getAxis() const {
 }
 
 template <typename T>
+inline Mat4x4<T> Quaternion<T>::transform() const {
+    Mat4x4<T> result{Mat4x4<T>::identity()};
+
+    const T xx = _data[1] * _data[1];
+    const T xy = _data[1] * _data[2];
+    const T xz = _data[1] * _data[3];
+    const T xw = _data[1] * _data[0];
+
+    const T yy = _data[2] * _data[2];
+    const T yz = _data[2] * _data[3];
+    const T yw = _data[2] * _data[0];
+
+    const T zz = _data[3] * _data[3];
+    const T zw = _data[3] * _data[0];
+
+    result(0, 0) = 1 - 2 * (yy + zz);
+    result(1, 0) = 2 * (xy - zw);
+    result(2, 0) = 2 * (xz + yw);
+
+    result(0, 1) = 2 * (xy + zw);
+    result(1, 1) = 1 - 2 * (xx + zz);
+    result(2, 1) = 2 * (yz - xw);
+
+    result(0, 2) = 2 * (xz - yw);
+    result(1, 2) = 2 * (yz + xw);
+    result(2, 2) = 1 - 2 * (xx + yy);
+
+    return result;
+}
+
+template <typename T>
+inline Quaternion<T> Quaternion<T>::identity() {
+    return {T(1), T(0), T(0), T(0)};
+}
+
+template <typename T>
 inline Quaternion<T> conjugate(const Quaternion<T>& lhs) {
     return {lhs.w(), -lhs.x(), -lhs.y(), -lhs.z()};
 }
@@ -80,9 +123,9 @@ inline Quaternion<T> inverse(const Quaternion<T>& lhs) {
     const T length = result.length();
 
     result[0] /= length * length;
-    result[1] /= length * length;
-    result[2] /= length * length;
-    result[3] /= length * length;
+    result[1] /= -length * length;
+    result[2] /= -length * length;
+    result[3] /= -length * length;
 
     return result;
 }

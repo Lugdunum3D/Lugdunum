@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lug/Math/Export.hpp>
+#include <lug/Math/Matrix.hpp>
 #include <lug/Math/Vector.hpp>
 
 namespace lug {
@@ -34,6 +35,8 @@ public:
     T getAngle() const;
     Vector<3, T> getAxis() const;
 
+    Mat4x4<T> transform() const;
+
 #define DEFINE_QUATERNION_ACCESS(name, rows)    \
     const T& name() const {                     \
         return (*this)[rows];                   \
@@ -57,14 +60,17 @@ public:
 
 #undef DEFINE_QUATERNION_ACCESS
 
+    static Quaternion<T> identity();
+
 private:
     T _data[4];
 };
 
+template class LUG_MATH_API Quaternion<float>;
 using Quatf = Quaternion<float>;
+
+template class LUG_MATH_API Quaternion<double>;
 using Quatd = Quaternion<double>;
-using Quati = Quaternion<int32_t>;
-using Quatu = Quaternion<uint32_t>;
 
 template <typename T>
 Quaternion<T> normalize(const Quaternion<T>& lhs);

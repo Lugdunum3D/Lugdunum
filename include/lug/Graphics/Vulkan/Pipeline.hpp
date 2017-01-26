@@ -1,19 +1,17 @@
 #pragma once
 
+#include <memory>
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/RenderPass.hpp>
-#include <lug/Graphics/Vulkan/ShaderModule.hpp>
-#include <lug/Graphics/Vulkan/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
-
-#include <memory>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+class CommandBuffer;
+class Device;
 
 class LUG_GRAPHICS_API Pipeline {
 public:

@@ -1,4 +1,7 @@
 #include <lug/Graphics/Vulkan/RenderPass.hpp>
+#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/Framebuffer.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {

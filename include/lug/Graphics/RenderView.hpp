@@ -9,6 +9,7 @@
 namespace lug {
 namespace Graphics {
 
+class Camera;
 class RenderTarget;
 
 class LUG_GRAPHICS_API RenderView {

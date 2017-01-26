@@ -1,14 +1,14 @@
 #pragma once
 
-#include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/Device.hpp>
-#include <lug/Graphics/Vulkan/Vulkan.hpp>
-
 #include <memory>
+#include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+class Device;
 
 class LUG_GRAPHICS_API DeviceMemory {
 public:

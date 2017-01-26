@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/Fence.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {

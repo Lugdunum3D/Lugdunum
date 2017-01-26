@@ -4,7 +4,6 @@
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
-#include <lug/Graphics/Vulkan/ShaderModule.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {

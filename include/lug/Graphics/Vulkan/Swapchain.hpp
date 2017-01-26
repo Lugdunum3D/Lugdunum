@@ -2,18 +2,17 @@
 
 #include <vector>
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/Image.hpp>
 #include <lug/Graphics/Vulkan/ImageView.hpp>
-#include <lug/Graphics/Vulkan/Queue.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
+class Device;
+class Queue;
 class RenderPass;
 
 class LUG_GRAPHICS_API Swapchain {

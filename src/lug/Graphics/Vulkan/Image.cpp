@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/Image.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -34,45 +35,6 @@ Image::~Image() {
     if (!_swapchainImage) {
         destroy();
     }
-}
-
-void Image::changeLayout(CommandBuffer& commandBuffer,
-                VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask,
-                VkImageLayout oldLayout, VkImageLayout newLayout,
-                VkPipelineStageFlags srcStageMask,
-                VkPipelineStageFlags dstStageMask,
-                uint32_t srcQueueFamilyIndex,
-                uint32_t dstQueueFamilyIndex) {
-
-    VkImageMemoryBarrier imageBarrier{
-        imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-        imageBarrier.pNext = nullptr,
-        imageBarrier.srcAccessMask = srcAccessMask,
-        imageBarrier.dstAccessMask = dstAccessMask,
-        imageBarrier.oldLayout = oldLayout,
-        imageBarrier.newLayout = newLayout,
-        imageBarrier.srcQueueFamilyIndex = srcQueueFamilyIndex,
-        imageBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex,
-        imageBarrier.image = _image,
-        {} // imageBarrier.subresourceRange
-    };
-
-    imageBarrier.subresourceRange.aspectMask = _aspect;
-    imageBarrier.subresourceRange.baseMipLevel = 0;
-    imageBarrier.subresourceRange.levelCount = 1;
-    imageBarrier.subresourceRange.baseArrayLayer = 0;
-    imageBarrier.subresourceRange.layerCount = 1;
-
-    vkCmdPipelineBarrier(commandBuffer, // commandBuffer
-                        srcStageMask, // srcStageMask
-                        dstStageMask, // dstStageMask
-                        VK_DEPENDENCY_BY_REGION_BIT, // dependencyFlags
-                        0, // memoryBarrierCount
-                        nullptr, // pMemoryBarriers
-                        0, // bufferMemoryBarrierCount
-                        nullptr, // pBufferMemoryBarriers
-                        1, // imageMemoryBarrierCount
-                        &imageBarrier); // pImageMemoryBarriers
 }
 
 void Image::destroy() {

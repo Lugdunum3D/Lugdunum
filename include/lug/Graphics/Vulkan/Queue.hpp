@@ -2,7 +2,6 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/CommandPool.hpp>
-#include <lug/Graphics/Vulkan/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {

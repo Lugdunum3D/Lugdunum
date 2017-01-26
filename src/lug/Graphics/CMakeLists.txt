@@ -3,8 +3,13 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 
 # all source files
 set(SRC
+    ${SRCROOT}/Camera.cpp
     ${SRCROOT}/Graphics.cpp
+    ${SRCROOT}/MeshInstance.cpp
     ${SRCROOT}/Module.cpp
+    ${SRCROOT}/MovableCamera.cpp
+    ${SRCROOT}/MovableObject.cpp
+    ${SRCROOT}/Node.cpp
     ${SRCROOT}/RenderQueue.cpp
     ${SRCROOT}/RenderView.cpp
     ${SRCROOT}/Scene.cpp
@@ -50,7 +55,11 @@ set(INC
     ${INCROOT}/MeshInstance.hpp
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl
+    ${INCROOT}/MovableCamera.hpp
     ${INCROOT}/MovableObject.hpp
+    ${INCROOT}/MovableObject.inl
+    ${INCROOT}/Node.hpp
+    ${INCROOT}/Node.inl
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/RenderQueue.hpp
     ${INCROOT}/RenderTarget.hpp

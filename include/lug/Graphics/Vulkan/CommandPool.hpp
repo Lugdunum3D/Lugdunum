@@ -3,13 +3,13 @@
 #include <vector>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
+class Device;
 class Queue;
 
 class LUG_GRAPHICS_API CommandPool {

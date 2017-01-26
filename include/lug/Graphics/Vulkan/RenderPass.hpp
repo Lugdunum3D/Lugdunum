@@ -2,13 +2,15 @@
 
 #include <memory>
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/Device.hpp>
-#include <lug/Graphics/Vulkan/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+class CommandBuffer;
+class Device;
+class Framebuffer;
 
 class LUG_GRAPHICS_API RenderPass {
 public:

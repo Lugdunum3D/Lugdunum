@@ -1,18 +1,18 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/MovableObject.hpp>
+#include <lug/Graphics/Node.hpp>
 #include <lug/Graphics/RenderQueue.hpp>
-#include <lug/Graphics/Scene.hpp>
 
 namespace lug {
 namespace Graphics {
 
+class Scene;
 class RenderView;
 
-class LUG_GRAPHICS_API Camera {
+class LUG_GRAPHICS_API Camera : public Node {
 public:
-    Camera() = default;
+    Camera(const std::string& name);
 
     Camera(const Camera&) = delete;
     Camera(Camera&&) = delete;

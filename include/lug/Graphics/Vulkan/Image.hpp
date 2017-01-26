@@ -1,13 +1,13 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+class Device;
 
 class LUG_GRAPHICS_API Image {
 public:
@@ -24,14 +24,6 @@ public:
     operator VkImage() const {
         return _image;
     }
-
-    void changeLayout(CommandBuffer& commandBuffer,
-                    VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask,
-                    VkImageLayout oldLayout, VkImageLayout newLayout,
-                    VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                    VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                    uint32_t srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                    uint32_t dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED);
 
     void destroy();
 

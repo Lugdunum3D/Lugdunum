@@ -4,6 +4,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Math)
 # all source files
 set(SRC
     ${SRCROOT}/Matrix.cpp
+    ${SRCROOT}/Quaternion.cpp
     ${SRCROOT}/Vector.cpp
 )
 source_group("src" FILES ${SRC})

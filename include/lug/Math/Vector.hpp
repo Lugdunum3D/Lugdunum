@@ -21,6 +21,7 @@ public:
     Vector(BaseMatrix&& matrix);
 
     Vector(const Vector<Rows - 1, T>& vector, T value = 0);
+    Vector(const Vector<Rows + 1, T>& vector);
 
     Vector(const Vector<Rows, T>& vector) = default;
     Vector(Vector<Rows, T>&& vector) = default;
@@ -31,6 +32,9 @@ public:
     ~Vector() = default;
 
     Vector<Rows, T> operator*=(const Matrix<Rows, Rows, T>& rhs);
+
+    Vector<Rows, T> operator*=(const Vector<Rows, T>& rhs);
+    Vector<Rows, T> operator/=(const Vector<Rows, T>& rhs);
 
 #define DEFINE_ACCESS(name, minimum_rows)                                                                               \
     template <bool EnableBool = true, typename = typename std::enable_if<(Rows >= minimum_rows) && EnableBool>::type>   \
@@ -96,10 +100,23 @@ DEFINE_LENGTH_VECTOR(4)
 #undef DEFINE_LENGTH_VECTOR
 
 template <uint8_t Rows, typename T>
+Vector<Rows, T> operator*(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs);
+
+template <uint8_t Rows, typename T>
+Vector<Rows, T> operator/(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs);
+
+template <uint8_t Rows, typename T>
 Vector<Rows, T> operator*(const Vector<Rows, T>& lhs, const Matrix<Rows, Rows, T>& rhs);
 
 template <uint8_t Rows, typename T>
 Vector<Rows, T> operator*(const Matrix<Rows, Rows, T>& lhs, const Vector<Rows, T>& rhs);
+
+// Special case Mat4x4 * Vec3
+template <typename T>
+Vector<3, T> operator*(const Vector<3, T>& lhs, const Matrix<4, 4, T>& rhs);
+
+template <typename T>
+Vector<3, T> operator*(const Matrix<4, 4, T>& lhs, const Vector<3, T>& rhs);
 
 #include <lug/Math/Vector.inl>
 

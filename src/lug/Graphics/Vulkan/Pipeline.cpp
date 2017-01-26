@@ -1,4 +1,7 @@
 #include <lug/Graphics/Vulkan/Pipeline.hpp>
+#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/ShaderModule.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {

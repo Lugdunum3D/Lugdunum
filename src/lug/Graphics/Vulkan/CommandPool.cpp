@@ -1,6 +1,6 @@
 #include <lug/Graphics/Vulkan/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Queue.hpp>
-#include <lug/System/Debug.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {

@@ -1,10 +1,11 @@
 #pragma once
 
 #include <vector>
-#include <lug/Graphics/MovableObject.hpp>
 
 namespace lug {
 namespace Graphics {
+
+class MovableObject;
 
 class RenderQueue {
 public:

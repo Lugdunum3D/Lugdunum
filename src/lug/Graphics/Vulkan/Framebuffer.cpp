@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/Framebuffer.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
 
 namespace lug {
 namespace Graphics {
