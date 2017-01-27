@@ -5,6 +5,7 @@
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
 #include <lug/System/Logger.hpp>
+#include <lug/Math/Geometry/Transform.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -790,6 +791,18 @@ Pipeline* Renderer::getGraphicsPipeline() const {
 }
 
 bool Renderer::beginFrame() {
+    static Math::Mat4x4f cameraView{
+        1.81066f, 0.0f, 0.0f, 0.0f,
+        0.0f, 2.07017f, -0.515011f, -0.514496f,
+        0.0f, -1.2421f, -0.858351f, -0.857493f,
+        0.0f, 0.0f, 5.73669f, 5.83095f
+    };
+    static Math::Mat4x4f modelTransform = Math::Mat4x4f::identity();
+
+    modelTransform = Math::Geometry::rotate(0.0001f, {0.0f, 1.0f, 0.0f}) * modelTransform;
+
+    Math::Mat4x4f result = cameraView.transpose() * modelTransform;
+
     if (!_window->beginFrame()) {
         return false;
     }
@@ -799,6 +812,8 @@ bool Renderer::beginFrame() {
     }
 
     _graphicsPipeline->bind(&_cmdBuffers[0]);
+
+    vkCmdPushConstants(_cmdBuffers[0], *_graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Math::Mat4x4f), &result);
 
     auto& extent = _window->getSwapchain().getExtent();
 

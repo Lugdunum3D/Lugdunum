@@ -134,6 +134,7 @@
     macro(vkDestroyDescriptorSetLayout)                 \
     macro(vkDestroySampler)                             \
     macro(vkDestroyImage)                               \
+    macro(vkCmdPushConstants)                           \
     LUG_DEVICE_VULKAN_FUNCTIONS_KHR_SWAPCHAIN(macro)
 
 inline namespace Vulkan {

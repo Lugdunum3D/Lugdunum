@@ -35,6 +35,7 @@ public:
     void destroy();
 
     RenderPass* getRenderPass() const;
+    PipelineLayout* getLayout() const;
 
     static std::unique_ptr<Pipeline> createGraphicsPipeline(const Device* device);
 

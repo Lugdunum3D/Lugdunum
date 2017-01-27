@@ -1,3 +1,4 @@
+#include <lug/Math/Matrix.hpp>
 #include <lug/Graphics/Vulkan/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/System/Logger.hpp>
@@ -38,14 +39,22 @@ void PipelineLayout::destroy() {
 }
 
 std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
+    VkPushConstantRange pushConstants[] = {
+        {
+            pushConstants[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+            pushConstants[0].offset = 0,
+            pushConstants[0].size = sizeof(Math::Mat4x4f)
+        }
+    };
+
     VkPipelineLayoutCreateInfo createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = 0,
         createInfo.setLayoutCount = 0,
         createInfo.pSetLayouts = nullptr,
-        createInfo.pushConstantRangeCount = 0,
-        createInfo.pPushConstantRanges = nullptr
+        createInfo.pushConstantRangeCount = sizeof(pushConstants) / sizeof(pushConstants[0]), // TODO: Sorry ^_^
+        createInfo.pPushConstantRanges = pushConstants
     };
 
     VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;

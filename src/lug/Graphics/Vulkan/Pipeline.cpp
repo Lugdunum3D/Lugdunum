@@ -61,6 +61,10 @@ RenderPass* Pipeline::getRenderPass() const {
     return _renderPass.get();
 }
 
+PipelineLayout* Pipeline::getLayout() const {
+    return _layout.get();
+}
+
 void Pipeline::bind(const CommandBuffer* commandBuffer) {
     vkCmdBindPipeline(*commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 }
