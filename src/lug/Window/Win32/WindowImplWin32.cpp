@@ -33,7 +33,7 @@ lug::Window::priv::WindowImpl::~WindowImpl() {
 }
 
 bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style) {
-    
+
     // Register the window class at first call
     if (windowCount == 0) {
         registerWindow();

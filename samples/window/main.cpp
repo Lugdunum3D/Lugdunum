@@ -10,8 +10,7 @@
 
 #include <unordered_map>
 
-auto createKeyEnumMap()
-{
+auto createKeyEnumMap() {
     std::unordered_map<lug::Window::Keyboard::Key, std::string> returnValue;
 
     returnValue[lug::Window::Keyboard::Key::A] = "A";
@@ -133,6 +132,7 @@ int main() {
 #endif
 
     logger->addHandler(handler);
+    lug::System::Logger::logger.addHandler(handler);
 
     if (!window) {
         logger->fatal("Window was not created");
@@ -149,6 +149,17 @@ int main() {
 
             if (event.type == lug::Window::EventType::CLOSE) {
                 logger->info("Closing the app");
+                window->close();
+            }
+
+            if (event.type == lug::Window::EventType::KEY_DOWN && event.key.code == lug::Window::Keyboard::Key::Escape) {
+                logger->info("Closing the app (escape)");
+                window->close();
+            }
+
+            if (event.type == lug::Window::EventType::KEY_DOWN
+                && event.key.code == lug::Window::Keyboard::Key::Q && event.key.ctrl) {
+                logger->info("Closing the app (ctrl+Q)");
                 window->close();
             }
 
