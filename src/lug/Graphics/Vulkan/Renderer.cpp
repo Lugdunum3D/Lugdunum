@@ -782,6 +782,10 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
     return _window.get();
 }
 
+::lug::Graphics::RenderWindow* Renderer::getWindow() {
+    return _window.get();
+}
+
 void Renderer::setGraphicsPipeline(std::unique_ptr<Pipeline> graphicsPipeline) {
     _graphicsPipeline = std::move(graphicsPipeline);
 }

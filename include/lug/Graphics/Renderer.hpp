@@ -36,6 +36,7 @@ public:
     virtual bool endFrame() = 0;
 
     virtual RenderWindow* createWindow(RenderWindow::InitInfo& initInfo) = 0;
+    virtual RenderWindow* getWindow() = 0;
 };
 
 } // Graphics

@@ -9,7 +9,7 @@ namespace Graphics {
 
 class LUG_GRAPHICS_API MeshInstance final : public lug::Graphics::MovableObject {
 public:
-    MeshInstance(const std::string& name, Mesh* mesh = nullptr);
+    MeshInstance(const std::string& name, Mesh* mesh);
 
     MeshInstance(const MeshInstance&) = delete;
     MeshInstance(MeshInstance&&) = delete;
@@ -18,9 +18,6 @@ public:
     MeshInstance& operator=(MeshInstance&&) = delete;
 
     ~MeshInstance() = default;
-
-    void attachMesh(Mesh* mesh);
-    void detachMesh();
 
     void needUpdate() override final;
 

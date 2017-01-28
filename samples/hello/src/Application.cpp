@@ -101,16 +101,28 @@ bool Application::init(int argc, char* argv[]) {
         _scene->getRoot()->attachChild(std::move(cubeNode));
     }
 
+    std::unique_ptr<lug::Graphics::Camera> camera = _graphics.createCamera("camera");
+    _camera = camera.get();
     // Add camera to scene
     {
-        _camera = _graphics.createCamera("camera");
-        std::unique_ptr<lug::Graphics::MovableCamera> movableCamera = _scene->createMovableCamera("movable camera", _camera.get());
+        std::unique_ptr<lug::Graphics::MovableCamera> movableCamera = _scene->createMovableCamera("movable camera", camera.get());
         std::unique_ptr<lug::Graphics::SceneNode> movableCameraNode = _scene->createSceneNode("movable camera node");
 
         movableCameraNode->attachMovableObject(std::move(movableCamera));
         _scene->getRoot()->attachChild(std::move(movableCameraNode));
-        _camera->setScene(_scene.get());
+        camera->setScene(_scene.get());
     }
+
+    // Attach camera to RenderView
+    {
+        auto& renderViews = _graphics.getRenderer()->getWindow()->getRenderViews();
+
+        LUG_ASSERT(renderViews.size() > 0, "There should be at least 1 render view");
+
+        renderViews[0]->attachCamera(std::move(camera));
+    }
+
+    _camera->translate({0.0f, 0.0f, -10.0f});
 
     return true;
 }

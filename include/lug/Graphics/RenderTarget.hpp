@@ -24,7 +24,15 @@ public:
 
     virtual uint16_t getWidth() const = 0;
     virtual uint16_t getHeight() const = 0;
+
+    const std::vector<std::unique_ptr<RenderView>>& getRenderViews() const;
+    std::vector<std::unique_ptr<RenderView>>& getRenderViews();
+
+protected:
+    std::vector<std::unique_ptr<RenderView>> _renderViews;
 };
+
+#include <lug/Graphics/RenderTarget.inl>
 
 } // Graphics
 } // lug

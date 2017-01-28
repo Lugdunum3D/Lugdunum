@@ -65,6 +65,7 @@ set(INC
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/RenderQueue.hpp
     ${INCROOT}/RenderTarget.hpp
+    ${INCROOT}/RenderTarget.inl
     ${INCROOT}/RenderTechnique.hpp
     ${INCROOT}/RenderView.hpp
     ${INCROOT}/RenderView.inl

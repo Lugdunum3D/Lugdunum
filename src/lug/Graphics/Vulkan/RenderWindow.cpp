@@ -1,6 +1,7 @@
 #include <cstring>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
+#include <lug/Graphics/Vulkan/RenderView.hpp>
 #include <lug/System/Debug.hpp>
 #include <lug/System/Logger.hpp>
 
@@ -68,7 +69,7 @@ bool RenderWindow::endFrame() {
     );
 }
 
-RenderView* RenderWindow::createView(RenderView::InitInfo& initInfo) {
+lug::Graphics::RenderView* RenderWindow::createView(lug::Graphics::RenderView::InitInfo& initInfo) {
     std::unique_ptr<RenderView> renderView = std::make_unique<RenderView>(this);
 
     renderView->init(initInfo);
