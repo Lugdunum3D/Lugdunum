@@ -12,7 +12,7 @@ inline Vector<Rows, T>::Vector(typename Vector<Rows, T>::BaseMatrix&& matrix) : 
 
 template <uint8_t Rows, typename T>
 inline Vector<Rows, T>::Vector(const Vector<Rows - 1, T>& vector, T value) {
-    for (uint8_t row = 0; row < Rows; ++row) {
+    for (uint8_t row = 0; row < Rows - 1; ++row) {
         (*this)(row) = vector(row);
     }
 
