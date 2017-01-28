@@ -135,13 +135,13 @@ void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM wPa
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
         e.type = EventType::KEY_DOWN;
-        configKeyEvent(e, wParam, lParam);
+        configKeyEvent(e.key, wParam, lParam);
         break;
 
     case WM_KEYUP:
     case WM_SYSKEYUP:
         e.type = EventType::KEY_UP;
-        configKeyEvent(e, wParam, lParam);
+        configKeyEvent(e.key, wParam, lParam);
         break;
 
     default:
@@ -228,12 +228,12 @@ lug::Window::Keyboard::Key lug::Window::priv::WindowImpl::getKeyCode(WPARAM wPar
     return static_cast<Keyboard::Key>(new_vk);
 }
 
-void lug::Window::priv::WindowImpl::configKeyEvent(Event& e, WPARAM wParam, LPARAM lParam) {
-    e.key.code = getKeyCode(wParam, lParam);
-    e.key.alt = HIWORD(GetAsyncKeyState(VK_MENU)) != 0;
-    e.key.ctrl = HIWORD(GetAsyncKeyState(VK_CONTROL)) != 0;
-    e.key.shift = HIWORD(GetAsyncKeyState(VK_SHIFT)) != 0;
-    e.key.system = HIWORD(GetAsyncKeyState(VK_LWIN)) || HIWORD(GetAsyncKeyState(VK_RWIN));
+void lug::Window::priv::WindowImpl::configKeyEvent(KeyEvent& key, WPARAM wParam, LPARAM lParam) {
+    key.code = getKeyCode(wParam, lParam);
+    key.alt = HIWORD(GetAsyncKeyState(VK_MENU)) != 0;
+    key.ctrl = HIWORD(GetAsyncKeyState(VK_CONTROL)) != 0;
+    key.shift = HIWORD(GetAsyncKeyState(VK_SHIFT)) != 0;
+    key.system = HIWORD(GetAsyncKeyState(VK_LWIN)) || HIWORD(GetAsyncKeyState(VK_RWIN));
 }
 
 ////////////////////////////////////////////////////////////
