@@ -33,10 +33,17 @@ public:
 
     ~Mesh() = default;
 
-private:
-    std::vector<Vertex> _vertices;
-    std::vector<uint32_t> _indices;
+    virtual bool load() = 0;
+
+public:
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
+
+protected:
     Material _baseMaterial;
+
+    bool _loaded{false};
+    std::string _name;
 };
 
 } // Graphics

@@ -6,6 +6,8 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Renderer.hpp>
+#include <lug/Graphics/Scene.hpp>
+#include <lug/Graphics/Mesh.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -35,12 +37,16 @@ public:
 
     Renderer* getRenderer() const;
 
+    std::unique_ptr<Scene> createScene();
+    std::unique_ptr<Mesh> createMesh(const std::string& name);
+
 private:
     const char* _appName;
     uint32_t _appVersion;
 
     std::set<Module::Type> _loadedModules{};
     std::unique_ptr<Renderer> _renderer{nullptr};
+    Renderer::Type _rendererType;
 };
 
 #include <lug/Graphics/Graphics.inl>

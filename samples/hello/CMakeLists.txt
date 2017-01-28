@@ -38,7 +38,7 @@ endif()
 
 
 # find Lugdunum and link with it
-find_package(LUG REQUIRED core graphics system window)
+find_package(LUG REQUIRED core graphics system window math)
 
 include_directories(${LUG_INCLUDE_DIR})
 include_directories(include)

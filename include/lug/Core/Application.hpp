@@ -54,7 +54,7 @@ public:
     const lug::Graphics::Graphics::InitInfo& getGraphicsInfo() const;
     lug::Graphics::Graphics::InitInfo& getGraphicsInfo();
 
-    bool init(int argc, char* argv[]);
+    virtual bool init(int argc, char* argv[]);
     bool run();
     void close();
 
@@ -91,9 +91,12 @@ private:
         {}                              // renderViewsInitInfo
     };
 
-    lug::Graphics::Graphics _graphics;
     lug::Graphics::RenderWindow* _window{nullptr};
+
+protected:
+    lug::Graphics::Graphics _graphics;
 };
+
 
 #include <lug/Core/Application.inl>
 

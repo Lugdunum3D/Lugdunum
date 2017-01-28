@@ -5,6 +5,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Camera.cpp
     ${SRCROOT}/Graphics.cpp
+    ${SRCROOT}/Mesh.cpp
     ${SRCROOT}/MeshInstance.cpp
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/MovableCamera.cpp
@@ -27,6 +28,7 @@ set(SRC
     ${SRCROOT}/Vulkan/ImageView.cpp
     ${SRCROOT}/Vulkan/Instance.cpp
     ${SRCROOT}/Vulkan/Loader.cpp
+    ${SRCROOT}/Vulkan/Mesh.cpp
     ${SRCROOT}/Vulkan/Pipeline.cpp
     ${SRCROOT}/Vulkan/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/Queue.cpp
@@ -87,6 +89,7 @@ set(INC
     ${INCROOT}/Vulkan/Instance.hpp
     ${INCROOT}/Vulkan/Instance.inl
     ${INCROOT}/Vulkan/Loader.hpp
+    ${INCROOT}/Vulkan/Mesh.hpp
     ${INCROOT}/Vulkan/Pipeline.hpp
     ${INCROOT}/Vulkan/PipelineLayout.hpp
     ${INCROOT}/Vulkan/Queue.hpp

@@ -3,6 +3,7 @@
 #include <lug/Graphics/Graphics.hpp>
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
+#include <lug/Graphics/Vulkan/Mesh.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {
@@ -15,7 +16,12 @@ bool Graphics::init(const InitInfo& initInfo) {
         case Renderer::Type::Vulkan:
             _renderer = std::make_unique<Vulkan::Renderer>();
             break;
+        default:
+            LUG_LOG.error("Graphics: Can't init renderer with specified render type");
+            break;
     }
+
+    _rendererType = initInfo.rendererType;
 
     _loadedModules = _renderer->init(_appName, _appVersion, initInfo.rendererInitInfo);
 
@@ -41,6 +47,30 @@ bool Graphics::init(const InitInfo& initInfo) {
 #endif
 
     return true;
+}
+
+std::unique_ptr<Scene> Graphics::createScene() {
+    return std::make_unique<Scene>();
+}
+
+std::unique_ptr<Mesh> Graphics::createMesh(const std::string& name) {
+    if (!_renderer) {
+        LUG_LOG.error("Graphics: Can't create a mesh, the renderer is not initialized");
+        return nullptr;
+    }
+
+    std::unique_ptr<Mesh> mesh = nullptr;
+
+    if (_rendererType == Renderer::Type::Vulkan) {
+        Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(_renderer.get());
+        std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(0, true)->getFamilyIdx() };
+        mesh = std::make_unique<Vulkan::Mesh>(name, queueFamilyIndices, &renderer->getDevice());
+    }
+    else {
+        LUG_LOG.error("Graphics: Unknown render type");
+    }
+
+    return mesh;
 }
 
 } // Graphics
