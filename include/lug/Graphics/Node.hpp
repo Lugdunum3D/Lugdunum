@@ -62,13 +62,13 @@ protected:
     std::vector<std::unique_ptr<Node>> _children;
 
 private:
-    Math::Vec3f _position{0.0f};
+    Math::Vec3f _position{Math::Vec3f(0.0f)};
     Math::Quatf _rotation{Math::Quatf::identity()};
-    Math::Vec3f _scale{1.0f};
+    Math::Vec3f _scale{Math::Vec3f(1.0f)};
 
-    Math::Vec3f _absolutePosition{0.0f};
+    Math::Vec3f _absolutePosition{Math::Vec3f(0.0f)};
     Math::Quatf _absoluteRotation{Math::Quatf::identity()};
-    Math::Vec3f _absoluteScale{1.0f};
+    Math::Vec3f _absoluteScale{Math::Vec3f(1.0f)};
 
     Math::Mat4x4f _transform{Math::Mat4x4f::identity()};
 
