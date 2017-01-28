@@ -20,12 +20,13 @@ lug::Window::Window::Window() : _impl{ new lug::Window::priv::WindowImpl(this) }
 
 lug::Window::Window::Window(Window&& rhs) : _impl{ rhs._impl } {
     rhs._impl = nullptr;
+    _keyState = std::move(rhs._keyState);
 }
 
 lug::Window::Window& lug::Window::Window::operator=(Window&& rhs) {
     _impl = rhs._impl;
     rhs._impl = nullptr;
-    _keyState = rhs._keyState;
+    _keyState = std::move(rhs._keyState);
 
     return *this;
 }

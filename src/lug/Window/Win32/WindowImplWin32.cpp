@@ -6,8 +6,7 @@ lug::Window::priv::WindowImpl* lug::Window::priv::WindowImpl::fullscreenWindow =
 
 lug::Window::priv::WindowImpl::WindowImpl(Window* win) : _parent{win} {}
 
-lug::Window::priv::WindowImpl::~WindowImpl()
-{
+lug::Window::priv::WindowImpl::~WindowImpl() {
     // Destroy the custom icon, if any
     if (_icon) {
         DestroyIcon(_icon);
@@ -135,14 +134,14 @@ void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM wPa
 
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
-        e = configKeyEvent(wParam, lParam);
         e.type = EventType::KEY_DOWN;
+        configKeyEvent(e, wParam, lParam);
         break;
 
     case WM_KEYUP:
     case WM_SYSKEYUP:
-        e = configKeyEvent(wParam, lParam);
         e.type = EventType::KEY_UP;
+        configKeyEvent(e, wParam, lParam);
         break;
 
     default:
@@ -229,16 +228,12 @@ lug::Window::Keyboard::Key lug::Window::priv::WindowImpl::getKeyCode(WPARAM wPar
     return static_cast<Keyboard::Key>(new_vk);
 }
 
-lug::Window::Event lug::Window::priv::WindowImpl::configKeyEvent(WPARAM wParam, LPARAM lParam)
-{
-    Event e;
-
+void lug::Window::priv::WindowImpl::configKeyEvent(Event& e, WPARAM wParam, LPARAM lParam) {
     e.key.code = getKeyCode(wParam, lParam);
     e.key.alt = HIWORD(GetAsyncKeyState(VK_MENU)) != 0;
     e.key.ctrl = HIWORD(GetAsyncKeyState(VK_CONTROL)) != 0;
     e.key.shift = HIWORD(GetAsyncKeyState(VK_SHIFT)) != 0;
     e.key.system = HIWORD(GetAsyncKeyState(VK_LWIN)) || HIWORD(GetAsyncKeyState(VK_RWIN));
-    return e;
 }
 
 ////////////////////////////////////////////////////////////

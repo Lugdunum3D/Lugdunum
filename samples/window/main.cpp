@@ -182,8 +182,7 @@ int main() {
         }
 
         // Checking that keys states are correctly set
-        for (auto it = keyEnumMap.begin(); it != keyEnumMap.end(); ++it)
-        {
+        for (auto it = keyEnumMap.begin(); it != keyEnumMap.end(); ++it) {
             if (window->isKeyPressed(it->first)) {
                 logger->info(it->second + " is set to pressed");
             }
