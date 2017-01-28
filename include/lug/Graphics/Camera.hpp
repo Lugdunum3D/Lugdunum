@@ -23,6 +23,7 @@ public:
     virtual ~Camera() = default;
 
     Scene* getScene() const;
+    void setScene(Scene* scene);
 
     RenderQueue& getRenderQueue();
     const RenderQueue& getRenderQueue() const;

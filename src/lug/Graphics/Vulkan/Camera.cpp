@@ -8,7 +8,7 @@ namespace Vulkan {
 
 Camera::Camera(const std::string& name) : lug::Graphics::Camera(name) {}
 
-void Camera::update(const RenderView* renderView) {
+void Camera::update(const lug::Graphics::RenderView* renderView) {
     _renderQueue.clear();
 
     if (_scene) {

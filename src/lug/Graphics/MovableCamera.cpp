@@ -5,7 +5,11 @@
 namespace lug {
 namespace Graphics {
 
-MovableCamera::MovableCamera(const std::string& name) : MovableObject(name) {}
+MovableCamera::MovableCamera(const std::string& name, Camera* camera) : MovableObject(name) {
+    if (camera) {
+        attachCamera(camera);
+    }
+}
 
 void MovableCamera::setParent(SceneNode* parent) {
     MovableObject::setParent(parent);

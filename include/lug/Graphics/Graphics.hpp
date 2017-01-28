@@ -8,6 +8,7 @@
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Scene.hpp>
 #include <lug/Graphics/Mesh.hpp>
+#include <lug/Graphics/Camera.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -39,6 +40,7 @@ public:
 
     std::unique_ptr<Scene> createScene();
     std::unique_ptr<Mesh> createMesh(const std::string& name);
+    std::unique_ptr<Camera> createCamera(const std::string& name);
 
 private:
     const char* _appName;

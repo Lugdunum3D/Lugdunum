@@ -92,11 +92,25 @@ bool Application::init(int argc, char* argv[]) {
         return false;
     }
 
-    std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance = _scene->createMeshInstance("cube instance", _cube.get());
-    std::unique_ptr<lug::Graphics::SceneNode> cubeNode = _scene->createSceneNode("cube instance node");
+    // Add mesh to scene
+    {
+        std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance = _scene->createMeshInstance("cube instance", _cube.get());
+        std::unique_ptr<lug::Graphics::SceneNode> cubeNode = _scene->createSceneNode("cube instance node");
 
-    cubeNode->attachMovableObject(std::move(cubeInstance));
-    _scene->getRoot()->attachChild(std::move(cubeNode));
+        cubeNode->attachMovableObject(std::move(cubeInstance));
+        _scene->getRoot()->attachChild(std::move(cubeNode));
+    }
+
+    // Add camera to scene
+    {
+        _camera = _graphics.createCamera("camera");
+        std::unique_ptr<lug::Graphics::MovableCamera> movableCamera = _scene->createMovableCamera("movable camera", _camera.get());
+        std::unique_ptr<lug::Graphics::SceneNode> movableCameraNode = _scene->createSceneNode("movable camera node");
+
+        movableCameraNode->attachMovableObject(std::move(movableCamera));
+        _scene->getRoot()->attachChild(std::move(movableCameraNode));
+        _camera->setScene(_scene.get());
+    }
 
     return true;
 }

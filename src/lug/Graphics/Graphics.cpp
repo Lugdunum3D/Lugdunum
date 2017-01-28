@@ -4,6 +4,7 @@
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Camera.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {
@@ -71,6 +72,24 @@ std::unique_ptr<Mesh> Graphics::createMesh(const std::string& name) {
     }
 
     return mesh;
+}
+
+std::unique_ptr<Camera> Graphics::createCamera(const std::string& name) {
+    if (!_renderer) {
+        LUG_LOG.error("Graphics: Can't create a camera, the renderer is not initialized");
+        return nullptr;
+    }
+
+    std::unique_ptr<Camera> camera = nullptr;
+
+    if (_rendererType == Renderer::Type::Vulkan) {
+        camera = std::make_unique<Vulkan::Camera>(name);
+    }
+    else {
+        LUG_LOG.error("Graphics: Unknown render type");
+    }
+
+    return camera;
 }
 
 } // Graphics

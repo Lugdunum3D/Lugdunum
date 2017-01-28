@@ -2,6 +2,10 @@ inline Scene* Camera::getScene() const {
     return _scene;
 }
 
+inline void Camera::setScene(Scene* scene) {
+    _scene = scene;
+}
+
 inline RenderQueue& Camera::getRenderQueue() {
     return _renderQueue;
 }

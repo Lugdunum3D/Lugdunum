@@ -2,6 +2,7 @@
 
 #include <lug/Core/Application.hpp>
 #include <lug/Graphics/Scene.hpp>
+#include <lug/Graphics/Camera.hpp>
 
 class Application : public lug::Core::Application {
 public:
@@ -22,6 +23,7 @@ public:
 
 private:
     std::unique_ptr<lug::Graphics::Scene> _scene;
+    std::unique_ptr<lug::Graphics::Camera> _camera;
 
     // Temporary store mesh because we don't have resource manager yet
     std::unique_ptr<lug::Graphics::Mesh> _cube;

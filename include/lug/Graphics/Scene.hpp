@@ -3,6 +3,7 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/SceneNode.hpp>
 #include <lug/Graphics/MeshInstance.hpp>
+#include <lug/Graphics/MovableCamera.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -24,7 +25,8 @@ public:
     ~Scene() = default;
 
     std::unique_ptr<SceneNode> createSceneNode(const std::string& name);
-    std::unique_ptr<MeshInstance> createMeshInstance(const std::string& name, Mesh* mesh);
+    std::unique_ptr<MeshInstance> createMeshInstance(const std::string& name, Mesh* mesh = nullptr);
+    std::unique_ptr<MovableCamera> createMovableCamera(const std::string& name, Camera* camera = nullptr);
 
     SceneNode* getRoot();
     const SceneNode* getRoot() const;

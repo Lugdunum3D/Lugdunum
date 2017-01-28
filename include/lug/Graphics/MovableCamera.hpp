@@ -10,7 +10,7 @@ class Camera;
 
 class LUG_GRAPHICS_API MovableCamera final : public lug::Graphics::MovableObject {
 public:
-    MovableCamera(const std::string& name);
+    MovableCamera(const std::string& name, Camera* camera = nullptr);
 
     MovableCamera(const MovableCamera&) = delete;
     MovableCamera(MovableCamera&&) = delete;

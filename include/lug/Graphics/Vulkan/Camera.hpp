@@ -19,7 +19,7 @@ public:
 
     ~Camera() = default;
 
-    void update(const RenderView* renderView) override final;
+    void update(const lug::Graphics::RenderView* renderView) override final;
 };
 
 } // Vulkan

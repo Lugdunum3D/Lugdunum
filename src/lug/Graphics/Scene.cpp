@@ -13,6 +13,10 @@ std::unique_ptr<MeshInstance> Scene::createMeshInstance(const std::string& name,
     return std::make_unique<MeshInstance>(name, mesh);
 }
 
+std::unique_ptr<MovableCamera> Scene::createMovableCamera(const std::string& name, Camera* camera) {
+    return std::make_unique<MovableCamera>(name, camera);
+}
+
 SceneNode* Scene::getSceneNode(const std::string& name) {
     return _root->getSceneNode(name);
 }
