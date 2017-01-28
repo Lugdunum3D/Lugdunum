@@ -9,6 +9,10 @@ std::unique_ptr<SceneNode> Scene::createSceneNode(const std::string& name) {
     return std::make_unique<SceneNode>(name);
 }
 
+std::unique_ptr<MeshInstance> Scene::createMeshInstance(const std::string& name, Mesh* mesh) {
+    return std::make_unique<MeshInstance>(name, mesh);
+}
+
 SceneNode* Scene::getSceneNode(const std::string& name) {
     return _root->getSceneNode(name);
 }

@@ -2,6 +2,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/SceneNode.hpp>
+#include <lug/Graphics/MeshInstance.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -23,6 +24,7 @@ public:
     ~Scene() = default;
 
     std::unique_ptr<SceneNode> createSceneNode(const std::string& name);
+    std::unique_ptr<MeshInstance> createMeshInstance(const std::string& name, Mesh* mesh);
 
     SceneNode* getRoot();
     const SceneNode* getRoot() const;

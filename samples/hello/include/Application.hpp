@@ -23,6 +23,6 @@ public:
 private:
     std::unique_ptr<lug::Graphics::Scene> _scene;
 
-    // Temporary store mesh because it can't be attached to the scene yet
-    std::unique_ptr<lug::Graphics::Mesh> _mesh;
+    // Temporary store mesh because we don't have resource manager yet
+    std::unique_ptr<lug::Graphics::Mesh> _cube;
 };

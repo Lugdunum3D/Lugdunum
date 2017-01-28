@@ -2,13 +2,14 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/MovableObject.hpp>
+#include <lug/Graphics/Mesh.hpp>
 
 namespace lug {
 namespace Graphics {
 
 class LUG_GRAPHICS_API MeshInstance final : public lug::Graphics::MovableObject {
 public:
-    MeshInstance(const std::string& name);
+    MeshInstance(const std::string& name, Mesh* mesh);
 
     MeshInstance(const MeshInstance&) = delete;
     MeshInstance(MeshInstance&&) = delete;
@@ -21,7 +22,7 @@ public:
     void needUpdate() override final;
 
 private:
-    // Mesh* _mesh{nullptr};
+    Mesh* _mesh{nullptr};
     // Mesh::Material* _material{nullptr};
 };
 

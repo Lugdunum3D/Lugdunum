@@ -1,4 +1,5 @@
 #include "Application.hpp"
+#include <lug/Graphics/MeshInstance.hpp>
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
     getRenderWindowInfo().windowInitInfo.title = "Hello Cube";
@@ -10,9 +11,9 @@ bool Application::init(int argc, char* argv[]) {
     }
 
     _scene = _graphics.createScene();
-    _mesh = _graphics.createMesh("Cube");
+    _cube = _graphics.createMesh("Cube");
 
-    _mesh->vertices = {
+    _cube->vertices = {
         {{-1.0f,-1.0f,-1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
         {{-1.0f,-1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
         {{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
@@ -61,7 +62,7 @@ bool Application::init(int argc, char* argv[]) {
         {{1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0}, {0.0f, 0.0f}}
     };
 
-    _mesh->indices = {
+    _cube->indices = {
         // Front
         2, 1, 0,
         2, 3, 1,
@@ -87,7 +88,17 @@ bool Application::init(int argc, char* argv[]) {
         20, 23, 22
     };
 
-    return _mesh->load();
+    if (!_cube->load()) {
+        return false;
+    }
+
+    std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance = _scene->createMeshInstance("cube instance", _cube.get());
+    std::unique_ptr<lug::Graphics::SceneNode> cubeNode = _scene->createSceneNode("cube instance node");
+
+    cubeNode->attachMovableObject(std::move(cubeInstance));
+    _scene->getRoot()->attachChild(std::move(cubeNode));
+
+    return true;
 }
 
 void Application::onEvent(const lug::Window::Event& event) {
