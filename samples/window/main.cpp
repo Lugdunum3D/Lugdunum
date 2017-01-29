@@ -1,3 +1,4 @@
+#include <unordered_map>
 #include <lug/Window/Window.hpp>
 #include <lug/Window/Keyboard.hpp>
 #include <lug/System/Logger.hpp>
@@ -173,6 +174,10 @@ int main() {
                 logger->info(keyEnumMap[event.key.code] + " is released");
             }
 
+            if (event.type == lug::Window::EventType::KEY_CHAR) {
+                logger->info("Char event received: {}", static_cast<char>(event.character.val));
+            }
+
             // Checking to see if any special keys are pressed
             if (event.type == lug::Window::EventType::KEY_DOWN ||
                 event.type == lug::Window::EventType::KEY_UP) {
@@ -192,12 +197,12 @@ int main() {
 
         }
 
-        // Checking that keys states are correctly set
-        for (auto it = keyEnumMap.begin(); it != keyEnumMap.end(); ++it) {
-            if (window->isKeyPressed(it->first)) {
-                logger->info(it->second + " is set to pressed");
-            }
-        }
+//        // Checking that keys states are correctly set
+//        for (auto it = keyEnumMap.begin(); it != keyEnumMap.end(); ++it) {
+//            if (window->isKeyPressed(it->first)) {
+//                logger->info(it->second + " is set to pressed");
+//            }
+//        }
     }
 
     return 0;

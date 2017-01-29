@@ -144,6 +144,12 @@ void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM wPa
         configKeyEvent(e.key, wParam, lParam);
         break;
 
+    case WM_CHAR:
+    case WM_SYSCHAR:
+        e.type = EventType::KEY_CHAR;
+        e.character.val = static_cast<wchar_t>(wParam);
+        break;
+
     default:
         return;
     }

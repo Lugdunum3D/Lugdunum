@@ -11,6 +11,7 @@ enum class LUG_WINDOW_API EventType : uint32_t {
     DESTROY,
     KEY_DOWN,
     KEY_UP,
+    KEY_CHAR,
 };
 
 struct LUG_WINDOW_API KeyEvent {
@@ -21,11 +22,16 @@ struct LUG_WINDOW_API KeyEvent {
     bool system;
 };
 
+struct LUG_WINDOW_API CharEvent {
+    wchar_t val;
+};
+
 struct LUG_WINDOW_API Event {
     EventType type;
 
     union {
         KeyEvent key;
+        CharEvent character;
     };
 };
 
