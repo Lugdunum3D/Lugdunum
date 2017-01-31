@@ -39,6 +39,11 @@ if(ENABLE_CI)
     include_directories(${PROJECT_SOURCE_DIR}/lib/ci_include)
 endif()
 
+# Add parallel build for MSVC
+if(LUG_COMPILER_MSVC)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()
+
 # add the librairies subdirectories
 add_subdirectory(Core)
 add_subdirectory(Graphics)
