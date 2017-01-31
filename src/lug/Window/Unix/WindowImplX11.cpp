@@ -54,6 +54,22 @@ void priv::WindowImpl::close() {
 
 Keyboard::Key keysymToLugKey(KeySym key) {
     switch (key) {
+        case XK_F1:             return Keyboard::Key::F1;           // The F1 key
+        case XK_F2:             return Keyboard::Key::F2;           // The F2 key
+        case XK_F3:             return Keyboard::Key::F3;           // The F3 key
+        case XK_F4:             return Keyboard::Key::F4;           // The F4 key
+        case XK_F5:             return Keyboard::Key::F5;           // The F5 key
+        case XK_F6:             return Keyboard::Key::F6;           // The F6 key
+        case XK_F7:             return Keyboard::Key::F7;           // The F7 key
+        case XK_F8:             return Keyboard::Key::F8;           // The F8 key
+        case XK_F9:             return Keyboard::Key::F9;           // The F9 key
+        case XK_F10:            return Keyboard::Key::F10;          // The F10 key
+        case XK_F11:            return Keyboard::Key::F11;          // The F11 key
+        case XK_F12:            return Keyboard::Key::F12;          // The F12 key
+        case XK_F13:            return Keyboard::Key::F13;          // The F13 key
+        case XK_F14:            return Keyboard::Key::F14;          // The F14 key
+        case XK_F15:            return Keyboard::Key::F15;          // The F15 key
+
         case XK_a:              return Keyboard::Key::A;            // The A key
         case XK_b:              return Keyboard::Key::B;            // The B key
         case XK_c:              return Keyboard::Key::C;            // The C key
@@ -80,6 +96,7 @@ Keyboard::Key keysymToLugKey(KeySym key) {
         case XK_x:              return Keyboard::Key::X;            // The X key
         case XK_y:              return Keyboard::Key::Y;            // The Y key
         case XK_z:              return Keyboard::Key::Z;            // The Z key
+
         case XK_0:              return Keyboard::Key::Num0;         // The 0 key
         case XK_1:              return Keyboard::Key::Num1;         // The 1 key
         case XK_2:              return Keyboard::Key::Num2;         // The 2 key
@@ -90,15 +107,19 @@ Keyboard::Key keysymToLugKey(KeySym key) {
         case XK_7:              return Keyboard::Key::Num7;         // The 7 key
         case XK_8:              return Keyboard::Key::Num8;         // The 8 key
         case XK_9:              return Keyboard::Key::Num9;         // The 9 key
+
         case XK_Escape:         return Keyboard::Key::Escape;       // The Escape key
+
         case XK_Control_L:      return Keyboard::Key::LControl;     // The left Control key
         case XK_Shift_L:        return Keyboard::Key::LShift;       // The left Shift key
         case XK_Alt_L:          return Keyboard::Key::LAlt;         // The left Alt key
         case XK_Super_L:        return Keyboard::Key::LSystem;      // The left OS specific key: window (Windows and Linux), apple (MacOS X), ...
+
         case XK_Control_R:      return Keyboard::Key::RControl;     // The right Control key
         case XK_Shift_R:        return Keyboard::Key::RShift;       // The right Shift key
         case XK_Alt_R:          return Keyboard::Key::RAlt;         // The right Alt key
         case XK_Super_R:        return Keyboard::Key::RSystem;      // The right OS specific key: window (Windows and Linux), apple (MacOS X), ...
+
         case XK_Menu:           return Keyboard::Key::Menu;         // The Menu key
         case XK_bracketleft:    return Keyboard::Key::LBracket;     // The [ key
         case XK_bracketright:   return Keyboard::Key::RBracket;     // The ] key
@@ -106,30 +127,22 @@ Keyboard::Key keysymToLugKey(KeySym key) {
         case XK_comma:          return Keyboard::Key::Comma;        // The , key
         case XK_period:         return Keyboard::Key::Period;       // The . key
         case XK_apostrophe:     return Keyboard::Key::Quote;        // The ' key
+        case XK_quotedbl:       return Keyboard::Key::QuoteDouble;  // The " key
         case XK_slash:          return Keyboard::Key::Slash;        // The / key
         case XK_backslash:      return Keyboard::Key::BackSlash;    // The \ key
         case XK_grave:          return Keyboard::Key::Tilde;        // The ~ key
         case XK_equal:          return Keyboard::Key::Equal;        // The = key
         case XK_minus:          return Keyboard::Key::Dash;         // The - key
+        case XK_ampersand:      return Keyboard::Key::Ampersand;    // The & key
         case XK_space:          return Keyboard::Key::Space;        // The Space key
         case XK_Return:         return Keyboard::Key::Return;       // The Return key
+
         case XK_KP_Enter:       return Keyboard::Key::Return;       // The Return key (from the keypad)
-        case XK_BackSpace:      return Keyboard::Key::BackSpace;    // The Backspace key
-        case XK_Tab:            return Keyboard::Key::Tab;          // The Tabulation key
-        case XK_Prior:          return Keyboard::Key::PageUp;       // The Page up key
-        case XK_Next:           return Keyboard::Key::PageDown;     // The Page down key
-        case XK_End:            return Keyboard::Key::End;          // The End key
-        case XK_Home:           return Keyboard::Key::Home;         // The Home key
-        case XK_Insert:         return Keyboard::Key::Insert;       // The Insert key
-        case XK_Delete:         return Keyboard::Key::Delete;       // The Delete key
         case XK_KP_Add:         return Keyboard::Key::Add;          // The + key
         case XK_KP_Subtract:    return Keyboard::Key::Subtract;     // The - key
         case XK_KP_Multiply:    return Keyboard::Key::Multiply;     // The * key
         case XK_KP_Divide:      return Keyboard::Key::Divide;       // The / key
-        case XK_Left:           return Keyboard::Key::Left;         // Left arrow
-        case XK_Right:          return Keyboard::Key::Right;        // Right arrow
-        case XK_Up:             return Keyboard::Key::Up;           // Up arrow
-        case XK_Down:           return Keyboard::Key::Down;         // Down arrow
+
         case XK_KP_Insert:      return Keyboard::Key::Numpad0;      // The numpad 0 key
         case XK_KP_End:         return Keyboard::Key::Numpad1;      // The numpad 1 key
         case XK_KP_Down:        return Keyboard::Key::Numpad2;      // The numpad 2 key
@@ -140,22 +153,23 @@ Keyboard::Key keysymToLugKey(KeySym key) {
         case XK_KP_Home:        return Keyboard::Key::Numpad7;      // The numpad 7 key
         case XK_KP_Up:          return Keyboard::Key::Numpad8;      // The numpad 8 key
         case XK_KP_Page_Up:     return Keyboard::Key::Numpad9;      // The numpad 9 key
-        case XK_F1:             return Keyboard::Key::F1;           // The F1 key
-        case XK_F2:             return Keyboard::Key::F2;           // The F2 key
-        case XK_F3:             return Keyboard::Key::F3;           // The F3 key
-        case XK_F4:             return Keyboard::Key::F4;           // The F4 key
-        case XK_F5:             return Keyboard::Key::F5;           // The F5 key
-        case XK_F6:             return Keyboard::Key::F6;           // The F6 key
-        case XK_F7:             return Keyboard::Key::F7;           // The F7 key
-        case XK_F8:             return Keyboard::Key::F8;           // The F8 key
-        case XK_F9:             return Keyboard::Key::F9;           // The F9 key
-        case XK_F10:            return Keyboard::Key::F10;          // The F10 key
-        case XK_F11:            return Keyboard::Key::F11;          // The F11 key
-        case XK_F12:            return Keyboard::Key::F12;          // The F12 key
-        case XK_F13:            return Keyboard::Key::F13;          // The F13 key
-        case XK_F14:            return Keyboard::Key::F14;          // The F14 key
-        case XK_F15:            return Keyboard::Key::F15;          // The F15 key
+
+        case XK_BackSpace:      return Keyboard::Key::BackSpace;    // The Backspace key
+        case XK_Tab:            return Keyboard::Key::Tab;          // The Tabulation key
+        case XK_Prior:          return Keyboard::Key::PageUp;       // The Page up key
+        case XK_Next:           return Keyboard::Key::PageDown;     // The Page down key
+        case XK_End:            return Keyboard::Key::End;          // The End key
+        case XK_Home:           return Keyboard::Key::Home;         // The Home key
+        case XK_Insert:         return Keyboard::Key::Insert;       // The Insert key
+        case XK_Delete:         return Keyboard::Key::Delete;       // The Delete key
+        
+        case XK_Left:           return Keyboard::Key::Left;         // Left arrow
+        case XK_Right:          return Keyboard::Key::Right;        // Right arrow
+        case XK_Up:             return Keyboard::Key::Up;           // Up arrow
+        case XK_Down:           return Keyboard::Key::Down;         // Down arrow
+        
         case XK_Pause:          return Keyboard::Key::Pause;        // The Pause key
+        case XK_Caps_Lock:      return Keyboard::Key::CapsLock;     // The Caps Lock key
         default:                return Keyboard::Key::Unknown;
     }
 }
