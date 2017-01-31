@@ -14,6 +14,8 @@
 auto createKeyEnumMap() {
     std::unordered_map<lug::Window::Keyboard::Key, std::string> returnValue;
 
+    returnValue[lug::Window::Keyboard::Key::Unknown] = "Unknown";
+
     returnValue[lug::Window::Keyboard::Key::A] = "A";
     returnValue[lug::Window::Keyboard::Key::B] = "B";
     returnValue[lug::Window::Keyboard::Key::C] = "C";
@@ -40,6 +42,7 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::X] = "X";
     returnValue[lug::Window::Keyboard::Key::Y] = "Y";
     returnValue[lug::Window::Keyboard::Key::Z] = "Z";
+
     returnValue[lug::Window::Keyboard::Key::Num0] = "Num0";
     returnValue[lug::Window::Keyboard::Key::Num1] = "Num1";
     returnValue[lug::Window::Keyboard::Key::Num2] = "Num2";
@@ -50,7 +53,7 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::Num7] = "Num7";
     returnValue[lug::Window::Keyboard::Key::Num8] = "Num8";
     returnValue[lug::Window::Keyboard::Key::Num9] = "Num9";
-    returnValue[lug::Window::Keyboard::Key::Escape] = "Escape";
+
     returnValue[lug::Window::Keyboard::Key::LControl] = "LControl";
     returnValue[lug::Window::Keyboard::Key::LShift] = "LShift";
     returnValue[lug::Window::Keyboard::Key::LAlt] = "LAlt";
@@ -59,6 +62,8 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::RShift] = "RShift";
     returnValue[lug::Window::Keyboard::Key::RAlt] = "RAlt";
     returnValue[lug::Window::Keyboard::Key::RSystem] = "RSystem";
+
+    returnValue[lug::Window::Keyboard::Key::Escape] = "Escape";
     returnValue[lug::Window::Keyboard::Key::Menu] = "Menu";
     returnValue[lug::Window::Keyboard::Key::LBracket] = "LBracket";
     returnValue[lug::Window::Keyboard::Key::RBracket] = "RBracket";
@@ -66,11 +71,13 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::Comma] = "Comma";
     returnValue[lug::Window::Keyboard::Key::Period] = "Period";
     returnValue[lug::Window::Keyboard::Key::Quote] = "Quote";
+    returnValue[lug::Window::Keyboard::Key::QuoteDouble] = "Double Quote";
     returnValue[lug::Window::Keyboard::Key::Slash] = "Slash";
     returnValue[lug::Window::Keyboard::Key::BackSlash] = "BackSlash";
     returnValue[lug::Window::Keyboard::Key::Tilde] = "Tilde";
     returnValue[lug::Window::Keyboard::Key::Equal] = "Equal";
     returnValue[lug::Window::Keyboard::Key::Dash] = "Dash";
+    returnValue[lug::Window::Keyboard::Key::Ampersand] = "Ampersand";
     returnValue[lug::Window::Keyboard::Key::Space] = "Space";
     returnValue[lug::Window::Keyboard::Key::Return] = "Return";
     returnValue[lug::Window::Keyboard::Key::BackSpace] = "BackSpace";
@@ -89,6 +96,7 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::Right] = "Right";
     returnValue[lug::Window::Keyboard::Key::Up] = "Up";
     returnValue[lug::Window::Keyboard::Key::Down] = "Down";
+
     returnValue[lug::Window::Keyboard::Key::Numpad0] = "Numpad0";
     returnValue[lug::Window::Keyboard::Key::Numpad1] = "Numpad1";
     returnValue[lug::Window::Keyboard::Key::Numpad2] = "Numpad2";
@@ -99,6 +107,7 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::Numpad7] = "Numpad7";
     returnValue[lug::Window::Keyboard::Key::Numpad8] = "Numpad8";
     returnValue[lug::Window::Keyboard::Key::Numpad9] = "Numpad9";
+
     returnValue[lug::Window::Keyboard::Key::F1] = "F1";
     returnValue[lug::Window::Keyboard::Key::F2] = "F2";
     returnValue[lug::Window::Keyboard::Key::F3] = "F3";
