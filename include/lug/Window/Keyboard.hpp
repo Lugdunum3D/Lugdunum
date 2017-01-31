@@ -123,108 +123,117 @@ enum class LUG_WINDOW_API Key : int {
 #elif defined(LUG_SYSTEM_LINUX)
 
 enum class LUG_WINDOW_API Key : int {
-    Unknown     = -1,               // Unhandled key
-    A           = XK_a,             // The A key
-    B           = XK_b,             // The B key
-    C           = XK_c,             // The C key
-    D           = XK_d,             // The D key
-    E           = XK_e,             // The E key
-    F           = XK_f,             // The F key
-    G           = XK_g,             // The G key
-    H           = XK_h,             // The H key
-    I           = XK_i,             // The I key
-    J           = XK_j,             // The J key
-    K           = XK_k,             // The K key
-    L           = XK_l,             // The L key
-    M           = XK_m,             // The M key
-    N           = XK_n,             // The N key
-    O           = XK_o,             // The O key
-    P           = XK_p,             // The P key
-    Q           = XK_q,             // The Q key
-    R           = XK_r,             // The R key
-    S           = XK_s,             // The S key
-    T           = XK_t,             // The T key
-    U           = XK_u,             // The U key
-    V           = XK_v,             // The V key
-    W           = XK_w,             // The W key
-    X           = XK_x,             // The X key
-    Y           = XK_y,             // The Y key
-    Z           = XK_z,             // The Z key
-    Num0        = XK_0,             // The 0 key
-    Num1        = XK_1,             // The 1 key
-    Num2        = XK_2,             // The 2 key
-    Num3        = XK_3,             // The 3 key
-    Num4        = XK_4,             // The 4 key
-    Num5        = XK_5,             // The 5 key
-    Num6        = XK_6,             // The 6 key
-    Num7        = XK_7,             // The 7 key
-    Num8        = XK_8,             // The 8 key
-    Num9        = XK_9,             // The 9 key
-    Escape      = XK_Escape,        // The Escape key
-    LControl    = XK_Control_L,     // The left Control key
-    LShift      = XK_Shift_L,       // The left Shift key
-    LAlt        = XK_Alt_L,         // The left Alt key
-    LSystem     = XK_Super_L,       // The left OS specific key: window (Windows and Linux), apple (MacOS X), ...
-    RControl    = XK_Control_R,     // The right Control key
-    RShift      = XK_Shift_R,       // The right Shift key
-    RAlt        = XK_Alt_R,         // The right Alt key
-    RSystem     = XK_Super_R,       // The right OS specific key: window (Windows and Linux), apple (MacOS X), ...
-    Menu        = XK_Menu,          // The Menu key
-    LBracket    = XK_bracketleft,   // The [ key
-    RBracket    = XK_bracketright,  // The ] key
-    SemiColon   = XK_semicolon,     // The , key
-    Comma       = XK_comma,         // The , key
-    Period      = XK_period,        // The . key
-    Quote       = XK_apostrophe,    // The ' key
-    Slash       = XK_slash,         // The / key
-    BackSlash   = XK_backslash,     // The \ key
-    Tilde       = XK_grave,         // The ~ key
-    Equal       = XK_equal,         // The = key
-    Dash        = XK_minus,         // The - key
-    Space       = XK_space,         // The Space key
-    Return      = XK_Return,        // The Return key
-    BackSpace   = XK_BackSpace,     // The Backspace key
-    Tab         = XK_Tab,           // The Tabulation key
-    PageUp      = XK_Prior,         // The Page up key
-    PageDown    = XK_Next,          // The Page down key
-    End         = XK_End,           // The End key
-    Home        = XK_Home,          // The Home key
-    Insert      = XK_Insert,        // The Insert key
-    Delete      = XK_Delete,        // The Delete key
-    Add         = XK_KP_Add,        // The + key
-    Subtract    = XK_KP_Subtract,   // The - key
-    Multiply    = XK_KP_Multiply,   // The * key
-    Divide      = XK_KP_Divide,     // The / key
-    Left        = XK_Left,          // Left arrow
-    Right       = XK_Right,         // Right arrow
-    Up          = XK_Up,            // Up arrow
-    Down        = XK_Down,          // Down arrow
-    Numpad0     = XK_KP_Insert,     // The numpad 0 key
-    Numpad1     = XK_KP_End,        // The numpad 1 key
-    Numpad2     = XK_KP_Down,       // The numpad 2 key
-    Numpad3     = XK_KP_Page_Down,  // The numpad 3 key
-    Numpad4     = XK_KP_Left,       // The numpad 4 key
-    Numpad5     = XK_KP_Begin,      // The numpad 5 key
-    Numpad6     = XK_KP_Right,      // The numpad 6 key
-    Numpad7     = XK_KP_Home,       // The numpad 7 key
-    Numpad8     = XK_KP_Up,         // The numpad 8 key
-    Numpad9     = XK_KP_Page_Up,    // The numpad 9 key
-    F1          = XK_F1,            // The F1 key
-    F2          = XK_F2,            // The F2 key
-    F3          = XK_F3,            // The F3 key
-    F4          = XK_F4,            // The F4 key
-    F5          = XK_F5,            // The F5 key
-    F6          = XK_F6,            // The F6 key
-    F7          = XK_F7,            // The F7 key
-    F8          = XK_F8,            // The F8 key
-    F9          = XK_F9,            // The F9 key
-    F10         = XK_F10,           // The F10 key
-    F11         = XK_F11,           // The F11 key
-    F12         = XK_F12,           // The F12 key
-    F13         = XK_F13,           // The F13 key
-    F14         = XK_F14,           // The F14 key
-    F15         = XK_F15,           // The F15 key
-    Pause       = XK_Pause,         // The Pause key
+    Unknown,        // Unhandled key
+    A,              // The A key
+    B,              // The B key
+    C,              // The C key
+    D,              // The D key
+    E,              // The E key
+    F,              // The F key
+    G,              // The G key
+    H,              // The H key
+    I,              // The I key
+    J,              // The J key
+    K,              // The K key
+    L,              // The L key
+    M,              // The M key
+    N,              // The N key
+    O,              // The O key
+    P,              // The P key
+    Q,              // The Q key
+    R,              // The R key
+    S,              // The S key
+    T,              // The T key
+    U,              // The U key
+    V,              // The V key
+    W,              // The W key
+    X,              // The X key
+    Y,              // The Y key
+    Z,              // The Z key
+
+    Num0,           // The 0 key
+    Num1,           // The 1 key
+    Num2,           // The 2 key
+    Num3,           // The 3 key
+    Num4,           // The 4 key
+    Num5,           // The 5 key
+    Num6,           // The 6 key
+    Num7,           // The 7 key
+    Num8,           // The 8 key
+    Num9,           // The 9 key
+
+    Escape,         // The Escape key
+
+    LControl,       // The left Control key
+    LShift,         // The left Shift key
+    LAlt,           // The left Alt key
+    LSystem,        // The left OS specific key: window (Windows and Linux), apple (MacOS X), ...
+    RControl,       // The right Control key
+    RShift,         // The right Shift key
+    RAlt,           // The right Alt key
+    RSystem,        // The right OS specific key: window (Windows and Linux), apple (MacOS X), ...
+
+    Menu,           // The Menu key
+    LBracket,       // The [ key
+    RBracket,       // The ] key
+    SemiColon,      // The , key
+    Comma,          // The , key
+    Period,         // The . key
+    Quote,          // The ' key
+    QuoteDouble,    // The " key
+    Slash,          // The / key
+    BackSlash,      // The \ key
+    Tilde,          // The ~ key
+    Equal,          // The = key
+    Dash,           // The - key
+    Ampersand,      // The & key
+    Space,          // The Space key
+    Return,         // The Return key
+    BackSpace,      // The Backspace key
+    Tab,            // The Tabulation key
+    PageUp,         // The Page up key
+    PageDown,       // The Page down key
+    End,            // The End key
+    Home,           // The Home key
+    Insert,         // The Insert key
+    Delete,         // The Delete key
+    Add,            // The + key
+    Subtract,       // The - key
+    Multiply,       // The * key
+    Divide,         // The / key
+    Left,           // Left arrow
+    Right,          // Right arrow
+    Up,             // Up arrow
+    Down,           // Down arrow
+
+    Numpad0,        // The numpad 0 key
+    Numpad1,        // The numpad 1 key
+    Numpad2,        // The numpad 2 key
+    Numpad3,        // The numpad 3 key
+    Numpad4,        // The numpad 4 key
+    Numpad5,        // The numpad 5 key
+    Numpad6,        // The numpad 6 key
+    Numpad7,        // The numpad 7 key
+    Numpad8,        // The numpad 8 key
+    Numpad9,        // The numpad 9 key
+
+    F1,             // The F1 key
+    F2,             // The F2 key
+    F3,             // The F3 key
+    F4,             // The F4 key
+    F5,             // The F5 key
+    F6,             // The F6 key
+    F7,             // The F7 key
+    F8,             // The F8 key
+    F9,             // The F9 key
+    F10,            // The F10 key
+    F11,            // The F11 key
+    F12,            // The F12 key
+    F13,            // The F13 key
+    F14,            // The F14 key
+    F15,            // The F15 key
+    Pause,          // The Pause key
+    CapsLock        // The Caps Lock key
 };
 
 #endif
