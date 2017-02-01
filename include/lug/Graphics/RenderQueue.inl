@@ -1,4 +1,4 @@
-inline const std::vector<const MovableObject*>& RenderQueue::getObjects() const {
+inline const std::vector<MovableObject*>& RenderQueue::getObjects() const {
     return _queue;
 
 }

@@ -41,6 +41,8 @@ public:
     const Math::Quatf& getAbsoluteRotation();
     const Math::Vec3f& getAbsoluteScale();
 
+    const Math::Mat4x4f& getTransform();
+
     void attachChild(std::unique_ptr<Node> child);
 
     void translate(const Math::Vec3f& direction, TransformSpace space = TransformSpace::Local);

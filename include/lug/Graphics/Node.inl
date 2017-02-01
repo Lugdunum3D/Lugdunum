@@ -34,3 +34,10 @@ inline const Math::Vec3f& Node::getAbsoluteScale() {
 
     return _absoluteScale;
 }
+
+inline const Math::Mat4x4f& Node::getTransform() {
+    if (_needUpdate) {
+        update();
+    }
+    return _transform;
+}

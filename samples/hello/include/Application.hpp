@@ -26,4 +26,6 @@ private:
 
     // Temporary store mesh because we don't have resource manager yet
     std::unique_ptr<lug::Graphics::Mesh> _cube;
+
+    lug::Graphics::SceneNode* _cubeNode;
 };

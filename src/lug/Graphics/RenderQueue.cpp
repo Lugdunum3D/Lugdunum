@@ -4,7 +4,7 @@
 namespace lug {
 namespace Graphics {
 
-void RenderQueue::addMovableObject(const MovableObject* object) {
+void RenderQueue::addMovableObject(MovableObject* object) {
     _queue[_size] = object;
     ++_size;
 }

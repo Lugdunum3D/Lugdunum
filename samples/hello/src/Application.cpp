@@ -154,6 +154,7 @@ bool Application::init(int argc, char* argv[]) {
     {
         std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance = _scene->createMeshInstance("cube instance", _cube.get());
         std::unique_ptr<lug::Graphics::SceneNode> cubeNode = _scene->createSceneNode("cube instance node");
+        _cubeNode = cubeNode.get();
 
         cubeNode->attachMovableObject(std::move(cubeInstance));
         _scene->getRoot()->attachChild(std::move(cubeNode));
@@ -194,5 +195,6 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame() {
+    _cubeNode->rotate(0.0001f, {0.0f, 1.0f, 0.0f});
     // Do something on each frame
 }

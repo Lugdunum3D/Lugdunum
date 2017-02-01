@@ -6,6 +6,10 @@ inline SceneNode* MovableObject::getParent() {
     return _parent;
 }
 
+inline const SceneNode* MovableObject::getParent() const {
+    return _parent;
+}
+
 inline const std::string& MovableObject::getName() const {
     return _name;
 }

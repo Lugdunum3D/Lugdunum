@@ -22,6 +22,7 @@ public:
 
     virtual void setParent(SceneNode* parent);
     SceneNode* getParent();
+    const SceneNode* getParent() const;
 
     const std::string& getName() const;
 

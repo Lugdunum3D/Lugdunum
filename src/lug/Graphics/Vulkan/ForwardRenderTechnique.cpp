@@ -1,6 +1,7 @@
 #include <lug/Config.hpp>
 #include <lug/Graphics/MeshInstance.hpp>
 #include <lug/Graphics/RenderQueue.hpp>
+#include <lug/Graphics/SceneNode.hpp>
 #include <lug/Graphics/Vulkan/ForwardRenderTechnique.hpp>
 #include <lug/Graphics/Vulkan/Mesh.hpp>
 #include <lug/Graphics/Vulkan/RenderView.hpp>
@@ -22,10 +23,10 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
     static Math::Mat4x4f projectionMatrix{Math::Mat4x4f::identity()};
     static Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({0.0f, 3.0f, 5.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
     static Math::Mat4x4f modelMatrix{Math::Mat4x4f::identity()};
+    static Math::Mat4x4f vpMatrix{Math::Mat4x4f::identity()};
+    static Math::Mat4x4f mvpMatrix{Math::Mat4x4f::identity()};
 
     auto& viewport = _renderView->getViewport();
-
-    Math::Mat4x4f mvpMatrix;
 
     // Update the projection matrix and rotate model matrix
     {
@@ -33,11 +34,9 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
             Math::Geometry::radians(_renderView->getCamera()->getFov()),
             viewport.getRatio(),
             0.1f, 100.0f);
-        // Rotate the object
-        modelMatrix = Math::Geometry::rotate(0.0001f, {0.0f, 1.0f, 0.0f}) * modelMatrix;
 
-        // Compute the MVP Matrix
-        mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
+        // Compute the VP Matrix
+        vpMatrix = projectionMatrix * viewMatrix;
     }
 
     if (!_cmdBuffers[0].begin()) return false;
@@ -45,8 +44,6 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
     // Init render pass
     {
         _graphicsPipeline->bind(&_cmdBuffers[0]);
-
-        vkCmdPushConstants(_cmdBuffers[0], *_graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Math::Mat4x4f), &mvpMatrix);
 
         VkViewport vkViewport{
             vkViewport.x = viewport.offset.x,
@@ -73,12 +70,15 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                                                 {viewport.extent.width, viewport.extent.height},
                                                 {viewport.offset.x, viewport.offset.y});
 
-        for (const auto& object: renderQueue.getObjects()) {
+        for (auto& object: renderQueue.getObjects()) {
             const MeshInstance* meshInstance = dynamic_cast<const MeshInstance*>(object);
             if (meshInstance) {
                 const Mesh* mesh = static_cast<const Mesh*>(meshInstance->getMesh());
-                // LUG_LOG.debug("Render object {}", mesh->name);
                 const VkBuffer vertexBuffer = *mesh->getVertexBuffer();
+
+                LUG_ASSERT(object->getParent() != nullptr, "A MovableObject should have a parent");
+                mvpMatrix = vpMatrix * object->getParent()->getTransform();
+                vkCmdPushConstants(_cmdBuffers[0], *_graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Math::Mat4x4f), &mvpMatrix);
                 vkCmdBindVertexBuffers(_cmdBuffers[0], 0, 1, &vertexBuffer, &vertexBufferOffset);
                 vkCmdDraw(_cmdBuffers[0], 36, 1, 0, 0);
             }
