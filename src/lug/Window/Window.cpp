@@ -85,6 +85,7 @@ void lug::Window::Window::initKeyState() {
     _keyState[lug::Window::Keyboard::Key::X] = false;
     _keyState[lug::Window::Keyboard::Key::Y] = false;
     _keyState[lug::Window::Keyboard::Key::Z] = false;
+
     _keyState[lug::Window::Keyboard::Key::Num0] = false;
     _keyState[lug::Window::Keyboard::Key::Num1] = false;
     _keyState[lug::Window::Keyboard::Key::Num2] = false;
@@ -95,7 +96,9 @@ void lug::Window::Window::initKeyState() {
     _keyState[lug::Window::Keyboard::Key::Num7] = false;
     _keyState[lug::Window::Keyboard::Key::Num8] = false;
     _keyState[lug::Window::Keyboard::Key::Num9] = false;
+
     _keyState[lug::Window::Keyboard::Key::Escape] = false;
+
     _keyState[lug::Window::Keyboard::Key::LControl] = false;
     _keyState[lug::Window::Keyboard::Key::LShift] = false;
     _keyState[lug::Window::Keyboard::Key::LAlt] = false;
@@ -104,6 +107,7 @@ void lug::Window::Window::initKeyState() {
     _keyState[lug::Window::Keyboard::Key::RShift] = false;
     _keyState[lug::Window::Keyboard::Key::RAlt] = false;
     _keyState[lug::Window::Keyboard::Key::RSystem] = false;
+
     _keyState[lug::Window::Keyboard::Key::Menu] = false;
     _keyState[lug::Window::Keyboard::Key::LBracket] = false;
     _keyState[lug::Window::Keyboard::Key::RBracket] = false;
@@ -111,11 +115,13 @@ void lug::Window::Window::initKeyState() {
     _keyState[lug::Window::Keyboard::Key::Comma] = false;
     _keyState[lug::Window::Keyboard::Key::Period] = false;
     _keyState[lug::Window::Keyboard::Key::Quote] = false;
+    _keyState[lug::Window::Keyboard::Key::QuoteDouble] = false;
     _keyState[lug::Window::Keyboard::Key::Slash] = false;
     _keyState[lug::Window::Keyboard::Key::BackSlash] = false;
     _keyState[lug::Window::Keyboard::Key::Tilde] = false;
     _keyState[lug::Window::Keyboard::Key::Equal] = false;
     _keyState[lug::Window::Keyboard::Key::Dash] = false;
+    _keyState[lug::Window::Keyboard::Key::Ampersand] = false;
     _keyState[lug::Window::Keyboard::Key::Space] = false;
     _keyState[lug::Window::Keyboard::Key::Return] = false;
     _keyState[lug::Window::Keyboard::Key::BackSpace] = false;
@@ -134,6 +140,7 @@ void lug::Window::Window::initKeyState() {
     _keyState[lug::Window::Keyboard::Key::Right] = false;
     _keyState[lug::Window::Keyboard::Key::Up] = false;
     _keyState[lug::Window::Keyboard::Key::Down] = false;
+
     _keyState[lug::Window::Keyboard::Key::Numpad0] = false;
     _keyState[lug::Window::Keyboard::Key::Numpad1] = false;
     _keyState[lug::Window::Keyboard::Key::Numpad2] = false;
@@ -144,6 +151,7 @@ void lug::Window::Window::initKeyState() {
     _keyState[lug::Window::Keyboard::Key::Numpad7] = false;
     _keyState[lug::Window::Keyboard::Key::Numpad8] = false;
     _keyState[lug::Window::Keyboard::Key::Numpad9] = false;
+
     _keyState[lug::Window::Keyboard::Key::F1] = false;
     _keyState[lug::Window::Keyboard::Key::F2] = false;
     _keyState[lug::Window::Keyboard::Key::F3] = false;
@@ -160,6 +168,7 @@ void lug::Window::Window::initKeyState() {
     _keyState[lug::Window::Keyboard::Key::F14] = false;
     _keyState[lug::Window::Keyboard::Key::F15] = false;
     _keyState[lug::Window::Keyboard::Key::Pause] = false;
+    _keyState[lug::Window::Keyboard::Key::CapsLock] = false;
 }
 
 bool lug::Window::Window::isOpen() const {

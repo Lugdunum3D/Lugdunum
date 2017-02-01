@@ -4,7 +4,7 @@
 uint8_t lug::Window::priv::WindowImpl::windowCount = 0;
 lug::Window::priv::WindowImpl* lug::Window::priv::WindowImpl::fullscreenWindow = nullptr;
 
-lug::Window::priv::WindowImpl::WindowImpl(Window* win) : _parent{win} {}
+lug::Window::priv::WindowImpl::WindowImpl(Window* win) : _parent{ win } {}
 
 lug::Window::priv::WindowImpl::~WindowImpl() {
     // Destroy the custom icon, if any
@@ -49,7 +49,8 @@ bool lug::Window::priv::WindowImpl::create(const std::string& title, Style style
     DWORD win32Style = WS_VISIBLE;
     if (style == Style::None) {
         win32Style |= WS_POPUP;
-    } else {
+    }
+    else {
         if ((style & Style::Titlebar) == Style::Titlebar) {
             win32Style |= WS_CAPTION | WS_MINIMIZEBOX;
         }
@@ -99,6 +100,124 @@ void lug::Window::priv::WindowImpl::close() {
 
     // No longer capture the cursor
     ReleaseCapture();
+}
+
+lug::Window::Keyboard::Key keysymToLugKey(WPARAM key) {
+    switch (key) {
+    case VK_F1:             return lug::Window::Keyboard::Key::F1;           // The F1 key
+    case VK_F2:             return lug::Window::Keyboard::Key::F2;           // The F2 key
+    case VK_F3:             return lug::Window::Keyboard::Key::F3;           // The F3 key
+    case VK_F4:             return lug::Window::Keyboard::Key::F4;           // The F4 key
+    case VK_F5:             return lug::Window::Keyboard::Key::F5;           // The F5 key
+    case VK_F6:             return lug::Window::Keyboard::Key::F6;           // The F6 key
+    case VK_F7:             return lug::Window::Keyboard::Key::F7;           // The F7 key
+    case VK_F8:             return lug::Window::Keyboard::Key::F8;           // The F8 key
+    case VK_F9:             return lug::Window::Keyboard::Key::F9;           // The F9 key
+    case VK_F10:            return lug::Window::Keyboard::Key::F10;          // The F10 key
+    case VK_F11:            return lug::Window::Keyboard::Key::F11;          // The F11 key
+    case VK_F12:            return lug::Window::Keyboard::Key::F12;          // The F12 key
+    case VK_F13:            return lug::Window::Keyboard::Key::F13;          // The F13 key
+    case VK_F14:            return lug::Window::Keyboard::Key::F14;          // The F14 key
+    case VK_F15:            return lug::Window::Keyboard::Key::F15;          // The F15 key
+
+    case 'A' :              return lug::Window::Keyboard::Key::A;            // The A key
+    case 'B' :              return lug::Window::Keyboard::Key::B;            // The B key
+    case 'C' :              return lug::Window::Keyboard::Key::C;            // The C key
+    case 'D' :              return lug::Window::Keyboard::Key::D;            // The D key
+    case 'E' :              return lug::Window::Keyboard::Key::E;            // The E key
+    case 'F' :              return lug::Window::Keyboard::Key::F;            // The F key
+    case 'G' :              return lug::Window::Keyboard::Key::G;            // The G key
+    case 'H' :              return lug::Window::Keyboard::Key::H;            // The H key
+    case 'I' :              return lug::Window::Keyboard::Key::I;            // The I key
+    case 'J' :              return lug::Window::Keyboard::Key::J;            // The J key
+    case 'K' :              return lug::Window::Keyboard::Key::K;            // The K key
+    case 'L' :              return lug::Window::Keyboard::Key::L;            // The L key
+    case 'M' :              return lug::Window::Keyboard::Key::M;            // The M key
+    case 'N' :              return lug::Window::Keyboard::Key::N;            // The N key
+    case 'O' :              return lug::Window::Keyboard::Key::O;            // The O key
+    case 'P' :              return lug::Window::Keyboard::Key::P;            // The P key
+    case 'Q' :              return lug::Window::Keyboard::Key::Q;            // The Q key
+    case 'R' :              return lug::Window::Keyboard::Key::R;            // The R key
+    case 'S' :              return lug::Window::Keyboard::Key::S;            // The S key
+    case 'T' :              return lug::Window::Keyboard::Key::T;            // The T key
+    case 'U' :              return lug::Window::Keyboard::Key::U;            // The U key
+    case 'V' :              return lug::Window::Keyboard::Key::V;            // The V key
+    case 'W' :              return lug::Window::Keyboard::Key::W;            // The W key
+    case 'X' :              return lug::Window::Keyboard::Key::X;            // The X key
+    case 'Y' :              return lug::Window::Keyboard::Key::Y;            // The Y key
+    case 'Z' :              return lug::Window::Keyboard::Key::Z;            // The Z key
+
+    case '0' :              return lug::Window::Keyboard::Key::Num0;         // The 0 key
+    case '1' :              return lug::Window::Keyboard::Key::Num1;         // The 1 key
+    case '2' :              return lug::Window::Keyboard::Key::Num2;         // The 2 key
+    case '3' :              return lug::Window::Keyboard::Key::Num3;         // The 3 key
+    case '4' :              return lug::Window::Keyboard::Key::Num4;         // The 4 key
+    case '5' :              return lug::Window::Keyboard::Key::Num5;         // The 5 key
+    case '6' :              return lug::Window::Keyboard::Key::Num6;         // The 6 key
+    case '7' :              return lug::Window::Keyboard::Key::Num7;         // The 7 key
+    case '8' :              return lug::Window::Keyboard::Key::Num8;         // The 8 key
+    case '9' :              return lug::Window::Keyboard::Key::Num9;         // The 9 key
+
+    case VK_ESCAPE :        return lug::Window::Keyboard::Key::Escape;       // The Escape key
+
+    case VK_LCONTROL :      return lug::Window::Keyboard::Key::LControl;     // The left Control key
+    case VK_LSHIFT :        return lug::Window::Keyboard::Key::LShift;       // The left Shift key
+    case VK_LMENU :         return lug::Window::Keyboard::Key::LAlt;         // The left Alt key
+    case VK_LWIN :          return lug::Window::Keyboard::Key::LSystem;      // The left OS specific key: window (Windows and Linux), apple (MacOS X), ...
+
+    case VK_RCONTROL :      return lug::Window::Keyboard::Key::RControl;     // The right Control key
+    case VK_RSHIFT :        return lug::Window::Keyboard::Key::RShift;       // The right Shift key
+    case VK_RMENU :         return lug::Window::Keyboard::Key::RAlt;         // The right Alt key
+    case VK_RWIN :          return lug::Window::Keyboard::Key::RSystem;      // The right OS specific key: window (Windows and Linux), apple (MacOS X), ...
+
+    case VK_APPS :          return lug::Window::Keyboard::Key::Menu;         // The Menu key
+    case VK_OEM_4:          return lug::Window::Keyboard::Key::LBracket;     // The [ key
+    case VK_OEM_6:          return lug::Window::Keyboard::Key::RBracket;     // The ] key
+    case VK_OEM_1:          return lug::Window::Keyboard::Key::SemiColon;    // The , key
+    case VK_OEM_COMMA:      return lug::Window::Keyboard::Key::Comma;        // The , key
+    case VK_OEM_PERIOD:     return lug::Window::Keyboard::Key::Period;       // The . key
+    case VK_OEM_7:          return lug::Window::Keyboard::Key::Quote;        // The ' key
+    case VK_OEM_2:          return lug::Window::Keyboard::Key::Slash;        // The / key
+    case VK_OEM_5:          return lug::Window::Keyboard::Key::BackSlash;    // The \ key
+    case VK_OEM_3:          return lug::Window::Keyboard::Key::Tilde;        // The ~ key
+    case VK_OEM_PLUS:       return lug::Window::Keyboard::Key::Equal;        // The = key
+    case VK_OEM_MINUS:      return lug::Window::Keyboard::Key::Dash;         // The - key
+    case VK_SPACE:          return lug::Window::Keyboard::Key::Space;        // The Space key
+    case VK_RETURN:         return lug::Window::Keyboard::Key::Return;       // The Return key
+
+    case VK_ADD:            return lug::Window::Keyboard::Key::Add;          // The + key
+    case VK_SUBTRACT:       return lug::Window::Keyboard::Key::Subtract;     // The - key
+    case VK_MULTIPLY:       return lug::Window::Keyboard::Key::Multiply;     // The * key
+    case VK_DIVIDE:         return lug::Window::Keyboard::Key::Divide;       // The / key
+
+    case VK_NUMPAD0:        return lug::Window::Keyboard::Key::Numpad0;      // The numpad 0 key
+    case VK_NUMPAD1:        return lug::Window::Keyboard::Key::Numpad1;      // The numpad 1 key
+    case VK_NUMPAD2:        return lug::Window::Keyboard::Key::Numpad2;      // The numpad 2 key
+    case VK_NUMPAD3:        return lug::Window::Keyboard::Key::Numpad3;      // The numpad 3 key
+    case VK_NUMPAD4:        return lug::Window::Keyboard::Key::Numpad4;      // The numpad 4 key
+    case VK_NUMPAD5:        return lug::Window::Keyboard::Key::Numpad5;      // The numpad 5 key
+    case VK_NUMPAD6:        return lug::Window::Keyboard::Key::Numpad6;      // The numpad 6 key
+    case VK_NUMPAD7:        return lug::Window::Keyboard::Key::Numpad7;      // The numpad 7 key
+    case VK_NUMPAD8:        return lug::Window::Keyboard::Key::Numpad8;      // The numpad 8 key
+    case VK_NUMPAD9:        return lug::Window::Keyboard::Key::Numpad9;      // The numpad 9 key
+
+    case VK_BACK:           return lug::Window::Keyboard::Key::BackSpace;    // The Backspace key
+    case VK_TAB:            return lug::Window::Keyboard::Key::Tab;          // The Tabulation key
+    case VK_PRIOR:          return lug::Window::Keyboard::Key::PageUp;       // The Page up key
+    case VK_NEXT:           return lug::Window::Keyboard::Key::PageDown;     // The Page down key
+    case VK_END:            return lug::Window::Keyboard::Key::End;          // The End key
+    case VK_HOME:           return lug::Window::Keyboard::Key::Home;         // The Home key
+    case VK_INSERT:         return lug::Window::Keyboard::Key::Insert;       // The Insert key
+    case VK_DELETE:         return lug::Window::Keyboard::Key::Delete;       // The Delete key
+
+    case VK_LEFT:           return lug::Window::Keyboard::Key::Left;         // Left arrow
+    case VK_RIGHT:          return lug::Window::Keyboard::Key::Right;        // Right arrow
+    case VK_UP:             return lug::Window::Keyboard::Key::Up;           // Up arrow
+    case VK_DOWN:           return lug::Window::Keyboard::Key::Down;         // Down arrow
+
+    case VK_PAUSE:          return lug::Window::Keyboard::Key::Pause;        // The Pause key
+    default:                return lug::Window::Keyboard::Key::Unknown;
+    }
 }
 
 bool lug::Window::priv::WindowImpl::pollEvent(lug::Window::Event& event) {
@@ -190,7 +309,8 @@ bool lug::Window::priv::WindowImpl::activateFullscreen() {
         if (MessageBox(NULL, "Fullscreen mode has failed to be initialized. Use Windowed Mode Instead?", "Warning", MB_YESNO | MB_ICONEXCLAMATION) == IDYES) {
             _fullscreen = false;
             return false;
-        } else {
+        }
+        else {
             // Pop Up A Message Box Letting User Know The Program Is Closing.
             MessageBox(NULL, "Program Will Now Close.", "ERROR", MB_OK | MB_ICONSTOP);
             return false;
@@ -231,7 +351,7 @@ lug::Window::Keyboard::Key lug::Window::priv::WindowImpl::getKeyCode(WPARAM wPar
         break;
     }
 
-    return static_cast<Keyboard::Key>(new_vk);
+    return keysymToLugKey(new_vk);
 }
 
 void lug::Window::priv::WindowImpl::configKeyEvent(KeyEvent& key, WPARAM wParam, LPARAM lParam) {
