@@ -1,6 +1,7 @@
-#include <lug/Graphics/Vulkan/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/ShaderModule.hpp>
 #include <lug/System/Logger.hpp>
 
@@ -70,11 +71,6 @@ void Pipeline::bind(const CommandBuffer* commandBuffer) {
 }
 
 std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device) {
-    struct Vertex{
-        float pos[3];
-        float normal[3];
-    };
-
     auto vertexShader = ShaderModule::create("shader.vert.spv", device);
     auto fragmentShader = ShaderModule::create("shader.frag.spv", device);
     if (vertexShader == nullptr || fragmentShader == nullptr) {
@@ -111,11 +107,11 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device)
 
     VkVertexInputBindingDescription vertexInputBindingDesc{
         vertexInputBindingDesc.binding = 0,
-        vertexInputBindingDesc.stride = sizeof(Vertex),
+        vertexInputBindingDesc.stride = sizeof(Mesh::Vertex),
         vertexInputBindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX
     };
 
-    VkVertexInputAttributeDescription vertexInputAttributesDesc[2] = {
+    VkVertexInputAttributeDescription vertexInputAttributesDesc[4] = {
         {
             vertexInputAttributesDesc[0].location = 0,
             vertexInputAttributesDesc[0].binding = 0,
@@ -126,7 +122,19 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device)
             vertexInputAttributesDesc[1].location = 1,
             vertexInputAttributesDesc[1].binding = 0,
             vertexInputAttributesDesc[1].format = VK_FORMAT_R32G32B32_SFLOAT,
-            vertexInputAttributesDesc[1].offset = offsetof(Vertex, normal)
+            vertexInputAttributesDesc[1].offset = offsetof(Mesh::Vertex, color)
+        },
+        {
+            vertexInputAttributesDesc[2].location = 2,
+            vertexInputAttributesDesc[2].binding = 0,
+            vertexInputAttributesDesc[2].format = VK_FORMAT_R32G32B32_SFLOAT,
+            vertexInputAttributesDesc[2].offset = offsetof(Mesh::Vertex, normal)
+        },
+        {
+            vertexInputAttributesDesc[3].location = 3,
+            vertexInputAttributesDesc[3].binding = 0,
+            vertexInputAttributesDesc[3].format = VK_FORMAT_R32G32_SFLOAT,
+            vertexInputAttributesDesc[3].offset = offsetof(Mesh::Vertex, uv)
         }
     };
 
@@ -137,7 +145,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device)
         vertexInputInfo.flags = 0,
         vertexInputInfo.vertexBindingDescriptionCount = 1,
         vertexInputInfo.pVertexBindingDescriptions = &vertexInputBindingDesc,
-        vertexInputInfo.vertexAttributeDescriptionCount = 2,
+        vertexInputInfo.vertexAttributeDescriptionCount = 4,
         vertexInputInfo.pVertexAttributeDescriptions = vertexInputAttributesDesc
    };
 

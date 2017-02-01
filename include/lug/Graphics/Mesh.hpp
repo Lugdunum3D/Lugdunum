@@ -16,9 +16,11 @@ public:
         Math::Vec3f specular;
     };
 
-    struct Vertex{
+    struct Vertex {
         Math::Vec3f pos;
+        Math::Vec3f color;
         Math::Vec3f normal;
+        Math::Vec2f uv;
     };
 
 public:
