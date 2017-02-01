@@ -40,10 +40,17 @@ void PipelineLayout::destroy() {
 
 std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
     VkPushConstantRange pushConstants[] = {
+        // Camera view projection matrix
         {
             pushConstants[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
             pushConstants[0].offset = 0,
             pushConstants[0].size = sizeof(Math::Mat4x4f)
+        },
+        // Model transformation
+        {
+            pushConstants[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+            pushConstants[1].offset = sizeof(Math::Mat4x4f),
+            pushConstants[1].size = sizeof(Math::Mat4x4f)
         }
     };
 
@@ -53,7 +60,7 @@ std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
         createInfo.flags = 0,
         createInfo.setLayoutCount = 0,
         createInfo.pSetLayouts = nullptr,
-        createInfo.pushConstantRangeCount = sizeof(pushConstants) / sizeof(pushConstants[0]), // TODO: Sorry ^_^
+        createInfo.pushConstantRangeCount = 2,
         createInfo.pPushConstantRanges = pushConstants
     };
 

@@ -22,9 +22,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                                     const Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) {
     static Math::Mat4x4f projectionMatrix{Math::Mat4x4f::identity()};
     static Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({0.0f, 3.0f, 5.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
-    static Math::Mat4x4f modelMatrix{Math::Mat4x4f::identity()};
     static Math::Mat4x4f vpMatrix{Math::Mat4x4f::identity()};
-    static Math::Mat4x4f mvpMatrix{Math::Mat4x4f::identity()};
 
     auto& viewport = _renderView->getViewport();
 
@@ -78,8 +76,13 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                 const VkBuffer vertexBuffer = *mesh->getVertexBuffer();
 
                 LUG_ASSERT(object->getParent() != nullptr, "A MovableObject should have a parent");
-                mvpMatrix = vpMatrix * object->getParent()->getTransform();
-                vkCmdPushConstants(_cmdBuffers[0], *_graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Math::Mat4x4f), &mvpMatrix);
+                Math::Mat4x4f pushConstants[] = {
+                    vpMatrix,
+                    object->getParent()->getTransform()
+                };
+                vkCmdPushConstants(_cmdBuffers[0], *_graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
+
+
                 vkCmdBindVertexBuffers(_cmdBuffers[0], 0, 1, &vertexBuffer, &vertexBufferOffset);
                 vkCmdBindIndexBuffer(_cmdBuffers[0], *mesh->getIndexBuffer(), indexBufferOffset, VK_INDEX_TYPE_UINT32);
                 vkCmdDrawIndexed(_cmdBuffers[0], (uint32_t)mesh->indices.size(), 1, 0, 0, 0);
