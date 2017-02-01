@@ -65,6 +65,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
     // Render objects
     {
         VkDeviceSize vertexBufferOffset = 0;
+        VkDeviceSize indexBufferOffset = 0;
         _graphicsPipeline->getRenderPass()->begin(&_cmdBuffers[0],
                                                 _framebuffers[currentImageIndex],
                                                 {viewport.extent.width, viewport.extent.height},
@@ -80,7 +81,8 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                 mvpMatrix = vpMatrix * object->getParent()->getTransform();
                 vkCmdPushConstants(_cmdBuffers[0], *_graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Math::Mat4x4f), &mvpMatrix);
                 vkCmdBindVertexBuffers(_cmdBuffers[0], 0, 1, &vertexBuffer, &vertexBufferOffset);
-                vkCmdDraw(_cmdBuffers[0], 36, 1, 0, 0);
+                vkCmdBindIndexBuffer(_cmdBuffers[0], *mesh->getIndexBuffer(), indexBufferOffset, VK_INDEX_TYPE_UINT32);
+                vkCmdDrawIndexed(_cmdBuffers[0], (uint32_t)mesh->indices.size(), 1, 0, 0, 0);
             }
         }
 
