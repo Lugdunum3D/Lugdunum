@@ -31,10 +31,10 @@ public:
     virtual ~RenderTechnique() = default;
 
     virtual bool render(const RenderQueue& renderQueue, const Semaphore& imageReadySemaphore, const Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) = 0;
-    virtual bool init(const std::vector<ImageView>& imageViews) = 0;
+    virtual bool init(const std::vector<std::unique_ptr<ImageView> >& imageViews) = 0;
     virtual void destroy() = 0;
 
-    virtual bool initFramebuffers(const std::vector<ImageView>& imageViews) = 0;
+    virtual bool initFramebuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) = 0;
 
 protected:
     const RenderView* _renderView;

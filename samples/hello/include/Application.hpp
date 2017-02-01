@@ -28,4 +28,5 @@ private:
     std::unique_ptr<lug::Graphics::Mesh> _cube;
 
     lug::Graphics::SceneNode* _cubeNode;
+    lug::Graphics::SceneNode* _cubeNode2;
 };

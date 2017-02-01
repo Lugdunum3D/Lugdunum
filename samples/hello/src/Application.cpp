@@ -145,7 +145,7 @@ bool Application::init(int argc, char* argv[]) {
         return false;
     }
 
-    // Add mesh to scene
+    // Add cube to scene
     {
         std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance = _scene->createMeshInstance("cube instance", _cube.get());
         std::unique_ptr<lug::Graphics::SceneNode> cubeNode = _scene->createSceneNode("cube instance node");
@@ -153,6 +153,16 @@ bool Application::init(int argc, char* argv[]) {
 
         cubeNode->attachMovableObject(std::move(cubeInstance));
         _scene->getRoot()->attachChild(std::move(cubeNode));
+    }
+
+    // Add cube2 to scene
+    {
+        std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance2 = _scene->createMeshInstance("cube instance 2", _cube.get());
+        std::unique_ptr<lug::Graphics::SceneNode> cubeNode2 = _scene->createSceneNode("cube instance node 2");
+        _cubeNode2 = cubeNode2.get();
+
+        cubeNode2->attachMovableObject(std::move(cubeInstance2));
+        _scene->getRoot()->attachChild(std::move(cubeNode2));
     }
 
     std::unique_ptr<lug::Graphics::Camera> camera = _graphics.createCamera("camera");
@@ -179,6 +189,9 @@ bool Application::init(int argc, char* argv[]) {
         renderViews[0]->attachCamera(std::move(camera));
         renderViews[1]->attachCamera(std::move(camera2));
     }
+
+    _cubeNode2->translate({0.0f, -2.0f, 0.0f});
+    _cubeNode->scale({0.5f, 0.5f, 0.5f});
 
     return true;
 }

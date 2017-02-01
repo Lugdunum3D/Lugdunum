@@ -186,6 +186,21 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device)
         multisampling.alphaToOneEnable = VK_FALSE
     };
 
+    VkPipelineDepthStencilStateCreateInfo depthStencil {
+        depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+        depthStencil.pNext = nullptr,
+        depthStencil.flags = 0,
+        depthStencil.depthTestEnable = VK_TRUE,
+        depthStencil.depthWriteEnable = VK_TRUE,
+        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS,
+        depthStencil.depthBoundsTestEnable = VK_FALSE,
+        depthStencil.stencilTestEnable = VK_FALSE,
+        {}, // depthStencil.front (Used for stencil, we don't need)
+        {}, // depthStencil.back (Used for stencil, we don't need)
+        depthStencil.minDepthBounds = 0.0f, // For depth bound, we don't care
+        depthStencil.maxDepthBounds = 0.0f // For depth bound, we don't care
+    };
+
     VkPipelineColorBlendAttachmentState colorBlendAttachment{
         colorBlendAttachment.blendEnable = VK_FALSE,
         colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO ,
@@ -268,7 +283,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device)
         createInfo.pViewportState = &viewportState,
         createInfo.pRasterizationState = &rasterizer,
         createInfo.pMultisampleState = &multisampling,
-        createInfo.pDepthStencilState = nullptr,
+        createInfo.pDepthStencilState = &depthStencil,
         createInfo.pColorBlendState = &colorBlending,
         createInfo.pDynamicState = &dynamicStateInfo,
         createInfo.layout = *pipelineLayout,

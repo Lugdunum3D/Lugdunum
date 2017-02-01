@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/Image.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -37,6 +38,14 @@ public:
     }
 
     void destroy();
+
+    static std::unique_ptr<ImageView> create(
+        const Device* device,
+        const Image* image,
+        VkFormat format,
+        VkImageAspectFlags imageAspect = VK_IMAGE_ASPECT_COLOR_BIT,
+        VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D
+    );
 
 private:
     VkImageView _imageView{ VK_NULL_HANDLE };

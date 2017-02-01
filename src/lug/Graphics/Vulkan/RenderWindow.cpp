@@ -118,7 +118,9 @@ bool RenderWindow::endFrame() {
 lug::Graphics::RenderView* RenderWindow::createView(lug::Graphics::RenderView::InitInfo& initInfo) {
     std::unique_ptr<RenderView> renderView = std::make_unique<RenderView>(this);
 
-    renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, _swapchain.getImagesViews());
+    if (!renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, _swapchain.getImagesViews())) {
+        return nullptr;
+    }
 
     _renderViews.push_back(std::move(renderView));
 
@@ -488,7 +490,6 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
 }
 
 void RenderWindow::destroy() {
-    LUG_LOG.info("Destroy render window");
     _presentQueue->waitIdle();
 
     for (auto& renderView : _renderViews) {

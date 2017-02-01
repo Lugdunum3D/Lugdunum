@@ -2,6 +2,7 @@
 #include <lug/Graphics/Vulkan/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Framebuffer.hpp>
+#include <lug/Graphics/Vulkan/Image.hpp>
 #include <lug/System/Logger.hpp>
 
 namespace lug {
@@ -44,8 +45,12 @@ void RenderPass::begin(const CommandBuffer* commandBuffer,
                         const Math::Vec2f& renderExtent,
                         const Math::Vec2f& renderOffset,
                         VkSubpassContents contents) {
-    VkClearValue clearColor{};
-    clearColor.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    VkClearValue clearColors[2];
+    clearColors[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    clearColors[1].depthStencil = {
+        1.0f, // Depth clear value
+        0 // Stecil clear value (We don't care yet)
+    };
 
     VkRenderPassBeginInfo beginInfo{
         beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
@@ -53,8 +58,8 @@ void RenderPass::begin(const CommandBuffer* commandBuffer,
         beginInfo.renderPass = _renderPass,
         beginInfo.framebuffer = framebuffer,
         {}, // beginInfo.renderArea
-        beginInfo.clearValueCount = 1,
-        beginInfo.pClearValues = &clearColor
+        beginInfo.clearValueCount = 2,
+        beginInfo.pClearValues = clearColors
     };
 
     beginInfo.renderArea.offset = {(int32_t)renderOffset.x(), (int32_t)renderOffset.y()};
@@ -68,22 +73,46 @@ void RenderPass::end(const CommandBuffer* commandBuffer) {
 }
 
 std::unique_ptr<RenderPass> RenderPass::create(const Device* device) {
+VkFormat depthFormat = Image::findSupportedFormat(device,
+                                                        {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+                                                        VK_IMAGE_TILING_OPTIMAL,
+                                                        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
-    VkAttachmentDescription colorAttachment{
-        colorAttachment.flags = 0,
-        colorAttachment.format = VK_FORMAT_B8G8R8A8_UNORM,
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT,
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+    VkAttachmentDescription attachments [2]{
+        // Color attachment
+        {
+            attachments[0].flags = 0,
+            attachments[0].format = VK_FORMAT_B8G8R8A8_UNORM,
+            attachments[0].samples = VK_SAMPLE_COUNT_1_BIT,
+            attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            attachments[0].initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            attachments[0].finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+        },
+        // Depth/stencil attachment
+        {
+            attachments[1].flags = 0,
+            attachments[1].format = depthFormat,
+            attachments[1].samples = VK_SAMPLE_COUNT_1_BIT,
+            attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            attachments[1].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            attachments[1].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            attachments[1].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+        }
     };
 
     VkAttachmentReference colorAttachmentRef{
         colorAttachmentRef.attachment = 0,
         colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+    };
+
+    VkAttachmentReference depthAttachmentRef{
+        depthAttachmentRef.attachment = 1,
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
     };
 
     VkSubpassDescription subpass{
@@ -94,7 +123,7 @@ std::unique_ptr<RenderPass> RenderPass::create(const Device* device) {
         subpass.colorAttachmentCount = 1,
         subpass.pColorAttachments = &colorAttachmentRef,
         subpass.pResolveAttachments = nullptr,
-        subpass.pDepthStencilAttachment = nullptr,
+        subpass.pDepthStencilAttachment = &depthAttachmentRef,
         subpass.preserveAttachmentCount = 0,
         subpass.pPreserveAttachments = nullptr
     };
@@ -103,8 +132,8 @@ std::unique_ptr<RenderPass> RenderPass::create(const Device* device) {
         createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = 0,
-        createInfo.attachmentCount = 1,
-        createInfo.pAttachments = &colorAttachment,
+        createInfo.attachmentCount = 2,
+        createInfo.pAttachments = attachments,
         createInfo.subpassCount = 1,
         createInfo.pSubpasses = &subpass,
         createInfo.dependencyCount = 0,

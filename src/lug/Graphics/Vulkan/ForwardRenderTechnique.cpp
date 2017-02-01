@@ -97,7 +97,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
     return _presentQueue->submit(_cmdBuffers[0], {drawCompleteSemaphore}, {imageReadySemaphore}, {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT});
 }
 
-bool ForwardRenderTechnique::init(const std::vector<ImageView>& imageViews) {
+bool ForwardRenderTechnique::init(const std::vector<std::unique_ptr<ImageView> >& imageViews) {
     _graphicsPipeline = Pipeline::createGraphicsPipeline(_device);
     if (!_graphicsPipeline) {
         return false;
@@ -108,7 +108,7 @@ bool ForwardRenderTechnique::init(const std::vector<ImageView>& imageViews) {
         return false;
     }
 
-    return initFramebuffers(imageViews);
+    return initDepthBuffers(imageViews) && initFramebuffers(imageViews);
 }
 
 void ForwardRenderTechnique::destroy() {
@@ -125,7 +125,65 @@ void ForwardRenderTechnique::destroy() {
     _framebuffers.clear();
 }
 
-bool ForwardRenderTechnique::initFramebuffers(const std::vector<ImageView>& imageViews) {
+bool ForwardRenderTechnique::initDepthBuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) {
+    VkFormat imagesFormat = Image::findSupportedFormat(_device,
+                                                        {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+                                                        VK_IMAGE_TILING_OPTIMAL,
+                                                        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    if (imagesFormat == VK_FORMAT_UNDEFINED) {
+        LUG_LOG.error("ForwardRenderTechnique: Can't find supported format for depth buffer");
+        return false;
+    }
+
+    _depthBuffers.resize(imageViews.size());
+    for (uint32_t i = 0; i < imageViews.size(); ++i) {
+        std::unique_ptr<Image> image = nullptr;
+        std::unique_ptr<ImageView> imageView = nullptr;
+        std::unique_ptr<DeviceMemory> imageMemory = nullptr;
+
+        VkExtent3D extent {
+            extent.width = imageViews[i]->getExtent().width,
+            extent.height = imageViews[i]->getExtent().height,
+            extent.depth = 1
+        };
+
+        // Create depth buffer image
+        {
+            image = Image::create(_device, imagesFormat, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+            if (!image) {
+                LUG_LOG.error("ForwardRenderTechnique: Can't create depth buffer image");
+                return false;
+            }
+
+            // Bind memory to image
+            auto& imageRequirements = image->getRequirements();
+            uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, imageRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            imageMemory = DeviceMemory::allocate(_device, imageRequirements.size, memoryTypeIndex);
+            if (!imageMemory) {
+                LUG_LOG.error("ForwardRenderTechnique: Can't allocate device memory for depth buffer image");
+                return false;
+            }
+
+            image->bindMemory(imageMemory.get());
+        }
+
+        // Create depth buffer image view
+        {
+            imageView = ImageView::create(_device, image.get(), imagesFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+            if (!imageView) {
+                LUG_LOG.error("ForwardRenderTechnique: Can't create depth buffer image view");
+                return false;
+            }
+        }
+
+        _depthBuffers[i].image = std::move(image);
+        _depthBuffers[i].imageView = std::move(imageView);
+        _depthBuffers[i].imageMemory = std::move(imageMemory);
+    }
+    return true;
+}
+
+bool ForwardRenderTechnique::initFramebuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) {
     RenderPass* renderPass = _graphicsPipeline->getRenderPass();
 
     VkResult result;
@@ -133,17 +191,18 @@ bool ForwardRenderTechnique::initFramebuffers(const std::vector<ImageView>& imag
     _framebuffers.resize(imageViews.size());
 
     for (size_t i = 0; i < imageViews.size(); i++) {
-        VkImageView attachments[1]{
-            imageViews[i]
+        VkImageView attachments[2]{
+            *imageViews[i],
+            *_depthBuffers[i].imageView
         };
 
         VkFramebufferCreateInfo framebufferInfo = {};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = *renderPass;
-        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.attachmentCount = 2;
         framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = imageViews[i].getExtent().width;
-        framebufferInfo.height = imageViews[i].getExtent().height;
+        framebufferInfo.width = imageViews[i]->getExtent().width;
+        framebufferInfo.height = imageViews[i]->getExtent().height;
         framebufferInfo.layers = 1;
 
         VkFramebuffer fb;
@@ -153,7 +212,7 @@ bool ForwardRenderTechnique::initFramebuffers(const std::vector<ImageView>& imag
             return false;
         }
         // TODO: Remove the extent initializer list when struct Extent is externalised
-        _framebuffers[i] = Framebuffer(fb, _device, {imageViews[i].getExtent().width, imageViews[i].getExtent().height});
+        _framebuffers[i] = Framebuffer(fb, _device, {imageViews[i]->getExtent().width, imageViews[i]->getExtent().height});
     }
     return true;
 }

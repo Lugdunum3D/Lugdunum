@@ -22,7 +22,7 @@ vec3 getDiffuse(vec3 lightColor, vec3 fragToLight)
 
 void main() {
     vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
-    vec3 lightPos = vec3(2.0f, -2.0f, 0.0f);
+    vec3 lightPos = vec3(-1.0f, 5.0f, 5.0f);
     vec3 fragToLight = normalize(lightPos - verticePos);
 
     vec3 ambient = getAmbient(lightColor, 0.1f);

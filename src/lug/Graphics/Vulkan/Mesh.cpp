@@ -56,7 +56,6 @@ bool Mesh::load() {
 }
 
 void Mesh::destroy() {
-    LUG_LOG.info("Destroy mesh");
     _vertexBuffer->destroy();
     _indexBuffer->destroy();
 }

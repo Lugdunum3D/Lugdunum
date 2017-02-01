@@ -24,7 +24,7 @@ public:
 
     ~RenderView() = default;
 
-    bool init(RenderView::InitInfo& initInfo, const Device* device, Queue* presentQueue, const std::vector<ImageView>& imageViews);
+    bool init(RenderView::InitInfo& initInfo, const Device* device, Queue* presentQueue, const std::vector<std::unique_ptr<ImageView> >& imageViews);
 
     bool render(const Semaphore& imageReadySemaphore, uint32_t currentImageIndex);
     void destroy() override final;

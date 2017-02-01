@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_map>
 #include <vector>
 #include <ostream>
 
@@ -51,6 +52,7 @@
     macro(vkGetPhysicalDeviceProperties)                \
     macro(vkGetPhysicalDeviceFeatures)                  \
     macro(vkGetPhysicalDeviceQueueFamilyProperties)     \
+    macro(vkGetPhysicalDeviceFormatProperties)          \
     macro(vkGetDeviceProcAddr)                          \
     macro(vkCreateDevice)                               \
     macro(vkDestroyInstance)                            \
@@ -171,6 +173,8 @@ struct PhysicalDeviceInfo {
     VkPhysicalDeviceMemoryProperties memoryProperties;
 
     std::vector<VkExtensionProperties> extensions;
+
+    std::unordered_map<VkFormat, VkFormatProperties> formatProperties;
 
     struct SwapChainInfo {
         VkSurfaceCapabilitiesKHR capabilities;

@@ -111,7 +111,7 @@ std::unique_ptr<Buffer> Buffer::create(
         return nullptr;
     }
 
-    return std::unique_ptr<Buffer>(new Buffer(bufferHandle, device));;
+    return std::unique_ptr<Buffer>(new Buffer(bufferHandle, device));
 }
 
 } // Vulkan

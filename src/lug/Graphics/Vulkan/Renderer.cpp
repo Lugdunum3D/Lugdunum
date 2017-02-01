@@ -54,8 +54,6 @@ Renderer::~Renderer() {
 }
 
 void Renderer::destroy() {
-    LUG_LOG.info("Destroy renderer");
-
     for (auto& queue : _queues) {
         queue.waitIdle();
     }
@@ -254,6 +252,16 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
                     LUG_LOG.error("RendererVulkan: Can't enumerate device extensions: {}", result);
                     return false;
                 }
+            }
+
+            // Load images formats properties
+            // The VkFormat enum members are from 1 to 184
+            {
+                for (uint32_t i = 1; i <= 184; ++i) {
+                    VkFormat format = (VkFormat)i;
+                    vkGetPhysicalDeviceFormatProperties(physicalDevices[idx], format, &_physicalDeviceInfos[idx].formatProperties[format]);
+                }
+
             }
 
             // TODO: Get additional informations (images properties, etc)

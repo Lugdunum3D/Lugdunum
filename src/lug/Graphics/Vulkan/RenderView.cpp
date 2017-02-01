@@ -9,7 +9,7 @@ namespace Vulkan {
 
 RenderView::RenderView(const RenderTarget* renderTarget) : lug::Graphics::RenderView(renderTarget) {}
 
-bool RenderView::init(RenderView::InitInfo& initInfo, const Device* device, Queue* presentQueue, const std::vector<ImageView>& imageViews) {
+bool RenderView::init(RenderView::InitInfo& initInfo, const Device* device, Queue* presentQueue, const std::vector<std::unique_ptr<ImageView> >& imageViews) {
     lug::Graphics::RenderView::init(initInfo);
 
     if (_info.renderTechniqueType == lug::Graphics::RenderTechnique::Type::Forward) {

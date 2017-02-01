@@ -37,7 +37,7 @@ public:
     bool present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore = VK_NULL_HANDLE);
 
     std::vector<Image>& getImages();
-    const std::vector<ImageView>& getImagesViews() const;
+    const std::vector<std::unique_ptr<ImageView> >& getImagesViews() const;
 
     const VkSurfaceFormatKHR& getFormat() const;
     const VkExtent2D& getExtent() const;
@@ -50,7 +50,7 @@ private:
     VkSwapchainKHR _swapchain{VK_NULL_HANDLE};
     const Device* _device{nullptr};
     std::vector<Image> _images;
-    std::vector<ImageView> _imagesViews;
+    std::vector<std::unique_ptr<ImageView> > _imagesViews;
     VkSurfaceFormatKHR _format;
     VkExtent2D _extent;
     bool _outOfDate{false};
