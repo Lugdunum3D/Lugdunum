@@ -147,7 +147,7 @@ void lug::Window::priv::WindowImpl::processWindowEvents(UINT message, WPARAM /*w
             break;
 
         RECT rect;
-        if (GetWindowRect(_handle, &rect)) {
+        if (GetClientRect(_handle, &rect)) {
             _parent->_mode.width = static_cast<uint16_t>(rect.right - rect.left);
             _parent->_mode.height = static_cast<uint16_t>(rect.bottom - rect.top);
         }
