@@ -34,7 +34,11 @@ public:
     const CommandPool& getCommandPool() const;
 
     void setCommandPool(CommandPool&& commandPool);
-    bool submit(VkCommandBuffer commandBuffer, VkSemaphore signalSemaphore = VK_NULL_HANDLE, VkSemaphore waitSemaphore = VK_NULL_HANDLE, VkPipelineStageFlags waitDstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkFence fence = VK_NULL_HANDLE) const;
+    bool submit(VkCommandBuffer commandBuffer,
+                const std::vector<VkSemaphore>& signalSemaphores = {},
+                const std::vector<VkSemaphore>& waitSemaphores = {},
+                const std::vector<VkPipelineStageFlags>& waitDstStageMasks = {},
+                VkFence fence = VK_NULL_HANDLE) const;
     bool waitIdle() const;
 
     void destroy();

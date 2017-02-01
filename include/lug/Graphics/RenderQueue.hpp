@@ -22,10 +22,14 @@ public:
     void addMovableObject(const MovableObject* object);
     void clear();
 
+    const std::vector<const MovableObject*>& getObjects() const;
+
 private:
     std::size_t _size{0};
     std::vector<const MovableObject*> _queue{4000}; // TODO: Change that
 };
+
+#include <lug/Graphics/RenderQueue.inl>
 
 } // Graphics
 } // lug

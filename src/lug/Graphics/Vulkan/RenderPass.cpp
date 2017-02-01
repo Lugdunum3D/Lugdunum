@@ -39,7 +39,11 @@ void RenderPass::destroy() {
     }
 }
 
-void RenderPass::begin(const CommandBuffer* commandBuffer, const Framebuffer& framebuffer, const VkExtent2D& extent, VkSubpassContents contents) {
+void RenderPass::begin(const CommandBuffer* commandBuffer,
+                        const Framebuffer& framebuffer,
+                        const Math::Vec2f& renderExtent,
+                        const Math::Vec2f& renderOffset,
+                        VkSubpassContents contents) {
     VkClearValue clearColor{};
     clearColor.color = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
@@ -53,8 +57,8 @@ void RenderPass::begin(const CommandBuffer* commandBuffer, const Framebuffer& fr
         beginInfo.pClearValues = &clearColor
     };
 
-    beginInfo.renderArea.offset = {0, 0};
-    beginInfo.renderArea.extent = extent;
+    beginInfo.renderArea.offset = {(int32_t)renderOffset.x(), (int32_t)renderOffset.y()};
+    beginInfo.renderArea.extent = {(uint32_t)renderExtent.x(), (uint32_t)renderExtent.y()};
 
     vkCmdBeginRenderPass(*commandBuffer, &beginInfo, contents);
 }
@@ -73,8 +77,8 @@ std::unique_ptr<RenderPass> RenderPass::create(const Device* device) {
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
         colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
     };
 
     VkAttachmentReference colorAttachmentRef{

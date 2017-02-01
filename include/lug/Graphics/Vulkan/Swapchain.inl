@@ -10,8 +10,8 @@ inline std::vector<Image>& Swapchain::getImages() {
     return _images;
 }
 
-inline const std::vector<Framebuffer>& Swapchain::getFramebuffers() const {
-    return _framebuffers;
+inline const std::vector<ImageView>& Swapchain::getImagesViews() const {
+    return _imagesViews;
 }
 
 inline const VkSurfaceFormatKHR& Swapchain::getFormat() const {

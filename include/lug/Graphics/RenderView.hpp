@@ -14,9 +14,10 @@ class RenderTarget;
 
 class LUG_GRAPHICS_API RenderView {
 public:
-    // x, y, width, height => pourcentage of the screen
+    // x, y, width, height => percentage of the screen
     // TODO: Declare offset and extent outside
-    struct Viewport {
+    class Viewport {
+    public:
         struct {
             float x;
             float y;
@@ -29,6 +30,8 @@ public:
 
         float minDepth;
         float maxDepth;
+
+        inline float getRatio() const;
     };
 
     struct Scissor {
@@ -76,7 +79,7 @@ public:
 
     void update();
 
-    virtual void render() = 0;
+    virtual void destroy() = 0;
 
 protected:
     const RenderTarget* _renderTarget;

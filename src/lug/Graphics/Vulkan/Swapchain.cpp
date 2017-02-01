@@ -16,7 +16,6 @@ Swapchain::Swapchain(Swapchain&& swapchain) {
     _device = swapchain._device;
     _images = std::move(swapchain._images);
     _imagesViews = std::move(swapchain._imagesViews);
-    _framebuffers = std::move(swapchain._framebuffers);
     _format = swapchain._format;
     _extent = swapchain._extent;
     swapchain._swapchain = VK_NULL_HANDLE;
@@ -30,7 +29,6 @@ Swapchain& Swapchain::operator=(Swapchain&& swapchain) {
     _device = swapchain._device;
     _images = std::move(swapchain._images);
     _imagesViews = std::move(swapchain._imagesViews);
-    _framebuffers = std::move(swapchain._framebuffers);
     _format = swapchain._format;
     _extent = swapchain._extent;
     swapchain._swapchain = VK_NULL_HANDLE;
@@ -47,7 +45,6 @@ void Swapchain::destroy() {
     _outOfDate = false;
 
     // Delete swapchain images and images views
-    _framebuffers.clear();
     _imagesViews.clear();
     _images.clear();
 
@@ -59,11 +56,7 @@ void Swapchain::destroy() {
     }
 }
 
-bool Swapchain::init(RenderPass* renderPass) {
-    return initImages() && initFramebuffers(renderPass);
-}
-
-bool Swapchain::initImages() {
+bool Swapchain::init() {
     VkResult result;
 
     // Get swapchain images
@@ -87,7 +80,7 @@ bool Swapchain::initImages() {
         // Copy VkImage vector to Image vector
         _images.resize(imagesCount);
         for (uint8_t i = 0; i < images.size(); ++i) {
-            _images[i] = Image(images[i], _device, true);
+            _images[i] = Image(images[i], _device, {_extent.width, _extent.height}, true);
         }
     }
 
@@ -127,45 +120,10 @@ bool Swapchain::initImages() {
                 return false;
             }
 
-            _imagesViews[i] = ImageView(imageView, _device);
+            _imagesViews[i] = ImageView(imageView, _device, {_extent.width, _extent.height});
         }
     }
 
-    return true;
-}
-
-bool Swapchain::initFramebuffers(RenderPass* renderPass) {
-    if (!renderPass) {
-        LUG_LOG.error("RendererVulkan: initFramebuffers(): renderPass is null");
-        return false;
-    }
-
-    VkResult result;
-    _framebuffers.clear();
-    _framebuffers.resize(_imagesViews.size());
-
-    for (size_t i = 0; i < _imagesViews.size(); i++) {
-        VkImageView attachments[1]{
-            _imagesViews[i]
-        };
-
-        VkFramebufferCreateInfo framebufferInfo = {};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = *renderPass;
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = _extent.width;
-        framebufferInfo.height = _extent.height;
-        framebufferInfo.layers = 1;
-
-        VkFramebuffer fb;
-        result = vkCreateFramebuffer(*_device, &framebufferInfo, nullptr, &fb);
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Failed to create framebuffer: {}", result);
-            return false;
-        }
-        _framebuffers[i] = Framebuffer(fb, _device);
-    }
     return true;
 }
 

@@ -11,7 +11,14 @@ class Device;
 
 class LUG_GRAPHICS_API Framebuffer {
 public:
-    Framebuffer(VkFramebuffer Framebuffer = VK_NULL_HANDLE, const Device* device = nullptr);
+    // TODO: Declare offset and extent outside
+    struct Extent {
+        uint32_t width;
+        uint32_t height;
+    };
+
+public:
+    Framebuffer(VkFramebuffer Framebuffer = VK_NULL_HANDLE, const Device* device = nullptr, const Extent& extent = {0, 0});
 
     Framebuffer(const Framebuffer&) = delete;
     Framebuffer(Framebuffer&& Framebuffer);
@@ -25,11 +32,17 @@ public:
         return _framebuffer;
     }
 
+    const Extent& getExtent() const {
+        return _extent;
+    }
+
     void destroy();
 
 private:
     VkFramebuffer _framebuffer{VK_NULL_HANDLE};
     const Device* _device{nullptr};
+
+    Extent _extent;
 };
 
 } // Vulkan

@@ -11,7 +11,14 @@ class Device;
 
 class LUG_GRAPHICS_API ImageView {
 public:
-    ImageView(VkImageView ImageView = VK_NULL_HANDLE, const Device* device = nullptr);
+    // TODO: Declare offset and extent outside
+    struct Extent{
+        uint32_t width;
+        uint32_t height;
+    };
+
+public:
+    ImageView(VkImageView ImageView = VK_NULL_HANDLE, const Device* device = nullptr, const Extent& extent = {0, 0});
 
     ImageView(const ImageView&) = delete;
     ImageView(ImageView&& ImageView);
@@ -25,11 +32,17 @@ public:
         return _imageView;
     }
 
+    const Extent& getExtent() const {
+        return _extent;
+    }
+
     void destroy();
 
 private:
     VkImageView _imageView{ VK_NULL_HANDLE };
     const Device* _device{nullptr};
+
+    Extent _extent;
 };
 
 } // Vulkan

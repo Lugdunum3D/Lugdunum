@@ -4,7 +4,8 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-RenderTechnique::RenderTechnique(const RenderView* renderView) : _renderView{renderView} {}
+RenderTechnique::RenderTechnique(const RenderView* renderView, const Device* device, Queue* presentQueue) :
+                                _renderView{renderView}, _device{device}, _presentQueue{presentQueue} {}
 
 } // Vulkan
 } // Graphics

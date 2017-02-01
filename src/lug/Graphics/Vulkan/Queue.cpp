@@ -1,5 +1,6 @@
 #include <lug/Graphics/Vulkan/Queue.hpp>
 #include <lug/System/Logger.hpp>
+#include <lug/System/Debug.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -41,17 +42,24 @@ Queue::~Queue() {
     destroy();
 }
 
-bool Queue::submit(VkCommandBuffer commandBuffer, VkSemaphore signalSemaphore, VkSemaphore waitSemaphore, VkPipelineStageFlags waitDstStageMask, VkFence fence) const {
+bool Queue::submit(VkCommandBuffer commandBuffer,
+                   const std::vector<VkSemaphore>& signalSemaphores,
+                   const std::vector<VkSemaphore>& waitSemaphores,
+                   const std::vector<VkPipelineStageFlags>& waitDstStageMasks,
+                   VkFence fence) const {
+
+    LUG_ASSERT(waitSemaphores.size() == waitDstStageMasks.size(), "waitDstStageMasks should be the same size as waitSemaphores");
+
     VkSubmitInfo submitInfo{
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
         submitInfo.pNext = nullptr,
-        submitInfo.waitSemaphoreCount = waitSemaphore != VK_NULL_HANDLE ? 1 : 0,
-        submitInfo.pWaitSemaphores = waitSemaphore != VK_NULL_HANDLE ? &waitSemaphore : nullptr,
-        submitInfo.pWaitDstStageMask = waitSemaphore != VK_NULL_HANDLE ? &waitDstStageMask : nullptr,
+        submitInfo.waitSemaphoreCount = waitSemaphores.size() > 0 ? (uint32_t)waitSemaphores.size() : 0,
+        submitInfo.pWaitSemaphores = waitSemaphores.size() > 0 ? waitSemaphores.data() : nullptr,
+        submitInfo.pWaitDstStageMask = waitDstStageMasks.size() > 0 ? waitDstStageMasks.data() : nullptr,
         submitInfo.commandBufferCount = 1,
         submitInfo.pCommandBuffers = &commandBuffer,
-        submitInfo.signalSemaphoreCount = signalSemaphore != VK_NULL_HANDLE ? 1 : 0,
-        submitInfo.pSignalSemaphores = signalSemaphore != VK_NULL_HANDLE ? &signalSemaphore : nullptr
+        submitInfo.signalSemaphoreCount = signalSemaphores.size() > 0 ? (uint32_t)signalSemaphores.size() : 0,
+        submitInfo.pSignalSemaphores = signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr
     };
 
     VkResult result = vkQueueSubmit(_queue, 1, &submitInfo, fence);

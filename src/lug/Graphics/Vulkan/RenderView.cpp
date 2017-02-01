@@ -9,21 +9,51 @@ namespace Vulkan {
 
 RenderView::RenderView(const RenderTarget* renderTarget) : lug::Graphics::RenderView(renderTarget) {}
 
-void RenderView::init(RenderView::InitInfo& initInfo) {
+bool RenderView::init(RenderView::InitInfo& initInfo, const Device* device, Queue* presentQueue, const std::vector<ImageView>& imageViews) {
     lug::Graphics::RenderView::init(initInfo);
 
     if (_info.renderTechniqueType == lug::Graphics::RenderTechnique::Type::Forward) {
-        _renderTechnique = std::make_unique<ForwardRenderTechnique>(this);
+        _renderTechnique = std::make_unique<ForwardRenderTechnique>(this, device, presentQueue);
     }
+
+    if (_renderTechnique && !_renderTechnique->init(imageViews)) {
+        LUG_LOG.warn("RenderView: Failed to init render technique");
+        return false;
+    }
+
+    // Work complete semaphore
+    {
+        VkSemaphore semaphore;
+        VkSemaphoreCreateInfo createInfo{
+            createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+            createInfo.pNext = nullptr,
+            createInfo.flags = 0
+        };
+        VkResult result = vkCreateSemaphore(*device, &createInfo, nullptr, &semaphore);
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+            return false;
+        }
+
+        _drawCompleteSemaphore = Semaphore(semaphore, device);
+    }
+
+    _presentQueue = presentQueue;
+
+    return true;
 }
 
-void RenderView::render() {
-    if (_camera) {
-        _camera->update(this);
-        _renderTechnique->render(_camera->getRenderQueue());
-    } else {
+bool RenderView::render(const Semaphore& imageReadySemaphore, uint32_t currentImageIndex) {
+    if (!_camera) {
         LUG_LOG.warn("RenderView: Attempt to render with no camera attached");
+        return true; // Not fatal, return success anyway
     }
+    _camera->update(this);
+    return _renderTechnique->render(_camera->getRenderQueue(), imageReadySemaphore, _drawCompleteSemaphore, currentImageIndex);
+}
+
+void RenderView::destroy() {
+    _renderTechnique->destroy();
 }
 
 } // Vulkan

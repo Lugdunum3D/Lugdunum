@@ -54,7 +54,9 @@ set(INC
     ${INCROOT}/Graphics.hpp
     ${INCROOT}/Graphics.inl
     ${INCROOT}/Mesh.hpp
+    ${INCROOT}/Mesh.inl
     ${INCROOT}/MeshInstance.hpp
+    ${INCROOT}/MeshInstance.inl
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl
     ${INCROOT}/MovableCamera.hpp
@@ -64,6 +66,7 @@ set(INC
     ${INCROOT}/Node.inl
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/RenderQueue.hpp
+    ${INCROOT}/RenderQueue.inl
     ${INCROOT}/RenderTarget.hpp
     ${INCROOT}/RenderTarget.inl
     ${INCROOT}/RenderTechnique.hpp
@@ -91,6 +94,7 @@ set(INC
     ${INCROOT}/Vulkan/Instance.inl
     ${INCROOT}/Vulkan/Loader.hpp
     ${INCROOT}/Vulkan/Mesh.hpp
+    ${INCROOT}/Vulkan/Mesh.inl
     ${INCROOT}/Vulkan/Pipeline.hpp
     ${INCROOT}/Vulkan/PipelineLayout.hpp
     ${INCROOT}/Vulkan/Queue.hpp
@@ -99,6 +103,7 @@ set(INC
     ${INCROOT}/Vulkan/RenderPass.hpp
     ${INCROOT}/Vulkan/RenderTechnique.hpp
     ${INCROOT}/Vulkan/RenderView.hpp
+    ${INCROOT}/Vulkan/RenderView.inl
     ${INCROOT}/Vulkan/RenderWindow.hpp
     ${INCROOT}/Vulkan/RenderWindow.inl
     ${INCROOT}/Vulkan/Semaphore.hpp

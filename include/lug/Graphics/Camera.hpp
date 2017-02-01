@@ -28,11 +28,15 @@ public:
     RenderQueue& getRenderQueue();
     const RenderQueue& getRenderQueue() const;
 
+    float getFov() const;
+    void setFov(float fov);
+
     virtual void update(const RenderView* renderView) = 0;
 
 protected:
     Scene* _scene{nullptr};
     RenderQueue _renderQueue;
+    float _fov;
 };
 
 #include <lug/Graphics/Camera.inl>

@@ -3,6 +3,7 @@
 #include <memory>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
+#include <lug/Math/Vector.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -30,7 +31,12 @@ public:
 
     void destroy();
 
-    void begin(const CommandBuffer* commandBuffer, const Framebuffer& framebuffer, const VkExtent2D& extent, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
+    // TODO: Replace Math::Vec2f with Extent struct (not defined yet)
+    void begin(const CommandBuffer* commandBuffer,
+                const Framebuffer& framebuffer,
+                const Math::Vec2f& renderExtent = {0, 0},
+                const Math::Vec2f& renderOffset = {0, 0},
+                VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
     void end(const CommandBuffer* commandBuffer);
 
     static std::unique_ptr<RenderPass> create(const Device* device);

@@ -19,8 +19,9 @@ bool Mesh::load() {
         return true;
     }
 
+
     {
-        _vertexBuffer = Buffer::create(_device, (uint32_t)_queueFamilyIndices.size(), _queueFamilyIndices.data(), (uint32_t)vertices.capacity(), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        _vertexBuffer = Buffer::create(_device, (uint32_t)_queueFamilyIndices.size(), _queueFamilyIndices.data(), (uint32_t)vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
         if (!_vertexBuffer)
             return false;
 
@@ -32,11 +33,11 @@ bool Mesh::load() {
         }
 
         _vertexBuffer->bindMemory(_vertexDeviceMemory.get());
-        _vertexBuffer->updateData(vertices.data(), (uint32_t)vertices.capacity());
+        _vertexBuffer->updateData(vertices.data(), (uint32_t)vertices.size() * sizeof(Vertex));
     }
 
     {
-        _indexBuffer = Buffer::create(_device, (uint32_t)_queueFamilyIndices.size(), _queueFamilyIndices.data(), (uint32_t)indices.capacity(), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        _indexBuffer = Buffer::create(_device, (uint32_t)_queueFamilyIndices.size(), _queueFamilyIndices.data(), (uint32_t)indices.size() * sizeof(uint32_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
         if (!_indexBuffer)
             return false;
 
@@ -48,15 +49,16 @@ bool Mesh::load() {
         }
 
         _indexBuffer->bindMemory(_indexDeviceMemory.get());
-        _indexBuffer->updateData(indices.data(), (uint32_t)indices.capacity());
+        _indexBuffer->updateData(indices.data(), (uint32_t)indices.size() * sizeof(uint32_t));
     }
 
     return true;
 }
 
 void Mesh::destroy() {
+    LUG_LOG.info("Destroy mesh");
     _vertexBuffer->destroy();
-    _vertexBuffer->destroy();
+    _indexBuffer->destroy();
 }
 
 } // Vulkan

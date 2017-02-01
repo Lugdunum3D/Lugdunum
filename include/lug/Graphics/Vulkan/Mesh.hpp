@@ -22,12 +22,15 @@ public:
     Mesh& operator=(const Mesh&) = delete;
     Mesh& operator=(Mesh&& mesh) = delete;
 
-    ~Mesh();
+    ~Mesh() override final;
 
     // TODO: Add reload() function
     bool load() override final;
 
     void destroy();
+
+    const Buffer* getVertexBuffer() const;
+    const Buffer* getIndexBuffer() const;
 
 private:
     std::unique_ptr<Buffer> _vertexBuffer;
@@ -41,6 +44,8 @@ private:
 
     const Device* _device{nullptr};
 };
+
+#include <lug/Graphics/Vulkan/Mesh.inl>
 
 } // Vulkan
 } // Graphics

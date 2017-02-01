@@ -27,3 +27,8 @@ inline std::unique_ptr<Camera> RenderView::detachCamera() {
 inline Camera* RenderView::getCamera() const {
     return _camera.get();
 }
+
+
+inline float RenderView::Viewport::getRatio() const {
+    return extent.width / extent.height;
+}

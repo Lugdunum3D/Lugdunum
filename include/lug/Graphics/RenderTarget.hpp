@@ -20,7 +20,7 @@ public:
 
     virtual RenderView* createView(RenderView::InitInfo& initInfo) = 0;
 
-    virtual void render() = 0;
+    virtual bool render() = 0;
 
     virtual uint16_t getWidth() const = 0;
     virtual uint16_t getHeight() const = 0;

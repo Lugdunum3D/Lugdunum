@@ -2,7 +2,10 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/RenderView.hpp>
+#include <lug/Graphics/Vulkan/Device.hpp>
+#include <lug/Graphics/Vulkan/Queue.hpp>
 #include <lug/Graphics/Vulkan/RenderTechnique.hpp>
+#include <lug/Graphics/Vulkan/Semaphore.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -21,16 +24,25 @@ public:
 
     ~RenderView() = default;
 
-    void init(RenderView::InitInfo& initInfo);
+    bool init(RenderView::InitInfo& initInfo, const Device* device, Queue* presentQueue, const std::vector<ImageView>& imageViews);
 
-    void render() override final;
+    bool render(const Semaphore& imageReadySemaphore, uint32_t currentImageIndex);
+    void destroy() override final;
+
+    RenderTechnique* getRenderTechnique();
+    const Semaphore& getDrawCompleteSemaphore() const;
 
     // TODO: Add a method to change the index of the good image to use (change by the render window)
     // TODO: Add the semaphores for the images ready in that class too
 
 private:
     std::unique_ptr<RenderTechnique> _renderTechnique{nullptr};
+
+    Semaphore _drawCompleteSemaphore{};
+    Queue* _presentQueue;
 };
+
+#include <lug/Graphics/Vulkan/RenderView.inl>
 
 } // Vulkan
 } // Graphics

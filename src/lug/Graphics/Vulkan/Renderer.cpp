@@ -54,28 +54,14 @@ Renderer::~Renderer() {
 }
 
 void Renderer::destroy() {
+    LUG_LOG.info("Destroy renderer");
+
     for (auto& queue : _queues) {
         queue.waitIdle();
     }
 
-    if (_graphicsPipeline != nullptr) {
-        _graphicsPipeline->destroy();
-    }
-
-    if (_vertexBuffer != nullptr) {
-        _vertexBuffer->destroy();
-    }
-
-    if (_indexBuffer != nullptr) {
-        _indexBuffer->destroy();
-    }
-
     // Destroy the window
     _window = nullptr;
-
-    for (auto& cmdBuffer: _cmdBuffers) {
-        cmdBuffer.destroy();
-    }
 
     for (auto& queue : _queues) {
         queue.destroy();
@@ -114,181 +100,7 @@ std::set<Module::Type> Renderer::init(const char* appName, uint32_t appVersion, 
     LUG_LOG.info("RendererVulkan: Use device {}", _physicalDeviceInfo->properties.deviceName);
 #endif
 
-    _cmdBuffers = getQueue(0, false)->getCommandPool().createCommandBuffers();
-
     return loadedModules;
-}
-
-/**
- * Will be called after the RenderWindow finished its own init
- * @return Success
- */
-bool Renderer::lateInit() {
-    struct Vertex{
-        float pos[3];
-        float normal[3];
-    };
-
-/*    const Vertex vertices[24] = {
-        //1. pos
-        //2. color
-        //3. normal
-        //4. texture uv
-
-        // Front
-        {{0.0f, 200.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-        {{200.0f, 200.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-        {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-        {{200.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-
-        // Back
-        {{0.0f, 200.0f, 200.0f}, {1.0f, 0.0f, 1.0}},
-        {{200.0f, 200.0f, 200.0f}, {1.0f, 0.0f, 1.0}},
-        {{0.0f, 0.0f, 200.0f}, {1.0f, 0.0f, 1.0}},
-        {{200.0f, 0.0f, 200.0f}, {1.0f, 0.0f, 1.0}},
-
-        // Left
-        {{0.0f, 200.0f, 0.0f}, {1.0f, 0.0f, 0.0}},
-        {{0.0f, 200.0f, 200.0f}, {1.0f, 0.0f, 0.0}},
-        {{0.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0}},
-        {{0.0f, 0.0f, 200.0f}, {1.0f, 0.0f, 0.0}},
-
-        // Right
-        {{200.0f, 200.0f, 0.0f}, {1.0f, 1.0f, 0.0f}},
-        {{200.0f, 200.0f, 200.0f}, {1.0f, 1.0f, 0.0f}},
-        {{200.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 0.0f}},
-        {{200.0f, 0.0f, 200.0f}, {1.0f, 1.0f, 0.0f}},
-
-        // Top
-        {{0.0f, 200.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-        {{0.0f, 200.0f, 200.0f}, {0.0f, 1.0f, 0.0f}},
-        {{200.0f, 200.0f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-        {{200.0f, 200.0f, 200.0f}, {0.0f, 1.0f, 0.0f}},
-
-        // Bottom
-        {{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 1.0}},
-        {{0.0f, 0.0f, 200.0f}, {0.0f, 1.0f, 1.0}},
-        {{200.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 1.0}},
-        {{200.0f, 0.0f, 200.0f}, {0.0f, 1.0f, 1.0}}
-    };
-*/
-    const Vertex vertices[] = {
-        //1. pos
-        //2. color
-        //3. normal
-        //4. texture uv
-
-        // Front
-        {{-1.0f,-1.0f,-1.0f}, {0.0f, 0.0f, 1.0f}},
-        {{-1.0f,-1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-        {{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-        {{-1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}},
-        {{-1.0f, 1.0f,-1.0f}, {0.0f, 0.0f, 1.0f}},
-        {{-1.0f,-1.0f,-1.0f}, {0.0f, 0.0f, 1.0f}},
-
-        // Back
-        {{-1.0f,-1.0f,-1.0f}, {1.0f, 0.0f, 1.0}},
-        {{1.0f, 1.0f,-1.0f}, {1.0f, 0.0f, 1.0}},
-        {{1.0f,-1.0f,-1.0f}, {1.0f, 0.0f, 1.0}},
-        {{-1.0f,-1.0f,-1.0f}, {1.0f, 0.0f, 1.0}},
-        {{-1.0f, 1.0f,-1.0f}, {1.0f, 0.0f, 1.0}},
-        {{1.0f, 1.0f,-1.0f}, {1.0f, 0.0f, 1.0}},
-
-        // Left
-        {{-1.0f,-1.0f,-1.0f}, {1.0f, 0.0f, 0.0}},
-        {{1.0f,-1.0f,-1.0f}, {1.0f, 0.0f, 0.0}},
-        {{1.0f,-1.0f, 1.0f}, {1.0f, 0.0f, 0.0}},
-        {{-1.0f,-1.0f,-1.0f}, {1.0f, 0.0f, 0.0}},
-        {{1.0f,-1.0f, 1.0f}, {1.0f, 0.0f, 0.0}},
-        {{-1.0f,-1.0f, 1.0f}, {1.0f, 0.0f, 0.0}},
-
-        // Right
-        {{-1.0f, 1.0f,-1.0f}, {1.0f, 1.0f, 0.0f}},
-        {{-1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 0.0f}},
-        {{1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 0.0f}},
-        {{-1.0f, 1.0f,-1.0f}, {1.0f, 1.0f, 0.0f}},
-        {{1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 0.0f}},
-        {{1.0f, 1.0f,-1.0f}, {1.0f, 1.0f, 0.0f}},
-
-        // Top
-        {{1.0f, 1.0f,-1.0f}, {0.0f, 1.0f, 0.0f}},
-        {{1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
-        {{1.0f,-1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
-        {{1.0f,-1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}},
-        {{1.0f,-1.0f,-1.0f}, {0.0f, 1.0f, 0.0f}},
-        {{1.0f, 1.0f,-1.0f}, {0.0f, 1.0f, 0.0f}},
-
-        // Bottom
-        {{-1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0}},
-        {{-1.0f,-1.0f, 1.0f}, {0.0f, 1.0f, 1.0}},
-        {{1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0}},
-        {{-1.0f,-1.0f, 1.0f}, {0.0f, 1.0f, 1.0}},
-        {{1.0f,-1.0f, 1.0f}, {0.0f, 1.0f, 1.0}},
-        {{1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0}}
-    };
-
-
-    const uint32_t indices[] = {
-        // Front
-        2, 1, 0,
-        2, 3, 1,
-
-        // Back
-        4, 5, 6,
-        6, 5, 7,
-
-        // Left
-        8, 9, 10,
-        10, 9, 11,
-
-        // Right
-        13, 12, 14,
-        13, 14, 15,
-
-        // Top
-        16, 19, 17,
-        16, 18, 19,
-
-        // Bottom
-        20, 21, 23,
-        20, 23, 22
-    };
-
-    std::vector<uint32_t> queueFamilyIndices = { (uint32_t)getQueue(0, true)->getFamilyIdx() };
-
-    {
-        _vertexBuffer = Buffer::create(&_device, (uint32_t)queueFamilyIndices.size(), queueFamilyIndices.data(), sizeof(vertices), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-        if (!_vertexBuffer)
-            return false;
-
-        auto& requirements = _vertexBuffer->getRequirements();
-        uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(&_device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-        _vertexDeviceMemory = DeviceMemory::allocate(&_device, requirements.size, memoryTypeIndex);
-        if (!_vertexDeviceMemory) {
-            return false;
-        }
-
-        _vertexBuffer->bindMemory(_vertexDeviceMemory.get());
-        _vertexBuffer->updateData((void*)vertices, sizeof(vertices));
-    }
-
-    {
-        _indexBuffer = Buffer::create(&_device, (uint32_t)queueFamilyIndices.size(), queueFamilyIndices.data(), sizeof(indices), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-        if (!_indexBuffer)
-            return false;
-
-        auto& requirements = _indexBuffer->getRequirements();
-        uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(&_device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-        _indexDeviceMemory = DeviceMemory::allocate(&_device, requirements.size, memoryTypeIndex);
-        if (!_indexDeviceMemory) {
-            return false;
-        }
-
-        _indexBuffer->bindMemory(_indexDeviceMemory.get());
-        _indexBuffer->updateData((void*)indices, sizeof(indices));
-    }
-
-    return true;
 }
 
 /**
@@ -786,86 +598,12 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
     return _window.get();
 }
 
-void Renderer::setGraphicsPipeline(std::unique_ptr<Pipeline> graphicsPipeline) {
-    _graphicsPipeline = std::move(graphicsPipeline);
-}
-
-Pipeline* Renderer::getGraphicsPipeline() const {
-    return _graphicsPipeline.get();
-}
-
 bool Renderer::beginFrame() {
-    static Math::Mat4x4f projectionMatrix{Math::Mat4x4f::identity()};
-    static Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({0.0f, 3.0f, 5.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
-    static Math::Mat4x4f modelMatrix{Math::Mat4x4f::identity()};
-
-    auto& extent = _window->getSwapchain().getExtent();
-
-    // Update the projection matrix and rotate model matrix
-    projectionMatrix = Math::Geometry::perspective(Math::Geometry::radians(45.0f), static_cast<float>(extent.width) / static_cast<float>(extent.height), 0.1f, 100.0f);
-    modelMatrix = Math::Geometry::rotate(0.0001f, {0.0f, 1.0f, 0.0f}) * modelMatrix;
-
-    // Compute the MVP Matrix
-    Math::Mat4x4f MVPMatrix = projectionMatrix * viewMatrix * modelMatrix;
-
-    if (!_window->beginFrame()) {
-        return false;
-    }
-
-    if (!_cmdBuffers[0].begin()) {
-        return false;
-    }
-
-    _graphicsPipeline->bind(&_cmdBuffers[0]);
-
-    vkCmdPushConstants(_cmdBuffers[0], *_graphicsPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(Math::Mat4x4f), &MVPMatrix);
-
-    VkViewport viewport{
-        viewport.x = 0.0f,
-        viewport.y = 0.0f,
-        viewport.width = static_cast<float>(extent.width),
-        viewport.height = static_cast<float>(extent.height),
-        viewport.minDepth = 0.0f,
-        viewport.maxDepth = 1.0f,
-    };
-
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = extent;
-
-    vkCmdSetViewport(_cmdBuffers[0], 0, 1, &viewport);
-    vkCmdSetScissor(_cmdBuffers[0], 0, 1, &scissor);
-
-    _graphicsPipeline->getRenderPass()->begin(&_cmdBuffers[0], _window->getCurrentFramebuffer(), extent);
-
-    {
-        VkBuffer vertexBuffer = *_vertexBuffer;
-        VkDeviceSize offset = 0;
-        vkCmdBindVertexBuffers(_cmdBuffers[0], 0, 1, &vertexBuffer, &offset);
-    }
-
-/*    {
-        VkBuffer indexBuffer = *_indexBuffer;
-        vkCmdBindIndexBuffer(_cmdBuffers[0], indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-    }
-
-    vkCmdDrawIndexed(_cmdBuffers[0], 36, 1, 0, 0, 0);*/
-
-    vkCmdDraw(_cmdBuffers[0], 36, 1, 0, 0);
-
-    return true;
+    return _window->beginFrame();
 }
 
 bool Renderer::endFrame() {
-    _graphicsPipeline->getRenderPass()->end(&_cmdBuffers[0]);
-
-    if (!_cmdBuffers[0].end()) {
-        return false;
-    }
-
-    // TODO: Foreach render target that we want to draw
     _window->render();
-
     return _window->endFrame();
 }
 

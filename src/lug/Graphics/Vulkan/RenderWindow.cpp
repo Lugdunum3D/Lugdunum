@@ -54,52 +54,97 @@ bool RenderWindow::beginFrame() {
         if (_swapchain.isOutOfDate()) {
             initSwapchainCapabilities();
             initSwapchain();
+            for (auto& renderView: _renderViews) {
+                RenderView* renderView_ = static_cast<RenderView*>(renderView.get());
+                renderView_->getRenderTechnique()->initFramebuffers(_swapchain.getImagesViews());
+            }
         } else {
             return false;
         }
     }
 
-    return true;
+
+    if (!_cmdBuffers[0].begin()) {
+        return false;
+    }
+
+    _swapchain.getImages()[_currentImageIndex].changeLayout(_cmdBuffers[0],
+                        0,
+                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        VK_IMAGE_LAYOUT_UNDEFINED,
+                        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+    if (!_cmdBuffers[0].end()) {
+        return false;
+    }
+
+    std::vector<VkSemaphore> imageReadyVkSemaphores(_imageReadySemaphores.begin(), _imageReadySemaphores.end());
+    return _presentQueue->submit(_cmdBuffers[0], imageReadyVkSemaphores, {_acquireImageCompleteSemaphore}, {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT});
 }
 
 bool RenderWindow::endFrame() {
-    return (
-        _presentQueue->submit(_renderer.getCommandBuffers()[0], _submitCompleteSemaphore, _acquireImageCompleteSemaphore, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, _fence)
-        && _swapchain.present(_presentQueue, _currentImageIndex, _submitCompleteSemaphore)
-    );
+    std::vector<VkSemaphore> waitSemaphores(_renderViews.size());
+    uint32_t i = 0;
+
+    for (auto& renderView: _renderViews) {
+        RenderView* renderView_ = static_cast<RenderView*>(renderView.get());
+        // Render views with no camera don't signal the semaphore as they don't draw
+        if (renderView_->getCamera()) {
+            waitSemaphores[i++] = renderView_->getDrawCompleteSemaphore();
+        }
+    }
+
+    // Update wait semaphores vector size,
+    // it could be != from _renderViews.size(), if some render views has no camera
+    if (waitSemaphores.size() != i) {
+        waitSemaphores.resize(i);
+    }
+    std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+
+    if (!_cmdBuffers[1].begin()) return false;
+
+    _swapchain.getImages()[_currentImageIndex].changeLayout(_cmdBuffers[1],
+                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                        VK_ACCESS_MEMORY_READ_BIT,
+                        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+    if (!_cmdBuffers[1].end()) return false;
+
+    return _presentQueue->submit(_cmdBuffers[1], {_allDrawsFinishedSemaphore}, waitSemaphores, waitDstStageMasks, _fence) &&
+    _swapchain.present(_presentQueue, _currentImageIndex, _allDrawsFinishedSemaphore);
 }
 
 lug::Graphics::RenderView* RenderWindow::createView(lug::Graphics::RenderView::InitInfo& initInfo) {
     std::unique_ptr<RenderView> renderView = std::make_unique<RenderView>(this);
 
-    renderView->init(initInfo);
+    renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, _swapchain.getImagesViews());
 
     _renderViews.push_back(std::move(renderView));
 
     return _renderViews.back().get();
 }
 
-void RenderWindow::render() {
+bool RenderWindow::render() {
+    uint32_t i = 0;
     for (auto &renderView: _renderViews) {
-        renderView->render();
+        if (!static_cast<RenderView*>(renderView.get())->render(_imageReadySemaphores[i++], _currentImageIndex)) return false;
     }
+
+    return true;
 }
 
 std::unique_ptr<RenderWindow>
 RenderWindow::create(Renderer &renderer, RenderWindow::InitInfo& initInfo) {
-    std::unique_ptr<RenderWindow> win(new RenderWindow(renderer));
+    std::unique_ptr<RenderWindow> window(new RenderWindow(renderer));
 
-    if (!win->init(initInfo)) {
-        return nullptr;
-    }
+    if (!window->init(initInfo)) return nullptr;
 
     for (auto& renderViewInitInfo : initInfo.renderViewsInitInfo) {
-        if (!win->createView(renderViewInitInfo)) {
-            return nullptr;
-        }
+        if (!window->createView(renderViewInitInfo)) return nullptr;
     }
 
-    return win;
+    return window;
 }
 
 /**
@@ -321,20 +366,8 @@ bool RenderWindow::initSwapchain() {
 
         _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat, extent);
 
-        if (!_swapchain.init(_renderer.getGraphicsPipeline()->getRenderPass()))
-            return false;
-
-        return true;
+        return _swapchain.init();
     }
-}
-
-bool RenderWindow::initPipeline() {
-    auto pipeline = Pipeline::createGraphicsPipeline(&_renderer.getDevice());
-    if (!pipeline) {
-        return false;
-    }
-    _renderer.setGraphicsPipeline(std::move(pipeline));
-    return true;
 }
 
 bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
@@ -391,7 +424,7 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
         _acquireImageCompleteSemaphore = Semaphore(semaphore, &_renderer.getDevice());
     }
 
-    // Submit semaphore
+    // All draws finished semaphore
     {
         VkSemaphore semaphore;
         VkSemaphoreCreateInfo createInfo{
@@ -405,7 +438,27 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
             return false;
         }
 
-        _submitCompleteSemaphore = Semaphore(semaphore, &_renderer.getDevice());
+        _allDrawsFinishedSemaphore = Semaphore(semaphore, &_renderer.getDevice());
+    }
+
+    // Image ready semaphores
+    {
+        VkSemaphoreCreateInfo createInfo{
+            createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+            createInfo.pNext = nullptr,
+            createInfo.flags = 0
+        };
+        _imageReadySemaphores.resize(initInfo.renderViewsInitInfo.size());
+        for (uint32_t i = 0; i < initInfo.renderViewsInitInfo.size(); ++i) {
+            VkSemaphore semaphore;
+            VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                return false;
+            }
+
+            _imageReadySemaphores[i] = Semaphore(semaphore, &_renderer.getDevice());
+        }
     }
 
     // Fence
@@ -425,16 +478,32 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
         _fence = Fence(fence, &_renderer.getDevice());
     }
 
-    return initSurface() && initSwapchainCapabilities() && initPresentQueue() && initPipeline() && initSwapchain() && _renderer.lateInit();
+    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue())) {
+        return false;
+    }
+
+    _cmdBuffers = _renderer.getQueue(0, true)->getCommandPool().createCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, 2);
+
+    return initSwapchain();
 }
 
 void RenderWindow::destroy() {
+    LUG_LOG.info("Destroy render window");
     _presentQueue->waitIdle();
+
+    for (auto& renderView : _renderViews) {
+        renderView->destroy();
+    }
+
     _swapchain.destroy();
 
     if (_surface != VK_NULL_HANDLE) {
         vkDestroySurfaceKHR(_renderer.getInstance(), _surface, nullptr);
         _surface = VK_NULL_HANDLE;
+    }
+
+    for (auto& cmdBuffer: _cmdBuffers) {
+        cmdBuffer.destroy();
     }
 }
 

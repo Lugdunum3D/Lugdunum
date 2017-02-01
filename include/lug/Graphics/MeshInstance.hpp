@@ -17,14 +17,18 @@ public:
     MeshInstance& operator=(const MeshInstance&) = delete;
     MeshInstance& operator=(MeshInstance&&) = delete;
 
-    ~MeshInstance() = default;
+    ~MeshInstance();
 
     void needUpdate() override final;
+
+    const Mesh* getMesh() const;
 
 private:
     Mesh* _mesh{nullptr};
     // Mesh::Material* _material{nullptr};
 };
+
+#include <lug/Graphics/MeshInstance.inl>
 
 } // Graphics
 } // lug

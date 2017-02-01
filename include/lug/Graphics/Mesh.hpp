@@ -19,7 +19,6 @@ public:
     struct Vertex{
         Math::Vec3f pos;
         Math::Vec3f normal;
-        Math::Vec2f uv;
     };
 
 public:
@@ -31,7 +30,10 @@ public:
     Mesh& operator=(const Mesh&) = delete;
     Mesh& operator=(Mesh&&) = delete;
 
-    ~Mesh() = default;
+    const std::string& getName() const;
+    void setName(const std::string &name);
+
+    virtual ~Mesh() = default;
 
     virtual bool load() = 0;
 
@@ -45,6 +47,8 @@ protected:
     bool _loaded{false};
     std::string _name;
 };
+
+#include <lug/Graphics/Mesh.inl>
 
 } // Graphics
 } // lug

@@ -34,11 +34,10 @@ public:
     bool endFrame() override final;
 
     const Swapchain& getSwapchain() const;
-    const Framebuffer& getCurrentFramebuffer() const;
 
     lug::Graphics::RenderView* createView(lug::Graphics::RenderView::InitInfo& initInfo) override final;
 
-    void render() override final;
+    bool render() override final;
 
     uint16_t getWidth() const override final;
     uint16_t getHeight() const override final;
@@ -51,18 +50,22 @@ private:
     bool initSwapchainCapabilities();
     bool initPresentQueue();
     bool initSwapchain();
-    bool initPipeline();
     void destroy();
 
 private:
     Renderer& _renderer;
     VkSurfaceKHR _surface{VK_NULL_HANDLE};
     Swapchain _swapchain{};
+
+    // Each renderView need an image ready semaphore
+    std::vector<Semaphore> _imageReadySemaphores{};
+
     Semaphore _acquireImageCompleteSemaphore{};
-    Semaphore _submitCompleteSemaphore{};
+    Semaphore _allDrawsFinishedSemaphore{};
     Fence _fence;
 
-    const Queue* _presentQueue{nullptr};
+    std::vector<CommandBuffer> _cmdBuffers;
+    Queue* _presentQueue{nullptr};
     uint32_t _currentImageIndex{0};
 };
 

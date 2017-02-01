@@ -5,13 +5,15 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-ImageView::ImageView(VkImageView imageView, const Device* device) : _imageView(imageView), _device(device) {}
+ImageView::ImageView(VkImageView imageView, const Device* device, const Extent& extent) : _imageView(imageView), _device(device), _extent(extent) {}
 
 ImageView::ImageView(ImageView&& imageView) {
     _imageView = imageView._imageView;
     _device = imageView._device;
+    _extent = imageView._extent;
     imageView._imageView = VK_NULL_HANDLE;
     imageView._device = nullptr;
+    imageView._extent = {0, 0};
 }
 
 ImageView& ImageView::operator=(ImageView&& imageView) {
@@ -19,8 +21,10 @@ ImageView& ImageView::operator=(ImageView&& imageView) {
 
     _imageView = imageView._imageView;
     _device = imageView._device;
+    _extent = imageView._extent;
     imageView._imageView = VK_NULL_HANDLE;
     imageView._device = nullptr;
+    imageView._extent = {0, 0};
 
     return *this;
 }

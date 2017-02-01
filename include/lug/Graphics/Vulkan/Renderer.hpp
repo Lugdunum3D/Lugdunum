@@ -12,6 +12,7 @@
 #include <lug/Graphics/Vulkan/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Instance.hpp>
 #include <lug/Graphics/Vulkan/Loader.hpp>
+#include <lug/Graphics/Vulkan/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/Queue.hpp>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
@@ -55,7 +56,6 @@ public:
     ~Renderer();
 
     std::set<Module::Type> init(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) override final;
-    bool lateInit();
 
     bool isInstanceLayerLoaded(const char* name) const;
     bool isInstanceExtensionLoaded(const char* name) const;
@@ -71,8 +71,6 @@ public:
     Queue* getQueue(VkQueueFlags flags, bool supportPresentation);
     const Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
 
-    std::vector<CommandBuffer>& getCommandBuffers();
-
     bool isSameQueue(VkQueueFlags flagsA, bool supportPresentationA, VkQueueFlags flagsB, bool supportPresentationB) const;
 
     InstanceInfo& getInstanceInfo();
@@ -82,9 +80,6 @@ public:
     const PhysicalDeviceInfo* getPhysicalDeviceInfo() const;
 
     void destroy();
-
-    void setGraphicsPipeline(std::unique_ptr<Pipeline> graphicsPipeline);
-    Pipeline* getGraphicsPipeline() const;
 
     bool beginFrame() override final;
     bool endFrame() override final;
@@ -122,15 +117,7 @@ private:
     std::vector<const char*> _loadedDeviceExtensions{};
     VkPhysicalDeviceFeatures _loadedDeviceFeatures{};
     std::set<int8_t> _loadedQueueFamiliesIdx{};
-
-    std::vector<CommandBuffer> _cmdBuffers;
-    std::unique_ptr<Pipeline> _graphicsPipeline{nullptr};
-
-
-    std::unique_ptr<DeviceMemory> _vertexDeviceMemory{nullptr};
-    std::unique_ptr<Buffer> _vertexBuffer{nullptr};
-    std::unique_ptr<DeviceMemory> _indexDeviceMemory{nullptr};
-    std::unique_ptr<Buffer> _indexBuffer{nullptr};
+    std::vector<Mesh*> _attachedMeshes{};
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;
