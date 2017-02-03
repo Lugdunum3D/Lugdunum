@@ -139,7 +139,6 @@ bool ForwardRenderTechnique::initDepthBuffers(const std::vector<std::unique_ptr<
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
         std::unique_ptr<Image> image = nullptr;
         std::unique_ptr<ImageView> imageView = nullptr;
-        std::unique_ptr<DeviceMemory> imageMemory = nullptr;
 
         VkExtent3D extent {
             extent.width = imageViews[i]->getExtent().width,
@@ -155,16 +154,21 @@ bool ForwardRenderTechnique::initDepthBuffers(const std::vector<std::unique_ptr<
                 return false;
             }
 
-            // Bind memory to image
             auto& imageRequirements = image->getRequirements();
-            uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, imageRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-            imageMemory = DeviceMemory::allocate(_device, imageRequirements.size, memoryTypeIndex);
-            if (!imageMemory) {
-                LUG_LOG.error("ForwardRenderTechnique: Can't allocate device memory for depth buffer image");
-                return false;
+
+            // Initialize depth buffer memory (This memory is common for all depth buffer images)
+            if (!_depthBufferMemory) {
+                uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, imageRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                // Allocate image requirements size for all images
+                _depthBufferMemory = DeviceMemory::allocate(_device, imageRequirements.size * imageViews.size(), memoryTypeIndex);
+                if (!_depthBufferMemory) {
+                    LUG_LOG.error("ForwardRenderTechnique: Can't allocate device memory for depth buffer images");
+                    return false;
+                }
             }
 
-            image->bindMemory(imageMemory.get());
+            // Bind memory to image
+            image->bindMemory(_depthBufferMemory.get(), imageRequirements.size * i);
         }
 
         // Create depth buffer image view
@@ -178,7 +182,6 @@ bool ForwardRenderTechnique::initDepthBuffers(const std::vector<std::unique_ptr<
 
         _depthBuffers[i].image = std::move(image);
         _depthBuffers[i].imageView = std::move(imageView);
-        _depthBuffers[i].imageMemory = std::move(imageMemory);
     }
     return true;
 }

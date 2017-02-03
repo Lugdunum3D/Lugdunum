@@ -15,7 +15,6 @@ public:
     struct DepthBuffer {
         std::unique_ptr<Image> image;
         std::unique_ptr<ImageView> imageView;
-        std::unique_ptr<DeviceMemory> imageMemory;
     };
 
 public:
@@ -42,6 +41,7 @@ private:
 
     // We have one depth buffer for each image
     std::vector<DepthBuffer> _depthBuffers;
+    std::unique_ptr<DeviceMemory> _depthBufferMemory{nullptr};
 };
 
 } // Vulkan
