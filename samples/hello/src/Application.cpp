@@ -190,7 +190,7 @@ bool Application::init(int argc, char* argv[]) {
         renderViews[1]->attachCamera(std::move(camera2));
     }
 
-    _cubeNode2->translate({0.0f, -2.0f, 0.0f});
+    _cubeNode2->translate({0.0f, 0.0f, 2.0f});
     _cubeNode->scale({0.5f, 0.5f, 0.5f});
 
     return true;

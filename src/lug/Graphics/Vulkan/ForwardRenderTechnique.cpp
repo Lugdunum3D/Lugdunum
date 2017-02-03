@@ -21,7 +21,7 @@ ForwardRenderTechnique::ForwardRenderTechnique(const RenderView* renderView, con
 bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaphore& imageReadySemaphore,
                                     const Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) {
     static Math::Mat4x4f projectionMatrix{Math::Mat4x4f::identity()};
-    static Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({0.0f, 3.0f, 5.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
+    static Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({0.0f, -4.0f, -5.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
     static Math::Mat4x4f vpMatrix{Math::Mat4x4f::identity()};
 
     auto& viewport = _renderView->getViewport();
