@@ -10,9 +10,15 @@
 namespace lug {
 namespace Window {
 
+/**
+ * \cond HIDDEN_SYMBOLS
+ */
 namespace priv {
     class WindowImpl;
 } // namespace priv
+/**
+ * \endcond
+ */
 
 // The video mode we set for the window we wish to create
 struct VideoMode

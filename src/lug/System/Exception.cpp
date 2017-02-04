@@ -8,6 +8,7 @@ const std::string& lug::System::Exception::getTypeName() const {
     return _typeName;
 }
 
+
 const std::string& lug::System::Exception::getDescription() const {
     return _description;
 }

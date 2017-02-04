@@ -9,14 +9,23 @@
 namespace lug {
 namespace System {
 
+/**
+ * \cond HIDDEN_SYMBOLS
+ */
 namespace priv {
 class Message;
 } // priv
+/**
+ * \endcond
+ */
 
 class Formatter;
 
 using FlagHandlerPointer = std::string (Formatter::*)(const std::tm* now);
 
+/**
+ * \cond HIDDEN_SYMBOLS
+ */
 namespace priv {
 
 class Formattable {
@@ -53,6 +62,9 @@ struct Token {
 };
 
 } // priv
+/**
+ * \endcond
+ */
 
 class LUG_SYSTEM_API Formatter {
 public:

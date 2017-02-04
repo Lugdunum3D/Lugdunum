@@ -12,6 +12,9 @@ namespace System {
 namespace Memory {
 namespace Allocator {
 
+/**
+ * \cond HIDDEN_SYMBOLS
+ */
 namespace priv {
 
 // std::ceil isn't constexpr in clang and msvc
@@ -23,6 +26,9 @@ constexpr int32_t ceil(float num)
 }
 
 }
+/**
+ * \endcond
+ */
 
 template <size_t MaxSize, size_t MaxAlignment = MaxSize, size_t Offset = 0>
 class Chunk {

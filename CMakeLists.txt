@@ -57,6 +57,7 @@ project(Lugdunum C CXX)
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
 set(VERSION_PATCH 0)
+mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
 add_definitions(-DLUG_VERSION_MAJOR=${VERSION_MAJOR})
 add_definitions(-DLUG_VERSION_MINOR=${VERSION_MINOR})
@@ -70,6 +71,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 lug_set_option(BUILD_SHARED_LIBS TRUE BOOL "TRUE to build Lugdunum as shared libraries, FALSE to build it as static libraries")
 lug_set_option(ENABLE_TEST FALSE BOOL "TRUE to enable unit tests, FALSE to disable unit tests")
+lug_set_option(BUILD_DOCUMENTATION FALSE BOOL "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
 
 if(NOT BUILD_SHARED_LIBS)
     add_definitions(-DLUG_STATIC)
@@ -93,7 +95,7 @@ install(DIRECTORY include
 install(FILES README.md DESTINATION ${INSTALL_MISC_DIR})
 install(FILES cmake/modules/FindLUG.cmake DESTINATION ${INSTALL_MISC_DIR}/cmake/modules)
 
-# Unit test
+# unit test
 if(ENABLE_TEST)
     # Note: enable_testing() MUST be on the top level CMakeLists.txt
     enable_testing()
@@ -104,6 +106,30 @@ if(ENABLE_TEST)
     add_subdirectory(lib/googletest)
 
     add_subdirectory(test/)
+endif()
+
+# documentation
+if(BUILD_DOCUMENTATION)
+
+    # find doxygen
+    find_package(Doxygen)
+
+    if(NOT DOXYGEN_FOUND)
+        message(FATAL_ERROR "Doxygen is needed to build the documentation.")
+    endif()
+
+    set(doxyfile_in ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+    set(doxyfile ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+    configure_file(${doxyfile_in} ${doxyfile} @ONLY)
+
+    add_custom_target(doc ALL
+        COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen"
+        VERBATIM)
+
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION ${INSTALL_MISC_DIR}/doc)
 endif()
 
 # TODO: setup the install for license
