@@ -10,7 +10,14 @@ class SceneNode;
 
 class LUG_GRAPHICS_API MovableObject {
 public:
-    MovableObject(const std::string& name);
+    enum class Type: uint8_t {
+        MESH = 0,
+        CAMERA = 1,
+        LIGHT = 2
+    };
+
+public:
+    MovableObject(const std::string& name, Type type);
 
     MovableObject(const MovableObject&) = delete;
     MovableObject(MovableObject&&) = delete;
@@ -25,12 +32,15 @@ public:
     const SceneNode* getParent() const;
 
     const std::string& getName() const;
+    Type getType() const;
 
     virtual void needUpdate() = 0;
 
 protected:
     SceneNode* _parent{nullptr};
     std::string _name;
+    Type _type;
+    bool _needUpdate{true};
 };
 
 #include <lug/Graphics/MovableObject.inl>

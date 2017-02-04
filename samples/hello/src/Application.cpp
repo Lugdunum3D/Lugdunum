@@ -1,5 +1,9 @@
 #include "Application.hpp"
+#include <lug/Graphics/DirectionalLight.hpp>
+#include <lug/Graphics/Spotlight.hpp>
+#include <lug/Graphics/PointLight.hpp>
 #include <lug/Graphics/MeshInstance.hpp>
+#include <lug/Graphics/Light.hpp>
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
     getRenderWindowInfo().windowInitInfo.title = "Hello Cube";
@@ -70,6 +74,7 @@ bool Application::init(int argc, char* argv[]) {
 
     _scene = _graphics.createScene();
     _cube = _graphics.createMesh("Cube");
+    _plane = _graphics.createMesh("Plane");
 
 
 
@@ -145,6 +150,26 @@ bool Application::init(int argc, char* argv[]) {
         return false;
     }
 
+    //1. pos
+    //2. color
+    //3. normal
+    //4. texture uv
+    _plane->vertices = {
+        {{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f, 1.0}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
+        {{-1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}},
+        {{1.0f, 1.0f, -1.0f}, {0.0f, 1.0f, 1.0}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
+        {{1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}}
+    };
+
+    _plane->indices = {
+        3, 1, 0,
+        2, 3, 0
+    };
+
+    if (!_plane->load()) {
+        return false;
+    }
+
     // Add cube to scene
     {
         std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance = _scene->createMeshInstance("cube instance", _cube.get());
@@ -163,6 +188,58 @@ bool Application::init(int argc, char* argv[]) {
 
         cubeNode2->attachMovableObject(std::move(cubeInstance2));
         _scene->getRoot()->attachChild(std::move(cubeNode2));
+    }
+
+    // Add plane to scene
+    {
+        std::unique_ptr<lug::Graphics::MeshInstance> planeInstance = _scene->createMeshInstance("plane instance", _plane.get());
+        std::unique_ptr<lug::Graphics::SceneNode> planeNode = _scene->createSceneNode("plane instance node");
+
+        planeNode->scale({10.0f, 1.0f, 10.0f});
+
+        planeNode->attachMovableObject(std::move(planeInstance));
+        _scene->getRoot()->attachChild(std::move(planeNode));
+    }
+
+    // Add directional light to scene
+/*   {
+        std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::DIRECTIONAL_LIGHT);
+        std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
+
+        light->setDiffuse({0.2f, 0.2f, 0.2f});
+        static_cast<lug::Graphics::DirectionalLight*>(light.get())->setDirection({0.0f, 4.0f, 5.0f});
+
+        lightNode->attachMovableObject(std::move(light));
+        _scene->getRoot()->attachChild(std::move(lightNode));
+    }*/
+
+    // Add point light to scene
+    {
+        std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::POINT_LIGHT);
+        std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
+
+        light->setDiffuse({0.0f, 0.2f, 1.0f});
+        static_cast<lug::Graphics::PointLight*>(light.get())->setPosition({1.5f, -2.0f, 1.5f});
+        static_cast<lug::Graphics::PointLight*>(light.get())->setLinear(0.14f);
+        static_cast<lug::Graphics::PointLight*>(light.get())->setQuadric(0.07f);
+
+        lightNode->attachMovableObject(std::move(light));
+        _scene->getRoot()->attachChild(std::move(lightNode));
+    }
+
+    // Add spotlight to scene
+    {
+        std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::SPOTLIGHT);
+        std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
+
+        light->setDiffuse({0.9f, 0.9f, 0.9f});
+        static_cast<lug::Graphics::Spotlight*>(light.get())->setDirection({0.0f, 4.0f, 5.0f});
+        static_cast<lug::Graphics::Spotlight*>(light.get())->setPosition({0.0f, -4.0f, -5.0f});
+        static_cast<lug::Graphics::Spotlight*>(light.get())->setAngle(9.0f);
+        static_cast<lug::Graphics::Spotlight*>(light.get())->setOuterAngle(11.0f);
+
+        lightNode->attachMovableObject(std::move(light));
+        _scene->getRoot()->attachChild(std::move(lightNode));
     }
 
     std::unique_ptr<lug::Graphics::Camera> camera = _graphics.createCamera("camera");

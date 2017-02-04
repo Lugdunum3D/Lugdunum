@@ -4,21 +4,28 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 # all source files
 set(SRC
     ${SRCROOT}/Camera.cpp
+    ${SRCROOT}/DirectionalLight.cpp
     ${SRCROOT}/Graphics.cpp
+    ${SRCROOT}/Light.cpp
     ${SRCROOT}/Mesh.cpp
     ${SRCROOT}/MeshInstance.cpp
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/MovableCamera.cpp
     ${SRCROOT}/MovableObject.cpp
     ${SRCROOT}/Node.cpp
+    ${SRCROOT}/PointLight.cpp
     ${SRCROOT}/RenderQueue.cpp
     ${SRCROOT}/RenderView.cpp
     ${SRCROOT}/Scene.cpp
     ${SRCROOT}/SceneNode.cpp
+    ${SRCROOT}/Spotlight.cpp
     ${SRCROOT}/Vulkan/Buffer.cpp
     ${SRCROOT}/Vulkan/Camera.cpp
     ${SRCROOT}/Vulkan/CommandBuffer.cpp
     ${SRCROOT}/Vulkan/CommandPool.cpp
+    ${SRCROOT}/Vulkan/DescriptorPool.cpp
+    ${SRCROOT}/Vulkan/DescriptorSet.cpp
+    ${SRCROOT}/Vulkan/DescriptorSetLayout.cpp
     ${SRCROOT}/Vulkan/Device.cpp
     ${SRCROOT}/Vulkan/DeviceMemory.cpp
     ${SRCROOT}/Vulkan/Fence.cpp
@@ -33,8 +40,8 @@ set(SRC
     ${SRCROOT}/Vulkan/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/Queue.cpp
     ${SRCROOT}/Vulkan/Renderer.cpp
-    ${SRCROOT}/Vulkan/RenderTechnique.cpp
     ${SRCROOT}/Vulkan/RenderPass.cpp
+    ${SRCROOT}/Vulkan/RenderTechnique.cpp
     ${SRCROOT}/Vulkan/RenderView.cpp
     ${SRCROOT}/Vulkan/RenderWindow.cpp
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
@@ -50,9 +57,12 @@ source_group("src" FILES ${SRC})
 set(INC
     ${INCROOT}/Camera.hpp
     ${INCROOT}/Camera.inl
+    ${INCROOT}/DirectionalLight.hpp
     ${INCROOT}/Export.hpp
     ${INCROOT}/Graphics.hpp
     ${INCROOT}/Graphics.inl
+    ${INCROOT}/Light.hpp
+    ${INCROOT}/Light.inl
     ${INCROOT}/Mesh.hpp
     ${INCROOT}/Mesh.inl
     ${INCROOT}/MeshInstance.hpp
@@ -64,6 +74,7 @@ set(INC
     ${INCROOT}/MovableObject.inl
     ${INCROOT}/Node.hpp
     ${INCROOT}/Node.inl
+    ${INCROOT}/PointLight.hpp
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/RenderQueue.hpp
     ${INCROOT}/RenderQueue.inl
@@ -77,11 +88,15 @@ set(INC
     ${INCROOT}/Scene.inl
     ${INCROOT}/SceneNode.hpp
     ${INCROOT}/SceneNode.inl
+    ${INCROOT}/Spotlight.hpp
     ${INCROOT}/Vulkan/Buffer.hpp
     ${INCROOT}/Vulkan/Camera.hpp
     ${INCROOT}/Vulkan/CommandBuffer.hpp
     ${INCROOT}/Vulkan/CommandPool.hpp
     ${INCROOT}/Vulkan/CommandPool.inl
+    ${INCROOT}/Vulkan/DescriptorPool.hpp
+    ${INCROOT}/Vulkan/DescriptorSet.hpp
+    ${INCROOT}/Vulkan/DescriptorSetLayout.hpp
     ${INCROOT}/Vulkan/Device.hpp
     ${INCROOT}/Vulkan/Device.inl
     ${INCROOT}/Vulkan/DeviceMemory.hpp

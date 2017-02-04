@@ -37,7 +37,7 @@ public:
     RenderPass* getRenderPass() const;
     PipelineLayout* getLayout() const;
 
-    static std::unique_ptr<Pipeline> createGraphicsPipeline(const Device* device);
+    static std::unique_ptr<Pipeline> createGraphicsPipeline(const Device* device, const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
 
 private:
     VkPipeline _pipeline{VK_NULL_HANDLE};

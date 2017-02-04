@@ -9,14 +9,18 @@ namespace Vulkan {
 
 RenderView::RenderView(const RenderTarget* renderTarget) : lug::Graphics::RenderView(renderTarget) {}
 
-bool RenderView::init(RenderView::InitInfo& initInfo, const Device* device, Queue* presentQueue, const std::vector<std::unique_ptr<ImageView> >& imageViews) {
+bool RenderView::init(RenderView::InitInfo& initInfo,
+                        const Device* device,
+                        Queue* presentQueue,
+                        DescriptorPool* descriptorPool,
+                        const std::vector<std::unique_ptr<ImageView> >& imageViews) {
     lug::Graphics::RenderView::init(initInfo);
 
     if (_info.renderTechniqueType == lug::Graphics::RenderTechnique::Type::Forward) {
         _renderTechnique = std::make_unique<ForwardRenderTechnique>(this, device, presentQueue);
     }
 
-    if (_renderTechnique && !_renderTechnique->init(imageViews)) {
+    if (_renderTechnique && !_renderTechnique->init(descriptorPool, imageViews)) {
         LUG_LOG.warn("RenderView: Failed to init render technique");
         return false;
     }

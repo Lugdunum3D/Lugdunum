@@ -3,7 +3,7 @@
 namespace lug {
 namespace Graphics {
 
-MovableObject::MovableObject(const std::string& name) : _name(name) {}
+MovableObject::MovableObject(const std::string& name, Type type) : _name(name), _type(type) {}
 
 } // Graphics
 } // lug

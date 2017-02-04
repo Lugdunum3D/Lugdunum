@@ -7,13 +7,19 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-PipelineLayout::PipelineLayout(VkPipelineLayout pipelineLayout, const Device* device) : _pipelineLayout(pipelineLayout), _device(device) {}
+PipelineLayout::PipelineLayout(std::vector<std::unique_ptr<DescriptorSetLayout> >& descriptorSetLayouts,
+                                VkPipelineLayout pipelineLayout,
+                                const Device* device) :
+                                _pipelineLayout(pipelineLayout), _device(device), _descriptorSetLayouts(std::move(descriptorSetLayouts)) {}
 
 PipelineLayout::PipelineLayout(PipelineLayout&& pipelineLayout) {
     _pipelineLayout = pipelineLayout._pipelineLayout;
     _device = pipelineLayout._device;
+    _descriptorSetLayouts = std::move(pipelineLayout._descriptorSetLayouts);
+
     pipelineLayout._pipelineLayout = VK_NULL_HANDLE;
     pipelineLayout._device = nullptr;
+    pipelineLayout._descriptorSetLayouts.resize(0);
 }
 
 PipelineLayout& PipelineLayout::operator=(PipelineLayout&& pipelineLayout) {
@@ -21,8 +27,11 @@ PipelineLayout& PipelineLayout::operator=(PipelineLayout&& pipelineLayout) {
 
     _pipelineLayout = pipelineLayout._pipelineLayout;
     _device = pipelineLayout._device;
+    _descriptorSetLayouts = std::move(pipelineLayout._descriptorSetLayouts);
+
     pipelineLayout._pipelineLayout = VK_NULL_HANDLE;
     pipelineLayout._device = nullptr;
+    pipelineLayout._descriptorSetLayouts.resize(0);
 
     return *this;
 }
@@ -39,18 +48,55 @@ void PipelineLayout::destroy() {
 }
 
 std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
+    std::vector<std::unique_ptr<DescriptorSetLayout> > descriptorSetLayouts;
+
+    // Bindings set 0
+    {
+        VkDescriptorSetLayoutBinding bindings[] = {
+            // Camera uniform buffer
+            {
+                bindings[0].binding = 0,
+                bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                bindings[0].descriptorCount = 1 ,
+                bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                bindings[0].pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+            }
+        };
+
+        descriptorSetLayouts.push_back(DescriptorSetLayout::create(device, bindings, 1));
+    }
+
+    // Bindings set 1
+    {
+        VkDescriptorSetLayoutBinding bindings[] = {
+            // Light uniform buffer
+            {
+                bindings[0].binding = 0,
+                bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                bindings[0].descriptorCount = 1 ,
+                bindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+                bindings[0].pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+            }
+        };
+        descriptorSetLayouts.push_back(DescriptorSetLayout::create(device, bindings, 1));
+    }
+
+    if (!descriptorSetLayouts[0] || !descriptorSetLayouts[1]) {
+        LUG_LOG.error("RendererVulkan: Can't create pipeline descriptor sets layout");
+        return nullptr;
+    }
+
+    VkDescriptorSetLayout vkDescriptorSetLayouts[] = {
+        *descriptorSetLayouts[0],
+        *descriptorSetLayouts[1]
+    };
+
     VkPushConstantRange pushConstants[] = {
-        // Camera view projection matrix
+        // Model transformation
         {
             pushConstants[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
             pushConstants[0].offset = 0,
             pushConstants[0].size = sizeof(Math::Mat4x4f)
-        },
-        // Model transformation
-        {
-            pushConstants[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-            pushConstants[1].offset = sizeof(Math::Mat4x4f),
-            pushConstants[1].size = sizeof(Math::Mat4x4f)
         }
     };
 
@@ -58,9 +104,9 @@ std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
         createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = 0,
-        createInfo.setLayoutCount = 0,
-        createInfo.pSetLayouts = nullptr,
-        createInfo.pushConstantRangeCount = 2,
+        createInfo.setLayoutCount = 2,
+        createInfo.pSetLayouts = vkDescriptorSetLayouts,
+        createInfo.pushConstantRangeCount = 1,
         createInfo.pPushConstantRanges = pushConstants
     };
 
@@ -72,7 +118,7 @@ std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
         return nullptr;
     }
 
-    return std::unique_ptr<PipelineLayout>(new PipelineLayout(pipelineLayout, device));
+    return std::unique_ptr<PipelineLayout>(new PipelineLayout(descriptorSetLayouts, pipelineLayout, device));
 }
 
 } // Vulkan

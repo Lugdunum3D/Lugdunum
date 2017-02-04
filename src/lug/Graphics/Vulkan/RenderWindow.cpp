@@ -52,11 +52,15 @@ bool RenderWindow::beginFrame() {
 
     while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, _acquireImageCompleteSemaphore)) {
         if (_swapchain.isOutOfDate()) {
-            initSwapchainCapabilities();
-            initSwapchain();
+            if (!initSwapchainCapabilities() || !initSwapchain()) {
+                return false;
+            }
             for (auto& renderView: _renderViews) {
                 RenderView* renderView_ = static_cast<RenderView*>(renderView.get());
-                renderView_->getRenderTechnique()->initFramebuffers(_swapchain.getImagesViews());
+                if (!renderView_->getRenderTechnique()->initDepthBuffers(_swapchain.getImagesViews()) ||
+                    !renderView_->getRenderTechnique()->initFramebuffers(_swapchain.getImagesViews())) {
+                    return false;
+                }
             }
         } else {
             return false;
@@ -118,7 +122,7 @@ bool RenderWindow::endFrame() {
 lug::Graphics::RenderView* RenderWindow::createView(lug::Graphics::RenderView::InitInfo& initInfo) {
     std::unique_ptr<RenderView> renderView = std::make_unique<RenderView>(this);
 
-    if (!renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, _swapchain.getImagesViews())) {
+    if (!renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, _descriptorPool.get(), _swapchain.getImagesViews())) {
         return nullptr;
     }
 
@@ -480,6 +484,37 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
         _fence = Fence(fence, &_renderer.getDevice());
     }
 
+    // Create descriptor pool
+    // This is in RenderWindow because we need to know the number of RenderTechnique (Actually the number of render views)
+    // Each RenderTechnique has got 50 descriptors for the lights and 1 for the camera
+    {
+        VkDescriptorPoolSize poolSize[] = {
+            // Uniform buffers descriptors (50 for lights and 1 for camera in ForwardRenderTechnique)
+            {
+                poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                poolSize[0].descriptorCount = (uint32_t)initInfo.renderViewsInitInfo.size() * (50 + 1)
+            }
+        };
+
+        VkDescriptorPoolCreateInfo createInfo{
+            createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+            createInfo.pNext = nullptr,
+            createInfo.flags = 0, // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
+            createInfo.maxSets = (uint32_t)initInfo.renderViewsInitInfo.size() * (50 + 1), // Only ForwardRenderTechnique has 50 descriptor sets (for lights) and 1 (for the camera)
+            createInfo.poolSizeCount = 1,
+            createInfo.pPoolSizes = poolSize
+        };
+
+        VkDescriptorPool descriptorPool{VK_NULL_HANDLE};
+        VkResult result = vkCreateDescriptorPool(_renderer.getDevice(), &createInfo, nullptr, &descriptorPool);
+        if (result != VK_SUCCESS) {
+            LUG_LOG.error("RendererVulkan: Can't create the descriptor pool: {}", result);
+            return false;
+        }
+        _descriptorPool = std::make_unique<DescriptorPool>(descriptorPool, &_renderer.getDevice());
+    }
+
+
     if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue())) {
         return false;
     }
@@ -496,6 +531,7 @@ void RenderWindow::destroy() {
         renderView->destroy();
     }
 
+
     _swapchain.destroy();
 
     if (_surface != VK_NULL_HANDLE) {
@@ -506,6 +542,8 @@ void RenderWindow::destroy() {
     for (auto& cmdBuffer: _cmdBuffers) {
         cmdBuffer.destroy();
     }
+
+    _descriptorPool->destroy();
 }
 
 } // Vulkan

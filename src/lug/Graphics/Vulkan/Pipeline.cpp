@@ -70,9 +70,9 @@ void Pipeline::bind(const CommandBuffer* commandBuffer) {
     vkCmdBindPipeline(*commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 }
 
-std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device) {
-    auto vertexShader = ShaderModule::create("shader.vert.spv", device);
-    auto fragmentShader = ShaderModule::create("shader.frag.spv", device);
+std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device, const std::string& vertexShaderFile, const std::string& fragmentShaderFile) {
+    auto vertexShader = ShaderModule::create(vertexShaderFile, device);
+    auto fragmentShader = ShaderModule::create(fragmentShaderFile, device);
     if (vertexShader == nullptr || fragmentShader == nullptr) {
         return nullptr;
     }
@@ -192,7 +192,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device)
         depthStencil.flags = 0,
         depthStencil.depthTestEnable = VK_TRUE,
         depthStencil.depthWriteEnable = VK_TRUE,
-        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS,
+        depthStencil.depthCompareOp = VK_COMPARE_OP_LESS_OR_EQUAL,
         depthStencil.depthBoundsTestEnable = VK_FALSE,
         depthStencil.stencilTestEnable = VK_FALSE,
         {}, // depthStencil.front (Used for stencil, we don't need)
@@ -202,12 +202,12 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device)
     };
 
     VkPipelineColorBlendAttachmentState colorBlendAttachment{
-        colorBlendAttachment.blendEnable = VK_FALSE,
-        colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ZERO ,
-        colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO ,
+        colorBlendAttachment.blendEnable = VK_TRUE,
+        colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE,
+        colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE,
         colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD,
-        colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
-        colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
+        colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
+        colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
         colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD,
         colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
     };

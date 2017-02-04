@@ -5,7 +5,7 @@
 namespace lug {
 namespace Graphics {
 
-MovableCamera::MovableCamera(const std::string& name, Camera* camera) : MovableObject(name) {
+MovableCamera::MovableCamera(const std::string& name, Camera* camera) : MovableObject(name, MovableObject::Type::CAMERA) {
     if (camera) {
         attachCamera(camera);
     }

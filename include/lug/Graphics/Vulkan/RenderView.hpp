@@ -2,6 +2,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/RenderView.hpp>
+#include <lug/Graphics/Vulkan/DescriptorPool.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Queue.hpp>
 #include <lug/Graphics/Vulkan/RenderTechnique.hpp>
@@ -24,7 +25,11 @@ public:
 
     ~RenderView() = default;
 
-    bool init(RenderView::InitInfo& initInfo, const Device* device, Queue* presentQueue, const std::vector<std::unique_ptr<ImageView> >& imageViews);
+    bool init(RenderView::InitInfo& initInfo,
+                const Device* device,
+                Queue* presentQueue,
+                DescriptorPool* descriptorPool,
+                const std::vector<std::unique_ptr<ImageView> >& imageViews);
 
     bool render(const Semaphore& imageReadySemaphore, uint32_t currentImageIndex);
     void destroy() override final;

@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/Buffer.hpp>
+#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/DeviceMemory.hpp>
 #include <lug/System/Logger.hpp>
@@ -44,12 +45,6 @@ Buffer::~Buffer() {
 }
 
 void Buffer::destroy() {
-    if (_deviceMemory != nullptr) {
-        // TODO: Own the ressource to destroy it
-        _deviceMemory->destroy();
-        _deviceMemory = nullptr;
-    }
-
     if (_buffer != VK_NULL_HANDLE) {
         vkDestroyBuffer(*_device, _buffer, nullptr);
         _buffer = VK_NULL_HANDLE;
@@ -72,10 +67,14 @@ void Buffer::unmapMemory() {
     vkUnmapMemory(*_device, *_deviceMemory);
 }
 
-void Buffer::updateData(void *data, uint32_t size, VkDeviceSize memoryOffset) {
+void Buffer::updateData(void *data, uint32_t size, uint32_t memoryOffset) {
     void *gpuData = mapMemory(size, memoryOffset);
     memcpy(gpuData, data, size);
     unmapMemory();
+}
+
+void Buffer::updateDataTransfer(const CommandBuffer* commandBuffer, void *data, uint32_t size, uint32_t offset) {
+    vkCmdUpdateBuffer(*commandBuffer, _buffer, offset, size, data);
 }
 
 const VkMemoryRequirements& Buffer::getRequirements() const {

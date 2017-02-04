@@ -24,6 +24,7 @@ RECURSIVE              = YES
 USE_MDFILE_AS_MAINPAGE = @doxy_main_page@
 SORT_MEMBER_DOCS       = NO
 SOURCE_BROWSER         = YES
+WARN_IF_UNDOCUMENTED   = NO
 
 #---------------------------------------------------------------------------
 # Configuration options related to the dot tool

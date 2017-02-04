@@ -50,6 +50,7 @@ public:
     void scale(const Math::Vec3f& scale);
 
     // TODO: Look at
+    // void lookAt(const Math::Vec3f& pos, const Math::Vec3f& target, TransformSpace space = TransformSpace::Local);
     // TODO: set position / rotate / scale
 
     virtual void needUpdate();

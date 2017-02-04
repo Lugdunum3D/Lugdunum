@@ -2,6 +2,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/CommandBuffer.hpp>
+#include <lug/Graphics/Vulkan/DescriptorPool.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/ImageView.hpp>
@@ -31,9 +32,10 @@ public:
     virtual ~RenderTechnique() = default;
 
     virtual bool render(const RenderQueue& renderQueue, const Semaphore& imageReadySemaphore, const Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) = 0;
-    virtual bool init(const std::vector<std::unique_ptr<ImageView> >& imageViews) = 0;
+    virtual bool init(DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<ImageView> >& imageViews) = 0;
     virtual void destroy() = 0;
 
+    virtual bool initDepthBuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) = 0;
     virtual bool initFramebuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) = 0;
 
 protected:

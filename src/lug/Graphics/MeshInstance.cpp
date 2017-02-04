@@ -3,7 +3,7 @@
 namespace lug {
 namespace Graphics {
 
-MeshInstance::MeshInstance(const std::string& name, Mesh* mesh) : MovableObject(name), _mesh(mesh) {}
+MeshInstance::MeshInstance(const std::string& name, Mesh* mesh) : MovableObject(name, MovableObject::Type::MESH), _mesh(mesh) {}
 
 MeshInstance::~MeshInstance() {
     // TODO: Remove this, the MeshInstance should not delete the mesh, it's not the owner !

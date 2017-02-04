@@ -8,6 +8,7 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
+class CommandBuffer;
 class Device;
 class DeviceMemory;
 
@@ -32,7 +33,8 @@ public:
     void bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
     void* mapMemory(VkDeviceSize size, VkDeviceSize offset = 0);
     void unmapMemory();
-    void updateData(void *data, uint32_t size, VkDeviceSize memoryOffset = 0);
+    void updateData(void *data, uint32_t size, uint32_t memoryOffset = 0);
+    void updateDataTransfer(const CommandBuffer* commandBuffer, void *data, uint32_t size, uint32_t offset = 0);
 
     const VkMemoryRequirements& getRequirements() const;
 

@@ -59,7 +59,7 @@ void Renderer::destroy() {
     }
 
     // Destroy the window
-    _window = nullptr;
+    _window.reset();
 
     for (auto& queue : _queues) {
         queue.destroy();
@@ -395,7 +395,6 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::T
             queue.setCommandPool(CommandPool(commandPool, &_device, &queue));
         }
     }
-
     return true;
 }
 

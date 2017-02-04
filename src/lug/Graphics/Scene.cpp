@@ -1,4 +1,8 @@
 #include <lug/Graphics/Scene.hpp>
+#include <lug/Graphics/DirectionalLight.hpp>
+#include <lug/Graphics/PointLight.hpp>
+#include <lug/Graphics/Spotlight.hpp>
+#include <lug/System/Logger.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -15,6 +19,17 @@ std::unique_ptr<MeshInstance> Scene::createMeshInstance(const std::string& name,
 
 std::unique_ptr<MovableCamera> Scene::createMovableCamera(const std::string& name, Camera* camera) {
     return std::make_unique<MovableCamera>(name, camera);
+}
+
+std::unique_ptr<Light> Scene::createLight(const std::string& name, Light::Type type) {
+    switch (type) {
+        case Light::Type::DIRECTIONAL_LIGHT:    return std::make_unique<DirectionalLight>(name);
+        case Light::Type::POINT_LIGHT:          return std::make_unique<PointLight>(name);
+        case Light::Type::SPOTLIGHT:            return std::make_unique<Spotlight>(name);
+        default:
+            LUG_LOG.warn("Scene::createLight: Unknow light type");
+            return nullptr;
+    }
 }
 
 SceneNode* Scene::getSceneNode(const std::string& name) {

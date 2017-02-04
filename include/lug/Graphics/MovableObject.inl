@@ -13,3 +13,7 @@ inline const SceneNode* MovableObject::getParent() const {
 inline const std::string& MovableObject::getName() const {
     return _name;
 }
+
+inline MovableObject::Type MovableObject::getType() const {
+    return _type;
+}

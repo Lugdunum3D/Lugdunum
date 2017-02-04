@@ -3,6 +3,7 @@
 #include <memory>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/RenderWindow.hpp>
+#include <lug/Graphics/Vulkan/DescriptorPool.hpp>
 #include <lug/Graphics/Vulkan/Fence.hpp>
 #include <lug/Graphics/Vulkan/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/Swapchain.hpp>
@@ -63,6 +64,8 @@ private:
     Semaphore _acquireImageCompleteSemaphore{};
     Semaphore _allDrawsFinishedSemaphore{};
     Fence _fence;
+
+    std::unique_ptr<::lug::Graphics::Vulkan::DescriptorPool> _descriptorPool{nullptr};
 
     std::vector<CommandBuffer> _cmdBuffers;
     Queue* _presentQueue{nullptr};
