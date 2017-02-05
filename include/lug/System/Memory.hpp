@@ -50,6 +50,9 @@ T* new_array(size_t alignment, size_t nb, const char* file, size_t line, Arena& 
 template <typename T, class Arena, typename std::enable_if<std::is_pod<T>::value, int>::type = 0>
 void delete_array(T* ptr, Arena& arena);
 
+/**
+ * \cond HIDDEN_SYMBOLS
+ */
 // unique_ptr
 namespace priv {
 
@@ -69,10 +72,16 @@ struct make_unique_deleter<T[Count]> {
 };
 
 } // namespace priv
+/**
+ * \endcond
+ */
 
 template<typename T, typename Deleter = typename priv::make_unique_deleter<T>::Deleter>
 using unique_ptr = std::unique_ptr<T, Deleter>;
 
+/**
+ * \cond HIDDEN_SYMBOLS
+ */
 namespace priv {
 
 template <typename T>
@@ -91,6 +100,9 @@ struct make_unique_if<T[Count]> {
 };
 
 } // namespace priv
+/**
+ * \endcond
+ */
 
 // Single object
 template <typename T, class Arena, typename ...Args>

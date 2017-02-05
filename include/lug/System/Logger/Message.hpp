@@ -4,6 +4,9 @@
 
 namespace lug {
 namespace System {
+/**
+ * \cond HIDDEN_SYMBOLS
+ */
 namespace priv {
 
 class Message {
@@ -27,5 +30,8 @@ public:
 };
 
 } // priv
+/**
+ * \endcond
+ */
 } // System
 } // lug
