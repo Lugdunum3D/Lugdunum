@@ -8,12 +8,21 @@
 namespace lug {
 namespace Core {
 
+/**
+ * @brief      Class for application.
+ *
+ *             Root class of the Engine. The user has to inherit from this class
+ *             and implement #onFrame and #onEvent.
+ */
 class LUG_CORE_API Application {
 public:
+    /**
+     * @brief      Stores the version of the Application
+     */
     struct Version {
-        uint32_t major; // 10 bits
-        uint32_t minor; // 10 bits
-        uint32_t patch; // 12 bits
+        uint32_t major; /** 10 bits */
+        uint32_t minor; /** 10 bits */
+        uint32_t patch; /** 12 bits */
 
         uint32_t createVersion() const;
 
@@ -38,27 +47,103 @@ public:
 
     virtual ~Application() = default;
 
+    /**
+     * @brief      Gets the application's information.
+     *
+     * @return     The applicaton's information.
+     */
     const Application::Info& getInfo() const;
 
+    /**
+     * @brief      Gets the lug::Graphics::Graphics component of the Application.
+     *
+     * @return     The lug::Graphics::Graphics component.
+     */
     lug::Graphics::Graphics& getGraphics();
     const lug::Graphics::Graphics& getGraphics() const;
 
+    /**
+     * @brief      Gets the Window attached to the Application.
+     *
+     * @return     The lug::Graphics::RenderWindow.
+     */
     lug::Graphics::RenderWindow* getWindow();
     const lug::Graphics::RenderWindow* getWindow() const;
 
+    /**
+     * @brief      Sets the render window information.
+     *
+     * @param      initInfo  The initialize information.
+     */
     void setRenderWindowInfo(lug::Graphics::RenderWindow::InitInfo& initInfo);
+
+    /**
+     * @brief      Gets the render window information.
+     *
+     * @return     The render window information.
+     */
     const lug::Graphics::RenderWindow::InitInfo& getRenderWindowInfo() const;
     lug::Graphics::RenderWindow::InitInfo& getRenderWindowInfo();
 
+    /**
+     * @brief      Sets the graphics information.
+     *
+     * @param[in]  initInfo  A refenrence to the RenderWindow initialize information.
+     */
     void setGraphicsInfo(const lug::Graphics::Graphics::InitInfo& initInfo);
+
+    /**
+     * @brief      Gets the graphics information.
+     *
+     * @return     A reference the Graphics initialize information.
+     */
     const lug::Graphics::Graphics::InitInfo& getGraphicsInfo() const;
     lug::Graphics::Graphics::InitInfo& getGraphicsInfo();
 
+    /**
+     * @brief      Init the application with the informations filled in the lug::Graphics::Graphics::InitInfo
+     *             and lug::Graphics::RenderWindow::InitInfo structures.
+     *
+     *             The lug::Graphics::Graphics::InitInfo structure can be modified by calling #getGraphicsInfo or #setGraphicsInfo. @n
+     *             The lug::Graphics::RenderWindow::InitInfo structure can be modified by calling #getRenderWindowInfo or #setRenderWindowInfo.
+     *
+     * @param[in]  argc  The argc argument as received from the main function.
+     * @param[in]  argv  The argv argument as received from the main function.
+     *
+     * @return     Wether the application was successfully initialized.
+     */
     virtual bool init(int argc, char* argv[]);
+
+    /**
+     * @brief      Run the application.
+     *
+     *             Launches an infinite loop (i.e. it does not exit immediately) and runs the application in the foreground.
+     *
+     * @return     Wether the application exited successfully.
+     */
     bool run();
+
+    /**
+     * @brief      Close the application.
+     *
+     *             This can be called in #onEvent or #onFrame.
+     */
     void close();
 
+    /**
+     * @brief      Overide this function to hanle an event.
+     *
+     *             This function will be called by the engine for each polled event.
+     *
+     * @param[in]  event  The event that was polled.
+     */
     virtual void onEvent(const lug::Window::Event& event) = 0;
+
+    /**
+     * @brief      Overide this function to handle a frame.
+     *
+     *             This function will be called by the engine at each frame.
+     */
     virtual void onFrame() = 0;
 
 private:
@@ -69,7 +154,7 @@ private:
     Info _info;
     bool _closed{false};
 
-    // Init infos
+
     lug::Graphics::Graphics::InitInfo _graphicsInitInfo{
         lug::Graphics::Renderer::Type::Vulkan,      // type
         {                                           // rendererInitInfo
