@@ -6,6 +6,7 @@
 #include <lug/Graphics/Vulkan/Buffer.hpp>
 #include <lug/Graphics/Vulkan/DescriptorSet.hpp>
 #include <lug/Graphics/Vulkan/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/Fence.hpp>
 #include <lug/Graphics/Vulkan/Image.hpp>
 #include <lug/Graphics/Vulkan/ImageView.hpp>
 #include <lug/Graphics/Vulkan/RenderTechnique.hpp>
@@ -15,10 +16,27 @@ namespace Graphics {
 namespace Vulkan {
 
 class LUG_GRAPHICS_API ForwardRenderTechnique final : public RenderTechnique {
-public:
+private:
     struct DepthBuffer {
         std::unique_ptr<Image> image;
         std::unique_ptr<ImageView> imageView;
+    };
+
+    struct FrameData {
+        DepthBuffer depthBuffer;
+        Framebuffer frameBuffer;
+        Fence fence;
+
+        // There is actually only 1 command buffer
+        std::vector<CommandBuffer> cmdBuffers;
+
+        // Lights
+        std::vector<DescriptorSet> lightsDescriptorSets;
+        std::vector<std::unique_ptr<Buffer>> lightsBuffers;
+
+        // Camera
+        std::unique_ptr<Buffer> cameraBuffer{nullptr};
+        DescriptorSet cameraDescriptorSet;
     };
 
 public:
@@ -42,21 +60,15 @@ public:
     bool initFramebuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) override final;
 
 private:
-    std::vector<CommandBuffer> _cmdBuffers;
-
-    // We have one depth buffer for each image
-    std::vector<DepthBuffer> _depthBuffers;
     std::unique_ptr<DeviceMemory> _depthBufferMemory{nullptr};
 
     std::unordered_map<Light::Type, std::unique_ptr<Pipeline> > _pipelines;
-    std::vector<DescriptorSet> _lightsDescriptorSets;
 
-    std::vector<std::unique_ptr<Buffer>> _lightsBuffers;
     std::unique_ptr<DeviceMemory> _lightsBuffersMemory{nullptr};
 
     std::unique_ptr<DeviceMemory> _cameraBufferMemory{nullptr};
-    std::unique_ptr<Buffer> _cameraBuffer{nullptr};
-    DescriptorSet _cameraDescriptorSet;
+
+    std::vector<FrameData> _framesData;
 };
 
 } // Vulkan

@@ -44,9 +44,11 @@ bool Application::run() {
             }
         }
 
+        //auto renderStart = std::chrono::high_resolution_clock::now();
         beginFrame();
         onFrame(getElapsedTime(start));
         endFrame();
+        //LUG_LOG.info("RENDER: {}", getElapsedTime(renderStart));
 
         elapsed += getElapsedTime(start);
         frames++;

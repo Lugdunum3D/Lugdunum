@@ -43,7 +43,6 @@ protected:
     const Device* _device{nullptr};
 
     Queue* _presentQueue{nullptr};
-    std::vector<Framebuffer> _framebuffers;
 };
 
 } // Vulkan

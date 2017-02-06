@@ -35,7 +35,7 @@ public:
     void destroy() override final;
 
     RenderTechnique* getRenderTechnique();
-    const Semaphore& getDrawCompleteSemaphore() const;
+    const Semaphore& getDrawCompleteSemaphore(uint32_t currentImageIndex) const;
 
     // TODO: Add a method to change the index of the good image to use (change by the render window)
     // TODO: Add the semaphores for the images ready in that class too
@@ -43,7 +43,7 @@ public:
 private:
     std::unique_ptr<RenderTechnique> _renderTechnique{nullptr};
 
-    Semaphore _drawCompleteSemaphore{};
+    std::vector<Semaphore> _drawCompleteSemaphores;
     Queue* _presentQueue;
 };
 

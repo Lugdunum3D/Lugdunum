@@ -25,6 +25,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                                     const Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) {
     static Math::Mat4x4f projectionMatrix{Math::Mat4x4f::identity()};
     static Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({0.0f, -10.0f, -20.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
+    FrameData& frameData = _framesData[currentImageIndex];
 
     auto& viewport = _renderView->getViewport();
 
@@ -36,7 +37,11 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
             0.1f, 100.0f);
     }
 
-    if (!_cmdBuffers[0].begin()) return false;
+    frameData.fence.wait();
+    frameData.fence.reset();
+    auto& cmdBuffer = frameData.cmdBuffers[0];
+
+    if (!cmdBuffer.begin()) return false;
 
     // Init render pass
     {
@@ -53,20 +58,20 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         scissor.offset = {(int32_t)_renderView->getScissor().offset.x, (int32_t)_renderView->getScissor().offset.y};
         scissor.extent = {(uint32_t)_renderView->getScissor().extent.width, (uint32_t)_renderView->getScissor().extent.height};
 
-        vkCmdSetViewport(_cmdBuffers[0], 0, 1, &vkViewport);
-        vkCmdSetScissor(_cmdBuffers[0], 0, 1, &scissor);
+        vkCmdSetViewport(cmdBuffer, 0, 1, &vkViewport);
+        vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
     }
 
     // Update lights buffer data and descriptor set bindings
     {
         for (uint32_t i = 0; i < renderQueue.getLightsNb(); ++i) {
             Light* light = renderQueue.getLights()[i];
-            auto& lightBuffer = _lightsBuffers[i];
+            auto& lightBuffer = frameData.lightsBuffers[i];
             uint32_t lightDataSize = 0;
             void* lightData = light->getData(lightDataSize);
 
-            _lightsDescriptorSets[i].update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER , 0, lightBuffer.get(), 0, lightDataSize);
-            lightBuffer->updateDataTransfer(&_cmdBuffers[0], lightData, lightDataSize);
+            frameData.lightsDescriptorSets[i].update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER , 0, lightBuffer.get(), 0, lightDataSize);
+            lightBuffer->updateDataTransfer(&cmdBuffer, lightData, lightDataSize);
         }
     }
 
@@ -76,7 +81,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
             viewMatrix,
             projectionMatrix
         };
-        _cameraBuffer->updateDataTransfer(&_cmdBuffers[0], cameraData, sizeof(cameraData));
+        frameData.cameraBuffer->updateDataTransfer(&cmdBuffer, cameraData, sizeof(cameraData));
     }
 
 
@@ -88,8 +93,8 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         RenderPass* renderPass = _pipelines[Light::Type::DirectionalLight]->getRenderPass();
 
         renderPass->begin(
-            &_cmdBuffers[0],
-            _framebuffers[currentImageIndex],
+            &cmdBuffer,
+            frameData.frameBuffer,
             {viewport.extent.width, viewport.extent.height},
             {viewport.offset.x, viewport.offset.y}
         );
@@ -98,7 +103,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         // We set them to 0 so that there is no blending
         {
             const float blendConstants[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-            vkCmdSetBlendConstants(_cmdBuffers[0], blendConstants);
+            vkCmdSetBlendConstants(cmdBuffer, blendConstants);
         }
 
 
@@ -109,21 +114,21 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                     // Blend constants are used as dst blend factor
                     // Now the depth buffer is filled, we can set the blend constants to 1 to enable blending
                     const float blendConstants[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-                    vkCmdSetBlendConstants(_cmdBuffers[0], blendConstants);
+                    vkCmdSetBlendConstants(cmdBuffer, blendConstants);
                 }
             }
 
             auto lightType = renderQueue.getLights()[i]->getLightType();
             auto& lightPipeline = _pipelines[lightType];
             // TODO: WARNING: Find alternative to light type
-            auto& descriptorSet = _lightsDescriptorSets[i];
+            auto& descriptorSet = frameData.lightsDescriptorSets[i];
 
-            lightPipeline->bind(&_cmdBuffers[0]);
+            lightPipeline->bind(&cmdBuffer);
 
             // WARNING: it will only works if the pipelines has got the same descriptor set layout
-            _cameraDescriptorSet.bind(lightPipeline->getLayout(), &_cmdBuffers[0], 0);
+            frameData.cameraDescriptorSet.bind(lightPipeline->getLayout(), &cmdBuffer, 0);
 
-            descriptorSet.bind(lightPipeline->getLayout(), &_cmdBuffers[0], 1);
+            descriptorSet.bind(lightPipeline->getLayout(), &cmdBuffer, 1);
 
             for (std::size_t j = 0; j < renderQueue.getObjectsNb(); ++j) {
                 auto& object = renderQueue.getObjects()[j];
@@ -136,20 +141,20 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                     Math::Mat4x4f pushConstants[] = {
                         object->getParent()->getTransform()
                     };
-                    vkCmdPushConstants(_cmdBuffers[0], *lightPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
+                    vkCmdPushConstants(cmdBuffer, *lightPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
 
-                    vkCmdBindVertexBuffers(_cmdBuffers[0], 0, 1, &vertexBuffer, &vertexBufferOffset);
-                    vkCmdBindIndexBuffer(_cmdBuffers[0], *mesh->getIndexBuffer(), indexBufferOffset, VK_INDEX_TYPE_UINT32);
-                    vkCmdDrawIndexed(_cmdBuffers[0], (uint32_t)mesh->indices.size(), 1, 0, 0, 0);
+                    vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &vertexBufferOffset);
+                    vkCmdBindIndexBuffer(cmdBuffer, *mesh->getIndexBuffer(), indexBufferOffset, VK_INDEX_TYPE_UINT32);
+                    vkCmdDrawIndexed(cmdBuffer, (uint32_t)mesh->indices.size(), 1, 0, 0, 0);
                 }
             }
         }
-       renderPass->end(&_cmdBuffers[0]);
+       renderPass->end(&cmdBuffer);
     }
 
-    if (!_cmdBuffers[0].end()) return false;
+    if (!cmdBuffer.end()) return false;
 
-    return _presentQueue->submit(_cmdBuffers[0], {drawCompleteSemaphore}, {imageReadySemaphore}, {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT});
+    return _presentQueue->submit(cmdBuffer, {drawCompleteSemaphore}, {imageReadySemaphore}, {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT}, frameData.fence);
 }
 
 bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<ImageView> >& imageViews) {
@@ -163,17 +168,43 @@ bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vec
         return false;
     }
 
+    _framesData.resize(imageViews.size());
     // We assume all pipelines have got the same layout
     // TODO: Create one DescriptorSetLayout for the pipelines
     std::vector<VkDescriptorSetLayout> descriptorSetLayouts(50, *_pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[1]);
-    _lightsDescriptorSets = descriptorPool->createDescriptorSets(descriptorSetLayouts);
-    if (_lightsDescriptorSets.size() == 0) {
-        return false;
-    }
+    for (uint32_t i = 0; i < _framesData.size(); ++i) {
+        // Create lights descriptor sets
+        {
+            _framesData[i].lightsDescriptorSets = descriptorPool->createDescriptorSets(descriptorSetLayouts);
+            if (_framesData[i].lightsDescriptorSets.size() == 0) {
+                return false;
+            }
+        }
 
-    _cmdBuffers = _presentQueue->getCommandPool().createCommandBuffers();
-    if (_cmdBuffers.size() == 0) {
-        return false;
+        // Fence
+        {
+            VkFence fence;
+            VkFenceCreateInfo createInfo{
+                createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+                createInfo.pNext = nullptr,
+                createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT
+            };
+            VkResult result = vkCreateFence(*_device, &createInfo, nullptr, &fence);
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't create swapchain fence: {}", result);
+                return false;
+            }
+
+            _framesData[i].fence = Fence(fence, _device);
+        }
+
+        // Create command buffers
+        {
+            _framesData[i].cmdBuffers = _presentQueue->getCommandPool().createCommandBuffers();
+            if (_framesData[i].cmdBuffers.size() == 0) {
+                return false;
+            }
+        }
     }
 
     return initDepthBuffers(imageViews) && initFramebuffers(imageViews) && initLightsBuffers() && initCameraBuffer(descriptorPool);
@@ -186,43 +217,42 @@ void ForwardRenderTechnique::destroy() {
         pipeline.second->destroy();
     }
 
-    for (auto& cmdBuffer: _cmdBuffers) {
-        cmdBuffer.destroy();
-    }
-
-    _framebuffers.clear();
+    _framesData.clear();
 }
 
 bool ForwardRenderTechnique::initLightsBuffers() {
     uint32_t familyIndices = _presentQueue->getFamilyIdx();
     uint32_t lightsBufferSize = sizeof(Spotlight::LightData);
     bool memoryInitialized = false;
-    _lightsBuffers.resize(50);
-
     uint32_t memoryOffset = 0;
-    for (uint32_t i = 0; i < 50; ++i) {
-        // Create buffer
-        _lightsBuffers[i] = Buffer::create(_device, 1, &familyIndices, lightsBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-        if (!_lightsBuffers[i]) {
-            return false;
-        }
 
-        // Allocate memory for all buffers (One time)
-        auto& lightBuffer = _lightsBuffers[i];
-        const VkMemoryRequirements* bufferRequirements = &lightBuffer->getRequirements();
-        if (!memoryInitialized) {
-            uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-            _lightsBuffersMemory = DeviceMemory::allocate(_device, bufferRequirements->size, memoryTypeIndex);
-            if (!_lightsBuffersMemory) {
-                return false;
+    for (uint32_t i = 0; i < _framesData.size(); ++i) {
+        {
+            for (uint32_t j = 0; j < 50; ++j) {
+                // Create buffer
+                _framesData[i].lightsBuffers.resize(50);
+                _framesData[i].lightsBuffers[j] = Buffer::create(_device, 1, &familyIndices, lightsBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+                if (!_framesData[i].lightsBuffers[j]) {
+                    return false;
+                }
+
+                // Allocate memory for all buffers (One time)
+                auto& lightBuffer = _framesData[i].lightsBuffers[j];
+                const VkMemoryRequirements* bufferRequirements = &lightBuffer->getRequirements();
+                if (!memoryInitialized) {
+                    uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                    _lightsBuffersMemory = DeviceMemory::allocate(_device, bufferRequirements->size * _framesData.size(), memoryTypeIndex);
+                    if (!_lightsBuffersMemory) {
+                        return false;
+                    }
+                    memoryInitialized = true;
+                }
+
+                // Bind buffer memory
+                lightBuffer->bindMemory(_lightsBuffersMemory.get(), memoryOffset);
+                memoryOffset += (uint32_t)bufferRequirements->size;
             }
-            memoryInitialized = true;
         }
-
-        // Bind buffer memory
-        lightBuffer->bindMemory(_lightsBuffersMemory.get(), memoryOffset);
-
-        memoryOffset += (uint32_t)bufferRequirements->size;
     }
 
     return true;
@@ -230,35 +260,45 @@ bool ForwardRenderTechnique::initLightsBuffers() {
 
 bool ForwardRenderTechnique::initCameraBuffer(DescriptorPool* descriptorPool) {
     uint32_t familyIndices = _presentQueue->getFamilyIdx();
+    bool memoryInitialized = false;
+    uint32_t memoryOffset = 0;
 
-    // Create buffer
-    _cameraBuffer = Buffer::create(_device, 1, &familyIndices, sizeof(Math::Mat4x4f) * 2, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-    if (!_cameraBuffer) {
-        return false;
+    for (uint32_t i = 0; i < _framesData.size(); ++i) {
+        {
+            // Create buffer
+            _framesData[i].cameraBuffer = Buffer::create(_device, 1, &familyIndices, sizeof(Math::Mat4x4f) * 2, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+            if (!_framesData[i].cameraBuffer) {
+                return false;
+            }
+
+            // Allocate memory for the camera buffer
+            const VkMemoryRequirements* bufferRequirements =  &_framesData[i].cameraBuffer->getRequirements();
+            if (!memoryInitialized) {
+                uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                _cameraBufferMemory = DeviceMemory::allocate(_device, bufferRequirements->size * _framesData.size(), memoryTypeIndex);
+                if (!_cameraBufferMemory) {
+                    return false;
+                }
+                memoryInitialized = true;
+            }
+
+            // Bind buffer memory
+            _framesData[i].cameraBuffer->bindMemory(_cameraBufferMemory.get(), memoryOffset);
+            memoryOffset += (uint32_t)bufferRequirements->size;
+
+            // Create camera descriptor set
+            // WARNING: it will only works if the pipelines has got the same descriptor set layout
+            auto& descriptorSetLayout = _pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[0];
+            std::vector<DescriptorSet> descriptorSets = descriptorPool->createDescriptorSets({*descriptorSetLayout});
+            if (descriptorSets.size() == 0) {
+                return false;
+            }
+            _framesData[i].cameraDescriptorSet = std::move(descriptorSets[0]);
+
+            // Assign camera buffer to descriptor set binding point 0
+            _framesData[i].cameraDescriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER , 0, _framesData[i].cameraBuffer.get(), 0, sizeof(Math::Mat4x4f) * 2);
+        }
     }
-
-    // Allocate memory for the camera buffer
-    const VkMemoryRequirements* bufferRequirements = &_cameraBuffer->getRequirements();
-    uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    _cameraBufferMemory = DeviceMemory::allocate(_device, bufferRequirements->size, memoryTypeIndex);
-    if (!_cameraBufferMemory) {
-        return false;
-    }
-
-    // Bind buffer memory
-    _cameraBuffer->bindMemory(_cameraBufferMemory.get(), 0);
-
-    // Create camera descriptor set
-    // WARNING: it will only works if the pipelines has got the same descriptor set layout
-    auto& descriptorSetLayout = _pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[0];
-    std::vector<DescriptorSet> descriptorSets = descriptorPool->createDescriptorSets({*descriptorSetLayout});
-    if (descriptorSets.size() == 0) {
-        return false;
-    }
-    _cameraDescriptorSet = std::move(descriptorSets[0]);
-
-    // Assign camera buffer to descriptor set binding point 0
-    _cameraDescriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER , 0, _cameraBuffer.get(), 0, sizeof(Math::Mat4x4f) * 2);
 
     return true;
 }
@@ -277,7 +317,7 @@ bool ForwardRenderTechnique::initDepthBuffers(const std::vector<std::unique_ptr<
         _depthBufferMemory.reset();
     }
 
-    _depthBuffers.resize(imageViews.size());
+    _framesData.resize(imageViews.size());
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
         std::unique_ptr<Image> image = nullptr;
         std::unique_ptr<ImageView> imageView = nullptr;
@@ -322,8 +362,8 @@ bool ForwardRenderTechnique::initDepthBuffers(const std::vector<std::unique_ptr<
             }
         }
 
-        _depthBuffers[i].image = std::move(image);
-        _depthBuffers[i].imageView = std::move(imageView);
+        _framesData[i].depthBuffer.image = std::move(image);
+        _framesData[i].depthBuffer.imageView = std::move(imageView);
     }
     return true;
 }
@@ -333,13 +373,12 @@ bool ForwardRenderTechnique::initFramebuffers(const std::vector<std::unique_ptr<
     RenderPass* renderPass = _pipelines[Light::Type::DirectionalLight]->getRenderPass();
 
     VkResult result;
-    _framebuffers.clear();
-    _framebuffers.resize(imageViews.size());
+    _framesData.resize(imageViews.size());
 
     for (size_t i = 0; i < imageViews.size(); i++) {
         VkImageView attachments[2]{
             *imageViews[i],
-            *_depthBuffers[i].imageView
+            *_framesData[i].depthBuffer.imageView
         };
 
         VkFramebufferCreateInfo framebufferInfo = {};
@@ -358,7 +397,8 @@ bool ForwardRenderTechnique::initFramebuffers(const std::vector<std::unique_ptr<
             return false;
         }
         // TODO: Remove the extent initializer list when struct Extent is externalised
-        _framebuffers[i] = Framebuffer(fb, _device, {imageViews[i]->getExtent().width, imageViews[i]->getExtent().height});
+        _framesData[i].frameBuffer.destroy();
+        _framesData[i].frameBuffer = Framebuffer(fb, _device, {imageViews[i]->getExtent().width, imageViews[i]->getExtent().height});
     }
     return true;
 }

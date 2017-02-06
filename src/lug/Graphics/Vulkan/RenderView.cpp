@@ -25,21 +25,24 @@ bool RenderView::init(RenderView::InitInfo& initInfo,
         return false;
     }
 
-    // Work complete semaphore
-    {
-        VkSemaphore semaphore;
-        VkSemaphoreCreateInfo createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0
-        };
-        VkResult result = vkCreateSemaphore(*device, &createInfo, nullptr, &semaphore);
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
-            return false;
-        }
+    _drawCompleteSemaphores.resize(imageViews.size());
+    for (uint32_t i = 0; i < imageViews.size(); ++i) {
+        // Work complete semaphore
+        {
+            VkSemaphore semaphore;
+            VkSemaphoreCreateInfo createInfo{
+                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                createInfo.pNext = nullptr,
+                createInfo.flags = 0
+            };
+            VkResult result = vkCreateSemaphore(*device, &createInfo, nullptr, &semaphore);
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                return false;
+            }
 
-        _drawCompleteSemaphore = Semaphore(semaphore, device);
+            _drawCompleteSemaphores[i] = Semaphore(semaphore, device);
+        }
     }
 
     _presentQueue = presentQueue;
@@ -53,7 +56,7 @@ bool RenderView::render(const Semaphore& imageReadySemaphore, uint32_t currentIm
         return true; // Not fatal, return success anyway
     }
     _camera->update(this);
-    return _renderTechnique->render(_camera->getRenderQueue(), imageReadySemaphore, _drawCompleteSemaphore, currentImageIndex);
+    return _renderTechnique->render(_camera->getRenderQueue(), imageReadySemaphore, _drawCompleteSemaphores[currentImageIndex], currentImageIndex);
 }
 
 void RenderView::destroy() {

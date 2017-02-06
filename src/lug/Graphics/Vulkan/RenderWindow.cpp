@@ -47,12 +47,15 @@ bool RenderWindow::pollEvent(lug::Window::Event& event) {
 }
 
 bool RenderWindow::beginFrame() {
-    _fence.wait();
-    _fence.reset();
+    Semaphore& acquireImageCompleteSemaphore = _acquireImageCompleteSemaphores[_imageCompleteSemaphoreIdx++];
 
-    while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, _acquireImageCompleteSemaphore)) {
+    if (_imageCompleteSemaphoreIdx >= _acquireImageCompleteSemaphores.size()) {
+        _imageCompleteSemaphoreIdx = 0;
+    }
+
+    while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, acquireImageCompleteSemaphore)) {
         if (_swapchain.isOutOfDate()) {
-            if (!initSwapchainCapabilities() || !initSwapchain()) {
+            if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
                 return false;
             }
             for (auto& renderView: _renderViews) {
@@ -67,26 +70,16 @@ bool RenderWindow::beginFrame() {
         }
     }
 
+    FrameData& frameData = _framesData[_currentImageIndex];
+    CommandBuffer& cmdBuffer = frameData.cmdBuffers[0];
 
-    if (!_cmdBuffers[0].begin()) {
-        return false;
-    }
-
-    _swapchain.getImages()[_currentImageIndex].changeLayout(_cmdBuffers[0],
-                        0,
-                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                        VK_IMAGE_LAYOUT_UNDEFINED,
-                        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
-
-    if (!_cmdBuffers[0].end()) {
-        return false;
-    }
-
-    std::vector<VkSemaphore> imageReadyVkSemaphores(_imageReadySemaphores.begin(), _imageReadySemaphores.end());
-    return _presentQueue->submit(_cmdBuffers[0], imageReadyVkSemaphores, {_acquireImageCompleteSemaphore}, {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT});
+    std::vector<VkSemaphore> imageReadyVkSemaphores(frameData.imageReadySemaphores.begin(), frameData.imageReadySemaphores.end());
+    return _presentQueue->submit(cmdBuffer, imageReadyVkSemaphores, {acquireImageCompleteSemaphore}, {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT});
 }
 
 bool RenderWindow::endFrame() {
+    FrameData& frameData = _framesData[_currentImageIndex];
+    CommandBuffer& cmdBuffer = frameData.cmdBuffers[1];
     std::vector<VkSemaphore> waitSemaphores(_renderViews.size());
     uint32_t i = 0;
 
@@ -94,7 +87,7 @@ bool RenderWindow::endFrame() {
         RenderView* renderView_ = static_cast<RenderView*>(renderView.get());
         // Render views with no camera don't signal the semaphore as they don't draw
         if (renderView_->getCamera()) {
-            waitSemaphores[i++] = renderView_->getDrawCompleteSemaphore();
+            waitSemaphores[i++] = renderView_->getDrawCompleteSemaphore(_currentImageIndex);
         }
     }
 
@@ -105,18 +98,8 @@ bool RenderWindow::endFrame() {
     }
     std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
-    if (!_cmdBuffers[1].begin()) return false;
-
-    _swapchain.getImages()[_currentImageIndex].changeLayout(_cmdBuffers[1],
-                        VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                        VK_ACCESS_MEMORY_READ_BIT,
-                        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-
-    if (!_cmdBuffers[1].end()) return false;
-
-    return _presentQueue->submit(_cmdBuffers[1], {_allDrawsFinishedSemaphore}, waitSemaphores, waitDstStageMasks, _fence) &&
-    _swapchain.present(_presentQueue, _currentImageIndex, _allDrawsFinishedSemaphore);
+    return _presentQueue->submit(cmdBuffer, {frameData.allDrawsFinishedSemaphore}, waitSemaphores, waitDstStageMasks) &&
+    _swapchain.present(_presentQueue, _currentImageIndex, frameData.allDrawsFinishedSemaphore);
 }
 
 lug::Graphics::RenderView* RenderWindow::createView(lug::Graphics::RenderView::InitInfo& initInfo) {
@@ -132,9 +115,10 @@ lug::Graphics::RenderView* RenderWindow::createView(lug::Graphics::RenderView::I
 }
 
 bool RenderWindow::render() {
+    FrameData& frameData = _framesData[_currentImageIndex];
     uint32_t i = 0;
     for (auto &renderView: _renderViews) {
-        if (!static_cast<RenderView*>(renderView.get())->render(_imageReadySemaphores[i++], _currentImageIndex)) return false;
+        if (!static_cast<RenderView*>(renderView.get())->render(frameData.imageReadySemaphores[i++], _currentImageIndex)) return false;
     }
 
     return true;
@@ -370,10 +354,126 @@ bool RenderWindow::initSwapchain() {
             return false;
         }
 
+        // Reset command buffers because they use the swapchain images
+        _presentQueue->waitIdle();
+        {
+            uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+            for (uint32_t i = 0; i < frameDataSize; ++i) {
+                for (uint32_t j = 0; j < _framesData[i].cmdBuffers.size(); ++j) {
+                    _framesData[i].cmdBuffers[j].reset();
+                }
+            }
+        }
+
         _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat, extent);
 
         return _swapchain.init();
     }
+}
+
+bool RenderWindow::initFramesData(RenderWindow::InitInfo& initInfo) {
+    uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+    if (_framesData.size() == frameDataSize) {
+        return true;
+    }
+
+    _framesData.resize(frameDataSize);
+    _acquireImageCompleteSemaphores.resize(frameDataSize);
+
+    for (uint32_t i = 0; i < frameDataSize; ++i) {
+        // Acquire image semaphore
+        {
+            VkSemaphore semaphore;
+            VkSemaphoreCreateInfo createInfo{
+                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                createInfo.pNext = nullptr,
+                createInfo.flags = 0
+            };
+            VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                return false;
+            }
+
+            _acquireImageCompleteSemaphores[i] = Semaphore(semaphore, &_renderer.getDevice());
+        }
+
+        // All draws finished semaphore
+        {
+            VkSemaphore semaphore;
+            VkSemaphoreCreateInfo createInfo{
+                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                createInfo.pNext = nullptr,
+                createInfo.flags = 0
+            };
+            VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                return false;
+            }
+
+            _framesData[i].allDrawsFinishedSemaphore = Semaphore(semaphore, &_renderer.getDevice());
+        }
+
+        // Image ready semaphores
+        {
+            VkSemaphoreCreateInfo createInfo{
+                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                createInfo.pNext = nullptr,
+                createInfo.flags = 0
+            };
+            _framesData[i].imageReadySemaphores.resize(initInfo.renderViewsInitInfo.size());
+            for (uint32_t j = 0; j < initInfo.renderViewsInitInfo.size(); ++j) {
+                VkSemaphore semaphore;
+                VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
+                if (result != VK_SUCCESS) {
+                    LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                    return false;
+                }
+
+                _framesData[i].imageReadySemaphores[j] = Semaphore(semaphore, &_renderer.getDevice());
+            }
+        }
+
+        // Command buffers
+        _framesData[i].cmdBuffers = _renderer.getQueue(0, true)->getCommandPool().createCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, 2);
+    }
+
+    return buildCommandBuffers();
+}
+
+bool RenderWindow::buildCommandBuffers() {
+    uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+    for (uint32_t i = 0; i < frameDataSize; ++i) {
+        // Build command buffer image present to color attachment
+        {
+            CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[0];
+            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT )) return false;
+
+            _swapchain.getImages()[i].changeLayout(cmdBuffer,
+                                0,
+                                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                                VK_IMAGE_LAYOUT_UNDEFINED,
+                                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+            if (!cmdBuffer.end()) return false;
+        }
+
+        // Build command buffer image color attachment to present
+        {
+            CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[1];
+            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT )) return false;
+
+            _swapchain.getImages()[i].changeLayout(cmdBuffer,
+                                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                                VK_ACCESS_MEMORY_READ_BIT,
+                                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+            if (!cmdBuffer.end()) return false;
+        }
+    }
+    return true;
 }
 
 bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
@@ -413,77 +513,6 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
         });
     }
 
-    // Acquire image semaphore
-    {
-        VkSemaphore semaphore;
-        VkSemaphoreCreateInfo createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0
-        };
-        VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
-            return false;
-        }
-
-        _acquireImageCompleteSemaphore = Semaphore(semaphore, &_renderer.getDevice());
-    }
-
-    // All draws finished semaphore
-    {
-        VkSemaphore semaphore;
-        VkSemaphoreCreateInfo createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0
-        };
-        VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
-            return false;
-        }
-
-        _allDrawsFinishedSemaphore = Semaphore(semaphore, &_renderer.getDevice());
-    }
-
-    // Image ready semaphores
-    {
-        VkSemaphoreCreateInfo createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0
-        };
-        _imageReadySemaphores.resize(initInfo.renderViewsInitInfo.size());
-        for (uint32_t i = 0; i < initInfo.renderViewsInitInfo.size(); ++i) {
-            VkSemaphore semaphore;
-            VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
-            if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
-                return false;
-            }
-
-            _imageReadySemaphores[i] = Semaphore(semaphore, &_renderer.getDevice());
-        }
-    }
-
-    // Fence
-    {
-        VkFence fence;
-        VkFenceCreateInfo createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-            createInfo.pNext = nullptr,
-            createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT
-        };
-        VkResult result = vkCreateFence(_renderer.getDevice(), &createInfo, nullptr, &fence);
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't create swapchain fence: {}", result);
-            return false;
-        }
-
-        _fence = Fence(fence, &_renderer.getDevice());
-    }
-
     // Create descriptor pool
     // This is in RenderWindow because we need to know the number of RenderTechnique (Actually the number of render views)
     // Each RenderTechnique has got 50 descriptors for the lights and 1 for the camera
@@ -492,7 +521,7 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
             // Uniform buffers descriptors (50 for lights and 1 for camera in ForwardRenderTechnique)
             {
                 poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                poolSize[0].descriptorCount = (uint32_t)initInfo.renderViewsInitInfo.size() * (50 + 1)
+                poolSize[0].descriptorCount = (uint32_t)initInfo.renderViewsInitInfo.size() * (50 + 1) * 3
             }
         };
 
@@ -500,7 +529,7 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
             createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             createInfo.pNext = nullptr,
             createInfo.flags = 0, // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
-            createInfo.maxSets = (uint32_t)initInfo.renderViewsInitInfo.size() * (50 + 1), // Only ForwardRenderTechnique has 50 descriptor sets (for lights) and 1 (for the camera)
+            createInfo.maxSets = (uint32_t)initInfo.renderViewsInitInfo.size() * (50 + 1) * 3, // Only ForwardRenderTechnique has 50 descriptor sets (for lights) and 1 (for the camera)
             createInfo.poolSizeCount = 1,
             createInfo.pPoolSizes = poolSize
         };
@@ -519,9 +548,7 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
         return false;
     }
 
-    _cmdBuffers = _renderer.getQueue(0, true)->getCommandPool().createCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, 2);
-
-    return initSwapchain();
+    return initSwapchain() && initFramesData(initInfo);
 }
 
 void RenderWindow::destroy() {
@@ -539,9 +566,7 @@ void RenderWindow::destroy() {
         _surface = VK_NULL_HANDLE;
     }
 
-    for (auto& cmdBuffer: _cmdBuffers) {
-        cmdBuffer.destroy();
-    }
+    _framesData.clear();
 
     _descriptorPool->destroy();
 }

@@ -16,6 +16,13 @@ namespace Vulkan {
 class Renderer;
 
 class LUG_GRAPHICS_API RenderWindow final : public ::lug::Graphics::RenderWindow {
+private:
+    struct FrameData {
+        Semaphore allDrawsFinishedSemaphore{};
+        std::vector<Semaphore> imageReadySemaphores{};
+        std::vector<CommandBuffer> cmdBuffers;
+    };
+
 public:
     RenderWindow() = delete;
 
@@ -51,6 +58,9 @@ private:
     bool initSwapchainCapabilities();
     bool initPresentQueue();
     bool initSwapchain();
+    bool initFramesData(RenderWindow::InitInfo& initInfo);
+    bool buildCommandBuffers();
+
     void destroy();
 
 private:
@@ -58,18 +68,15 @@ private:
     VkSurfaceKHR _surface{VK_NULL_HANDLE};
     Swapchain _swapchain{};
 
-    // Each renderView need an image ready semaphore
-    std::vector<Semaphore> _imageReadySemaphores{};
-
-    Semaphore _acquireImageCompleteSemaphore{};
-    Semaphore _allDrawsFinishedSemaphore{};
-    Fence _fence;
-
     std::unique_ptr<::lug::Graphics::Vulkan::DescriptorPool> _descriptorPool{nullptr};
 
-    std::vector<CommandBuffer> _cmdBuffers;
     Queue* _presentQueue{nullptr};
     uint32_t _currentImageIndex{0};
+
+    std::vector<FrameData> _framesData;
+
+    std::vector<Semaphore> _acquireImageCompleteSemaphores;
+    uint32_t _imageCompleteSemaphoreIdx = 0;
 };
 
 #include <lug/Graphics/Vulkan/RenderWindow.inl>

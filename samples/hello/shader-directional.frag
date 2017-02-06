@@ -12,7 +12,7 @@ layout(set = 0, binding = 0) uniform cameraUniform {
     mat4 proj;
 };
 
-layout(set = 1, binding = 0) uniform testUniform {
+layout(set = 1, binding = 0) uniform lightUniform {
     vec3 lightAmbient;
     vec3 lightDiffuse;
     vec3 lightSpecular;
