@@ -280,6 +280,6 @@ void Application::onEvent(const lug::Window::Event& event) {
     }
 }
 
-void Application::onFrame() {
-    _cubeNode->rotate(0.0005f, {0.0f, 1.0f, 0.0f});
+void Application::onFrame(float elapsedTime) {
+    _cubeNode->rotate(0.005f * elapsedTime, {0.0f, 1.0f, 0.0f});
 }

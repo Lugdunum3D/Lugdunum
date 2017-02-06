@@ -144,7 +144,7 @@ public:
      *
      *             This function will be called by the engine at each frame.
      */
-    virtual void onFrame() = 0;
+    virtual void onFrame(float elapsedTime) = 0;
 
 private:
     bool beginFrame();

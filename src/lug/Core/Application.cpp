@@ -1,3 +1,4 @@
+#include <chrono>
 #include <lug/Core/Application.hpp>
 
 namespace lug {
@@ -22,8 +23,16 @@ bool Application::init(int argc, char* argv[]) {
     return true;
 }
 
+// TODO: Replace with Timer class
+float getElapsedTime(std::chrono::high_resolution_clock::time_point& start) {
+    auto stop = std::chrono::high_resolution_clock::now();
+    return  std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count() / 1000.0f;
+}
+
 bool Application::run() {
     while (!_closed && _window && _window->isOpen()) {
+        // TODO: Replace with Timer class
+        auto start = std::chrono::high_resolution_clock::now();
         // Poll events
         {
             lug::Window::Event event;
@@ -33,7 +42,7 @@ bool Application::run() {
         }
 
         beginFrame();
-        onFrame();
+        onFrame(getElapsedTime(start));
         endFrame();
     }
 
