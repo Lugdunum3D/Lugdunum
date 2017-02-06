@@ -4,9 +4,9 @@
 #include <lug/System/Logger.hpp>
 
 #if defined(LUG_SYSTEM_ANDROID)
-#include <lug/System/Logger/LogCatHandler.hpp>
+    #include <lug/System/Logger/LogCatHandler.hpp>
 #else
-#include <lug/System/Logger/OstreamHandler.hpp>
+    #include <lug/System/Logger/OstreamHandler.hpp>
 #endif
 
 #include <unordered_map>
@@ -16,6 +16,7 @@ auto createKeyEnumMap() {
 
     returnValue[lug::Window::Keyboard::Key::Unknown] = "Unknown";
 
+    // Basic keys
     returnValue[lug::Window::Keyboard::Key::A] = "A";
     returnValue[lug::Window::Keyboard::Key::B] = "B";
     returnValue[lug::Window::Keyboard::Key::C] = "C";
@@ -54,6 +55,7 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::Num8] = "Num8";
     returnValue[lug::Window::Keyboard::Key::Num9] = "Num9";
 
+    // Modifiers
     returnValue[lug::Window::Keyboard::Key::LControl] = "LControl";
     returnValue[lug::Window::Keyboard::Key::LShift] = "LShift";
     returnValue[lug::Window::Keyboard::Key::LAlt] = "LAlt";
@@ -63,7 +65,7 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::RAlt] = "RAlt";
     returnValue[lug::Window::Keyboard::Key::RSystem] = "RSystem";
 
-    returnValue[lug::Window::Keyboard::Key::Escape] = "Escape";
+    // Advanced keys
     returnValue[lug::Window::Keyboard::Key::Menu] = "Menu";
     returnValue[lug::Window::Keyboard::Key::LBracket] = "LBracket";
     returnValue[lug::Window::Keyboard::Key::RBracket] = "RBracket";
@@ -71,13 +73,11 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::Comma] = "Comma";
     returnValue[lug::Window::Keyboard::Key::Period] = "Period";
     returnValue[lug::Window::Keyboard::Key::Quote] = "Quote";
-    returnValue[lug::Window::Keyboard::Key::QuoteDouble] = "Double Quote";
     returnValue[lug::Window::Keyboard::Key::Slash] = "Slash";
     returnValue[lug::Window::Keyboard::Key::BackSlash] = "BackSlash";
     returnValue[lug::Window::Keyboard::Key::Tilde] = "Tilde";
     returnValue[lug::Window::Keyboard::Key::Equal] = "Equal";
     returnValue[lug::Window::Keyboard::Key::Dash] = "Dash";
-    returnValue[lug::Window::Keyboard::Key::Ampersand] = "Ampersand";
     returnValue[lug::Window::Keyboard::Key::Space] = "Space";
     returnValue[lug::Window::Keyboard::Key::Return] = "Return";
     returnValue[lug::Window::Keyboard::Key::BackSpace] = "BackSpace";
@@ -96,7 +96,31 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::Right] = "Right";
     returnValue[lug::Window::Keyboard::Key::Up] = "Up";
     returnValue[lug::Window::Keyboard::Key::Down] = "Down";
+    returnValue[lug::Window::Keyboard::Key::Pause] = "Pause";
+    returnValue[lug::Window::Keyboard::Key::CapsLock] = "CapsLock";
+    returnValue[lug::Window::Keyboard::Key::Escape] = "Escape";
 
+    // AZERTY Specifics
+    returnValue[lug::Window::Keyboard::Key::Twosuperior] = "Twosuperior";
+    returnValue[lug::Window::Keyboard::Key::Ampersand] = "Ampersand";
+    returnValue[lug::Window::Keyboard::Key::Eacute] = "Eacute";
+    returnValue[lug::Window::Keyboard::Key::QuoteDouble] = "QuoteDouble";
+    returnValue[lug::Window::Keyboard::Key::LParen] = "LParen";
+    returnValue[lug::Window::Keyboard::Key::Egrave] = "Egrave";
+    returnValue[lug::Window::Keyboard::Key::Underscore] = "Underscore";
+    returnValue[lug::Window::Keyboard::Key::Ccedilla] = "Ccedilla";
+    returnValue[lug::Window::Keyboard::Key::Agrave] = "Agrave";
+    returnValue[lug::Window::Keyboard::Key::RParen] = "RParen";
+    returnValue[lug::Window::Keyboard::Key::DeadCircumflex] = "DeadCircumflex";
+    returnValue[lug::Window::Keyboard::Key::Ugrave] = "Ugrave";
+    returnValue[lug::Window::Keyboard::Key::Asterisk] = "Asterisk";
+    returnValue[lug::Window::Keyboard::Key::Dollar] = "Dollar";
+    returnValue[lug::Window::Keyboard::Key::Colon] = "Colon";
+    returnValue[lug::Window::Keyboard::Key::Exclam] = "Exclam";
+    returnValue[lug::Window::Keyboard::Key::Less] = "Less";
+    returnValue[lug::Window::Keyboard::Key::Greater] = "Greater";
+
+    // Numpad
     returnValue[lug::Window::Keyboard::Key::Numpad0] = "Numpad0";
     returnValue[lug::Window::Keyboard::Key::Numpad1] = "Numpad1";
     returnValue[lug::Window::Keyboard::Key::Numpad2] = "Numpad2";
@@ -108,6 +132,7 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::Numpad8] = "Numpad8";
     returnValue[lug::Window::Keyboard::Key::Numpad9] = "Numpad9";
 
+    // Function keys
     returnValue[lug::Window::Keyboard::Key::F1] = "F1";
     returnValue[lug::Window::Keyboard::Key::F2] = "F2";
     returnValue[lug::Window::Keyboard::Key::F3] = "F3";
@@ -123,7 +148,6 @@ auto createKeyEnumMap() {
     returnValue[lug::Window::Keyboard::Key::F13] = "F13";
     returnValue[lug::Window::Keyboard::Key::F14] = "F14";
     returnValue[lug::Window::Keyboard::Key::F15] = "F15";
-    returnValue[lug::Window::Keyboard::Key::Pause] = "Pause";
 
     return returnValue;
 }
@@ -157,39 +181,39 @@ int main() {
         while (window->pollEvent(event)) {
             logger->info("Event received: {}", static_cast<uint32_t>(event.type));
 
-            if (event.type == lug::Window::EventType::CLOSE) {
+            if (event.type == lug::Window::EventType::Close) {
                 logger->info("Closing the app");
                 window->close();
             }
 
-            if (event.type == lug::Window::EventType::KEY_DOWN && event.key.code == lug::Window::Keyboard::Key::Escape) {
+            if (event.type == lug::Window::EventType::KeyPressed && event.key.code == lug::Window::Keyboard::Key::Escape) {
                 logger->info("Closing the app (escape)");
                 window->close();
             }
 
-            if (event.type == lug::Window::EventType::KEY_DOWN
+            if (event.type == lug::Window::EventType::KeyPressed
                 && event.key.code == lug::Window::Keyboard::Key::Q && event.key.ctrl) {
                 logger->info("Closing the app (ctrl+Q)");
                 window->close();
             }
 
-            // Checking KEY_DOWN events
-            if (event.type == lug::Window::EventType::KEY_DOWN) {
+            // Checking KeyPressed events
+            if (event.type == lug::Window::EventType::KeyPressed) {
                 logger->info(keyEnumMap[event.key.code] + " is pressed");
             }
 
-            // Checking KEY_UP events
-            if (event.type == lug::Window::EventType::KEY_UP) {
+            // Checking KeyReleased events
+            if (event.type == lug::Window::EventType::KeyReleased) {
                 logger->info(keyEnumMap[event.key.code] + " is released");
             }
 
-            if (event.type == lug::Window::EventType::KEY_CHAR) {
+            if (event.type == lug::Window::EventType::CharEntered) {
                 logger->info("Char event received: {}", static_cast<char>(event.character.val));
             }
 
             // Checking to see if any special keys are pressed
-            if (event.type == lug::Window::EventType::KEY_DOWN ||
-                event.type == lug::Window::EventType::KEY_UP) {
+            if (event.type == lug::Window::EventType::KeyPressed ||
+                event.type == lug::Window::EventType::KeyReleased) {
                 if (event.key.ctrl) {
                     logger->info("MODIFIER CTRL");
                 }

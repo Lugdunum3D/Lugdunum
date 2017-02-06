@@ -32,6 +32,17 @@ EXTRACT_PRIVATE        = YES
 EXTRACT_ALL            = YES
 EXTRACT_STATIC         = YES
 
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = __attribute__(x)= \
+                         __declspec(x)= \
+                         __cplusplus \
+                         LUG_WINDOW_API \
+                         LUG_SYSTEM_API \
+                         LUG_GRAPHICS_API \
+                         LUG_CORE_API
+
 
 #---------------------------------------------------------------------------
 # Configuration options related to the dot tool
