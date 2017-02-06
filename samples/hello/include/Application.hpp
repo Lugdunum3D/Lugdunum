@@ -14,7 +14,7 @@ public:
     Application& operator=(const Application&) = delete;
     Application& operator=(Application&&) = delete;
 
-    ~Application() = default;
+    ~Application() override final;
 
     bool init(int argc, char* argv[]) override final;
 

@@ -6,6 +6,10 @@
 #include <lug/Graphics/MeshInstance.hpp>
 #include <lug/Graphics/Light.hpp>
 
+// TODO: Remove this when the ResourceManager is done
+#include <lug/Graphics/Renderer.hpp>
+#include <lug/Graphics/Vulkan/Renderer.hpp>
+
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
     std::srand((uint32_t)std::time(0));
     getRenderWindowInfo().windowInitInfo.title = "Hello Cube";
@@ -67,6 +71,15 @@ Application::Application() : lug::Core::Application::Application{{"hello", {0, 1
         },
         nullptr                                         // camera
     });
+}
+
+Application::~Application() {
+    // TODO: Remove this when the ResourceManager is done
+    lug::Graphics::Renderer* renderer = _graphics.getRenderer();
+    lug::Graphics::Vulkan::Renderer* vkRender = static_cast<lug::Graphics::Vulkan::Renderer*>(renderer);
+    for (auto& queue: vkRender->getQueues()) {
+        queue.waitIdle();
+    }
 }
 
 float randomFloat(float from, float to) {
