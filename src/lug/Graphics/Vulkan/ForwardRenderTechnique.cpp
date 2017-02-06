@@ -225,6 +225,7 @@ bool ForwardRenderTechnique::initLightsBuffers() {
     uint32_t lightsBufferSize = sizeof(Spotlight::LightData);
     bool memoryInitialized = false;
     uint32_t memoryOffset = 0;
+    uint32_t alignedSize = 0;
 
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
         {
@@ -240,8 +241,10 @@ bool ForwardRenderTechnique::initLightsBuffers() {
                 auto& lightBuffer = _framesData[i].lightsBuffers[j];
                 const VkMemoryRequirements* bufferRequirements = &lightBuffer->getRequirements();
                 if (!memoryInitialized) {
+                    alignedSize = bufferRequirements->size + bufferRequirements->alignment - (bufferRequirements->size % bufferRequirements->alignment);
+
                     uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-                    _lightsBuffersMemory = DeviceMemory::allocate(_device, bufferRequirements->size * _framesData.size(), memoryTypeIndex);
+                    _lightsBuffersMemory = DeviceMemory::allocate(_device, alignedSize * _framesData.size(), memoryTypeIndex);
                     if (!_lightsBuffersMemory) {
                         return false;
                     }
@@ -250,7 +253,7 @@ bool ForwardRenderTechnique::initLightsBuffers() {
 
                 // Bind buffer memory
                 lightBuffer->bindMemory(_lightsBuffersMemory.get(), memoryOffset);
-                memoryOffset += (uint32_t)bufferRequirements->size;
+                memoryOffset += alignedSize;
             }
         }
     }
