@@ -41,7 +41,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
     frameData.fence.reset();
     auto& cmdBuffer = frameData.cmdBuffers[0];
 
-    if (!cmdBuffer.begin()) return false;
+    if (!cmdBuffer.reset() || !cmdBuffer.begin()) return false;
 
     // Init render pass
     {
@@ -229,9 +229,10 @@ bool ForwardRenderTechnique::initLightsBuffers() {
 
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
         {
+            _framesData[i].lightsBuffers.resize(50);
+
             for (uint32_t j = 0; j < 50; ++j) {
                 // Create buffer
-                _framesData[i].lightsBuffers.resize(50);
                 _framesData[i].lightsBuffers[j] = Buffer::create(_device, 1, &familyIndices, lightsBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
                 if (!_framesData[i].lightsBuffers[j]) {
                     return false;
@@ -244,7 +245,7 @@ bool ForwardRenderTechnique::initLightsBuffers() {
                     alignedSize = bufferRequirements->size + bufferRequirements->alignment - (bufferRequirements->size % bufferRequirements->alignment);
 
                     uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-                    _lightsBuffersMemory = DeviceMemory::allocate(_device, alignedSize * _framesData.size(), memoryTypeIndex);
+                    _lightsBuffersMemory = DeviceMemory::allocate(_device, alignedSize * _framesData.size() * 50, memoryTypeIndex);
                     if (!_lightsBuffersMemory) {
                         return false;
                     }
