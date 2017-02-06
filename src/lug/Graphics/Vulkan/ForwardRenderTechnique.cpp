@@ -85,7 +85,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         VkDeviceSize vertexBufferOffset = 0;
         VkDeviceSize indexBufferOffset = 0;
         // ALl the lights pipelines have the same renderPass
-        RenderPass* renderPass = _pipelines[Light::Type::DIRECTIONAL_LIGHT]->getRenderPass();
+        RenderPass* renderPass = _pipelines[Light::Type::DirectionalLight]->getRenderPass();
 
         renderPass->begin(
             &_cmdBuffers[0],
@@ -153,19 +153,19 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
 }
 
 bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<ImageView> >& imageViews) {
-    _pipelines[Light::Type::DIRECTIONAL_LIGHT] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-directional.frag.spv");
-    _pipelines[Light::Type::POINT_LIGHT] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-point.frag.spv");
-    _pipelines[Light::Type::SPOTLIGHT] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-spot.frag.spv");
+    _pipelines[Light::Type::DirectionalLight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-directional.frag.spv");
+    _pipelines[Light::Type::PointLight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-point.frag.spv");
+    _pipelines[Light::Type::Spotlight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-spot.frag.spv");
 
-    if (!_pipelines[Light::Type::DIRECTIONAL_LIGHT] ||
-        !_pipelines[Light::Type::POINT_LIGHT] ||
-        !_pipelines[Light::Type::SPOTLIGHT]) {
+    if (!_pipelines[Light::Type::DirectionalLight] ||
+        !_pipelines[Light::Type::PointLight] ||
+        !_pipelines[Light::Type::Spotlight]) {
         return false;
     }
 
     // We assume all pipelines have got the same layout
     // TODO: Create one DescriptorSetLayout for the pipelines
-    std::vector<VkDescriptorSetLayout> descriptorSetLayouts(50, *_pipelines[Light::Type::DIRECTIONAL_LIGHT]->getLayout()->getDescriptorSetLayouts()[1]);
+    std::vector<VkDescriptorSetLayout> descriptorSetLayouts(50, *_pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[1]);
     _lightsDescriptorSets = descriptorPool->createDescriptorSets(descriptorSetLayouts);
     if (_lightsDescriptorSets.size() == 0) {
         return false;
@@ -250,7 +250,7 @@ bool ForwardRenderTechnique::initCameraBuffer(DescriptorPool* descriptorPool) {
 
     // Create camera descriptor set
     // WARNING: it will only works if the pipelines has got the same descriptor set layout
-    auto& descriptorSetLayout = _pipelines[Light::Type::DIRECTIONAL_LIGHT]->getLayout()->getDescriptorSetLayouts()[0];
+    auto& descriptorSetLayout = _pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[0];
     std::vector<DescriptorSet> descriptorSets = descriptorPool->createDescriptorSets({*descriptorSetLayout});
     if (descriptorSets.size() == 0) {
         return false;
@@ -330,7 +330,7 @@ bool ForwardRenderTechnique::initDepthBuffers(const std::vector<std::unique_ptr<
 
 bool ForwardRenderTechnique::initFramebuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) {
     // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
-    RenderPass* renderPass = _pipelines[Light::Type::DIRECTIONAL_LIGHT]->getRenderPass();
+    RenderPass* renderPass = _pipelines[Light::Type::DirectionalLight]->getRenderPass();
 
     VkResult result;
     _framebuffers.clear();

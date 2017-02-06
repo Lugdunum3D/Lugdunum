@@ -204,7 +204,7 @@ bool Application::init(int argc, char* argv[]) {
 
     // Add directional light to scene
 /*   {
-        std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::DIRECTIONAL_LIGHT);
+        std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::DirectionalLight);
         std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
 
         light->setDiffuse({0.2f, 0.2f, 0.2f});
@@ -230,7 +230,7 @@ bool Application::init(int argc, char* argv[]) {
 
     // Add spotlight to scene
     {
-        std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::SPOTLIGHT);
+        std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::Spotlight);
         std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
 
         light->setDiffuse({0.9f, 0.9f, 0.9f});

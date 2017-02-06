@@ -3,7 +3,7 @@
 namespace lug {
 namespace Graphics {
 
-PointLight::PointLight(const std::string& name): Light(name, Light::Type::POINT_LIGHT) {}
+PointLight::PointLight(const std::string& name): Light(name, Light::Type::PointLight) {}
 
 void PointLight::setPosition(const Math::Vec3f& position) {
     _position = position;

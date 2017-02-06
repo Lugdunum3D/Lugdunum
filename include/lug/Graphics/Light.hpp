@@ -13,9 +13,9 @@ namespace Graphics {
 class LUG_GRAPHICS_API Light : public MovableObject {
 public:
     enum class Type: uint8_t {
-        DIRECTIONAL_LIGHT = 0,
-        POINT_LIGHT = 1,
-        SPOTLIGHT = 2
+        DirectionalLight = 0,
+        PointLight = 1,
+        Spotlight = 2
     };
 
     struct LightData {

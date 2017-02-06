@@ -3,7 +3,7 @@
 namespace lug {
 namespace Graphics {
 
-DirectionalLight::DirectionalLight(const std::string& name): Light(name, Light::Type::DIRECTIONAL_LIGHT) {}
+DirectionalLight::DirectionalLight(const std::string& name): Light(name, Light::Type::DirectionalLight) {}
 
 void DirectionalLight::setDirection(const Math::Vec3f& direction) {
     _direction = direction;
