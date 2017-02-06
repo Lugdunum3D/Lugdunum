@@ -94,7 +94,25 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
             {viewport.offset.x, viewport.offset.y}
         );
 
+        // Blend constants are used as dst blend factor
+        // We set them to 0 so that there is no blending
+        {
+            const float blendConstants[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+            vkCmdSetBlendConstants(_cmdBuffers[0], blendConstants);
+        }
+
+
         for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
+
+            {
+                if (i == 1) {
+                    // Blend constants are used as dst blend factor
+                    // Now the depth buffer is filled, we can set the blend constants to 1 to enable blending
+                    const float blendConstants[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+                    vkCmdSetBlendConstants(_cmdBuffers[0], blendConstants);
+                }
+            }
+
             auto lightType = renderQueue.getLights()[i]->getLightType();
             auto& lightPipeline = _pipelines[lightType];
             // TODO: WARNING: Find alternative to light type

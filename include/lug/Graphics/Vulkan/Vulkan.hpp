@@ -113,6 +113,7 @@
     macro(vkUnmapMemory)                                \
     macro(vkCmdSetViewport)                             \
     macro(vkCmdSetScissor)                              \
+    macro(vkCmdSetBlendConstants)                       \
     macro(vkCmdBindVertexBuffers)                       \
     macro(vkCmdBindIndexBuffer)                         \
     macro(vkWaitForFences)                              \

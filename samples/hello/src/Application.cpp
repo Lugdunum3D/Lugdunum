@@ -170,6 +170,16 @@ bool Application::init(int argc, char* argv[]) {
         return false;
     }
 
+    // Add cube2 to scene
+    {
+        std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance2 = _scene->createMeshInstance("cube instance 2", _cube.get());
+        std::unique_ptr<lug::Graphics::SceneNode> cubeNode2 = _scene->createSceneNode("cube instance node 2");
+        _cubeNode2 = cubeNode2.get();
+
+        cubeNode2->attachMovableObject(std::move(cubeInstance2));
+        _scene->getRoot()->attachChild(std::move(cubeNode2));
+    }
+
     // Add cube to scene
     {
         std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance = _scene->createMeshInstance("cube instance", _cube.get());
@@ -180,15 +190,6 @@ bool Application::init(int argc, char* argv[]) {
         _scene->getRoot()->attachChild(std::move(cubeNode));
     }
 
-    // Add cube2 to scene
-    {
-        std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance2 = _scene->createMeshInstance("cube instance 2", _cube.get());
-        std::unique_ptr<lug::Graphics::SceneNode> cubeNode2 = _scene->createSceneNode("cube instance node 2");
-        _cubeNode2 = cubeNode2.get();
-
-        cubeNode2->attachMovableObject(std::move(cubeInstance2));
-        _scene->getRoot()->attachChild(std::move(cubeNode2));
-    }
 
     // Add plane to scene
     {
