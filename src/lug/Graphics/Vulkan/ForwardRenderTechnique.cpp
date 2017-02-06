@@ -242,7 +242,11 @@ bool ForwardRenderTechnique::initLightsBuffers() {
                 auto& lightBuffer = _framesData[i].lightsBuffers[j];
                 const VkMemoryRequirements* bufferRequirements = &lightBuffer->getRequirements();
                 if (!memoryInitialized) {
-                    alignedSize = bufferRequirements->size + bufferRequirements->alignment - (bufferRequirements->size % bufferRequirements->alignment);
+                    if (bufferRequirements->size % bufferRequirements->alignment != 0) {
+                        alignedSize = bufferRequirements->size + bufferRequirements->alignment - (bufferRequirements->size % bufferRequirements->alignment);
+                    } else {
+                        alignedSize = bufferRequirements->size;
+                    }
 
                     uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
                     _lightsBuffersMemory = DeviceMemory::allocate(_device, alignedSize * _framesData.size() * 50, memoryTypeIndex);
