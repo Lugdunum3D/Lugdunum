@@ -1,5 +1,6 @@
 #include <chrono>
 #include <lug/Core/Application.hpp>
+#include <lug/System/Logger.hpp>
 
 namespace lug {
 namespace Core {
@@ -30,6 +31,8 @@ float getElapsedTime(std::chrono::high_resolution_clock::time_point& start) {
 }
 
 bool Application::run() {
+    float elapsed = 0;
+    uint32_t frames = 0;
     while (!_closed && _window && _window->isOpen()) {
         // TODO: Replace with Timer class
         auto start = std::chrono::high_resolution_clock::now();
@@ -44,6 +47,14 @@ bool Application::run() {
         beginFrame();
         onFrame(getElapsedTime(start));
         endFrame();
+
+        elapsed += getElapsedTime(start);
+        frames++;
+        if (elapsed >= 1000.0f) {
+            LUG_LOG.info("FPS: {}", frames);
+            frames = 0;
+            elapsed = 0;
+        }
     }
 
     return true;

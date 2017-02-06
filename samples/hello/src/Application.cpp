@@ -1,3 +1,4 @@
+#include <ctime>
 #include "Application.hpp"
 #include <lug/Graphics/DirectionalLight.hpp>
 #include <lug/Graphics/Spotlight.hpp>
@@ -6,6 +7,7 @@
 #include <lug/Graphics/Light.hpp>
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
+    std::srand((uint32_t)std::time(0));
     getRenderWindowInfo().windowInitInfo.title = "Hello Cube";
 
     getRenderWindowInfo().renderViewsInitInfo.push_back({
@@ -65,6 +67,24 @@ Application::Application() : lug::Core::Application::Application{{"hello", {0, 1
         },
         nullptr                                         // camera
     });
+}
+
+float randomFloat(float from, float to) {
+    return from + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(to-from)));
+}
+
+lug::Math::Vec3f randColor() {
+    float r = randomFloat(0.0f, 1.0f);
+    float g = randomFloat(0.0f, 1.0f);
+    float b = randomFloat(0.0f, 1.0f);
+    return lug::Math::Vec3f({r, g, b});
+}
+
+lug::Math::Vec3f randPos() {
+    float x = randomFloat(-10.0f, 10.0f);
+    float y = randomFloat(-1.0f, -10.0f);
+    float z = randomFloat(-10.0f, 10.0f);
+    return lug::Math::Vec3f({x, y, z});
 }
 
 bool Application::init(int argc, char* argv[]) {
@@ -170,14 +190,22 @@ bool Application::init(int argc, char* argv[]) {
         return false;
     }
 
-    // Add cube2 to scene
-    {
-        std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance2 = _scene->createMeshInstance("cube instance 2", _cube.get());
-        std::unique_ptr<lug::Graphics::SceneNode> cubeNode2 = _scene->createSceneNode("cube instance node 2");
-        _cubeNode2 = cubeNode2.get();
+    float cubeNbX = 5;
+    float cubeNbY = 5;
+    float centerX = cubeNbX * 3.0f / 2.0f;
+    float centerY = cubeNbY * 3.0f / 2.0f;
+    for (uint32_t x = 0; x < cubeNbX; ++x) {
+        for (uint32_t y = 0; y < cubeNbY; ++y) {
+            // Add cube2 to scene
+            {
+                std::unique_ptr<lug::Graphics::MeshInstance> cubeInstance2 = _scene->createMeshInstance("cube instance 2", _cube.get());
+                std::unique_ptr<lug::Graphics::SceneNode> cubeNode2 = _scene->createSceneNode("cube instance node 2");
+                cubeNode2->translate({x * 3.0f - centerX, 0.0f, y * 3.0f - centerY});
 
-        cubeNode2->attachMovableObject(std::move(cubeInstance2));
-        _scene->getRoot()->attachChild(std::move(cubeNode2));
+                cubeNode2->attachMovableObject(std::move(cubeInstance2));
+                _scene->getRoot()->attachChild(std::move(cubeNode2));
+            }
+        }
     }
 
     // Add cube to scene
@@ -203,33 +231,36 @@ bool Application::init(int argc, char* argv[]) {
     }
 
     // Add directional light to scene
-/*   {
+   {
         std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::DirectionalLight);
         std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
 
-        light->setDiffuse({0.2f, 0.2f, 0.2f});
+        light->setDiffuse({0.1f, 0.1f, 0.1f});
         static_cast<lug::Graphics::DirectionalLight*>(light.get())->setDirection({0.0f, 4.0f, 5.0f});
-
-        lightNode->attachMovableObject(std::move(light));
-        _scene->getRoot()->attachChild(std::move(lightNode));
-    }*/
-
-    // Add point light to scene
-    {
-        std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::POINT_LIGHT);
-        std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
-
-        light->setDiffuse({0.0f, 0.2f, 1.0f});
-        static_cast<lug::Graphics::PointLight*>(light.get())->setPosition({1.5f, -2.0f, 1.5f});
-        static_cast<lug::Graphics::PointLight*>(light.get())->setLinear(0.14f);
-        static_cast<lug::Graphics::PointLight*>(light.get())->setQuadric(0.07f);
 
         lightNode->attachMovableObject(std::move(light));
         _scene->getRoot()->attachChild(std::move(lightNode));
     }
 
+    for (uint32_t i = 0; i < 49; ++i) {
+        // Add point light to scene
+        {
+            std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::PointLight);
+            std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
+
+            light->setDiffuse(randColor());
+            light->setAmbient({0.0f, 0.0f, 0.0f});
+            static_cast<lug::Graphics::PointLight*>(light.get())->setPosition(randPos());
+            static_cast<lug::Graphics::PointLight*>(light.get())->setLinear(0.22f);
+            static_cast<lug::Graphics::PointLight*>(light.get())->setQuadric(0.20f);
+
+            lightNode->attachMovableObject(std::move(light));
+            _scene->getRoot()->attachChild(std::move(lightNode));
+        }
+    }
+
     // Add spotlight to scene
-    {
+/*    {
         std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::Spotlight);
         std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
 
@@ -241,7 +272,7 @@ bool Application::init(int argc, char* argv[]) {
 
         lightNode->attachMovableObject(std::move(light));
         _scene->getRoot()->attachChild(std::move(lightNode));
-    }
+    }*/
 
     std::unique_ptr<lug::Graphics::Camera> camera = _graphics.createCamera("camera");
     std::unique_ptr<lug::Graphics::Camera> camera2 = _graphics.createCamera("camera2");
@@ -268,8 +299,8 @@ bool Application::init(int argc, char* argv[]) {
         renderViews[1]->attachCamera(std::move(camera2));
     }
 
-    _cubeNode2->translate({0.0f, 0.0f, 2.0f});
     _cubeNode->scale({0.5f, 0.5f, 0.5f});
+    _cubeNode->translate({0.0f, -2.0f, -centerY});
 
     return true;
 }
