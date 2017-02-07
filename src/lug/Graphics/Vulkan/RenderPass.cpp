@@ -71,8 +71,9 @@ void RenderPass::begin(const CommandBuffer* commandBuffer,
 void RenderPass::end(const CommandBuffer* commandBuffer) {
     vkCmdEndRenderPass(*commandBuffer);
 }
-
+#include <lug/System/Logger.hpp>
 std::unique_ptr<RenderPass> RenderPass::create(const Device* device) {
+    LUG_LOG.info("MODIF OK");
 VkFormat depthFormat = Image::findSupportedFormat(device,
                                                         {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
                                                         VK_IMAGE_TILING_OPTIMAL,
@@ -82,7 +83,7 @@ VkFormat depthFormat = Image::findSupportedFormat(device,
         // Color attachment
         {
             attachments[0].flags = 0,
-            attachments[0].format = VK_FORMAT_B8G8R8A8_UNORM,
+            attachments[0].format = VK_FORMAT_R8G8B8A8_UNORM,
             attachments[0].samples = VK_SAMPLE_COUNT_1_BIT,
             attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
             attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE,

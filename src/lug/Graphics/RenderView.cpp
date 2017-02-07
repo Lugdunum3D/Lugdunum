@@ -1,12 +1,17 @@
 #include <lug/Graphics/RenderView.hpp>
 #include <lug/Graphics/RenderTarget.hpp>
 
+#include <lug/System/Logger.hpp>
+
+
 namespace lug {
 namespace Graphics {
 
 RenderView::RenderView(const RenderTarget* renderTarget) : _renderTarget{renderTarget} {}
 
+
 void RenderView::update() {
+
     _viewport = {
         {                                                               // offset
             _renderTarget->getWidth() * _info.viewport.offset.x,        // x
@@ -21,6 +26,13 @@ void RenderView::update() {
         _info.viewport.minDepth,                                        // minDepth
         _info.viewport.maxDepth                                         // maxDepth
     };
+
+     LUG_LOG.info(" getWidth {}", _viewport.extent.width);
+     LUG_LOG.info(" getheight {}", _viewport.extent.height);
+
+     LUG_LOG.info(" _renderTarget->getWidth {}",  _renderTarget->getWidth());
+     LUG_LOG.info(" _renderTarget->getHeight {}", _renderTarget->getHeight());
+
 
     _scissor = {
         {                                                               // offset

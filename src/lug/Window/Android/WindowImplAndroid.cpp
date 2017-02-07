@@ -10,9 +10,12 @@ ANativeWindow* lug::Window::priv::WindowImpl::nativeWindow = nullptr;
 ANativeActivity* lug::Window::priv::WindowImpl::activity = nullptr;
 
 
-WindowImpl::WindowImpl(Window*) {}
+WindowImpl::WindowImpl(Window* win): _parent{win} {}
 
 bool WindowImpl::init(const Window::InitInfo&) {
+
+            _parent->_mode.width = 1920;
+            _parent->_mode.height = 1080;
     return true;
 }
 
