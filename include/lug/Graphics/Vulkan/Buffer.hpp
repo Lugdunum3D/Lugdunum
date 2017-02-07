@@ -36,6 +36,8 @@ public:
     void updateData(void *data, uint32_t size, uint32_t memoryOffset = 0);
     void updateDataTransfer(const CommandBuffer* commandBuffer, void *data, uint32_t size, uint32_t offset = 0);
 
+    static uint32_t getSizeAligned(const Device* device, uint32_t size);
+
     const VkMemoryRequirements& getRequirements() const;
 
     static std::unique_ptr<Buffer> create(

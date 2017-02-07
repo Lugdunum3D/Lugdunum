@@ -518,10 +518,15 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
     // Each RenderTechnique has got 50 descriptors for the lights and 1 for the camera
     {
         VkDescriptorPoolSize poolSize[] = {
-            // Uniform buffers descriptors (50 for lights and 1 for camera in ForwardRenderTechnique)
+            // Uniform buffers descriptors (1 for camera in ForwardRenderTechnique)
             {
                 poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-                poolSize[0].descriptorCount = (uint32_t)initInfo.renderViewsInitInfo.size() * (50 + 1) * 3
+                poolSize[0].descriptorCount = (uint32_t)initInfo.renderViewsInitInfo.size() * 3
+            },
+            // Dynamic uniform buffers descriptors (1 for lights in ForwardRenderTechnique)
+            {
+                poolSize[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+                poolSize[1].descriptorCount = (uint32_t)initInfo.renderViewsInitInfo.size() * 3
             }
         };
 
@@ -529,8 +534,8 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
             createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             createInfo.pNext = nullptr,
             createInfo.flags = 0, // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
-            createInfo.maxSets = (uint32_t)initInfo.renderViewsInitInfo.size() * (50 + 1) * 3, // Only ForwardRenderTechnique has 50 descriptor sets (for lights) and 1 (for the camera)
-            createInfo.poolSizeCount = 1,
+            createInfo.maxSets = (uint32_t)initInfo.renderViewsInitInfo.size() * (1 + 1) * 3, // Only ForwardRenderTechnique has 1 descriptor sets (for lights) and 1 (for the camera)
+            createInfo.poolSizeCount = 2,
             createInfo.pPoolSizes = poolSize
         };
 

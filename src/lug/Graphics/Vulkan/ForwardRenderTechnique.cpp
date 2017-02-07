@@ -1,6 +1,8 @@
+#include <algorithm>
 #include <lug/Config.hpp>
 #include <lug/Graphics/DirectionalLight.hpp>
 #include <lug/Graphics/MeshInstance.hpp>
+#include <lug/Graphics/PointLight.hpp>
 #include <lug/Graphics/RenderQueue.hpp>
 #include <lug/Graphics/SceneNode.hpp>
 #include <lug/Graphics/Spotlight.hpp>
@@ -64,15 +66,21 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
 
     // Update lights buffer data and descriptor set bindings
     {
+        uint32_t size = static_cast<uint32_t>(_lightsAlignement * renderQueue.getLightsNb());
+
+        char* data = new char[size];
+        uint32_t offset = 0;
+        auto& lightBuffer = frameData.lightsBuffer;
         for (uint32_t i = 0; i < renderQueue.getLightsNb(); ++i) {
             Light* light = renderQueue.getLights()[i];
-            auto& lightBuffer = frameData.lightsBuffers[i];
             uint32_t lightDataSize = 0;
             void* lightData = light->getData(lightDataSize);
 
-            frameData.lightsDescriptorSets[i].update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER , 0, lightBuffer.get(), 0, lightDataSize);
-            lightBuffer->updateDataTransfer(&cmdBuffer, lightData, lightDataSize);
+            memcpy(data + offset, lightData, lightDataSize);
+            offset += _lightsAlignement;
         }
+        lightBuffer->updateDataTransfer(&cmdBuffer, data, offset);
+        delete[] data;
     }
 
     // Update camera buffer data
@@ -107,6 +115,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         }
 
 
+        uint32_t dynamicOffset = 0;
         for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
 
             {
@@ -120,15 +129,15 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
 
             auto lightType = renderQueue.getLights()[i]->getLightType();
             auto& lightPipeline = _pipelines[lightType];
-            // TODO: WARNING: Find alternative to light type
-            auto& descriptorSet = frameData.lightsDescriptorSets[i];
+            auto& descriptorSet = frameData.lightsDescriptorSet;
 
             lightPipeline->bind(&cmdBuffer);
 
             // WARNING: it will only works if the pipelines has got the same descriptor set layout
             frameData.cameraDescriptorSet.bind(lightPipeline->getLayout(), &cmdBuffer, 0);
 
-            descriptorSet.bind(lightPipeline->getLayout(), &cmdBuffer, 1);
+            descriptorSet.bind(lightPipeline->getLayout(), &cmdBuffer, 1, 1, &dynamicOffset);
+            dynamicOffset += _lightsAlignement;
 
             for (std::size_t j = 0; j < renderQueue.getObjectsNb(); ++j) {
                 auto& object = renderQueue.getObjects()[j];
@@ -171,14 +180,15 @@ bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vec
     _framesData.resize(imageViews.size());
     // We assume all pipelines have got the same layout
     // TODO: Create one DescriptorSetLayout for the pipelines
-    std::vector<VkDescriptorSetLayout> descriptorSetLayouts(50, *_pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[1]);
+    auto& descriptorSetLayout = _pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[1];
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
         // Create lights descriptor sets
         {
-            _framesData[i].lightsDescriptorSets = descriptorPool->createDescriptorSets(descriptorSetLayouts);
-            if (_framesData[i].lightsDescriptorSets.size() == 0) {
+            std::vector<DescriptorSet> descriptorSets = descriptorPool->createDescriptorSets({*descriptorSetLayout});
+            if (descriptorSets.size() == 0) {
                 return false;
             }
+            _framesData[i].lightsDescriptorSet = std::move(descriptorSets[0]);
         }
 
         // Fence
@@ -222,44 +232,41 @@ void ForwardRenderTechnique::destroy() {
 
 bool ForwardRenderTechnique::initLightsBuffers() {
     uint32_t familyIndices = _presentQueue->getFamilyIdx();
-    uint32_t lightsBufferSize = sizeof(Spotlight::LightData);
     bool memoryInitialized = false;
     uint32_t memoryOffset = 0;
-    uint32_t alignedSize = 0;
+    uint32_t largestLightSize = 0;
 
+    // Calculate largest light structure
+    {
+        largestLightSize = (uint32_t)std::max(sizeof(DirectionalLight::LightData), sizeof(PointLight::LightData));
+        largestLightSize = std::max(largestLightSize, (uint32_t)sizeof(Spotlight::LightData));
+    }
+    _lightsAlignement = Buffer::getSizeAligned(_device, largestLightSize);
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
         {
-            _framesData[i].lightsBuffers.resize(50);
+            // Create buffer
+            _framesData[i].lightsBuffer = Buffer::create(_device, 1, &familyIndices, _lightsAlignement * 50, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+            if (!_framesData[i].lightsBuffer) {
+                return false;
+            }
 
-            for (uint32_t j = 0; j < 50; ++j) {
-                // Create buffer
-                _framesData[i].lightsBuffers[j] = Buffer::create(_device, 1, &familyIndices, lightsBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-                if (!_framesData[i].lightsBuffers[j]) {
+            // Allocate memory for all buffers (One time)
+            auto& lightBuffer = _framesData[i].lightsBuffer;
+            const VkMemoryRequirements* bufferRequirements = &lightBuffer->getRequirements();
+            if (!memoryInitialized) {
+
+
+                uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                _lightsBuffersMemory = DeviceMemory::allocate(_device, _lightsAlignement * _framesData.size(), memoryTypeIndex);
+                if (!_lightsBuffersMemory) {
                     return false;
                 }
-
-                // Allocate memory for all buffers (One time)
-                auto& lightBuffer = _framesData[i].lightsBuffers[j];
-                const VkMemoryRequirements* bufferRequirements = &lightBuffer->getRequirements();
-                if (!memoryInitialized) {
-                    if (bufferRequirements->size % bufferRequirements->alignment != 0) {
-                        alignedSize = bufferRequirements->size + bufferRequirements->alignment - (bufferRequirements->size % bufferRequirements->alignment);
-                    } else {
-                        alignedSize = bufferRequirements->size;
-                    }
-
-                    uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-                    _lightsBuffersMemory = DeviceMemory::allocate(_device, alignedSize * _framesData.size() * 50, memoryTypeIndex);
-                    if (!_lightsBuffersMemory) {
-                        return false;
-                    }
-                    memoryInitialized = true;
-                }
-
-                // Bind buffer memory
-                lightBuffer->bindMemory(_lightsBuffersMemory.get(), memoryOffset);
-                memoryOffset += alignedSize;
+                memoryInitialized = true;
             }
+
+            lightBuffer->bindMemory(_lightsBuffersMemory.get(), memoryOffset);
+            _framesData[i].lightsDescriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC , 0, lightBuffer.get(), 0, _lightsAlignement);
+            memoryOffset += _lightsAlignement;
         }
     }
 

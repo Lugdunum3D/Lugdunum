@@ -33,8 +33,12 @@ DescriptorSet::~DescriptorSet() {
     destroy();
 }
 
-void DescriptorSet::bind(const PipelineLayout* pipelineLayout, const CommandBuffer* commandBuffer, uint32_t setNb) {
-    vkCmdBindDescriptorSets(*commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *pipelineLayout, setNb, 1, &_descriptorSet, 0, nullptr);
+void DescriptorSet::bind(const PipelineLayout* pipelineLayout,
+                            const CommandBuffer* commandBuffer,
+                            uint32_t setNb,
+                            uint32_t dynamicOffsetsCount,
+                            const uint32_t* dynamicOffsets) {
+    vkCmdBindDescriptorSets(*commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *pipelineLayout, setNb, 1, &_descriptorSet, dynamicOffsetsCount, dynamicOffsets);
 }
 
 void DescriptorSet::update(VkDescriptorType descriptorType, uint32_t dstBinding, const Buffer* buffer, uint32_t offset, uint32_t range) {

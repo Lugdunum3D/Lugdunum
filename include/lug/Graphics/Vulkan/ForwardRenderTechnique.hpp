@@ -31,8 +31,8 @@ private:
         std::vector<CommandBuffer> cmdBuffers;
 
         // Lights
-        std::vector<DescriptorSet> lightsDescriptorSets;
-        std::vector<std::unique_ptr<Buffer>> lightsBuffers;
+        DescriptorSet lightsDescriptorSet;
+        std::unique_ptr<Buffer> lightsBuffer;
 
         // Camera
         std::unique_ptr<Buffer> cameraBuffer{nullptr};
@@ -69,6 +69,8 @@ private:
     std::unique_ptr<DeviceMemory> _cameraBufferMemory{nullptr};
 
     std::vector<FrameData> _framesData;
+
+    uint32_t _lightsAlignement{0};
 };
 
 } // Vulkan

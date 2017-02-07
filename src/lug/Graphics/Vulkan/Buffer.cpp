@@ -113,6 +113,19 @@ std::unique_ptr<Buffer> Buffer::create(
     return std::unique_ptr<Buffer>(new Buffer(bufferHandle, device));
 }
 
+uint32_t Buffer::getSizeAligned(const Device* device, uint32_t size) {
+    uint32_t alignment = (uint32_t)device->getPhysicalDeviceInfo()->properties.limits.minUniformBufferOffsetAlignment;
+    uint32_t sizeAligned = 0;
+
+    if (size % alignment != 0) {
+        sizeAligned = static_cast<uint32_t>(size + alignment - (size % alignment));
+    } else {
+        sizeAligned = static_cast<uint32_t>(size);
+    }
+
+    return sizeAligned;
+}
+
 } // Vulkan
 } // Graphics
 } // lug
