@@ -257,7 +257,7 @@ bool ForwardRenderTechnique::initLightsBuffers() {
 
 
                 uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-                _lightsBuffersMemory = DeviceMemory::allocate(_device, _lightsAlignement * _framesData.size(), memoryTypeIndex);
+                _lightsBuffersMemory = DeviceMemory::allocate(_device, _lightsAlignement * _framesData.size() * 50, memoryTypeIndex);
                 if (!_lightsBuffersMemory) {
                     return false;
                 }
