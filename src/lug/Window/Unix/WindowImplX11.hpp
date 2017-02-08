@@ -21,6 +21,7 @@ public:
     void close();
 
     bool pollEvent(lug::Window::Event& event);
+    void enableKeyRepeat(bool enable);
 
 private:
     void setWindowDecorations(Style style);

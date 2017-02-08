@@ -16,6 +16,8 @@ bool priv::WindowImpl::create(const std::string& title, Style style) {
         return false;
     }
 
+    enableKeyRepeat(false);
+
     int screen = DefaultScreen(_display);
     ::Window parent = RootWindow(_display, screen);
 
@@ -217,7 +219,6 @@ bool priv::WindowImpl::pollEvent(Event& event) {
         case KeyPress:
             event.type          = EventType::KeyPressed;
             event.key.code      = keysymToLugKey(XLookupKeysym((&xEvent.xkey), 0)); // TODO: indexes?
-            event.key.alt       = xEvent.xkey.state & Mod1Mask;
             event.key.ctrl      = xEvent.xkey.state & ControlMask;
             event.key.shift     = xEvent.xkey.state & ShiftMask;
             event.key.system    = xEvent.xkey.state & Mod4Mask;
@@ -235,6 +236,15 @@ bool priv::WindowImpl::pollEvent(Event& event) {
     }
 
     return true;
+}
+
+void priv::WindowImpl::enableKeyRepeat(bool enable) {
+    if (enable) {
+        XAutoRepeatOn(_display);
+    }
+    else {
+        XAutoRepeatOff(_display);
+    }
 }
 
 void priv::WindowImpl::setWindowDecorations(Style style) {
