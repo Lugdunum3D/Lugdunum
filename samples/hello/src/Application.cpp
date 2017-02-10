@@ -255,7 +255,7 @@ bool Application::init(int argc, char* argv[]) {
         _scene->getRoot()->attachChild(std::move(lightNode));
     }
 
-    for (uint32_t i = 0; i < 49; ++i) {
+    for (uint32_t i = 0; i < 30; ++i) {
         // Add point light to scene
         {
             std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::PointLight);

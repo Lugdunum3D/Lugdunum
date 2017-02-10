@@ -1,3 +1,4 @@
+#include <chrono>
 #include <algorithm>
 #include <lug/Config.hpp>
 #include <lug/Graphics/DirectionalLight.hpp>
@@ -20,24 +21,33 @@ namespace Vulkan {
 
 using MeshInstance = ::lug::Graphics::MeshInstance;
 
+float getElapsedTime(std::chrono::high_resolution_clock::time_point& start) {
+    auto stop = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration<double, std::milli>(stop - start).count();
+}
+
 ForwardRenderTechnique::ForwardRenderTechnique(const RenderView* renderView, const Device* device, Queue* presentQueue) :
                                                 RenderTechnique(renderView, device, presentQueue) {}
 
 bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaphore& imageReadySemaphore,
                                     const Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) {
-    static Math::Mat4x4f projectionMatrix{Math::Mat4x4f::identity()};
-    static Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({0.0f, -10.0f, -20.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
+    static float rotation = 0.0f;
+    static auto start = std::chrono::high_resolution_clock::now();
+    LUG_LOG.info("{}", getElapsedTime(start));
+    rotation += (.250f * getElapsedTime(start));
     FrameData& frameData = _framesData[currentImageIndex];
 
-    auto& viewport = _renderView->getViewport();
+    float x = 20.0f * cos(Math::Geometry::radians(rotation));
+    float y = 20.0f * sin(Math::Geometry::radians(rotation));
 
-    // Update the projection matrix and rotate model matrix
-    {
-        projectionMatrix = Math::Geometry::perspective(
-            Math::Geometry::radians(_renderView->getCamera()->getFov()),
-            viewport.getRatio(),
-            0.1f, 100.0f);
+    if (rotation > 360.0f) {
+        rotation = 0.0f;
     }
+    Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({x, -10.0f, y}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
+
+    // LUG_LOG.info("{}", viewMatrix);
+
+    auto& viewport = _renderView->getViewport();
 
     frameData.fence.wait();
     frameData.fence.reset();
@@ -87,7 +97,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
     {
         Math::Mat4x4f cameraData[] = {
             viewMatrix,
-            projectionMatrix
+            _renderView->getCamera()->getProjectionMatrix()
         };
         frameData.cameraBuffer->updateDataTransfer(&cmdBuffer, cameraData, sizeof(cameraData));
     }
@@ -160,6 +170,8 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         }
        renderPass->end(&cmdBuffer);
     }
+
+    start = std::chrono::high_resolution_clock::now();
 
     if (!cmdBuffer.end()) return false;
 

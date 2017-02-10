@@ -3,6 +3,8 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Node.hpp>
 #include <lug/Graphics/RenderQueue.hpp>
+#include <lug/Math/Geometry/Transform.hpp>
+#include <lug/Math/Matrix.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -66,17 +68,67 @@ public:
     void setFov(float fov);
 
     /**
+     * @brief      Sets the ratio. Usually called automatically by the RenderView
+     *             when attached or when the ratio changed.
+     *
+     * @param[in]  ratio  The ratio
+     */
+    void setRatio(float ratio);
+
+    /**
+     * @brief      Sets the near (distance of near plane).
+     *
+     * @param[in]  near   The near value.
+     */
+    void setNear(float near);
+
+    /**
+     * @brief      Gets the near (distance of near plane).
+     *
+     * @return     The near value.
+     */
+    float getNear() const;
+
+    /**
+     * @brief      Sets the far (distance of far plane).
+     *
+     * @param[in]  far   The far value.
+     */
+    void setFar(float far);
+
+    /**
+     * @brief      Gets the far (distance of far plane)
+     *
+     * @return     The far value.
+     */
+    float getFar() const;
+
+    /**
+     * @brief      Gets the projection matrix. Computes it if needed, but internally
+     *             the projection matrix is cached.
+     *
+     * @return     The projection matrix.
+     */
+    const Math::Mat4x4f& getProjectionMatrix();
+
+    /**
      * @brief      Update the render queue of the Camera by fetching
      *             the visible objects of the attached scene.
      *
      * @param[in]  renderView  The render view
      */
-    virtual void update(const RenderView* renderView) = 0;
+    virtual void update(const RenderView* renderView);
 
 protected:
     Scene* _scene{nullptr};
     RenderQueue _renderQueue;
     float _fov;
+    Math::Mat4x4f _projMatrix{Math::Mat4x4f::identity()};
+    RenderView* _renderView{nullptr};
+
+    float _near{0.1f};
+    float _far{100.0f};
+    bool _needUpdateProj{true};
 };
 
 #include <lug/Graphics/Camera.inl>

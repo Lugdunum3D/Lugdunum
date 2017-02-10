@@ -21,3 +21,23 @@ inline float Camera::getFov() const {
 inline void Camera::setFov(float fov) {
     _fov = fov;
 }
+
+inline float Camera::getFar() const {
+    return _far;
+}
+
+inline void Camera::setFar(float far) {
+    _far = far;
+}
+
+inline float Camera::getNear() const {
+    return _near;
+}
+
+inline void Camera::setNear(float near) {
+    _near = near;
+}
+
+inline const Math::Mat4x4f& Camera::getProjectionMatrix() {
+    return _projMatrix;
+}
