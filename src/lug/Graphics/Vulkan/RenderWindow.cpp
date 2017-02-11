@@ -47,13 +47,18 @@ bool RenderWindow::pollEvent(lug::Window::Event& event) {
 }
 
 bool RenderWindow::beginFrame() {
-    Semaphore& acquireImageCompleteSemaphore = _acquireImageCompleteSemaphores[_imageCompleteSemaphoreIdx++];
-
-    if (_imageCompleteSemaphoreIdx >= _acquireImageCompleteSemaphores.size()) {
-        _imageCompleteSemaphoreIdx = 0;
+    AcquireImageData* acquireImageData = nullptr;
+    // Retrieve free AcquireImageData
+    {
+        for (auto& acquireImageData_ : _acquireImageDatas) {
+            if (acquireImageData_.imageIdx == -1) {
+                acquireImageData = &acquireImageData_;
+                break;
+            }
+        }
     }
 
-    while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, acquireImageCompleteSemaphore)) {
+    while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, acquireImageData->completeSemaphore)) {
         if (_swapchain.isOutOfDate()) {
             if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
                 return false;
@@ -70,11 +75,22 @@ bool RenderWindow::beginFrame() {
         }
     }
 
+    // Set previous AcquireImageData free
+    {
+        for (auto& acquireImageData_ : _acquireImageDatas) {
+            if (acquireImageData_.imageIdx == (int)_currentImageIndex) {
+                acquireImageData_.imageIdx = -1;
+            }
+        }
+    }
+
+    acquireImageData->imageIdx = (int)_currentImageIndex;
+
     FrameData& frameData = _framesData[_currentImageIndex];
     CommandBuffer& cmdBuffer = frameData.cmdBuffers[0];
 
     std::vector<VkSemaphore> imageReadyVkSemaphores(frameData.imageReadySemaphores.begin(), frameData.imageReadySemaphores.end());
-    return _presentQueue->submit(cmdBuffer, imageReadyVkSemaphores, {acquireImageCompleteSemaphore}, {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT});
+    return _presentQueue->submit(cmdBuffer, imageReadyVkSemaphores, {acquireImageData->completeSemaphore}, {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT});
 }
 
 bool RenderWindow::endFrame() {
@@ -378,26 +394,9 @@ bool RenderWindow::initFramesData(RenderWindow::InitInfo& initInfo) {
     }
 
     _framesData.resize(frameDataSize);
-    _acquireImageCompleteSemaphores.resize(frameDataSize);
+    _acquireImageDatas.resize(frameDataSize + 1);
 
     for (uint32_t i = 0; i < frameDataSize; ++i) {
-        // Acquire image semaphore
-        {
-            VkSemaphore semaphore;
-            VkSemaphoreCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = 0
-            };
-            VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
-            if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
-                return false;
-            }
-
-            _acquireImageCompleteSemaphores[i] = Semaphore(semaphore, &_renderer.getDevice());
-        }
-
         // All draws finished semaphore
         {
             VkSemaphore semaphore;
@@ -437,6 +436,26 @@ bool RenderWindow::initFramesData(RenderWindow::InitInfo& initInfo) {
 
         // Command buffers
         _framesData[i].cmdBuffers = _renderer.getQueue(0, true)->getCommandPool().createCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, 2);
+    }
+
+    for (uint32_t i = 0; i < frameDataSize + 1; ++i) {
+        // Acquire image semaphore
+        {
+            VkSemaphore semaphore;
+            VkSemaphoreCreateInfo createInfo{
+                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+                createInfo.pNext = nullptr,
+                createInfo.flags = 0
+            };
+            VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
+            if (result != VK_SUCCESS) {
+                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                return false;
+            }
+
+            _acquireImageDatas[i].completeSemaphore = Semaphore(semaphore, &_renderer.getDevice());
+            _acquireImageDatas[i].imageIdx = -1;
+        }
     }
 
     return buildCommandBuffers();

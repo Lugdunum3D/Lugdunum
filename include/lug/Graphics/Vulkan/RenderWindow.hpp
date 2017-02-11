@@ -17,6 +17,11 @@ class Renderer;
 
 class LUG_GRAPHICS_API RenderWindow final : public ::lug::Graphics::RenderWindow {
 private:
+    struct AcquireImageData {
+        Semaphore completeSemaphore;
+        int imageIdx = -1;
+    };
+
     struct FrameData {
         Semaphore allDrawsFinishedSemaphore{};
         std::vector<Semaphore> imageReadySemaphores{};
@@ -75,8 +80,7 @@ private:
 
     std::vector<FrameData> _framesData;
 
-    std::vector<Semaphore> _acquireImageCompleteSemaphores;
-    uint32_t _imageCompleteSemaphoreIdx = 0;
+    std::vector<AcquireImageData> _acquireImageDatas;
 };
 
 #include <lug/Graphics/Vulkan/RenderWindow.inl>

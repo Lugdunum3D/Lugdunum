@@ -23,7 +23,7 @@ using MeshInstance = ::lug::Graphics::MeshInstance;
 
 float getElapsedTime(std::chrono::high_resolution_clock::time_point& start) {
     auto stop = std::chrono::high_resolution_clock::now();
-    return std::chrono::duration<double, std::milli>(stop - start).count();
+    return (float)std::chrono::duration<double, std::milli>(stop - start).count();
 }
 
 ForwardRenderTechnique::ForwardRenderTechnique(const RenderView* renderView, const Device* device, Queue* presentQueue) :

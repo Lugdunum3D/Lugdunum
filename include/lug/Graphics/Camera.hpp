@@ -78,9 +78,9 @@ public:
     /**
      * @brief      Sets the near (distance of near plane).
      *
-     * @param[in]  near   The near value.
+     * @param[in]  nearDist   The near value.
      */
-    void setNear(float near);
+    void setNear(float nearDist);
 
     /**
      * @brief      Gets the near (distance of near plane).
@@ -92,9 +92,9 @@ public:
     /**
      * @brief      Sets the far (distance of far plane).
      *
-     * @param[in]  far   The far value.
+     * @param[in]  farDist   The far value.
      */
-    void setFar(float far);
+    void setFar(float farDist);
 
     /**
      * @brief      Gets the far (distance of far plane)

@@ -26,16 +26,16 @@ inline float Camera::getFar() const {
     return _far;
 }
 
-inline void Camera::setFar(float far) {
-    _far = far;
+inline void Camera::setFar(float farDist) {
+    _far = farDist;
 }
 
 inline float Camera::getNear() const {
     return _near;
 }
 
-inline void Camera::setNear(float near) {
-    _near = near;
+inline void Camera::setNear(float nearDist) {
+    _near = nearDist;
 }
 
 inline const Math::Mat4x4f& Camera::getProjectionMatrix() {
