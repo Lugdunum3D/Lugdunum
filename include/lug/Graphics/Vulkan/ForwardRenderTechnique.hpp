@@ -4,6 +4,7 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Light.hpp>
 #include <lug/Graphics/Vulkan/Buffer.hpp>
+#include <lug/Graphics/Vulkan/BufferPool.hpp>
 #include <lug/Graphics/Vulkan/DescriptorSet.hpp>
 #include <lug/Graphics/Vulkan/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Fence.hpp>
@@ -30,13 +31,7 @@ private:
         // There is actually only 1 command buffer
         std::vector<CommandBuffer> cmdBuffers;
 
-        // Lights
-        DescriptorSet lightsDescriptorSet;
-        std::unique_ptr<Buffer> lightsBuffer;
-
-        // Camera
-        std::unique_ptr<Buffer> cameraBuffer{nullptr};
-        DescriptorSet cameraDescriptorSet;
+        std::unordered_map<std::string, BufferPool::SubBuffer*> subBuffers;
     };
 
 public:
@@ -54,19 +49,16 @@ public:
     bool init(DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<ImageView> >& imageViews) override final;
     void destroy() override final;
 
-    bool initLightsBuffers();
-    bool initCameraBuffer(DescriptorPool* descriptorPool);
     bool initDepthBuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) override final;
     bool initFramebuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) override final;
 
 private:
+    std::unique_ptr<BufferPool> _cameraPool;
+    std::unique_ptr<BufferPool> _lightsPool;
+
     std::unique_ptr<DeviceMemory> _depthBufferMemory{nullptr};
 
     std::unordered_map<Light::Type, std::unique_ptr<Pipeline> > _pipelines;
-
-    std::unique_ptr<DeviceMemory> _lightsBuffersMemory{nullptr};
-
-    std::unique_ptr<DeviceMemory> _cameraBufferMemory{nullptr};
 
     std::vector<FrameData> _framesData;
 

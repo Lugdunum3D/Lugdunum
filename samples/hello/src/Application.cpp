@@ -1,4 +1,5 @@
 #include <ctime>
+#include <sstream>
 #include "Application.hpp"
 #include <lug/Graphics/DirectionalLight.hpp>
 #include <lug/Graphics/Spotlight.hpp>
@@ -258,7 +259,9 @@ bool Application::init(int argc, char* argv[]) {
     for (uint32_t i = 0; i < 30; ++i) {
         // Add point light to scene
         {
-            std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::PointLight);
+            std::stringstream ss;
+            ss << "light" << i;
+            std::unique_ptr<lug::Graphics::Light> light = _scene->createLight(ss.str(), lug::Graphics::Light::Type::PointLight);
             std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
 
             light->setDiffuse(randColor());

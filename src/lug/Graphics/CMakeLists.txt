@@ -20,6 +20,7 @@ set(SRC
     ${SRCROOT}/SceneNode.cpp
     ${SRCROOT}/Spotlight.cpp
     ${SRCROOT}/Vulkan/Buffer.cpp
+    ${SRCROOT}/Vulkan/BufferPool.cpp
     ${SRCROOT}/Vulkan/Camera.cpp
     ${SRCROOT}/Vulkan/CommandBuffer.cpp
     ${SRCROOT}/Vulkan/CommandPool.cpp
@@ -90,6 +91,7 @@ set(INC
     ${INCROOT}/SceneNode.inl
     ${INCROOT}/Spotlight.hpp
     ${INCROOT}/Vulkan/Buffer.hpp
+    ${INCROOT}/Vulkan/BufferPool.hpp
     ${INCROOT}/Vulkan/Camera.hpp
     ${INCROOT}/Vulkan/CommandBuffer.hpp
     ${INCROOT}/Vulkan/CommandPool.hpp

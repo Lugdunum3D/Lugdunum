@@ -33,7 +33,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                                     const Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) {
     static float rotation = 0.0f;
     static auto start = std::chrono::high_resolution_clock::now();
-    LUG_LOG.info("{}", getElapsedTime(start));
+    //LUG_LOG.info("{}", getElapsedTime(start));
     rotation += (.250f * getElapsedTime(start));
     FrameData& frameData = _framesData[currentImageIndex];
 
@@ -74,34 +74,40 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
     }
 
-    // Update lights buffer data and descriptor set bindings
-    {
-        uint32_t size = static_cast<uint32_t>(_lightsAlignement * renderQueue.getLightsNb());
-
-        char* data = new char[size];
-        uint32_t offset = 0;
-        auto& lightBuffer = frameData.lightsBuffer;
-        for (uint32_t i = 0; i < renderQueue.getLightsNb(); ++i) {
-            Light* light = renderQueue.getLights()[i];
-            uint32_t lightDataSize = 0;
-            void* lightData = light->getData(lightDataSize);
-
-            memcpy(data + offset, lightData, lightDataSize);
-            offset += _lightsAlignement;
-        }
-        lightBuffer->updateDataTransfer(&cmdBuffer, data, offset);
-        delete[] data;
-    }
-
     // Update camera buffer data
+    BufferPool::SubBuffer* cameraBuffer = frameData.subBuffers[_renderView->getCamera()->getName()];
     {
+        if (!cameraBuffer) {
+            cameraBuffer = _cameraPool->allocate();
+            frameData.subBuffers[_renderView->getCamera()->getName()] = cameraBuffer;
+        }
+
         Math::Mat4x4f cameraData[] = {
             viewMatrix,
             _renderView->getCamera()->getProjectionMatrix()
         };
-        frameData.cameraBuffer->updateDataTransfer(&cmdBuffer, cameraData, sizeof(cameraData));
+
+        cameraBuffer->buffer->updateDataTransfer(&cmdBuffer, cameraData, sizeof(cameraData), cameraBuffer->offset);
     }
 
+    // Update lights buffers data
+    {
+        for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
+            auto& light = renderQueue.getLights()[i];
+            uint32_t lightSize = 0;
+            void* lightData;
+
+            lightData = light->getData(lightSize);
+            BufferPool::SubBuffer* lightBuffer = frameData.subBuffers[light->getName()];
+
+            if (!lightBuffer) {
+                lightBuffer = _lightsPool->allocate();
+                frameData.subBuffers[light->getName()] = lightBuffer;
+            }
+
+            lightBuffer->buffer->updateDataTransfer(&cmdBuffer, lightData, lightSize, lightBuffer->offset);
+        }
+    }
 
     // Render objects
     {
@@ -117,6 +123,8 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
             {viewport.offset.x, viewport.offset.y}
         );
 
+        cameraBuffer->descriptorSet->bind(_pipelines[Light::Type::DirectionalLight]->getLayout(), &cmdBuffer, 0, 1, &cameraBuffer->offset);
+
         // Blend constants are used as dst blend factor
         // We set them to 0 so that there is no blending
         {
@@ -125,7 +133,6 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         }
 
 
-        uint32_t dynamicOffset = 0;
         for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
 
             {
@@ -137,17 +144,14 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                 }
             }
 
-            auto lightType = renderQueue.getLights()[i]->getLightType();
+            auto& light = renderQueue.getLights()[i];
+            auto lightType = light->getLightType();
             auto& lightPipeline = _pipelines[lightType];
-            auto& descriptorSet = frameData.lightsDescriptorSet;
 
             lightPipeline->bind(&cmdBuffer);
 
-            // WARNING: it will only works if the pipelines has got the same descriptor set layout
-            frameData.cameraDescriptorSet.bind(lightPipeline->getLayout(), &cmdBuffer, 0);
-
-            descriptorSet.bind(lightPipeline->getLayout(), &cmdBuffer, 1, 1, &dynamicOffset);
-            dynamicOffset += _lightsAlignement;
+            BufferPool::SubBuffer* lightBuffer = frameData.subBuffers[light->getName()];
+            lightBuffer->descriptorSet->bind(_pipelines[Light::Type::DirectionalLight]->getLayout(), &cmdBuffer, 1, 1, &lightBuffer->offset);
 
             for (std::size_t j = 0; j < renderQueue.getObjectsNb(); ++j) {
                 auto& object = renderQueue.getObjects()[j];
@@ -190,19 +194,7 @@ bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vec
     }
 
     _framesData.resize(imageViews.size());
-    // We assume all pipelines have got the same layout
-    // TODO: Create one DescriptorSetLayout for the pipelines
-    auto& descriptorSetLayout = _pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[1];
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
-        // Create lights descriptor sets
-        {
-            std::vector<DescriptorSet> descriptorSets = descriptorPool->createDescriptorSets({*descriptorSetLayout});
-            if (descriptorSets.size() == 0) {
-                return false;
-            }
-            _framesData[i].lightsDescriptorSet = std::move(descriptorSets[0]);
-        }
-
         // Fence
         {
             VkFence fence;
@@ -229,7 +221,29 @@ bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vec
         }
     }
 
-    return initDepthBuffers(imageViews) && initFramebuffers(imageViews) && initLightsBuffers() && initCameraBuffer(descriptorPool);
+    std::vector<uint32_t> queueFamilyIndices = {(uint32_t)_presentQueue->getFamilyIdx()};
+    _cameraPool = std::make_unique<BufferPool>((uint32_t)_framesData.size(),
+                                                (uint32_t)sizeof(Math::Mat4x4f) * 2,
+                                                _device,
+                                                queueFamilyIndices,
+                                                descriptorPool,
+                                                _pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[0].get());
+
+
+    uint32_t largestLightSize = 0;
+    // Calculate largest light structure
+    {
+        largestLightSize = (uint32_t)std::max(sizeof(DirectionalLight::LightData), sizeof(PointLight::LightData));
+        largestLightSize = std::max(largestLightSize, (uint32_t)sizeof(Spotlight::LightData));
+    }
+    _lightsPool = std::make_unique<BufferPool>((uint32_t)_framesData.size() * 50,
+                                                largestLightSize,
+                                                _device,
+                                                queueFamilyIndices,
+                                                descriptorPool,
+                                                _pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[1].get());
+
+    return initDepthBuffers(imageViews) && initFramebuffers(imageViews);
 }
 
 void ForwardRenderTechnique::destroy() {
@@ -240,94 +254,6 @@ void ForwardRenderTechnique::destroy() {
     }
 
     _framesData.clear();
-}
-
-bool ForwardRenderTechnique::initLightsBuffers() {
-    uint32_t familyIndices = _presentQueue->getFamilyIdx();
-    bool memoryInitialized = false;
-    uint32_t memoryOffset = 0;
-    uint32_t largestLightSize = 0;
-
-    // Calculate largest light structure
-    {
-        largestLightSize = (uint32_t)std::max(sizeof(DirectionalLight::LightData), sizeof(PointLight::LightData));
-        largestLightSize = std::max(largestLightSize, (uint32_t)sizeof(Spotlight::LightData));
-    }
-    _lightsAlignement = Buffer::getSizeAligned(_device, largestLightSize);
-    for (uint32_t i = 0; i < _framesData.size(); ++i) {
-        {
-            // Create buffer
-            _framesData[i].lightsBuffer = Buffer::create(_device, 1, &familyIndices, _lightsAlignement * 50, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-            if (!_framesData[i].lightsBuffer) {
-                return false;
-            }
-
-            // Allocate memory for all buffers (One time)
-            auto& lightBuffer = _framesData[i].lightsBuffer;
-            const VkMemoryRequirements* bufferRequirements = &lightBuffer->getRequirements();
-            if (!memoryInitialized) {
-
-
-                uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-                _lightsBuffersMemory = DeviceMemory::allocate(_device, _lightsAlignement * _framesData.size() * 50, memoryTypeIndex);
-                if (!_lightsBuffersMemory) {
-                    return false;
-                }
-                memoryInitialized = true;
-            }
-
-            lightBuffer->bindMemory(_lightsBuffersMemory.get(), memoryOffset);
-            _framesData[i].lightsDescriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC , 0, lightBuffer.get(), 0, _lightsAlignement);
-            memoryOffset += _lightsAlignement;
-        }
-    }
-
-    return true;
-}
-
-bool ForwardRenderTechnique::initCameraBuffer(DescriptorPool* descriptorPool) {
-    uint32_t familyIndices = _presentQueue->getFamilyIdx();
-    bool memoryInitialized = false;
-    uint32_t memoryOffset = 0;
-
-    for (uint32_t i = 0; i < _framesData.size(); ++i) {
-        {
-            // Create buffer
-            _framesData[i].cameraBuffer = Buffer::create(_device, 1, &familyIndices, sizeof(Math::Mat4x4f) * 2, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-            if (!_framesData[i].cameraBuffer) {
-                return false;
-            }
-
-            // Allocate memory for the camera buffer
-            const VkMemoryRequirements* bufferRequirements =  &_framesData[i].cameraBuffer->getRequirements();
-            if (!memoryInitialized) {
-                uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, *bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-                _cameraBufferMemory = DeviceMemory::allocate(_device, bufferRequirements->size * _framesData.size(), memoryTypeIndex);
-                if (!_cameraBufferMemory) {
-                    return false;
-                }
-                memoryInitialized = true;
-            }
-
-            // Bind buffer memory
-            _framesData[i].cameraBuffer->bindMemory(_cameraBufferMemory.get(), memoryOffset);
-            memoryOffset += (uint32_t)bufferRequirements->size;
-
-            // Create camera descriptor set
-            // WARNING: it will only works if the pipelines has got the same descriptor set layout
-            auto& descriptorSetLayout = _pipelines[Light::Type::DirectionalLight]->getLayout()->getDescriptorSetLayouts()[0];
-            std::vector<DescriptorSet> descriptorSets = descriptorPool->createDescriptorSets({*descriptorSetLayout});
-            if (descriptorSets.size() == 0) {
-                return false;
-            }
-            _framesData[i].cameraDescriptorSet = std::move(descriptorSets[0]);
-
-            // Assign camera buffer to descriptor set binding point 0
-            _framesData[i].cameraDescriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER , 0, _framesData[i].cameraBuffer.get(), 0, sizeof(Math::Mat4x4f) * 2);
-        }
-    }
-
-    return true;
 }
 
 bool ForwardRenderTechnique::initDepthBuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) {
