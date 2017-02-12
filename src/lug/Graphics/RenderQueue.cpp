@@ -25,5 +25,15 @@ void RenderQueue::clear() {
     _lightsNb = 0;
 }
 
+void RenderQueue::removeDirtyProperty() {
+    for (std::size_t i = 0; i < _size; ++i) {
+        _queue[i]->isDirty(false);
+    }
+
+    for (std::size_t i = 0; i < _lightsNb; ++i) {
+        _lightsQueue[i]->isDirty(false);
+    }
+}
+
 } // Graphics
 } // lug

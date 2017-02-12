@@ -63,6 +63,14 @@ void RenderView::destroy() {
     _renderTechnique->destroy();
 }
 
+bool RenderView::endFrame() {
+    if (_camera) {
+        // Call isDirty(false) for each objects in the RenderQueue
+        _camera->getRenderQueue().removeDirtyProperty();
+    }
+    return true;
+}
+
 } // Vulkan
 } // Graphics
 } // lug

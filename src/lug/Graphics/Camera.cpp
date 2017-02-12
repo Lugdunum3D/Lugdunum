@@ -16,5 +16,10 @@ void Camera::update(const RenderView* renderView) {
     }
 }
 
+void Camera::needUpdateProj() {
+    _needUpdateProj = true;
+    _dirty = true;
+}
+
 } // Graphics
 } // lug

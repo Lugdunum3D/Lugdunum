@@ -55,6 +55,9 @@ public:
 
     virtual void needUpdate();
 
+    bool isDirty() const;
+    void isDirty(bool dirty);
+
 private:
     void update();
 
@@ -63,6 +66,9 @@ protected:
 
     std::string _name;
     std::vector<std::unique_ptr<Node>> _children;
+
+    // Flag to know if the node is dirty since the last frame
+    bool _dirty{true};
 
 private:
     Math::Vec3f _position{Math::Vec3f(0.0f)};

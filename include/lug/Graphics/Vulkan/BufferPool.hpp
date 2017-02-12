@@ -30,6 +30,8 @@ public:
         SubBuffer& operator=(const SubBuffer&) = default;
         SubBuffer& operator=(SubBuffer&& subBuffer) = default;
 
+        void free();
+
     public:
         DescriptorSet* descriptorSet;
         Buffer* buffer;
@@ -82,7 +84,7 @@ public:
 private:
     uint32_t _countPerChunk;
     uint32_t _subBufferSize;
-    std::vector<Chunk> _chunks;
+    std::vector<std::unique_ptr<Chunk> > _chunks;
 
     const Device* _device;
     std::vector<uint32_t> _queueFamilyIndices;

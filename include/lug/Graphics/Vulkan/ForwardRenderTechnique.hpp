@@ -31,7 +31,7 @@ private:
         // There is actually only 1 command buffer
         std::vector<CommandBuffer> cmdBuffers;
 
-        std::unordered_map<std::string, BufferPool::SubBuffer*> subBuffers;
+        std::vector<BufferPool::SubBuffer*> freeSubBuffers;
     };
 
 public:
@@ -62,7 +62,7 @@ private:
 
     std::vector<FrameData> _framesData;
 
-    uint32_t _lightsAlignement{0};
+    std::unordered_map<std::string, BufferPool::SubBuffer*> _subBuffers;
 };
 
 } // Vulkan

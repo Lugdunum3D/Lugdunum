@@ -36,11 +36,17 @@ public:
 
     virtual void needUpdate() = 0;
 
+    bool isDirty() const;
+    void isDirty(bool dirty);
+
 protected:
     SceneNode* _parent{nullptr};
     std::string _name;
     Type _type;
     bool _needUpdate{true};
+
+    // Flag to know if the node is dirty since the last frame
+    bool _dirty{true};
 };
 
 #include <lug/Graphics/MovableObject.inl>

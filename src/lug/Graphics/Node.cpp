@@ -80,6 +80,7 @@ void Node::scale(const Math::Vec3f& scale) {
 
 void Node::needUpdate() {
     _needUpdate = true;
+    _dirty = true;
 
     for (const auto& child : _children) {
         child->needUpdate();

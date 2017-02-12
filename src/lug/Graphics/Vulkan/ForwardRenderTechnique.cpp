@@ -44,6 +44,8 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         rotation = 0.0f;
     }
     Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({x, -10.0f, y}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
+    // TODO: remove this
+    _renderView->getCamera()->isDirty(true);
 
     // LUG_LOG.info("{}", viewMatrix);
 
@@ -52,6 +54,10 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
     frameData.fence.wait();
     frameData.fence.reset();
     auto& cmdBuffer = frameData.cmdBuffers[0];
+
+    for (auto subBuffer: frameData.freeSubBuffers) {
+        subBuffer->free();
+    }
 
     if (!cmdBuffer.reset() || !cmdBuffer.begin()) return false;
 
@@ -75,37 +81,56 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
     }
 
     // Update camera buffer data
-    BufferPool::SubBuffer* cameraBuffer = frameData.subBuffers[_renderView->getCamera()->getName()];
+    BufferPool::SubBuffer* cameraBuffer = _subBuffers[_renderView->getCamera()->getName()];
     {
-        if (!cameraBuffer) {
+        Camera* camera = _renderView->getCamera();
+        if (camera->isDirty()) {
+            if (cameraBuffer) {
+                frameData.freeSubBuffers.push_back(cameraBuffer);
+            }
+
+            Math::Mat4x4f cameraData[] = {
+                viewMatrix,
+                camera->getProjectionMatrix()
+            };
+
             cameraBuffer = _cameraPool->allocate();
-            frameData.subBuffers[_renderView->getCamera()->getName()] = cameraBuffer;
+            cameraBuffer->buffer->updateDataTransfer(&cmdBuffer, cameraData, sizeof(cameraData), cameraBuffer->offset);
+            camera->isDirty(false);
+            _subBuffers[camera->getName()] = cameraBuffer;
         }
 
-        Math::Mat4x4f cameraData[] = {
-            viewMatrix,
-            _renderView->getCamera()->getProjectionMatrix()
-        };
-
-        cameraBuffer->buffer->updateDataTransfer(&cmdBuffer, cameraData, sizeof(cameraData), cameraBuffer->offset);
+        if (!cameraBuffer) {
+            cameraBuffer = _cameraPool->allocate();
+            _subBuffers[camera->getName()] = cameraBuffer;
+        }
     }
 
     // Update lights buffers data
     {
         for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
             auto& light = renderQueue.getLights()[i];
-            uint32_t lightSize = 0;
-            void* lightData;
 
-            lightData = light->getData(lightSize);
-            BufferPool::SubBuffer* lightBuffer = frameData.subBuffers[light->getName()];
+            BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
+
+            if (light->isDirty()) {
+                uint32_t lightSize = 0;
+                void* lightData;
+
+                lightData = light->getData(lightSize);
+                if (lightBuffer) {
+                    frameData.freeSubBuffers.push_back(lightBuffer);
+                }
+
+                lightBuffer = _lightsPool->allocate();
+                lightBuffer->buffer->updateDataTransfer(&cmdBuffer, lightData, lightSize, lightBuffer->offset);
+                _subBuffers[light->getName()] = lightBuffer;
+            }
 
             if (!lightBuffer) {
                 lightBuffer = _lightsPool->allocate();
-                frameData.subBuffers[light->getName()] = lightBuffer;
+                _subBuffers[light->getName()] = lightBuffer;
             }
-
-            lightBuffer->buffer->updateDataTransfer(&cmdBuffer, lightData, lightSize, lightBuffer->offset);
         }
     }
 
@@ -150,7 +175,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
 
             lightPipeline->bind(&cmdBuffer);
 
-            BufferPool::SubBuffer* lightBuffer = frameData.subBuffers[light->getName()];
+            BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
             lightBuffer->descriptorSet->bind(_pipelines[Light::Type::DirectionalLight]->getLayout(), &cmdBuffer, 1, 1, &lightBuffer->offset);
 
             for (std::size_t j = 0; j < renderQueue.getObjectsNb(); ++j) {

@@ -33,6 +33,7 @@ public:
 
     bool render(const Semaphore& imageReadySemaphore, uint32_t currentImageIndex);
     void destroy() override final;
+    bool endFrame() override final;
 
     RenderTechnique* getRenderTechnique();
     const Semaphore& getDrawCompleteSemaphore(uint32_t currentImageIndex) const;

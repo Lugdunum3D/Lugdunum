@@ -611,6 +611,13 @@ bool Renderer::beginFrame() {
 
 bool Renderer::endFrame() {
     _window->render();
+
+    for (auto& renderView: _window->getRenderViews()) {
+        if (!renderView->endFrame()) {
+            return false;
+        }
+    }
+
     return _window->endFrame();
 }
 

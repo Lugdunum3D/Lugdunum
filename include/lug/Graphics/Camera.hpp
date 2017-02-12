@@ -118,6 +118,7 @@ public:
      * @param[in]  renderView  The render view
      */
     virtual void update(const RenderView* renderView);
+    void needUpdateProj();
 
 protected:
     Scene* _scene{nullptr};

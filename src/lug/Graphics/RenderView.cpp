@@ -33,6 +33,10 @@ void RenderView::update() {
             _renderTarget->getHeight() * _info.scissor.extent.height    // height
         }
     };
+
+    if (_camera) {
+        _camera->needUpdateProj();
+    }
 }
 
 void RenderView::init(RenderView::InitInfo& initInfo) {

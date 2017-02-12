@@ -17,3 +17,11 @@ inline const std::string& MovableObject::getName() const {
 inline MovableObject::Type MovableObject::getType() const {
     return _type;
 }
+
+inline bool MovableObject::isDirty() const {
+    return _dirty;
+}
+
+inline void MovableObject::isDirty(bool dirty) {
+    _dirty = dirty;
+}

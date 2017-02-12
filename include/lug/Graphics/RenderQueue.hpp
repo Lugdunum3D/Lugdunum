@@ -22,6 +22,7 @@ public:
 
     void addMovableObject(MovableObject* object);
     void clear();
+    void removeDirtyProperty();
 
     const std::vector<MovableObject*>& getObjects() const;
     std::size_t getObjectsNb() const;

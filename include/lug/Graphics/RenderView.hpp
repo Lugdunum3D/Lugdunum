@@ -80,6 +80,7 @@ public:
     void update();
 
     virtual void destroy() = 0;
+    virtual bool endFrame() = 0;
 
 protected:
     const RenderTarget* _renderTarget;
