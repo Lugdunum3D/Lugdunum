@@ -92,6 +92,11 @@ install(DIRECTORY include
 install(FILES README.md DESTINATION ${INSTALL_MISC_DIR})
 install(FILES cmake/modules/FindLUG.cmake DESTINATION ${INSTALL_MISC_DIR}/cmake/modules)
 
+# setup the install of resources (only shaders for the moment)
+install(DIRECTORY resources
+        DESTINATION ${INSTALL_MISC_DIR}
+)
+
 # unit test
 if(ENABLE_TEST)
     # Note: enable_testing() MUST be on the top level CMakeLists.txt
