@@ -161,7 +161,8 @@ private:
             {                                       // mandatoryModules
                 lug::Graphics::Module::Type::Core
             },
-            {}                                      // optionalModules
+            {},                                     // optionalModules
+            true                                    // use dedicaced GPU
         }
     };
 

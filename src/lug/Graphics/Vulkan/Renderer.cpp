@@ -293,6 +293,7 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::T
             checkRequirementsDevice(_physicalDeviceInfos[idx], initInfo.optionalModules, tmpLoadedModules, false);
 
             matchedDevicesIdx.push_back(idx);
+
         }
 
         if (matchedDevicesIdx.size() == 0) {
@@ -303,7 +304,8 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::T
         // TODO: Add score
         matchedDeviceIdx = matchedDevicesIdx[0];
         for (uint8_t idx : matchedDevicesIdx) {
-            if (_physicalDeviceInfos[idx].properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+            lug::System::Logger::logger.info("Device {} out of {} Mode: {}", idx + 1, _physicalDeviceInfos.size(), (int)_physicalDeviceInfos[idx].properties.deviceType);
+            if (_physicalDeviceInfos[idx].properties.deviceType == ((initInfo.useDiscreteGPU == true) ? (VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) : (VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU))) {
                 matchedDeviceIdx = idx;
                 break;
             }

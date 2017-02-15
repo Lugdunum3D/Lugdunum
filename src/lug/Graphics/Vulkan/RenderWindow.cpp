@@ -277,7 +277,11 @@ bool RenderWindow::initSwapchain() {
         // Check the preset mode
         if (std::find(info->swapChain.presentModes.begin(), info->swapChain.presentModes.end(), swapchainPresentMode) == info->swapChain.presentModes.end()) {
             LUG_LOG.error("RendererWindow: Missing VK_PRESENT_MODE_MAILBOX_KHR mode");
-            return false;
+            swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+            if (std::find(info->swapChain.presentModes.begin(), info->swapChain.presentModes.end(), swapchainPresentMode) == info->swapChain.presentModes.end()) {
+                LUG_LOG.error("RendererWindow: Missing VK_PRESENT_MODE_FIFO_KHR mode");
+                return false;
+            }
         }
 
         // Check the formats

@@ -17,6 +17,7 @@ public:
     struct InitInfo {
         std::set<Module::Type> mandatoryModules;
         std::set<Module::Type> optionalModules;
+        bool useDiscreteGPU;
     };
 
 public:
