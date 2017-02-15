@@ -108,7 +108,7 @@ void priv::WindowImpl::close() {
     ReleaseCapture();
 }
 
-Keyboard::Key vkToLugKey(WPARAM key) {
+static Keyboard::Key vkToLugKey(WPARAM key) {
     switch (key) {
     case VK_F1:             return Keyboard::Key::F1;           // The F1 key
     case VK_F2:             return Keyboard::Key::F2;           // The F2 key

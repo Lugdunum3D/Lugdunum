@@ -54,7 +54,7 @@ void priv::WindowImpl::close() {
     }
 }
 
-Keyboard::Key keysymToLugKey(KeySym key) {
+static Keyboard::Key keysymToLugKey(KeySym key) {
     switch (key) {
         case XK_F1:                 return Keyboard::Key::F1;               // The F1 key
         case XK_F2:                 return Keyboard::Key::F2;               // The F2 key
@@ -157,7 +157,7 @@ Keyboard::Key keysymToLugKey(KeySym key) {
         case XK_greater:            return Keyboard::Key::Greater;          // The > key
 
         // Note: the keys for the keypad below are in the numlock off state, i.e. 8 => KP_Up
-        // It would be nice to actually find a good solution to this problem.
+        // TODO: It would be nice to actually find a good solution to this problem.
         case XK_KP_Enter:           return Keyboard::Key::Return;           // The Return key (from the keypad)
         case XK_KP_Add:             return Keyboard::Key::Add;              // The + key
         case XK_KP_Subtract:        return Keyboard::Key::Subtract;         // The - key
@@ -273,4 +273,3 @@ void priv::WindowImpl::setWindowDecorations(Style style) {
 
 } // lug
 } // Window
-

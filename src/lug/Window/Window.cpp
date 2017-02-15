@@ -12,6 +12,12 @@
 
 #include <lug/Window/Android/WindowImplAndroid.hpp>
 
+#else
+
+// Theorically this should never happen since the Config.cmake will
+// warn the user before, but #error anyway
+#error "Unsupported operating system or environment"
+
 #endif
 
 namespace lug {
