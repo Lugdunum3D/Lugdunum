@@ -212,8 +212,7 @@ bool Window::pollEvent(Event& event) {
 
         if (event.type == EventType::KeyPressed) {
             _keyState[event.key.code] = true;
-        }
-        else if (event.type == EventType::KeyReleased) {
+        } else if (event.type == EventType::KeyReleased) {
             _keyState[event.key.code] = false;
         }
         return value;
@@ -235,4 +234,3 @@ bool Window::isKeyPressed(Keyboard::Key key) const {
 
 } // namespace Window
 } // namespace lug
-

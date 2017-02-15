@@ -9,8 +9,6 @@
     #include <lug/System/Logger/OstreamHandler.hpp>
 #endif
 
-#include <unordered_map>
-
 auto createKeyEnumMap() {
     std::unordered_map<lug::Window::Keyboard::Key, std::string> returnValue;
 
