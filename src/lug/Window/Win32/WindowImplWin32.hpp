@@ -20,6 +20,7 @@ public:
     bool create(const std::string& title, Style style);
     void close();
     bool pollEvent(lug::Window::Event&);
+    void enableKeyRepeat(bool enable);
 
 private:
     void processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam);
@@ -36,14 +37,15 @@ private:
     Window* _parent{nullptr};
     std::queue<lug::Window::Event> _events;
 
-    HWND _handle{nullptr};         ///< Win32 handle of the window
-    LONG_PTR _callback{0};         ///< Stores the original event callback function of the control
-    HCURSOR _cursor{nullptr};      ///< The system cursor to display into the window
-    HICON _icon{nullptr};          ///< Custom icon assigned to the window
-    bool _fullscreen{false};       ///< Is the window fullscreen?
+    HWND _handle{nullptr};         // Win32 handle of the window
+    LONG_PTR _callback{0};         // Stores the original event callback function of the control
+    HCURSOR _cursor{nullptr};      // The system cursor to display into the window
+    HICON _icon{nullptr};          // Custom icon assigned to the window
+    bool _fullscreen{false};       // Is the window fullscreen?
 
     static uint8_t windowCount;
     static lug::Window::priv::WindowImpl*  fullscreenWindow;
+    bool _keyRepeatEnabled;
 };
 
 } // namespace priv
