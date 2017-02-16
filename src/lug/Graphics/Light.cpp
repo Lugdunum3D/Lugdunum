@@ -7,6 +7,7 @@ Light::Light(const std::string& name, Type type): MovableObject(name, MovableObj
 
 void Light::needUpdate() {
     _needUpdate = true;
+    _dirty = true;
 }
 
 } // Graphics

@@ -16,6 +16,7 @@ void* DirectionalLight::getData(uint32_t& size) {
         _data.diffuse = _diffuse;
         _data.specular = _specular;
         _data.direction = _direction;
+        _needUpdate = false;
     }
 
     size = sizeof(DirectionalLight::LightData);

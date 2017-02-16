@@ -34,6 +34,7 @@ void* PointLight::getData(uint32_t& size) {
         _data.constant = _constant;
         _data.linear = _linear;
         _data.quadric = _quadric;
+        _needUpdate = false;
     }
 
     size = sizeof(PointLight::LightData);

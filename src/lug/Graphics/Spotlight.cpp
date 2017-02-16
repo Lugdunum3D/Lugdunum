@@ -34,6 +34,7 @@ void* Spotlight::getData(uint32_t& size) {
         _data.direction = _direction;
         _data.angle = _angle;
         _data.outerAngle = _outerAngle;
+        _needUpdate = false;
     }
 
     size = sizeof(Spotlight::LightData);
