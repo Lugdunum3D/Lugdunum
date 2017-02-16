@@ -47,11 +47,28 @@ bool ObjModelLoader::loadFromFile(Model* model, const std::string& file) {
                 0.0f, 0.0f, 1.0f
             };
 
-            mesh->vertices.push_back(vertex);
-            mesh->indices.push_back(indicesOffset);
+            uint32_t vertexIndice = 0;
+            // Search duplicate vertex
+            {
+                bool duplicate = false;
+                for (auto& meshVertex: mesh->vertices) {
+                    if (meshVertex == vertex) {
+                        duplicate = true;
+                        break;
+                    }
+                    vertexIndice++;
+                }
 
-            verticesOffset++;
+                // Add vertex
+                if (!duplicate) {
+                    mesh->vertices.push_back(vertex);
+                    verticesOffset++;
+                }
+            }
+
+            mesh->indices.push_back(vertexIndice);
             indicesOffset++;
+
         }
         model->addMesh(std::move(mesh));
     }

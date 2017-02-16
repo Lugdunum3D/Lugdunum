@@ -203,7 +203,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                     ModelInstance* modelInstance = meshInstance->getModelInstance();
                     Model* model = static_cast<Model*>(modelInstance->getModel());
                     const VkBuffer vertexBuffer = *model->getVertexBuffer();
-                    VkDeviceSize vertexBufferOffset = 0;
+                    VkDeviceSize vertexBufferOffset = modelMesh->verticesOffset * sizeof(lug::Graphics::Mesh::Vertex);
                     VkDeviceSize indexBufferOffset = modelMesh->indicesOffset * sizeof(uint32_t);
 
                     LUG_ASSERT(modelInstance->getParent() != nullptr, "A ModelInstance should have a parent");

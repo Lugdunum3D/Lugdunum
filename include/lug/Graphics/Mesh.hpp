@@ -21,6 +21,10 @@ public:
         Math::Vec3f color;
         Math::Vec3f normal;
         Math::Vec2f uv;
+
+        bool operator==(const Vertex& vertex) const {
+            return pos == vertex.pos && color == vertex.color && normal == vertex.normal && uv == vertex.uv;
+        }
     };
 
 public:

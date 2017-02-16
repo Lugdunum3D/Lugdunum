@@ -1,3 +1,4 @@
+#include <cstring>
 #include <lug/Graphics/Vulkan/Model.hpp>
 #include <lug/System/Logger.hpp>
 
@@ -57,13 +58,11 @@ bool Model::load() {
     // Upload vertex data
     {
         Mesh::Vertex* vertices = new Mesh::Vertex[verticesNb];
-        uint32_t i = 0;
+        uint32_t offset = 0;
 
         for (const auto& mesh: _meshs) {
-            // TODO: Do one memcpy
-            for (const auto& vertex: mesh->vertices) {
-                vertices[i++] = vertex;
-            }
+            std::memcpy(vertices + offset, mesh->vertices.data(), mesh->vertices.size() * sizeof(Mesh::Vertex));
+            offset += static_cast<uint32_t>(mesh->vertices.size());
         }
 
         _vertexBuffer->updateData(vertices, verticesNb * sizeof(Mesh::Vertex));
@@ -73,13 +72,11 @@ bool Model::load() {
     // Upload index data
     {
         uint32_t* indices = new uint32_t[indicesNb];
-        uint32_t i = 0;
+        uint32_t offset = 0;
 
         for (const auto& mesh: _meshs) {
-            // TODO: Do one memcpy
-            for (const auto& index: mesh->indices) {
-                indices[i++] = index;
-            }
+            std::memcpy(indices + offset, mesh->indices.data(), mesh->indices.size() * sizeof(uint32_t));
+            offset += static_cast<uint32_t>(mesh->indices.size());
         }
 
         _indexBuffer->updateData(indices, indicesNb * sizeof(uint32_t));
