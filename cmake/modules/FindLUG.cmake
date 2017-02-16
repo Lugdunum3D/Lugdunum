@@ -34,6 +34,7 @@
 # - LUG_LIBRARIES:    the list of all libraries corresponding to the required modules
 # - LUG_FOUND:        true if all the required modules are found
 # - LUG_INCLUDE_DIR:  the path where Lugdunum headers are located (the directory containing the lug/Config.hpp file)
+# - LUG_RESOURCES_DIR: the path where Lugdunum resources are located
 #
 # example:
 #   find_package(LUG COMPONENTS system window graphics REQUIRED)
@@ -58,10 +59,26 @@ set(FIND_LUG_PATHS
     /opt
 )
 
+# define the list of search paths for miscs
+set(FIND_LUG_MICS_PATHS
+    ${LUG_ROOT}
+    $ENV{LUG_ROOT}
+    $ENV{ANDROID_NDK}/sources/lugdunum
+    ${ANDROID_NDK}/sources/lugdunum
+    /usr/local/share/lug
+)
+
 # find the LUG include directory
 find_path(LUG_INCLUDE_DIR lug/Config.hpp
           PATH_SUFFIXES include
           PATHS ${FIND_LUG_PATHS}
+          CMAKE_FIND_ROOT_PATH_BOTH
+)
+
+# find the LUG resources directory
+find_path(LUG_RESOURCES_DIR shaders
+          PATH_SUFFIXES resources
+          PATHS ${FIND_LUG_MICS_PATHS}
           CMAKE_FIND_ROOT_PATH_BOTH
 )
 
@@ -201,6 +218,7 @@ endforeach()
 if (LUG_FOUND)
     message(STATUS "Found Lugdunum headers in ${LUG_INCLUDE_DIR}")
     message(STATUS "Found Lugdunum libraries in ${LUG_LIBRARIES}")
+    message(STATUS "Found Lugdunum resources in ${LUG_RESOURCES_DIR}")
 else()
     # include directory or library not found
     set(FIND_LUG_ERROR "Could NOT find Lugdunum (missing: ${FIND_LUG_MISSING})")

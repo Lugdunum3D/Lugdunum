@@ -1,4 +1,4 @@
-set(SHADERS_DIR "${LUG_ROOT}/resources/shaders")
+set(SHADERS_DIR "${LUG_RESOURCES_DIR}/shaders")
 
 # shaders compilation commands
 macro(compile_shader shader)
