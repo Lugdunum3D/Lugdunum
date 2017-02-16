@@ -52,6 +52,8 @@ bool Mesh::load() {
         _indexBuffer->updateData(indices.data(), (uint32_t)indices.size() * sizeof(uint32_t));
     }
 
+    _loaded = true;
+
     return true;
 }
 

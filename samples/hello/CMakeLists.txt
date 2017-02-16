@@ -68,3 +68,6 @@ else()
     compile_shaders(${EXECUTABLE_NAME} ${SHADERS})
     target_link_libraries(${EXECUTABLE_NAME} ${LUG_LIBRARIES})
 endif()
+
+# install models
+file(COPY ${LUG_RESOURCES_DIR}/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

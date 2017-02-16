@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Mesh.hpp>
+#include <lug/Graphics/Model.hpp>
 #include <lug/Graphics/Vulkan/Buffer.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/DeviceMemory.hpp>
@@ -12,17 +12,17 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-class LUG_GRAPHICS_API Mesh : public lug::Graphics::Mesh {
+class LUG_GRAPHICS_API Model : public lug::Graphics::Model {
 public:
-    explicit Mesh(const std::string& name, const std::vector<uint32_t>& queueFamilyIndices, const Device* device);
+    explicit Model(const std::string& name, const std::vector<uint32_t>& queueFamilyIndices, const Device* device);
 
-    Mesh(const Mesh&) = delete;
-    Mesh(Mesh&& mesh) = delete;
+    Model(const Model&) = delete;
+    Model(Model&& Model) = delete;
 
-    Mesh& operator=(const Mesh&) = delete;
-    Mesh& operator=(Mesh&& mesh) = delete;
+    Model& operator=(const Model&) = delete;
+    Model& operator=(Model&& Model) = delete;
 
-    ~Mesh() override final;
+    ~Model() override final;
 
     // TODO: Add reload() function
     bool load() override final;
@@ -31,7 +31,6 @@ public:
 
     const Buffer* getVertexBuffer() const;
     const Buffer* getIndexBuffer() const;
-
 
 private:
     std::unique_ptr<Buffer> _vertexBuffer;
@@ -46,7 +45,7 @@ private:
     const Device* _device{nullptr};
 };
 
-#include <lug/Graphics/Vulkan/Mesh.inl>
+#include <lug/Graphics/Vulkan/Model.inl>
 
 } // Vulkan
 } // Graphics

@@ -5,6 +5,7 @@
 #include <lug/Graphics/Spotlight.hpp>
 #include <lug/Graphics/PointLight.hpp>
 #include <lug/Graphics/MeshInstance.hpp>
+#include <lug/Graphics/ModelInstance.hpp>
 #include <lug/Graphics/Light.hpp>
 
 // TODO: Remove this when the ResourceManager is done
@@ -112,6 +113,14 @@ bool Application::init(int argc, char* argv[]) {
     _cube = _graphics.createMesh("Cube");
     _plane = _graphics.createMesh("Plane");
 
+    // Low Poly by Olexandr Zymohliad
+    // is licensed under CC Attribution
+    // https://skfb.ly/IXwu
+    _model = _graphics.createModel("model", "models/LowPoly/Low poly.obj");
+    if (!_model) {
+        return false;
+    }
+
 
 
     //1. pos
@@ -206,7 +215,7 @@ bool Application::init(int argc, char* argv[]) {
         return false;
     }
 
-    float cubeNbX = 5;
+/*    float cubeNbX = 5;
     float cubeNbY = 5;
     float centerX = cubeNbX * 3.0f / 2.0f;
     float centerY = cubeNbY * 3.0f / 2.0f;
@@ -232,11 +241,11 @@ bool Application::init(int argc, char* argv[]) {
 
         cubeNode->attachMovableObject(std::move(cubeInstance));
         _scene->getRoot()->attachChild(std::move(cubeNode));
-    }
+    }*/
 
 
     // Add plane to scene
-    {
+/*    {
         std::unique_ptr<lug::Graphics::MeshInstance> planeInstance = _scene->createMeshInstance("plane instance", _plane.get());
         std::unique_ptr<lug::Graphics::SceneNode> planeNode = _scene->createSceneNode("plane instance node");
 
@@ -244,6 +253,18 @@ bool Application::init(int argc, char* argv[]) {
 
         planeNode->attachMovableObject(std::move(planeInstance));
         _scene->getRoot()->attachChild(std::move(planeNode));
+    }
+*/
+    // Add model to scene
+    {
+        std::unique_ptr<lug::Graphics::ModelInstance> modelInstance = _scene->createModelInstance("model instance", _model.get());
+        std::unique_ptr<lug::Graphics::SceneNode> modelNode = _scene->createSceneNode("model instance node");
+
+        modelNode->rotate(lug::Math::Geometry::radians(180.0f), {1.0f, 0.0f, 0.0f});
+
+        modelNode->attachMovableObject(std::move(modelInstance));
+        _scene->getRoot()->attachChild(std::move(modelNode));
+
     }
 
     // Add directional light to scene
@@ -317,8 +338,8 @@ bool Application::init(int argc, char* argv[]) {
         renderViews[1]->attachCamera(std::move(camera2));
     }
 
-    _cubeNode->scale({0.5f, 0.5f, 0.5f});
-    _cubeNode->translate({0.0f, -2.0f, -centerY});
+/*    _cubeNode->scale({0.5f, 0.5f, 0.5f});
+    _cubeNode->translate({0.0f, -2.0f, -centerY});*/
 
     return true;
 }
@@ -330,5 +351,6 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(float elapsedTime) {
-    _cubeNode->rotate(0.5f * elapsedTime, {0.0f, 1.0f, 0.0f});
+    (void)elapsedTime;
+    //_cubeNode->rotate(0.5f * elapsedTime, {0.0f, 1.0f, 0.0f});
 }

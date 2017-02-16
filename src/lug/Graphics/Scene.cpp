@@ -17,6 +17,10 @@ std::unique_ptr<MeshInstance> Scene::createMeshInstance(const std::string& name,
     return std::make_unique<MeshInstance>(name, mesh);
 }
 
+std::unique_ptr<ModelInstance> Scene::createModelInstance(const std::string& name, Model* model) {
+    return std::make_unique<ModelInstance>(name, model);
+}
+
 std::unique_ptr<MovableCamera> Scene::createMovableCamera(const std::string& name, Camera* camera) {
     return std::make_unique<MovableCamera>(name, camera);
 }

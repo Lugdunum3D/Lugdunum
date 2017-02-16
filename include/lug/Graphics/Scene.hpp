@@ -3,6 +3,7 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Light.hpp>
 #include <lug/Graphics/MeshInstance.hpp>
+#include <lug/Graphics/ModelInstance.hpp>
 #include <lug/Graphics/MovableCamera.hpp>
 #include <lug/Graphics/SceneNode.hpp>
 
@@ -27,6 +28,7 @@ public:
 
     std::unique_ptr<SceneNode> createSceneNode(const std::string& name);
     std::unique_ptr<MeshInstance> createMeshInstance(const std::string& name, Mesh* mesh = nullptr);
+    std::unique_ptr<ModelInstance> createModelInstance(const std::string& name, Model* model = nullptr);
     std::unique_ptr<MovableCamera> createMovableCamera(const std::string& name, Camera* camera = nullptr);
     std::unique_ptr<Light> createLight(const std::string& name, Light::Type type);
 

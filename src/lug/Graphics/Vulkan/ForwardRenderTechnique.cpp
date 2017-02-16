@@ -3,12 +3,14 @@
 #include <lug/Config.hpp>
 #include <lug/Graphics/DirectionalLight.hpp>
 #include <lug/Graphics/MeshInstance.hpp>
+#include <lug/Graphics/ModelInstance.hpp>
 #include <lug/Graphics/PointLight.hpp>
 #include <lug/Graphics/RenderQueue.hpp>
 #include <lug/Graphics/SceneNode.hpp>
 #include <lug/Graphics/Spotlight.hpp>
 #include <lug/Graphics/Vulkan/ForwardRenderTechnique.hpp>
 #include <lug/Graphics/Vulkan/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Model.hpp>
 #include <lug/Graphics/Vulkan/RenderView.hpp>
 #include <lug/Math/Matrix.hpp>
 #include <lug/Math/Vector.hpp>
@@ -136,8 +138,6 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
 
     // Render objects
     {
-        VkDeviceSize vertexBufferOffset = 0;
-        VkDeviceSize indexBufferOffset = 0;
         // ALl the lights pipelines have the same renderPass
         RenderPass* renderPass = _pipelines[Light::Type::DirectionalLight]->getRenderPass();
 
@@ -178,23 +178,45 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
             BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
             lightBuffer->descriptorSet->bind(_pipelines[Light::Type::DirectionalLight]->getLayout(), &cmdBuffer, 1, 1, &lightBuffer->offset);
 
-            for (std::size_t j = 0; j < renderQueue.getObjectsNb(); ++j) {
-                auto& object = renderQueue.getObjects()[j];
-                if (object->getType() == MovableObject::Type::MESH) {
-                    const MeshInstance* meshInstance = static_cast<const MeshInstance*>(object);
-                    const Mesh* mesh = static_cast<const Mesh*>(meshInstance->getMesh());
-                    const VkBuffer vertexBuffer = *mesh->getVertexBuffer();
+            for (std::size_t j = 0; j < renderQueue.getMeshsNb(); ++j) {
+                MeshInstance* meshInstance = renderQueue.getMeshs()[j];
+                lug::Graphics::Mesh* mesh = static_cast<lug::Graphics::Mesh*>(meshInstance->getMesh());
 
-                    LUG_ASSERT(object->getParent() != nullptr, "A MovableObject should have a parent");
+                if (!mesh->isModelMesh()) {
+                    Mesh* vkMesh = static_cast<Mesh*>(mesh);
+                    VkBuffer vertexBuffer = *vkMesh->getVertexBuffer();
+                    VkDeviceSize vertexBufferOffset = 0;
+                    VkDeviceSize indexBufferOffset = 0;
+
+                    LUG_ASSERT(meshInstance->getParent() != nullptr, "A MeshInstance should have a parent");
                     Math::Mat4x4f pushConstants[] = {
-                        object->getParent()->getTransform()
+                        meshInstance->getParent()->getTransform()
                     };
                     vkCmdPushConstants(cmdBuffer, *lightPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
 
                     vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &vertexBufferOffset);
-                    vkCmdBindIndexBuffer(cmdBuffer, *mesh->getIndexBuffer(), indexBufferOffset, VK_INDEX_TYPE_UINT32);
-                    vkCmdDrawIndexed(cmdBuffer, (uint32_t)mesh->indices.size(), 1, 0, 0, 0);
+                    vkCmdBindIndexBuffer(cmdBuffer, *vkMesh->getIndexBuffer(), indexBufferOffset, VK_INDEX_TYPE_UINT32);
+                    vkCmdDrawIndexed(cmdBuffer, (uint32_t)vkMesh->indices.size(), 1, 0, 0, 0);
                 }
+                else {
+                    Model::Mesh* modelMesh = static_cast<Model::Mesh*>(mesh);
+                    ModelInstance* modelInstance = meshInstance->getModelInstance();
+                    Model* model = static_cast<Model*>(modelInstance->getModel());
+                    const VkBuffer vertexBuffer = *model->getVertexBuffer();
+                    VkDeviceSize vertexBufferOffset = 0;
+                    VkDeviceSize indexBufferOffset = modelMesh->indicesOffset * sizeof(uint32_t);
+
+                    LUG_ASSERT(modelInstance->getParent() != nullptr, "A ModelInstance should have a parent");
+                    Math::Mat4x4f pushConstants[] = {
+                        modelInstance->getParent()->getTransform()
+                    };
+                    vkCmdPushConstants(cmdBuffer, *lightPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
+
+                    vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &vertexBufferOffset);
+                    vkCmdBindIndexBuffer(cmdBuffer, *model->getIndexBuffer(), indexBufferOffset, VK_INDEX_TYPE_UINT32);
+                    vkCmdDrawIndexed(cmdBuffer, (uint32_t)modelMesh->indices.size(), 1, 0, 0, 0);
+                }
+
             }
         }
        renderPass->end(&cmdBuffer);

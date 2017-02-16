@@ -1,9 +1,11 @@
 #include <iterator>
 #include <sstream>
 #include <lug/Graphics/Graphics.hpp>
+#include <lug/Graphics/ModelLoader.hpp>
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Model.hpp>
 #include <lug/Graphics/Vulkan/Camera.hpp>
 #include <lug/System/Logger.hpp>
 
@@ -72,6 +74,35 @@ std::unique_ptr<Mesh> Graphics::createMesh(const std::string& name) {
     }
 
     return mesh;
+}
+
+std::unique_ptr<Model> Graphics::createModel(const std::string& name, const std::string& fileName) {
+    if (!_renderer) {
+        LUG_LOG.error("Graphics: Can't create a model, the renderer is not initialized");
+        return nullptr;
+    }
+
+    std::unique_ptr<Model> model = nullptr;
+
+    if (_rendererType == Renderer::Type::Vulkan) {
+        Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(_renderer.get());
+        std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(0, true)->getFamilyIdx() };
+        model = std::make_unique<Vulkan::Model>(name, queueFamilyIndices, &renderer->getDevice());
+    }
+    else {
+        LUG_LOG.error("Graphics: Unknown render type");
+        return nullptr;
+    }
+
+    if (fileName.size() != 0) {
+        if (!ModelLoader::loadFromFile(model.get(), fileName) ||
+            !model->load()) {
+            return nullptr;
+        }
+    }
+
+
+    return model;
 }
 
 std::unique_ptr<Camera> Graphics::createCamera(const std::string& name) {

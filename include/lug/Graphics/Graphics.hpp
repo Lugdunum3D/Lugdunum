@@ -3,12 +3,13 @@
 #include <algorithm>
 #include <memory>
 #include <set>
+#include <lug/Graphics/Camera.hpp>
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Mesh.hpp>
+#include <lug/Graphics/Model.hpp>
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Scene.hpp>
-#include <lug/Graphics/Mesh.hpp>
-#include <lug/Graphics/Camera.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -90,6 +91,16 @@ public:
      *             Returns @p nullptr if the mesh creation fails.
      */
     std::unique_ptr<Mesh> createMesh(const std::string& name);
+
+    /**
+     * @brief      Creates a model.
+     *
+     * @param[in]  name  The name of the model.
+     *
+     * @return     A pointer to the scene instance. The ownership is given to the caller. @n
+     *             Returns @p nullptr if the model creation fails.
+     */
+    std::unique_ptr<Model> createModel(const std::string& name, const std::string& fileName = "");
 
     /**
      * @brief      Creates a camera.

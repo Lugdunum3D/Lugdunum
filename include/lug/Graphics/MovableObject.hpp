@@ -11,9 +11,10 @@ class SceneNode;
 class LUG_GRAPHICS_API MovableObject {
 public:
     enum class Type: uint8_t {
-        MESH = 0,
-        CAMERA = 1,
-        LIGHT = 2
+        MODEL = 0,
+        MESH = 1,
+        CAMERA = 2,
+        LIGHT = 3
     };
 
 public:

@@ -9,10 +9,14 @@ set(SRC
     ${SRCROOT}/Light.cpp
     ${SRCROOT}/Mesh.cpp
     ${SRCROOT}/MeshInstance.cpp
+    ${SRCROOT}/ModelInstance.cpp
     ${SRCROOT}/Module.cpp
+    ${SRCROOT}/Model.cpp
+    ${SRCROOT}/ModelLoader.cpp
     ${SRCROOT}/MovableCamera.cpp
     ${SRCROOT}/MovableObject.cpp
     ${SRCROOT}/Node.cpp
+    ${SRCROOT}/ObjModelLoader.cpp
     ${SRCROOT}/PointLight.cpp
     ${SRCROOT}/RenderQueue.cpp
     ${SRCROOT}/RenderView.cpp
@@ -37,6 +41,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Instance.cpp
     ${SRCROOT}/Vulkan/Loader.cpp
     ${SRCROOT}/Vulkan/Mesh.cpp
+    ${SRCROOT}/Vulkan/Model.cpp
     ${SRCROOT}/Vulkan/Pipeline.cpp
     ${SRCROOT}/Vulkan/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/Queue.cpp
@@ -68,6 +73,10 @@ set(INC
     ${INCROOT}/Mesh.inl
     ${INCROOT}/MeshInstance.hpp
     ${INCROOT}/MeshInstance.inl
+    ${INCROOT}/Model.hpp
+    ${INCROOT}/ModelInstance.hpp
+    ${INCROOT}/ModelInstance.inl
+    ${INCROOT}/ModelLoader.hpp
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl
     ${INCROOT}/MovableCamera.hpp
@@ -75,6 +84,7 @@ set(INC
     ${INCROOT}/MovableObject.inl
     ${INCROOT}/Node.hpp
     ${INCROOT}/Node.inl
+    ${INCROOT}/ObjModelLoader.hpp
     ${INCROOT}/PointLight.hpp
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/RenderQueue.hpp

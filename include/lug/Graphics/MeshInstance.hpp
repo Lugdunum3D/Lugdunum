@@ -7,9 +7,11 @@
 namespace lug {
 namespace Graphics {
 
+class ModelInstance;
+
 class LUG_GRAPHICS_API MeshInstance final : public lug::Graphics::MovableObject {
 public:
-    MeshInstance(const std::string& name, Mesh* mesh);
+    MeshInstance(const std::string& name, Mesh* mesh, ModelInstance* modelInstance = nullptr);
 
     MeshInstance(const MeshInstance&) = delete;
     MeshInstance(MeshInstance&&) = delete;
@@ -22,9 +24,14 @@ public:
     void needUpdate() override final;
 
     const Mesh* getMesh() const;
+    Mesh* getMesh();
+
+    const ModelInstance* getModelInstance() const;
+    ModelInstance* getModelInstance();
 
 private:
     Mesh* _mesh{nullptr};
+    ModelInstance* _modelInstance;
     // Mesh::Material* _material{nullptr};
 };
 

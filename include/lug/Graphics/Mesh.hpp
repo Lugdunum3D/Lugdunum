@@ -39,6 +39,8 @@ public:
 
     virtual bool load() = 0;
 
+    virtual bool isModelMesh() const;
+
 public:
     std::vector<Vertex> vertices;
     std::vector<uint32_t> indices;

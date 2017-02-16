@@ -1,14 +1,14 @@
-inline const std::vector<MovableObject*>& RenderQueue::getObjects() const {
-    return _queue;
+inline const std::vector<MeshInstance*>& RenderQueue::getMeshs() const {
+    return _meshs;
 
 }
 
-inline std::size_t RenderQueue::getObjectsNb() const {
-    return _size;
+inline std::size_t RenderQueue::getMeshsNb() const {
+    return _meshsNb;
 }
 
 inline const std::vector<Light*>& RenderQueue::getLights() const {
-    return _lightsQueue;
+    return _lights;
 
 }
 
