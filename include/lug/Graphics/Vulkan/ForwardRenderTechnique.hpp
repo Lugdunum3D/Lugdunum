@@ -11,6 +11,7 @@
 #include <lug/Graphics/Vulkan/Image.hpp>
 #include <lug/Graphics/Vulkan/ImageView.hpp>
 #include <lug/Graphics/Vulkan/RenderTechnique.hpp>
+#include <lug/System/Clock.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -63,6 +64,10 @@ private:
     std::vector<FrameData> _framesData;
 
     std::unordered_map<std::string, BufferPool::SubBuffer*> _subBuffers;
+
+    // TODO: Remove this
+    System::Clock _clock;
+    float _rotation{0.0f};
 };
 
 } // Vulkan

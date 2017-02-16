@@ -23,27 +23,21 @@ namespace Vulkan {
 
 using MeshInstance = ::lug::Graphics::MeshInstance;
 
-float getElapsedTime(std::chrono::high_resolution_clock::time_point& start) {
-    auto stop = std::chrono::high_resolution_clock::now();
-    return (float)std::chrono::duration<double, std::milli>(stop - start).count();
-}
-
 ForwardRenderTechnique::ForwardRenderTechnique(const RenderView* renderView, const Device* device, Queue* presentQueue) :
                                                 RenderTechnique(renderView, device, presentQueue) {}
 
 bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaphore& imageReadySemaphore,
                                     const Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) {
-    static float rotation = 0.0f;
-    static auto start = std::chrono::high_resolution_clock::now();
-    //LUG_LOG.info("{}", getElapsedTime(start));
-    rotation += (.250f * getElapsedTime(start));
+    //LUG_LOG.info("{}", _clock.getElapsedTime().getSeconds());
+    _rotation += (0.05f * (float)_clock.getElapsedTime().getMilliseconds());
+    _clock.reset();
     FrameData& frameData = _framesData[currentImageIndex];
 
-    float x = 20.0f * cos(Math::Geometry::radians(rotation));
-    float y = 20.0f * sin(Math::Geometry::radians(rotation));
+    float x = 20.0f * cos(Math::Geometry::radians(_rotation));
+    float y = 20.0f * sin(Math::Geometry::radians(_rotation));
 
-    if (rotation > 360.0f) {
-        rotation = 0.0f;
+    if (_rotation > 360.0f) {
+        _rotation = 0.0f;
     }
     Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({x, -10.0f, y}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
     // TODO: remove this
@@ -221,8 +215,6 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         }
        renderPass->end(&cmdBuffer);
     }
-
-    start = std::chrono::high_resolution_clock::now();
 
     if (!cmdBuffer.end()) return false;
 

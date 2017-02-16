@@ -19,7 +19,7 @@ public:
     bool init(int argc, char* argv[]) override final;
 
     void onEvent(const lug::Window::Event& event) override final;
-    void onFrame(float elapsedTime) override final;
+    void onFrame(const lug::System::Time& elapsedTime) override final;
 
 private:
     std::unique_ptr<lug::Graphics::Scene> _scene;
