@@ -58,8 +58,12 @@ bool Mesh::load() {
 }
 
 void Mesh::destroy() {
-    _vertexBuffer->destroy();
-    _indexBuffer->destroy();
+    if (_vertexBuffer) {
+        _vertexBuffer->destroy();
+    }
+    if (_indexBuffer) {
+        _indexBuffer->destroy();
+    }
 }
 
 } // Vulkan

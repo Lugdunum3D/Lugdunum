@@ -89,8 +89,12 @@ bool Model::load() {
 }
 
 void Model::destroy() {
-    _vertexBuffer->destroy();
-    _indexBuffer->destroy();
+    if (_vertexBuffer) {
+        _vertexBuffer->destroy();
+    }
+    if (_indexBuffer) {
+        _indexBuffer->destroy();
+    }
 }
 
 } // Vulkan
