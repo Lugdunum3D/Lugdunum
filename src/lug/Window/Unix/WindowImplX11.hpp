@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lug/Window/Window.hpp> // I include Window.hpp before Xlib because Xlib is dumb
+#include <X11/XKBlib.h>
 #include <X11/Xlib.h>
 
 namespace lug {

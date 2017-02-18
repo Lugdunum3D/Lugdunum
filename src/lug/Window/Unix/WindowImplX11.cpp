@@ -16,7 +16,13 @@ bool priv::WindowImpl::create(const std::string& title, Style style) {
         return false;
     }
 
-    enableKeyRepeat(false);
+    enableKeyRepeat(true);
+
+    int xkb_minor_version = XkbMinorVersion;
+    int xkb_major_version = XkbMajorVersion;
+    if (XkbLibraryVersion(&xkb_minor_version, &xkb_major_version)) {
+        XkbSetAutoRepeatRate(_display, XkbUseCoreKbd, 1000, 100);
+    }
 
     int screen = DefaultScreen(_display);
     ::Window parent = RootWindow(_display, screen);
