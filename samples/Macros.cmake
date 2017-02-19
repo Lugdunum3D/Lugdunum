@@ -1,10 +1,10 @@
-set(SHADERS_DIR "${LUG_RESOURCES_DIR}/shaders")
+set(SHADERS_DIR "shaders")
 
 # shaders compilation commands
 macro(compile_shader shader)
     add_custom_command(OUTPUT ${shader}.spv
-                    COMMAND glslangValidator -V ${SHADERS_DIR}/${shader} -o ${shader}.spv
-                    DEPENDS ${SHADERS_DIR}/${shader}
+                    COMMAND glslangValidator -V ${LUG_RESOURCES_DIR}/${SHADERS_DIR}/${shader} -o ${shader}.spv
+                    DEPENDS ${LUG_RESOURCES_DIR}/${SHADERS_DIR}/${shader}
                     COMMENT "Compiling ${shader}")
     list(APPEND SHADERS_SPV ${shader}.spv)
 endmacro()

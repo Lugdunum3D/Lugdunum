@@ -29,6 +29,4 @@ private:
     std::unique_ptr<lug::Graphics::Mesh> _plane;
 
     std::unique_ptr<lug::Graphics::Model> _model;
-
-    lug::Graphics::SceneNode* _cubeNode;
 };
