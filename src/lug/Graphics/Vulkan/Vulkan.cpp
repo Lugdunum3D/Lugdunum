@@ -103,6 +103,8 @@ const char * enumToStr(VkResult enumVal) {
         return "The requested window is already connected to a VkSurfaceKHR, or to some other non-Vulkan API";
     case VK_ERROR_VALIDATION_FAILED_EXT:
         return "A validation layer found an error";
+    default:
+        return "ERROR: UNKNOWN VULKAN ERROR";
     }
 }
 
