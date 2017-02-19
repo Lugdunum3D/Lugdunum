@@ -54,6 +54,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
     for (auto subBuffer: frameData.freeSubBuffers) {
         subBuffer->free();
     }
+    frameData.freeSubBuffers.clear();
 
     if (!cmdBuffer.reset() || !cmdBuffer.begin()) return false;
 
