@@ -272,13 +272,13 @@ bool Application::init(int argc, char* argv[]) {
         std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::DirectionalLight);
         std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
 
-        light->setDiffuse({0.1f, 0.1f, 0.1f});
+        light->setDiffuse({1.0f, 1.0f, 1.0f});
         static_cast<lug::Graphics::DirectionalLight*>(light.get())->setDirection({0.0f, 4.0f, 5.0f});
 
         lightNode->attachMovableObject(std::move(light));
         _scene->getRoot()->attachChild(std::move(lightNode));
     }
-
+/*
     for (uint32_t i = 0; i < 30; ++i) {
         // Add point light to scene
         {
@@ -296,7 +296,7 @@ bool Application::init(int argc, char* argv[]) {
             lightNode->attachMovableObject(std::move(light));
             _scene->getRoot()->attachChild(std::move(lightNode));
         }
-    }
+    }*/
 
     // Add spotlight to scene
 /*    {
