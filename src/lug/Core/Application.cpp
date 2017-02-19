@@ -30,6 +30,9 @@ bool Application::run() {
     uint32_t frames = 0;
     System::Clock clock;
     while (!_closed && _window && _window->isOpen()) {
+        const auto elapsedTime = clock.getElapsedTime();
+        clock.reset();
+
         // Poll events
         {
             lug::Window::Event event;
@@ -39,17 +42,17 @@ bool Application::run() {
         }
 
         beginFrame();
-        onFrame(clock.getElapsedTime());
+        onFrame(elapsedTime);
         endFrame();
 
-        elapsed += clock.getElapsedTime().getSeconds();
+        elapsed += elapsedTime.getSeconds();
         frames++;
+
         if (elapsed >= 1.0f) {
-            LUG_LOG.info("FPS: {}", frames);
+            LUG_LOG.info("FPS: {}", frames / elapsed);
             frames = 0;
             elapsed = 0;
         }
-        clock.reset();
     }
 
     return true;
