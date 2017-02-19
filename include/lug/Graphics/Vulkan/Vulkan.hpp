@@ -170,9 +170,9 @@ struct PhysicalDeviceInfo {
     VkPhysicalDeviceProperties properties;
     VkPhysicalDeviceFeatures features;
 
-    std::vector<VkQueueFamilyProperties> queueFamilies;
-
     VkPhysicalDeviceMemoryProperties memoryProperties;
+
+    std::vector<VkQueueFamilyProperties> queueFamilies;
 
     std::vector<VkExtensionProperties> extensions;
 
@@ -189,7 +189,12 @@ struct PhysicalDeviceInfo {
     bool containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const;
 };
 
-LUG_GRAPHICS_API const char* resultToStr(VkResult result);
+LUG_GRAPHICS_API const char* enumToStr(VkResult enumVal);
+LUG_GRAPHICS_API const char* enumToStr(VkPhysicalDeviceType enumVal);
+LUG_GRAPHICS_API std::vector<const char*> enumToStr(VkMemoryPropertyFlags enumVal);
+LUG_GRAPHICS_API std::vector<const char*> enumToStr(VkQueueFlags enumVal);
+LUG_GRAPHICS_API const char* enumToStr(VkFormat enumVal);
+LUG_GRAPHICS_API std::vector<const char*> enumToStr(VkFormatFeatureFlags enumVal);
 
 } // Vulkan
 } // Graphics
@@ -200,6 +205,6 @@ LUG_GRAPHICS_API const char* resultToStr(VkResult result);
  */
 std::ostream& operator<<(std::ostream& ss, const VkResult& result);
 inline std::ostream& operator<<(std::ostream& ss, const VkResult& result) {
-    ss << ::lug::Graphics::Vulkan::resultToStr(result);
+    ss << ::lug::Graphics::Vulkan::enumToStr(result);
     return ss;
 }
