@@ -103,8 +103,6 @@ const char * enumToStr(VkResult enumVal) {
         return "The requested window is already connected to a VkSurfaceKHR, or to some other non-Vulkan API";
     case VK_ERROR_VALIDATION_FAILED_EXT:
         return "A validation layer found an error";
-    default:
-        return "ERROR: UNKNOWN VULKAN ERROR";
     }
 }
 
@@ -121,8 +119,6 @@ const char * enumToStr(VkPhysicalDeviceType enumVal) {
         return "VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU";
     case VK_PHYSICAL_DEVICE_TYPE_CPU:
         return "VK_PHYSICAL_DEVICE_TYPE_CPU";
-    default:
-        return "ERROR: UNKNOWN VULKAN PHYSICAL DEVICE TYPE";
     }
 }
 
@@ -346,7 +342,6 @@ const char* enumToStr(VkFormat enumVal) {
     case VK_FORMAT_PVRTC1_4BPP_SRGB_BLOCK_IMG: return  "VK_FORMAT_PVRTC1_4BPP_SRGB_BLOCK_IMG";
     case VK_FORMAT_PVRTC2_2BPP_SRGB_BLOCK_IMG: return  "VK_FORMAT_PVRTC2_2BPP_SRGB_BLOCK_IMG";
     case VK_FORMAT_PVRTC2_4BPP_SRGB_BLOCK_IMG: return  "VK_FORMAT_PVRTC2_4BPP_SRGB_BLOCK_IMG";
-    default: return "ERROR: UNKNOW FORMAT";
     }
 }
 
