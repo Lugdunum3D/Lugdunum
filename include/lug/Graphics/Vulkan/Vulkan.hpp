@@ -191,10 +191,10 @@ struct PhysicalDeviceInfo {
 
 LUG_GRAPHICS_API const char* enumToStr(VkResult enumVal);
 LUG_GRAPHICS_API const char* enumToStr(VkPhysicalDeviceType enumVal);
-LUG_GRAPHICS_API std::vector<const char*> enumToStr(VkMemoryPropertyFlags enumVal);
-LUG_GRAPHICS_API std::vector<const char*> enumToStr(VkQueueFlags enumVal);
+LUG_GRAPHICS_API std::vector<const char*> VkMemoryPropertyFlagsToStr(VkMemoryPropertyFlags enumVal);
+LUG_GRAPHICS_API std::vector<const char*> VkQueueFlagsToStr(VkQueueFlags enumVal);
 LUG_GRAPHICS_API const char* enumToStr(VkFormat enumVal);
-LUG_GRAPHICS_API std::vector<const char*> enumToStr(VkFormatFeatureFlags enumVal);
+LUG_GRAPHICS_API std::vector<const char*> VkFormatFeatureFlagsToStr(VkFormatFeatureFlags enumVal);
 
 } // Vulkan
 } // Graphics

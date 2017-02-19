@@ -111,20 +111,18 @@ const char * enumToStr(VkResult enumVal) {
 const char * enumToStr(VkPhysicalDeviceType enumVal) {
     switch(enumVal)
     {
-    case VK_PHYSICAL_DEVICE_TYPE_OTHER:
-        return "VK_PHYSICAL_DEVICE_TYPE_OTHER";
-    case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-        return "VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU";
-    case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-        return "VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU";
-    case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-        return "VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU";
-    case VK_PHYSICAL_DEVICE_TYPE_CPU:
-        return "VK_PHYSICAL_DEVICE_TYPE_CPU";
+    case VK_PHYSICAL_DEVICE_TYPE_OTHER: return          "VK_PHYSICAL_DEVICE_TYPE_OTHER";
+    case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: return "VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU";
+    case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: return   "VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU";
+    case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: return    "VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU";
+    case VK_PHYSICAL_DEVICE_TYPE_CPU: return            "VK_PHYSICAL_DEVICE_TYPE_CPU";
+    case VK_PHYSICAL_DEVICE_TYPE_RANGE_SIZE: return     "VK_PHYSICAL_DEVICE_TYPE_RANGE_SIZE";
+    case VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM: return       "VK_PHYSICAL_DEVICE_TYPE_MAX_ENUM";
+    default: return "ERROR: INVALID PHYSICAL DEVICE TYPE";
     }
 }
 
-std::vector<const char*> enumToStr(VkMemoryPropertyFlags enumVal) {
+std::vector<const char*> VkMemoryPropertyFlagsToStr(VkMemoryPropertyFlags enumVal) {
     std::vector<const char*> retVal;
 
     if (enumVal & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT"); }
@@ -137,7 +135,7 @@ std::vector<const char*> enumToStr(VkMemoryPropertyFlags enumVal) {
     return retVal;
 }
 
-std::vector<const char*> enumToStr(VkQueueFlags enumVal) {
+std::vector<const char*> VkQueueFlagsToStr(VkQueueFlags enumVal) {
     std::vector<const char*> retVal;
 
     if (enumVal & VK_QUEUE_GRAPHICS_BIT) { retVal.push_back("VK_QUEUE_GRAPHICS_BIT"); }
@@ -151,7 +149,7 @@ std::vector<const char*> enumToStr(VkQueueFlags enumVal) {
 const char* enumToStr(VkFormat enumVal) {
     switch (enumVal)
     {
-    case VK_FORMAT_UNDEFINED: return                    "VK_FORMAT_UNDEFINED";
+    case VK_FORMAT_UNDEFINED: return                   "VK_FORMAT_UNDEFINED";
     case VK_FORMAT_R4G4_UNORM_PACK8: return            "VK_FORMAT_R4G4_UNORM_PACK8";
     case VK_FORMAT_R4G4B4A4_UNORM_PACK16: return       "VK_FORMAT_R4G4B4A4_UNORM_PACK16";
     case VK_FORMAT_B4G4R4A4_UNORM_PACK16: return       "VK_FORMAT_B4G4R4A4_UNORM_PACK16";
@@ -344,10 +342,13 @@ const char* enumToStr(VkFormat enumVal) {
     case VK_FORMAT_PVRTC1_4BPP_SRGB_BLOCK_IMG: return  "VK_FORMAT_PVRTC1_4BPP_SRGB_BLOCK_IMG";
     case VK_FORMAT_PVRTC2_2BPP_SRGB_BLOCK_IMG: return  "VK_FORMAT_PVRTC2_2BPP_SRGB_BLOCK_IMG";
     case VK_FORMAT_PVRTC2_4BPP_SRGB_BLOCK_IMG: return  "VK_FORMAT_PVRTC2_4BPP_SRGB_BLOCK_IMG";
+    case VK_FORMAT_RANGE_SIZE: return                   "VK_FORMAT_RANGE_SIZE";
+    case VK_FORMAT_MAX_ENUM: return                     "VK_FORMAT_MAX_ENUM";
+    default: return "ERROR: INVALID FORMAT";
     }
 }
 
-std::vector<const char*> enumToStr(VkFormatFeatureFlags enumVal) {
+std::vector<const char*> VkFormatFeatureFlagsToStr(VkFormatFeatureFlags enumVal) {
     std::vector<const char*> retVal;
 
     if (enumVal & VK_IMAGE_USAGE_TRANSFER_SRC_BIT) { retVal.push_back("VK_IMAGE_USAGE_TRANSFER_SRC_BIT"); }
