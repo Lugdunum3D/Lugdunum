@@ -173,6 +173,8 @@ int main() {
 
     logger->info("Window was created successfully");
 
+    window->enableKeyRepeat(true);
+    
     // While window is open execute the following
     while (window->isOpen()) {
         lug::Window::Event event;
