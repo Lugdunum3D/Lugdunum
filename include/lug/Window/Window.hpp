@@ -98,6 +98,11 @@ public:
     void close();
 
     /**
+     * @brief      Close the window gracefully.
+     */
+    void enableKeyRepeat(bool enable);
+
+    /**
      * @brief      Determines if a key pressed.
      *
      * @param[in]  key   The key to check.

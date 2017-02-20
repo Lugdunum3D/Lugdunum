@@ -226,6 +226,12 @@ bool Window::pollEvent(Event& event) {
     return false;
 }
 
+void Window::enableKeyRepeat(bool enable) {
+    if (_impl != nullptr) {
+        _impl->enableKeyRepeat(enable);
+    }
+}
+
 void Window::close() {
     if (_impl != nullptr) {
         _impl->close();
