@@ -30,8 +30,7 @@ bool Application::run() {
     uint32_t frames = 0;
     System::Clock clock;
     while (!_closed && _window && _window->isOpen()) {
-        const auto elapsedTime = clock.getElapsedTime();
-        clock.reset();
+        const auto elapsedTime = clock.reset();
 
         // Poll events
         {
@@ -45,7 +44,7 @@ bool Application::run() {
         onFrame(elapsedTime);
         endFrame();
 
-        elapsed += elapsedTime.getSeconds();
+        elapsed += elapsedTime.getSeconds<float>();
         frames++;
 
         if (elapsed >= 1.0f) {

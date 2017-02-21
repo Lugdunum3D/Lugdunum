@@ -351,7 +351,7 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
-    _rotation += (0.5f * (float)elapsedTime.getMilliseconds());
+    _rotation += (0.05f * elapsedTime.getMilliseconds<float>());
 
     float x = 20.0f * cos(lug::Math::Geometry::radians(_rotation));
     float y = 20.0f * sin(lug::Math::Geometry::radians(_rotation));

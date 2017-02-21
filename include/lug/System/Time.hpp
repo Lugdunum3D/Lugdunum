@@ -15,8 +15,12 @@ public:
     Time(int64_t microseconds);
 
     int64_t getMicroseconds() const;
-    int32_t getMilliseconds() const;
-    float getSeconds() const;
+
+    template <typename T = float>
+    T getMilliseconds() const;
+
+    template <typename T = float>
+    T getSeconds() const;
 
     static Time getCurrentTime();
 
