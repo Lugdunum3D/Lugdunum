@@ -100,5 +100,27 @@ TEST(Quaternion, ToAxisAngle) {
     ASSERT_NEAR(10.0f, Geometry::degrees(angle), 0.01f);
 }
 
+TEST(Quaternion, DirectionTo) {
+    Vec3f a{1.0f, 0.0f, 0.0f};
+    Vec3f b{-1.0f, 0.0f, 0.0f};
+    Vec3f c{1.0f, 1.0f, 0.0f};
+
+    const auto rotAToB = directionTo(a, b);
+    a = rotAToB.transform() * a;
+
+    for (uint8_t row = 0; row < a.getRows(); ++row) {
+        ASSERT_NEAR(Math::normalize(a)(row), Math::normalize(b)(row), 0.01f)
+            << "row = " << static_cast<int>(row);
+    }
+
+    const auto rotBToC = directionTo(b, c);
+    b = rotBToC.transform() * b;
+
+    for (uint8_t row = 0; row < b.getRows(); ++row) {
+        ASSERT_NEAR(Math::normalize(b)(row), Math::normalize(c)(row), 0.01f)
+            << "row = " << static_cast<int>(row);
+    }
+}
+
 } // Math
 } // lug

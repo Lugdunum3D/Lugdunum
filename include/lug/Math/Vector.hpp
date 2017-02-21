@@ -62,6 +62,7 @@ public:
 #undef DEFINE_ACCESS
 
     constexpr T length() const;
+    constexpr T squaredLength() const;
     void normalize();
 };
 

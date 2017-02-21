@@ -41,6 +41,22 @@ inline void Camera::setNear(float nearDist) {
     needUpdateProj();
 }
 
+inline void Camera::setRenderView(RenderView* renderView) {
+    _renderView = renderView;
+}
+
 inline const Math::Mat4x4f& Camera::getProjectionMatrix() {
+    if (_needUpdateProj) {
+        updateProj();
+    }
+
     return _projMatrix;
+}
+
+inline const Math::Mat4x4f& Camera::getViewMatrix() {
+    if (_needUpdateView) {
+        updateView();
+    }
+
+    return _viewMatrix;
 }

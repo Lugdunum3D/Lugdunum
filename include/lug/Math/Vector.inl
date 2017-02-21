@@ -55,7 +55,12 @@ inline Vector<Rows, T> Vector<Rows, T>::operator/=(const Vector<Rows, T>& rhs) {
 
 template <uint8_t Rows, typename T>
 inline constexpr T Vector<Rows, T>::length() const {
-    return T(std::sqrt((BaseMatrix::_values * BaseMatrix::_values).sum()));
+    return T(std::sqrt(squaredLength()));
+}
+
+template <uint8_t Rows, typename T>
+inline constexpr T Vector<Rows, T>::squaredLength() const {
+    return T((BaseMatrix::_values * BaseMatrix::_values).sum());
 }
 
 template <uint8_t Rows, typename T>

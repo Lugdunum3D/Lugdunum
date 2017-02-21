@@ -16,11 +16,23 @@ inline const RenderView::Scissor& RenderView::getScissor() const {
 
 inline std::unique_ptr<Camera> RenderView::attachCamera(std::unique_ptr<Camera> camera) {
     std::unique_ptr<Camera> old = std::move(_camera);
+
     _camera = std::move(camera);
+    _camera->setRenderView(this);
+
+
+    if (old) {
+        old->setRenderView(nullptr);
+    }
+
     return old;
 }
 
 inline std::unique_ptr<Camera> RenderView::detachCamera() {
+    if (_camera) {
+        _camera->setRenderView(nullptr);
+    }
+
     return std::move(_camera);
 }
 

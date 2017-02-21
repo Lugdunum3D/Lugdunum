@@ -112,24 +112,45 @@ public:
     const Math::Mat4x4f& getProjectionMatrix();
 
     /**
+     * @brief      Gets the view matrix. Computes it if needed, but internally
+     *             the view matrix is cached.
+     *
+     * @return     The view matrix.
+     */
+    const Math::Mat4x4f& getViewMatrix();
+
+    /**
      * @brief      Update the render queue of the Camera by fetching
      *             the visible objects of the attached scene.
      *
      * @param[in]  renderView  The render view
      */
-    virtual void update(const RenderView* renderView);
+    virtual void update(const RenderView* renderView) = 0;
+
+    void setRenderView(RenderView* renderView);
+
+    void needUpdate() override final;
     void needUpdateProj();
+    void needUpdateView();
 
 protected:
     Scene* _scene{nullptr};
     RenderQueue _renderQueue;
-    float _fov;
-    Math::Mat4x4f _projMatrix{Math::Mat4x4f::identity()};
     RenderView* _renderView{nullptr};
 
+    float _fov{45.0f};
     float _near{0.1f};
     float _far{100.0f};
+
+private:
+    void updateProj();
+    void updateView();
+
+    Math::Mat4x4f _projMatrix{Math::Mat4x4f::identity()};
+    Math::Mat4x4f _viewMatrix{Math::Mat4x4f::identity()};
+
     bool _needUpdateProj{true};
+    bool _needUpdateView{true};
 };
 
 #include <lug/Graphics/Camera.inl>

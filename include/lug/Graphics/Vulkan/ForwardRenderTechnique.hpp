@@ -64,10 +64,6 @@ private:
     std::vector<FrameData> _framesData;
 
     std::unordered_map<std::string, BufferPool::SubBuffer*> _subBuffers;
-
-    // TODO: Remove this
-    System::Clock _clock;
-    float _rotation{0.0f};
 };
 
 } // Vulkan

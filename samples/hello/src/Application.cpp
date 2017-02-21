@@ -351,6 +351,19 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
-    (void)elapsedTime;
-    //_cubeNode->rotate(0.5f * elapsedTime, {0.0f, 1.0f, 0.0f});
+    _rotation += (0.5f * (float)elapsedTime.getMilliseconds());
+
+    float x = 20.0f * cos(lug::Math::Geometry::radians(_rotation));
+    float y = 20.0f * sin(lug::Math::Geometry::radians(_rotation));
+
+    if (_rotation > 360.0f) {
+        _rotation -= 360.0f;
+    }
+
+    auto& renderViews = _graphics.getRenderer()->getWindow()->getRenderViews();
+
+    for (int i = 0; i < 2; ++i) {
+        renderViews[i]->getCamera()->setPosition({x, -10.0f, y}, lug::Graphics::Node::TransformSpace::World);
+        renderViews[i]->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, lug::Graphics::Node::TransformSpace::World);
+    }
 }

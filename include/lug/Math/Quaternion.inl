@@ -7,6 +7,8 @@ Quaternion<T>::Quaternion(T data[4]) {
     _data[1] = data[1];
     _data[2] = data[2];
     _data[3] = data[3];
+
+    normalize();
 }
 
 template <typename T>
@@ -48,8 +50,13 @@ inline void Quaternion<T>::normalize() {
 }
 
 template <typename T>
-inline T Quaternion<T>::length() const {
-    return std::sqrt(_data[0] * _data[0] + _data[1] * _data[1] + _data[2] * _data[2] + _data[3] * _data[3]);
+inline constexpr T Quaternion<T>::length() const {
+    return std::sqrt(squaredLength());
+}
+
+template <typename T>
+inline constexpr T Quaternion<T>::squaredLength() const {
+    return _data[0] * _data[0] + _data[1] * _data[1] + _data[2] * _data[2] + _data[3] * _data[3];
 }
 
 template <typename T>
@@ -74,26 +81,26 @@ inline Mat4x4<T> Quaternion<T>::transform() const {
     const T xx = _data[1] * _data[1];
     const T xy = _data[1] * _data[2];
     const T xz = _data[1] * _data[3];
-    const T xw = _data[1] * _data[0];
+    const T wx = _data[0] * _data[1];
 
     const T yy = _data[2] * _data[2];
     const T yz = _data[2] * _data[3];
-    const T yw = _data[2] * _data[0];
+    const T wy = _data[0] * _data[2];
 
     const T zz = _data[3] * _data[3];
-    const T zw = _data[3] * _data[0];
+    const T wz = _data[0] * _data[3];
 
-    result(0, 0) = 1 - 2 * (yy + zz);
-    result(1, 0) = 2 * (xy - zw);
-    result(2, 0) = 2 * (xz + yw);
+    result(0, 0) = T(1) - T(2) * (yy + zz);
+    result(1, 0) = T(2) * (xy + wz);
+    result(2, 0) = T(2) * (xz - wy);
 
-    result(0, 1) = 2 * (xy + zw);
-    result(1, 1) = 1 - 2 * (xx + zz);
-    result(2, 1) = 2 * (yz - xw);
+    result(0, 1) = T(2) * (xy - wz);
+    result(1, 1) = T(1) - T(2) * (xx + zz);
+    result(2, 1) = T(2) * (yz + wx);
 
-    result(0, 2) = 2 * (xz - yw);
-    result(1, 2) = 2 * (yz + xw);
-    result(2, 2) = 1 - 2 * (xx + yy);
+    result(0, 2) = T(2) * (xz + wy);
+    result(1, 2) = T(2) * (yz - wx);
+    result(2, 2) = T(1) - T(2) * (xx + yy);
 
     return result;
 }
@@ -127,12 +134,54 @@ inline Quaternion<T> inverse(const Quaternion<T>& lhs) {
     result[2] /= -length * length;
     result[3] /= -length * length;
 
+    result.normalize();
+
     return result;
 }
 
 template <typename T>
 inline T dot(const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
     return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2] + lhs[3] * rhs[3];
+}
+
+template <typename T>
+Quaternion<T> directionTo(const Vector<3, T>& original, const Vector<3, T>& expected) {
+    Quaternion<T> result;
+
+    Vector<3, T> v0 = normalize(original);
+    Vector<3, T> v1 = normalize(expected);
+
+    T cosTheta = dot(v0, v1);
+
+    if (cosTheta >= T(1) - epsilon<T>()) {
+        // Same vectors
+        return Quaternion<T>::identity();
+    }
+
+    if (cosTheta < T(-1) + epsilon<T>()) {
+        // Generate a fallback vector
+        Vector<3, T> axis = cross(Vector<3, T>{0.0f, 0.0f, 1.0f}, v0);
+        if (axis.squaredLength() <= (1e-06 * 1e-06)) {
+            axis = cross(Vector<3, T>{1.0f, 0.0f, 0.0f}, v0);
+        }
+
+        axis.normalize();
+        result = Quaternion<T>(pi<T>(), axis);
+    } else {
+        T s = sqrt((T(1) + cosTheta) * T(2));
+        T invs = T(1) / s;
+
+        Vector<3, T> c = cross(v0, v1);
+
+        result.w() = s * 0.5f;
+        result.x() = c.x() * invs;
+        result.y() = c.y() * invs;
+        result.z() = c.z() * invs;
+
+        result.normalize();
+    }
+
+    return result;
 }
 
 template <typename T>
@@ -173,4 +222,10 @@ inline bool operator==(const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
 template <typename T>
 inline bool operator!=(const Quaternion<T>& lhs, const Quaternion<T>& rhs) {
     return lhs[0] != rhs[0] || lhs[1] != rhs[1] || lhs[2] != rhs[2] || lhs[3] != rhs[3];
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const Quaternion<T>& quaternion) {
+    os << "{w: " << quaternion.w() << ", x: " << quaternion.x() << ", y: " << quaternion.y() << ", z: " << quaternion.z() << "}";
+    return os;
 }

@@ -28,22 +28,7 @@ ForwardRenderTechnique::ForwardRenderTechnique(const RenderView* renderView, con
 
 bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaphore& imageReadySemaphore,
                                     const Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) {
-    //LUG_LOG.info("{}", _clock.getElapsedTime().getSeconds());
-    _rotation += (0.05f * (float)_clock.getElapsedTime().getMilliseconds());
-    _clock.reset();
     FrameData& frameData = _framesData[currentImageIndex];
-
-    float x = 20.0f * cos(Math::Geometry::radians(_rotation));
-    float y = 20.0f * sin(Math::Geometry::radians(_rotation));
-
-    if (_rotation > 360.0f) {
-        _rotation = 0.0f;
-    }
-    Math::Mat4x4f viewMatrix{Math::Geometry::lookAt<float>({x, -10.0f, y}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f})};
-    // TODO: remove this
-    _renderView->getCamera()->isDirty(true);
-
-    // LUG_LOG.info("{}", viewMatrix);
 
     auto& viewport = _renderView->getViewport();
 
@@ -81,25 +66,22 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
     BufferPool::SubBuffer* cameraBuffer = _subBuffers[_renderView->getCamera()->getName()];
     {
         Camera* camera = _renderView->getCamera();
-        if (camera->isDirty()) {
-            if (cameraBuffer) {
-                frameData.freeSubBuffers.push_back(cameraBuffer);
-            }
-
-            Math::Mat4x4f cameraData[] = {
-                viewMatrix,
-                camera->getProjectionMatrix()
-            };
-
-            cameraBuffer = _cameraPool->allocate();
-            cameraBuffer->buffer->updateDataTransfer(&cmdBuffer, cameraData, sizeof(cameraData), cameraBuffer->offset);
-            camera->isDirty(false);
-            _subBuffers[camera->getName()] = cameraBuffer;
+        if (camera->isDirty() && cameraBuffer) {
+            frameData.freeSubBuffers.push_back(cameraBuffer);
+            cameraBuffer = nullptr;
         }
 
         if (!cameraBuffer) {
             cameraBuffer = _cameraPool->allocate();
             _subBuffers[camera->getName()] = cameraBuffer;
+
+            Math::Mat4x4f cameraData[] = {
+                camera->getViewMatrix(),
+                camera->getProjectionMatrix()
+            };
+
+            cameraBuffer->buffer->updateDataTransfer(&cmdBuffer, cameraData, sizeof(cameraData), cameraBuffer->offset);
+            camera->isDirty(false);
         }
     }
 
@@ -110,23 +92,20 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
 
             BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
 
-            if (light->isDirty()) {
-                uint32_t lightSize = 0;
-                void* lightData;
-
-                lightData = light->getData(lightSize);
-                if (lightBuffer) {
-                    frameData.freeSubBuffers.push_back(lightBuffer);
-                }
-
-                lightBuffer = _lightsPool->allocate();
-                lightBuffer->buffer->updateDataTransfer(&cmdBuffer, lightData, lightSize, lightBuffer->offset);
-                _subBuffers[light->getName()] = lightBuffer;
+            if (light->isDirty() && lightBuffer) {
+                frameData.freeSubBuffers.push_back(lightBuffer);
+                lightBuffer = nullptr;
             }
 
             if (!lightBuffer) {
                 lightBuffer = _lightsPool->allocate();
                 _subBuffers[light->getName()] = lightBuffer;
+
+                uint32_t lightSize = 0;
+                void* lightData;
+
+                lightData = light->getData(lightSize);
+                lightBuffer->buffer->updateDataTransfer(&cmdBuffer, lightData, lightSize, lightBuffer->offset);
             }
         }
     }
