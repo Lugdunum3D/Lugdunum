@@ -131,14 +131,45 @@ inline Quaternion<T> Quaternion<T>::fromAxes(const Vector<3, T>& xAxis, const Ve
 
 template <typename T>
 inline Quaternion<T> Quaternion<T>::fromRotationMatrix(const Matrix<4, 4, T>& rotMatrix) {
-    const T w = sqrt(T(1) + rotMatrix(0, 0) + rotMatrix(1, 1) + rotMatrix(2, 2)) / T(2);
+    const T tr = rotMatrix(0, 0) + rotMatrix(1, 1) + rotMatrix(2, 2);
 
-    return Quaternion<T>(
-        w,
-        (rotMatrix(2, 1) - rotMatrix(1, 2)) / (T(4) * w),
-        (rotMatrix(0, 2) - rotMatrix(2, 0)) / (T(4) * w),
-        (rotMatrix(1, 0) - rotMatrix(0, 1)) / (T(4) * w)
-    );
+    if (tr > 0.0f) {
+        const T s = sqrt(T(1) + tr) * T(2);
+
+        return Quaternion<T>(
+            0.25f * s,
+            (rotMatrix(2, 1) - rotMatrix(1, 2)) / s,
+            (rotMatrix(0, 2) - rotMatrix(2, 0)) / s,
+            (rotMatrix(1, 0) - rotMatrix(0, 1)) / s
+        );
+    } else if ((rotMatrix(0, 0) > rotMatrix(1, 1)) && (rotMatrix(0, 0) > rotMatrix(2, 2))) {
+        const T s = sqrt(T(1) + rotMatrix(0, 0) - rotMatrix(1, 1) - rotMatrix(2, 2)) * T(2);
+
+        return Quaternion<T>(
+            (rotMatrix(2, 1) - rotMatrix(1, 2)) / s,
+            0.25 * s,
+            (rotMatrix(0, 1) + rotMatrix(1, 0)) / s,
+            (rotMatrix(0, 2) + rotMatrix(2, 0)) / s
+        );
+    } else if (rotMatrix(1, 1) > rotMatrix(2, 2)) {
+        const T s = sqrt(T(1) + rotMatrix(1, 1) - rotMatrix(0, 0) - rotMatrix(2, 2)) * T(2);
+
+        return Quaternion<T>(
+            (rotMatrix(0, 2) - rotMatrix(2, 0)) / s,
+            (rotMatrix(0, 1) + rotMatrix(1, 0)) / s,
+            0.25 * s,
+            (rotMatrix(1, 2) + rotMatrix(2, 1)) / s
+        );
+    } else {
+        const T s = sqrt(T(1) + rotMatrix(2, 2) - rotMatrix(0, 0) - rotMatrix(1, 1)) * T(2);
+
+        return Quaternion<T>(
+            (rotMatrix(1, 0) - rotMatrix(0, 1)) / s,
+            (rotMatrix(0, 2) + rotMatrix(2, 0)) / s,
+            (rotMatrix(1, 2) + rotMatrix(2, 1)) / s,
+            0.25 * s
+        );
+    }
 }
 
 template <typename T>
