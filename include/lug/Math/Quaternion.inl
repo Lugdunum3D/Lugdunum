@@ -111,6 +111,37 @@ inline Quaternion<T> Quaternion<T>::identity() {
 }
 
 template <typename T>
+inline Quaternion<T> Quaternion<T>::fromAxes(const Vector<3, T>& xAxis, const Vector<3, T>& yAxis, const Vector<3, T>& zAxis) {
+    Matrix<4, 4, T> rotMatrix = Matrix<4, 4, T>::identity();
+
+    rotMatrix(0, 0) = xAxis.x();
+    rotMatrix(1, 0) = xAxis.y();
+    rotMatrix(2, 0) = xAxis.z();
+
+    rotMatrix(0, 1) = yAxis.x();
+    rotMatrix(1, 1) = yAxis.y();
+    rotMatrix(2, 1) = yAxis.z();
+
+    rotMatrix(0, 2) = zAxis.x();
+    rotMatrix(1, 2) = zAxis.y();
+    rotMatrix(2, 2) = zAxis.z();
+
+    return fromRotationMatrix(rotMatrix);
+}
+
+template <typename T>
+inline Quaternion<T> Quaternion<T>::fromRotationMatrix(const Matrix<4, 4, T>& rotMatrix) {
+    const T w = sqrt(T(1) + rotMatrix(0, 0) + rotMatrix(1, 1) + rotMatrix(2, 2)) / T(2);
+
+    return Quaternion<T>(
+        w,
+        (rotMatrix(2, 1) - rotMatrix(1, 2)) / (T(4) * w),
+        (rotMatrix(0, 2) - rotMatrix(2, 0)) / (T(4) * w),
+        (rotMatrix(1, 0) - rotMatrix(0, 1)) / (T(4) * w)
+    );
+}
+
+template <typename T>
 inline Quaternion<T> conjugate(const Quaternion<T>& lhs) {
     return {lhs.w(), -lhs.x(), -lhs.y(), -lhs.z()};
 }

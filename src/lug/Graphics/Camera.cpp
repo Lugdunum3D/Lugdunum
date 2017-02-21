@@ -22,6 +22,10 @@ void Camera::needUpdateView() {
     _dirty = true;
 }
 
+void Camera::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& up, Node::TransformSpace space) {
+    Node::lookAt(targetPosition, {0.0f, 0.0f, -1.0f}, up, space);
+}
+
 void Camera::updateProj() {
     if (!_renderView) {
         return;

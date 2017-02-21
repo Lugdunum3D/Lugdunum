@@ -133,6 +133,8 @@ public:
     void needUpdateProj();
     void needUpdateView();
 
+    void lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& up, Node::TransformSpace space = TransformSpace::Local);
+
 protected:
     Scene* _scene{nullptr};
     RenderQueue _renderQueue;

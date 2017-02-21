@@ -64,6 +64,9 @@ public:
 
     static Quaternion<T> identity();
 
+    static Quaternion<T> fromAxes(const Vector<3, T>& xAxis, const Vector<3, T>& yAxis, const Vector<3, T>& zAxis);
+    static Quaternion<T> fromRotationMatrix(const Matrix<4, 4, T>& rotMatrix);
+
 private:
     T _data[4];
 };

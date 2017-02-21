@@ -364,6 +364,6 @@ void Application::onFrame(const lug::System::Time& elapsedTime) {
 
     for (int i = 0; i < 2; ++i) {
         renderViews[i]->getCamera()->setPosition({x, -10.0f, y}, lug::Graphics::Node::TransformSpace::World);
-        renderViews[i]->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, lug::Graphics::Node::TransformSpace::World);
+        renderViews[i]->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
     }
 }

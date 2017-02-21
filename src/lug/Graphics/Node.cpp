@@ -113,7 +113,7 @@ void Node::setRotation(const Math::Quatf& rotation, TransformSpace space) {
     needUpdate();
 }
 
-void Node::setDirection(const Math::Vec3f& direction, const Math::Vec3f& localDirectionVector, TransformSpace space) {
+void Node::setDirection(const Math::Vec3f& direction, const Math::Vec3f& localDirectionVector, const Math::Vec3f& up, TransformSpace space) {
     if (direction.length() == 0.0f) return;
 
     // The direction we want the local direction point to
@@ -130,20 +130,21 @@ void Node::setDirection(const Math::Vec3f& direction, const Math::Vec3f& localDi
         // Nothing to do here
     }
 
-    // Calculate target orientation relative to world space
+    Math::Vec3f xVec = Math::normalize(cross(up, targetDirection));
+    Math::Vec3f yVec = Math::normalize(cross(targetDirection, xVec));
+    Math::Quatf unitZToTarget = Math::Quatf::fromAxes(xVec, yVec, targetDirection);
+
     Math::Quatf targetOrientation;
-    const Math::Quatf& currentOrientation = getAbsoluteRotation();
-
-    // Get current local direction relative to world space
-    Math::Vec3f currentDirection = currentOrientation.transform() * localDirectionVector;
-
-    // Get rotation between currentDir et targetDir
-    targetOrientation = directionTo(currentDirection, targetDirection) * currentOrientation;
+    if (localDirectionVector == Math::Vec3f{0.0f, 0.0f, -1.0f}) {
+        targetOrientation = Math::Quatf(-unitZToTarget.y(), -unitZToTarget.z(), unitZToTarget.w(), unitZToTarget.x());
+    } else {
+        targetOrientation = unitZToTarget * directionTo(localDirectionVector, Math::Vec3f{0.0f, 0.0f, 1.0f});
+    }
 
     setRotation(targetOrientation, TransformSpace::Parent);
 }
 
-void Node::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDirectionVector, TransformSpace space) {
+void Node::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDirectionVector, const Math::Vec3f& up, TransformSpace space) {
     Math::Vec3f origin;
 
     if (space == TransformSpace::Local) {
@@ -154,7 +155,7 @@ void Node::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDir
         origin = getAbsolutePosition();
     }
 
-    setDirection(targetPosition - origin, localDirectionVector, space);
+    setDirection(targetPosition - origin, localDirectionVector, up, space);
 }
 
 void Node::needUpdate() {
