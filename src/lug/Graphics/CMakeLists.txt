@@ -146,6 +146,8 @@ if (NOT CI_BUILD)
     include_directories(${VULKAN_INCLUDE_DIR})
 endif()
 
+include_directories(${PROJECT_SOURCE_DIR}/thirdparty/tinyobjloader)
+
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}

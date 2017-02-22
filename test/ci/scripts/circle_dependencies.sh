@@ -27,7 +27,7 @@ sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
 # Build gmock
 
 if [[ ! -d "$HOME/.local/gmock" ]]; then
-    cd "$HOME/Lugdunum/lib/googletest/googlemock"
+    cd "$HOME/Lugdunum/thirdparty/googletest/googlemock"
     mkdir build
     cd build
     cmake ..

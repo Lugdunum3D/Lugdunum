@@ -1,6 +1,6 @@
-[submodule "lib/googletest"]
-	path = lib/googletest
+[submodule "thirdparty/googletest"]
+	path = thirdparty/googletest
 	url = https://github.com/google/googletest.git
-[submodule "lib/fmt"]
-	path = lib/fmt
-	url = git@github.com:fmtlib/fmt.git
+[submodule "thirdparty/tinyobjloader"]
+	path = thirdparty/tinyobjloader
+	url = https://github.com/syoyo/tinyobjloader.git

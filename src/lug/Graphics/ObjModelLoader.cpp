@@ -1,5 +1,5 @@
 #define TINYOBJLOADER_IMPLEMENTATION
-#include <lug/Ext/tinyobjloader/tiny_obj_loader.h>
+#include <tiny_obj_loader.h>
 
 #include <lug/Graphics/ObjModelLoader.hpp>
 #include <lug/System/Logger.hpp>

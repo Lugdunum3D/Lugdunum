@@ -3,8 +3,8 @@
 GTEST_ROOT="$HOME/.local/gmock"
 GMOCK_ROOT="$HOME/.local/gmock"
 
-GTEST_INCLUDE_DIR=../lib/googletest/googletest/include
-GMOCK_INCLUDE_DIR=../lib/googletest/googlemock/include
+GTEST_INCLUDE_DIR=../thirdparty/googletest/googletest/include
+GMOCK_INCLUDE_DIR=../thirdparty/googletest/googlemock/include
 
 case $CIRCLE_NODE_INDEX in
   0)  export CXX=clang++

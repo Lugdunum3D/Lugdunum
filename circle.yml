@@ -11,9 +11,9 @@ dependencies:
     - "~/.local"
 
   pre:
-    - ./lib/ci_scripts/circle_dependencies.sh
+    - ./test/ci/scripts/circle_dependencies.sh
 
 test:
   override:
-    - ./lib/ci_scripts/circle.sh:
+    - ./test/ci/scripts/circle.sh:
         parallel: true

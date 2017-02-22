@@ -36,7 +36,7 @@ endif()
 string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
 
 if(CI_BUILD)
-    include_directories(${PROJECT_SOURCE_DIR}/lib/ci_include)
+    include_directories(${PROJECT_SOURCE_DIR}/test/ci/include)
 endif()
 
 # Add parallel build for MSVC
