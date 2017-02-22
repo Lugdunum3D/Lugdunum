@@ -24,7 +24,7 @@ public:
     }
 
     template <typename Function>
-    Function getProcAddr(const char* name);
+    Function getProcAddr(const char* name) const;
 
     void destroy();
 

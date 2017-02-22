@@ -98,7 +98,7 @@ private:
     std::vector<const char*> checkRequirementsExtensions(const Info& info, const std::vector<const char*>& extensions, std::vector<const char*>& extensionsFound);
 
 private:
-    Loader _loader; // Need to be at the beginning, we don't want to unload Vulkan functions too early
+    Loader _loader;
 
     Instance _instance{};
     Device _device{};

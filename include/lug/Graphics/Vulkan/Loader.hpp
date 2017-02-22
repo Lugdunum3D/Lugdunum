@@ -8,9 +8,12 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
+class Instance;
+class Device;
+
 class LUG_GRAPHICS_API Loader {
 public:
-    Loader();
+    Loader() = default;
 
     Loader(const Loader&) = delete;
     Loader(Loader&&) = delete;
@@ -18,10 +21,13 @@ public:
     Loader& operator=(const Loader&) = delete;
     Loader& operator=(Loader&&) = delete;
 
-    ~Loader();
+    ~Loader() = default;
 
-    void loadInstanceFunctions(VkInstance instance);
-    void loadDeviceFunctions(VkDevice device);
+    bool loadCoreFunctions();
+    bool loadInstanceFunctions(const Instance& instance);
+    bool loadDeviceFunctions(const Device& device);
+
+    void unload();
 
 private:
     System::Library::Handle _handle{nullptr};

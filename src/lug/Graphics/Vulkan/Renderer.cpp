@@ -71,11 +71,15 @@ void Renderer::destroy() {
     {
         if (isInstanceExtensionLoaded(VK_EXT_DEBUG_REPORT_EXTENSION_NAME)) {
             auto vkDestroyDebugReportCallbackEXT = _instance.getProcAddr<PFN_vkDestroyDebugReportCallbackEXT>("vkDestroyDebugReportCallbackEXT");
-            vkDestroyDebugReportCallbackEXT(_instance, _debugReportCallback, nullptr);
+
+            if (vkDestroyDebugReportCallbackEXT) {
+                vkDestroyDebugReportCallbackEXT(_instance, _debugReportCallback, nullptr);
+            }
         }
     }
 
     _instance.destroy();
+    _loader.unload();
 }
 
 std::set<Module::Type> Renderer::init(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) {
@@ -108,6 +112,14 @@ std::set<Module::Type> Renderer::init(const char* appName, uint32_t appVersion, 
  */
 bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo, std::set<Module::Type>& loadedModules) {
     VkResult result;
+
+    // Load vulkan core functions
+    {
+        if (!_loader.loadCoreFunctions()) {
+            LUG_LOG.error("RendererVulkan: Can't load core vulkan functions");
+            return false;
+        }
+    }
 
     // Load instance properties
     {
@@ -186,7 +198,6 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
         }
 
         _instance = Instance(instance);
-        _loader.loadInstanceFunctions(_instance);
     }
 
     // Create report callback if necessary
@@ -198,7 +209,20 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
             createInfo.pfnCallback = debugReportCallback;
 
             auto vkCreateDebugReportCallbackEXT = _instance.getProcAddr<PFN_vkCreateDebugReportCallbackEXT>("vkCreateDebugReportCallbackEXT");
-            vkCreateDebugReportCallbackEXT(_instance, &createInfo, nullptr, &_debugReportCallback);
+
+            if (vkCreateDebugReportCallbackEXT) {
+                vkCreateDebugReportCallbackEXT(_instance, &createInfo, nullptr, &_debugReportCallback);
+            } else {
+                LUG_LOG.warn("RendererVulkan: Can't load function vkCreateDebugReportCallbackEXT");
+            }
+        }
+    }
+
+    // Load vulkan instance functions
+    {
+        if (!_loader.loadInstanceFunctions(_instance)) {
+            LUG_LOG.error("RendererVulkan: Can't load instance vulkan functions");
+            return false;
         }
     }
 
@@ -359,7 +383,14 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::T
         }
 
         _device = Device(device, _physicalDeviceInfo);
-        _loader.loadDeviceFunctions(_device);
+    }
+
+    // Load vulkan device functions
+    {
+        if (!_loader.loadDeviceFunctions(_device)) {
+            LUG_LOG.error("RendererVulkan: Can't load device vulkan functions");
+            return false;
+        }
     }
 
     // Create queues
