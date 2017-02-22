@@ -33,7 +33,9 @@ if(ANDROID)
         message(STATUS "target android-23, forcing static lib")
         set(BUILD_SHARED_LIBS false)
     endif()
+
     lug_set_option(ANDROID_STL c++_shared STRING "Choose which Android STL to use (default : c++_shared)")
+
     if(NOT ANDROID_STL STREQUAL c++_static AND NOT ANDROID_STL STREQUAL c++_shared)
         message(FATAL_ERROR "Invalid STL : ${ANDROID_STL}")
     endif()
@@ -59,6 +61,9 @@ set(VERSION_MINOR 1)
 set(VERSION_PATCH 0)
 mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
+# use cmake modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+
 # include the configuration file
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake)
 
@@ -66,9 +71,9 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 lug_set_option(BUILD_SHARED_LIBS TRUE BOOL "TRUE to build Lugdunum as shared libraries, FALSE to build it as static libraries")
-lug_set_option(ENABLE_TEST FALSE BOOL "TRUE to enable unit tests, FALSE to disable unit tests")
-lug_set_option(ENABLE_CI FALSE BOOL "TRUE to enable CI platform includes")
+lug_set_option(BUILD_TESTS FALSE BOOL "TRUE to enable unit tests, FALSE to disable unit tests")
 lug_set_option(BUILD_DOCUMENTATION FALSE BOOL "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
+lug_set_option(ENABLE_CI FALSE BOOL "TRUE to enable CI platform includes")
 
 if(NOT BUILD_SHARED_LIBS)
     add_definitions(-DLUG_STATIC)
@@ -98,14 +103,9 @@ install(DIRECTORY resources
 )
 
 # unit test
-if(ENABLE_TEST)
+if(BUILD_TESTS)
     # Note: enable_testing() MUST be on the top level CMakeLists.txt
     enable_testing()
-
-    add_definitions(-DGTEST_CREATE_SHARED_LIBRARY=1)
-
-    set(BUILD_GMOCK ON)
-    add_subdirectory(lib/googletest)
 
     add_subdirectory(test/)
 endif()

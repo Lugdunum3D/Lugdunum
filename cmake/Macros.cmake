@@ -83,7 +83,7 @@ macro(lug_add_test name)
         target_link_libraries(${target} ${THIS_EXTERNAL_LIBS})
     endif()
 
-    target_link_libraries(${target} gmock ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(${target} ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
     add_test(NAME ${name}UnitTests COMMAND ${target} --gtest_output=xml:${TEST_OUTPUT}/${name}UnitTests.xml)
 
