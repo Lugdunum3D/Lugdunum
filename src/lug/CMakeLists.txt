@@ -35,7 +35,7 @@ endif()
 
 string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
 
-if(ENABLE_CI)
+if(CI_BUILD)
     include_directories(${PROJECT_SOURCE_DIR}/lib/ci_include)
 endif()
 

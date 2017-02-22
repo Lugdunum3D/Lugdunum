@@ -141,7 +141,7 @@ set(INC
 )
 source_group("inc" FILES ${INC})
 
-if (NOT ENABLE_CI)
+if (NOT CI_BUILD)
     find_package(Vulkan)
     include_directories(${VULKAN_INCLUDE_DIR})
 endif()

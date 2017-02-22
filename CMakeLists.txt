@@ -73,7 +73,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 lug_set_option(BUILD_SHARED_LIBS TRUE BOOL "TRUE to build Lugdunum as shared libraries, FALSE to build it as static libraries")
 lug_set_option(BUILD_TESTS FALSE BOOL "TRUE to enable unit tests, FALSE to disable unit tests")
 lug_set_option(BUILD_DOCUMENTATION FALSE BOOL "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
-lug_set_option(ENABLE_CI FALSE BOOL "TRUE to enable CI platform includes")
+lug_set_option(CI_BUILD FALSE BOOL "TRUE to enable CI platform includes")
 
 if(NOT BUILD_SHARED_LIBS)
     add_definitions(-DLUG_STATIC)
@@ -106,12 +106,6 @@ install(DIRECTORY resources
 if(BUILD_TESTS)
     # Note: enable_testing() MUST be on the top level CMakeLists.txt
     enable_testing()
-
-    if (ENABLE_CI)
-        set(GTEST_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/googletest/googletest/include)
-        set(GMOCK_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/googletest/googlemock/include)
-    endif()
-
     add_subdirectory(test/)
 endif()
 
