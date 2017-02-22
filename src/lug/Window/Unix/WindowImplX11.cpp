@@ -1,8 +1,8 @@
-#include <lug/System/Logger.hpp>
-#include <lug/Window/Unix/WindowImplX11.hpp>
 #include <cstring>
 #include <string>
 #include <queue>
+#include <lug/System/Logger.hpp>
+#include <lug/Window/Unix/WindowImplX11.hpp>
 #include <lug/Window/Unix/WmHints.hpp>
 
 namespace lug {
@@ -242,7 +242,7 @@ bool priv::WindowImpl::pollEvent(Event& event) {
     return true;
 }
 
-void priv::WindowImpl::enableKeyRepeat(bool enable) {
+void priv::WindowImpl::setKeyRepeat(bool enable) {
     if (enable) {
         XAutoRepeatOn(_display);
     }

@@ -7,7 +7,7 @@ namespace Window {
 uint8_t priv::WindowImpl::windowCount = 0;
 priv::WindowImpl* priv::WindowImpl::fullscreenWindow = nullptr;
 
-priv::WindowImpl::WindowImpl(Window* win) : _parent{win}, _keyRepeatEnabled(false) {}
+priv::WindowImpl::WindowImpl(Window* win) : _parent{win}, _keyRepeat(false) {}
 
 priv::WindowImpl::~WindowImpl() {
     // Destroy the custom icon, if any
@@ -245,9 +245,8 @@ bool priv::WindowImpl::pollEvent(Event& event) {
     return false;
 }
 
-void priv::WindowImpl::enableKeyRepeat(bool enable)
-{
-    _keyRepeatEnabled = enable;
+void priv::WindowImpl::setKeyRepeat(bool enable) {
+    _keyRepeat = enable;
 }
 
 void priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam) {
@@ -264,7 +263,7 @@ void priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM l
 
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
-        if (_keyRepeatEnabled || ((HIWORD(lParam) & KF_REPEAT) == 0)) {
+        if (_keyRepeat || ((HIWORD(lParam) & KF_REPEAT) == 0)) {
             e.type = EventType::KeyPressed;
             configKeyEvent(e.key, wParam, lParam);
         } else {
@@ -280,7 +279,7 @@ void priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM l
 
     case WM_CHAR:
  //   case WM_SYSCHAR:
-        if (_keyRepeatEnabled || ((lParam & (1 << 30)) == 0)) {
+        if (_keyRepeat || ((lParam & (1 << 30)) == 0)) {
             e.type = EventType::CharEntered;
             e.character.val = static_cast<wchar_t>(wParam);
         } else {

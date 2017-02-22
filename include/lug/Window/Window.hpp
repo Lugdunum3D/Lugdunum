@@ -98,9 +98,11 @@ public:
     void close();
 
     /**
-     * @brief      Close the window gracefully.
+     * @brief      Enables or disables key repeat.
+     *
+     * @param[in]  enable  Desired state
      */
-    void enableKeyRepeat(bool enable);
+    void setKeyRepeat(bool enable);
 
     /**
      * @brief      Determines if a key pressed.

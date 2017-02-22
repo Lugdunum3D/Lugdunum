@@ -6,7 +6,7 @@
 namespace lug {
 namespace Window {
 namespace priv {
-    
+
 class WindowImpl {
 public:
     WindowImpl(Window*);
@@ -19,8 +19,9 @@ public:
 
     bool create(const std::string& title, Style style);
     void close();
+
     bool pollEvent(lug::Window::Event&);
-    void enableKeyRepeat(bool enable);
+    void setKeyRepeat(bool enable);
 
 private:
     void processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam);
@@ -45,7 +46,7 @@ private:
 
     static uint8_t windowCount;
     static lug::Window::priv::WindowImpl*  fullscreenWindow;
-    bool _keyRepeatEnabled;
+    bool _keyRepeat;
 };
 
 } // namespace priv

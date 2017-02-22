@@ -226,9 +226,9 @@ bool Window::pollEvent(Event& event) {
     return false;
 }
 
-void Window::enableKeyRepeat(bool enable) {
+void Window::setKeyRepeat(bool enable) {
     if (_impl != nullptr) {
-        _impl->enableKeyRepeat(enable);
+        _impl->setKeyRepeat(enable);
     }
 }
 
