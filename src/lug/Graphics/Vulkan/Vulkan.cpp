@@ -122,29 +122,6 @@ const char * enumToStr(VkPhysicalDeviceType enumVal) {
     }
 }
 
-std::vector<const char*> VkMemoryPropertyFlagsToStr(VkMemoryPropertyFlags enumVal) {
-    std::vector<const char*> retVal;
-
-    if (enumVal & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT"); }
-    if (enumVal & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT"); }
-    if (enumVal & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_HOST_COHERENT_BIT"); }
-    if (enumVal & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_HOST_CACHED_BIT"); }
-    if (enumVal & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT"); }
-    if (enumVal & VK_MEMORY_PROPERTY_FLAG_BITS_MAX_ENUM) { retVal.push_back("VK_MEMORY_PROPERTY_FLAG_BITS_MAX_ENUM"); }
-
-    return retVal;
-}
-
-std::vector<const char*> VkQueueFlagsToStr(VkQueueFlags enumVal) {
-    std::vector<const char*> retVal;
-
-    if (enumVal & VK_QUEUE_GRAPHICS_BIT) { retVal.push_back("VK_QUEUE_GRAPHICS_BIT"); }
-    if (enumVal & VK_QUEUE_COMPUTE_BIT) { retVal.push_back("VK_QUEUE_COMPUTE_BIT"); }
-    if (enumVal & VK_QUEUE_TRANSFER_BIT) { retVal.push_back("VK_QUEUE_TRANSFER_BIT"); }
-    if (enumVal & VK_QUEUE_SPARSE_BINDING_BIT) { retVal.push_back("VK_QUEUE_SPARSE_BINDING_BIT"); }
-
-    return retVal;
-}
 
 const char* enumToStr(VkFormat enumVal) {
     switch (enumVal)
@@ -348,17 +325,50 @@ const char* enumToStr(VkFormat enumVal) {
     }
 }
 
-std::vector<const char*> VkFormatFeatureFlagsToStr(VkFormatFeatureFlags enumVal) {
+std::vector<const char*> VkMemoryPropertyFlagsToStr(VkMemoryPropertyFlags flag) {
     std::vector<const char*> retVal;
 
-    if (enumVal & VK_IMAGE_USAGE_TRANSFER_SRC_BIT) { retVal.push_back("VK_IMAGE_USAGE_TRANSFER_SRC_BIT"); }
-    if (enumVal & VK_IMAGE_USAGE_TRANSFER_DST_BIT) { retVal.push_back("VK_IMAGE_USAGE_TRANSFER_DST_BIT"); }
-    if (enumVal & VK_IMAGE_USAGE_SAMPLED_BIT) { retVal.push_back("VK_IMAGE_USAGE_SAMPLED_BIT"); }
-    if (enumVal & VK_IMAGE_USAGE_STORAGE_BIT) { retVal.push_back("VK_IMAGE_USAGE_STORAGE_BIT"); }
-    if (enumVal & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) { retVal.push_back("VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT"); }
-    if (enumVal & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) { retVal.push_back("VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT"); }
-    if (enumVal & VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT) { retVal.push_back("VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT"); }
-    if (enumVal & VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT) { retVal.push_back("VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT"); }
+    if (flag & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT"); }
+    if (flag & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT"); }
+    if (flag & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_HOST_COHERENT_BIT"); }
+    if (flag & VK_MEMORY_PROPERTY_HOST_CACHED_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_HOST_CACHED_BIT"); }
+    if (flag & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT) { retVal.push_back("VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT"); }
+    if (flag & VK_MEMORY_PROPERTY_FLAG_BITS_MAX_ENUM) { retVal.push_back("VK_MEMORY_PROPERTY_FLAG_BITS_MAX_ENUM"); }
+
+    return retVal;
+}
+
+std::vector<const char*> VkQueueFlagsToStr(VkQueueFlags flag) {
+    std::vector<const char*> retVal;
+
+    if (flag & VK_QUEUE_GRAPHICS_BIT) { retVal.push_back("VK_QUEUE_GRAPHICS_BIT"); }
+    if (flag & VK_QUEUE_COMPUTE_BIT) { retVal.push_back("VK_QUEUE_COMPUTE_BIT"); }
+    if (flag & VK_QUEUE_TRANSFER_BIT) { retVal.push_back("VK_QUEUE_TRANSFER_BIT"); }
+    if (flag & VK_QUEUE_SPARSE_BINDING_BIT) { retVal.push_back("VK_QUEUE_SPARSE_BINDING_BIT"); }
+
+    return retVal;
+}
+
+std::vector<const char*> VkFormatFeatureFlagsToStr(VkFormatFeatureFlags flag) {
+    std::vector<const char*> retVal;
+
+    if (flag & VK_IMAGE_USAGE_TRANSFER_SRC_BIT) { retVal.push_back("VK_IMAGE_USAGE_TRANSFER_SRC_BIT"); }
+    if (flag & VK_IMAGE_USAGE_TRANSFER_DST_BIT) { retVal.push_back("VK_IMAGE_USAGE_TRANSFER_DST_BIT"); }
+    if (flag & VK_IMAGE_USAGE_SAMPLED_BIT) { retVal.push_back("VK_IMAGE_USAGE_SAMPLED_BIT"); }
+    if (flag & VK_IMAGE_USAGE_STORAGE_BIT) { retVal.push_back("VK_IMAGE_USAGE_STORAGE_BIT"); }
+    if (flag & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) { retVal.push_back("VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT"); }
+    if (flag & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) { retVal.push_back("VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT"); }
+    if (flag & VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT) { retVal.push_back("VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT"); }
+    if (flag & VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT) { retVal.push_back("VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT"); }
+
+    return retVal;
+}
+
+std::vector<const char*> VkMemoryHeapFlagsToStr(VkMemoryHeapFlags flag)
+{
+    std::vector<const char*> retVal;
+
+    if (flag & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT ) { retVal.push_back("VK_MEMORY_HEAP_DEVICE_LOCAL_BIT"); }
 
     return retVal;
 }
