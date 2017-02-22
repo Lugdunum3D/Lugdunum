@@ -211,14 +211,14 @@ bool Window::pollEvent(Event& event) {
         const bool value = _impl->pollEvent(event);
 
         // If we've receive Destroy just close window without returning the event to the user
-        if (value && event.type == EventType::Destroy) {
+        if (value && event.type == Event::Type::Destroy) {
             close();
             return false;
         }
 
-        if (event.type == EventType::KeyPressed) {
+        if (event.type == Event::Type::KeyPressed) {
             _keyState[event.key.code] = true;
-        } else if (event.type == EventType::KeyReleased) {
+        } else if (event.type == Event::Type::KeyReleased) {
             _keyState[event.key.code] = false;
         }
         return value;

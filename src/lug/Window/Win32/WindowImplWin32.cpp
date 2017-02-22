@@ -254,17 +254,17 @@ void priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM l
 
     switch (message) {
     case WM_CLOSE:
-        e.type = EventType::Close;
+        e.type = Event::Type::Close;
         break;
 
     case WM_DESTROY:
-        e.type = EventType::Destroy;
+        e.type = Event::Type::Destroy;
         break;
 
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
         if (_keyRepeat || ((HIWORD(lParam) & KF_REPEAT) == 0)) {
-            e.type = EventType::KeyPressed;
+            e.type = Event::Type::KeyPressed;
             configKeyEvent(e.key, wParam, lParam);
         } else {
             return;
@@ -273,14 +273,14 @@ void priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM l
 
     case WM_KEYUP:
     case WM_SYSKEYUP:
-        e.type = EventType::KeyReleased;
+        e.type = Event::Type::KeyReleased;
         configKeyEvent(e.key, wParam, lParam);
         break;
 
     case WM_CHAR:
  //   case WM_SYSCHAR:
         if (_keyRepeat || ((lParam & (1 << 30)) == 0)) {
-            e.type = EventType::CharEntered;
+            e.type = Event::Type::CharEntered;
             e.character.val = static_cast<wchar_t>(wParam);
         } else {
             return;

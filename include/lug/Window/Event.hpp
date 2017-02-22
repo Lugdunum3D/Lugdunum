@@ -1,23 +1,12 @@
 #pragma once
 
+#include <cstdint>
+
 #include <lug/Window/Export.hpp>
 #include <lug/Window/Keyboard.hpp>
 
-#include <cstdint>
-
 namespace lug {
 namespace Window {
-
-/**
- * Type of event
- */
-enum class LUG_WINDOW_API EventType : uint32_t {
-    Close,          // Window close event
-    Destroy,        // Window destroy event
-    KeyPressed,     // KeyPressed event
-    KeyReleased,    // KeyReleased event
-    CharEntered,    // CharEntered event
-};
 
 /**
  * @brief      Represents a keyboard event
@@ -41,7 +30,19 @@ struct LUG_WINDOW_API CharEvent {
  * @brief      Represents an event
  */
 struct LUG_WINDOW_API Event {
-    EventType type;             // The type of the event
+
+    /**
+     * Type of event
+     */
+    enum class LUG_WINDOW_API Type : uint32_t {
+        Close,          // Window close event
+        Destroy,        // Window destroy event
+        KeyPressed,     // KeyPressed event
+        KeyReleased,    // KeyReleased event
+        CharEntered,    // CharEntered event
+    };
+
+    Type type;             // The type of the event
 
     /**
      * Value of the event

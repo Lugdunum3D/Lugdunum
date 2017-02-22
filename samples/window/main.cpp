@@ -181,39 +181,39 @@ int main() {
         while (window->pollEvent(event)) {
             logger->info("Event received: {}", static_cast<uint32_t>(event.type));
 
-            if (event.type == lug::Window::EventType::Close) {
+            if (event.type == lug::Window::Event::Type::Close) {
                 logger->info("Closing the app");
                 window->close();
             }
 
-            if (event.type == lug::Window::EventType::KeyPressed && event.key.code == lug::Window::Keyboard::Key::Escape) {
+            if (event.type == lug::Window::Event::Type::KeyPressed && event.key.code == lug::Window::Keyboard::Key::Escape) {
                 logger->info("Closing the app (escape)");
                 window->close();
             }
 
-            if (event.type == lug::Window::EventType::KeyPressed
+            if (event.type == lug::Window::Event::Type::KeyPressed
                 && event.key.code == lug::Window::Keyboard::Key::Q && event.key.ctrl) {
                 logger->info("Closing the app (ctrl+Q)");
                 window->close();
             }
 
             // Checking KeyPressed events
-            if (event.type == lug::Window::EventType::KeyPressed) {
+            if (event.type == lug::Window::Event::Type::KeyPressed) {
                 logger->info(keyEnumMap[event.key.code] + " is pressed");
             }
 
             // Checking KeyReleased events
-            if (event.type == lug::Window::EventType::KeyReleased) {
+            if (event.type == lug::Window::Event::Type::KeyReleased) {
                 logger->info(keyEnumMap[event.key.code] + " is released");
             }
 
-            if (event.type == lug::Window::EventType::CharEntered) {
+            if (event.type == lug::Window::Event::Type::CharEntered) {
                 logger->info("Char event received: {}", static_cast<char>(event.character.val));
             }
 
             // Checking to see if any special keys are pressed
-            if (event.type == lug::Window::EventType::KeyPressed ||
-                event.type == lug::Window::EventType::KeyReleased) {
+            if (event.type == lug::Window::Event::Type::KeyPressed ||
+                event.type == lug::Window::Event::Type::KeyReleased) {
                 if (event.key.ctrl) {
                     logger->info("MODIFIER CTRL");
                 }

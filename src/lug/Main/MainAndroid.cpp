@@ -64,7 +64,7 @@ void AndroidApp::onStop(ANativeActivity*) {}
 
 void AndroidApp::onDestroy(ANativeActivity* ) {
     lug::Window::Event e;
-    e.type = lug::Window::EventType::CLOSE;
+    e.type = lug::Window::Event::Type::Close;
     lug::Window::priv::WindowImpl::events.push(std::move(e));
 }
 

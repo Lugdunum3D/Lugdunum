@@ -214,21 +214,21 @@ bool priv::WindowImpl::pollEvent(Event& event) {
     switch (xEvent.type) {
         case ClientMessage:
             if (xEvent.xclient.message_type == _wmProtocols && static_cast<Atom>(xEvent.xclient.data.l[0]) == _wmDeleteWindow) {
-                event.type = EventType::Close;
+                event.type = Event::Type::Close;
             }
             break;
         case DestroyNotify:
-            event.type = EventType::Close;
+            event.type = Event::Type::Close;
             break;
         case KeyPress:
-            event.type          = EventType::KeyPressed;
+            event.type          = Event::Type::KeyPressed;
             event.key.code      = keysymToLugKey(XLookupKeysym((&xEvent.xkey), 0)); // TODO: indexes?
             event.key.ctrl      = xEvent.xkey.state & ControlMask;
             event.key.shift     = xEvent.xkey.state & ShiftMask;
             event.key.system    = xEvent.xkey.state & Mod4Mask;
             break;
         case KeyRelease:
-            event.type          = EventType::KeyReleased;
+            event.type          = Event::Type::KeyReleased;
             event.key.code      = keysymToLugKey(XLookupKeysym((&xEvent.xkey), 0)); // TODO: indexes?
             event.key.alt       = xEvent.xkey.state & Mod1Mask;
             event.key.ctrl      = xEvent.xkey.state & ControlMask;
