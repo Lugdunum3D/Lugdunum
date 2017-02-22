@@ -60,29 +60,35 @@ set(FIND_LUG_PATHS
 )
 
 # define the list of search paths for miscs
-set(FIND_LUG_MICS_PATHS
-    ${LUG_ROOT}
-    $ENV{LUG_ROOT}
-    $ENV{ANDROID_NDK}/sources/lugdunum
-    ${ANDROID_NDK}/sources/lugdunum
-    /usr/local/share/lug
+set(FIND_LUG_MISCS_PATHS
+    .
+    share/lug
 )
 
-# find the LUG include directory
-find_path(LUG_INCLUDE_DIR lug/Config.hpp
-          PATH_SUFFIXES include
-          PATHS ${FIND_LUG_PATHS}
-          CMAKE_FIND_ROOT_PATH_BOTH
+find_path(LUG_ROOT_DIR include/lug/Config.hpp
+               PATHS ${FIND_LUG_PATHS}
+               CMAKE_FIND_ROOT_PATH_BOTH
 )
 
-# find the LUG resources directory
-find_path(LUG_RESOURCES_DIR shaders
-          PATH_SUFFIXES resources
-          PATHS ${FIND_LUG_MICS_PATHS}
-          CMAKE_FIND_ROOT_PATH_BOTH
-)
+if(LUG_ROOT_DIR)
+    set(LUG_INCLUDE_DIR ${LUG_ROOT_DIR}/include)
+
+    find_path(LUG_MISC_DIR resources/shaders
+                PATH_SUFFIXES ${FIND_LUG_MISCS_PATHS}
+                PATHS ${LUG_ROOT_DIR}
+                CMAKE_FIND_ROOT_PATH_BOTH
+    )
+
+    if(LUG_MISC_DIR)
+        set(LUG_RESOURCES_DIR ${LUG_MISC_DIR}/resources)
+    endif()
+endif()
 
 set(LUG_FOUND TRUE) # will be set to false if one of the required modules is not found
+
+if(NOT LUG_INCLUDE_DIR)
+    set(LUG_FOUND FALSE)
+endif()
 
 if(LUG_OS_ANDROID)
     # this will append `lug-main` to the components to find if we are on WINDOWS or ANDROID
