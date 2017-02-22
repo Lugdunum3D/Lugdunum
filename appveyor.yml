@@ -216,7 +216,7 @@ before_build:
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DBUILD_SHARED_LIBS=ON ..
+    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -Dgtest_force_shared_crt=ON ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
