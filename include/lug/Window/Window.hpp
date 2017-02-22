@@ -58,9 +58,9 @@ enum class LUG_WINDOW_API Style : uint16_t {
 class LUG_WINDOW_API Window {
 public:
     Window(const Window&) = delete;
-    Window(Window&&);
+    Window(Window&&) = delete;
     Window& operator=(const Window&) = delete;
-    Window& operator=(Window&&);
+    Window& operator=(Window&&) = delete;
     ~Window();
 
     /**

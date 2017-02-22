@@ -23,21 +23,8 @@
 namespace lug {
 namespace Window {
 
-Window::Window() : _impl{ new priv::WindowImpl(this) } {
+Window::Window() : _impl{new priv::WindowImpl(this)} {
     initKeyState();
-}
-
-Window::Window(Window&& rhs) : _impl{rhs._impl} {
-    rhs._impl = nullptr;
-    _keyState = std::move(rhs._keyState);
-}
-
-Window& Window::operator=(Window&& rhs) {
-    _impl = rhs._impl;
-    rhs._impl = nullptr;
-    _keyState = std::move(rhs._keyState);
-
-    return *this;
 }
 
 Window::~Window() {
