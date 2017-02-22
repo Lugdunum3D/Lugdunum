@@ -35,7 +35,7 @@ bool priv::WindowImpl::create(const std::string& title, Style style) {
         return false;
     }
 
-    XSelectInput(_display, _window, ExposureMask | KeyPressMask | KeyReleaseMask);
+    XSelectInput(_display, _window, KeyPressMask | KeyReleaseMask);
     XStoreName(_display, _window, title.c_str());
     XMapWindow(_display, _window);
 
@@ -204,10 +204,59 @@ Bool selectEvents(Display*, XEvent* event, XPointer) {
     return (event->type == ClientMessage || event->type == DestroyNotify || event->type == KeyPress || event->type == KeyRelease);
 }
 
+/**
+ * @brief      This functions filters event depending on the value of _keyRepeat.
+ *
+ * @param      xEvent  The x event to filter.
+ *
+ * @return     True if the event should be ignored, False if it should be keeped.
+ */
+bool priv::WindowImpl::shouldIgnoreRepeated(XEvent& xEvent) {
+    // (code shamelessly taken from the SFML, which took it from SDL) ;)
+
+    // We are only interested in filtering KeyRelease events, i.e. from now on we only
+    // have KeyRelease events
+    if (xEvent.type != KeyRelease) {
+        return false;
+    }
+
+    // Check if there's a matching KeyPress event in the queue, else we can return
+    if (XPending(_display) == 0) {
+        return false;
+    }
+
+    // Grab it but don't remove it from the queue, it still needs to be processed
+    XEvent nextEvent;
+    XPeekEvent(_display, &nextEvent);
+
+    // Again, we're only interested in a corresponding KeyPress
+    if (nextEvent.type != KeyPress) {
+        return false;
+    }
+
+    // Check if it is a duplicated event (same timestamp as the KeyRelease event)
+    if ((nextEvent.xkey.keycode == xEvent.xkey.keycode) &&
+        (nextEvent.xkey.time - xEvent.xkey.time < 2)) {
+        // If we don't want repeated events, remove the next KeyPress from the queue
+        if (!_keyRepeat) {
+            XNextEvent(_display, &nextEvent);
+        }
+
+        // This KeyRelease is a repeated event and we don't want it
+        return true;
+    }
+
+    return false;
+}
+
 bool priv::WindowImpl::pollEvent(Event& event) {
     XEvent xEvent;
 
     if (XCheckIfEvent(_display, &xEvent, selectEvents, nullptr) == False) {
+        return false;
+    }
+
+    if (shouldIgnoreRepeated(xEvent)) {
         return false;
     }
 
@@ -242,13 +291,8 @@ bool priv::WindowImpl::pollEvent(Event& event) {
     return true;
 }
 
-void priv::WindowImpl::setKeyRepeat(bool enable) {
-    if (enable) {
-        XAutoRepeatOn(_display);
-    }
-    else {
-        XAutoRepeatOff(_display);
-    }
+void priv::WindowImpl::setKeyRepeat(bool state) {
+    _keyRepeat = state;
 }
 
 void priv::WindowImpl::setWindowDecorations(Style style) {

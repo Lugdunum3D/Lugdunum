@@ -100,9 +100,11 @@ public:
     /**
      * @brief      Enables or disables key repeat.
      *
-     * @param[in]  enable  Desired state
+     * The key repeat is set to false by default (i.e. the default, untouched, behaviour)
+     *
+     * @param[in]  state  Desired state
      */
-    void setKeyRepeat(bool enable);
+    void setKeyRepeat(bool state);
 
     /**
      * @brief      Determines if a key pressed.

@@ -7,7 +7,7 @@ namespace Window {
 uint8_t priv::WindowImpl::windowCount = 0;
 priv::WindowImpl* priv::WindowImpl::fullscreenWindow = nullptr;
 
-priv::WindowImpl::WindowImpl(Window* win) : _parent{win}, _keyRepeat(false) {}
+priv::WindowImpl::WindowImpl(Window* win) : _parent{win} {}
 
 priv::WindowImpl::~WindowImpl() {
     // Destroy the custom icon, if any
@@ -245,8 +245,8 @@ bool priv::WindowImpl::pollEvent(Event& event) {
     return false;
 }
 
-void priv::WindowImpl::setKeyRepeat(bool enable) {
-    _keyRepeat = enable;
+void priv::WindowImpl::setKeyRepeat(bool state) {
+    _keyRepeat = state;
 }
 
 void priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam) {

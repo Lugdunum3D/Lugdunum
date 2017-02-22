@@ -21,7 +21,7 @@ public:
     void close();
 
     bool pollEvent(lug::Window::Event&);
-    void setKeyRepeat(bool enable);
+    void setKeyRepeat(bool state);
 
 private:
     void processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam);
@@ -46,7 +46,7 @@ private:
 
     static uint8_t windowCount;
     static lug::Window::priv::WindowImpl*  fullscreenWindow;
-    bool _keyRepeat;
+    bool _keyRepeat{true};
 };
 
 } // namespace priv

@@ -22,10 +22,11 @@ public:
     void close();
 
     bool pollEvent(lug::Window::Event& event);
-    void setKeyRepeat(bool enable);
+    void setKeyRepeat(bool state);
 
 private:
     void setWindowDecorations(Style style);
+    bool shouldIgnoreRepeated(XEvent& xEvent);
 
 private:
     Window* _parent{nullptr};
@@ -36,6 +37,8 @@ private:
     Atom _wmProtocols;
     Atom _wmDeleteWindow;
     Atom _wmHints;
+
+    bool _keyRepeat{true};
 };
 
 } // namespace priv
