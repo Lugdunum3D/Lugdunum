@@ -137,7 +137,7 @@ inline Quaternion<T> Quaternion<T>::fromRotationMatrix(const Matrix<4, 4, T>& ro
         const T s = sqrt(T(1) + tr) * T(2);
 
         return Quaternion<T>(
-            0.25f * s,
+            T(0.25f) * s,
             (rotMatrix(2, 1) - rotMatrix(1, 2)) / s,
             (rotMatrix(0, 2) - rotMatrix(2, 0)) / s,
             (rotMatrix(1, 0) - rotMatrix(0, 1)) / s
@@ -147,7 +147,7 @@ inline Quaternion<T> Quaternion<T>::fromRotationMatrix(const Matrix<4, 4, T>& ro
 
         return Quaternion<T>(
             (rotMatrix(2, 1) - rotMatrix(1, 2)) / s,
-            0.25 * s,
+            T(0.25) * s,
             (rotMatrix(0, 1) + rotMatrix(1, 0)) / s,
             (rotMatrix(0, 2) + rotMatrix(2, 0)) / s
         );
@@ -157,7 +157,7 @@ inline Quaternion<T> Quaternion<T>::fromRotationMatrix(const Matrix<4, 4, T>& ro
         return Quaternion<T>(
             (rotMatrix(0, 2) - rotMatrix(2, 0)) / s,
             (rotMatrix(0, 1) + rotMatrix(1, 0)) / s,
-            0.25 * s,
+            T(0.25) * s,
             (rotMatrix(1, 2) + rotMatrix(2, 1)) / s
         );
     } else {
@@ -167,7 +167,7 @@ inline Quaternion<T> Quaternion<T>::fromRotationMatrix(const Matrix<4, 4, T>& ro
             (rotMatrix(1, 0) - rotMatrix(0, 1)) / s,
             (rotMatrix(0, 2) + rotMatrix(2, 0)) / s,
             (rotMatrix(1, 2) + rotMatrix(2, 1)) / s,
-            0.25 * s
+            T(0.25) * s
         );
     }
 }
