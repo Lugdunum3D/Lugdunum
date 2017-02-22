@@ -2,25 +2,23 @@
 
 inline const char* getLastErrorWindows() {
     static const DWORD size = 200 + 1;
-    static WCHAR bufferWide[size];
     static char buffer[size];
 
     auto lastError = GetLastError();
 
-    FormatMessage(
-        FORMAT_MESSAGE_FROM_STRING | FORMAT_MESSAGE_IGNORE_INSERTS,
+    auto messageSize = FormatMessage(
+        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
         nullptr,
         lastError,
         0,
-        reinterpret_cast<LPSTR>(bufferWide),
+        buffer,
         size,
         nullptr
     );
 
-#pragma warning (push)
-#pragma warning (disable : 4996)
-    std::wcstombs(buffer, bufferWide, size);
-#pragma warning (pop)
+    if (messageSize > 0) {
+        buffer[messageSize - 1] = 0;
+    }
 
     return buffer;
 }
@@ -38,7 +36,7 @@ inline Handle open(const char* name) {
 
     if (!handle) {
 #if defined(LUG_SYSTEM_WINDOWS)
-        LUG_LOG.warn("Library: Can't load the library: {}", getLastErrorWindows());
+        LUG_LOG.warn("Library: Can't load the library: {}: {}", name, getLastErrorWindows());
 #else
         LUG_LOG.warn("Library: Can't load the library: {}", dlerror());
 #endif
