@@ -107,6 +107,14 @@ if(BUILD_TESTS)
     # Note: enable_testing() MUST be on the top level CMakeLists.txt
     enable_testing()
 
+    if (ENABLE_CI)
+        set(GTEST_ROOT ${CMAKE_SOURCE_DIR}/lib/googletest/googlemock/build/gtest)
+        set(GMOCK_ROOT ${CMAKE_SOURCE_DIR}/lib/googletest/googlemock/build)
+
+        set(GTEST_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/googletest/googletest/include)
+        set(GMOCK_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/lib/googletest/googlemock/include)
+    endif()
+
     add_subdirectory(test/)
 endif()
 
