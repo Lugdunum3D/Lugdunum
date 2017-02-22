@@ -189,22 +189,23 @@ struct PhysicalDeviceInfo {
     bool containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const;
 };
 
-struct ApiVersion {
-    int major;
-    int minor;
-    int patch;
+struct LUG_GRAPHICS_API Version {
+    uint32_t major;
+    uint32_t minor;
+    uint32_t patch;
+
+    static Version fromInt(uint32_t version);
 };
 
 LUG_GRAPHICS_API const char* enumToStr(VkResult enumVal);
 LUG_GRAPHICS_API const char* enumToStr(VkPhysicalDeviceType enumVal);
 LUG_GRAPHICS_API const char* enumToStr(VkFormat enumVal);
+
 LUG_GRAPHICS_API std::vector<const char*> VkMemoryPropertyFlagsToStr(VkMemoryPropertyFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkQueueFlagsToStr(VkQueueFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkFormatFeatureFlagsToStr(VkFormatFeatureFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkMemoryHeapFlagsToStr(VkMemoryHeapFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkMemoryHeapFlagsToStr(VkMemoryHeapFlags flag);
-LUG_GRAPHICS_API ApiVersion apiVersionToStruct(uint32_t version);
-
 
 } // Vulkan
 } // Graphics

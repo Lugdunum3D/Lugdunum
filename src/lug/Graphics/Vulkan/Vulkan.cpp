@@ -55,6 +55,15 @@ bool PhysicalDeviceInfo::containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx
     return idx != -1;
 }
 
+Version Version::fromInt(uint32_t version)
+{
+    return {
+        (version >> 22) & 0x3FF, // major
+        (version >> 12) & 0x3FF, // minor
+        version & 0xFFF // patch
+    };
+}
+
 const char * enumToStr(VkResult enumVal) {
     switch (enumVal) {
     case VK_SUCCESS:
@@ -369,17 +378,6 @@ std::vector<const char*> VkMemoryHeapFlagsToStr(VkMemoryHeapFlags flag)
     std::vector<const char*> retVal;
 
     if (flag & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT ) { retVal.push_back("VK_MEMORY_HEAP_DEVICE_LOCAL_BIT"); }
-
-    return retVal;
-}
-
-ApiVersion apiVersionToStruct(uint32_t version)
-{
-    ApiVersion retVal;
-
-    retVal.major = (version << 22) & 0x3FF;
-    retVal.minor = (version << 12) & 0x3FF;
-    retVal.patch = version & 0xFFF;
 
     return retVal;
 }
