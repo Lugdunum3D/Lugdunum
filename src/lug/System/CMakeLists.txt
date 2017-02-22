@@ -4,6 +4,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/System)
 # all source files
 set(SRC
     ${SRCROOT}/Exception.cpp
+    ${SRCROOT}/Path.cpp
     ${SRCROOT}/Logger/FileHandler.cpp
     ${SRCROOT}/Logger/Formatter.cpp
     ${SRCROOT}/Logger/Handler.cpp
@@ -20,6 +21,7 @@ set(SRC
 set(INC
     ${INCROOT}/Debug.hpp
     ${INCROOT}/Exception.hpp
+    ${INCROOT}/Path.hpp
     ${INCROOT}/Export.hpp
     ${INCROOT}/Logger.hpp
     ${INCROOT}/Logger/Common.hpp
@@ -63,6 +65,16 @@ endif()
 if(LUG_OS_ANDROID)
     list(APPEND SRC ${SRCROOT}/Logger/LogCatHandler.cpp)
     list(APPEND INC ${INCROOT}/Logger/LogCatHandler.hpp)
+endif()
+
+if(LUG_OS_LINUX)
+    list(APPEND INC ${SRCROOT}/Unix/PathImplUnix.hpp)
+    list(APPEND SRC ${SRCROOT}/Unix/PathImplUnix.cpp)
+elseif(LUG_OS_WINDOWS)
+    list(APPEND INC ${SRCROOT}/Win32/PathImplWin32.hpp)
+    list(APPEND SRC ${SRCROOT}/Win32/PathImplWin32.cpp)
+else()
+    message(FATAL_ERROR "No path implementation for this platform")
 endif()
 
 source_group("src" FILES ${SRC})
