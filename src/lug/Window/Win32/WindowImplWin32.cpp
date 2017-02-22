@@ -278,7 +278,6 @@ void priv::WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM l
         break;
 
     case WM_CHAR:
- //   case WM_SYSCHAR:
         if (_keyRepeat || ((lParam & (1 << 30)) == 0)) {
             e.type = Event::Type::CharEntered;
             e.character.val = static_cast<wchar_t>(wParam);
@@ -363,8 +362,7 @@ Keyboard::Key priv::WindowImpl::getKeyCode(WPARAM wParam, LPARAM lParam) {
         new_vk = extended ? VK_RMENU : VK_LMENU;
         break;
     default:
-        // not a key we map from generic to left/right specialized
-        //  just return it.
+        // Not a key we map from generic to left/right specialized, just return it.
         break;
     }
 

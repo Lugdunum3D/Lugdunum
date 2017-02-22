@@ -11,9 +11,9 @@ source_group("src" FILES ${SRC})
 set(INC
     ${INCROOT}/Event.hpp
     ${INCROOT}/Export.hpp
+    ${INCROOT}/Keyboard.hpp
     ${INCROOT}/Window.hpp
     ${INCROOT}/WindowHandle.hpp
-    ${INCROOT}/Keyboard.hpp
 )
 source_group("inc" FILES ${INC})
 

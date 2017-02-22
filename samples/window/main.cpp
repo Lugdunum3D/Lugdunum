@@ -1,7 +1,7 @@
 #include <unordered_map>
-#include <lug/Window/Window.hpp>
-#include <lug/Window/Keyboard.hpp>
 #include <lug/System/Logger.hpp>
+#include <lug/Window/Keyboard.hpp>
+#include <lug/Window/Window.hpp>
 
 #if defined(LUG_SYSTEM_ANDROID)
     #include <lug/System/Logger/LogCatHandler.hpp>
