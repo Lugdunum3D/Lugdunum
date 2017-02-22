@@ -35,6 +35,7 @@ bool Loader::loadCoreFunctions() {
         {                                                                               \
             name = reinterpret_cast<PFN_##name>(vkGetInstanceProcAddr(nullptr, #name)); \
             if (!name) {                                                                \
+                LUG_LOG.error("Vulkan: Can't load symbol {}", #name);                   \
                 return false;                                                           \
             }                                                                           \
         }
@@ -47,12 +48,13 @@ bool Loader::loadCoreFunctions() {
 }
 
 bool Loader::loadInstanceFunctions(const Instance& instance) {
-    #define LUG_LOAD_VULKAN_FUNCTIONS(name)                 \
-        {                                                   \
-            name = instance.getProcAddr<PFN_##name>(#name); \
-            if (!name) {                                    \
-                return false;                               \
-            }                                               \
+    #define LUG_LOAD_VULKAN_FUNCTIONS(name)                             \
+        {                                                               \
+            name = instance.getProcAddr<PFN_##name>(#name);             \
+            if (!name) {                                                \
+                LUG_LOG.error("Vulkan: Can't load symbol {}", #name);   \
+                return false;                                           \
+            }                                                           \
         }
 
     LUG_INSTANCE_VULKAN_FUNCTIONS(LUG_LOAD_VULKAN_FUNCTIONS);
@@ -63,12 +65,13 @@ bool Loader::loadInstanceFunctions(const Instance& instance) {
 }
 
 bool Loader::loadDeviceFunctions(const Device& device) {
-    #define LUG_LOAD_VULKAN_FUNCTIONS(name)                 \
-        {                                                   \
-            name = device.getProcAddr<PFN_##name>(#name);   \
-            if (!name) {                                    \
-                return false;                               \
-            }                                               \
+    #define LUG_LOAD_VULKAN_FUNCTIONS(name)                             \
+        {                                                               \
+            name = device.getProcAddr<PFN_##name>(#name);               \
+            if (!name) {                                                \
+                LUG_LOG.error("Vulkan: Can't load symbol {}", #name);   \
+                return false;                                           \
+            }                                                           \
         }
 
     LUG_DEVICE_VULKAN_FUNCTIONS(LUG_LOAD_VULKAN_FUNCTIONS);
