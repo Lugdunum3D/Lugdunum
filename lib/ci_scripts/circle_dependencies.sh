@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Install dependencies
+
 if [[ ! -d "$HOME/.local/debs" ]]; then
   sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
   sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y

@@ -3,12 +3,12 @@
 case $CIRCLE_NODE_INDEX in
   0)  export CXX=clang++
       mkdir build && cd build
-      cmake ../ -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DENABLE_CI=true
+      cmake ../ -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DENABLE_CI=true -DGTEST_ROOT=../lib/googletest/googlemock/build/gtest -DGMOCK_ROOT=../lib/googletest/googlemock/build
       make all test
       ;;
   1)  export CXX=g++
       mkdir build && cd build
-      cmake ../ -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DENABLE_CI=true
+      cmake ../ -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DENABLE_CI=true -DGTEST_ROOT=../lib/googletest/googlemock/build/gtest -DGMOCK_ROOT=../lib/googletest/googlemock/build
       make all test
       ;;
 esac
