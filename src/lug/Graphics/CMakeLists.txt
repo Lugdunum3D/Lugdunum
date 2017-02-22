@@ -146,6 +146,10 @@ if (NOT CI_BUILD)
     include_directories(${VULKAN_INCLUDE_DIR})
 endif()
 
+if (NOT IS_DIRECTORY "${PROJECT_SOURCE_DIR}/thirdparty/tinyobjloader")
+  message(FATAL_ERROR "call \"git submodule update --init --recursive\"")
+endif()
+
 include_directories(${PROJECT_SOURCE_DIR}/thirdparty/tinyobjloader)
 
 # define the target
