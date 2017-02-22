@@ -575,12 +575,13 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
 }
 
 void RenderWindow::destroy() {
-    _presentQueue->waitIdle();
+    if (_presentQueue) {
+        _presentQueue->waitIdle();
+    }
 
     for (auto& renderView : _renderViews) {
         renderView->destroy();
     }
-
 
     _swapchain.destroy();
 
