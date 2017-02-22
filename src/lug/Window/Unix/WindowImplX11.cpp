@@ -16,17 +16,17 @@ bool priv::WindowImpl::create(const std::string& title, Style style) {
         return false;
     }
 
-    int xkb_minor_version = XkbMinorVersion;
-    int xkb_major_version = XkbMajorVersion;
-    if (XkbLibraryVersion(&xkb_minor_version, &xkb_major_version)) {
+    int minor = XkbMinorVersion;
+    int major = XkbMajorVersion;
+    if (XkbLibraryVersion(&minor, &major)) {
         XkbSetAutoRepeatRate(_display, XkbUseCoreKbd, 1000, 100);
     }
 
     int screen = DefaultScreen(_display);
     ::Window parent = RootWindow(_display, screen);
 
+    // The default color
     uint32_t blackColor = BlackPixel(_display, DefaultScreen(_display));
-
     _window = XCreateSimpleWindow(_display, parent, 0, 0, _parent->_mode.width, _parent->_mode.height, 90, 2, blackColor);
 
     if (!_window) {
@@ -296,11 +296,13 @@ void priv::WindowImpl::setKeyRepeat(bool state) {
 }
 
 void priv::WindowImpl::setWindowDecorations(Style style) {
-    WMHints hints;
-    std::memset(&hints, 0, sizeof(hints));
-    hints.flags = MWMHintsFunctions | MWMHintsDecorations;
-    hints.decorations = 0;
-    hints.functions = 0;
+    WMHints hints{
+        hints.flags = MWMHintsFunctions | MWMHintsDecorations,
+        hints.functions = 0,
+        hints.decorations = 0,
+        hints.inputMode = 0,
+        hints.state = 0,
+    };
 
     if (static_cast<bool>(style & Style::Titlebar)) {
         hints.decorations |= MWMDecorBorder | MWMDecorTitle | MWMDecorMinimize | MWMDecorMenu;
@@ -316,7 +318,10 @@ void priv::WindowImpl::setWindowDecorations(Style style) {
     }
 
     XChangeProperty(_display, _window, _wmHints, _wmHints,
-                    32, PropModeReplace, reinterpret_cast<const unsigned char*>(&hints), 5);
+                    32, // 32 bits
+                    PropModeReplace, // Replace existing
+                    reinterpret_cast<const unsigned char*>(&hints),
+                    5); // 5 elements
 }
 
 } // lug
