@@ -113,7 +113,30 @@ public:
      *
      * @return     Wether the application was successfully initialized.
      */
-    virtual bool init(int argc, char* argv[]);
+    bool init(int argc, char* argv[]);
+
+    /**
+     * @brief      Begin the initialisation of the application with the informations filled in the
+     *             lug::Graphics::Graphics::InitInfo structure.
+     *
+     *             The lug::Graphics::Graphics::InitInfo structure can be modified by calling #getGraphicsInfo or #setGraphicsInfo. @n
+     *
+     * @param[in]  argc  The argc argument as received from the main function.
+     * @param[in]  argv  The argv argument as received from the main function.
+     *
+     * @return     Wether the application was successfully initialized.
+     */
+    bool beginInit(int argc, char* argv[]);
+
+    /**
+     * @brief      Finish the initialisation of the application with the informations filled in the
+     *             lug::Graphics::RenderWindow::InitInfo structure.
+     *
+     *             The lug::Graphics::RenderWindow::InitInfo structure can be modified by calling #getRenderWindowInfo or #setRenderWindowInfo.
+     *
+     * @return     Wether the application was successfully initialized.
+     */
+    bool finishInit();
 
     /**
      * @brief      Run the application.
@@ -159,12 +182,12 @@ private:
     lug::Graphics::Graphics::InitInfo _graphicsInitInfo{
         lug::Graphics::Renderer::Type::Vulkan,      // type
         {                                           // rendererInitInfo
-            {                                       // mandatoryModules
-                lug::Graphics::Module::Type::Core
-            },
-            {},                                     // optionalModules
             true                                    // use dedicaced GPU
-        }
+        },
+        {                                           // mandatoryModules
+            lug::Graphics::Module::Type::Core
+        },
+        {},                                         // optionalModules
     };
 
     lug::Graphics::RenderWindow::InitInfo _renderWindowInitInfo{

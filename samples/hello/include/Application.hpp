@@ -16,7 +16,7 @@ public:
 
     ~Application() override final;
 
-    bool init(int argc, char* argv[]) override final;
+    bool init(int argc, char* argv[]);
 
     void onEvent(const lug::Window::Event& event) override final;
     void onFrame(const lug::System::Time& elapsedTime) override final;

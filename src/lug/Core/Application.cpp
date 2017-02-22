@@ -9,6 +9,10 @@ namespace Core {
 Application::Application(const Application::Info& info) : _info{info}, _graphics{info.name, info.version} {}
 
 bool Application::init(int argc, char* argv[]) {
+    return beginInit(argc, argv) && finishInit();
+}
+
+bool Application::beginInit(int argc, char* argv[]) {
     // TODO: Use argc and argv to parse the command line
     (void)(argc);
     (void)(argv);
@@ -17,7 +21,12 @@ bool Application::init(int argc, char* argv[]) {
         return false;
     }
 
+    return true;
+}
+
+bool Application::finishInit() {
     _window = _graphics.getRenderer()->createWindow(_renderWindowInitInfo);
+
     if (!_window) {
         return false;
     }

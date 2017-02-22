@@ -8,6 +8,8 @@
 namespace lug {
 namespace Graphics {
 
+class Graphics;
+
 class LUG_GRAPHICS_API Renderer {
 public:
     enum class Type : uint8_t {
@@ -15,13 +17,11 @@ public:
     };
 
     struct InitInfo {
-        std::set<Module::Type> mandatoryModules;
-        std::set<Module::Type> optionalModules;
         bool useDiscreteGPU;
     };
 
 public:
-    Renderer() = default;
+    Renderer(Graphics& graphics);
 
     Renderer(const Renderer&) = delete;
     Renderer(Renderer&&) = delete;
@@ -31,13 +31,17 @@ public:
 
     virtual ~Renderer() = default;
 
-    virtual std::set<Module::Type> init(const char* appName, uint32_t appVersion, const InitInfo& initInfo) = 0;
+    virtual bool beginInit(const char* appName, uint32_t appVersion, const InitInfo& initInfo) = 0;
+    virtual bool finishInit(const InitInfo& initInfo) = 0;
 
     virtual bool beginFrame() = 0;
     virtual bool endFrame() = 0;
 
     virtual RenderWindow* createWindow(RenderWindow::InitInfo& initInfo) = 0;
     virtual RenderWindow* getWindow() = 0;
+
+protected:
+    Graphics& _graphics;
 };
 
 } // Graphics

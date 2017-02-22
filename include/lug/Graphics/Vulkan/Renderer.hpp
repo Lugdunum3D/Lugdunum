@@ -45,7 +45,7 @@ public:
     };
 
 public:
-    Renderer() = default;
+    Renderer(Graphics& graphics);
 
     Renderer(const Renderer&) = delete;
     Renderer(Renderer&&) = delete;
@@ -55,7 +55,8 @@ public:
 
     ~Renderer();
 
-    std::set<Module::Type> init(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) override final;
+    bool beginInit(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) override final;
+    bool finishInit(const Renderer::InitInfo& initInfo) override final;
 
     bool isInstanceLayerLoaded(const char* name) const;
     bool isInstanceExtensionLoaded(const char* name) const;
@@ -85,11 +86,11 @@ public:
     bool endFrame() override final;
 
 private:
-    bool initInstance(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo, std::set<Module::Type> &loadedModules);
-    bool initDevice(const Renderer::InitInfo& initInfo, std::set<Module::Type> &loadedModules);
+    bool initInstance(const char* appName, uint32_t appVersion);
+    bool initDevice(const Renderer::InitInfo& initInfo);
 
-    bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules);
-    bool checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool finalization);
+    bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck);
+    bool checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, bool finalization);
 
     template <typename Info>
     std::vector<const char*> checkRequirementsLayers(const Info& info, const std::vector<const char*>& layers, std::vector<const char*>& layersFound);

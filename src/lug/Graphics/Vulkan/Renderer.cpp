@@ -49,6 +49,8 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
     return VK_FALSE;
 }
 
+Renderer::Renderer(Graphics& graphics) : ::lug::Graphics::Renderer(graphics) {}
+
 Renderer::~Renderer() {
     destroy();
 }
@@ -82,35 +84,31 @@ void Renderer::destroy() {
     _loader.unload();
 }
 
-std::set<Module::Type> Renderer::init(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) {
-    std::set<Module::Type> loadedModules;
+bool Renderer::beginInit(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) {
+    (void)(initInfo);
 
-    loadedModules.insert(initInfo.mandatoryModules.begin(), initInfo.mandatoryModules.end());
-    loadedModules.insert(initInfo.optionalModules.begin(), initInfo.optionalModules.end());
-
-    if (!initInstance(appName, appVersion, initInfo, loadedModules)) {
-        LUG_LOG.error("RendererVulkan: Can't load the instance");
-        return {};
+    if (!initInstance(appName, appVersion)) {
+        LUG_LOG.error("RendererVulkan: Can't init the instance");
+        return false;
     }
 
-    if (!initDevice(initInfo, loadedModules)) {
-        LUG_LOG.error("RendererVulkan: Can't load the device");
-        return {};
+    return true;
+}
+
+bool Renderer::finishInit(const Renderer::InitInfo& initInfo) {
+    if (!initDevice(initInfo)) {
+        LUG_LOG.error("RendererVulkan: Can't init the device");
+        return false;
     }
 
 #if defined(LUG_DEBUG)
     LUG_LOG.info("RendererVulkan: Use device {}", _physicalDeviceInfo->properties.deviceName);
 #endif
 
-    return loadedModules;
+    return true;
 }
 
-/**
- * Initialize the Vulkan instance
- * @param  loadedModules Modules to load
- * @return               Wether the instance was loaded successfully or not
- */
-bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo, std::set<Module::Type>& loadedModules) {
+bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
     VkResult result;
 
     // Load vulkan core functions
@@ -161,11 +159,11 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
     // Create instance
     {
         // Check which layers / extensions to load for modules
-        if (!checkRequirementsInstance(initInfo.mandatoryModules, loadedModules)) {
+        if (!checkRequirementsInstance(_graphics.getLoadedMandatoryModules())) {
             return false;
         }
 
-        checkRequirementsInstance(initInfo.optionalModules, loadedModules);
+        checkRequirementsInstance(_graphics.getLoadedOptionalModules());
 
         // Create the application information for vkCreateInstance
         VkApplicationInfo applicationInfo{
@@ -295,12 +293,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
     return true;
 }
 
-/**
- * Initialize the Vulkan device
- * @param  loadedModules Modules to load
- * @return               Wether the device was loaded successfully or not
- */
-bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::Type> &loadedModules) {
+bool Renderer::initDevice(const Renderer::InitInfo& initInfo) {
     VkResult result;
 
     // Select device
@@ -309,12 +302,11 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::T
         std::vector<uint8_t> matchedDevicesIdx{};
 
         for (uint8_t idx = 0; idx < _physicalDeviceInfos.size(); ++idx) {
-            std::set<Module::Type> tmpLoadedModules;
-            if (!checkRequirementsDevice(_physicalDeviceInfos[idx], initInfo.mandatoryModules, tmpLoadedModules, false)) {
+            if (!checkRequirementsDevice(_physicalDeviceInfos[idx], _graphics.getLoadedMandatoryModules(), false)) {
                 continue;
             }
 
-            checkRequirementsDevice(_physicalDeviceInfos[idx], initInfo.optionalModules, tmpLoadedModules, false);
+            checkRequirementsDevice(_physicalDeviceInfos[idx], _graphics.getLoadedOptionalModules(), false);
 
             matchedDevicesIdx.push_back(idx);
 
@@ -340,8 +332,8 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::T
 
     // Set the loaded informations of the matched device
     {
-        checkRequirementsDevice(*_physicalDeviceInfo, initInfo.mandatoryModules, loadedModules, true);
-        checkRequirementsDevice(*_physicalDeviceInfo, initInfo.optionalModules, loadedModules, true);
+        checkRequirementsDevice(*_physicalDeviceInfo, _graphics.getLoadedMandatoryModules(), true);
+        checkRequirementsDevice(*_physicalDeviceInfo, _graphics.getLoadedOptionalModules(), true);
     }
 
     // Create device
@@ -431,7 +423,7 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::T
     return true;
 }
 
-bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules) {
+bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck) {
     bool requirementsCheck = true;
 
     for (const auto moduleType : modulesToCheck) {
@@ -482,7 +474,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
             _loadedInstanceLayers.insert(_loadedInstanceLayers.end(), layers.begin(), layers.end());
             _loadedInstanceExtensions.insert(_loadedInstanceExtensions.end(), extensions.begin(), extensions.end());
         } else {
-            loadedModules.erase(moduleType);
+            _graphics.unsupportedModule(moduleType);
         }
 
         requirementsCheck = requirementsCheck && moduleRequirementsCheck;
@@ -491,7 +483,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
     return requirementsCheck;
 }
 
-bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool finalization) {
+bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, bool finalization) {
     bool requirementsCheck = true;
 
     for (const auto moduleType : modulesToCheck) {
@@ -589,7 +581,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 
                 _loadedQueueFamiliesIdx.insert(queueFamiliesIdx.begin(), queueFamiliesIdx.end());
             } else {
-                loadedModules.erase(moduleType);
+                _graphics.unsupportedModule(moduleType);
             }
         }
 

@@ -15,25 +15,39 @@ namespace Graphics {
 Graphics::Graphics(const char* appName, uint32_t appVersion) : _appName{appName}, _appVersion{appVersion} {}
 
 bool Graphics::init(const InitInfo& initInfo) {
-    switch(initInfo.rendererType) {
+    return beginInit(initInfo) && finishInit();
+}
+
+bool Graphics::beginInit(const InitInfo& initInfo) {
+    _initInfo = initInfo;
+
+    switch(_initInfo.rendererType) {
         case Renderer::Type::Vulkan:
-            _renderer = std::make_unique<Vulkan::Renderer>();
+            _renderer = std::make_unique<Vulkan::Renderer>(*this);
             break;
         default:
             LUG_LOG.error("Graphics: Can't init renderer with specified render type");
             break;
     }
 
-    _rendererType = initInfo.rendererType;
+    _loadedMandatoryModules = _initInfo.mandatoryModules;
+    _loadedOptionalModules = _initInfo.optionalModules;
 
-    _loadedModules = _renderer->init(_appName, _appVersion, initInfo.rendererInitInfo);
+    if (!_renderer->beginInit(_appName, _appVersion, _initInfo.rendererInitInfo)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Graphics::finishInit() {
+    if (!_renderer->finishInit(_initInfo.rendererInitInfo)) {
+        return false;
+    }
 
     // Check if all mandatory modules are loaded
     {
-        std::set<Module::Type> intersect{};
-        std::set_intersection(_loadedModules.begin(), _loadedModules.end(), initInfo.rendererInitInfo.mandatoryModules.begin(), initInfo.rendererInitInfo.mandatoryModules.end(), std::inserter(intersect, intersect.begin()));
-
-        if (intersect.size() != initInfo.rendererInitInfo.mandatoryModules.size()) {
+        if (_loadedMandatoryModules.size() != _initInfo.mandatoryModules.size()) {
             LUG_LOG.error("Graphics: Can't init the engine with all the mandatory modules");
             return false;
         }
@@ -44,12 +58,36 @@ bool Graphics::init(const InitInfo& initInfo) {
 
     {
         std::stringstream ss{};
-        std::copy(_loadedModules.begin(), _loadedModules.end(), std::ostream_iterator<Module::Type>(ss, " "));
-        LUG_LOG.info("Graphics: Modules loaded : {}", ss.str());
+        std::copy(_loadedMandatoryModules.begin(), _loadedMandatoryModules.end(), std::ostream_iterator<Module::Type>(ss, " "));
+        LUG_LOG.info("Graphics: Mandatory modules loaded : {}", ss.str());
+    }
+
+    {
+        std::stringstream ss{};
+        std::copy(_loadedOptionalModules.begin(), _loadedOptionalModules.end(), std::ostream_iterator<Module::Type>(ss, " "));
+        LUG_LOG.info("Graphics: Optional modules loaded : {}", ss.str());
     }
 #endif
 
     return true;
+}
+
+void Graphics::unsupportedModule(Module::Type type) {
+    {
+        const auto it = std::find(std::begin(_loadedMandatoryModules), std::end(_loadedMandatoryModules), type);
+
+        if (it != std::end(_loadedMandatoryModules)) {
+            _loadedMandatoryModules.erase(it);
+        }
+    }
+
+    {
+        const auto it = std::find(std::begin(_loadedOptionalModules), std::end(_loadedOptionalModules), type);
+
+        if (it != std::end(_loadedOptionalModules)) {
+            _loadedOptionalModules.erase(it);
+        }
+    }
 }
 
 std::unique_ptr<Scene> Graphics::createScene() {
@@ -64,7 +102,7 @@ std::unique_ptr<Mesh> Graphics::createMesh(const std::string& name) {
 
     std::unique_ptr<Mesh> mesh = nullptr;
 
-    if (_rendererType == Renderer::Type::Vulkan) {
+    if (_initInfo.rendererType == Renderer::Type::Vulkan) {
         Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(_renderer.get());
         std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(0, true)->getFamilyIdx() };
         mesh = std::make_unique<Vulkan::Mesh>(name, queueFamilyIndices, &renderer->getDevice());
@@ -84,7 +122,7 @@ std::unique_ptr<Model> Graphics::createModel(const std::string& name, const std:
 
     std::unique_ptr<Model> model = nullptr;
 
-    if (_rendererType == Renderer::Type::Vulkan) {
+    if (_initInfo.rendererType == Renderer::Type::Vulkan) {
         Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(_renderer.get());
         std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(0, true)->getFamilyIdx() };
         model = std::make_unique<Vulkan::Model>(name, queueFamilyIndices, &renderer->getDevice());
@@ -113,7 +151,7 @@ std::unique_ptr<Camera> Graphics::createCamera(const std::string& name) {
 
     std::unique_ptr<Camera> camera = nullptr;
 
-    if (_rendererType == Renderer::Type::Vulkan) {
+    if (_initInfo.rendererType == Renderer::Type::Vulkan) {
         camera = std::make_unique<Vulkan::Camera>(name);
     }
     else {

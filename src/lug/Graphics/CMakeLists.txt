@@ -18,6 +18,7 @@ set(SRC
     ${SRCROOT}/Node.cpp
     ${SRCROOT}/ObjModelLoader.cpp
     ${SRCROOT}/PointLight.cpp
+    ${SRCROOT}/Renderer.cpp
     ${SRCROOT}/RenderQueue.cpp
     ${SRCROOT}/RenderView.cpp
     ${SRCROOT}/Scene.cpp
