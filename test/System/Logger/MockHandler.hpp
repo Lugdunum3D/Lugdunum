@@ -5,6 +5,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 class MockHandler : public Handler {
 public:
@@ -15,5 +16,6 @@ public:
     MOCK_METHOD0(flush, void());
 };
 
-} // namespace lug
-} // namespace System
+} // Logger
+} // System
+} // lug

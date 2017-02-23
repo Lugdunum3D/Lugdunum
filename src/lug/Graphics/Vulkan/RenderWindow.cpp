@@ -3,7 +3,7 @@
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
 #include <lug/Graphics/Vulkan/RenderView.hpp>
 #include <lug/System/Debug.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
 

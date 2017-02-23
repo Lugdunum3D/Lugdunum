@@ -1,7 +1,7 @@
 #include <lug/Math/Matrix.hpp>
 #include <lug/Graphics/Vulkan/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

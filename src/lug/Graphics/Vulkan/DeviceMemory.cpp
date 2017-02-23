@@ -1,6 +1,6 @@
 #include <lug/Graphics/Vulkan/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Device.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

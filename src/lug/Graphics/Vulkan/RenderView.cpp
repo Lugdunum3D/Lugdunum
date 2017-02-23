@@ -1,7 +1,7 @@
 #include <lug/Graphics/Vulkan/RenderView.hpp>
 #include <lug/Graphics/RenderQueue.hpp>
 #include <lug/Graphics/Vulkan/ForwardRenderTechnique.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

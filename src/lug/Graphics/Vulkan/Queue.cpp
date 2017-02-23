@@ -1,5 +1,5 @@
 #include <lug/Graphics/Vulkan/Queue.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 #include <lug/System/Debug.hpp>
 
 namespace lug {

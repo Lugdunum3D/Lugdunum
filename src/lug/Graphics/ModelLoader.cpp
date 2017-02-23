@@ -2,7 +2,8 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <lug/Graphics/ModelLoader.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

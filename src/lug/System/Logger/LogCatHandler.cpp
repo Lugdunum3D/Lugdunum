@@ -2,6 +2,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 LogCatHandler::LogCatHandler(const std::string& name) : Handler(name) {}
 
@@ -26,5 +27,6 @@ android_LogPriority LogCatHandler::lugLevelToLogCatPrio(Level level) {
     return ANDROID_LOG_UNKNOWN;
 }
 
-} // namespace lug
-} // namespace System
+} // Logger
+} // System
+} // lug

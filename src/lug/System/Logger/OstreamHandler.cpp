@@ -4,6 +4,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 OstreamHandler::OstreamHandler(const std::string& name, std::ostream& out) : Handler(name), _os(out) {}
 
@@ -18,5 +19,6 @@ void OstreamHandler::flush() {
 StdoutHandler::StdoutHandler(const std::string& name) : OstreamHandler(name, std::cout) {}
 StderrHandler::StderrHandler(const std::string& name) : OstreamHandler(name, std::cerr) {}
 
-} // namespace lug
-} // namespace System
+} // Logger
+} // System
+} // lug

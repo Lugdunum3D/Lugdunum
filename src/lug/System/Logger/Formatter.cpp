@@ -6,6 +6,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 namespace priv {
 
 std::string UserChars::format(Message*) const {
@@ -182,5 +183,6 @@ void Formatter::format(priv::Message& msg, const std::tm* now) {
     }
 }
 
-} // namespace lug
-} // namespace System
+} // Logger
+} // System
+} // lug

@@ -1,5 +1,5 @@
 #include <lug/Graphics/Vulkan/BufferPool.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

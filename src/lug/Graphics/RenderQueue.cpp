@@ -4,7 +4,7 @@
 #include <lug/Graphics/ModelInstance.hpp>
 #include <lug/Graphics/MovableObject.hpp>
 #include <lug/Graphics/RenderQueue.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

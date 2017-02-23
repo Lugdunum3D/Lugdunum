@@ -1,4 +1,4 @@
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
@@ -6,6 +6,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 constexpr const char* loggerName = "MyTestLogger";
 constexpr const char* handlerName = "MyTestHandler";
@@ -304,6 +305,7 @@ TEST(Logger, LogsExceptionWhenParseFails) {
 } // namespace ExceptionHandler
 
 
+}
 }
 }
 

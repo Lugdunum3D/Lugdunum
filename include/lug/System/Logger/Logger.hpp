@@ -11,6 +11,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 class Handler;
 
@@ -24,7 +25,7 @@ public:
     Logger& operator=(const Logger&) = delete;
     Logger& operator=(Logger&&) = default;
 
-    virtual ~Logger() = default;
+    ~Logger() = default;
 
     void addHandler(Handler* handler);
     void addHandler(const std::string& name);
@@ -60,17 +61,18 @@ public:
     void handle(priv::Message& msg);
     void flush();
 
-    static System::Logger logger;
+    static Logger& getInternalLogger();
 
 protected:
     const std::string _name;
     std::set<Handler*> _handlers;
 };
 
-#include <lug/System/Logger.inl>
+#include <lug/System/Logger/Logger.inl>
 
-#define LUG_LOG ::lug::System::Logger::logger
+#define LUG_LOG ::lug::System::Logger::Logger::getInternalLogger()
 
+} // Logger
 } // System
 } // lug
 

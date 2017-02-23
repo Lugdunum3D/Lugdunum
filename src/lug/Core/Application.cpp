@@ -1,7 +1,7 @@
 #include <chrono>
 #include <lug/Core/Application.hpp>
 #include <lug/System/Clock.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Core {

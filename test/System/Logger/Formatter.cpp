@@ -6,6 +6,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 using namespace ::testing;
 
@@ -69,5 +70,6 @@ TEST(Formatter, FormatsTime) {
     ASSERT_STREQ(msg.formatted.c_str(), ss.str().c_str());
 }
 
+}
 }
 }

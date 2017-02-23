@@ -6,6 +6,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 using namespace ::testing;
 
@@ -149,6 +150,6 @@ TEST(OstreamHandler, CallsFormat) {
     LoggingFacility::clear();
 }
 
-
+}
 }
 }

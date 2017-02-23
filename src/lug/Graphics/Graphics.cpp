@@ -7,7 +7,7 @@
 #include <lug/Graphics/Vulkan/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Model.hpp>
 #include <lug/Graphics/Vulkan/Camera.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

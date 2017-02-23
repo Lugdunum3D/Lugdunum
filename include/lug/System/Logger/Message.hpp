@@ -4,6 +4,8 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
+
 /**
  * \cond HIDDEN_SYMBOLS
  */
@@ -33,5 +35,7 @@ public:
 /**
  * \endcond
  */
+
+} // Logger
 } // System
 } // lug

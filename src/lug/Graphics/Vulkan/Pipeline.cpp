@@ -3,7 +3,7 @@
 #include <lug/Graphics/Vulkan/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/ShaderModule.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

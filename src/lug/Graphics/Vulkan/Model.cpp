@@ -1,6 +1,6 @@
 #include <cstring>
 #include <lug/Graphics/Vulkan/Model.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

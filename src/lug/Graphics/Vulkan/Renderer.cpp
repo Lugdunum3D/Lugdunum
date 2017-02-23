@@ -5,7 +5,7 @@
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
 #include <lug/Graphics/Vulkan/RTTI/Enum.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 #include <lug/Math/Geometry/Transform.hpp>
 
 namespace lug {
@@ -33,16 +33,16 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
     const char* msg,
     void* /*userData*/) {
 
-    // Convert VkDebugReportFlagsEXT to System::Level
-    System::Level level = System::Level::Off;
+    // Convert VkDebugReportFlagsEXT to System::Logger::Level
+    System::Logger::Level level = System::Logger::Level::Off;
     if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
-        level = System::Level::Error;
+        level = System::Logger::Level::Error;
     } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT || flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
-        level = System::Level::Warning;
+        level = System::Logger::Level::Warning;
     } else if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
-        level = System::Level::Info;
+        level = System::Logger::Level::Info;
     } else {
-        level = System::Level::Debug;
+        level = System::Logger::Level::Debug;
     }
 
     LUG_LOG.log(level, "{}: {}", layerPrefix, msg);
@@ -319,7 +319,6 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo) {
         // TODO: Add score
         matchedDeviceIdx = matchedDevicesIdx[0];
         for (uint8_t idx : matchedDevicesIdx) {
-            lug::System::Logger::logger.info("Device {} out of {} Mode: {}", idx + 1, _physicalDeviceInfos.size(), (int)_physicalDeviceInfos[idx].properties.deviceType);
             if (_physicalDeviceInfos[idx].properties.deviceType == ((initInfo.useDiscreteGPU == true) ? (VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) : (VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU))) {
                 matchedDeviceIdx = idx;
                 break;

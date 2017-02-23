@@ -1,5 +1,5 @@
 #include <lug/Window/Window.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 #if defined(LUG_SYSTEM_ANDROID)
     #include <lug/System/Logger/LogCatHandler.hpp>

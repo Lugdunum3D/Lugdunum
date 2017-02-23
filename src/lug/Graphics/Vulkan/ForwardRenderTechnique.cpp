@@ -15,7 +15,7 @@
 #include <lug/Math/Matrix.hpp>
 #include <lug/Math/Vector.hpp>
 #include <lug/Math/Geometry/Transform.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

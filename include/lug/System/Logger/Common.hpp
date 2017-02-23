@@ -36,6 +36,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 #define LUG_LOG_ENUM(CHANNEL) CHANNEL,
 enum class Level : uint8_t {
@@ -45,5 +46,6 @@ enum class Level : uint8_t {
 
 LUG_SYSTEM_API std::ostream& operator<<(std::ostream& os, Level level);
 
+} // Logger
 } // System
 } // lug

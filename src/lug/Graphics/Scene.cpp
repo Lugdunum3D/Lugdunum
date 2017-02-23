@@ -2,7 +2,7 @@
 #include <lug/Graphics/DirectionalLight.hpp>
 #include <lug/Graphics/PointLight.hpp>
 #include <lug/Graphics/Spotlight.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

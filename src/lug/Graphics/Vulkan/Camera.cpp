@@ -1,6 +1,6 @@
 #include <lug/Graphics/Vulkan/Camera.hpp>
 #include <lug/Graphics/Scene.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

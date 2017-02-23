@@ -2,7 +2,7 @@
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/Graphics/Vulkan/Queue.hpp>
 #include <lug/Graphics/Vulkan/RenderPass.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {
