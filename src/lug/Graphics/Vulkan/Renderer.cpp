@@ -4,6 +4,7 @@
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
+#include <lug/Graphics/Vulkan/RTTI/Enum.hpp>
 #include <lug/System/Logger.hpp>
 #include <lug/Math/Geometry/Transform.hpp>
 
@@ -277,13 +278,11 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
             }
 
             // Load images formats properties
-            // The VkFormat enum members are from 1 to 184
             {
-                for (uint32_t i = 1; i <= 184; ++i) {
-                    VkFormat format = (VkFormat)i;
-                    vkGetPhysicalDeviceFormatProperties(physicalDevices[idx], format, &_physicalDeviceInfos[idx].formatProperties[format]);
-                }
-
+                #define LUG_LOAD_IMAGE_FORMAT_PROPERTIES(formatEnum) \
+                    vkGetPhysicalDeviceFormatProperties(physicalDevices[idx], formatEnum, &_physicalDeviceInfos[idx].formatProperties[formatEnum]);
+                LUG_VULKAN_FORMAT(LUG_LOAD_IMAGE_FORMAT_PROPERTIES)
+                #undef LUG_LOAD_IMAGE_FORMAT_PROPERTIES
             }
 
             // TODO: Get additional informations (images properties, etc)

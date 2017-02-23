@@ -53,6 +53,7 @@ set(SRC
     ${SRCROOT}/Vulkan/RenderWindow.cpp
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
+    ${SRCROOT}/Vulkan/RTTI/Enum.cpp
     ${SRCROOT}/Vulkan/Semaphore.cpp
     ${SRCROOT}/Vulkan/ShaderModule.cpp
     ${SRCROOT}/Vulkan/Swapchain.cpp
@@ -134,6 +135,7 @@ set(INC
     ${INCROOT}/Vulkan/RenderView.inl
     ${INCROOT}/Vulkan/RenderWindow.hpp
     ${INCROOT}/Vulkan/RenderWindow.inl
+    ${INCROOT}/Vulkan/RTTI/Enum.hpp
     ${INCROOT}/Vulkan/Semaphore.hpp
     ${INCROOT}/Vulkan/ShaderModule.hpp
     ${INCROOT}/Vulkan/Swapchain.hpp
