@@ -8,8 +8,7 @@ namespace lug {
 namespace Graphics {
 
 // TODO: Move in helper class
-std::string  getFileExtension(const std::string& fileName)
-{
+std::string  getFileExtension(const std::string& fileName) {
     std::size_t size = fileName.rfind('.', fileName.length());
     if (size != std::string::npos)
         return (fileName.substr(size + 1, fileName.length() - size));
@@ -115,7 +114,7 @@ bool ModelLoader::loadFromFile(Model* model, const std::string& file) {
         model->addMesh(std::move(mesh));
     }
 
-    return (true);
+    return true;
 }
 
 } // Graphics
