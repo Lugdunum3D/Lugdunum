@@ -16,7 +16,7 @@ public:
     ModelLoader& operator=(const ModelLoader&) = delete;
     ModelLoader& operator=(ModelLoader&& ModelLoader) = delete;
 
-    virtual ~ModelLoader() = default;
+    ~ModelLoader() = default;
 
     static bool loadFromFile(Model* model, const std::string& file);
 };

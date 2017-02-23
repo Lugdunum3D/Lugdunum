@@ -16,7 +16,6 @@ set(SRC
     ${SRCROOT}/MovableCamera.cpp
     ${SRCROOT}/MovableObject.cpp
     ${SRCROOT}/Node.cpp
-    ${SRCROOT}/ObjModelLoader.cpp
     ${SRCROOT}/PointLight.cpp
     ${SRCROOT}/Renderer.cpp
     ${SRCROOT}/RenderQueue.cpp
@@ -86,7 +85,6 @@ set(INC
     ${INCROOT}/MovableObject.inl
     ${INCROOT}/Node.hpp
     ${INCROOT}/Node.inl
-    ${INCROOT}/ObjModelLoader.hpp
     ${INCROOT}/PointLight.hpp
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/RenderQueue.hpp
@@ -149,14 +147,29 @@ if (NOT CI_BUILD)
     include_directories(${VULKAN_INCLUDE_DIR})
 endif()
 
-if (NOT IS_DIRECTORY "${PROJECT_SOURCE_DIR}/thirdparty/tinyobjloader")
-  message(FATAL_ERROR "call \"git submodule update --init --recursive\"")
+# Find assimp
+find_package(Assimp)
+if (NOT ASSIMP_FOUND)
+  if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/assimp")
+    message(FATAL_ERROR "Can't find assimp, call git submodule update --recursive")
+  endif()
+
+  if (WIN32)
+    set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/windows/${ARCH_DIR}")
+  elseif (LINUX)
+    set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/linux")
+  else ()
+    set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/android")
+  endif()
+
+  set(ASSIMP_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/assimp/include")
+  find_package(Assimp REQUIRED)
 endif()
 
-include_directories(${PROJECT_SOURCE_DIR}/thirdparty/tinyobjloader)
-
+include_directories(${ASSIMP_INCLUDE_DIR})
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system lug-math
+                EXTERNAL_LIBS ${ASSIMP_LIBRARY}
 )
