@@ -463,17 +463,6 @@ std::vector<const char*> VkImageUsageFlagsToStr(VkImageUsageFlags flag)
     return retVal;
 }
 
-Version apiVersionToStruct(uint32_t version)
-{
-    Version retVal;
-
-    retVal.major = (version << 22) & 0x3FF;
-    retVal.minor = (version << 12) & 0x3FF;
-    retVal.patch = version & 0xFFF;
-
-    return retVal;
-}
-
 } // Vulkan
 } // Graphics
 } // lug

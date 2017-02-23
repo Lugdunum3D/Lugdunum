@@ -212,8 +212,6 @@ LUG_GRAPHICS_API std::vector<const char*> VkSurfaceTransformFlagsKHRToStr(VkSurf
 LUG_GRAPHICS_API std::vector<const char*> VkCompositeAlphaFlagsKHRToStr(VkCompositeAlphaFlagsKHR flag);
 LUG_GRAPHICS_API std::vector<const char*> VkImageUsageFlagsToStr(VkImageUsageFlags flag);
 
-LUG_GRAPHICS_API Version apiVersionToStruct(uint32_t version);
-
 } // Vulkan
 } // Graphics
 } // lug
