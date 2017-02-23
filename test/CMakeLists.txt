@@ -30,7 +30,7 @@ if (NOT GMOCK_FOUND)
   endif()
 
   set(GMOCK_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/googlemock/include")
-  find_package(GMOCK REQUIRED)
+  find_package(GMock REQUIRED)
 endif()
 
 # Find gtest

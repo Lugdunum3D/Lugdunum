@@ -10,7 +10,7 @@ if [[ ! -d "$HOME/.local/debs" ]]; then
   mkdir -p "$HOME/.local/debs"
   cd "$HOME/.local/debs"
 
-  for package in clang-3.8 cmake gcc-6 g++-6; do
+  for package in clang-3.8 cmake gcc-6 g++-6 libassimp-dev; do
     sudo aptitude --download-only install $package -y
   done
 
@@ -23,17 +23,3 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /u
 sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 60 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-3.8
 sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100
 sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
-
-# Build gmock
-
-if [[ ! -d "$HOME/.local/gmock" ]]; then
-    cd "$HOME/Lugdunum/thirdparty/googletest/googlemock"
-    mkdir build
-    cd build
-    cmake ..
-    cmake --build .
-
-    mkdir -p "$HOME/.local/gmock"
-    cp gtest/*.a "$HOME/.local/gmock"
-    cp *.a "$HOME/.local/gmock"
-fi
