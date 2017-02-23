@@ -2,7 +2,11 @@
 #include <fstream>
 #include <lug/Graphics/Vulkan/Device.hpp>
 #include <lug/System/Logger/Logger.hpp>
-
+#if defined (LUG_SYSTEM_ANDROID)
+    #include <lug/Window/Window.hpp>
+    #include <lug/Window/Android/WindowImplAndroid.hpp>
+    #include <android/asset_manager.h>
+#endif
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
@@ -39,24 +43,42 @@ void ShaderModule::destroy() {
 }
 
 std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, const Device* device) {
-    // TODO: replace opening file with something more global
-    std::ifstream shaderCode(file, std::ios::binary);
 
-    if (!shaderCode.good()) {
-        // TODO: use errno to print the correct error
-        LUG_LOG.error("RendererVulkan: Can't open file \"{}\"", file);
-        return nullptr;
-    }
+    #if defined (LUG_SYSTEM_ANDROID)
+        // Load shader from compressed asset
+        AAsset* asset = AAssetManager_open((lug::Window::priv::WindowImpl::activity)->assetManager, file.c_str(), AASSET_MODE_STREAMING);
+        if (!asset) {
+            LUG_LOG.error("RendererVulkan: Can't find Android assetManager");
+            return nullptr;
+        }
+        size_t shaderCodeSize = AAsset_getLength(asset);
+        if (shaderCodeSize <= 0) {
+            LUG_LOG.error("RendererVulkan: Android asset is empty");
+            return nullptr;
+        }
+        char* buffer = new char[shaderCodeSize];
+        AAsset_read(asset, buffer, shaderCodeSize);
+        AAsset_close(asset);
+    #else
 
-    shaderCode.seekg(0, shaderCode.end);
-    uint32_t shaderCodeSize = static_cast<uint32_t>(shaderCode.tellg());
-    shaderCode.seekg(0, shaderCode.beg);
+        // TODO: replace opening file with something more global
+        std::ifstream shaderCode(file, std::ios::binary);
 
-    char* buffer = new char[shaderCodeSize];
+        if (!shaderCode.good()) {
+            // TODO: use errno to print the correct error
+            LUG_LOG.error("RendererVulkan: Can't open file \"{}\"", file);
+            return nullptr;
+        }
 
-    shaderCode.read(buffer, shaderCodeSize);
-    shaderCode.close();
+        shaderCode.seekg(0, shaderCode.end);
+        uint32_t shaderCodeSize = static_cast<uint32_t>(shaderCode.tellg());
+        shaderCode.seekg(0, shaderCode.beg);
 
+        char* buffer = new char[shaderCodeSize];
+
+        shaderCode.read(buffer, shaderCodeSize);
+        shaderCode.close();
+    #endif
     VkShaderModuleCreateInfo createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         createInfo.pNext = nullptr,

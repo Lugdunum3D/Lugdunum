@@ -3,7 +3,7 @@ android {
     compileSdkVersion 24
     buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "com.lugdunum.samples.base"
+        applicationId "com.lugdunum.samples.hello"
         minSdkVersion 24
         targetSdkVersion 24
         versionCode 1
@@ -25,7 +25,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            path "../../../base/CMakeLists.txt"
+            path "../../../hello/CMakeLists.txt"
         }
     }
 }

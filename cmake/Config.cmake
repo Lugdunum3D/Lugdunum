@@ -9,7 +9,7 @@ else()
     message(FATAL_ERROR "Unsupported operating system or environment")
     return()
 endif()
-
+message(${CMAKE_SYSTEM_NAME})
 # detect compiler
 if(CMAKE_CXX_COMPILER MATCHES ".*clang[+][+]" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang++")
     set(LUG_COMPILER_CLANG 1)

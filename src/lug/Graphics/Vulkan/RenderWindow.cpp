@@ -7,7 +7,7 @@
 
 #if defined(LUG_SYSTEM_WINDOWS)
 
-#include <lug/Window/Win32/WindowImplWin32.hpp>
+ #include <lug/Window/Win32/WindowImplWin32.hpp>
 
 #elif defined(LUG_SYSTEM_LINUX)
 
@@ -56,6 +56,7 @@ bool RenderWindow::beginFrame() {
                 break;
             }
         }
+//    LUG_LOG.info("RenderWindow::beginFrame start");
     }
 
     while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, acquireImageData->completeSemaphore)) {
@@ -63,6 +64,9 @@ bool RenderWindow::beginFrame() {
             if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
                 return false;
             }
+            initSwapchainCapabilities();
+            initSwapchain();
+
             for (auto& renderView: _renderViews) {
                 RenderView* renderView_ = static_cast<RenderView*>(renderView.get());
                 if (!renderView_->getRenderTechnique()->initDepthBuffers(_swapchain.getImagesViews()) ||
@@ -119,11 +123,18 @@ bool RenderWindow::endFrame() {
 }
 
 lug::Graphics::RenderView* RenderWindow::createView(lug::Graphics::RenderView::InitInfo& initInfo) {
+LUG_LOG.info("RenderWindow::createView start");
+
     std::unique_ptr<RenderView> renderView = std::make_unique<RenderView>(this);
 
     if (!renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, _descriptorPool.get(), _swapchain.getImagesViews())) {
+        LUG_LOG.error("RenderWindow::createView NULLLLL");
+
         return nullptr;
     }
+
+LUG_LOG.info("RenderWindow::createView end");
+
 
     _renderViews.push_back(std::move(renderView));
 
@@ -144,11 +155,19 @@ std::unique_ptr<RenderWindow>
 RenderWindow::create(Renderer &renderer, RenderWindow::InitInfo& initInfo) {
     std::unique_ptr<RenderWindow> window(new RenderWindow(renderer));
 
+LUG_LOG.info("RenderWindow::RenderWindow::create start");
+
     if (!window->init(initInfo)) return nullptr;
 
     for (auto& renderViewInitInfo : initInfo.renderViewsInitInfo) {
+        LUG_LOG.info("RenderWindow::RenderWindow::create loop");
+
         if (!window->createView(renderViewInitInfo)) return nullptr;
+        // break;
     }
+     // if (!window->createView(initInfo.renderViewsInitInfo[0])) return nullptr;
+    
+        LUG_LOG.info("RenderWindow::RenderWindow::create end");
 
     return window;
 }
@@ -158,6 +177,8 @@ RenderWindow::create(Renderer &renderer, RenderWindow::InitInfo& initInfo) {
  * @return Success
  */
 bool RenderWindow::initSurface() {
+        LUG_LOG.info("RenderWindow::initSurface start");
+
 #if defined(LUG_SYSTEM_WINDOWS) // Win32 surface
     VkWin32SurfaceCreateInfoKHR createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
@@ -178,6 +199,15 @@ bool RenderWindow::initSurface() {
     };
 
     VkResult result = vkCreateXlibSurfaceKHR(_renderer.getInstance(), &createInfo, nullptr, &_surface);
+#elif defined(LUG_SYSTEM_ANDROID) // Android Surface
+    VkAndroidSurfaceCreateInfoKHR createInfo{
+        createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
+        createInfo.pNext = nullptr,
+        createInfo.flags = 0,
+        createInfo.window = _impl->getWindow()
+    };
+
+    VkResult result = vkCreateAndroidSurfaceKHR(_renderer.getInstance(), &createInfo, nullptr, &_surface);
 #else
 #error "RenderWindow::initSurface Unknow platform"
 #endif
@@ -186,10 +216,14 @@ bool RenderWindow::initSurface() {
         LUG_LOG.error("RendererWindow: Can't initialize surface: {}", result);
         return false;
     }
+
+    LUG_LOG.info("RenderWindow::initSurface END : RETURN TRUE");
+
     return true;
 }
 
 bool RenderWindow::initSwapchainCapabilities() {
+ LUG_LOG.info("RenderWindow::initSwapchainCapabilities START");
     VkResult result;
     PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
 
@@ -232,6 +266,8 @@ bool RenderWindow::initSwapchainCapabilities() {
         }
     }
 
+ LUG_LOG.info("RenderWindow::initSwapchainCapabilities END");
+
     return true;
 }
 
@@ -257,7 +293,10 @@ bool RenderWindow::initPresentQueue() {
     return true;
 }
 
+
 bool RenderWindow::initSwapchain() {
+  LUG_LOG.info("RendererWindow::initSwapchain START");
+
     VkResult result;
     PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
 
@@ -265,7 +304,7 @@ bool RenderWindow::initSwapchain() {
 
     VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
     VkSurfaceFormatKHR swapchainFormat{
-        swapchainFormat.format = VK_FORMAT_B8G8R8A8_UNORM,
+        swapchainFormat.format = VK_FORMAT_R8G8B8A8_UNORM,
         swapchainFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
     };
     uint32_t minImageCount = 3;
@@ -288,6 +327,9 @@ bool RenderWindow::initSwapchain() {
         if (std::find_if(info->swapChain.formats.begin(), info->swapChain.formats.end(), [&swapchainFormat](const VkSurfaceFormatKHR& lhs) {
             return lhs.colorSpace == swapchainFormat.colorSpace && swapchainFormat.format == lhs.format;
         }) == info->swapChain.formats.end()) {
+
+              LUG_LOG.info("RendererWindow::initSwapchain Missing");
+
             LUG_LOG.error("RendererWindow: Missing VK_FORMAT_B8G8R8A8_UNORM/VK_COLOR_SPACE_SRGB_NONLINEAR_KHR format");
             return false;
         }
@@ -334,7 +376,7 @@ bool RenderWindow::initSwapchain() {
             createInfo.queueFamilyIndexCount = 0,
             createInfo.pQueueFamilyIndices = nullptr,
             createInfo.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(transform),
-            createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+            createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
             createInfo.presentMode = swapchainPresentMode,
             createInfo.clipped = VK_TRUE,
             createInfo.oldSwapchain = _swapchain
@@ -386,6 +428,8 @@ bool RenderWindow::initSwapchain() {
         }
 
         _swapchain = Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat, extent);
+
+  LUG_LOG.info("RendererWindow::initSwapchain END before _swapchain.init(");
 
         return _swapchain.init();
     }
@@ -566,12 +610,18 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
         _descriptorPool = std::make_unique<DescriptorPool>(descriptorPool, &_renderer.getDevice());
     }
 
-
+    LUG_LOG.info("RenderWindow::init defore init surface");
     if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue())) {
         return false;
     }
+    LUG_LOG.info("RenderWindow::init after initSurface() && initSwapchainCapabilities() && initPresentQueue()");
+
+
 
     return initSwapchain() && initFramesData(initInfo);
+    LUG_LOG.info("_renderer.getQueue");
+
+    return initSwapchain();
 }
 
 void RenderWindow::destroy() {

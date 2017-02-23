@@ -44,25 +44,18 @@ macro(lug_add_library target)
     string(TOUPPER "${NAME_UPPER}" NAME_UPPER)
     set_target_properties(${target} PROPERTIES DEFINE_SYMBOL ${NAME_UPPER}_EXPORT)
 
-    if(BUILD_SHARED_LIBS)
-        set_target_properties(${target} PROPERTIES DEBUG_POSTFIX -d)
+    set_target_properties(${target} PROPERTIES DEBUG_POSTFIX -d)
 
-        if(LUG_OS_WINDOWS)
-            # include the major version number in Windows shared library names (but not import library names)
-            set_target_properties(${target} PROPERTIES SUFFIX "-${VERSION_MAJOR}${CMAKE_SHARED_LIBRARY_SUFFIX}")
-        endif()
+    if(LUG_OS_WINDOWS)
+        # include the major version number in Windows shared library names (but not import library names)
+        set_target_properties(${target} PROPERTIES SUFFIX "-${VERSION_MAJOR}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    endif()
 
-        if(LUG_OS_WINDOWS AND LUG_COMPILER_GCC)
-            # on Windows/gcc get rid of "lib" prefix for shared libraries,
-            # and transform the ".dll.a" suffix into ".a" for import libraries
-            set_target_properties(${target} PROPERTIES PREFIX "")
-            set_target_properties(${target} PROPERTIES IMPORT_SUFFIX ".a")
-        endif()
-    else()
-        set_target_properties(${target} PROPERTIES DEBUG_POSTFIX -s-d)
-        set_target_properties(${target} PROPERTIES RELEASE_POSTFIX -s)
-        set_target_properties(${target} PROPERTIES MINSIZEREL_POSTFIX -s)
-        set_target_properties(${target} PROPERTIES RELWITHDEBINFO_POSTFIX -s)
+    if(LUG_OS_WINDOWS AND LUG_COMPILER_GCC)
+        # on Windows/gcc get rid of "lib" prefix for shared libraries,
+        # and transform the ".dll.a" suffix into ".a" for import libraries
+        set_target_properties(${target} PROPERTIES PREFIX "")
+        set_target_properties(${target} PROPERTIES IMPORT_SUFFIX ".a")
     endif()
 
     # set the target's folder (for IDEs that support it, e.g. Visual Studio)

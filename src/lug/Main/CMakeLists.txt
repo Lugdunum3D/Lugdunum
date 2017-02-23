@@ -15,7 +15,8 @@ source_group("inc" FILES ${INC})
 
 # Include Main cpp files depending on user os
 if(LUG_OS_ANDROID)
-    include_directories(${CMAKE_SYSROOT}/usr/include)
+#    include_directories(${CMAKE_SYSROOT}/usr/include)
+    include_directories(/Users/sumenia/Library/Android/sdk/ndk-bundle/platforms/android-24/arch-arm64/usr/include)
     list(APPEND SRC ${SRCROOT}/MainAndroid.cpp)
     list(APPEND INC ${SRCROOT}/MainAndroid.hpp)
 endif()

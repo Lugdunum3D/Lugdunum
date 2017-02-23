@@ -12,8 +12,14 @@
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 
+#include <string>
+#include <lug/System/Logger.hpp>
+
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
     std::srand((uint32_t)std::time(0));
+
+    lug::System::Logger::logger.info("In constructor of Application::Application()");
+
     getRenderWindowInfo().windowInitInfo.title = "Hello Cube";
 
     getRenderWindowInfo().renderViewsInitInfo.push_back({
@@ -335,7 +341,7 @@ bool Application::init(int argc, char* argv[]) {
         LUG_ASSERT(renderViews.size() > 0, "There should be at least 1 render view");
 
         renderViews[0]->attachCamera(std::move(camera));
-        renderViews[1]->attachCamera(std::move(camera2));
+//        renderViews[1]->attachCamera(std::move(camera2));
     }
 
 /*    _cubeNode->scale({0.5f, 0.5f, 0.5f});

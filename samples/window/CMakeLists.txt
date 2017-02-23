@@ -15,10 +15,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/modules")
 
 include("${CMAKE_SOURCE_DIR}/../../cmake/Config.cmake")
 
-if(ANDROID_NATIVE_API_LEVEL EQUAL 23)
-    set(LUG_STATIC_LIBRARIES true)
-endif()
-
 # find Lugdunum and link with it
 find_package(LUG REQUIRED window system)
 

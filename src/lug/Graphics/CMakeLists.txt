@@ -173,9 +173,14 @@ if (NOT ASSIMP_FOUND)
 endif()
 
 include_directories(${ASSIMP_INCLUDE_DIR})
+if(LUG_OS_ANDROID)
+    include_directories(${CMAKE_SYSROOT}/usr/include)
+    list(APPEND EXT_LIBRARIES android)
+endif()
+
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${ASSIMP_LIBRARY}
+                EXTERNAL_LIBS ${ASSIMP_LIBRARY} ${EXT_LIBRARIES}
 )

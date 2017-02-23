@@ -1,10 +1,10 @@
 #pragma once
-
 // Version
 #define LUG_VERSION_MAJOR 0
 #define LUG_VERSION_MINOR 1
 #define LUG_VERSION_PATCH 0
 
+#define LUG_SYSTEM_ANDROID
 // Detect the operating system
 #if defined(_WIN32)
 
@@ -16,9 +16,9 @@
 
         #define LUG_SYSTEM_ANDROID
 
-    #elif defined(__linux__)
-
-        #define LUG_SYSTEM_LINUX
+//    #elif defined(__linux__)
+//
+//        #define LUG_SYSTEM_LINUX
 
     #else
 
@@ -56,29 +56,22 @@
 
 
 // Define macros for import / export
-#if !defined(LUG_STATIC)
 
-    #if defined(LUG_SYSTEM_WINDOWS)
+#if defined(LUG_SYSTEM_WINDOWS)
 
-        #define LUG_API_EXPORT __declspec(dllexport)
-        #define LUG_API_IMPORT __declspec(dllimport)
+    #define LUG_API_EXPORT __declspec(dllexport)
+    #define LUG_API_IMPORT __declspec(dllimport)
 
-        // Disable C4251 and C4275 warnings for Visual C++ compilers
-        #if defined(LUG_COMPILER_MSVC)
-            #pragma warning(disable:4251)
-            #pragma warning(disable:4275)
-        #endif
-
-    #else
-
-        #define LUG_API_EXPORT __attribute__ ((__visibility__ ("default")))
-        #define LUG_API_IMPORT __attribute__ ((__visibility__ ("default")))
-
+    // Disable C4251 and C4275 warnings for Visual C++ compilers
+    #if defined(LUG_COMPILER_MSVC)
+        #pragma warning(disable:4251)
+        #pragma warning(disable:4275)
     #endif
 
 #else
 
-    #define LUG_API_EXPORT
-    #define LUG_API_IMPORT
+    #define LUG_API_EXPORT __attribute__ ((__visibility__ ("default")))
+    #define LUG_API_IMPORT __attribute__ ((__visibility__ ("default")))
 
 #endif
+

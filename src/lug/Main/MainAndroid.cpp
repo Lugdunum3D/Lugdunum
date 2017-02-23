@@ -1,6 +1,7 @@
 #include <thread>
 #include <lug/Main/MainAndroid.hpp>
 #include <lug/Window/Android/WindowImplAndroid.hpp>
+#include <lug/System/Logger.hpp>
 
 namespace lug {
 namespace Main {
@@ -70,13 +71,17 @@ void AndroidApp::onDestroy(ANativeActivity* ) {
 
 void AndroidApp::onWindowFocusChanged(ANativeActivity*, int) {}
 
-void AndroidApp::onNativeWindowCreated(ANativeActivity*, ANativeWindow* ) {}
+void AndroidApp::onNativeWindowCreated(ANativeActivity* , ANativeWindow* window) {
+    lug::Window::priv::WindowImpl::nativeWindow = window;
+}
 
 void AndroidApp::onNativeWindowResized(ANativeActivity*, ANativeWindow* ) {}
 
 void AndroidApp::onNativeWindowRedrawNeeded(ANativeActivity*, ANativeWindow*) {}
 
-void AndroidApp::onNativeWindowDestroyed(ANativeActivity*, ANativeWindow* ) {}
+void AndroidApp::onNativeWindowDestroyed(ANativeActivity*, ANativeWindow* window) {
+    lug::Window::priv::WindowImpl::nativeWindow = window;
+}
 
 void AndroidApp::onInputQueueCreated(ANativeActivity*, AInputQueue* input) {
     lug::Window::priv::WindowImpl::inputQueue = input;
@@ -96,5 +101,7 @@ void AndroidApp::onLowMemory(ANativeActivity*) {}
 } // lug
 
 void  ANativeActivity_onCreate(ANativeActivity* activity, void* savedState, size_t savedStateSize) {
+    LUG_LOG.info("coucou");
     activity->instance = new lug::Main::AndroidApp(activity, savedState, savedStateSize);
+    lug::Window::priv::WindowImpl::activity = activity; 
 }

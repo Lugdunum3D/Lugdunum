@@ -16,14 +16,18 @@ bool RenderView::init(RenderView::InitInfo& initInfo,
                         const std::vector<std::unique_ptr<ImageView> >& imageViews) {
     lug::Graphics::RenderView::init(initInfo);
 
+    LUG_LOG.info("RenderView::init");
     if (_info.renderTechniqueType == lug::Graphics::RenderTechnique::Type::Forward) {
         _renderTechnique = std::make_unique<ForwardRenderTechnique>(this, device, presentQueue);
     }
+
+    LUG_LOG.info("RenderView::init before renderTechnique->init");
 
     if (_renderTechnique && !_renderTechnique->init(descriptorPool, imageViews)) {
         LUG_LOG.warn("RenderView: Failed to init render technique");
         return false;
     }
+    LUG_LOG.info("RenderView::init after renderTechnique->init");
 
     _drawCompleteSemaphores.resize(imageViews.size());
     for (uint32_t i = 0; i < imageViews.size(); ++i) {

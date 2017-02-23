@@ -214,6 +214,7 @@ bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vec
 
     _framesData.resize(imageViews.size());
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
+        LUG_LOG.info("loop     for (uint32_t i = 0; i < _framesData.size(); ++i) {}", i);
         // Fence
         {
             VkFence fence;

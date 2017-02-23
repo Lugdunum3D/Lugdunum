@@ -5,15 +5,22 @@ namespace Window {
 namespace priv {
 
 std::queue<lug::Window::Event> lug::Window::priv::WindowImpl::events;
-AInputQueue *lug::Window::priv::WindowImpl::inputQueue = nullptr;
+AInputQueue* lug::Window::priv::WindowImpl::inputQueue = nullptr;
+ANativeWindow* lug::Window::priv::WindowImpl::nativeWindow = nullptr;
+ANativeActivity* lug::Window::priv::WindowImpl::activity = nullptr;
+
 
 WindowImpl::WindowImpl(Window*) {}
 
-bool WindowImpl::init(const Window::InitInfo& initInfo) {
+bool WindowImpl::init(const Window::InitInfo&) {
     return true;
 }
 
 void WindowImpl::close() {}
+
+ANativeWindow* WindowImpl::getWindow() {
+    return nativeWindow;
+}
 
 bool WindowImpl::pollEvent(lug::Window::Event& event) {
 

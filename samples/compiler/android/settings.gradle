@@ -1,1 +1,1 @@
-include ':baseApp', ':windowApp'
+include ':baseApp', ':windowApp', ':hello'

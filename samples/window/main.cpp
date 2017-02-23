@@ -8,7 +8,9 @@
 #endif
 
 int main() {
-    auto window = lug::Window::Window::create(800, 600, "Default Window", lug::Window::Style::Default);
+//    auto window = lug::Window::Window::create(800, 600, "Default Window", lug::Window::Style::Default);
+    auto window = lug::Window::Window::create();
+
 
     auto logger = lug::System::makeLogger("LugdunumSamples");
 
