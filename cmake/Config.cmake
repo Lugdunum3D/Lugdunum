@@ -30,3 +30,10 @@ elseif(LUG_OS_LINUX)
 elseif(LUG_OS_ANDROID)
     set(INSTALL_MISC_DIR ${ANDROID_NDK}/sources/lugdunum)
 endif()
+
+
+if (CMAKE_CL_64)
+  set(ARCH_DIR "x64")
+else()
+  set(ARCH_DIR "x86")
+endif()
