@@ -200,12 +200,19 @@ struct LUG_GRAPHICS_API Version {
 LUG_GRAPHICS_API const char* enumToStr(VkResult enumVal);
 LUG_GRAPHICS_API const char* enumToStr(VkPhysicalDeviceType enumVal);
 LUG_GRAPHICS_API const char* enumToStr(VkFormat enumVal);
+LUG_GRAPHICS_API const char* enumToStr(VkSurfaceTransformFlagBitsKHR enumVal);
+LUG_GRAPHICS_API const char* enumToStr(VkColorSpaceKHR enumVal);
+LUG_GRAPHICS_API const char* enumToStr(VkPresentModeKHR enumVal);
 
 LUG_GRAPHICS_API std::vector<const char*> VkMemoryPropertyFlagsToStr(VkMemoryPropertyFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkQueueFlagsToStr(VkQueueFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkFormatFeatureFlagsToStr(VkFormatFeatureFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkMemoryHeapFlagsToStr(VkMemoryHeapFlags flag);
-LUG_GRAPHICS_API std::vector<const char*> VkMemoryHeapFlagsToStr(VkMemoryHeapFlags flag);
+LUG_GRAPHICS_API std::vector<const char*> VkSurfaceTransformFlagsKHRToStr(VkSurfaceTransformFlagsKHR flag);
+LUG_GRAPHICS_API std::vector<const char*> VkCompositeAlphaFlagsKHRToStr(VkCompositeAlphaFlagsKHR flag);
+LUG_GRAPHICS_API std::vector<const char*> VkImageUsageFlagsToStr(VkImageUsageFlags flag);
+
+LUG_GRAPHICS_API Version apiVersionToStruct(uint32_t version);
 
 } // Vulkan
 } // Graphics
