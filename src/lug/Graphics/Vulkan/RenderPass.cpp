@@ -71,7 +71,7 @@ void RenderPass::begin(const CommandBuffer* commandBuffer,
 void RenderPass::end(const CommandBuffer* commandBuffer) {
     vkCmdEndRenderPass(*commandBuffer);
 }
-#include <lug/System/Logger.hpp>
+
 std::unique_ptr<RenderPass> RenderPass::create(const Device* device) {
     LUG_LOG.info("MODIF OK");
 VkFormat depthFormat = Image::findSupportedFormat(device,

@@ -1,7 +1,7 @@
 #include <lug/Graphics/RenderView.hpp>
 #include <lug/Graphics/RenderTarget.hpp>
 
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 
 namespace lug {

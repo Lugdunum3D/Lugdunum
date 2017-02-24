@@ -116,7 +116,7 @@ bool Application::init(int argc, char* argv[]) {
     // Low Poly by Olexandr Zymohliad
     // is licensed under CC Attribution
     // https://skfb.ly/IXwu
-    _model = _graphics.createModel("model", "models/LowPoly/Low poly.obj");
+    _model = _graphics.createModel("model", "models/plop.obj");
     if (!_model) {
         return false;
     }

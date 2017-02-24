@@ -4,7 +4,10 @@
 #include <lug/Graphics/ModelLoader.hpp>
 #include <lug/System/Logger/Logger.hpp>
 #include <lug/System/Logger/Logger.hpp>
-
+#if defined(LUG_SYSTEM_ANDROID)
+    #include <assimp/port/AndroidJNI/AndroidJNIIOSystem.h>
+    #include <lug/Window/Android/WindowImplAndroid.hpp>
+#endif
 namespace lug {
 namespace Graphics {
 
@@ -19,6 +22,12 @@ std::string  getFileExtension(const std::string& fileName) {
 
 bool ModelLoader::loadFromFile(Model* model, const std::string& file) {
     Assimp::Importer importer;
+
+#if defined(LUG_SYSTEM_ANDROID)
+    Assimp::AndroidJNIIOSystem* ioSystem = new Assimp::AndroidJNIIOSystem(::lug::Window::priv::WindowImpl::activity);
+    importer.SetIOHandler(ioSystem);
+#endif
+
     importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
 
     LUG_LOG.info("Loading model {}", file);

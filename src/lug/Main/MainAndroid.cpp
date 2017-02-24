@@ -1,8 +1,8 @@
 #include <thread>
 #include <lug/Main/MainAndroid.hpp>
 #include <lug/Window/Android/WindowImplAndroid.hpp>
-#include <lug/System/Logger.hpp>
-
+#include <lug/System/Logger/Logger.hpp>
+#include <lug/System/Logger/LogCatHandler.hpp>
 namespace lug {
 namespace Main {
 
@@ -100,8 +100,19 @@ void AndroidApp::onLowMemory(ANativeActivity*) {}
 } // Main
 } // lug
 
+#include <sys/stat.h>
+
 void  ANativeActivity_onCreate(ANativeActivity* activity, void* savedState, size_t savedStateSize) {
+
+    LUG_LOG.addHandler(lug::System::Logger::makeHandler<lug::System::Logger::LogCatHandler>("logcat"));
+
     LUG_LOG.info("coucou");
+    
+    LUG_LOG.info("{} {}", mkdir((std::string(activity->internalDataPath) + "/models/").c_str(),    S_IRUSR | S_IWUSR | S_IXUSR ), errno);
+
+    LUG_LOG.info("{} {}", mkdir((std::string(activity->internalDataPath) + "/models/LowPoly/").c_str(),    S_IRUSR | S_IWUSR | S_IXUSR ), errno);
+
+
     activity->instance = new lug::Main::AndroidApp(activity, savedState, savedStateSize);
     lug::Window::priv::WindowImpl::activity = activity; 
 }
