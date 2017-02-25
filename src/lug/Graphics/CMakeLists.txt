@@ -87,6 +87,7 @@ set(INC
     ${INCROOT}/Node.inl
     ${INCROOT}/PointLight.hpp
     ${INCROOT}/Renderer.hpp
+    ${INCROOT}/Renderer.inl
     ${INCROOT}/RenderQueue.hpp
     ${INCROOT}/RenderQueue.inl
     ${INCROOT}/RenderTarget.hpp

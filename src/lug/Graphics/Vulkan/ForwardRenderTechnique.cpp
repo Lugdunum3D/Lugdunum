@@ -11,6 +11,7 @@
 #include <lug/Graphics/Vulkan/ForwardRenderTechnique.hpp>
 #include <lug/Graphics/Vulkan/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Model.hpp>
+#include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/RenderView.hpp>
 #include <lug/Math/Matrix.hpp>
 #include <lug/Math/Vector.hpp>
@@ -23,8 +24,8 @@ namespace Vulkan {
 
 using MeshInstance = ::lug::Graphics::MeshInstance;
 
-ForwardRenderTechnique::ForwardRenderTechnique(const RenderView* renderView, const Device* device, Queue* presentQueue) :
-                                                RenderTechnique(renderView, device, presentQueue) {}
+ForwardRenderTechnique::ForwardRenderTechnique(const Renderer& renderer, const RenderView* renderView, const Device* device, Queue* presentQueue) :
+                                                RenderTechnique(renderer, renderView, device, presentQueue) {}
 
 bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaphore& imageReadySemaphore,
                                     const Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) {
@@ -204,9 +205,9 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
 bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<ImageView> >& imageViews) {
     auto colorFormat = _renderView->getFormat().format;
 
-    _pipelines[Light::Type::DirectionalLight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-directional.frag.spv", colorFormat);
-    _pipelines[Light::Type::PointLight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-point.frag.spv", colorFormat);
-    _pipelines[Light::Type::Spotlight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-spot.frag.spv", colorFormat);
+    _pipelines[Light::Type::DirectionalLight] = Pipeline::createGraphicsPipeline(_device, _renderer.getInfo().shadersRoot + "shader.vert.spv", _renderer.getInfo().shadersRoot + "shader-directional.frag.spv", colorFormat);
+    _pipelines[Light::Type::PointLight] = Pipeline::createGraphicsPipeline(_device, _renderer.getInfo().shadersRoot + "shader.vert.spv", _renderer.getInfo().shadersRoot + "shader-point.frag.spv", colorFormat);
+    _pipelines[Light::Type::Spotlight] = Pipeline::createGraphicsPipeline(_device, _renderer.getInfo().shadersRoot + "shader.vert.spv", _renderer.getInfo().shadersRoot + "shader-spot.frag.spv", colorFormat);
 
     if (!_pipelines[Light::Type::DirectionalLight] ||
         !_pipelines[Light::Type::PointLight] ||

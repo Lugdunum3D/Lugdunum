@@ -36,7 +36,7 @@ private:
     };
 
 public:
-    ForwardRenderTechnique(const RenderView* renderView, const Device* device, Queue* presentQueue);
+    ForwardRenderTechnique(const Renderer& renderer, const RenderView* renderView, const Device* device, Queue* presentQueue);
 
     ForwardRenderTechnique(const ForwardRenderTechnique&) = delete;
     ForwardRenderTechnique(ForwardRenderTechnique&&) = delete;

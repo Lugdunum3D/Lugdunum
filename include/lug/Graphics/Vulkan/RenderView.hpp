@@ -12,10 +12,12 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
+class Renderer;
+
 class LUG_GRAPHICS_API RenderView final : public lug::Graphics::RenderView {
 public:
     // TODO: Take the number of images and the list of images
-    RenderView(const RenderTarget* renderTarget);
+    RenderView(const Renderer& renderer, const RenderTarget* renderTarget);
 
     RenderView(const RenderView&) = delete;
     RenderView(RenderView&&) = delete;
@@ -44,6 +46,7 @@ public:
     // TODO: Add the semaphores for the images ready in that class too
 
 private:
+    const Renderer& _renderer;
     std::unique_ptr<RenderTechnique> _renderTechnique{nullptr};
 
     std::vector<Semaphore> _drawCompleteSemaphores;

@@ -86,7 +86,7 @@ void Renderer::destroy() {
 }
 
 bool Renderer::beginInit(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) {
-    (void)(initInfo);
+    _initInfo = initInfo;
 
     if (!initInstance(appName, appVersion)) {
         LUG_LOG.error("RendererVulkan: Can't init the instance");
@@ -96,8 +96,8 @@ bool Renderer::beginInit(const char* appName, uint32_t appVersion, const Rendere
     return true;
 }
 
-bool Renderer::finishInit(const Renderer::InitInfo& initInfo) {
-    if (!initDevice(initInfo)) {
+bool Renderer::finishInit() {
+    if (!initDevice()) {
         LUG_LOG.error("RendererVulkan: Can't init the device");
         return false;
     }
@@ -292,7 +292,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
     return true;
 }
 
-bool Renderer::initDevice(const Renderer::InitInfo& initInfo) {
+bool Renderer::initDevice() {
     VkResult result;
 
     // Select device
@@ -319,7 +319,7 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo) {
         // TODO: Add score
         matchedDeviceIdx = matchedDevicesIdx[0];
         for (uint8_t idx : matchedDevicesIdx) {
-            if (_physicalDeviceInfos[idx].properties.deviceType == ((initInfo.useDiscreteGPU == true) ? (VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) : (VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU))) {
+            if (_physicalDeviceInfos[idx].properties.deviceType == ((_initInfo.useDiscreteGPU == true) ? (VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) : (VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU))) {
                 matchedDeviceIdx = idx;
                 break;
             }

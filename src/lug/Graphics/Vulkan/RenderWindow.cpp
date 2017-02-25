@@ -115,7 +115,7 @@ bool RenderWindow::endFrame() {
 }
 
 lug::Graphics::RenderView* RenderWindow::createView(lug::Graphics::RenderView::InitInfo& initInfo) {
-    std::unique_ptr<RenderView> renderView = std::make_unique<RenderView>(this);
+    std::unique_ptr<RenderView> renderView = std::make_unique<RenderView>(_renderer, this);
 
     if (!renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, _descriptorPool.get(), _swapchain.getImagesViews())) {
         return nullptr;

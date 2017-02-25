@@ -73,6 +73,7 @@ void Pipeline::bind(const CommandBuffer* commandBuffer) {
 std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device, const std::string& vertexShaderFile, const std::string& fragmentShaderFile, VkFormat colorFormat) {
     auto vertexShader = ShaderModule::create(vertexShaderFile, device);
     auto fragmentShader = ShaderModule::create(fragmentShaderFile, device);
+
     if (vertexShader == nullptr || fragmentShader == nullptr) {
         return nullptr;
     }

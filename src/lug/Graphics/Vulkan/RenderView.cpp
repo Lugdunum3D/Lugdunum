@@ -8,7 +8,7 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-RenderView::RenderView(const RenderTarget* renderTarget) : lug::Graphics::RenderView(renderTarget) {}
+RenderView::RenderView(const Renderer& renderer, const RenderTarget* renderTarget) : lug::Graphics::RenderView(renderTarget), _renderer(renderer) {}
 
 bool RenderView::init(RenderView::InitInfo& initInfo,
                         const Device* device,
@@ -18,7 +18,7 @@ bool RenderView::init(RenderView::InitInfo& initInfo,
     lug::Graphics::RenderView::init(initInfo);
 
     if (_info.renderTechniqueType == lug::Graphics::RenderTechnique::Type::Forward) {
-        _renderTechnique = std::make_unique<ForwardRenderTechnique>(this, device, presentQueue);
+        _renderTechnique = std::make_unique<ForwardRenderTechnique>(_renderer, this, device, presentQueue);
     }
 
     if (_renderTechnique && !_renderTechnique->init(descriptorPool, imageViews)) {

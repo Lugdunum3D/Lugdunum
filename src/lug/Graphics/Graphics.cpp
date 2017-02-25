@@ -41,7 +41,7 @@ bool Graphics::beginInit(const InitInfo& initInfo) {
 }
 
 bool Graphics::finishInit() {
-    if (!_renderer->finishInit(_initInfo.rendererInitInfo)) {
+    if (!_renderer->finishInit()) {
         return false;
     }
 

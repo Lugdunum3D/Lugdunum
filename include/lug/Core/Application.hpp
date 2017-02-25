@@ -182,7 +182,8 @@ private:
     lug::Graphics::Graphics::InitInfo _graphicsInitInfo{
         lug::Graphics::Renderer::Type::Vulkan,      // type
         {                                           // rendererInitInfo
-            true                                    // use dedicaced GPU
+            true,                                   // use dedicaced GPU
+            "shaders/"                              // shaders root
         },
         {                                           // mandatoryModules
             lug::Graphics::Module::Type::Core

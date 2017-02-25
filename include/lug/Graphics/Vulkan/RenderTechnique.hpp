@@ -17,11 +17,12 @@ class RenderQueue;
 
 namespace Vulkan {
 
+class Renderer;
 class RenderView;
 
 class LUG_GRAPHICS_API RenderTechnique {
 public:
-    RenderTechnique(const RenderView* renderView, const Device* device, Queue* presentQueue);
+    RenderTechnique(const Renderer& renderer, const RenderView* renderView, const Device* device, Queue* presentQueue);
 
     RenderTechnique(const RenderTechnique&) = delete;
     RenderTechnique(RenderTechnique&&) = delete;
@@ -39,6 +40,7 @@ public:
     virtual bool initFramebuffers(const std::vector<std::unique_ptr<ImageView> >& imageViews) = 0;
 
 protected:
+    const Renderer& _renderer;
     const RenderView* _renderView;
     const Device* _device{nullptr};
 

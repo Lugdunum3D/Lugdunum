@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <set>
+#include <string>
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/RenderWindow.hpp>
 
@@ -18,6 +19,7 @@ public:
 
     struct InitInfo {
         bool useDiscreteGPU;
+        std::string shadersRoot;
     };
 
 public:
@@ -32,7 +34,7 @@ public:
     virtual ~Renderer() = default;
 
     virtual bool beginInit(const char* appName, uint32_t appVersion, const InitInfo& initInfo) = 0;
-    virtual bool finishInit(const InitInfo& initInfo) = 0;
+    virtual bool finishInit() = 0;
 
     virtual bool beginFrame() = 0;
     virtual bool endFrame() = 0;
@@ -40,9 +42,14 @@ public:
     virtual RenderWindow* createWindow(RenderWindow::InitInfo& initInfo) = 0;
     virtual RenderWindow* getWindow() = 0;
 
+    const InitInfo& getInfo() const;
+
 protected:
     Graphics& _graphics;
+    InitInfo _initInfo;
 };
+
+#include <lug/Graphics/Renderer.inl>
 
 } // Graphics
 } // lug

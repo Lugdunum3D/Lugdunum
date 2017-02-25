@@ -56,7 +56,7 @@ public:
     ~Renderer();
 
     bool beginInit(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) override final;
-    bool finishInit(const Renderer::InitInfo& initInfo) override final;
+    bool finishInit() override final;
 
     bool isInstanceLayerLoaded(const char* name) const;
     bool isInstanceExtensionLoaded(const char* name) const;
@@ -87,7 +87,7 @@ public:
 
 private:
     bool initInstance(const char* appName, uint32_t appVersion);
-    bool initDevice(const Renderer::InitInfo& initInfo);
+    bool initDevice();
 
     bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck);
     bool checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, bool finalization);
