@@ -245,6 +245,15 @@
     macro(VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT)      \
     macro(VK_IMAGE_USAGE_INPUT_ATTACHMENT_BIT)
 
+#define LUG_VULKAN_SAMPLE_COUNT_BIT(macro)  \
+    macro(VK_SAMPLE_COUNT_1_BIT)            \
+    macro(VK_SAMPLE_COUNT_2_BIT)            \
+    macro(VK_SAMPLE_COUNT_4_BIT)            \
+    macro(VK_SAMPLE_COUNT_8_BIT)            \
+    macro(VK_SAMPLE_COUNT_16_BIT)           \
+    macro(VK_SAMPLE_COUNT_32_BIT)           \
+    macro(VK_SAMPLE_COUNT_64_BIT)
+
 #define LUG_VULKAN_SURFACE_TRANSFORM_KHR_BIT(macro)                  \
     macro(VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)                     \
     macro(VK_SURFACE_TRANSFORM_ROTATE_90_BIT_KHR)                    \
@@ -279,6 +288,7 @@ LUG_GRAPHICS_API std::vector<const char*> VkQueueFlagsToStr(VkQueueFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkFormatFeatureFlagsToStr(VkFormatFeatureFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkMemoryHeapFlagsToStr(VkMemoryHeapFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkImageUsageFlagsToStr(VkImageUsageFlags flag);
+LUG_GRAPHICS_API std::vector<const char*> VkSampleCountFlagsToStr(VkSampleCountFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkSurfaceTransformFlagsKHRToStr(VkSurfaceTransformFlagsKHR flag);
 LUG_GRAPHICS_API std::vector<const char*> VkCompositeAlphaFlagsKHRToStr(VkCompositeAlphaFlagsKHR flag);
 
