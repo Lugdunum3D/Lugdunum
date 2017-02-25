@@ -43,24 +43,26 @@ void ShaderModule::destroy() {
 }
 
 std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, const Device* device) {
-
     #if defined (LUG_SYSTEM_ANDROID)
         // Load shader from compressed asset
         AAsset* asset = AAssetManager_open((lug::Window::priv::WindowImpl::activity)->assetManager, file.c_str(), AASSET_MODE_STREAMING);
+
         if (!asset) {
-            LUG_LOG.error("RendererVulkan: Can't find Android assetManager");
+            LUG_LOG.error("RendererVulkan: Can't open Android asset \"{}\"", file);
             return nullptr;
         }
+
         size_t shaderCodeSize = AAsset_getLength(asset);
+
         if (shaderCodeSize <= 0) {
-            LUG_LOG.error("RendererVulkan: Android asset is empty");
+            LUG_LOG.error("RendererVulkan: Android asset \"{}\" is empty", file);
             return nullptr;
         }
+
         char* buffer = new char[shaderCodeSize];
         AAsset_read(asset, buffer, shaderCodeSize);
         AAsset_close(asset);
     #else
-
         // TODO: replace opening file with something more global
         std::ifstream shaderCode(file, std::ios::binary);
 
@@ -79,6 +81,7 @@ std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, cons
         shaderCode.read(buffer, shaderCodeSize);
         shaderCode.close();
     #endif
+
     VkShaderModuleCreateInfo createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         createInfo.pNext = nullptr,
