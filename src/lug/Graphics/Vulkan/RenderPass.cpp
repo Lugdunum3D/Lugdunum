@@ -72,17 +72,19 @@ void RenderPass::end(const CommandBuffer* commandBuffer) {
     vkCmdEndRenderPass(*commandBuffer);
 }
 
-std::unique_ptr<RenderPass> RenderPass::create(const Device* device) {
-    VkFormat depthFormat = Image::findSupportedFormat(device,
-                                                        {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-                                                        VK_IMAGE_TILING_OPTIMAL,
-                                                        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+std::unique_ptr<RenderPass> RenderPass::create(const Device* device, VkFormat colorFormat) {
+    VkFormat depthFormat = Image::findSupportedFormat(
+        device,
+        {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+    );
 
     VkAttachmentDescription attachments [2]{
         // Color attachment
         {
             attachments[0].flags = 0,
-            attachments[0].format = VK_FORMAT_R8G8B8A8_UNORM,
+            attachments[0].format = colorFormat,
             attachments[0].samples = VK_SAMPLE_COUNT_1_BIT,
             attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
             attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_STORE,

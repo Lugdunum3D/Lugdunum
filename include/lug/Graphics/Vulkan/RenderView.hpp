@@ -38,6 +38,8 @@ public:
     RenderTechnique* getRenderTechnique();
     const Semaphore& getDrawCompleteSemaphore(uint32_t currentImageIndex) const;
 
+    VkSurfaceFormatKHR getFormat() const;
+
     // TODO: Add a method to change the index of the good image to use (change by the render window)
     // TODO: Add the semaphores for the images ready in that class too
 

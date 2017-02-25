@@ -17,6 +17,11 @@
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>
 
+#if defined(LUG_SYSTEM_LINUX)
+    // Fuck you X11
+    #undef None
+#endif
+
 #define LUG_EXPORTED_VULKAN_FUNCTIONS(macro)    \
     macro(vkGetInstanceProcAddr)
 

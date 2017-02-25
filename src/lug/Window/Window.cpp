@@ -1,17 +1,11 @@
 #include <lug/Window/Window.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
-
     #include <lug/Window/Win32/WindowImplWin32.hpp>
-
 #elif defined(LUG_SYSTEM_LINUX)
-
     #include <lug/Window/Unix/WindowImplX11.hpp>
-
 #elif defined(LUG_SYSTEM_ANDROID)
-
     #include <lug/Window/Android/WindowImplAndroid.hpp>
-
 #endif
 
 namespace lug {

@@ -2,6 +2,7 @@
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/RenderWindow.hpp>
 #include <lug/Graphics/Vulkan/RenderView.hpp>
+#include <lug/Graphics/Vulkan/RTTI/Enum.hpp>
 #include <lug/System/Debug.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
@@ -183,7 +184,7 @@ bool RenderWindow::initSurface() {
 
     VkResult result = vkCreateAndroidSurfaceKHR(_renderer.getInstance(), &createInfo, nullptr, &_surface);
 #else
-#error "RenderWindow::initSurface Unknow platform"
+    #error "RenderWindow::initSurface Unknow platform"
 #endif
 
     if (result != VK_SUCCESS) {
@@ -269,9 +270,24 @@ bool RenderWindow::initSwapchain() {
 
     LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
 
-    VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+    // TODO: Find a way to put Preferencies elsewhere
+    struct SwapchainPreferencies {
+        const std::vector<VkPresentModeKHR> presentModes; // By order of preferency
+        const std::vector<VkFormat> formats; // By order of preferency
+    } swapchainPreferencies {
+        {
+            VK_PRESENT_MODE_MAILBOX_KHR,
+            VK_PRESENT_MODE_FIFO_KHR
+        },
+        {
+            VK_FORMAT_B8G8R8A8_UNORM,
+            VK_FORMAT_R8G8B8A8_UNORM
+        }
+    };
+
+    VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAX_ENUM_KHR;
     VkSurfaceFormatKHR swapchainFormat{
-        swapchainFormat.format = VK_FORMAT_R8G8B8A8_UNORM,
+        swapchainFormat.format = VK_FORMAT_MAX_ENUM,
         swapchainFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
     };
     uint32_t minImageCount = 3;
@@ -280,22 +296,35 @@ bool RenderWindow::initSwapchain() {
 
     // Check requirements for swapchain
     {
-        // Check the preset mode
-        if (std::find(info->swapChain.presentModes.begin(), info->swapChain.presentModes.end(), swapchainPresentMode) == info->swapChain.presentModes.end()) {
-            LUG_LOG.error("RendererWindow: Missing VK_PRESENT_MODE_MAILBOX_KHR mode");
-            swapchainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-            if (std::find(info->swapChain.presentModes.begin(), info->swapChain.presentModes.end(), swapchainPresentMode) == info->swapChain.presentModes.end()) {
-                LUG_LOG.error("RendererWindow: Missing VK_PRESENT_MODE_FIFO_KHR mode");
+        // Check the present mode
+        {
+            for (auto presentMode : swapchainPreferencies.presentModes) {
+                if (std::find(info->swapChain.presentModes.begin(), info->swapChain.presentModes.end(), presentMode) != info->swapChain.presentModes.end()) {
+                    LUG_LOG.info("RendererWindow: Use present mode {}", RTTI::toStr(presentMode));
+
+                    swapchainPresentMode = presentMode;
+                    break;
+                }
+            }
+
+            if (swapchainPresentMode == VK_PRESENT_MODE_MAX_ENUM_KHR) {
+                LUG_LOG.error("RendererWindow: Missing present mode supported by Lugdunum");
                 return false;
             }
         }
 
         // Check the formats
-        if (std::find_if(info->swapChain.formats.begin(), info->swapChain.formats.end(), [&swapchainFormat](const VkSurfaceFormatKHR& lhs) {
-            return lhs.colorSpace == swapchainFormat.colorSpace && swapchainFormat.format == lhs.format;
-        }) == info->swapChain.formats.end()) {
-            LUG_LOG.error("RendererWindow: Missing VK_FORMAT_B8G8R8A8_UNORM/VK_COLOR_SPACE_SRGB_NONLINEAR_KHR format");
-            return false;
+        {
+            for (auto format : swapchainPreferencies.formats) {
+                if (std::find_if(info->swapChain.formats.begin(), info->swapChain.formats.end(), [&swapchainFormat, &format](const VkSurfaceFormatKHR& lhs) {
+                    return lhs.colorSpace == swapchainFormat.colorSpace && format == lhs.format;
+                }) != info->swapChain.formats.end()) {
+                    LUG_LOG.info("RendererWindow: Use format {}", RTTI::toStr(format));
+
+                    swapchainFormat.format = format;
+                    break;
+                }
+            }
         }
 
         // Check image counts

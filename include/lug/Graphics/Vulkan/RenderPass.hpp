@@ -39,7 +39,7 @@ public:
                 VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
     void end(const CommandBuffer* commandBuffer);
 
-    static std::unique_ptr<RenderPass> create(const Device* device);
+    static std::unique_ptr<RenderPass> create(const Device* device, VkFormat colorFormat);
 private:
     VkRenderPass _renderPass{VK_NULL_HANDLE};
     const Device* _device{nullptr};

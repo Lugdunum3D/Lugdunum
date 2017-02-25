@@ -202,9 +202,11 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
 }
 
 bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<ImageView> >& imageViews) {
-    _pipelines[Light::Type::DirectionalLight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-directional.frag.spv");
-    _pipelines[Light::Type::PointLight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-point.frag.spv");
-    _pipelines[Light::Type::Spotlight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-spot.frag.spv");
+    auto colorFormat = _renderView->getFormat().format;
+
+    _pipelines[Light::Type::DirectionalLight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-directional.frag.spv", colorFormat);
+    _pipelines[Light::Type::PointLight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-point.frag.spv", colorFormat);
+    _pipelines[Light::Type::Spotlight] = Pipeline::createGraphicsPipeline(_device, "shader.vert.spv", "shader-spot.frag.spv", colorFormat);
 
     if (!_pipelines[Light::Type::DirectionalLight] ||
         !_pipelines[Light::Type::PointLight] ||

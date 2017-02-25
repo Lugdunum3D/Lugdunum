@@ -1,6 +1,7 @@
 #include <lug/Graphics/Vulkan/RenderView.hpp>
 #include <lug/Graphics/RenderQueue.hpp>
 #include <lug/Graphics/Vulkan/ForwardRenderTechnique.hpp>
+#include <lug/Graphics/Vulkan/RenderWindow.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -69,6 +70,10 @@ bool RenderView::endFrame() {
         _camera->getRenderQueue().removeDirtyProperty();
     }
     return true;
+}
+
+VkSurfaceFormatKHR RenderView::getFormat() const {
+    return static_cast<const RenderWindow*>(_renderTarget)->getSwapchain().getFormat();
 }
 
 } // Vulkan

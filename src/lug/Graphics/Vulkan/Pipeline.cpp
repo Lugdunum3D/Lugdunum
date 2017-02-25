@@ -70,7 +70,7 @@ void Pipeline::bind(const CommandBuffer* commandBuffer) {
     vkCmdBindPipeline(*commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 }
 
-std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device, const std::string& vertexShaderFile, const std::string& fragmentShaderFile) {
+std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device, const std::string& vertexShaderFile, const std::string& fragmentShaderFile, VkFormat colorFormat) {
     auto vertexShader = ShaderModule::create(vertexShaderFile, device);
     auto fragmentShader = ShaderModule::create(fragmentShaderFile, device);
     if (vertexShader == nullptr || fragmentShader == nullptr) {
@@ -229,7 +229,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
     colorBlending.blendConstants[3] = 0.0f;
 
     auto pipelineLayout = PipelineLayout::create(device);
-    auto renderPass = RenderPass::create(device);
+    auto renderPass = RenderPass::create(device, colorFormat);
 
     if (!pipelineLayout || !renderPass) {
         return nullptr;
