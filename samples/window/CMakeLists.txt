@@ -8,6 +8,10 @@ include(${CMAKE_SOURCE_DIR}/../../cmake/Macros.cmake)
 # determine the build type
 lug_set_option(CMAKE_BUILD_TYPE Release STRING "Choose the type of build (Debug or Release)")
 
+if(ANDROID)
+    populate_android_infos()
+endif()
+
 # project name
 project(window)
 

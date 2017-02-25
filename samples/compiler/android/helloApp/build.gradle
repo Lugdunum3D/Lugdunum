@@ -9,12 +9,7 @@ android {
         versionCode 1
         versionName "1.0"
         externalNativeBuild {
-            cmake {
-                abiFilters 'arm64-v8a'
-                arguments '-DANDROID_TOOLCHAIN=clang'
-                arguments '-DANDROID_STL=c++_shared'
-                cppFlags "-Wall -Wextra -frtti -fexceptions -std=c++14"
-            }
+            cmake {}
         }
     }
     sourceSets{

@@ -9,6 +9,31 @@ macro(lug_set_option var default type docstring)
     set(${var} ${${var}} CACHE ${type} ${docstring} FORCE)
 endmacro()
 
+macro(populate_android_infos)
+    set(ANDROID_ABI arm64-v8a)
+    message(STATUS "ANDROID_ABI : ${ANDROID_ABI}")
+
+    set(ANDROID_TOOLCHAIN clang)
+    message(STATUS "ANDROID_TOOLCHAIN : ${ANDROID_TOOLCHAIN}")
+
+    lug_set_option(ANDROID_PLATFORM android-24 STRING "Target specific android version target (default : android-24)")
+    if(NOT ANDROID_PLATFORM MATCHES android-2[4-9])
+        message(FATAL_ERROR "Invalid android version target : ${ANDROID_PLATFORM}")
+    endif()
+    message(STATUS "ANDROID_PLATFORM : ${ANDROID_PLATFORM}")
+
+    lug_set_option(ANDROID_STL c++_shared STRING "Choose which Android STL to use (default : c++_shared)")
+
+    if(NOT ANDROID_STL STREQUAL c++_static AND NOT ANDROID_STL STREQUAL c++_shared)
+        message(FATAL_ERROR "Invalid STL : ${ANDROID_STL}")
+    endif()
+
+    set(ANDROID_CPP_FEATURES "rtti exceptions")
+    message(STATUS "ANDROID_CPP_FEATURES : ${ANDROID_CPP_FEATURES}")
+
+    set(LIB_SUFFIX "/${ANDROID_ABI}")
+endmacro()
+
 macro(lug_add_compile_options target)
     # c++14 on android
     if(LUG_OS_ANDROID)
