@@ -167,7 +167,7 @@ TEST(Logger, Handlers) {
 
     std::unique_ptr<MockLogger> logger = std::make_unique<MockLogger>(loggerName);
 
-    ASSERT_EQ(logger->getHandlers().size(), 0);
+    ASSERT_EQ(logger->getHandlers().size(), size_t(0));
 
     MockHandler* handler = makeHandler<MockHandler>(handlerName);
 
@@ -198,7 +198,7 @@ namespace OstreamCustomClass {
 class Custom {
 public:
     std::ostream& operator<<(std::ostream& out) const;
-    friend std::ostream& operator<<(std::ostream& out, const Custom& b) {
+    friend std::ostream& operator<<(std::ostream& out, const Custom&) {
         return out << "Test";
     }
 };
@@ -266,9 +266,9 @@ namespace ExceptionHandler {
 class Custom {
 public:
     std::ostream& operator<<(std::ostream& out) const;
-    friend std::ostream& operator<<(std::ostream& out, const Custom& b) {
+
+    friend std::ostream& operator<<(std::ostream&, const Custom&) {
         throw std::runtime_error("Uncaught");
-        return out;
     }
 };
 

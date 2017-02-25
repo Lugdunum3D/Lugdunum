@@ -252,8 +252,8 @@ bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vec
     uint32_t largestLightSize = 0;
     // Calculate largest light structure
     {
-        largestLightSize = (uint32_t)std::max(sizeof(DirectionalLight::LightData), sizeof(PointLight::LightData));
-        largestLightSize = std::max(largestLightSize, (uint32_t)sizeof(Spotlight::LightData));
+        largestLightSize = (uint32_t)(std::max)(sizeof(DirectionalLight::LightData), sizeof(PointLight::LightData));
+        largestLightSize = (std::max)(largestLightSize, (uint32_t)sizeof(Spotlight::LightData));
     }
     _lightsPool = std::make_unique<BufferPool>((uint32_t)_framesData.size() * 50,
                                                 largestLightSize,

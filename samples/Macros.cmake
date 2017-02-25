@@ -12,7 +12,6 @@ macro(compile_shader shader)
 endmacro()
 
 macro(compile_shaders target)
-
     foreach(shader ${ARGN})
         compile_shader(${shader})
     endforeach(shader)

@@ -7,6 +7,6 @@ TEST(ExceptionReturnValues, ReturnLine) {
         LUG_EXCEPT(IOException, "My exception worked");
     }
     catch (const lug::System::IOException &e) {
-        EXPECT_EQ(e.getLine(), 7);
+        EXPECT_EQ(e.getLine(), uint32_t(7));
     }
 }

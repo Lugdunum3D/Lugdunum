@@ -3,12 +3,7 @@ cmake_minimum_required(VERSION 3.1)
 # project name
 project(test)
 
-include("${CMAKE_SOURCE_DIR}/cmake/Macros.cmake")
-
 set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}")
-
-set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 14)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR})
@@ -52,7 +47,6 @@ if (NOT GTEST_FOUND)
     set(GTEST_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/googletest/include")
     find_package(GTest REQUIRED)
 endif()
-
 
 include_directories(${GTEST_INCLUDE_DIRS})
 include_directories(${GMOCK_INCLUDE_DIRS})

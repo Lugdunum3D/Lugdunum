@@ -1,13 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
-# define a macro that helps defining an option
-macro(lug_set_option var default type docstring)
-    if(NOT DEFINED ${var})
-        set(${var} ${default})
-    endif()
-
-    set(${var} ${${var}} CACHE ${type} ${docstring} FORCE)
-endmacro()
+# include the macros files
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Macros.cmake)
 
 if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
@@ -64,7 +58,7 @@ mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 # use cmake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
-# include the configuration file
+# include the configuration files
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake)
 
 # add the include path

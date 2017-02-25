@@ -19,21 +19,15 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/modules")
 include("${CMAKE_SOURCE_DIR}/../../cmake/Config.cmake")
 
 find_package(Vulkan)
-include_directories(${VULKAN_INCLUDE_DIR})
-
-if(LUG_COMPILER_MSVC)
-    if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-        string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    else()
-        list(APPEND CMAKE_CXX_FLAGS "/W4")
+if (NOT VULKAN_INCLUDE_DIR)
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/../../../thirdparty/vulkan")
+        message(FATAL_ERROR "Can't find vulkan, call `git submodule update --recursive`")
     endif()
 
-    list(APPEND CMAKE_CXX_FLAGS "/WX")
-elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
-    list(APPEND CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -std=c++14")
+    set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../../../thirdparty/vulkan/include)
 endif()
 
-string(REPLACE ";" " " "CMAKE_CXX_FLAGS" "${CMAKE_CXX_FLAGS}")
+include_directories(${VULKAN_INCLUDE_DIR})
 
 if(ANDROID_NATIVE_API_LEVEL EQUAL 23)
     set(LUG_STATIC_LIBRARIES true)
@@ -63,6 +57,8 @@ if(LUG_OS_ANDROID)
                           android
                           ${LUG_LIBRARIES}
     )
+
+    target_compile_options(${EXECUTABLE_NAME} PUBLIC -std=c++14)
 else()
     add_executable(${EXECUTABLE_NAME} include/Application.hpp src/Application.cpp src/main.cpp)
     compile_shaders(${EXECUTABLE_NAME} ${SHADERS})
@@ -71,3 +67,5 @@ endif()
 
 # install models
 file(COPY ${LUG_RESOURCES_DIR}/models DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+# TODO: Use macro to generate target and add compilation flags

@@ -1,13 +1,43 @@
 include(CMakeParseArguments)
 
-macro(lug_add_library target)
+# define a macro that helps defining an option
+macro(lug_set_option var default type docstring)
+    if(NOT DEFINED ${var})
+        set(${var} ${default})
+    endif()
 
+    set(${var} ${${var}} CACHE ${type} ${docstring} FORCE)
+endmacro()
+
+macro(lug_add_compile_options target)
+    # c++14 on android
+    if(LUG_OS_ANDROID)
+        target_compile_options(${target} PUBLIC -std=c++14)
+    endif()
+
+    # use warnings and errors
+    if(LUG_COMPILER_MSVC)
+        target_compile_options(${target} PUBLIC /W4 /WX)
+    elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
+        target_compile_options(${target} PUBLIC -Wall -Wextra -Werror)
+    endif()
+
+    # add parallel build for MSVC
+    if(LUG_COMPILER_MSVC)
+        target_compile_options(${target} PUBLIC /MP)
+    endif()
+endmacro()
+
+macro(lug_add_library target)
     # parse the arguments
     cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;EXTERNAL_LIBS" ${ARGN})
 
     # create the target
     add_library(${target} ${THIS_SOURCES})
     set_target_properties(${target} PROPERTIES LINKER_LANGUAGE CXX)
+
+    # add compile options
+    lug_add_compile_options(${target})
 
     # define the export symbol
     string(REPLACE "-" "_" NAME_UPPER "${target}")
@@ -61,17 +91,18 @@ macro(lug_add_library target)
             ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT devel
             FRAMEWORK DESTINATION ${CMAKE_INSTALL_FRAMEWORK_PREFIX} COMPONENT bin
     )
-
 endmacro()
 
 macro(lug_add_test name)
-
     set(target run${name}UnitTests)
 
     # parse the arguments
     cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;EXTERNAL_LIBS" ${ARGN})
 
     add_executable(${target} ${THIS_SOURCES} ${PROJECT_SOURCE_DIR}/main.cpp)
+
+    # add compile options
+    lug_add_compile_options(${target})
 
     # link the target to its lug dependencies
     if(THIS_DEPENDS)
@@ -86,5 +117,4 @@ macro(lug_add_test name)
     target_link_libraries(${target} ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
     add_test(NAME ${name}UnitTests COMMAND ${target} --gtest_output=xml:${TEST_OUTPUT}/${name}UnitTests.xml)
-
 endmacro()
