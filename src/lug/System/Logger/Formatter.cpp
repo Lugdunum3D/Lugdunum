@@ -24,7 +24,9 @@ std::string LevelFlag::format(Message* message) const {
     std::stringstream ss;
     ss << std::left << std::setfill(' ') << std::setw(7) << message->level;
     std::string tmp(ss.str());
-    std::transform(tmp.begin(), tmp.end(), tmp.begin(), toupper);
+    std::transform(tmp.begin(), tmp.end(), tmp.begin(), [](char c) {
+        return static_cast<char>(toupper(c));
+    });
     return tmp;
 }
 
