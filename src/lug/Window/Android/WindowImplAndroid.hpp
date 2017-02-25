@@ -9,7 +9,6 @@ namespace lug {
 namespace Window {
 namespace priv {
 
-
 class LUG_WINDOW_API WindowImpl {
 public:
     WindowImpl(Window*);
@@ -24,6 +23,7 @@ public:
     LUG_WINDOW_API static AInputQueue* inputQueue;
     LUG_WINDOW_API static ANativeWindow* nativeWindow;
     LUG_WINDOW_API static ANativeActivity* activity;
+
 private:
     Window* _parent{nullptr};
 };

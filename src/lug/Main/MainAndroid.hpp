@@ -36,7 +36,6 @@ private:
 
     void* _savedState;
     size_t _savedStateSize;
-    // void* window;
 };
 
 } // Main

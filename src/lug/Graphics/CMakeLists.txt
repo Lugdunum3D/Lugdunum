@@ -166,14 +166,14 @@ if (NOT ASSIMP_FOUND)
         set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/linux")
     else ()
         set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/android")
-	message(STATUS ${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/android)
     endif()
-    message(STATUS ${ASSIMP_ROOT})
+
     set(ASSIMP_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/assimp/include")
     find_package(Assimp REQUIRED)
 endif()
 
 include_directories(${ASSIMP_INCLUDE_DIR})
+
 if(LUG_OS_ANDROID)
     include_directories(${CMAKE_SYSROOT}/usr/include)
     list(APPEND EXT_LIBRARIES z android ${ASSIMP_LIBRARY_ANDROID})

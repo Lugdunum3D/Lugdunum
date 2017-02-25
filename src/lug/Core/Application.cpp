@@ -3,15 +3,10 @@
 #include <lug/System/Clock.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
-#include <android/log.h>
 namespace lug {
 namespace Core {
 
-Application::Application(const Application::Info& info) : _info{info}, _graphics{info.name, info.version} {
-     LUG_LOG.error("Application OK");
-    __android_log_print(ANDROID_LOG_VERBOSE, "lugdu", "APPLI OK");
-
-}
+Application::Application(const Application::Info& info) : _info{info}, _graphics{info.name, info.version} {}
 
 bool Application::init(int argc, char* argv[]) {
     return beginInit(argc, argv) && finishInit();

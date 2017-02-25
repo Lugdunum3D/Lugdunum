@@ -32,14 +32,6 @@ if(ANDROID)
         PATH_SUFFIXES lib
         CMAKE_FIND_ROOT_PATH_BOTH
     )
-
-    find_library(ASSIMP_LIBRARY_ANDROID
-        NAMES android_jniiosystem
-        PATHS $ENV{ASSIMP_ROOT} ${ASSIMP_ROOT}
-        PATH_SUFFIXES lib
-        CMAKE_FIND_ROOT_PATH_BOTH
-    )
-
 endif()
 
 include(FindPackageHandleStandardArgs)

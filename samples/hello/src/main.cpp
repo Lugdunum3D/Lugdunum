@@ -4,22 +4,17 @@
 #else
 	#include <lug/System/Logger/OstreamHandler.hpp>
 #endif
+
 #include "Application.hpp"
 
 int main(int argc, char *argv[]) {
-
 #if defined(LUG_SYSTEM_ANDROID)
-    //LUG_LOG.addHandler(lug::System::Logger::makeHandler<lug::System::Logger::LogCatHandler>("logcat"));
+    LUG_LOG.addHandler(lug::System::Logger::makeHandler<lug::System::Logger::LogCatHandler>("logcat"));
 #else
     LUG_LOG.addHandler(lug::System::Logger::makeHandler<lug::System::Logger::StdoutHandler>("stdout"));
-#endif 
-
-    LUG_LOG.info("Starting the app!");
+#endif
 
     Application app;
-
-    LUG_LOG.info("app instanciated!");
-
 
     if (!app.init(argc, argv)) {
         return 1;
