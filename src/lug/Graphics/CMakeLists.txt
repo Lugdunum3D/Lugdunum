@@ -155,22 +155,29 @@ endif()
 include_directories(${VULKAN_INCLUDE_DIR})
 
 # Find assimp
-find_package(Assimp)
+if(NOT LUG_OS_ANDROID)
+    find_package(Assimp)
+endif()
+
 if (NOT ASSIMP_FOUND)
     if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/assimp")
         message(FATAL_ERROR "Can't find assimp, call `git submodule update --recursive`")
     endif()
 
+    set(ASSIMP_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/assimp/include")
+
     if (LUG_OS_WINDOWS)
         set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/windows/${ARCH_DIR}")
+        find_package(Assimp REQUIRED)
     elseif (LUG_OS_LINUX)
         set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/linux")
-    else ()
+        find_package(Assimp REQUIRED)
+    elseif (LUG_OS_ANDROID)
         set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/android")
+        set(ASSIMP_LIBRARY "${ASSIMP_ROOT}/libassimp.a")
+        set(ASSIMP_LIBRARY_ANDROID "${ASSIMP_ROOT}/libandroid_jniiosystem.a")
     endif()
 
-    set(ASSIMP_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/assimp/include")
-    find_package(Assimp REQUIRED)
 endif()
 
 include_directories(${ASSIMP_INCLUDE_DIR})
