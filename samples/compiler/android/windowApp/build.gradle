@@ -9,7 +9,11 @@ android {
         versionCode 1
         versionName "1.0"
         externalNativeBuild {
-            cmake {}
+            cmake {
+                // We still must manually tell cmake we're on Android because it needs to know it before
+                // the project directive, which will call the toolchain
+                arguments '-DANDROID=true'
+            }
         }
     }
     sourceSets{
