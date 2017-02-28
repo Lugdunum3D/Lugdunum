@@ -174,7 +174,13 @@ if (NOT ASSIMP_FOUND)
         find_package(Assimp REQUIRED)
     elseif (LUG_OS_ANDROID)
         set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/android")
-        set(ASSIMP_LIBRARY "${ASSIMP_ROOT}/libassimp.a")
+        set(ASSIMP_LIBRARY "${ASSIMP_ROOT}/libassimp.so")
+
+        # Install the libassimp.so alongside lug-graphics.so
+        install(FILES ${ASSIMP_LIBRARY}
+            DESTINATION lib${LIB_SUFFIX}
+        )
+
         set(ASSIMP_LIBRARY_ANDROID "${ASSIMP_ROOT}/libandroid_jniiosystem.a")
     endif()
 
