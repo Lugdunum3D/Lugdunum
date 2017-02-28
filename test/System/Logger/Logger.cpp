@@ -265,10 +265,16 @@ namespace ExceptionHandler {
 
 class Custom {
 public:
+    bool mustThrow;
+
     std::ostream& operator<<(std::ostream& out) const;
 
-    friend std::ostream& operator<<(std::ostream&, const Custom&) {
-        throw std::runtime_error("Uncaught");
+    friend std::ostream& operator<<(std::ostream& out, const Custom& custom) {
+        if (custom.mustThrow) {
+            throw std::runtime_error("Uncaught");
+        } else {
+            return out;
+        }
     }
 };
 
@@ -276,7 +282,7 @@ TEST(Logger, ExceptionHandler) {
 
     Logger* logger = makeLogger(loggerName);
     MockHandler* handler = makeHandler<MockHandler>(handlerName);
-    Custom custom;
+    Custom custom{true};
 
     EXPECT_CALL(*handler, handle(Field(&priv::Message::raw, Property(&fmt::MemoryWriter::c_str, HasSubstr("Uncaught"))))).Times(1);
 
