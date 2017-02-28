@@ -40,6 +40,19 @@ lug_set_option(BUILD_DOCUMENTATION FALSE BOOL "Create and install the HTML based
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
 
+# find fmt
+find_package(Fmt)
+
+if (NOT FMT_INCLUDE_DIR)
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/fmt")
+        message(FATAL_ERROR "Can't find fmt, call `git submodule update --recursive`")
+    endif()
+
+    set(FMT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/fmt/include)
+endif()
+
+include_directories(${FMT_INCLUDE_DIR})
+
 # add the subdirectories
 add_subdirectory(src/lug/)
 
