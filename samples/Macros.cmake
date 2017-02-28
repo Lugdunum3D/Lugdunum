@@ -99,6 +99,7 @@ macro(lug_add_sample target)
         endif()
 
         set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../../thirdparty/vulkan/include)
+        message(STATUS "Found Vulkan: ${VULKAN_INCLUDE_DIR}")
     endif()
 
     include_directories(${VULKAN_INCLUDE_DIR})
@@ -112,6 +113,7 @@ macro(lug_add_sample target)
         endif()
 
         set(FMT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../../thirdparty/fmt/include)
+        message(STATUS "Found Fmt: ${FMT_INCLUDE_DIR}")
     endif()
 
     include_directories(${FMT_INCLUDE_DIR})

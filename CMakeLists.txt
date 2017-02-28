@@ -53,6 +53,7 @@ if (NOT FMT_INCLUDE_DIR)
     endif()
 
     set(FMT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/fmt/include)
+    message(STATUS "Found Fmt: ${FMT_INCLUDE_DIR}")
 endif()
 
 include_directories(${FMT_INCLUDE_DIR})

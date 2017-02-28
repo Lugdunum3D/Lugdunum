@@ -184,12 +184,13 @@ if (NOT ASSIMP_FOUND)
         set(ASSIMP_LIBRARY_ANDROID "${ASSIMP_ROOT}/libandroid_jniiosystem.a")
     endif()
 
+    message(STATUS "Found Assimp library: ${ASSIMP_LIBRARY}")
+    message(STATUS "Found Assimp includes: ${ASSIMP_INCLUDE_DIR}")
 endif()
 
 include_directories(${ASSIMP_INCLUDE_DIR})
 
 if(LUG_OS_ANDROID)
-    include_directories(${CMAKE_SYSROOT}/usr/include)
     list(APPEND EXT_LIBRARIES z android ${ASSIMP_LIBRARY_ANDROID})
 endif()
 
