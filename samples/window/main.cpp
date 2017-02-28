@@ -9,15 +9,20 @@
 
 int main() {
 //    auto window = lug::Window::Window::create(800, 600, "Default Window", lug::Window::Style::Default);
-    auto window = lug::Window::Window::create();
+    auto window = lug::Window::Window::create({
+        800,                        // width
+        600,                        // height
+        "Default Window",           // title
+        lug::Window::Style::Default // style
+    });
 
 
-    auto logger = lug::System::makeLogger("LugdunumSamples");
+    auto logger = lug::System::Logger::makeLogger("LugdunumSamples");
 
 #if defined(LUG_SYSTEM_ANDROID)
-    auto handler = lug::System::makeHandler<lug::System::LogCatHandler>("LogCat");
+    auto handler = lug::System::Logger::makeHandler<lug::System::Logger::LogCatHandler>("LogCat");
 #else
-    auto handler = lug::System::makeHandler<lug::System::StdoutHandler>("Stdout");
+    auto handler = lug::System::Logger::makeHandler<lug::System::Logger::StdoutHandler>("Stdout");
 #endif
 
     logger->addHandler(handler);
