@@ -23,5 +23,5 @@ include(${PROJECT_SOURCE_DIR}/../Macros.cmake)
 
 lug_add_sample(base
                SOURCES main.cpp
-               DEPENDS system
+               DEPENDS system window
 )

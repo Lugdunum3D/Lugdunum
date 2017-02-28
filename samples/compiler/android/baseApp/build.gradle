@@ -8,8 +8,16 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
+        ndk {
+            // Specifies the ABI configurations of your native
+            // libraries Gradle should build and package with your APK.
+            abiFilters 'arm64-v8a'
+        }
         externalNativeBuild {
             cmake {
+                // see https://github.com/android-ndk/ndk/issues/306
+                arguments '-DANDROID_STL=c++_shared'
+
                 // We still must manually tell cmake we're on Android because it needs to know it before
                 // the project directive, which will call the toolchain
                 arguments '-DANDROID=true'
