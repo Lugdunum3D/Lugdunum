@@ -41,9 +41,13 @@ macro(target_shader shader)
 endmacro()
 
 macro(target_shaders target)
-    foreach(shader ${ARGN})
-        target_shader(${shader})
-    endforeach(shader)
+    lug_set_option(BUILD_SHADERS TRUE BOOL "Compile shaders")
+
+    if(BUILD_SHADERS)
+        foreach(shader ${ARGN})
+            target_shader(${shader})
+        endforeach(shader)
+    endif()
 
     add_custom_target(shaders DEPENDS ${SHADERS_DEPENDS})
     add_dependencies(${target} shaders)
