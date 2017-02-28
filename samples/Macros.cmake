@@ -94,11 +94,11 @@ macro(lug_add_sample target)
     find_package(Vulkan)
 
     if (NOT VULKAN_INCLUDE_DIR)
-        if (NOT EXISTS "${CMAKE_SOURCE_DIR}/../../../thirdparty/vulkan")
+        if (NOT EXISTS "${CMAKE_SOURCE_DIR}/../../thirdparty/vulkan")
             message(FATAL_ERROR "Can't find vulkan, call `git submodule update --recursive`")
         endif()
 
-        set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../../../thirdparty/vulkan/include)
+        set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../../thirdparty/vulkan/include)
     endif()
 
     include_directories(${VULKAN_INCLUDE_DIR})
@@ -107,11 +107,11 @@ macro(lug_add_sample target)
     find_package(Fmt)
 
     if (NOT FMT_INCLUDE_DIR)
-        if (NOT EXISTS "${CMAKE_SOURCE_DIR}/../../../thirdparty/fmt")
+        if (NOT EXISTS "${CMAKE_SOURCE_DIR}/../../thirdparty/fmt")
             message(FATAL_ERROR "Can't find fmt, call `git submodule update --recursive`")
         endif()
 
-        set(FMT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../../../thirdparty/fmt/include)
+        set(FMT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../../thirdparty/fmt/include)
     endif()
 
     include_directories(${FMT_INCLUDE_DIR})
