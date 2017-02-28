@@ -76,7 +76,7 @@ void Renderer::destroy() {
             auto vkDestroyDebugReportCallbackEXT = _instance.getProcAddr<PFN_vkDestroyDebugReportCallbackEXT>("vkDestroyDebugReportCallbackEXT");
 
             if (vkDestroyDebugReportCallbackEXT) {
-                vkDestroyDebugReportCallbackEXT(_instance, _debugReportCallback, nullptr);
+                vkDestroyDebugReportCallbackEXT(static_cast<VkInstance>(_instance), _debugReportCallback, nullptr);
             }
         }
     }
@@ -210,7 +210,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
             auto vkCreateDebugReportCallbackEXT = _instance.getProcAddr<PFN_vkCreateDebugReportCallbackEXT>("vkCreateDebugReportCallbackEXT");
 
             if (vkCreateDebugReportCallbackEXT) {
-                vkCreateDebugReportCallbackEXT(_instance, &createInfo, nullptr, &_debugReportCallback);
+                vkCreateDebugReportCallbackEXT(static_cast<VkInstance>(_instance), &createInfo, nullptr, &_debugReportCallback);
             } else {
                 LUG_LOG.warn("RendererVulkan: Can't load function vkCreateDebugReportCallbackEXT");
             }
@@ -228,7 +228,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
     // Load physical devices information
     {
         uint32_t physicalDevicesCount = 0;
-        result = vkEnumeratePhysicalDevices(_instance, &physicalDevicesCount, nullptr);
+        result = vkEnumeratePhysicalDevices(static_cast<VkInstance>(_instance), &physicalDevicesCount, nullptr);
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate physical devices: {}", result);
             return false;
@@ -237,7 +237,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
         _physicalDeviceInfos.resize(physicalDevicesCount);
 
         std::vector<VkPhysicalDevice> physicalDevices(physicalDevicesCount);
-        result = vkEnumeratePhysicalDevices(_instance, &physicalDevicesCount, physicalDevices.data());
+        result = vkEnumeratePhysicalDevices(static_cast<VkInstance>(_instance), &physicalDevicesCount, physicalDevices.data());
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate physical devices: {}", result);
             return false;
@@ -390,7 +390,7 @@ bool Renderer::initDevice() {
         uint8_t i = 0;
         for (auto idx : _loadedQueueFamiliesIdx) {
             VkQueue queue;
-            vkGetDeviceQueue(_device, idx, 0, &queue);
+            vkGetDeviceQueue(static_cast<VkDevice>(_device), idx, 0, &queue);
 
             _queues[i] = Queue(idx, queue, _physicalDeviceInfo->queueFamilies[idx].queueFlags);
 
@@ -409,7 +409,7 @@ bool Renderer::initDevice() {
             };
 
             VkCommandPool commandPool{VK_NULL_HANDLE};
-            result = vkCreateCommandPool(_device, &createInfo, nullptr, &commandPool);
+            result = vkCreateCommandPool(static_cast<VkDevice>(_device), &createInfo, nullptr, &commandPool);
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create a command pool: {}", result);
                 return false;

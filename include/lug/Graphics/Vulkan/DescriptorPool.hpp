@@ -13,7 +13,7 @@ class Device;
 
 class LUG_GRAPHICS_API DescriptorPool {
 public:
-    DescriptorPool(VkDescriptorPool descriptorPool = VK_NULL_HANDLE, const Device *device = nullptr);
+    explicit DescriptorPool(VkDescriptorPool descriptorPool = VK_NULL_HANDLE, const Device *device = nullptr);
 
     DescriptorPool(const DescriptorPool&) = delete;
     // Warning: Don't move DescriptorPool after creating a DescriptorSet
@@ -25,7 +25,7 @@ public:
 
     ~DescriptorPool();
 
-    operator VkDescriptorPool() const {
+    explicit operator VkDescriptorPool() const {
         return _descriptorPool;
     }
 

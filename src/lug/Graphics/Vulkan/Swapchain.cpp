@@ -50,7 +50,7 @@ void Swapchain::destroy() {
 
     // Delete swapchain
     if (_swapchain != VK_NULL_HANDLE) {
-        vkDestroySwapchainKHR(*_device, _swapchain, nullptr);
+        vkDestroySwapchainKHR(static_cast<VkDevice>(*_device), _swapchain, nullptr);
         _swapchain = VK_NULL_HANDLE;
         _device = nullptr;
     }
@@ -64,14 +64,14 @@ bool Swapchain::init() {
         uint32_t imagesCount = 0;
         std::vector<VkImage> images;
 
-        result = vkGetSwapchainImagesKHR(*_device, _swapchain, &imagesCount, nullptr);
+        result = vkGetSwapchainImagesKHR(static_cast<VkDevice>(*_device), _swapchain, &imagesCount, nullptr);
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate swapchain images: {}", result);
             return false;
         }
 
         images.resize(imagesCount);
-        result = vkGetSwapchainImagesKHR(*_device, _swapchain, &imagesCount, images.data());
+        result = vkGetSwapchainImagesKHR(static_cast<VkDevice>(*_device), _swapchain, &imagesCount, images.data());
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate swapchain images: {}", result);
             return false;
@@ -103,7 +103,7 @@ bool Swapchain::init() {
 bool Swapchain::getNextImage(uint32_t *imageIndex, VkSemaphore semaphore) {
     // Get next image
     // TODO: remove UINT64_MAX timeout and ask next image later if VK_NOT_READY is returned
-    VkResult result = vkAcquireNextImageKHR(*_device, _swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex);
+    VkResult result = vkAcquireNextImageKHR(static_cast<VkDevice>(*_device), _swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex);
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         _outOfDate = true;
         return false;
@@ -128,7 +128,7 @@ bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaph
         presentInfo.pResults = nullptr
     };
 
-    VkResult result = vkQueuePresentKHR(*presentQueue, &presentInfo);
+    VkResult result = vkQueuePresentKHR(static_cast<VkQueue>(*presentQueue), &presentInfo);
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: present(): Can't acquire swapchain next image: {}", result);
         return false;

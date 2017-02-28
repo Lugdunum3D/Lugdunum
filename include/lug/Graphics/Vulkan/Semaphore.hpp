@@ -11,7 +11,7 @@ class Device;
 
 class LUG_GRAPHICS_API Semaphore {
 public:
-    Semaphore(VkSemaphore semaphore = VK_NULL_HANDLE, const Device* device = nullptr);
+    explicit Semaphore(VkSemaphore semaphore = VK_NULL_HANDLE, const Device* device = nullptr);
 
     Semaphore(const Semaphore&) = delete;
     Semaphore(Semaphore&& semaphore);
@@ -21,7 +21,7 @@ public:
 
     ~Semaphore();
 
-    operator VkSemaphore() const {
+    explicit operator VkSemaphore() const {
         return _semaphore;
     }
 

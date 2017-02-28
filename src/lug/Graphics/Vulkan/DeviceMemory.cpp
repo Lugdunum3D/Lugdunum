@@ -32,7 +32,7 @@ DeviceMemory::~DeviceMemory() {
 
 void DeviceMemory::destroy() {
     if (_deviceMemory != VK_NULL_HANDLE) {
-        vkFreeMemory(*_device, _deviceMemory, nullptr);
+        vkFreeMemory(static_cast<VkDevice>(*_device), _deviceMemory, nullptr);
         _deviceMemory = VK_NULL_HANDLE;
     }
 }
@@ -46,7 +46,7 @@ std::unique_ptr<DeviceMemory> DeviceMemory::allocate(const Device* device, VkDev
     };
 
     VkDeviceMemory memory = VK_NULL_HANDLE;
-    VkResult result = vkAllocateMemory(*device, &allocateInfo, nullptr, &memory);
+    VkResult result = vkAllocateMemory(static_cast<VkDevice>(*device), &allocateInfo, nullptr, &memory);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't allocate device memory: {}", result);

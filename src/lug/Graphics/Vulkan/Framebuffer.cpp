@@ -35,7 +35,7 @@ Framebuffer::~Framebuffer() {
 
 void Framebuffer::destroy() {
     if (_framebuffer != VK_NULL_HANDLE) {
-        vkDestroyFramebuffer(*_device, _framebuffer, nullptr);
+        vkDestroyFramebuffer(static_cast<VkDevice>(*_device), _framebuffer, nullptr);
         _framebuffer = VK_NULL_HANDLE;
     }
 }

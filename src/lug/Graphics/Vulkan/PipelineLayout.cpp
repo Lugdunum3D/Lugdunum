@@ -42,7 +42,7 @@ PipelineLayout::~PipelineLayout() {
 
 void PipelineLayout::destroy() {
     if (_pipelineLayout != VK_NULL_HANDLE) {
-        vkDestroyPipelineLayout(*_device, _pipelineLayout, nullptr);
+        vkDestroyPipelineLayout(static_cast<VkDevice>(*_device), _pipelineLayout, nullptr);
         _pipelineLayout = VK_NULL_HANDLE;
     }
 }
@@ -87,8 +87,8 @@ std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
     }
 
     VkDescriptorSetLayout vkDescriptorSetLayouts[] = {
-        *descriptorSetLayouts[0],
-        *descriptorSetLayouts[1]
+        static_cast<VkDescriptorSetLayout>(*descriptorSetLayouts[0]),
+        static_cast<VkDescriptorSetLayout>(*descriptorSetLayouts[1])
     };
 
     VkPushConstantRange pushConstants[] = {
@@ -111,7 +111,7 @@ std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
     };
 
     VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-    VkResult result = vkCreatePipelineLayout(*device, &createInfo, nullptr, &pipelineLayout);
+    VkResult result = vkCreatePipelineLayout(static_cast<VkDevice>(*device), &createInfo, nullptr, &pipelineLayout);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create pipeline layout: {}", result);

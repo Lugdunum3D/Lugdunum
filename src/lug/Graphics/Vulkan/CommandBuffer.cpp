@@ -72,7 +72,7 @@ bool CommandBuffer::reset(bool releaseRessources) {
 
 void CommandBuffer::destroy() {
     if (_commandBuffer != VK_NULL_HANDLE) {
-        vkFreeCommandBuffers(*_commandPool->getDevice(), *_commandPool, 1, &_commandBuffer);
+        vkFreeCommandBuffers(static_cast<VkDevice>(*_commandPool->getDevice()), static_cast<VkCommandPool>(*_commandPool), 1, &_commandBuffer);
         _commandBuffer = VK_NULL_HANDLE;
     }
 

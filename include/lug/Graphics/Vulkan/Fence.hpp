@@ -11,7 +11,7 @@ class Device;
 
 class LUG_GRAPHICS_API Fence {
 public:
-    Fence(VkFence fence = VK_NULL_HANDLE, const Device* device = nullptr);
+    explicit Fence(VkFence fence = VK_NULL_HANDLE, const Device* device = nullptr);
 
     Fence(const Fence&) = delete;
     Fence(Fence&& fence);
@@ -21,7 +21,7 @@ public:
 
     ~Fence();
 
-    operator VkFence() const {
+    explicit operator VkFence() const {
         return _fence;
     }
 

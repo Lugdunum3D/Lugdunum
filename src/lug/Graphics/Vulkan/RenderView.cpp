@@ -36,7 +36,7 @@ bool RenderView::init(RenderView::InitInfo& initInfo,
                 createInfo.pNext = nullptr,
                 createInfo.flags = 0
             };
-            VkResult result = vkCreateSemaphore(*device, &createInfo, nullptr, &semaphore);
+            VkResult result = vkCreateSemaphore(static_cast<VkDevice>(*device), &createInfo, nullptr, &semaphore);
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
                 return false;

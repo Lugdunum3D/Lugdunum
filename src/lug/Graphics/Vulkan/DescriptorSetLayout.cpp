@@ -33,7 +33,7 @@ DescriptorSetLayout::~DescriptorSetLayout() {
 
 void DescriptorSetLayout::destroy() {
     if (_descriptorSetLayout != VK_NULL_HANDLE) {
-        vkDestroyDescriptorSetLayout(*_device, _descriptorSetLayout, nullptr);
+        vkDestroyDescriptorSetLayout(static_cast<VkDevice>(*_device), _descriptorSetLayout, nullptr);
         _descriptorSetLayout = VK_NULL_HANDLE;
     }
 }
@@ -48,7 +48,7 @@ std::unique_ptr<DescriptorSetLayout> DescriptorSetLayout::create(const Device* d
     };
 
     VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-    VkResult result = vkCreateDescriptorSetLayout(*device, &createInfo, nullptr, &descriptorSetLayout);
+    VkResult result = vkCreateDescriptorSetLayout(static_cast<VkDevice>(*device), &createInfo, nullptr, &descriptorSetLayout);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create descriptor set layout: {}", result);

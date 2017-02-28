@@ -25,7 +25,7 @@ public:
 
     ~RenderPass();
 
-    operator VkRenderPass() const {
+    explicit operator VkRenderPass() const {
         return _renderPass;
     }
 

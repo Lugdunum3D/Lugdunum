@@ -10,7 +10,7 @@ namespace Vulkan {
 
 class LUG_GRAPHICS_API Queue {
 public:
-    Queue(int8_t idx = -1, VkQueue queue = VK_NULL_HANDLE, VkQueueFlags flags = 0, bool presentation = false);
+    explicit Queue(int8_t idx = -1, VkQueue queue = VK_NULL_HANDLE, VkQueueFlags flags = 0, bool presentation = false);
 
     Queue(const Queue&) = delete;
     Queue(Queue&& queue);
@@ -20,7 +20,7 @@ public:
 
     ~Queue();
 
-    operator VkQueue() const {
+    explicit operator VkQueue() const {
         return _queue;
     }
 
@@ -34,7 +34,7 @@ public:
     const CommandPool& getCommandPool() const;
 
     void setCommandPool(CommandPool&& commandPool);
-    bool submit(VkCommandBuffer commandBuffer,
+    bool submit(const CommandBuffer& commandBuffer,
                 const std::vector<VkSemaphore>& signalSemaphores = {},
                 const std::vector<VkSemaphore>& waitSemaphores = {},
                 const std::vector<VkPipelineStageFlags>& waitDstStageMasks = {},

@@ -36,7 +36,7 @@ ImageView::~ImageView() {
 
 void ImageView::destroy() {
     if (_imageView != VK_NULL_HANDLE) {
-        vkDestroyImageView(*_device, _imageView, nullptr);
+        vkDestroyImageView(static_cast<VkDevice>(*_device), _imageView, nullptr);
         _imageView = VK_NULL_HANDLE;
     }
 }
@@ -52,7 +52,7 @@ std::unique_ptr<ImageView> ImageView::create(
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = 0,
-        createInfo.image = *image,
+        createInfo.image = static_cast<VkImage>(*image),
         createInfo.viewType = viewType,
         createInfo.format = format,
         {}, // createInfo.components
@@ -73,7 +73,7 @@ std::unique_ptr<ImageView> ImageView::create(
     createInfo.subresourceRange.layerCount = 1;
 
     VkImageView imageViewHandle = VK_NULL_HANDLE;
-    VkResult result = vkCreateImageView(*device, &createInfo, nullptr, &imageViewHandle);
+    VkResult result = vkCreateImageView(static_cast<VkDevice>(*device), &createInfo, nullptr, &imageViewHandle);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create image view: {}", result);

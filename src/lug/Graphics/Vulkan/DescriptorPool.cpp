@@ -44,7 +44,7 @@ std::vector<DescriptorSet> DescriptorPool::createDescriptorSets(const std::vecto
     };
 
     std::vector<VkDescriptorSet> descriptorSets(count);
-    VkResult result = vkAllocateDescriptorSets(*_device, &allocateInfo, descriptorSets.data());
+    VkResult result = vkAllocateDescriptorSets(static_cast<VkDevice>(*_device), &allocateInfo, descriptorSets.data());
 
     // TODO: Handle VK_ERROR_FRAGMENTED_POOL and negative values to create a new descriptor pool
     if (result != VK_SUCCESS) {
@@ -63,7 +63,7 @@ std::vector<DescriptorSet> DescriptorPool::createDescriptorSets(const std::vecto
 
 void DescriptorPool::destroy() {
     if (_descriptorPool != VK_NULL_HANDLE) {
-        vkDestroyDescriptorPool(*_device, _descriptorPool, nullptr);
+        vkDestroyDescriptorPool(static_cast<VkDevice>(*_device), _descriptorPool, nullptr);
         _descriptorPool = VK_NULL_HANDLE;
     }
 

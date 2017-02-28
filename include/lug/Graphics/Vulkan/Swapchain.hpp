@@ -17,7 +17,7 @@ class RenderPass;
 
 class LUG_GRAPHICS_API Swapchain {
 public:
-    Swapchain(VkSwapchainKHR swapchain = VK_NULL_HANDLE, const Device* device = nullptr, const VkSurfaceFormatKHR& swapchainFormat = {}, const VkExtent2D& extent = {});
+    explicit Swapchain(VkSwapchainKHR swapchain = VK_NULL_HANDLE, const Device* device = nullptr, const VkSurfaceFormatKHR& swapchainFormat = {}, const VkExtent2D& extent = {});
 
     Swapchain(const Swapchain&) = delete;
     Swapchain(Swapchain&& Swapchain);
@@ -27,7 +27,7 @@ public:
 
     ~Swapchain();
 
-    operator VkSwapchainKHR() const {
+    explicit operator VkSwapchainKHR() const {
         return _swapchain;
     }
 

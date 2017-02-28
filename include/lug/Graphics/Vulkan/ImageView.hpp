@@ -19,7 +19,7 @@ public:
     };
 
 public:
-    ImageView(VkImageView ImageView = VK_NULL_HANDLE, const Device* device = nullptr, const Extent& extent = {0, 0});
+    explicit ImageView(VkImageView ImageView = VK_NULL_HANDLE, const Device* device = nullptr, const Extent& extent = {0, 0});
 
     ImageView(const ImageView&) = delete;
     ImageView(ImageView&& ImageView);
@@ -29,7 +29,7 @@ public:
 
     ~ImageView();
 
-    operator VkImageView() const {
+    explicit operator VkImageView() const {
         return _imageView;
     }
 

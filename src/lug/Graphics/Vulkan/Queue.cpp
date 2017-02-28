@@ -42,13 +42,15 @@ Queue::~Queue() {
     destroy();
 }
 
-bool Queue::submit(VkCommandBuffer commandBuffer,
+bool Queue::submit(const CommandBuffer& commandBuffer,
                    const std::vector<VkSemaphore>& signalSemaphores,
                    const std::vector<VkSemaphore>& waitSemaphores,
                    const std::vector<VkPipelineStageFlags>& waitDstStageMasks,
                    VkFence fence) const {
 
     LUG_ASSERT(waitSemaphores.size() == waitDstStageMasks.size(), "waitDstStageMasks should be the same size as waitSemaphores");
+
+    VkCommandBuffer vkCommandBuffer = static_cast<VkCommandBuffer>(commandBuffer);
 
     VkSubmitInfo submitInfo{
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -57,7 +59,7 @@ bool Queue::submit(VkCommandBuffer commandBuffer,
         submitInfo.pWaitSemaphores = waitSemaphores.size() > 0 ? waitSemaphores.data() : nullptr,
         submitInfo.pWaitDstStageMask = waitDstStageMasks.size() > 0 ? waitDstStageMasks.data() : nullptr,
         submitInfo.commandBufferCount = 1,
-        submitInfo.pCommandBuffers = &commandBuffer,
+        submitInfo.pCommandBuffers = &vkCommandBuffer,
         submitInfo.signalSemaphoreCount = signalSemaphores.size() > 0 ? (uint32_t)signalSemaphores.size() : 0,
         submitInfo.pSignalSemaphores = signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr
     };

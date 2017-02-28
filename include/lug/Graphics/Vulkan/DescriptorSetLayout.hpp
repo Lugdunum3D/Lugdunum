@@ -22,7 +22,7 @@ public:
 
     ~DescriptorSetLayout();
 
-    operator VkDescriptorSetLayout() const {
+    explicit operator VkDescriptorSetLayout() const {
         return _descriptorSetLayout;
     }
 

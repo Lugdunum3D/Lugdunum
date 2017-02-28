@@ -35,7 +35,7 @@ RenderPass::~RenderPass() {
 
 void RenderPass::destroy() {
     if (_renderPass != VK_NULL_HANDLE) {
-        vkDestroyRenderPass(*_device, _renderPass, nullptr);
+        vkDestroyRenderPass(static_cast<VkDevice>(*_device), _renderPass, nullptr);
         _renderPass = VK_NULL_HANDLE;
     }
 }
@@ -55,8 +55,8 @@ void RenderPass::begin(const CommandBuffer* commandBuffer,
     VkRenderPassBeginInfo beginInfo{
         beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         beginInfo.pNext = nullptr,
-        beginInfo.renderPass = _renderPass,
-        beginInfo.framebuffer = framebuffer,
+        beginInfo.renderPass = static_cast<VkRenderPass>(_renderPass),
+        beginInfo.framebuffer = static_cast<VkFramebuffer>(framebuffer),
         {}, // beginInfo.renderArea
         beginInfo.clearValueCount = 2,
         beginInfo.pClearValues = clearColors
@@ -65,11 +65,11 @@ void RenderPass::begin(const CommandBuffer* commandBuffer,
     beginInfo.renderArea.offset = {(int32_t)renderOffset.x(), (int32_t)renderOffset.y()};
     beginInfo.renderArea.extent = {(uint32_t)renderExtent.x(), (uint32_t)renderExtent.y()};
 
-    vkCmdBeginRenderPass(*commandBuffer, &beginInfo, contents);
+    vkCmdBeginRenderPass(static_cast<VkCommandBuffer>(*commandBuffer), &beginInfo, contents);
 }
 
 void RenderPass::end(const CommandBuffer* commandBuffer) {
-    vkCmdEndRenderPass(*commandBuffer);
+    vkCmdEndRenderPass(static_cast<VkCommandBuffer>(*commandBuffer));
 }
 
 std::unique_ptr<RenderPass> RenderPass::create(const Device* device, VkFormat colorFormat) {
@@ -143,7 +143,7 @@ std::unique_ptr<RenderPass> RenderPass::create(const Device* device, VkFormat co
     };
 
     VkRenderPass renderPass = VK_NULL_HANDLE;
-    VkResult result = vkCreateRenderPass(*device, &createInfo, nullptr, &renderPass);
+    VkResult result = vkCreateRenderPass(static_cast<VkDevice>(*device), &createInfo, nullptr, &renderPass);
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create render pass: {}", result);
         return nullptr;

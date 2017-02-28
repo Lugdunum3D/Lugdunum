@@ -12,7 +12,7 @@ class Device;
 
 class LUG_GRAPHICS_API DeviceMemory {
 public:
-    DeviceMemory(VkDeviceMemory deviceMemory = VK_NULL_HANDLE, const Device* device = nullptr);
+    explicit DeviceMemory(VkDeviceMemory deviceMemory = VK_NULL_HANDLE, const Device* device = nullptr);
 
     DeviceMemory(const DeviceMemory&) = delete;
     DeviceMemory(DeviceMemory&& deviceMemory);
@@ -22,7 +22,7 @@ public:
 
     ~DeviceMemory();
 
-    operator VkDeviceMemory() const {
+    explicit operator VkDeviceMemory() const {
         return _deviceMemory;
     }
 

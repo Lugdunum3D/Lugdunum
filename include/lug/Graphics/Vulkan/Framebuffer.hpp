@@ -18,7 +18,7 @@ public:
     };
 
 public:
-    Framebuffer(VkFramebuffer Framebuffer = VK_NULL_HANDLE, const Device* device = nullptr, const Extent& extent = {0, 0});
+    explicit Framebuffer(VkFramebuffer Framebuffer = VK_NULL_HANDLE, const Device* device = nullptr, const Extent& extent = {0, 0});
 
     Framebuffer(const Framebuffer&) = delete;
     Framebuffer(Framebuffer&& Framebuffer);
@@ -28,7 +28,7 @@ public:
 
     ~Framebuffer();
 
-    operator VkFramebuffer() const {
+    explicit operator VkFramebuffer() const {
         return _framebuffer;
     }
 

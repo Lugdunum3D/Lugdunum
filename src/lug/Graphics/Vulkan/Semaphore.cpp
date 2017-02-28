@@ -31,7 +31,7 @@ Semaphore::~Semaphore() {
 
 void Semaphore::destroy() {
     if (_semaphore != VK_NULL_HANDLE) {
-        vkDestroySemaphore(*_device, _semaphore, nullptr);
+        vkDestroySemaphore(static_cast<VkDevice>(*_device), _semaphore, nullptr);
         _semaphore = VK_NULL_HANDLE;
     }
 }

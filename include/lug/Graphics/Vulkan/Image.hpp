@@ -21,7 +21,7 @@ public:
     };
 
 public:
-    Image(VkImage Image = VK_NULL_HANDLE, const Device* device = nullptr, const Extent& extent = {0, 0}, bool swapchainImage = false, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
+    explicit Image(VkImage Image = VK_NULL_HANDLE, const Device* device = nullptr, const Extent& extent = {0, 0}, bool swapchainImage = false, VkImageAspectFlags aspect = VK_IMAGE_ASPECT_COLOR_BIT);
 
     Image(const Image&) = delete;
     Image(Image&& Image);
@@ -31,7 +31,7 @@ public:
 
     ~Image();
 
-    operator VkImage() const {
+    explicit operator VkImage() const {
         return _image;
     }
 

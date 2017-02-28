@@ -37,7 +37,7 @@ ShaderModule::~ShaderModule() {
 
 void ShaderModule::destroy() {
     if (_shaderModule != VK_NULL_HANDLE) {
-        vkDestroyShaderModule(*_device, _shaderModule, nullptr);
+        vkDestroyShaderModule(static_cast<VkDevice>(*_device), _shaderModule, nullptr);
         _shaderModule = VK_NULL_HANDLE;
     }
 }
@@ -91,7 +91,7 @@ std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, cons
     };
 
     VkShaderModule shaderModule = VK_NULL_HANDLE;
-    VkResult result = vkCreateShaderModule(*device, &createInfo, nullptr, &shaderModule);
+    VkResult result = vkCreateShaderModule(static_cast<VkDevice>(*device), &createInfo, nullptr, &shaderModule);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create shader module \"{}\": {}", file, result);

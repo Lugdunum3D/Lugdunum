@@ -12,7 +12,7 @@ namespace Vulkan {
 
 class LUG_GRAPHICS_API DescriptorSet {
 public:
-    DescriptorSet(VkDescriptorSet descriptorSet = VK_NULL_HANDLE, const Device* device = nullptr);
+    explicit DescriptorSet(VkDescriptorSet descriptorSet = VK_NULL_HANDLE, const Device* device = nullptr);
 
     DescriptorSet(const DescriptorSet&) = delete;
     DescriptorSet(DescriptorSet&& DescriptorSet);
@@ -22,7 +22,7 @@ public:
 
     ~DescriptorSet();
 
-    operator VkDescriptorSet() const {
+    explicit operator VkDescriptorSet() const {
         return _descriptorSet;
     }
 

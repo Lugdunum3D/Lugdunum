@@ -25,7 +25,7 @@ public:
 
     ~PipelineLayout();
 
-    operator VkPipelineLayout() const {
+    explicit operator VkPipelineLayout() const {
         return _pipelineLayout;
     }
 

@@ -11,7 +11,7 @@ class CommandPool;
 
 class LUG_GRAPHICS_API CommandBuffer {
 public:
-    CommandBuffer(VkCommandBuffer commandBuffer = VK_NULL_HANDLE, CommandPool* commandPool = nullptr);
+    explicit CommandBuffer(VkCommandBuffer commandBuffer = VK_NULL_HANDLE, CommandPool* commandPool = nullptr);
 
     CommandBuffer(const CommandBuffer&) = delete;
     CommandBuffer(CommandBuffer&& CommandBuffer);
@@ -21,7 +21,7 @@ public:
 
     ~CommandBuffer();
 
-    operator VkCommandBuffer() const {
+    explicit operator VkCommandBuffer() const {
         return _commandBuffer;
     }
 

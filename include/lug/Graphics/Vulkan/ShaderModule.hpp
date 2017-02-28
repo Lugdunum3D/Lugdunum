@@ -23,7 +23,7 @@ public:
 
     ~ShaderModule();
 
-    operator VkShaderModule() const {
+    explicit operator VkShaderModule() const {
         return _shaderModule;
     }
 

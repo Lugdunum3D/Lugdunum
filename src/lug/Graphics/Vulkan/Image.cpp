@@ -9,7 +9,7 @@ namespace Vulkan {
 Image::Image(VkImage image, const Device* device, const Extent& extent, bool swapchainImage, VkImageAspectFlags aspect) :
             _image(image), _device(device), _swapchainImage(swapchainImage), _aspect(aspect), _extent(extent) {
                 if (_image != VK_NULL_HANDLE) {
-                    vkGetImageMemoryRequirements(*device, _image, &_requirements);
+                    vkGetImageMemoryRequirements(static_cast<VkDevice>(*device), _image, &_requirements);
                 }
             }
 
@@ -81,7 +81,7 @@ void Image::changeLayout(CommandBuffer& commandBuffer,
     imageBarrier.subresourceRange.baseArrayLayer = 0;
     imageBarrier.subresourceRange.layerCount = 1;
 
-    vkCmdPipelineBarrier(commandBuffer, // commandBuffer
+    vkCmdPipelineBarrier(static_cast<VkCommandBuffer>(commandBuffer), // commandBuffer
                         srcStageMask, // srcStageMask
                         dstStageMask, // dstStageMask
                         VK_DEPENDENCY_BY_REGION_BIT, // dependencyFlags
@@ -95,14 +95,14 @@ void Image::changeLayout(CommandBuffer& commandBuffer,
 
 void Image::destroy() {
     if (_image != VK_NULL_HANDLE) {
-        vkDestroyImage(*_device, _image, nullptr);
+        vkDestroyImage(static_cast<VkDevice>(*_device), _image, nullptr);
         _image = VK_NULL_HANDLE;
     }
 }
 
 void Image::bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
     _deviceMemory = deviceMemory;
-    vkBindImageMemory(*_device, _image, *deviceMemory, memoryOffset);
+    vkBindImageMemory(static_cast<VkDevice>(*_device), _image, static_cast<VkDeviceMemory>(*deviceMemory), memoryOffset);
 }
 
 const VkMemoryRequirements& Image::getRequirements() const {
@@ -144,7 +144,7 @@ std::unique_ptr<Image> Image::create(
     createInfo.extent.depth = extent.depth;
 
     VkImage imageHandle = VK_NULL_HANDLE;
-    VkResult result = vkCreateImage(*device, &createInfo, nullptr, &imageHandle);
+    VkResult result = vkCreateImage(static_cast<VkDevice>(*device), &createInfo, nullptr, &imageHandle);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create image: {}", result);

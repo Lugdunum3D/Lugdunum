@@ -53,7 +53,7 @@ bool RenderWindow::beginFrame() {
         }
     }
 
-    while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, acquireImageData->completeSemaphore)) {
+    while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, static_cast<VkSemaphore>(acquireImageData->completeSemaphore))) {
         if (_swapchain.isOutOfDate()) {
             if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
                 return false;
@@ -85,8 +85,22 @@ bool RenderWindow::beginFrame() {
     FrameData& frameData = _framesData[_currentImageIndex];
     CommandBuffer& cmdBuffer = frameData.cmdBuffers[0];
 
-    std::vector<VkSemaphore> imageReadyVkSemaphores(frameData.imageReadySemaphores.begin(), frameData.imageReadySemaphores.end());
-    return _presentQueue->submit(cmdBuffer, imageReadyVkSemaphores, {acquireImageData->completeSemaphore}, {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT});
+    std::vector<VkSemaphore> imageReadyVkSemaphores;
+    imageReadyVkSemaphores.reserve(frameData.imageReadySemaphores.size());
+
+    std::transform(frameData.imageReadySemaphores.begin(), frameData.imageReadySemaphores.end(),
+        std::back_inserter(imageReadyVkSemaphores),
+        [](const Semaphore& semaphore) {
+            return static_cast<VkSemaphore>(semaphore);
+        }
+    );
+
+    return _presentQueue->submit(
+        cmdBuffer,
+        imageReadyVkSemaphores,
+        {static_cast<VkSemaphore>(acquireImageData->completeSemaphore)},
+        {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT}
+    );
 }
 
 bool RenderWindow::endFrame() {
@@ -99,7 +113,7 @@ bool RenderWindow::endFrame() {
         RenderView* renderView_ = static_cast<RenderView*>(renderView.get());
         // Render views with no camera don't signal the semaphore as they don't draw
         if (renderView_->getCamera()) {
-            waitSemaphores[i++] = renderView_->getDrawCompleteSemaphore(_currentImageIndex);
+            waitSemaphores[i++] = static_cast<VkSemaphore>(renderView_->getDrawCompleteSemaphore(_currentImageIndex));
         }
     }
 
@@ -110,8 +124,11 @@ bool RenderWindow::endFrame() {
     }
     std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
-    return _presentQueue->submit(cmdBuffer, {frameData.allDrawsFinishedSemaphore}, waitSemaphores, waitDstStageMasks) &&
-    _swapchain.present(_presentQueue, _currentImageIndex, frameData.allDrawsFinishedSemaphore);
+    return _presentQueue->submit(
+        cmdBuffer,
+        {static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore)},
+        waitSemaphores, waitDstStageMasks
+    ) && _swapchain.present(_presentQueue, _currentImageIndex, static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore));
 }
 
 lug::Graphics::RenderView* RenderWindow::createView(lug::Graphics::RenderView::InitInfo& initInfo) {
@@ -163,7 +180,7 @@ bool RenderWindow::initSurface() {
         createInfo.hwnd = _impl->getHandle()
     };
 
-    VkResult result = vkCreateWin32SurfaceKHR(_renderer.getInstance(), &createInfo, nullptr, &_surface);
+    VkResult result = vkCreateWin32SurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), &createInfo, nullptr, &_surface);
 #elif defined(LUG_SYSTEM_LINUX) // Linux surface
     VkXlibSurfaceCreateInfoKHR createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
@@ -173,7 +190,7 @@ bool RenderWindow::initSurface() {
         createInfo.window = _impl->getWindow()
     };
 
-    VkResult result = vkCreateXlibSurfaceKHR(_renderer.getInstance(), &createInfo, nullptr, &_surface);
+    VkResult result = vkCreateXlibSurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), &createInfo, nullptr, &_surface);
 #elif defined(LUG_SYSTEM_ANDROID) // Android Surface
     VkAndroidSurfaceCreateInfoKHR createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
@@ -182,7 +199,7 @@ bool RenderWindow::initSurface() {
         createInfo.window = _impl->getWindow()
     };
 
-    VkResult result = vkCreateAndroidSurfaceKHR(_renderer.getInstance(), &createInfo, nullptr, &_surface);
+    VkResult result = vkCreateAndroidSurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), &createInfo, nullptr, &_surface);
 #else
     #error "RenderWindow::initSurface Unknow platform"
 #endif
@@ -372,7 +389,7 @@ bool RenderWindow::initSwapchain() {
             createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
             createInfo.presentMode = swapchainPresentMode,
             createInfo.clipped = VK_TRUE,
-            createInfo.oldSwapchain = _swapchain
+            createInfo.oldSwapchain = static_cast<VkSwapchainKHR>(_swapchain)
         };
 
         // Thank you clang
@@ -403,7 +420,7 @@ bool RenderWindow::initSwapchain() {
         createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
 
         VkSwapchainKHR swapchainKHR;
-        result = vkCreateSwapchainKHR(_renderer.getDevice(), &createInfo, nullptr, &swapchainKHR);
+        result = vkCreateSwapchainKHR(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &swapchainKHR);
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't initialize swapchain: {}", result);
             return false;
@@ -444,7 +461,7 @@ bool RenderWindow::initFramesData(RenderWindow::InitInfo& initInfo) {
                 createInfo.pNext = nullptr,
                 createInfo.flags = 0
             };
-            VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
+            VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
                 return false;
@@ -463,7 +480,7 @@ bool RenderWindow::initFramesData(RenderWindow::InitInfo& initInfo) {
             _framesData[i].imageReadySemaphores.resize(initInfo.renderViewsInitInfo.size());
             for (uint32_t j = 0; j < initInfo.renderViewsInitInfo.size(); ++j) {
                 VkSemaphore semaphore;
-                VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
+                VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
                 if (result != VK_SUCCESS) {
                     LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
                     return false;
@@ -486,7 +503,7 @@ bool RenderWindow::initFramesData(RenderWindow::InitInfo& initInfo) {
                 createInfo.pNext = nullptr,
                 createInfo.flags = 0
             };
-            VkResult result = vkCreateSemaphore(_renderer.getDevice(), &createInfo, nullptr, &semaphore);
+            VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
                 return false;
@@ -593,7 +610,7 @@ bool RenderWindow::init(RenderWindow::InitInfo& initInfo) {
         };
 
         VkDescriptorPool descriptorPool{VK_NULL_HANDLE};
-        VkResult result = vkCreateDescriptorPool(_renderer.getDevice(), &createInfo, nullptr, &descriptorPool);
+        VkResult result = vkCreateDescriptorPool(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &descriptorPool);
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't create the descriptor pool: {}", result);
             return false;
@@ -620,7 +637,7 @@ void RenderWindow::destroy() {
     _swapchain.destroy();
 
     if (_surface != VK_NULL_HANDLE) {
-        vkDestroySurfaceKHR(_renderer.getInstance(), _surface, nullptr);
+        vkDestroySurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), _surface, nullptr);
         _surface = VK_NULL_HANDLE;
     }
 

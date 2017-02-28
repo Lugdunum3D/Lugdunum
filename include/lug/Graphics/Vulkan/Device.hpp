@@ -19,7 +19,7 @@ public:
 
     ~Device();
 
-    operator VkDevice() const {
+    explicit operator VkDevice() const {
         return _device;
     }
 

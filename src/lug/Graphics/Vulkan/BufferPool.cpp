@@ -60,7 +60,7 @@ BufferPool::SubBuffer* BufferPool::allocate() {
         chunk->buffer->bindMemory(chunk->bufferMemory.get(), 0);
 
         // Create and update descriptor set
-        std::vector<DescriptorSet> descriptorSets = _descriptorPool->createDescriptorSets({*_descriptorSetLayout});
+        std::vector<DescriptorSet> descriptorSets = _descriptorPool->createDescriptorSets({static_cast<VkDescriptorSetLayout>(*_descriptorSetLayout)});
         if (descriptorSets.size() == 0) {
             return nullptr;
         }

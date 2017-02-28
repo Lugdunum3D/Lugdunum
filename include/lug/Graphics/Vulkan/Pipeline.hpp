@@ -26,7 +26,7 @@ public:
 
     ~Pipeline();
 
-    operator VkPipeline() const {
+    explicit operator VkPipeline() const {
         return _pipeline;
     }
 

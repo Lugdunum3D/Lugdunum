@@ -9,7 +9,7 @@ namespace Vulkan {
 
 class LUG_GRAPHICS_API Camera final : public lug::Graphics::Camera {
 public:
-    Camera(const std::string& name);
+    explicit Camera(const std::string& name);
 
     Camera(const Camera&) = delete;
     Camera(Camera&&) = default;

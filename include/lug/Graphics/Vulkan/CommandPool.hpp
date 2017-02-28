@@ -14,7 +14,7 @@ class Queue;
 
 class LUG_GRAPHICS_API CommandPool {
 public:
-    CommandPool(VkCommandPool commandPool = VK_NULL_HANDLE, Device *device = nullptr, Queue *queue = nullptr);
+    explicit CommandPool(VkCommandPool commandPool = VK_NULL_HANDLE, Device *device = nullptr, Queue *queue = nullptr);
 
     CommandPool(const CommandPool&) = delete;
     // Warning: Don't move CommandPool after creating a CommandBuffer
@@ -26,7 +26,7 @@ public:
 
     ~CommandPool();
 
-    operator VkCommandPool() const {
+    explicit operator VkCommandPool() const {
         return _commandPool;
     }
 

@@ -38,9 +38,9 @@ void DescriptorSet::bind(const PipelineLayout* pipelineLayout,
                             uint32_t setNb,
                             uint32_t dynamicOffsetsCount,
                             const uint32_t* dynamicOffsets) {
-    vkCmdBindDescriptorSets(*commandBuffer,
+    vkCmdBindDescriptorSets(static_cast<VkCommandBuffer>(*commandBuffer),
                             VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            *pipelineLayout, setNb,
+                            static_cast<VkPipelineLayout>(*pipelineLayout), setNb,
                             1,
                             &_descriptorSet,
                             dynamicOffsetsCount,
@@ -49,7 +49,7 @@ void DescriptorSet::bind(const PipelineLayout* pipelineLayout,
 
 void DescriptorSet::update(VkDescriptorType descriptorType, uint32_t dstBinding, const Buffer* buffer, uint32_t offset, uint32_t range) {
     VkDescriptorBufferInfo bufferInfo{
-        bufferInfo.buffer = *buffer,
+        bufferInfo.buffer = static_cast<VkBuffer>(*buffer),
         bufferInfo.offset = offset,
         bufferInfo.range = range,
     };
@@ -67,7 +67,7 @@ void DescriptorSet::update(VkDescriptorType descriptorType, uint32_t dstBinding,
         write.pTexelBufferView = nullptr
     };
 
-    vkUpdateDescriptorSets(*_device, 1, &write, 0, nullptr);
+    vkUpdateDescriptorSets(static_cast<VkDevice>(*_device), 1, &write, 0, nullptr);
 }
 
 void DescriptorSet::destroy() {

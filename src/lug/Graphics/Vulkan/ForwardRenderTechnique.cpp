@@ -59,8 +59,8 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         scissor.offset = {(int32_t)_renderView->getScissor().offset.x, (int32_t)_renderView->getScissor().offset.y};
         scissor.extent = {(uint32_t)_renderView->getScissor().extent.width, (uint32_t)_renderView->getScissor().extent.height};
 
-        vkCmdSetViewport(cmdBuffer, 0, 1, &vkViewport);
-        vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+        vkCmdSetViewport(static_cast<VkCommandBuffer>(cmdBuffer), 0, 1, &vkViewport);
+        vkCmdSetScissor(static_cast<VkCommandBuffer>(cmdBuffer), 0, 1, &scissor);
     }
 
     // Update camera buffer data
@@ -129,7 +129,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
         // We set them to 0 so that there is no blending
         {
             const float blendConstants[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-            vkCmdSetBlendConstants(cmdBuffer, blendConstants);
+            vkCmdSetBlendConstants(static_cast<VkCommandBuffer>(cmdBuffer), blendConstants);
         }
 
 
@@ -140,7 +140,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                     // Blend constants are used as dst blend factor
                     // Now the depth buffer is filled, we can set the blend constants to 1 to enable blending
                     const float blendConstants[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-                    vkCmdSetBlendConstants(cmdBuffer, blendConstants);
+                    vkCmdSetBlendConstants(static_cast<VkCommandBuffer>(cmdBuffer), blendConstants);
                 }
             }
 
@@ -159,7 +159,7 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
 
                 if (!mesh->isModelMesh()) {
                     Mesh* vkMesh = static_cast<Mesh*>(mesh);
-                    VkBuffer vertexBuffer = *vkMesh->getVertexBuffer();
+                    VkBuffer vertexBuffer = static_cast<VkBuffer>(*vkMesh->getVertexBuffer());
                     VkDeviceSize vertexBufferOffset = 0;
                     VkDeviceSize indexBufferOffset = 0;
 
@@ -167,17 +167,17 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                     Math::Mat4x4f pushConstants[] = {
                         meshInstance->getParent()->getTransform()
                     };
-                    vkCmdPushConstants(cmdBuffer, *lightPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
+                    vkCmdPushConstants(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkPipelineLayout>(*lightPipeline->getLayout()), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
 
-                    vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &vertexBufferOffset);
-                    vkCmdBindIndexBuffer(cmdBuffer, *vkMesh->getIndexBuffer(), indexBufferOffset, VK_INDEX_TYPE_UINT32);
-                    vkCmdDrawIndexed(cmdBuffer, (uint32_t)vkMesh->indices.size(), 1, 0, 0, 0);
+                    vkCmdBindVertexBuffers(static_cast<VkCommandBuffer>(cmdBuffer), 0, 1, &vertexBuffer, &vertexBufferOffset);
+                    vkCmdBindIndexBuffer(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkBuffer>(*vkMesh->getIndexBuffer()), indexBufferOffset, VK_INDEX_TYPE_UINT32);
+                    vkCmdDrawIndexed(static_cast<VkCommandBuffer>(cmdBuffer), (uint32_t)vkMesh->indices.size(), 1, 0, 0, 0);
                 }
                 else {
                     Model::Mesh* modelMesh = static_cast<Model::Mesh*>(mesh);
                     ModelInstance* modelInstance = meshInstance->getModelInstance();
                     Model* model = static_cast<Model*>(modelInstance->getModel());
-                    const VkBuffer vertexBuffer = *model->getVertexBuffer();
+                    const VkBuffer vertexBuffer = static_cast<VkBuffer>(*model->getVertexBuffer());
                     VkDeviceSize vertexBufferOffset = modelMesh->verticesOffset * sizeof(lug::Graphics::Mesh::Vertex);
                     VkDeviceSize indexBufferOffset = modelMesh->indicesOffset * sizeof(uint32_t);
 
@@ -185,11 +185,11 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
                     Math::Mat4x4f pushConstants[] = {
                         modelInstance->getParent()->getTransform()
                     };
-                    vkCmdPushConstants(cmdBuffer, *lightPipeline->getLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
+                    vkCmdPushConstants(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkPipelineLayout>(*lightPipeline->getLayout()), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
 
-                    vkCmdBindVertexBuffers(cmdBuffer, 0, 1, &vertexBuffer, &vertexBufferOffset);
-                    vkCmdBindIndexBuffer(cmdBuffer, *model->getIndexBuffer(), indexBufferOffset, VK_INDEX_TYPE_UINT32);
-                    vkCmdDrawIndexed(cmdBuffer, (uint32_t)modelMesh->indices.size(), 1, 0, 0, 0);
+                    vkCmdBindVertexBuffers(static_cast<VkCommandBuffer>(cmdBuffer), 0, 1, &vertexBuffer, &vertexBufferOffset);
+                    vkCmdBindIndexBuffer(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkBuffer>(*model->getIndexBuffer()), indexBufferOffset, VK_INDEX_TYPE_UINT32);
+                    vkCmdDrawIndexed(static_cast<VkCommandBuffer>(cmdBuffer), (uint32_t)modelMesh->indices.size(), 1, 0, 0, 0);
                 }
 
             }
@@ -199,7 +199,13 @@ bool ForwardRenderTechnique::render(const RenderQueue& renderQueue, const Semaph
 
     if (!cmdBuffer.end()) return false;
 
-    return _presentQueue->submit(cmdBuffer, {drawCompleteSemaphore}, {imageReadySemaphore}, {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT}, frameData.fence);
+    return _presentQueue->submit(
+        cmdBuffer,
+        {static_cast<VkSemaphore>(drawCompleteSemaphore)},
+        {static_cast<VkSemaphore>(imageReadySemaphore)},
+        {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
+        static_cast<VkFence>(frameData.fence)
+    );
 }
 
 bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<ImageView> >& imageViews) {
@@ -225,7 +231,7 @@ bool ForwardRenderTechnique::init(DescriptorPool* descriptorPool, const std::vec
                 createInfo.pNext = nullptr,
                 createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT
             };
-            VkResult result = vkCreateFence(*_device, &createInfo, nullptr, &fence);
+            VkResult result = vkCreateFence(static_cast<VkDevice>(*_device), &createInfo, nullptr, &fence);
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain fence: {}", result);
                 return false;
@@ -352,13 +358,13 @@ bool ForwardRenderTechnique::initFramebuffers(const std::vector<std::unique_ptr<
 
     for (size_t i = 0; i < imageViews.size(); i++) {
         VkImageView attachments[2]{
-            *imageViews[i],
-            *_framesData[i].depthBuffer.imageView
+            static_cast<VkImageView>(*imageViews[i]),
+            static_cast<VkImageView>(*_framesData[i].depthBuffer.imageView)
         };
 
         VkFramebufferCreateInfo framebufferInfo = {};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = *renderPass;
+        framebufferInfo.renderPass = static_cast<VkRenderPass>(*renderPass);
         framebufferInfo.attachmentCount = 2;
         framebufferInfo.pAttachments = attachments;
         framebufferInfo.width = imageViews[i]->getExtent().width;
@@ -366,7 +372,7 @@ bool ForwardRenderTechnique::initFramebuffers(const std::vector<std::unique_ptr<
         framebufferInfo.layers = 1;
 
         VkFramebuffer fb;
-        result = vkCreateFramebuffer(*_device, &framebufferInfo, nullptr, &fb);
+        result = vkCreateFramebuffer(static_cast<VkDevice>(*_device), &framebufferInfo, nullptr, &fb);
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Failed to create framebuffer: {}", result);
             return false;

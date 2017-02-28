@@ -11,7 +11,7 @@ namespace Vulkan {
 Buffer::Buffer(VkBuffer buffer,
     const Device* device,
     DeviceMemory* deviceMemory) : _buffer(buffer), _device(device), _deviceMemory(deviceMemory) {
-    vkGetBufferMemoryRequirements(*device, _buffer, &_requirements);
+    vkGetBufferMemoryRequirements(static_cast<VkDevice>(*device), _buffer, &_requirements);
 }
 
 Buffer::Buffer(Buffer&& buffer) {
@@ -46,25 +46,25 @@ Buffer::~Buffer() {
 
 void Buffer::destroy() {
     if (_buffer != VK_NULL_HANDLE) {
-        vkDestroyBuffer(*_device, _buffer, nullptr);
+        vkDestroyBuffer(static_cast<VkDevice>(*_device), _buffer, nullptr);
         _buffer = VK_NULL_HANDLE;
     }
 }
 
 void Buffer::bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
     _deviceMemory = deviceMemory;
-    vkBindBufferMemory(*_device, _buffer, *deviceMemory, memoryOffset);
+    vkBindBufferMemory(static_cast<VkDevice>(*_device), static_cast<VkBuffer>(_buffer), static_cast<VkDeviceMemory>(*deviceMemory), memoryOffset);
 }
 
 void* Buffer::mapMemory(VkDeviceSize size, VkDeviceSize offset) {
     void* data = nullptr;
-    vkMapMemory(*_device, *_deviceMemory, offset, size, 0, &data);
+    vkMapMemory(static_cast<VkDevice>(*_device), static_cast<VkDeviceMemory>(*_deviceMemory), offset, size, 0, &data);
 
     return data;
 }
 
 void Buffer::unmapMemory() {
-    vkUnmapMemory(*_device, *_deviceMemory);
+    vkUnmapMemory(static_cast<VkDevice>(*_device), static_cast<VkDeviceMemory>(*_deviceMemory));
 }
 
 void Buffer::updateData(void *data, uint32_t size, uint32_t memoryOffset) {
@@ -74,7 +74,7 @@ void Buffer::updateData(void *data, uint32_t size, uint32_t memoryOffset) {
 }
 
 void Buffer::updateDataTransfer(const CommandBuffer* commandBuffer, void *data, uint32_t size, uint32_t offset) {
-    vkCmdUpdateBuffer(*commandBuffer, _buffer, offset, size, data);
+    vkCmdUpdateBuffer(static_cast<VkCommandBuffer>(*commandBuffer), _buffer, offset, size, data);
 }
 
 const VkMemoryRequirements& Buffer::getRequirements() const {
@@ -103,7 +103,7 @@ std::unique_ptr<Buffer> Buffer::create(
     };
 
     VkBuffer bufferHandle = VK_NULL_HANDLE;
-    VkResult result = vkCreateBuffer(*device, &createInfo, nullptr, &bufferHandle);
+    VkResult result = vkCreateBuffer(static_cast<VkDevice>(*device), &createInfo, nullptr, &bufferHandle);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create buffer: {}", result);

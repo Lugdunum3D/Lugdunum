@@ -45,7 +45,7 @@ Pipeline::~Pipeline() {
 
 void Pipeline::destroy() {
     if (_pipeline != VK_NULL_HANDLE) {
-        vkDestroyPipeline(*_device, _pipeline, nullptr);
+        vkDestroyPipeline(static_cast<VkDevice>(*_device), _pipeline, nullptr);
         _pipeline = VK_NULL_HANDLE;
     }
 
@@ -67,7 +67,7 @@ PipelineLayout* Pipeline::getLayout() const {
 }
 
 void Pipeline::bind(const CommandBuffer* commandBuffer) {
-    vkCmdBindPipeline(*commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+    vkCmdBindPipeline(static_cast<VkCommandBuffer>(*commandBuffer), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 }
 
 std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device, const std::string& vertexShaderFile, const std::string& fragmentShaderFile, VkFormat colorFormat) {
@@ -84,7 +84,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         vertexShaderStage.pNext = nullptr,
         vertexShaderStage.flags = 0,
         vertexShaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT,
-        vertexShaderStage.module = *vertexShader,
+        vertexShaderStage.module = static_cast<VkShaderModule>(*vertexShader),
         vertexShaderStage.pName = "main",
         vertexShaderStage.pSpecializationInfo = nullptr
     };
@@ -95,7 +95,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         fragmentShaderStage.pNext = nullptr,
         fragmentShaderStage.flags = 0,
         fragmentShaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT,
-        fragmentShaderStage.module = *fragmentShader,
+        fragmentShaderStage.module = static_cast<VkShaderModule>(*fragmentShader),
         fragmentShaderStage.pName = "main",
         fragmentShaderStage.pSpecializationInfo = nullptr
     };
@@ -288,8 +288,8 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         createInfo.pDepthStencilState = &depthStencil,
         createInfo.pColorBlendState = &colorBlending,
         createInfo.pDynamicState = &dynamicStateInfo,
-        createInfo.layout = *pipelineLayout,
-        createInfo.renderPass = *renderPass,
+        createInfo.layout = static_cast<VkPipelineLayout>(*pipelineLayout),
+        createInfo.renderPass = static_cast<VkRenderPass>(*renderPass),
         createInfo.subpass = 0,
         createInfo.basePipelineHandle = VK_NULL_HANDLE,
         createInfo.basePipelineIndex = 0
@@ -299,7 +299,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
 
     // TODO: create with VkPipelineCache
     // TODO: create multiple pipelines with one call
-    VkResult result = vkCreateGraphicsPipelines(*device, VK_NULL_HANDLE, 1, &createInfo, nullptr, &pipeline);
+    VkResult result = vkCreateGraphicsPipelines(static_cast<VkDevice>(*device), VK_NULL_HANDLE, 1, &createInfo, nullptr, &pipeline);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create graphics pipeline: {}", result);

@@ -19,7 +19,7 @@ public:
 
     ~Instance();
 
-    operator VkInstance() const {
+    explicit operator VkInstance() const {
         return _instance;
     }
 

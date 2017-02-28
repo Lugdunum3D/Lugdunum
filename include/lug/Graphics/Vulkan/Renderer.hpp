@@ -45,7 +45,7 @@ public:
     };
 
 public:
-    Renderer(Graphics& graphics);
+    explicit Renderer(Graphics& graphics);
 
     Renderer(const Renderer&) = delete;
     Renderer(Renderer&&) = delete;

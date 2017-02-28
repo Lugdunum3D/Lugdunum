@@ -14,7 +14,7 @@ class DeviceMemory;
 
 class LUG_GRAPHICS_API Buffer {
 public:
-    Buffer(VkBuffer Buffer = VK_NULL_HANDLE, const Device* device = nullptr, DeviceMemory* deviceMemory = nullptr);
+    explicit Buffer(VkBuffer Buffer = VK_NULL_HANDLE, const Device* device = nullptr, DeviceMemory* deviceMemory = nullptr);
 
     Buffer(const Buffer&) = delete;
     Buffer(Buffer&& buffer);
@@ -24,7 +24,7 @@ public:
 
     ~Buffer();
 
-    operator VkBuffer() const {
+    explicit operator VkBuffer() const {
         return _buffer;
     }
 
