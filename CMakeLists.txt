@@ -29,6 +29,10 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 # include the configuration files
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake)
 
+if(LUG_OS_ANDROID)
+    set(CMAKE_INSTALL_PREFIX "${ANDROID_NDK}/sources/lugdunum")
+endif()
+
 # add the include path
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 

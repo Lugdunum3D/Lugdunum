@@ -28,7 +28,7 @@ if(LUG_OS_WINDOWS)
 elseif(LUG_OS_LINUX)
     set(INSTALL_MISC_DIR share/lug)
 elseif(LUG_OS_ANDROID)
-    set(INSTALL_MISC_DIR ${ANDROID_NDK}/sources/lugdunum)
+    set(INSTALL_MISC_DIR .)
 endif()
 
 # define the architecture
