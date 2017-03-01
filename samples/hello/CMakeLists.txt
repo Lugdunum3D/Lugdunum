@@ -39,7 +39,7 @@ set(SHADERS
     shader-spot.frag
 )
 
-set(OTHER_RESOURCES
+set(LUG_RESOURCES
     models/LowPoly/Low\ poly.obj
     models/LowPoly/Low_poly.mtl
 )
@@ -50,5 +50,5 @@ lug_add_sample(hello
                SOURCES ${SRC} ${INC}
                DEPENDS core graphics system window math
                SHADERS ${SHADERS}
-               OTHER_RESOURCES ${OTHER_RESOURCES}
+               LUG_RESOURCES ${LUG_RESOURCES}
 )

@@ -4,7 +4,7 @@ set(LUG_SHADERS_DIR "shaders")
 set(PROJECT_SHADERS_ROOT "shaders")
 
 # shaders
-macro(target_shader shader)
+macro(add_shader shader)
     # Select where to copy the resource
     if(LUG_OS_ANDROID)
         set(new_path ${ANDROID_PROJECT_SHADERS}/${shader})
@@ -40,12 +40,12 @@ macro(target_shader shader)
     list(APPEND SHADERS_DEPENDS ${new_path})
 endmacro()
 
-macro(target_shaders target)
+macro(add_shaders target)
     lug_set_option(BUILD_SHADERS TRUE BOOL "Compile shaders")
 
     if(BUILD_SHADERS)
         foreach(shader ${ARGN})
-            target_shader(${shader})
+            add_shader(${shader})
         endforeach(shader)
     endif()
 
@@ -54,15 +54,15 @@ macro(target_shaders target)
 endmacro()
 
 # resources
-macro(target_resource other_resource)
+macro(add_resource target_resources directory resource)
     # Select where to copy the resource
     if(LUG_OS_ANDROID)
-        set(new_path ${ANDROID_PROJECT_ASSETS}/${other_resource})
+        set(new_path ${ANDROID_PROJECT_ASSETS}/${resource})
     else()
-        set(new_path ${CMAKE_CURRENT_BINARY_DIR}/${other_resource})
+        set(new_path ${CMAKE_CURRENT_BINARY_DIR}/${resource})
     endif()
 
-    set(old_path ${LUG_RESOURCES_DIR}/${other_resource})
+    set(old_path ${directory}/${resource})
     get_filename_component(new_path_directory ${new_path} DIRECTORY)
 
     # Custom command to create the directory and copy the resource
@@ -75,24 +75,24 @@ macro(target_resource other_resource)
         COMMENT "Copying ${old_path} to ${new_path}"
     )
 
-    list(APPEND OTHER_RESOURCES_DEPENDS ${new_path})
+    list(APPEND ${target_resources}_DEPENDS ${new_path})
 endmacro()
 
-macro(target_resources target)
+macro(add_resources target target_resources directory)
     # Copy all resources
-    foreach(other_resource ${ARGN})
-        target_resource(${other_resource})
-    endforeach(other_resource)
+    foreach(resource ${ARGN})
+        add_resource(${target_resources} ${directory} ${resource})
+    endforeach(resource)
 
     # Link new resources files to the target
-    add_custom_target(resources DEPENDS ${OTHER_RESOURCES_DEPENDS})
-    add_dependencies(${target} resources)
+    add_custom_target(${target_resources} DEPENDS ${${target_resources}_DEPENDS})
+    add_dependencies(${target} ${target_resources})
 endmacro()
 
 # macro to add a sample
 macro(lug_add_sample target)
     # parse the arguments
-    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;SHADERS;OTHER_RESOURCES" ${ARGN})
+    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;SHADERS;LUG_RESOURCES;OTHER_RESOURCES" ${ARGN})
 
     # find vulkan
     find_package(Vulkan)
@@ -144,11 +144,16 @@ macro(lug_add_sample target)
 
     # copy / build shaders
     if(THIS_SHADERS)
-        target_shaders(${target} ${THIS_SHADERS})
+        add_shaders(${target} ${THIS_SHADERS})
+    endif()
+
+    # copy lugdunum resources
+    if(THIS_LUG_RESOURCES)
+        add_resources(${target} lug_resources ${LUG_RESOURCES_DIR} ${THIS_LUG_RESOURCES})
     endif()
 
     # copy resources
     if(THIS_OTHER_RESOURCES)
-        target_resources(${target} ${THIS_OTHER_RESOURCES})
+        add_resources(${target} sample_resources "${CMAKE_SOURCE_DIR}/resources" ${THIS_OTHER_RESOURCES})
     endif()
 endmacro()
