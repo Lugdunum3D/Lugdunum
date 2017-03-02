@@ -73,10 +73,6 @@ endif()
 
 set(LUG_FOUND TRUE) # will be set to false if one of the required modules is not found
 
-if(NOT LUG_INCLUDE_DIR)
-    set(LUG_FOUND FALSE)
-endif()
-
 if(LUG_OS_ANDROID)
     # this will append `lug-main` to the components to find if we are on WINDOWS or ANDROID
     # lug-main provides a wrapper for the main functions of Android and Windows to provide
@@ -180,17 +176,11 @@ foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
 
 endforeach()
 
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(LUG DEFAULT_MSG LUG_INCLUDE_DIR LUG_LIBRARIES LUG_RESOURCES_DIR)
+
 if (LUG_FOUND)
     message(STATUS "Found Lugdunum headers in ${LUG_INCLUDE_DIR}")
     message(STATUS "Found Lugdunum libraries in ${LUG_LIBRARIES}")
     message(STATUS "Found Lugdunum resources in ${LUG_RESOURCES_DIR}")
-else()
-    # include directory or library not found
-    set(FIND_LUG_ERROR "Could NOT find Lugdunum (missing: ${FIND_LUG_MISSING})")
-
-    if(LUG_FIND_REQUIRED)
-        message(FATAL_ERROR ${FIND_LUG_ERROR})
-    else()
-        message("${FIND_LUG_ERROR}")
-    endif()
 endif()
