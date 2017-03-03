@@ -426,6 +426,44 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
             }
             break;
 
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+            e.type = Event::Type::KeyReleased;
+            configKeyEvent(e.key, wParam, lParam);
+            break;
+
+        case WM_CHAR:
+            if (_keyRepeat || ((lParam & (1 << 30)) == 0)) {
+                e.type = Event::Type::CharEntered;
+                e.character.val = static_cast<wchar_t>(wParam);
+            } else {
+                return;
+            }
+            break;
+
+        case WM_RBUTTONDOWN:
+        case WM_LBUTTONDOWN:
+        case WM_MBUTTONDOWN:
+        case WM_XBUTTONDOWN:
+            e.type = Event::Type::ButtonPressed;
+            configMouseButtonEvent(e.button, message, wParam, lParam);
+            break;
+
+        case WM_RBUTTONUP:
+        case WM_LBUTTONUP:
+        case WM_MBUTTONUP:
+        case WM_XBUTTONUP:
+            e.type = Event::Type::ButtonReleased;
+            configMouseButtonEvent(e.button, message, wParam, lParam);
+           break;
+
+        case WM_MOUSEMOVE:
+            e.type = Event::Type::MouseMoved;
+            e.button.code = Mouse::Button::Unknown;
+            e.button.coord.x = static_cast<int32_t>(LOWORD(lParam));
+            e.button.coord.y = static_cast<int32_t>(HIWORD(lParam));
+            break;
+
         default:
             return;
     }
@@ -517,6 +555,33 @@ void WindowImpl::configKeyEvent(KeyEvent& key, WPARAM wParam, LPARAM lParam) {
     key.ctrl = HIWORD(GetAsyncKeyState(VK_CONTROL)) != 0;
     key.shift = HIWORD(GetAsyncKeyState(VK_SHIFT)) != 0;
     key.system = HIWORD(GetAsyncKeyState(VK_LWIN)) || HIWORD(GetAsyncKeyState(VK_RWIN));
+}
+
+void WindowImpl::configMouseButtonEvent(MouseEvent& key, UINT message, WPARAM wParam, LPARAM lParam) {
+    switch (message) {
+        case WM_RBUTTONUP:
+        case WM_RBUTTONDOWN:
+            key.code = Mouse::Button::Right;
+            break;
+        case WM_LBUTTONUP:
+        case WM_LBUTTONDOWN:
+            key.code = Mouse::Button::Left;
+            break;
+        case WM_MBUTTONUP:
+        case WM_MBUTTONDOWN:
+            key.code = Mouse::Button::Middle;
+            break;
+        case WM_XBUTTONUP:
+        case WM_XBUTTONDOWN:
+            key.code = HIWORD(wParam) == XBUTTON1 ? Mouse::Button::XButton1 : Mouse::Button::XButton2;
+            break;
+        default:
+            key.code = Mouse::Button::Unknown;
+            break;
+    }
+
+    key.coord.x = static_cast<int32_t>(LOWORD(lParam));
+    key.coord.y = static_cast<int32_t>(HIWORD(lParam));
 }
 
 LRESULT CALLBACK WindowImpl::onEvent(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {

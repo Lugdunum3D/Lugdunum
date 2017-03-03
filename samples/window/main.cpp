@@ -2,6 +2,7 @@
 
 #include <lug/System/Logger/Logger.hpp>
 #include <lug/Window/Keyboard.hpp>
+#include <lug/Window/Mouse.hpp>
 #include <lug/Window/Window.hpp>
 
 #if defined(LUG_SYSTEM_ANDROID)
@@ -151,6 +152,19 @@ auto createKeyEnumMap() {
     return returnValue;
 }
 
+auto createButtonEnumMap() {
+    std::unordered_map<lug::Window::Mouse::Button, std::string> returnValue;
+
+    // Function keys
+    returnValue[lug::Window::Mouse::Button::Left] = "Left";
+    returnValue[lug::Window::Mouse::Button::Right] = "Right";
+    returnValue[lug::Window::Mouse::Button::Middle] = "Middle";
+    returnValue[lug::Window::Mouse::Button::XButton1] = "XButton1";
+    returnValue[lug::Window::Mouse::Button::XButton2] = "XButton2";
+
+    return returnValue;
+}
+
 int main() {
     auto window = lug::Window::Window::create({
         800,                        // width
@@ -163,6 +177,8 @@ int main() {
     auto logger = lug::System::Logger::makeLogger("LugdunumSamples");
 
     auto keyEnumMap = createKeyEnumMap();
+
+    auto buttonEnumMap = createButtonEnumMap();
 
 #if defined(LUG_SYSTEM_ANDROID)
     auto handler = lug::System::Logger::makeHandler<lug::System::Logger::LogCatHandler>("LogCat");
@@ -204,6 +220,15 @@ int main() {
                 window->close();
             }
 
+            // Checking to see if mouse position is stored correctly
+            {
+                int32_t x;
+                int32_t y;
+
+                window->getMousePos(x, y);
+                logger->info("Mouse is at position {} {}", x, y);
+            }
+
             // Checking KeyPressed events
             if (event.type == lug::Window::Event::Type::KeyPressed) {
                 logger->info(keyEnumMap[event.key.code] + " is pressed");
@@ -213,6 +238,21 @@ int main() {
             if (event.type == lug::Window::Event::Type::KeyReleased) {
                 logger->info(keyEnumMap[event.key.code] + " is released");
             }
+
+            // Checking ButtonPressed events
+            if (event.type == lug::Window::Event::Type::ButtonPressed) {
+                logger->info(buttonEnumMap[event.button.code] + " is pressed at position {} {}", event.button.coord.x, event.button.coord.y);
+            }
+
+            // Checking ButtonReleased events
+            if (event.type == lug::Window::Event::Type::ButtonReleased) {
+                logger->info(buttonEnumMap[event.button.code] + " is released at position {} {}", event.button.coord.x, event.button.coord.y);
+            }
+
+//            // Checking ButtonReleased events
+//            if (event.type == lug::Window::Event::Type::MouseMoved) {
+//                logger->info("Mouse moved at position {} {}", event.button.coord.x, event.button.coord.y);
+//            }
 
             if (event.type == lug::Window::Event::Type::CharEntered) {
                 logger->info("Char event received: {}", static_cast<char>(event.character.val));
@@ -236,6 +276,20 @@ int main() {
             }
 
         }
+
+//        // Checking that keys states are correctly set
+//        for (auto it = keyEnumMap.begin(); it != keyEnumMap.end(); ++it) {
+//            if (window->isKeyPressed(it->first)) {
+//                logger->info(it->second + " is set to pressed");
+//            }
+//        }
+
+//        // Checking that mouse button states are correctly set
+//        for (auto it = buttonEnumMap.begin(); it != buttonEnumMap.end(); ++it) {
+//            if (window->isMousePressed(it->first)) {
+//                logger->info(it->second + " is set to pressed");
+//            }
+//        }
     }
 
     return 0;
