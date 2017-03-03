@@ -329,7 +329,7 @@ inline typename std::enable_if<(Rows == 4) && EnableBool, Matrix<Rows, Columns, 
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline Matrix<Columns, Rows, T> Matrix<Rows, Columns, T>::transpose() const {
-    Matrix<Columns, Rows, T> transposeMatrix;
+    Matrix<Columns, Rows, T> transposeMatrix(0);
 
     for (uint8_t row = 0; row < Rows; ++row) {
         for (uint8_t col = 0; col < Columns; ++col) {
