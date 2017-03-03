@@ -13,7 +13,9 @@ class Vector : public Matrix<Rows, 1, T> {
 public:
     using BaseMatrix = Matrix<Rows, 1, T>;
 
-    explicit constexpr Vector(T value = 0);
+    constexpr Vector() = default;
+
+    explicit constexpr Vector(T value);
     Vector(std::initializer_list<T> list);
 
     // Convert from matrix (we want non explicit conversion)

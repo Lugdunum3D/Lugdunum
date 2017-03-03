@@ -28,7 +28,7 @@ inline Vector<Rows, T>::Vector(const Vector<Rows + 1, T>& vector) {
 
 template <uint8_t Rows, typename T>
 inline Vector<Rows, T> Vector<Rows, T>::operator*=(const Matrix<Rows, Rows, T>& rhs) {
-    Vector<Rows, T> tmp{};
+    Vector<Rows, T> tmp(0);
 
     for (uint8_t row = 0; row < Rows; ++row) {
         for (uint8_t col = 0; col < Rows; ++col) {
