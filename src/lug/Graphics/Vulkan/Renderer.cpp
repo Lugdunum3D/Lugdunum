@@ -35,13 +35,14 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
 
     // Convert VkDebugReportFlagsEXT to System::Logger::Level
     System::Logger::Level level = System::Logger::Level::Off;
+
     if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
         level = System::Logger::Level::Error;
     } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT || flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
         level = System::Logger::Level::Warning;
     } else if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
         level = System::Logger::Level::Info;
-    } else {
+    } else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
         level = System::Logger::Level::Debug;
     }
 
@@ -204,7 +205,8 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
         if (isInstanceExtensionLoaded(VK_EXT_DEBUG_REPORT_EXTENSION_NAME)) {
             VkDebugReportCallbackCreateInfoEXT createInfo = {};
             createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-            createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+            // We don't want VK_DEBUG_REPORT_INFORMATION_BIT_EXT and not VK_DEBUG_REPORT_DEBUG_BIT_EXT
+            createInfo.flags = VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT;
             createInfo.pfnCallback = debugReportCallback;
 
             auto vkCreateDebugReportCallbackEXT = _instance.getProcAddr<PFN_vkCreateDebugReportCallbackEXT>("vkCreateDebugReportCallbackEXT");
