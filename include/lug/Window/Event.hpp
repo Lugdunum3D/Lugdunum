@@ -14,29 +14,42 @@ namespace Window {
  * @brief      Represents a keyboard event
  */
 struct LUG_WINDOW_API KeyEvent {
-    Keyboard::Key code; // The key that triggered the event
-    bool alt;           // True if alt was pressed, False otherwise
-    bool ctrl;          // True if ctrl was pressed, False otherwise
-    bool shift;         // True if shift was pressed, False otherwise
-    bool system;        // True if system was pressed, False otherwise
+    Keyboard::Key code;   ///< The key that triggered the event
+    bool alt;                              ///< True if alt was pressed, False otherwise
+    bool ctrl;                             ///< True if ctrl was pressed, False otherwise
+    bool shift;                            ///< True if shift was pressed, False otherwise
+    bool system;                           ///< True if system was pressed, False otherwise
 };
 
 /**
 * @brief      Represents a mouse event
 */
 struct LUG_WINDOW_API MouseEvent {
-    Mouse::Button code;                 // The button that triggered the event
+    union {
+        Mouse::Button code; ///< The button that triggered the event
+        struct {
+            double xOffset;
+            double yOffset;
+        } scrollOffset;     ///< The distance in x and y that the scroll wheel has traveled
+    };
     struct {
         int32_t x;
         int32_t y;
-    } coord;   // The mouse coordinate if the event was triggered by movement
+    } coord;                ///< The mouse coordinate if the event was triggered by movement
+    bool ctrl;     ///< True if ctrl was pressed, False otherwise
+    bool shift;    ///< True if shift was pressed, False otherwise
+    bool lMouse;   ///< True if left mouse button was pressed, False otherwise
+    bool rMouse;   ///< True if right mouse button was pressed, False otherwise
+    bool mMouse;   ///< True if middle mouse button was pressed, False otherwise
+    bool x1Mouse;  ///< True if extra 1 mouse button was pressed, False otherwise
+    bool x2Mouse;  ///< True if extra 2 mouse button was pressed, False otherwise
 };
 
 /**
  * @brief      Represents a char event
  */
 struct LUG_WINDOW_API CharEvent {
-    wchar_t val;        // Raw value of the character pressed (with accents, etc.)
+    wchar_t val;        ///< Raw value of the character pressed (with accents, etc.)
 };
 
 /**
@@ -48,26 +61,27 @@ struct LUG_WINDOW_API Event {
      * Type of event
      */
     enum class LUG_WINDOW_API Type : uint32_t {
-        Close,          //< Window close event
-        Destroy,        //< Window destroy event
-        Resize,         //< Window resize event
-        KeyPressed,     //< KeyPressed event
-        KeyReleased,    //< KeyReleased event
-        CharEntered,    //< CharEntered event
-        ButtonPressed,  //< ButtonPressed event
-        ButtonReleased, //< ButtonReleased event
-        MouseMoved,     //< MouseMoved event
+        Close,          ///< Window close event
+        Destroy,        ///< Window destroy event
+        Resize,         ///< Window resize event
+        KeyPressed,     ///< KeyPressed event
+        KeyReleased,    ///< KeyReleased event
+        CharEntered,    ///< CharEntered event
+        ButtonPressed,  ///< ButtonPressed event
+        ButtonReleased, ///< ButtonReleased event
+        MouseMoved,     ///< MouseMoved event
+        MouseWheel,     ///< MouseWheelRotated event
     };
 
-    Type type;          // The type of the event
+    Type type;          ///< The type of the event
 
     /**
      * Value of the event
      */
     union {
-        KeyEvent key;           // A KeyEvent
-        CharEvent character;    // A CharEvent
-        MouseEvent button;      // A MouseEvent
+        KeyEvent key;           ///< A KeyEvent
+        CharEvent character;    ///< A CharEvent
+        MouseEvent button;      ///< A MouseEvent
     };
 };
 

@@ -220,14 +220,14 @@ int main() {
                 window->close();
             }
 
-            // Checking to see if mouse position is stored correctly
-            {
-                int32_t x;
-                int32_t y;
-
-                window->getMousePos(x, y);
-                logger->info("Mouse is at position {} {}", x, y);
-            }
+//            // Checking to see if mouse position is stored correctly
+//            {
+//                uint32_t x;
+//                uint32_t y;
+//
+//                window->getMousePos(x, y);
+//                logger->info("Mouse is at position {} {}", x, y);
+//            }
 
             // Checking KeyPressed events
             if (event.type == lug::Window::Event::Type::KeyPressed) {
@@ -248,8 +248,19 @@ int main() {
             if (event.type == lug::Window::Event::Type::ButtonReleased) {
                 logger->info(buttonEnumMap[event.button.code] + " is released at position {} {}", event.button.coord.x, event.button.coord.y);
             }
+            
+//            // Checking MouseWheel events
+//            if (event.type == lug::Window::Event::Type::MouseWheel) {
+//                logger->info("Mouse scroll wheel offset {} {}", event.button.scrollOffset.xOffset, event.button.scrollOffset.yOffset);
+//                if (event.button.ctrl) {
+//                    logger->info("MODIFIER CTRL");
+//                }
+//                if (event.button.shift) {
+//                    logger->info("MODIFIER SHIFT");
+//                }
+//            }
 
-//            // Checking ButtonReleased events
+//            // Checking MouseMoved events
 //            if (event.type == lug::Window::Event::Type::MouseMoved) {
 //                logger->info("Mouse moved at position {} {}", event.button.coord.x, event.button.coord.y);
 //            }

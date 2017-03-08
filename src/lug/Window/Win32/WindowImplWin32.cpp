@@ -446,7 +446,8 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
         case WM_MBUTTONDOWN:
         case WM_XBUTTONDOWN:
             e.type = Event::Type::ButtonPressed;
-            configMouseButtonEvent(e.button, message, wParam, lParam);
+            configMouseEvent(e.button, wParam, lParam);
+            configMouseButtonEvent(e.button, message, wParam);
             break;
 
         case WM_RBUTTONUP:
@@ -454,14 +455,21 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
         case WM_MBUTTONUP:
         case WM_XBUTTONUP:
             e.type = Event::Type::ButtonReleased;
-            configMouseButtonEvent(e.button, message, wParam, lParam);
+            configMouseEvent(e.button, wParam, lParam);
+            configMouseButtonEvent(e.button, message, wParam);
            break;
 
         case WM_MOUSEMOVE:
             e.type = Event::Type::MouseMoved;
             e.button.code = Mouse::Button::Unknown;
-            e.button.coord.x = static_cast<int32_t>(LOWORD(lParam));
-            e.button.coord.y = static_cast<int32_t>(HIWORD(lParam));
+            configMouseEvent(e.button, wParam, lParam);
+            break;
+
+        case WM_MOUSEWHEEL:
+        case WM_MOUSEHWHEEL:
+            e.type = Event::Type::MouseWheel;
+            configMouseEvent(e.button, wParam, lParam);
+            configMouseWheelEvent(e.button, message, wParam);
             break;
 
         default:
@@ -582,6 +590,76 @@ void WindowImpl::configMouseButtonEvent(MouseEvent& key, UINT message, WPARAM wP
 
     key.coord.x = static_cast<int32_t>(LOWORD(lParam));
     key.coord.y = static_cast<int32_t>(HIWORD(lParam));
+}
+
+void WindowImpl::configMouseEvent(MouseEvent & mouse, WPARAM wParam, LPARAM lParam) {
+    mouse.ctrl = false;
+    mouse.lMouse = false;
+    mouse.mMouse = false;
+    mouse.rMouse = false;
+    mouse.shift = false;
+    mouse.x1Mouse = false;
+    mouse.x2Mouse = false;
+
+    getMouseCoord(mouse, lParam);
+    getMouseEventModifier(mouse, wParam);
+}
+
+void WindowImpl::getMouseEventModifier(MouseEvent & mouse, WPARAM wParam) {
+    int keyModifier = GET_KEYSTATE_WPARAM(wParam);
+
+    if (keyModifier & MK_CONTROL) {
+        mouse.ctrl = true;
+    }
+
+    if (keyModifier & MK_LBUTTON) {
+        mouse.lMouse = true;
+    }
+
+    if (keyModifier & MK_MBUTTON) {
+        mouse.mMouse = true;
+    }
+
+    if (keyModifier & MK_RBUTTON) {
+        mouse.rMouse = true;
+    }
+
+    if (keyModifier & MK_SHIFT) {
+        mouse.shift = true;
+    }
+
+    if (keyModifier & MK_XBUTTON1) {
+        mouse.x1Mouse = true;
+    }
+
+    if (keyModifier & MK_XBUTTON2) {
+        mouse.x2Mouse = true;
+    }
+}
+
+void WindowImpl::getMouseCoord(MouseEvent & mouse, LPARAM lParam) {
+    mouse.coord.x = static_cast<int32_t>(LOWORD(lParam));
+    mouse.coord.y = static_cast<int32_t>(HIWORD(lParam));
+}
+
+void WindowImpl::configMouseWheelEvent(MouseEvent & mouse, UINT message, WPARAM wParam)
+{
+    double xOffset = 0.0;
+    double yOffset = 0.0;
+
+//    if (message == WM_MOUSEWHEEL) {
+//        xOffset = static_cast<SHORT>(HIWORD(wParam) / static_cast<double>(WHEEL_DELTA));
+//    } else if (message == WM_MOUSEHWHEEL) {
+//        yOffset = -(static_cast<SHORT>(HIWORD(wParam) / static_cast<double>(WHEEL_DELTA)));
+//    }
+    if (message == WM_MOUSEWHEEL) {
+        xOffset = GET_WHEEL_DELTA_WPARAM(wParam);
+    }
+    else if (message == WM_MOUSEHWHEEL) {
+        yOffset = -(GET_WHEEL_DELTA_WPARAM(wParam));
+    }
+    mouse.scrollOffset.xOffset = xOffset;
+    mouse.scrollOffset.yOffset = yOffset;
 }
 
 LRESULT CALLBACK WindowImpl::onEvent(HWND handle, UINT message, WPARAM wParam, LPARAM lParam) {

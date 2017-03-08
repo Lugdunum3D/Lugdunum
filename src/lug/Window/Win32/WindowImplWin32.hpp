@@ -32,7 +32,11 @@ private:
     bool activateFullscreen();
     Keyboard::Key getKeyCode(WPARAM wParam, LPARAM lParam);
     void configKeyEvent(KeyEvent& key, WPARAM wParam, LPARAM lParam);
-    void configMouseButtonEvent(MouseEvent& key, UINT message, WPARAM wParam, LPARAM lParam);
+    void configMouseEvent(MouseEvent& mouse, WPARAM wParam, LPARAM lParam);
+    void getMouseEventModifier(MouseEvent& mouse, WPARAM wParam);
+    void getMouseCoord(MouseEvent& mouse, LPARAM lParam);
+    void configMouseButtonEvent(MouseEvent& mouse, UINT message, WPARAM wParam);
+    void configMouseWheelEvent(MouseEvent& mouse, UINT message, WPARAM wParam);
 
     static LRESULT CALLBACK onEvent(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
 

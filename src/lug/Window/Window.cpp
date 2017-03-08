@@ -249,7 +249,7 @@ bool Window::isMousePressed(Mouse::Button button) const {
     return (_mouseState.at(button));
 }
 
-void Window::getMousePos(int32_t & x, int32_t & y) const {
+void Window::getMousePos(uint32_t & x, uint32_t & y) const {
     x = _mouseCoord.x;
     y = _mouseCoord.y;
 }

@@ -136,7 +136,7 @@ public:
     * @param[in]  y   The parametre that will be set to the mouse's position on the x axis.
     *
     */
-    void getMousePos(int32_t & x, int32_t & y) const;
+    void getMousePos(uint32_t & x, uint32_t & y) const;
 
 protected:
     Window();
@@ -176,8 +176,8 @@ protected:
     * Ued to store the mouse's position, used by #getMousePos.
     */
     struct {
-        int32_t x;
-        int32_t y;
+        uint32_t x;
+        uint32_t y;
     } _mouseCoord;
     friend lug::Window::priv::WindowImpl;
 };
