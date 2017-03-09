@@ -6,16 +6,16 @@
 #include <unordered_map>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Renderer.hpp>
-#include <lug/Graphics/Vulkan/Buffer.hpp>
-#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/Device.hpp>
-#include <lug/Graphics/Vulkan/DeviceMemory.hpp>
-#include <lug/Graphics/Vulkan/Instance.hpp>
-#include <lug/Graphics/Vulkan/Loader.hpp>
-#include <lug/Graphics/Vulkan/Mesh.hpp>
-#include <lug/Graphics/Vulkan/Pipeline.hpp>
-#include <lug/Graphics/Vulkan/Queue.hpp>
-#include <lug/Graphics/Vulkan/RenderWindow.hpp>
+#include <lug/Graphics/Vulkan/API/Buffer.hpp>
+#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
+#include <lug/Graphics/Vulkan/API/Device.hpp>
+#include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/API/Instance.hpp>
+#include <lug/Graphics/Vulkan/API/Loader.hpp>
+#include <lug/Graphics/Vulkan/API/Pipeline.hpp>
+#include <lug/Graphics/Vulkan/API/Queue.hpp>
+#include <lug/Graphics/Vulkan/Render/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -62,15 +62,15 @@ public:
     bool isInstanceExtensionLoaded(const char* name) const;
     bool isDeviceExtensionLoaded(const char* name) const;
 
-    ::lug::Graphics::RenderWindow* createWindow(RenderWindow::InitInfo& initInfo) override final;
-    ::lug::Graphics::RenderWindow* getWindow() override final;
+    ::lug::Graphics::Render::Window* createWindow(Render::Window::InitInfo& initInfo) override final;
+    ::lug::Graphics::Render::Window* getWindow() override final;
 
-    const Instance& getInstance() const;
-    const Device& getDevice() const;
-    std::vector<Queue>& getQueues();
-    const std::vector<Queue>& getQueues() const;
-    Queue* getQueue(VkQueueFlags flags, bool supportPresentation);
-    const Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
+    const API::Instance& getInstance() const;
+    const API::Device& getDevice() const;
+    std::vector<API::Queue>& getQueues();
+    const std::vector<API::Queue>& getQueues() const;
+    API::Queue* getQueue(VkQueueFlags flags, bool supportPresentation);
+    const API::Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
 
     bool isSameQueue(VkQueueFlags flagsA, bool supportPresentationA, VkQueueFlags flagsB, bool supportPresentationB) const;
 
@@ -99,11 +99,11 @@ private:
     std::vector<const char*> checkRequirementsExtensions(const Info& info, const std::vector<const char*>& extensions, std::vector<const char*>& extensionsFound);
 
 private:
-    Loader _loader;
+    API::Loader _loader;
 
-    Instance _instance{};
-    Device _device{};
-    std::vector<Queue> _queues{};
+    API::Instance _instance{};
+    API::Device _device{};
+    std::vector<API::Queue> _queues{};
 
     InstanceInfo _instanceInfo{};
     PhysicalDeviceInfo* _physicalDeviceInfo{nullptr};
@@ -111,14 +111,14 @@ private:
 
     VkDebugReportCallbackEXT _debugReportCallback{VK_NULL_HANDLE};
 
-    std::unique_ptr<::lug::Graphics::Vulkan::RenderWindow> _window;
+    std::unique_ptr<Render::Window> _window;
 
     std::vector<const char*> _loadedInstanceLayers{};
     std::vector<const char*> _loadedInstanceExtensions{};
     std::vector<const char*> _loadedDeviceExtensions{};
     VkPhysicalDeviceFeatures _loadedDeviceFeatures{};
     std::set<int8_t> _loadedQueueFamiliesIdx{};
-    std::vector<Mesh*> _attachedMeshes{};
+    std::vector<Render::Mesh*> _attachedMeshes{};
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;

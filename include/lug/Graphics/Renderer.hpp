@@ -4,7 +4,7 @@
 #include <set>
 #include <string>
 #include <lug/Graphics/Module.hpp>
-#include <lug/Graphics/RenderWindow.hpp>
+#include <lug/Graphics/Render/Window.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -39,8 +39,8 @@ public:
     virtual bool beginFrame() = 0;
     virtual bool endFrame() = 0;
 
-    virtual RenderWindow* createWindow(RenderWindow::InitInfo& initInfo) = 0;
-    virtual RenderWindow* getWindow() = 0;
+    virtual Render::Window* createWindow(Render::Window::InitInfo& initInfo) = 0;
+    virtual Render::Window* getWindow() = 0;
 
     const InitInfo& getInfo() const;
 

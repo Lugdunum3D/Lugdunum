@@ -15,23 +15,23 @@ inline const lug::Graphics::Graphics& Application::getGraphics() const {
 }
 
 
-inline lug::Graphics::RenderWindow* Application::getWindow() {
+inline lug::Graphics::Render::Window* Application::getWindow() {
     return _window;
 }
 
-inline const lug::Graphics::RenderWindow* Application::getWindow() const {
+inline const lug::Graphics::Render::Window* Application::getWindow() const {
     return _window;
 }
 
-inline void Application::setRenderWindowInfo(lug::Graphics::RenderWindow::InitInfo& initInfo) {
+inline void Application::setRenderWindowInfo(lug::Graphics::Render::Window::InitInfo& initInfo) {
     _renderWindowInitInfo = std::move(initInfo);
 }
 
-inline const lug::Graphics::RenderWindow::InitInfo& Application::getRenderWindowInfo() const {
+inline const lug::Graphics::Render::Window::InitInfo& Application::getRenderWindowInfo() const {
     return _renderWindowInitInfo;
 }
 
-inline lug::Graphics::RenderWindow::InitInfo& Application::getRenderWindowInfo() {
+inline lug::Graphics::Render::Window::InitInfo& Application::getRenderWindowInfo() {
     return _renderWindowInitInfo;
 }
 

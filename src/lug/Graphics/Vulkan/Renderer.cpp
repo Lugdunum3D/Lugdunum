@@ -1,10 +1,10 @@
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Graphics.hpp>
-#include <lug/Graphics/Vulkan/Loader.hpp>
+#include <lug/Graphics/Vulkan/API/Loader.hpp>
+#include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
-#include <lug/Graphics/Vulkan/RenderWindow.hpp>
-#include <lug/Graphics/Vulkan/RTTI/Enum.hpp>
+#include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/System/Logger/Logger.hpp>
 #include <lug/Math/Geometry/Transform.hpp>
 
@@ -197,7 +197,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
             return false;
         }
 
-        _instance = Instance(instance);
+        _instance = API::Instance(instance);
     }
 
     // Create report callback if necessary
@@ -374,7 +374,7 @@ bool Renderer::initDevice() {
             return false;
         }
 
-        _device = Device(device, _physicalDeviceInfo);
+        _device = API::Device(device, _physicalDeviceInfo);
     }
 
     // Load vulkan device functions
@@ -394,7 +394,7 @@ bool Renderer::initDevice() {
             VkQueue queue;
             vkGetDeviceQueue(static_cast<VkDevice>(_device), idx, 0, &queue);
 
-            _queues[i] = Queue(idx, queue, _physicalDeviceInfo->queueFamilies[idx].queueFlags);
+            _queues[i] = API::Queue(idx, queue, _physicalDeviceInfo->queueFamilies[idx].queueFlags);
 
             ++i;
         }
@@ -417,7 +417,7 @@ bool Renderer::initDevice() {
                 return false;
             }
 
-            queue.setCommandPool(CommandPool(commandPool, &_device, &queue));
+            queue.setCommandPool(API::CommandPool(commandPool, &_device, &queue));
         }
     }
     return true;
@@ -621,12 +621,12 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
     return extensionsNotFound;
 }
 
-::lug::Graphics::RenderWindow* Renderer::createWindow(RenderWindow::InitInfo& initInfo) {
-    _window = RenderWindow::create(*this, initInfo);
+::lug::Graphics::Render::Window* Renderer::createWindow(Render::Window::InitInfo& initInfo) {
+    _window = Render::Window::create(*this, initInfo);
     return _window.get();
 }
 
-::lug::Graphics::RenderWindow* Renderer::getWindow() {
+::lug::Graphics::Render::Window* Renderer::getWindow() {
     return _window.get();
 }
 

@@ -1,12 +1,12 @@
 #include <ctime>
 #include <sstream>
 #include "Application.hpp"
-#include <lug/Graphics/DirectionalLight.hpp>
-#include <lug/Graphics/Spotlight.hpp>
-#include <lug/Graphics/PointLight.hpp>
-#include <lug/Graphics/MeshInstance.hpp>
-#include <lug/Graphics/ModelInstance.hpp>
-#include <lug/Graphics/Light.hpp>
+#include <lug/Graphics/Light/Directional.hpp>
+#include <lug/Graphics/Light/Light.hpp>
+#include <lug/Graphics/Light/Spot.hpp>
+#include <lug/Graphics/Light/Point.hpp>
+#include <lug/Graphics/Scene/MeshInstance.hpp>
+#include <lug/Graphics/Scene/ModelInstance.hpp>
 
 // TODO: Remove this when the ResourceManager is done
 #include <lug/Graphics/Renderer.hpp>
@@ -17,61 +17,61 @@ Application::Application() : lug::Core::Application::Application{{"hello", {0, 1
     getRenderWindowInfo().windowInitInfo.title = "Hello Cube";
 
     getRenderWindowInfo().renderViewsInitInfo.push_back({
-        lug::Graphics::RenderTechnique::Type::Forward,  // renderTechniqueType
-        {                                               // viewport
-            {                                           // offset
-                0.0f,                                   // x
-                0.0f                                    // y
+        lug::Graphics::Render::Technique::Type::Forward,    // renderTechniqueType
+        {                                                   // viewport
+            {                                               // offset
+                0.0f,                                       // x
+                0.0f                                        // y
             },
 
-            {                                           // extent
-                0.5f,                                   // width
-                1.0f                                    // height
+            {                                               // extent
+                0.5f,                                       // width
+                1.0f                                        // height
             },
 
-            0.0f,                                       // minDepth
-            1.0f                                        // maxDepth
+            0.0f,                                           // minDepth
+            1.0f                                            // maxDepth
         },
-        {                                               // scissor
-            {                                           // offset
-                0.0f,                                   // x
-                0.0f                                    // y
+        {                                                   // scissor
+            {                                               // offset
+                0.0f,                                       // x
+                0.0f                                        // y
             },
-            {                                           // extent
-                1.0f,                                   // width
-                1.0f                                    // height
+            {                                               // extent
+                1.0f,                                       // width
+                1.0f                                        // height
             }
         },
-        nullptr                                         // camera
+        nullptr                                             // camera
     });
 
     getRenderWindowInfo().renderViewsInitInfo.push_back({
-        lug::Graphics::RenderTechnique::Type::Forward,  // renderTechniqueType
-        {                                               // viewport
-            {                                           // offset
-                0.5f,                                   // x
-                0.0f                                    // y
+        lug::Graphics::Render::Technique::Type::Forward,    // renderTechniqueType
+        {                                                   // viewport
+            {                                               // offset
+                0.5f,                                       // x
+                0.0f                                        // y
             },
 
-            {                                           // extent
-                0.5f,                                   // width
-                1.0f                                    // height
+            {                                               // extent
+                0.5f,                                       // width
+                1.0f                                        // height
             },
 
-            0.0f,                                       // minDepth
-            1.0f                                        // maxDepth
+            0.0f,                                           // minDepth
+            1.0f                                            // maxDepth
         },
-        {                                               // scissor
-            {                                           // offset
-                0.0f,                                   // x
-                0.0f                                    // y
+        {                                                   // scissor
+            {                                               // offset
+                0.0f,                                       // x
+                0.0f                                        // y
             },
-            {                                           // extent
-                1.0f,                                   // width
-                1.0f                                    // height
+            {                                               // extent
+                1.0f,                                       // width
+                1.0f                                        // height
             }
         },
-        nullptr                                         // camera
+        nullptr                                             // camera
     });
 
     getGraphicsInfo().rendererInitInfo.useDiscreteGPU = false;
@@ -252,8 +252,8 @@ bool Application::init(int argc, char* argv[]) {
 */
     // Add model to scene
     {
-        std::unique_ptr<lug::Graphics::ModelInstance> modelInstance = _scene->createModelInstance("model instance", _model.get());
-        std::unique_ptr<lug::Graphics::SceneNode> modelNode = _scene->createSceneNode("model instance node");
+        std::unique_ptr<lug::Graphics::Scene::ModelInstance> modelInstance = _scene->createModelInstance("model instance", _model.get());
+        std::unique_ptr<lug::Graphics::Scene::Node> modelNode = _scene->createSceneNode("model instance node");
 
         modelNode->rotate(lug::Math::Geometry::radians(180.0f), {1.0f, 0.0f, 0.0f});
 
@@ -264,11 +264,11 @@ bool Application::init(int argc, char* argv[]) {
 
     // Add directional light to scene
     {
-        std::unique_ptr<lug::Graphics::Light> light = _scene->createLight("light", lug::Graphics::Light::Type::DirectionalLight);
-        std::unique_ptr<lug::Graphics::SceneNode> lightNode = _scene->createSceneNode("light node");
+        std::unique_ptr<lug::Graphics::Light::Light> light = _scene->createLight("light", lug::Graphics::Light::Light::Type::Directional);
+        std::unique_ptr<lug::Graphics::Scene::Node> lightNode = _scene->createSceneNode("light node");
 
         light->setDiffuse({1.0f, 1.0f, 1.0f});
-        static_cast<lug::Graphics::DirectionalLight*>(light.get())->setDirection({0.0f, 4.0f, 5.0f});
+        static_cast<lug::Graphics::Light::Directional*>(light.get())->setDirection({0.0f, 4.0f, 5.0f});
 
         lightNode->attachMovableObject(std::move(light));
         _scene->getRoot()->attachChild(std::move(lightNode));
@@ -304,13 +304,13 @@ bool Application::init(int argc, char* argv[]) {
         _scene->getRoot()->attachChild(std::move(lightNode));
     }*/
 
-    std::unique_ptr<lug::Graphics::Camera> camera = _graphics.createCamera("camera");
-    std::unique_ptr<lug::Graphics::Camera> camera2 = _graphics.createCamera("camera2");
+    std::unique_ptr<lug::Graphics::Render::Camera> camera = _graphics.createCamera("camera");
+    std::unique_ptr<lug::Graphics::Render::Camera> camera2 = _graphics.createCamera("camera2");
     // Add camera to scene
     {
-        std::unique_ptr<lug::Graphics::MovableCamera> movableCamera = _scene->createMovableCamera("movable camera", camera.get());
-        std::unique_ptr<lug::Graphics::MovableCamera> movableCamera2 = _scene->createMovableCamera("movable camera2", camera2.get());
-        std::unique_ptr<lug::Graphics::SceneNode> movableCameraNode = _scene->createSceneNode("movable camera node");
+        std::unique_ptr<lug::Graphics::Scene::MovableCamera> movableCamera = _scene->createMovableCamera("movable camera", camera.get());
+        std::unique_ptr<lug::Graphics::Scene::MovableCamera> movableCamera2 = _scene->createMovableCamera("movable camera2", camera2.get());
+        std::unique_ptr<lug::Graphics::Scene::Node> movableCameraNode = _scene->createSceneNode("movable camera node");
 
         movableCameraNode->attachMovableObject(std::move(movableCamera));
         movableCameraNode->attachMovableObject(std::move(movableCamera2));
