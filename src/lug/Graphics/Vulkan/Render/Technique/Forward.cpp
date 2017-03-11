@@ -285,6 +285,11 @@ void Forward::destroy() {
     }
 
     _framesData.clear();
+
+    _depthBufferMemory->destroy();
+
+    _cameraPool.reset();
+    _lightsPool.reset();
 }
 
 bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {

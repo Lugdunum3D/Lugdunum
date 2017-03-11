@@ -46,6 +46,8 @@ void PipelineLayout::destroy() {
         vkDestroyPipelineLayout(static_cast<VkDevice>(*_device), _pipelineLayout, nullptr);
         _pipelineLayout = VK_NULL_HANDLE;
     }
+
+    _descriptorSetLayouts.clear();
 }
 
 std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {

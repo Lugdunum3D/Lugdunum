@@ -73,8 +73,6 @@ Application::Application() : lug::Core::Application::Application{{"hello", {0, 1
         },
         nullptr                                             // camera
     });
-
-    getGraphicsInfo().rendererInitInfo.useDiscreteGPU = false;
 }
 
 Application::~Application() {

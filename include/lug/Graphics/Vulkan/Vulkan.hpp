@@ -183,12 +183,12 @@ struct PhysicalDeviceInfo {
 
     std::unordered_map<VkFormat, VkFormatProperties> formatProperties;
 
-    struct SwapChainInfo {
+    struct Swapchain {
         VkSurfaceCapabilitiesKHR capabilities;
 
         std::vector<VkSurfaceFormatKHR> formats;
         std::vector<VkPresentModeKHR> presentModes;
-    } swapChain;
+    } swapchain;
 
     bool containsExtension(const char* extensionName) const;
     bool containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const;

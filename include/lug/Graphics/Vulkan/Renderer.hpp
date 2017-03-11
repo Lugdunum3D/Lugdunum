@@ -44,6 +44,16 @@ public:
         // TODO: Better support for queues
     };
 
+    struct Preferencies {
+        PhysicalDeviceInfo* device;
+
+        struct Swapchain {
+            std::vector<VkPresentModeKHR> presentModes;                 // By order of preferency
+            std::vector<VkFormat> formats;                              // By order of preferency
+            std::vector<VkCompositeAlphaFlagBitsKHR> compositeAlphas;   // By order of preferency
+        } swapchain;
+    };
+
 public:
     explicit Renderer(Graphics& graphics);
 
@@ -80,6 +90,12 @@ public:
     PhysicalDeviceInfo* getPhysicalDeviceInfo();
     const PhysicalDeviceInfo* getPhysicalDeviceInfo() const;
 
+    std::vector<PhysicalDeviceInfo>& getPhysicalDeviceInfos();
+    const std::vector<PhysicalDeviceInfo>& getPhysicalDeviceInfos() const;
+
+    Preferencies& getPreferencies();
+    const Preferencies& getPreferencies() const;
+
     void destroy();
 
     bool beginFrame() override final;
@@ -90,7 +106,7 @@ private:
     bool initDevice();
 
     bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck);
-    bool checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, bool finalization);
+    bool checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, bool finalization, bool quiet);
 
     template <typename Info>
     std::vector<const char*> checkRequirementsLayers(const Info& info, const std::vector<const char*>& layers, std::vector<const char*>& layersFound);
@@ -119,6 +135,25 @@ private:
     VkPhysicalDeviceFeatures _loadedDeviceFeatures{};
     std::set<int8_t> _loadedQueueFamiliesIdx{};
     std::vector<Render::Mesh*> _attachedMeshes{};
+
+    Preferencies _preferencies{
+        nullptr,                                    // device
+
+        {                                           // swapchain
+            {                                       // presentModes
+                VK_PRESENT_MODE_MAILBOX_KHR,
+                VK_PRESENT_MODE_FIFO_KHR
+            },
+            {                                       // formats
+                VK_FORMAT_B8G8R8A8_UNORM,
+                VK_FORMAT_R8G8B8A8_UNORM
+            },
+            {                                       // compositeAlphas
+                VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+                VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
+            }
+        }
+    };
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;

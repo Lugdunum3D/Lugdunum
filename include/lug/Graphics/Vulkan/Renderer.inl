@@ -93,3 +93,19 @@ inline PhysicalDeviceInfo* Renderer::getPhysicalDeviceInfo() {
 inline const PhysicalDeviceInfo* Renderer::getPhysicalDeviceInfo() const {
     return _physicalDeviceInfo;
 }
+
+inline std::vector<PhysicalDeviceInfo>& Renderer::getPhysicalDeviceInfos() {
+    return _physicalDeviceInfos;
+}
+
+inline const std::vector<PhysicalDeviceInfo>& Renderer::getPhysicalDeviceInfos() const {
+    return _physicalDeviceInfos;
+}
+
+inline Renderer::Preferencies& Renderer::getPreferencies() {
+    return _preferencies;
+}
+
+inline const Renderer::Preferencies& Renderer::getPreferencies() const {
+    return _preferencies;
+}

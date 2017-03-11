@@ -22,7 +22,7 @@ namespace Render {
 Window::Window(Renderer &renderer) : _renderer(renderer) {}
 
 Window::~Window() {
-    destroy();
+    destroyRender();
 }
 
 bool Window::pollEvent(lug::Window::Event& event) {
@@ -160,11 +160,42 @@ Window::create(Renderer &renderer, Window::InitInfo& initInfo) {
 
     if (!window->init(initInfo)) return nullptr;
 
-    for (auto& renderViewInitInfo : initInfo.renderViewsInitInfo) {
-        if (!window->createView(renderViewInitInfo)) return nullptr;
+    return window;
+}
+
+bool Window::initDescriptorPool() {
+    // Create descriptor pool
+    // This is in Window because we need to know the number of RenderTechnique (Actually the number of render views)
+    // Each RenderTechnique has got 50 descriptors for the lights and 1 for the camera
+
+    VkDescriptorPoolSize poolSize[] = {
+        // Dynamic uniform buffers descriptors (1 for camera and 1 for lights in ForwardRenderTechnique)
+        {
+            poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+            poolSize[0].descriptorCount = (uint32_t)_initInfo.renderViewsInitInfo.size() * 3 * 2
+        }
+    };
+
+    VkDescriptorPoolCreateInfo createInfo{
+        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        createInfo.pNext = nullptr,
+        createInfo.flags = 0, // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
+        createInfo.maxSets = (uint32_t)_initInfo.renderViewsInitInfo.size() * (1 + 1) * 3, // Only ForwardRenderTechnique has 1 descriptor sets (for lights) and 1 (for the camera)
+        createInfo.poolSizeCount = 1,
+        createInfo.pPoolSizes = poolSize
+    };
+
+    VkDescriptorPool descriptorPool{VK_NULL_HANDLE};
+
+    VkResult result = vkCreateDescriptorPool(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &descriptorPool);
+    if (result != VK_SUCCESS) {
+        LUG_LOG.error("RendererVulkan: Can't create the descriptor pool: {}", result);
+        return false;
     }
 
-    return window;
+    _descriptorPool = std::make_unique<API::DescriptorPool>(descriptorPool, &_renderer.getDevice());
+
+    return true;
 }
 
 /**
@@ -221,7 +252,7 @@ bool Window::initSwapchainCapabilities() {
 
     // Get swapchain capabilities
     {
-        result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(info->handle, _surface, &info->swapChain.capabilities);
+        result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(info->handle, _surface, &info->swapchain.capabilities);
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't get surface capabilities: {}", result);
             return false;
@@ -234,8 +265,8 @@ bool Window::initSwapchainCapabilities() {
             return false;
         }
 
-        info->swapChain.formats.resize(formatsCount);
-        result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, _surface, &formatsCount, info->swapChain.formats.data());
+        info->swapchain.formats.resize(formatsCount);
+        result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, _surface, &formatsCount, info->swapchain.formats.data());
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve formats: {}", result);
             return false;
@@ -248,8 +279,8 @@ bool Window::initSwapchainCapabilities() {
             return false;
         }
 
-        info->swapChain.presentModes.resize(presentModesCount);
-        result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, _surface, &presentModesCount, info->swapChain.presentModes.data());
+        info->swapchain.presentModes.resize(presentModesCount);
+        result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, _surface, &presentModesCount, info->swapchain.presentModes.data());
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve present modes: {}", result);
             return false;
@@ -289,25 +320,14 @@ bool Window::initSwapchain() {
     LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
 
     // TODO: Find a way to put Preferencies elsewhere
-    struct SwapchainPreferencies {
-        const std::vector<VkPresentModeKHR> presentModes; // By order of preferency
-        const std::vector<VkFormat> formats; // By order of preferency
-    } swapchainPreferencies {
-        {
-            VK_PRESENT_MODE_MAILBOX_KHR,
-            VK_PRESENT_MODE_FIFO_KHR
-        },
-        {
-            VK_FORMAT_B8G8R8A8_UNORM,
-            VK_FORMAT_R8G8B8A8_UNORM
-        }
-    };
+    Renderer::Preferencies::Swapchain& swapchainPreferencies = _renderer.getPreferencies().swapchain;
 
     VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAX_ENUM_KHR;
     VkSurfaceFormatKHR swapchainFormat{
         swapchainFormat.format = VK_FORMAT_MAX_ENUM,
         swapchainFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
     };
+    VkCompositeAlphaFlagBitsKHR compositeAlpha = static_cast<VkCompositeAlphaFlagBitsKHR>(0);
     uint32_t minImageCount = 3;
     VkExtent2D extent{};
     VkSurfaceTransformFlagsKHR transform{};
@@ -317,7 +337,7 @@ bool Window::initSwapchain() {
         // Check the present mode
         {
             for (auto presentMode : swapchainPreferencies.presentModes) {
-                if (std::find(info->swapChain.presentModes.begin(), info->swapChain.presentModes.end(), presentMode) != info->swapChain.presentModes.end()) {
+                if (std::find(info->swapchain.presentModes.begin(), info->swapchain.presentModes.end(), presentMode) != info->swapchain.presentModes.end()) {
                     LUG_LOG.info("RendererWindow: Use present mode {}", API::RTTI::toStr(presentMode));
 
                     swapchainPresentMode = presentMode;
@@ -334,39 +354,61 @@ bool Window::initSwapchain() {
         // Check the formats
         {
             for (auto format : swapchainPreferencies.formats) {
-                if (std::find_if(info->swapChain.formats.begin(), info->swapChain.formats.end(), [&swapchainFormat, &format](const VkSurfaceFormatKHR& lhs) {
+                if (std::find_if(info->swapchain.formats.begin(), info->swapchain.formats.end(), [&swapchainFormat, &format](const VkSurfaceFormatKHR& lhs) {
                     return lhs.colorSpace == swapchainFormat.colorSpace && format == lhs.format;
-                }) != info->swapChain.formats.end()) {
+                }) != info->swapchain.formats.end()) {
                     LUG_LOG.info("RendererWindow: Use format {}", API::RTTI::toStr(format));
 
                     swapchainFormat.format = format;
                     break;
                 }
             }
+
+            if (swapchainFormat.format == VK_FORMAT_MAX_ENUM) {
+                LUG_LOG.error("RendererWindow: Missing swapchain format supported by Lugdunum");
+                return false;
+            }
+        }
+
+        // Check composite alpha
+        {
+            for (auto compositeAlphaPreferency : swapchainPreferencies.compositeAlphas) {
+                if (info->swapchain.capabilities.supportedCompositeAlpha & compositeAlphaPreferency) {
+                    LUG_LOG.info("RendererWindow: Use composite alpha {}", API::RTTI::toStr(compositeAlphaPreferency));
+
+                    compositeAlpha = compositeAlphaPreferency;
+                    break;
+                }
+            }
+
+            if (!compositeAlpha) {
+                LUG_LOG.error("RendererWindow: Missing composite alpha supported by Lugdunum");
+                return false;
+            }
         }
 
         // Check image counts
-        if (info->swapChain.capabilities.maxImageCount > 0 && info->swapChain.capabilities.maxImageCount < minImageCount) {
-            LUG_LOG.error("RendererWindow: Not enough images ({} required), found {}", minImageCount, info->swapChain.capabilities.maxImageCount);
+        if (info->swapchain.capabilities.maxImageCount > 0 && info->swapchain.capabilities.maxImageCount < minImageCount) {
+            LUG_LOG.error("RendererWindow: Not enough images ({} required), found {}", minImageCount, info->swapchain.capabilities.maxImageCount);
             return false;
         }
 
         // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
-        if (info->swapChain.capabilities.currentExtent.height == 0xFFFFFFFF
-            && info->swapChain.capabilities.currentExtent.width == 0xFFFFFFFF) {
+        if (info->swapchain.capabilities.currentExtent.height == 0xFFFFFFFF
+            && info->swapchain.capabilities.currentExtent.width == 0xFFFFFFFF) {
             extent.height = _mode.height;
             extent.width = _mode.width;
         } else {
-            extent.height = info->swapChain.capabilities.currentExtent.height;
-            extent.width = info->swapChain.capabilities.currentExtent.width;
+            extent.height = info->swapchain.capabilities.currentExtent.height;
+            extent.width = info->swapchain.capabilities.currentExtent.width;
         }
 
         // Find the transformation of the surface
-        if (info->swapChain.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
+        if (info->swapchain.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
             // We prefer a non-rotated transform
             transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
         } else {
-            transform = info->swapChain.capabilities.currentTransform;
+            transform = info->swapchain.capabilities.currentTransform;
         }
     }
 
@@ -387,7 +429,7 @@ bool Window::initSwapchain() {
             createInfo.queueFamilyIndexCount = 0,
             createInfo.pQueueFamilyIndices = nullptr,
             createInfo.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(transform),
-            createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR,
+            createInfo.compositeAlpha = compositeAlpha,
             createInfo.presentMode = swapchainPresentMode,
             createInfo.clipped = VK_TRUE,
             createInfo.oldSwapchain = static_cast<VkSwapchainKHR>(_swapchain)
@@ -444,7 +486,7 @@ bool Window::initSwapchain() {
     }
 }
 
-bool Window::initFramesData(Window::InitInfo& initInfo) {
+bool Window::initFramesData() {
     uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
     if (_framesData.size() == frameDataSize) {
         return true;
@@ -478,8 +520,8 @@ bool Window::initFramesData(Window::InitInfo& initInfo) {
                 createInfo.pNext = nullptr,
                 createInfo.flags = 0
             };
-            _framesData[i].imageReadySemaphores.resize(initInfo.renderViewsInitInfo.size());
-            for (uint32_t j = 0; j < initInfo.renderViewsInitInfo.size(); ++j) {
+            _framesData[i].imageReadySemaphores.resize(_initInfo.renderViewsInitInfo.size());
+            for (uint32_t j = 0; j < _initInfo.renderViewsInitInfo.size(); ++j) {
                 VkSemaphore semaphore;
                 VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
                 if (result != VK_SUCCESS) {
@@ -553,13 +595,15 @@ bool Window::buildCommandBuffers() {
 }
 
 bool Window::init(Window::InitInfo& initInfo) {
+    _initInfo = std::move(initInfo);
+
     // Init the window
-    if (!::lug::Window::Window::init(initInfo.windowInitInfo)) {
+    if (!::lug::Window::Window::init(_initInfo.windowInitInfo)) {
         return false;
     }
 
-    if (initInfo.renderViewsInitInfo.size() == 0) {
-        initInfo.renderViewsInitInfo.push_back({
+    if (_initInfo.renderViewsInitInfo.size() == 0) {
+        _initInfo.renderViewsInitInfo.push_back({
             lug::Graphics::Render::Technique::Type::Forward,    // renderTechniqueType
             {                                                   // viewport
                 {                                               // offset
@@ -589,44 +633,22 @@ bool Window::init(Window::InitInfo& initInfo) {
         });
     }
 
-    // Create descriptor pool
-    // This is in Window because we need to know the number of RenderTechnique (Actually the number of render views)
-    // Each RenderTechnique has got 50 descriptors for the lights and 1 for the camera
-    {
-        VkDescriptorPoolSize poolSize[] = {
-            // Dynamic uniform buffers descriptors (1 for camera and 1 for lights in ForwardRenderTechnique)
-            {
-                poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-                poolSize[0].descriptorCount = (uint32_t)initInfo.renderViewsInitInfo.size() * 3 * 2
-            }
-        };
+    return initRender();
+}
 
-        VkDescriptorPoolCreateInfo createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0, // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
-            createInfo.maxSets = (uint32_t)initInfo.renderViewsInitInfo.size() * (1 + 1) * 3, // Only ForwardRenderTechnique has 1 descriptor sets (for lights) and 1 (for the camera)
-            createInfo.poolSizeCount = 1,
-            createInfo.pPoolSizes = poolSize
-        };
-
-        VkDescriptorPool descriptorPool{VK_NULL_HANDLE};
-        VkResult result = vkCreateDescriptorPool(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &descriptorPool);
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't create the descriptor pool: {}", result);
-            return false;
-        }
-        _descriptorPool = std::make_unique<API::DescriptorPool>(descriptorPool, &_renderer.getDevice());
-    }
-
-    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue())) {
+bool Window::initRender() {
+    if (!(initDescriptorPool() && initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData())) {
         return false;
     }
 
-    return initSwapchain() && initFramesData(initInfo);
+    for (auto& renderViewInitInfo : _initInfo.renderViewsInitInfo) {
+        if (!createView(renderViewInitInfo)) return false;
+    }
+
+    return true;
 }
 
-void Window::destroy() {
+void Window::destroyRender() {
     if (_presentQueue) {
         _presentQueue->waitIdle();
     }
@@ -634,6 +656,8 @@ void Window::destroy() {
     for (auto& renderView : _renderViews) {
         renderView->destroy();
     }
+
+    _renderViews.clear();
 
     _swapchain.destroy();
 
@@ -645,6 +669,8 @@ void Window::destroy() {
     _framesData.clear();
 
     _descriptorPool->destroy();
+
+    _acquireImageDatas.clear();
 }
 
 } // Render

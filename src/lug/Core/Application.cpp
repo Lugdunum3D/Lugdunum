@@ -17,7 +17,7 @@ bool Application::beginInit(int argc, char* argv[]) {
     (void)(argc);
     (void)(argv);
 
-    if (!_graphics.init(_graphicsInitInfo)) {
+    if (!_graphics.beginInit(_graphicsInitInfo)) {
         return false;
     }
 
@@ -25,6 +25,10 @@ bool Application::beginInit(int argc, char* argv[]) {
 }
 
 bool Application::finishInit() {
+    if (!_graphics.finishInit()) {
+        return false;
+    }
+
     _window = _graphics.getRenderer()->createWindow(_renderWindowInitInfo);
 
     if (!_window) {

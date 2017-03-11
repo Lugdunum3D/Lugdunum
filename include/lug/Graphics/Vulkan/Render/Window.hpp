@@ -59,18 +59,22 @@ public:
 
     static std::unique_ptr<Window> create(Renderer& renderer, Window::InitInfo& initInfo);
 
+    bool initRender();
+    void destroyRender();
+
 private:
     bool init(Window::InitInfo& initInfo);
+    bool initDescriptorPool();
     bool initSurface();
     bool initSwapchainCapabilities();
     bool initPresentQueue();
     bool initSwapchain();
-    bool initFramesData(Window::InitInfo& initInfo);
+    bool initFramesData();
     bool buildCommandBuffers();
 
-    void destroy();
-
 private:
+    InitInfo _initInfo;
+
     Renderer& _renderer;
     VkSurfaceKHR _surface{VK_NULL_HANDLE};
     API::Swapchain _swapchain{};

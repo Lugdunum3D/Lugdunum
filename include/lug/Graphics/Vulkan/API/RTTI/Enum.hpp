@@ -286,6 +286,7 @@ LUG_GRAPHICS_API const char* toStr(VkFormat enumVal);
 LUG_GRAPHICS_API const char* toStr(VkColorSpaceKHR enumVal);
 LUG_GRAPHICS_API const char* toStr(VkPresentModeKHR enumVal);
 LUG_GRAPHICS_API const char* toStr(VkSurfaceTransformFlagBitsKHR enumVal);
+LUG_GRAPHICS_API const char* toStr(VkCompositeAlphaFlagBitsKHR enumVal);
 
 LUG_GRAPHICS_API std::vector<const char*> VkMemoryPropertyFlagsToStr(VkMemoryPropertyFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkQueueFlagsToStr(VkQueueFlags flag);

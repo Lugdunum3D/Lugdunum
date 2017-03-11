@@ -18,7 +18,6 @@ public:
     };
 
     struct InitInfo {
-        bool useDiscreteGPU;
         std::string shadersRoot;
     };
 
