@@ -35,6 +35,7 @@ bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
     LUG_LOG.info("Loading model {}", file);
 
     const aiScene* scene = importer.ReadFile(file,
+        aiProcess_FlipWindingOrder |
         aiProcess_CalcTangentSpace |
         aiProcess_Triangulate |
         aiProcess_SortByPType |
@@ -46,7 +47,9 @@ bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
         aiProcess_FindDegenerates |
         aiProcess_FindInvalidData |
         aiProcess_OptimizeMeshes |
-        aiProcess_GenSmoothNormals);
+        aiProcess_GenSmoothNormals |
+        aiProcess_PreTransformVertices
+    );
 
     if (!scene) {
         LUG_LOG.error("ModelLoader::loadFromFile: Failed to load model {}: {}", file, importer.GetErrorString());

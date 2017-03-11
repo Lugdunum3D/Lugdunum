@@ -113,11 +113,11 @@ void Node::setRotation(const Math::Quatf& rotation, TransformSpace space) {
     needUpdate();
 }
 
-void Node::setDirection(const Math::Vec3f& direction, const Math::Vec3f& localDirectionVector, const Math::Vec3f& up, TransformSpace space) {
-    if (direction.length() == 0.0f) return;
+void Node::setDirection(const Math::Vec3f& spaceTargetDirection, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space) {
+    if (spaceTargetDirection.length() == 0.0f) return;
 
     // The direction we want the local direction point to
-    Math::Vec3f targetDirection = Math::normalize(direction);
+    Math::Vec3f targetDirection = Math::normalize(spaceTargetDirection);
 
     // Transform target direction to world space
     if (space == TransformSpace::Local) {
@@ -130,7 +130,7 @@ void Node::setDirection(const Math::Vec3f& direction, const Math::Vec3f& localDi
         // Nothing to do here
     }
 
-    Math::Vec3f xVec = Math::normalize(cross(up, targetDirection));
+    Math::Vec3f xVec = Math::normalize(cross(localUpVector, targetDirection));
     Math::Vec3f yVec = Math::normalize(cross(targetDirection, xVec));
     Math::Quatf unitZToTarget = Math::Quatf::fromAxes(xVec, yVec, targetDirection);
 
@@ -144,7 +144,7 @@ void Node::setDirection(const Math::Vec3f& direction, const Math::Vec3f& localDi
     setRotation(targetOrientation, TransformSpace::Parent);
 }
 
-void Node::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDirectionVector, const Math::Vec3f& up, TransformSpace space) {
+void Node::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space) {
     Math::Vec3f origin;
 
     if (space == TransformSpace::Local) {
@@ -155,7 +155,7 @@ void Node::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDir
         origin = getAbsolutePosition();
     }
 
-    setDirection(targetPosition - origin, localDirectionVector, up, space);
+    setDirection(targetPosition - origin, localDirectionVector, localUpVector, space);
 }
 
 void Node::needUpdate() {

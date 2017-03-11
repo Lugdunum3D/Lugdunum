@@ -1,11 +1,20 @@
 #include <lug/Graphics/Scene/Node.hpp>
+#include <lug/Graphics/Scene/Scene.hpp>
 #include <lug/Graphics/Render/Queue.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Scene {
 
-Node::Node(const std::string& name) : ::lug::Graphics::Node(name) {}
+Node::Node(Scene& scene, const std::string& name) : ::lug::Graphics::Node(name), _scene(scene) {}
+
+Node *Node::createSceneNode(const std::string& name, std::unique_ptr<MovableObject> object) {
+    std::unique_ptr<Node> node = _scene.createSceneNode(name, std::move(object));
+
+    Node* ptrNode = node.get();
+    attachChild(std::move(node));
+    return ptrNode;
+}
 
 void Node::attachMovableObject(std::unique_ptr<MovableObject> movableObject) {
     movableObject->setParent(this);

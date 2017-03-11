@@ -27,7 +27,10 @@ layout (location = 3) out vec2 verticeUv;
 
 void main() {
     mat4 vp = proj * view;
+
     gl_Position = vp * pushConstants.modelTransform * vec4(pos, 1.0);
+    gl_Position.y = -gl_Position.y;
+
     verticePos = vec3(pushConstants.modelTransform * vec4(pos, 1.0));
     verticeColor = color;
     verticeNormal = mat3(transpose(inverse(pushConstants.modelTransform))) * normal;

@@ -30,7 +30,7 @@ public:
 
     ~Scene() = default;
 
-    std::unique_ptr<Node> createSceneNode(const std::string& name);
+    std::unique_ptr<Node> createSceneNode(const std::string& name, std::unique_ptr<MovableObject> object = nullptr);
     std::unique_ptr<MeshInstance> createMeshInstance(const std::string& name, Render::Mesh* mesh = nullptr);
     std::unique_ptr<ModelInstance> createModelInstance(const std::string& name, Render::Model* model = nullptr);
     std::unique_ptr<MovableCamera> createMovableCamera(const std::string& name, Render::Camera* camera = nullptr);

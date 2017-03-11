@@ -8,10 +8,16 @@ namespace lug {
 namespace Graphics {
 namespace Scene {
 
-Scene::Scene() : _root{std::make_unique<Node>("root")} {}
+Scene::Scene() : _root{std::make_unique<Node>(*this, "root")} {}
 
-std::unique_ptr<Node> Scene::createSceneNode(const std::string& name) {
-    return std::make_unique<Node>(name);
+std::unique_ptr<Node> Scene::createSceneNode(const std::string& name, std::unique_ptr<MovableObject> object) {
+    std::unique_ptr<Node> node = std::make_unique<Node>(*this, name);
+
+    if (object) {
+        node->attachMovableObject(std::move(object));
+    }
+
+    return node;
 }
 
 std::unique_ptr<MeshInstance> Scene::createMeshInstance(const std::string& name, Render::Mesh* mesh) {

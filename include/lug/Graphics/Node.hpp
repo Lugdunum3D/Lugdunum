@@ -52,9 +52,9 @@ public:
 
     void setPosition(const Math::Vec3f& position, TransformSpace space = TransformSpace::Local);
     void setRotation(const Math::Quatf& rotation, TransformSpace space = TransformSpace::Local);
-    void setDirection(const Math::Vec3f& direction, const Math::Vec3f& localDirectionVector, const Math::Vec3f& up, TransformSpace space = TransformSpace::Local);
+    void setDirection(const Math::Vec3f& spaceTargetDirection, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space = TransformSpace::Local);
 
-    void lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDirectionVector, const Math::Vec3f& up, TransformSpace space = TransformSpace::Local);
+    void lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space = TransformSpace::Local);
 
     virtual void needUpdate();
 
