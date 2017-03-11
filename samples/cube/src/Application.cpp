@@ -1,4 +1,5 @@
 #include "Application.hpp"
+
 #include <lug/Graphics/Light/Directional.hpp>
 #include <lug/Graphics/Scene/MeshInstance.hpp>
 
@@ -121,6 +122,7 @@ bool Application::init(int argc, char* argv[]) {
         _scene->getRoot()->createSceneNode("light node", std::move(light));
     }
 
+    // Create a camera
     std::unique_ptr<lug::Graphics::Render::Camera> camera = _graphics.createCamera("camera");
     camera->setScene(_scene.get());
 

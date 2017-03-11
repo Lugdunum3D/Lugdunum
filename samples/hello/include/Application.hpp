@@ -1,7 +1,6 @@
 #pragma once
 
 #include <lug/Core/Application.hpp>
-#include <lug/Graphics/Render/Camera.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
 
 class Application : public ::lug::Core::Application {
@@ -25,9 +24,6 @@ private:
     std::unique_ptr<lug::Graphics::Scene::Scene> _scene;
 
     // Temporary store mesh because we don't have resource manager yet
-    std::unique_ptr<lug::Graphics::Render::Mesh> _cube;
-    std::unique_ptr<lug::Graphics::Render::Mesh> _plane;
-
     std::unique_ptr<lug::Graphics::Render::Model> _model;
 
     float _rotation{0.0f};
