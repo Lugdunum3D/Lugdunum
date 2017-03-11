@@ -2,6 +2,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 LogCatHandler::LogCatHandler(const std::string& name) : Handler(name) {}
 
@@ -15,16 +16,17 @@ void LogCatHandler::flush() {
 
 android_LogPriority LogCatHandler::lugLevelToLogCatPrio(Level level) {
     switch (level) {
-        case lug::System::Level::Off:       return ANDROID_LOG_SILENT;
-        case lug::System::Level::Debug:     return ANDROID_LOG_DEBUG;
-        case lug::System::Level::Info:      return ANDROID_LOG_INFO;
-        case lug::System::Level::Warning:   return ANDROID_LOG_WARN;
-        case lug::System::Level::Error:     return ANDROID_LOG_ERROR;
-        case lug::System::Level::Fatal:     return ANDROID_LOG_FATAL;
-        case lug::System::Level::Assert:    return ANDROID_LOG_FATAL;
+        case lug::System::Logger::Level::Off:       return ANDROID_LOG_SILENT;
+        case lug::System::Logger::Level::Debug:     return ANDROID_LOG_DEBUG;
+        case lug::System::Logger::Level::Info:      return ANDROID_LOG_INFO;
+        case lug::System::Logger::Level::Warning:   return ANDROID_LOG_WARN;
+        case lug::System::Logger::Level::Error:     return ANDROID_LOG_ERROR;
+        case lug::System::Logger::Level::Fatal:     return ANDROID_LOG_FATAL;
+        case lug::System::Logger::Level::Assert:    return ANDROID_LOG_FATAL;
     }
     return ANDROID_LOG_UNKNOWN;
 }
 
-} // namespace lug
-} // namespace System
+} // Logger
+} // System
+} // lug

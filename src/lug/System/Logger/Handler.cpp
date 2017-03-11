@@ -4,6 +4,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 Handler::Handler(const std::string& name):
     _name(name),
@@ -34,5 +35,6 @@ bool Handler::shouldLog(Level level) const {
     return level >= _level;
 }
 
-} // namespace System
-} // namespace lug
+} // Logger
+} // System
+} // lug

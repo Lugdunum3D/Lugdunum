@@ -3,13 +3,13 @@
 #include <algorithm>
 #include <memory>
 #include <set>
-#include <lug/Graphics/Camera.hpp>
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Mesh.hpp>
-#include <lug/Graphics/Model.hpp>
 #include <lug/Graphics/Module.hpp>
+#include <lug/Graphics/Render/Camera.hpp>
+#include <lug/Graphics/Render/Mesh.hpp>
+#include <lug/Graphics/Render/Model.hpp>
 #include <lug/Graphics/Renderer.hpp>
-#include <lug/Graphics/Scene.hpp>
+#include <lug/Graphics/Scene/Scene.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -30,6 +30,8 @@ public:
     struct InitInfo {
         Renderer::Type rendererType;            /** The renderer to use. */
         Renderer::InitInfo rendererInitInfo;    /** Initialization info for the renderer. */
+        std::set<Module::Type> mandatoryModules;
+        std::set<Module::Type> optionalModules;
     };
 
 public:
@@ -59,6 +61,24 @@ public:
     bool init(const InitInfo& initInfo);
 
     /**
+     * @brief      Begin the initialization of the application with the informations filled in @p initInfo structure.
+     *             Just create the lug::Graphics::Renderer and begin its initialization.
+     *
+     * @param[in]  initInfo  The initialize information.
+     *
+     * @return     @p true if the initialization was successful.
+     */
+    bool beginInit(const InitInfo& initInfo);
+
+    /**
+     * @brief      Finish the initialization of the application with the informations filled in @p initInfo structure.
+     *             Finish the initialization of the lug::Graphics::Renderer.
+     *
+     * @return     @p true if the initialization was successful.
+     */
+    bool finishInit();
+
+    /**
      * @brief      Check if a module is loaded
      *
      * @param[in]  type  The module type to check.
@@ -66,7 +86,11 @@ public:
      * @return     @p true if the module is loaded.
      */
     bool isModuleLoaded(Module::Type type) const;
-    const std::set<Module::Type>& getLoadedModules() const;
+
+    const std::set<Module::Type>& getLoadedMandatoryModules() const;
+    const std::set<Module::Type>& getLoadedOptionalModules() const;
+
+    void unsupportedModule(Module::Type type);
 
     /**
      * @brief      Gets the renderer.
@@ -80,7 +104,7 @@ public:
      *
      * @return     A pointer to the scene instance. The ownership is given to the caller.
      */
-    std::unique_ptr<Scene> createScene();
+    std::unique_ptr<Scene::Scene> createScene();
 
     /**
      * @brief      Creates a mesh.
@@ -90,7 +114,7 @@ public:
      * @return     A pointer to the scene instance. The ownership is given to the caller. @n
      *             Returns @p nullptr if the mesh creation fails.
      */
-    std::unique_ptr<Mesh> createMesh(const std::string& name);
+    std::unique_ptr<Render::Mesh> createMesh(const std::string& name);
 
     /**
      * @brief      Creates a model.
@@ -100,7 +124,7 @@ public:
      * @return     A pointer to the scene instance. The ownership is given to the caller. @n
      *             Returns @p nullptr if the model creation fails.
      */
-    std::unique_ptr<Model> createModel(const std::string& name, const std::string& fileName = "");
+    std::unique_ptr<Render::Model> createModel(const std::string& name, const std::string& fileName = "");
 
     /**
      * @brief      Creates a camera.
@@ -110,15 +134,18 @@ public:
      * @return     A pointer to the camera instance. The ownership is given to the caller. @n
      *             Returns @p nullptr if the camera creation fails.
      */
-    std::unique_ptr<Camera> createCamera(const std::string& name);
+    std::unique_ptr<Render::Camera> createCamera(const std::string& name);
 
 private:
     const char* _appName;
     uint32_t _appVersion;
 
-    std::set<Module::Type> _loadedModules{};
+    InitInfo _initInfo;
+
+    std::set<Module::Type> _loadedMandatoryModules{};
+    std::set<Module::Type> _loadedOptionalModules{};
+
     std::unique_ptr<Renderer> _renderer{nullptr};
-    Renderer::Type _rendererType;
 };
 
 #include <lug/Graphics/Graphics.inl>

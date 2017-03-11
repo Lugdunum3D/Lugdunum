@@ -70,13 +70,17 @@ void AndroidApp::onDestroy(ANativeActivity* ) {
 
 void AndroidApp::onWindowFocusChanged(ANativeActivity*, int) {}
 
-void AndroidApp::onNativeWindowCreated(ANativeActivity*, ANativeWindow* ) {}
+void AndroidApp::onNativeWindowCreated(ANativeActivity* , ANativeWindow* window) {
+    lug::Window::priv::WindowImpl::nativeWindow = window;
+}
 
 void AndroidApp::onNativeWindowResized(ANativeActivity*, ANativeWindow* ) {}
 
 void AndroidApp::onNativeWindowRedrawNeeded(ANativeActivity*, ANativeWindow*) {}
 
-void AndroidApp::onNativeWindowDestroyed(ANativeActivity*, ANativeWindow* ) {}
+void AndroidApp::onNativeWindowDestroyed(ANativeActivity*, ANativeWindow* window) {
+    lug::Window::priv::WindowImpl::nativeWindow = window;
+}
 
 void AndroidApp::onInputQueueCreated(ANativeActivity*, AInputQueue* input) {
     lug::Window::priv::WindowImpl::inputQueue = input;
@@ -97,4 +101,5 @@ void AndroidApp::onLowMemory(ANativeActivity*) {}
 
 void  ANativeActivity_onCreate(ANativeActivity* activity, void* savedState, size_t savedStateSize) {
     activity->instance = new lug::Main::AndroidApp(activity, savedState, savedStateSize);
+    lug::Window::priv::WindowImpl::activity = activity;
 }

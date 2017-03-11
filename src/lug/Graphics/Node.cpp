@@ -60,8 +60,10 @@ void Node::translate(const Math::Vec3f& direction, TransformSpace space) {
 }
 
 void Node::rotate(float angle, const Math::Vec3f& axis, TransformSpace space) {
-    Math::Quatf quat(angle, axis);
+    rotate(Math::Quatf(angle, axis), space);
+}
 
+void Node::rotate(const Math::Quatf& quat, TransformSpace space) {
     if (space == TransformSpace::Local) {
         _rotation = _rotation * quat;
     } else if (space == TransformSpace::Parent) {
@@ -76,6 +78,84 @@ void Node::rotate(float angle, const Math::Vec3f& axis, TransformSpace space) {
 void Node::scale(const Math::Vec3f& scale) {
     _scale *= scale;
     needUpdate();
+}
+
+void Node::setPosition(const Math::Vec3f& position, TransformSpace space) {
+    if (space == TransformSpace::Local) {
+        _position = _rotation.transform() * position;
+    } else if (space == TransformSpace::Parent) {
+        _position = position;
+    } else if (space == TransformSpace::World) {
+        if (_parent) {
+            _position = (_parent->getAbsoluteRotation().transform() * position * _parent->getAbsoluteScale()) + _parent->getAbsolutePosition();
+        } else {
+            _position = position;
+        }
+    }
+
+    needUpdate();
+}
+
+void Node::setRotation(const Math::Quatf& rotation, TransformSpace space) {
+    if (space == TransformSpace::Local) {
+        // TODO: Use the current local rotation to compute the new rotation
+        _rotation = rotation;
+    } else if (space == TransformSpace::Parent) {
+        _rotation = rotation;
+    } else if (space == TransformSpace::World) {
+        if (_parent) {
+            _rotation = Math::inverse(getAbsoluteRotation()) * rotation;
+        } else {
+            _rotation = rotation;
+        }
+    }
+
+    needUpdate();
+}
+
+void Node::setDirection(const Math::Vec3f& spaceTargetDirection, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space) {
+    if (spaceTargetDirection.length() == 0.0f) return;
+
+    // The direction we want the local direction point to
+    Math::Vec3f targetDirection = Math::normalize(spaceTargetDirection);
+
+    // Transform target direction to world space
+    if (space == TransformSpace::Local) {
+        targetDirection = getAbsoluteRotation().transform() * targetDirection;
+    } else if (space == TransformSpace::Parent) {
+        if (_parent) {
+            targetDirection = _parent->getAbsoluteRotation().transform() * targetDirection;
+        }
+    } else if (space == TransformSpace::World) {
+        // Nothing to do here
+    }
+
+    Math::Vec3f xVec = Math::normalize(cross(localUpVector, targetDirection));
+    Math::Vec3f yVec = Math::normalize(cross(targetDirection, xVec));
+    Math::Quatf unitZToTarget = Math::Quatf::fromAxes(xVec, yVec, targetDirection);
+
+    Math::Quatf targetOrientation;
+    if (localDirectionVector == Math::Vec3f{0.0f, 0.0f, -1.0f}) {
+        targetOrientation = Math::Quatf(-unitZToTarget.y(), -unitZToTarget.z(), unitZToTarget.w(), unitZToTarget.x());
+    } else {
+        targetOrientation = unitZToTarget * directionTo(localDirectionVector, Math::Vec3f{0.0f, 0.0f, 1.0f});
+    }
+
+    setRotation(targetOrientation, TransformSpace::Parent);
+}
+
+void Node::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space) {
+    Math::Vec3f origin;
+
+    if (space == TransformSpace::Local) {
+        origin = Math::Vec3f(0.0f);
+    } else if (space == TransformSpace::Parent) {
+        origin = _position;
+    } else if (space == TransformSpace::World) {
+        origin = getAbsolutePosition();
+    }
+
+    setDirection(targetPosition - origin, localDirectionVector, localUpVector, space);
 }
 
 void Node::needUpdate() {

@@ -28,7 +28,8 @@ set(INC
     ${INCROOT}/Library.inl
     ${INCROOT}/Time.hpp
     ${INCROOT}/Time.inl
-    ${INCROOT}/Logger.hpp
+    ${INCROOT}/Logger/Logger.hpp
+    ${INCROOT}/Logger/Logger.inl
     ${INCROOT}/Logger/Common.hpp
     ${INCROOT}/Logger/FileHandler.hpp
     ${INCROOT}/Logger/Formatter.hpp

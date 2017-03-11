@@ -7,6 +7,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 class LUG_SYSTEM_API FileHandler : public Handler {
 public:
@@ -29,5 +30,6 @@ private:
     std::ofstream _ofs;
 };
 
-} // lug
+} // Logger
 } // System
+} // lug

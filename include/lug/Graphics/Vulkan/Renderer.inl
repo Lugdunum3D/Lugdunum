@@ -22,24 +22,24 @@ inline bool Renderer::isDeviceExtensionLoaded(const char* name) const {
     return std::find_if(_loadedDeviceExtensions.cbegin(), _loadedDeviceExtensions.cend(), compareExtensions) != _loadedDeviceExtensions.cend();
 }
 
-inline const Instance& Renderer::getInstance() const {
+inline const API::Instance& Renderer::getInstance() const {
     return _instance;
 }
 
-inline const Device& Renderer::getDevice() const {
+inline const API::Device& Renderer::getDevice() const {
     return _device;
 }
 
-inline std::vector<Queue> &Renderer::getQueues() {
+inline std::vector<API::Queue> &Renderer::getQueues() {
     return _queues;
 }
 
-inline const std::vector<Queue>& Renderer::getQueues() const {
+inline const std::vector<API::Queue>& Renderer::getQueues() const {
     return _queues;
 }
 
-inline Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentation) {
-    Queue* returnQueue = nullptr;
+inline API::Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentation) {
+    API::Queue* returnQueue = nullptr;
 
     for (auto& queue : _queues) {
         if ((queue.getFlags() & flags) == flags && (!supportPresentation || queue.supportsPresentation())) {
@@ -49,15 +49,15 @@ inline Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentation) {
         }
     }
 
-    if (!returnQueue || flags == VK_QUEUE_TRANSFER_BIT) {
-        return getQueue(VK_QUEUE_GRAPHICS_BIT, supportPresentation);
+    if (!returnQueue && flags & VK_QUEUE_TRANSFER_BIT) {
+        return getQueue((flags & ~VK_QUEUE_TRANSFER_BIT) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
     }
 
     return returnQueue;
 }
 
-inline const Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentation) const {
-    const Queue* returnQueue = nullptr;
+inline const API::Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentation) const {
+    const API::Queue* returnQueue = nullptr;
 
     for (const auto& queue : _queues) {
         if ((queue.getFlags() & flags) == flags && (!supportPresentation || queue.supportsPresentation())) {
@@ -67,8 +67,8 @@ inline const Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentat
         }
     }
 
-    if (!returnQueue || flags == VK_QUEUE_TRANSFER_BIT) {
-        return getQueue(VK_QUEUE_GRAPHICS_BIT, supportPresentation);
+    if (!returnQueue && flags & VK_QUEUE_TRANSFER_BIT) {
+        return getQueue((flags & ~VK_QUEUE_TRANSFER_BIT) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
     }
 
     return returnQueue;
@@ -92,4 +92,20 @@ inline PhysicalDeviceInfo* Renderer::getPhysicalDeviceInfo() {
 
 inline const PhysicalDeviceInfo* Renderer::getPhysicalDeviceInfo() const {
     return _physicalDeviceInfo;
+}
+
+inline std::vector<PhysicalDeviceInfo>& Renderer::getPhysicalDeviceInfos() {
+    return _physicalDeviceInfos;
+}
+
+inline const std::vector<PhysicalDeviceInfo>& Renderer::getPhysicalDeviceInfos() const {
+    return _physicalDeviceInfos;
+}
+
+inline Renderer::Preferencies& Renderer::getPreferencies() {
+    return _preferencies;
+}
+
+inline const Renderer::Preferencies& Renderer::getPreferencies() const {
+    return _preferencies;
 }

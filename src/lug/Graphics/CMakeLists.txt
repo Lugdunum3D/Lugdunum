@@ -3,151 +3,221 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 
 # all source files
 set(SRC
-    ${SRCROOT}/Camera.cpp
-    ${SRCROOT}/DirectionalLight.cpp
     ${SRCROOT}/Graphics.cpp
-    ${SRCROOT}/Light.cpp
-    ${SRCROOT}/Mesh.cpp
-    ${SRCROOT}/MeshInstance.cpp
-    ${SRCROOT}/ModelInstance.cpp
+
+    ${SRCROOT}/Light/Directional.cpp
+    ${SRCROOT}/Light/Light.cpp
+    ${SRCROOT}/Light/Point.cpp
+    ${SRCROOT}/Light/Spot.cpp
+
     ${SRCROOT}/Module.cpp
-    ${SRCROOT}/Model.cpp
-    ${SRCROOT}/ModelLoader.cpp
-    ${SRCROOT}/MovableCamera.cpp
-    ${SRCROOT}/MovableObject.cpp
     ${SRCROOT}/Node.cpp
-    ${SRCROOT}/ObjModelLoader.cpp
-    ${SRCROOT}/PointLight.cpp
-    ${SRCROOT}/RenderQueue.cpp
-    ${SRCROOT}/RenderView.cpp
-    ${SRCROOT}/Scene.cpp
-    ${SRCROOT}/SceneNode.cpp
-    ${SRCROOT}/Spotlight.cpp
-    ${SRCROOT}/Vulkan/Buffer.cpp
-    ${SRCROOT}/Vulkan/BufferPool.cpp
-    ${SRCROOT}/Vulkan/Camera.cpp
-    ${SRCROOT}/Vulkan/CommandBuffer.cpp
-    ${SRCROOT}/Vulkan/CommandPool.cpp
-    ${SRCROOT}/Vulkan/DescriptorPool.cpp
-    ${SRCROOT}/Vulkan/DescriptorSet.cpp
-    ${SRCROOT}/Vulkan/DescriptorSetLayout.cpp
-    ${SRCROOT}/Vulkan/Device.cpp
-    ${SRCROOT}/Vulkan/DeviceMemory.cpp
-    ${SRCROOT}/Vulkan/Fence.cpp
-    ${SRCROOT}/Vulkan/ForwardRenderTechnique.cpp
-    ${SRCROOT}/Vulkan/Framebuffer.cpp
-    ${SRCROOT}/Vulkan/Image.cpp
-    ${SRCROOT}/Vulkan/ImageView.cpp
-    ${SRCROOT}/Vulkan/Instance.cpp
-    ${SRCROOT}/Vulkan/Loader.cpp
-    ${SRCROOT}/Vulkan/Mesh.cpp
-    ${SRCROOT}/Vulkan/Model.cpp
-    ${SRCROOT}/Vulkan/Pipeline.cpp
-    ${SRCROOT}/Vulkan/PipelineLayout.cpp
-    ${SRCROOT}/Vulkan/Queue.cpp
+
+    ${SRCROOT}/Render/Camera.cpp
+    ${SRCROOT}/Render/Mesh.cpp
+    ${SRCROOT}/Render/Model.cpp
+    ${SRCROOT}/Render/Queue.cpp
+    ${SRCROOT}/Render/View.cpp
+
+    ${SRCROOT}/Renderer.cpp
+
+    ${SRCROOT}/Scene/MeshInstance.cpp
+    ${SRCROOT}/Scene/ModelInstance.cpp
+    ${SRCROOT}/Scene/ModelLoader.cpp
+    ${SRCROOT}/Scene/MovableCamera.cpp
+    ${SRCROOT}/Scene/MovableObject.cpp
+    ${SRCROOT}/Scene/Node.cpp
+    ${SRCROOT}/Scene/Scene.cpp
+
+    ${SRCROOT}/Vulkan/API/Buffer.cpp
+    ${SRCROOT}/Vulkan/API/CommandBuffer.cpp
+    ${SRCROOT}/Vulkan/API/CommandPool.cpp
+    ${SRCROOT}/Vulkan/API/DescriptorPool.cpp
+    ${SRCROOT}/Vulkan/API/DescriptorSet.cpp
+    ${SRCROOT}/Vulkan/API/DescriptorSetLayout.cpp
+    ${SRCROOT}/Vulkan/API/Device.cpp
+    ${SRCROOT}/Vulkan/API/DeviceMemory.cpp
+    ${SRCROOT}/Vulkan/API/Fence.cpp
+    ${SRCROOT}/Vulkan/API/Framebuffer.cpp
+    ${SRCROOT}/Vulkan/API/Image.cpp
+    ${SRCROOT}/Vulkan/API/ImageView.cpp
+    ${SRCROOT}/Vulkan/API/Instance.cpp
+    ${SRCROOT}/Vulkan/API/Loader.cpp
+    ${SRCROOT}/Vulkan/API/Pipeline.cpp
+    ${SRCROOT}/Vulkan/API/PipelineLayout.cpp
+    ${SRCROOT}/Vulkan/API/Queue.cpp
+    ${SRCROOT}/Vulkan/API/RTTI/Enum.cpp
+    ${SRCROOT}/Vulkan/API/RenderPass.cpp
+    ${SRCROOT}/Vulkan/API/Semaphore.cpp
+    ${SRCROOT}/Vulkan/API/ShaderModule.cpp
+    ${SRCROOT}/Vulkan/API/Swapchain.cpp
+
+    ${SRCROOT}/Vulkan/Render/BufferPool.cpp
+    ${SRCROOT}/Vulkan/Render/Camera.cpp
+    ${SRCROOT}/Vulkan/Render/Mesh.cpp
+    ${SRCROOT}/Vulkan/Render/Model.cpp
+    ${SRCROOT}/Vulkan/Render/Technique/Forward.cpp
+    ${SRCROOT}/Vulkan/Render/Technique/Technique.cpp
+    ${SRCROOT}/Vulkan/Render/View.cpp
+    ${SRCROOT}/Vulkan/Render/Window.cpp
+
     ${SRCROOT}/Vulkan/Renderer.cpp
-    ${SRCROOT}/Vulkan/RenderPass.cpp
-    ${SRCROOT}/Vulkan/RenderTechnique.cpp
-    ${SRCROOT}/Vulkan/RenderView.cpp
-    ${SRCROOT}/Vulkan/RenderWindow.cpp
+
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
-    ${SRCROOT}/Vulkan/Semaphore.cpp
-    ${SRCROOT}/Vulkan/ShaderModule.cpp
-    ${SRCROOT}/Vulkan/Swapchain.cpp
+
     ${SRCROOT}/Vulkan/Vulkan.cpp
 )
 source_group("src" FILES ${SRC})
 
 # all header files
 set(INC
-    ${INCROOT}/Camera.hpp
-    ${INCROOT}/Camera.inl
-    ${INCROOT}/DirectionalLight.hpp
     ${INCROOT}/Export.hpp
     ${INCROOT}/Graphics.hpp
     ${INCROOT}/Graphics.inl
-    ${INCROOT}/Light.hpp
-    ${INCROOT}/Light.inl
-    ${INCROOT}/Mesh.hpp
-    ${INCROOT}/Mesh.inl
-    ${INCROOT}/MeshInstance.hpp
-    ${INCROOT}/MeshInstance.inl
-    ${INCROOT}/Model.hpp
-    ${INCROOT}/ModelInstance.hpp
-    ${INCROOT}/ModelInstance.inl
-    ${INCROOT}/ModelLoader.hpp
+
+    ${INCROOT}/Light/Directional.hpp
+    ${INCROOT}/Light/Light.hpp
+    ${INCROOT}/Light/Light.inl
+    ${INCROOT}/Light/Point.hpp
+    ${INCROOT}/Light/Spot.hpp
+
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl
-    ${INCROOT}/MovableCamera.hpp
-    ${INCROOT}/MovableObject.hpp
-    ${INCROOT}/MovableObject.inl
     ${INCROOT}/Node.hpp
     ${INCROOT}/Node.inl
-    ${INCROOT}/ObjModelLoader.hpp
-    ${INCROOT}/PointLight.hpp
+
+    ${INCROOT}/Render/Camera.hpp
+    ${INCROOT}/Render/Camera.inl
+    ${INCROOT}/Render/Mesh.hpp
+    ${INCROOT}/Render/Mesh.inl
+    ${INCROOT}/Render/Model.hpp
+    ${INCROOT}/Render/Queue.hpp
+    ${INCROOT}/Render/Queue.inl
+    ${INCROOT}/Render/Target.hpp
+    ${INCROOT}/Render/Target.inl
+    ${INCROOT}/Render/Technique/Type.hpp
+    ${INCROOT}/Render/View.hpp
+    ${INCROOT}/Render/View.inl
+    ${INCROOT}/Render/Window.hpp
+
     ${INCROOT}/Renderer.hpp
-    ${INCROOT}/RenderQueue.hpp
-    ${INCROOT}/RenderQueue.inl
-    ${INCROOT}/RenderTarget.hpp
-    ${INCROOT}/RenderTarget.inl
-    ${INCROOT}/RenderTechnique.hpp
-    ${INCROOT}/RenderView.hpp
-    ${INCROOT}/RenderView.inl
-    ${INCROOT}/RenderWindow.hpp
-    ${INCROOT}/Scene.hpp
-    ${INCROOT}/Scene.inl
-    ${INCROOT}/SceneNode.hpp
-    ${INCROOT}/SceneNode.inl
-    ${INCROOT}/Spotlight.hpp
-    ${INCROOT}/Vulkan/Buffer.hpp
-    ${INCROOT}/Vulkan/BufferPool.hpp
-    ${INCROOT}/Vulkan/Camera.hpp
-    ${INCROOT}/Vulkan/CommandBuffer.hpp
-    ${INCROOT}/Vulkan/CommandPool.hpp
-    ${INCROOT}/Vulkan/CommandPool.inl
-    ${INCROOT}/Vulkan/DescriptorPool.hpp
-    ${INCROOT}/Vulkan/DescriptorSet.hpp
-    ${INCROOT}/Vulkan/DescriptorSetLayout.hpp
-    ${INCROOT}/Vulkan/Device.hpp
-    ${INCROOT}/Vulkan/Device.inl
-    ${INCROOT}/Vulkan/DeviceMemory.hpp
-    ${INCROOT}/Vulkan/Fence.hpp
-    ${INCROOT}/Vulkan/ForwardRenderTechnique.hpp
-    ${INCROOT}/Vulkan/Framebuffer.hpp
-    ${INCROOT}/Vulkan/Image.hpp
-    ${INCROOT}/Vulkan/ImageView.hpp
-    ${INCROOT}/Vulkan/Instance.hpp
-    ${INCROOT}/Vulkan/Instance.inl
-    ${INCROOT}/Vulkan/Loader.hpp
-    ${INCROOT}/Vulkan/Mesh.hpp
-    ${INCROOT}/Vulkan/Mesh.inl
-    ${INCROOT}/Vulkan/Pipeline.hpp
-    ${INCROOT}/Vulkan/PipelineLayout.hpp
-    ${INCROOT}/Vulkan/Queue.hpp
+    ${INCROOT}/Renderer.inl
+
+    ${INCROOT}/Scene/MeshInstance.hpp
+    ${INCROOT}/Scene/MeshInstance.inl
+    ${INCROOT}/Scene/ModelInstance.hpp
+    ${INCROOT}/Scene/ModelInstance.inl
+    ${INCROOT}/Scene/ModelLoader.hpp
+    ${INCROOT}/Scene/MovableCamera.hpp
+    ${INCROOT}/Scene/MovableObject.hpp
+    ${INCROOT}/Scene/MovableObject.inl
+    ${INCROOT}/Scene/Node.hpp
+    ${INCROOT}/Scene/Node.inl
+    ${INCROOT}/Scene/Scene.hpp
+    ${INCROOT}/Scene/Scene.inl
+
+    ${INCROOT}/Vulkan/API/Buffer.hpp
+    ${INCROOT}/Vulkan/API/CommandBuffer.hpp
+    ${INCROOT}/Vulkan/API/CommandPool.hpp
+    ${INCROOT}/Vulkan/API/CommandPool.inl
+    ${INCROOT}/Vulkan/API/DescriptorPool.hpp
+    ${INCROOT}/Vulkan/API/DescriptorSet.hpp
+    ${INCROOT}/Vulkan/API/DescriptorSetLayout.hpp
+    ${INCROOT}/Vulkan/API/Device.hpp
+    ${INCROOT}/Vulkan/API/Device.inl
+    ${INCROOT}/Vulkan/API/DeviceMemory.hpp
+    ${INCROOT}/Vulkan/API/Fence.hpp
+    ${INCROOT}/Vulkan/API/Framebuffer.hpp
+    ${INCROOT}/Vulkan/API/Image.hpp
+    ${INCROOT}/Vulkan/API/ImageView.hpp
+    ${INCROOT}/Vulkan/API/Instance.hpp
+    ${INCROOT}/Vulkan/API/Instance.inl
+    ${INCROOT}/Vulkan/API/Loader.hpp
+    ${INCROOT}/Vulkan/API/Pipeline.hpp
+    ${INCROOT}/Vulkan/API/PipelineLayout.hpp
+    ${INCROOT}/Vulkan/API/Queue.hpp
+    ${INCROOT}/Vulkan/API/Queue.inl
+    ${INCROOT}/Vulkan/API/RTTI/Enum.hpp
+    ${INCROOT}/Vulkan/API/RenderPass.hpp
+    ${INCROOT}/Vulkan/API/Semaphore.hpp
+    ${INCROOT}/Vulkan/API/ShaderModule.hpp
+    ${INCROOT}/Vulkan/API/Swapchain.hpp
+    ${INCROOT}/Vulkan/API/Swapchain.inl
+
+    ${INCROOT}/Vulkan/Render/BufferPool.hpp
+    ${INCROOT}/Vulkan/Render/Camera.hpp
+    ${INCROOT}/Vulkan/Render/Mesh.hpp
+    ${INCROOT}/Vulkan/Render/Mesh.inl
+    ${INCROOT}/Vulkan/Render/Model.hpp
+    ${INCROOT}/Vulkan/Render/Model.inl
+    ${INCROOT}/Vulkan/Render/Technique/Forward.hpp
+    ${INCROOT}/Vulkan/Render/Technique/Technique.hpp
+    ${INCROOT}/Vulkan/Render/View.hpp
+    ${INCROOT}/Vulkan/Render/View.inl
+    ${INCROOT}/Vulkan/Render/Window.hpp
+    ${INCROOT}/Vulkan/Render/Window.inl
+
     ${INCROOT}/Vulkan/Renderer.hpp
     ${INCROOT}/Vulkan/Renderer.inl
-    ${INCROOT}/Vulkan/RenderPass.hpp
-    ${INCROOT}/Vulkan/RenderTechnique.hpp
-    ${INCROOT}/Vulkan/RenderView.hpp
-    ${INCROOT}/Vulkan/RenderView.inl
-    ${INCROOT}/Vulkan/RenderWindow.hpp
-    ${INCROOT}/Vulkan/RenderWindow.inl
-    ${INCROOT}/Vulkan/Semaphore.hpp
-    ${INCROOT}/Vulkan/ShaderModule.hpp
-    ${INCROOT}/Vulkan/Swapchain.hpp
-    ${INCROOT}/Vulkan/Swapchain.inl
     ${INCROOT}/Vulkan/Vulkan.hpp
 )
 source_group("inc" FILES ${INC})
 
-if (NOT ENABLE_CI)
-    find_package(Vulkan)
-    include_directories(${VULKAN_INCLUDE_DIR})
+find_package(Vulkan)
+if (NOT VULKAN_INCLUDE_DIR)
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/vulkan")
+        message(FATAL_ERROR "Can't find vulkan, call `git submodule update --recursive`")
+    endif()
+
+    set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/vulkan/include)
+endif()
+
+include_directories(${VULKAN_INCLUDE_DIR})
+
+# Find assimp
+if(NOT LUG_OS_ANDROID)
+    find_package(Assimp)
+endif()
+
+if (NOT ASSIMP_FOUND)
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/assimp")
+        message(FATAL_ERROR "Can't find assimp, call `git submodule update --recursive`")
+    endif()
+
+    set(ASSIMP_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/assimp/include")
+
+    if (LUG_OS_WINDOWS)
+        set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/windows/${ARCH_DIR}")
+        find_package(Assimp REQUIRED)
+    elseif (LUG_OS_LINUX)
+        set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/linux")
+        find_package(Assimp REQUIRED)
+    elseif (LUG_OS_ANDROID)
+        set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/android")
+        set(ASSIMP_LIBRARY "${ASSIMP_ROOT}/libassimp.so")
+
+        # Install the libassimp.so alongside lug-graphics.so
+        install(FILES ${ASSIMP_LIBRARY}
+            DESTINATION lib${LIB_SUFFIX}
+        )
+
+        set(ASSIMP_LIBRARY_ANDROID "${ASSIMP_ROOT}/libandroid_jniiosystem.a")
+    endif()
+
+    message(STATUS "Found Assimp library: ${ASSIMP_LIBRARY}")
+    message(STATUS "Found Assimp includes: ${ASSIMP_INCLUDE_DIR}")
+endif()
+
+include_directories(${ASSIMP_INCLUDE_DIR})
+
+if(LUG_OS_ANDROID)
+    list(APPEND EXT_LIBRARIES z android ${ASSIMP_LIBRARY_ANDROID})
 endif()
 
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system lug-math
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${ASSIMP_LIBRARY}
 )

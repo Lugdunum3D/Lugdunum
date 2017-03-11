@@ -1,0 +1,38 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 24
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.lugdunum.samples.hello"
+        minSdkVersion 24
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+        ndk {
+            // Specifies the ABI configurations of your native
+            // libraries Gradle should build and package with your APK.
+            abiFilters 'arm64-v8a'
+        }
+        externalNativeBuild {
+            cmake {
+                // see https://github.com/android-ndk/ndk/issues/306
+                arguments '-DANDROID_STL=c++_shared'
+
+                // We still must manually tell cmake we're on Android because it needs to know it before
+                // the project directive, which will call the toolchain
+                arguments '-DANDROID=true'
+            }
+        }
+    }
+    sourceSets{
+        main {
+            jniLibs.srcDirs = [android.ndkDirectory.getPath() + '/sources/lugdunum/lib']
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "../../../hello/CMakeLists.txt"
+        }
+    }
+}

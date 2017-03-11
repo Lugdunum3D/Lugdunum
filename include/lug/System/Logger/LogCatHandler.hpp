@@ -5,6 +5,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 class LUG_SYSTEM_API LogCatHandler : public Handler {
 public:
@@ -25,5 +26,6 @@ private:
     android_LogPriority lugLevelToLogCatPrio(Level level);
 };
 
-} // lug
+} // Logger
 } // System
+} // lug

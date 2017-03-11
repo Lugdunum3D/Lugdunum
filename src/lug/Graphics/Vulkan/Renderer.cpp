@@ -1,10 +1,11 @@
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Graphics.hpp>
-#include <lug/Graphics/Vulkan/Loader.hpp>
+#include <lug/Graphics/Vulkan/API/Loader.hpp>
+#include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
-#include <lug/Graphics/Vulkan/RenderWindow.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/Graphics/Vulkan/Render/Window.hpp>
+#include <lug/System/Logger/Logger.hpp>
 #include <lug/Math/Geometry/Transform.hpp>
 
 namespace lug {
@@ -32,22 +33,25 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
     const char* msg,
     void* /*userData*/) {
 
-    // Convert VkDebugReportFlagsEXT to System::Level
-    System::Level level = System::Level::Off;
+    // Convert VkDebugReportFlagsEXT to System::Logger::Level
+    System::Logger::Level level = System::Logger::Level::Off;
+
     if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
-        level = System::Level::Error;
+        level = System::Logger::Level::Error;
     } else if (flags & VK_DEBUG_REPORT_WARNING_BIT_EXT || flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
-        level = System::Level::Warning;
+        level = System::Logger::Level::Warning;
     } else if (flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
-        level = System::Level::Info;
-    } else {
-        level = System::Level::Debug;
+        level = System::Logger::Level::Info;
+    } else if (flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
+        level = System::Logger::Level::Debug;
     }
 
-    LUG_LOG.log(level, "{}: {}", layerPrefix, msg);
+    LUG_LOG.log(level, "DebugReport: {}: {}", layerPrefix, msg);
 
     return VK_FALSE;
 }
+
+Renderer::Renderer(Graphics& graphics) : ::lug::Graphics::Renderer(graphics) {}
 
 Renderer::~Renderer() {
     destroy();
@@ -65,49 +69,79 @@ void Renderer::destroy() {
         queue.destroy();
     }
 
+    _queues.clear();
+
     _device.destroy();
 
     // Destroy the report callback if necessary
     {
         if (isInstanceExtensionLoaded(VK_EXT_DEBUG_REPORT_EXTENSION_NAME)) {
             auto vkDestroyDebugReportCallbackEXT = _instance.getProcAddr<PFN_vkDestroyDebugReportCallbackEXT>("vkDestroyDebugReportCallbackEXT");
-            vkDestroyDebugReportCallbackEXT(_instance, _debugReportCallback, nullptr);
+
+            if (vkDestroyDebugReportCallbackEXT) {
+                vkDestroyDebugReportCallbackEXT(static_cast<VkInstance>(_instance), _debugReportCallback, nullptr);
+            }
         }
     }
 
     _instance.destroy();
+    _loader.unload();
 }
 
-std::set<Module::Type> Renderer::init(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) {
-    std::set<Module::Type> loadedModules;
+bool Renderer::beginInit(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) {
+    _initInfo = initInfo;
 
-    loadedModules.insert(initInfo.mandatoryModules.begin(), initInfo.mandatoryModules.end());
-    loadedModules.insert(initInfo.optionalModules.begin(), initInfo.optionalModules.end());
-
-    if (!initInstance(appName, appVersion, initInfo, loadedModules)) {
-        LUG_LOG.error("RendererVulkan: Can't load the instance");
-        return {};
+    if (!initInstance(appName, appVersion)) {
+        LUG_LOG.error("RendererVulkan: Can't init the instance");
+        return false;
     }
 
-    if (!initDevice(initInfo, loadedModules)) {
-        LUG_LOG.error("RendererVulkan: Can't load the device");
-        return {};
+    return true;
+}
+
+bool Renderer::finishInit() {
+    // Is it a second time finishInit?
+    if (static_cast<VkDevice>(_device)) {
+        for (auto& queue : _queues) {
+            queue.waitIdle();
+        }
+
+        // Destroy the render part of the window
+        if (_window) {
+            _window->destroyRender();
+        }
+
+        for (auto& queue : _queues) {
+            queue.destroy();
+        }
+
+        _queues.clear();
+
+        _device.destroy();
+    }
+
+    if (!initDevice()) {
+        LUG_LOG.error("RendererVulkan: Can't init the device");
+        return false;
     }
 
 #if defined(LUG_DEBUG)
     LUG_LOG.info("RendererVulkan: Use device {}", _physicalDeviceInfo->properties.deviceName);
 #endif
 
-    return loadedModules;
+    return true;
 }
 
-/**
- * Initialize the Vulkan instance
- * @param  loadedModules Modules to load
- * @return               Wether the instance was loaded successfully or not
- */
-bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo, std::set<Module::Type>& loadedModules) {
+bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
     VkResult result;
+
+    // Load vulkan core functions
+    {
+        if (!_loader.loadCoreFunctions()) {
+            LUG_LOG.error("RendererVulkan: Can't load core vulkan functions");
+            return false;
+        }
+    }
 
     // Load instance properties
     {
@@ -149,11 +183,11 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
     // Create instance
     {
         // Check which layers / extensions to load for modules
-        if (!checkRequirementsInstance(initInfo.mandatoryModules, loadedModules)) {
+        if (!checkRequirementsInstance(_graphics.getLoadedMandatoryModules())) {
             return false;
         }
 
-        checkRequirementsInstance(initInfo.optionalModules, loadedModules);
+        checkRequirementsInstance(_graphics.getLoadedOptionalModules());
 
         // Create the application information for vkCreateInstance
         VkApplicationInfo applicationInfo{
@@ -185,8 +219,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
             return false;
         }
 
-        _instance = Instance(instance);
-        _loader.loadInstanceFunctions(_instance);
+        _instance = API::Instance(instance);
     }
 
     // Create report callback if necessary
@@ -194,18 +227,32 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
         if (isInstanceExtensionLoaded(VK_EXT_DEBUG_REPORT_EXTENSION_NAME)) {
             VkDebugReportCallbackCreateInfoEXT createInfo = {};
             createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-            createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+            // We don't want VK_DEBUG_REPORT_INFORMATION_BIT_EXT and not VK_DEBUG_REPORT_DEBUG_BIT_EXT
+            createInfo.flags = VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT | VK_DEBUG_REPORT_ERROR_BIT_EXT;
             createInfo.pfnCallback = debugReportCallback;
 
             auto vkCreateDebugReportCallbackEXT = _instance.getProcAddr<PFN_vkCreateDebugReportCallbackEXT>("vkCreateDebugReportCallbackEXT");
-            vkCreateDebugReportCallbackEXT(_instance, &createInfo, nullptr, &_debugReportCallback);
+
+            if (vkCreateDebugReportCallbackEXT) {
+                vkCreateDebugReportCallbackEXT(static_cast<VkInstance>(_instance), &createInfo, nullptr, &_debugReportCallback);
+            } else {
+                LUG_LOG.warn("RendererVulkan: Can't load function vkCreateDebugReportCallbackEXT");
+            }
+        }
+    }
+
+    // Load vulkan instance functions
+    {
+        if (!_loader.loadInstanceFunctions(_instance)) {
+            LUG_LOG.error("RendererVulkan: Can't load instance vulkan functions");
+            return false;
         }
     }
 
     // Load physical devices information
     {
         uint32_t physicalDevicesCount = 0;
-        result = vkEnumeratePhysicalDevices(_instance, &physicalDevicesCount, nullptr);
+        result = vkEnumeratePhysicalDevices(static_cast<VkInstance>(_instance), &physicalDevicesCount, nullptr);
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate physical devices: {}", result);
             return false;
@@ -214,7 +261,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
         _physicalDeviceInfos.resize(physicalDevicesCount);
 
         std::vector<VkPhysicalDevice> physicalDevices(physicalDevicesCount);
-        result = vkEnumeratePhysicalDevices(_instance, &physicalDevicesCount, physicalDevices.data());
+        result = vkEnumeratePhysicalDevices(static_cast<VkInstance>(_instance), &physicalDevicesCount, physicalDevices.data());
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate physical devices: {}", result);
             return false;
@@ -255,13 +302,11 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
             }
 
             // Load images formats properties
-            // The VkFormat enum members are from 1 to 184
             {
-                for (uint32_t i = 1; i <= 184; ++i) {
-                    VkFormat format = (VkFormat)i;
-                    vkGetPhysicalDeviceFormatProperties(physicalDevices[idx], format, &_physicalDeviceInfos[idx].formatProperties[format]);
-                }
-
+                #define LUG_LOAD_IMAGE_FORMAT_PROPERTIES(formatEnum) \
+                    vkGetPhysicalDeviceFormatProperties(physicalDevices[idx], formatEnum, &_physicalDeviceInfos[idx].formatProperties[formatEnum]);
+                LUG_VULKAN_FORMAT(LUG_LOAD_IMAGE_FORMAT_PROPERTIES)
+                #undef LUG_LOAD_IMAGE_FORMAT_PROPERTIES
             }
 
             // TODO: Get additional informations (images properties, etc)
@@ -271,53 +316,59 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion, const Rend
     return true;
 }
 
-/**
- * Initialize the Vulkan device
- * @param  loadedModules Modules to load
- * @return               Wether the device was loaded successfully or not
- */
-bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::Type> &loadedModules) {
+bool Renderer::initDevice() {
     VkResult result;
 
-    // Select device
-    {
-        uint8_t matchedDeviceIdx = 0;
-        std::vector<uint8_t> matchedDevicesIdx{};
+    if (_preferencies.device) {
+        _physicalDeviceInfo = _preferencies.device;
 
-        for (uint8_t idx = 0; idx < _physicalDeviceInfos.size(); ++idx) {
-            std::set<Module::Type> tmpLoadedModules;
-            if (!checkRequirementsDevice(_physicalDeviceInfos[idx], initInfo.mandatoryModules, tmpLoadedModules, false)) {
-                continue;
+        // Set the loaded informations of the device
+        {
+            if (!checkRequirementsDevice(*_physicalDeviceInfo, _graphics.getLoadedMandatoryModules(), true, false)) {
+                return false;
             }
 
-            checkRequirementsDevice(_physicalDeviceInfos[idx], initInfo.optionalModules, tmpLoadedModules, false);
-
-            matchedDevicesIdx.push_back(idx);
-
+            checkRequirementsDevice(*_physicalDeviceInfo, _graphics.getLoadedOptionalModules(), true, false);
         }
+    } else {
+        // Select device
+        {
+            uint8_t matchedDeviceIdx = 0;
+            std::vector<uint8_t> matchedDevicesIdx{};
 
-        if (matchedDevicesIdx.size() == 0) {
-            LUG_LOG.error("RendererVulkan: Can't find a compatible device");
-            return false;
-        }
+            for (uint8_t idx = 0; idx < _physicalDeviceInfos.size(); ++idx) {
+                if (!checkRequirementsDevice(_physicalDeviceInfos[idx], _graphics.getLoadedMandatoryModules(), false, false)) {
+                    continue;
+                }
 
-        // TODO: Add score
-        matchedDeviceIdx = matchedDevicesIdx[0];
-        for (uint8_t idx : matchedDevicesIdx) {
-            lug::System::Logger::logger.info("Device {} out of {} Mode: {}", idx + 1, _physicalDeviceInfos.size(), (int)_physicalDeviceInfos[idx].properties.deviceType);
-            if (_physicalDeviceInfos[idx].properties.deviceType == ((initInfo.useDiscreteGPU == true) ? (VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) : (VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU))) {
-                matchedDeviceIdx = idx;
-                break;
+                checkRequirementsDevice(_physicalDeviceInfos[idx], _graphics.getLoadedOptionalModules(), false, false);
+
+                matchedDevicesIdx.push_back(idx);
+
             }
+
+            if (matchedDevicesIdx.size() == 0) {
+                LUG_LOG.error("RendererVulkan: Can't find a compatible device");
+                return false;
+            }
+
+            // TODO: Add score
+            matchedDeviceIdx = matchedDevicesIdx[0];
+            for (uint8_t idx : matchedDevicesIdx) {
+                if (_physicalDeviceInfos[idx].properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
+                    matchedDeviceIdx = idx;
+                    break;
+                }
+            }
+
+            _physicalDeviceInfo = &(_physicalDeviceInfos[matchedDeviceIdx]);
         }
 
-        _physicalDeviceInfo = &(_physicalDeviceInfos[matchedDeviceIdx]);
-    }
-
-    // Set the loaded informations of the matched device
-    {
-        checkRequirementsDevice(*_physicalDeviceInfo, initInfo.mandatoryModules, loadedModules, true);
-        checkRequirementsDevice(*_physicalDeviceInfo, initInfo.optionalModules, loadedModules, true);
+        // Set the loaded informations of the matched device
+        {
+            checkRequirementsDevice(*_physicalDeviceInfo, _graphics.getLoadedMandatoryModules(), true, true);
+            checkRequirementsDevice(*_physicalDeviceInfo, _graphics.getLoadedOptionalModules(), true, true);
+        }
     }
 
     // Create device
@@ -358,8 +409,15 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::T
             return false;
         }
 
-        _device = Device(device, _physicalDeviceInfo);
-        _loader.loadDeviceFunctions(_device);
+        _device = API::Device(device, _physicalDeviceInfo);
+    }
+
+    // Load vulkan device functions
+    {
+        if (!_loader.loadDeviceFunctions(_device)) {
+            LUG_LOG.error("RendererVulkan: Can't load device vulkan functions");
+            return false;
+        }
     }
 
     // Create queues
@@ -369,9 +427,9 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::T
         uint8_t i = 0;
         for (auto idx : _loadedQueueFamiliesIdx) {
             VkQueue queue;
-            vkGetDeviceQueue(_device, idx, 0, &queue);
+            vkGetDeviceQueue(static_cast<VkDevice>(_device), idx, 0, &queue);
 
-            _queues[i] = Queue(idx, queue, _physicalDeviceInfo->queueFamilies[idx].queueFlags);
+            _queues[i] = API::Queue(idx, queue, _physicalDeviceInfo->queueFamilies[idx].queueFlags);
 
             ++i;
         }
@@ -388,19 +446,19 @@ bool Renderer::initDevice(const Renderer::InitInfo& initInfo, std::set<Module::T
             };
 
             VkCommandPool commandPool{VK_NULL_HANDLE};
-            result = vkCreateCommandPool(_device, &createInfo, nullptr, &commandPool);
+            result = vkCreateCommandPool(static_cast<VkDevice>(_device), &createInfo, nullptr, &commandPool);
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create a command pool: {}", result);
                 return false;
             }
 
-            queue.setCommandPool(CommandPool(commandPool, &_device, &queue));
+            queue.setCommandPool(API::CommandPool(commandPool, &_device, &queue));
         }
     }
     return true;
 }
 
-bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules) {
+bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck) {
     bool requirementsCheck = true;
 
     for (const auto moduleType : modulesToCheck) {
@@ -451,7 +509,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
             _loadedInstanceLayers.insert(_loadedInstanceLayers.end(), layers.begin(), layers.end());
             _loadedInstanceExtensions.insert(_loadedInstanceExtensions.end(), extensions.begin(), extensions.end());
         } else {
-            loadedModules.erase(moduleType);
+            _graphics.unsupportedModule(moduleType);
         }
 
         requirementsCheck = requirementsCheck && moduleRequirementsCheck;
@@ -460,7 +518,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
     return requirementsCheck;
 }
 
-bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool finalization) {
+bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, bool finalization, bool quiet) {
     bool requirementsCheck = true;
 
     for (const auto moduleType : modulesToCheck) {
@@ -477,7 +535,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
             const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(physicalDeviceInfo, requirements.mandatoryDeviceExtensions, extensions);
             moduleRequirementsCheck = moduleRequirementsCheck && extensionsNotFound.size() == 0;
 
-            if (!finalization) {
+            if (!quiet) {
                 for (const char* const extensionName : extensionsNotFound) {
                     LUG_LOG.warn("Device {}: Can't load mandatory extension '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, extensionName, moduleType);
                 }
@@ -487,7 +545,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
         {
             const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(physicalDeviceInfo, requirements.optionalDeviceExtensions, extensions);
 
-            if (!finalization) {
+            if (!quiet) {
                 for (const char* extensionName : extensionsNotFound) {
                     LUG_LOG.warn("Device {}: Can't load optional extension '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, extensionName, moduleType);
                 }
@@ -495,33 +553,33 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
         }
 
         // TODO: Log error
-        #define LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES(featureName)                                                                            \
-            {                                                                                                                                               \
-                if (requirements.mandatoryFeatures.featureName == VK_TRUE) {                                                                                \
-                    if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                               \
-                        features.featureName = VK_TRUE;                                                                                                     \
-                    } else {                                                                                                                                \
-                        if (!finalization) {                                                                                                                \
-                            LUG_LOG.warn("Device {}: Can't load mandatory feature '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, #featureName, moduleType); \
-                        }                                                                                                                                   \
-                                                                                                                                                            \
-                        moduleRequirementsCheck = false;                                                                                                    \
-                    }                                                                                                                                       \
-                }                                                                                                                                           \
+        #define LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES(featureName)                                                                                                \
+            {                                                                                                                                                                   \
+                if (requirements.mandatoryFeatures.featureName == VK_TRUE) {                                                                                                    \
+                    if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                                                   \
+                        features.featureName = VK_TRUE;                                                                                                                         \
+                    } else {                                                                                                                                                    \
+                        if (!quiet) {                                                                                                                                           \
+                            LUG_LOG.warn("Device {}: Can't load mandatory feature '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, #featureName, moduleType);   \
+                        }                                                                                                                                                       \
+                                                                                                                                                                                \
+                        moduleRequirementsCheck = false;                                                                                                                        \
+                    }                                                                                                                                                           \
+                }                                                                                                                                                               \
             }
         LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES);
         #undef LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES
 
         // TODO: Log error
-        #define LUG_CHECK_VULKAN_PHYSICAL_DEVICE_OPTIONNAL_FEATURES(featureName)                                                                        \
-            {                                                                                                                                           \
-                if (requirements.optionalFeatures.featureName == VK_TRUE) {                                                                             \
-                    if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                           \
-                        features.featureName = VK_TRUE;                                                                                                 \
-                    } else if (!finalization) {                                                                                                         \
-                        LUG_LOG.warn("Device {}: Can't load optional feature '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, #featureName, moduleType); \
-                    }                                                                                                                                   \
-                }                                                                                                                                       \
+        #define LUG_CHECK_VULKAN_PHYSICAL_DEVICE_OPTIONNAL_FEATURES(featureName)                                                                                            \
+            {                                                                                                                                                               \
+                if (requirements.optionalFeatures.featureName == VK_TRUE) {                                                                                                 \
+                    if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                                               \
+                        features.featureName = VK_TRUE;                                                                                                                     \
+                    } else if (!quiet) {                                                                                                                                    \
+                        LUG_LOG.warn("Device {}: Can't load optional feature '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, #featureName, moduleType);    \
+                    }                                                                                                                                                       \
+                }                                                                                                                                                           \
             }
         LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_CHECK_VULKAN_PHYSICAL_DEVICE_OPTIONNAL_FEATURES);
         #undef LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES
@@ -531,7 +589,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
             if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
                 queueFamiliesIdx.insert(idx);
             } else {
-                if (!finalization) {
+                if (!quiet) {
                     LUG_LOG.warn("Device {}: Can't find mandatory queue type for module '{}'", physicalDeviceInfo.properties.deviceName, moduleType);
                 }
 
@@ -543,7 +601,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
             int8_t idx = 0;
             if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
                 queueFamiliesIdx.insert(idx);
-            } else if (!finalization) {
+            } else if (!quiet) {
                 LUG_LOG.warn("Device {}: Can't find optional queue type for module '{}'", physicalDeviceInfo.properties.deviceName, moduleType);
             }
         }
@@ -558,7 +616,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 
                 _loadedQueueFamiliesIdx.insert(queueFamiliesIdx.begin(), queueFamiliesIdx.end());
             } else {
-                loadedModules.erase(moduleType);
+                _graphics.unsupportedModule(moduleType);
             }
         }
 
@@ -598,12 +656,19 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
     return extensionsNotFound;
 }
 
-::lug::Graphics::RenderWindow* Renderer::createWindow(RenderWindow::InitInfo& initInfo) {
-    _window = RenderWindow::create(*this, initInfo);
+::lug::Graphics::Render::Window* Renderer::createWindow(Render::Window::InitInfo& initInfo) {
+    if (_window) {
+        if (!_window->initRender()) {
+            _window.reset();
+        }
+    } else {
+        _window = Render::Window::create(*this, initInfo);
+    }
+
     return _window.get();
 }
 
-::lug::Graphics::RenderWindow* Renderer::getWindow() {
+::lug::Graphics::Render::Window* Renderer::getWindow() {
     return _window.get();
 }
 

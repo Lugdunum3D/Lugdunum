@@ -32,8 +32,10 @@ Time Clock::getElapsedTime() const {
     return Time(Time::getCurrentTime().getMicroseconds() - _startTime.getMicroseconds());
 }
 
-void Clock::reset() {
+Time Clock::reset() {
+    auto old = Time(Time::getCurrentTime().getMicroseconds() - _startTime.getMicroseconds());
     _startTime = Time::getCurrentTime();
+    return old;
 }
 
 } // System

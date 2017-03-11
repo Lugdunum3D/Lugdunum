@@ -8,6 +8,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 /**
  * \cond HIDDEN_SYMBOLS
@@ -96,5 +97,6 @@ private:
     std::vector<priv::Token> _formatChain;
 };
 
-} // lug
+} // Logger
 } // System
+} // lug

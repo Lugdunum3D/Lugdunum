@@ -4,16 +4,25 @@ namespace lug {
 namespace Window {
 namespace priv {
 
-std::queue<lug::Window::Event> lug::Window::priv::WindowImpl::events;
-AInputQueue *lug::Window::priv::WindowImpl::inputQueue = nullptr;
+std::queue<lug::Window::Event> WindowImpl::events;
+AInputQueue* WindowImpl::inputQueue = nullptr;
+ANativeWindow* WindowImpl::nativeWindow = nullptr;
+ANativeActivity* WindowImpl::activity = nullptr;
 
-WindowImpl::WindowImpl(Window*) {}
+WindowImpl::WindowImpl(Window* win): _parent{win} {}
 
-bool WindowImpl::init(const Window::InitInfo& initInfo) {
+bool WindowImpl::init(const Window::InitInfo&) {
+    _parent->_mode.width = ANativeWindow_getWidth(nativeWindow);
+    _parent->_mode.height = ANativeWindow_getHeight(nativeWindow);
+
     return true;
 }
 
 void WindowImpl::close() {}
+
+ANativeWindow* WindowImpl::getWindow() {
+    return nativeWindow;
+}
 
 bool WindowImpl::pollEvent(lug::Window::Event& event) {
 

@@ -1,4 +1,4 @@
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
@@ -6,6 +6,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 constexpr const char* loggerName = "MyTestLogger";
 constexpr const char* handlerName = "MyTestHandler";
@@ -166,7 +167,7 @@ TEST(Logger, Handlers) {
 
     std::unique_ptr<MockLogger> logger = std::make_unique<MockLogger>(loggerName);
 
-    ASSERT_EQ(logger->getHandlers().size(), 0);
+    ASSERT_EQ(logger->getHandlers().size(), size_t(0));
 
     MockHandler* handler = makeHandler<MockHandler>(handlerName);
 
@@ -197,7 +198,7 @@ namespace OstreamCustomClass {
 class Custom {
 public:
     std::ostream& operator<<(std::ostream& out) const;
-    friend std::ostream& operator<<(std::ostream& out, const Custom& b) {
+    friend std::ostream& operator<<(std::ostream& out, const Custom&) {
         return out << "Test";
     }
 };
@@ -264,10 +265,16 @@ namespace ExceptionHandler {
 
 class Custom {
 public:
+    bool mustThrow;
+
     std::ostream& operator<<(std::ostream& out) const;
-    friend std::ostream& operator<<(std::ostream& out, const Custom& b) {
-        throw std::runtime_error("Uncaught");
-        return out;
+
+    friend std::ostream& operator<<(std::ostream& out, const Custom& custom) {
+        if (custom.mustThrow) {
+            throw std::runtime_error("Uncaught");
+        } else {
+            return out;
+        }
     }
 };
 
@@ -275,7 +282,7 @@ TEST(Logger, ExceptionHandler) {
 
     Logger* logger = makeLogger(loggerName);
     MockHandler* handler = makeHandler<MockHandler>(handlerName);
-    Custom custom;
+    Custom custom{true};
 
     EXPECT_CALL(*handler, handle(Field(&priv::Message::raw, Property(&fmt::MemoryWriter::c_str, HasSubstr("Uncaught"))))).Times(1);
 
@@ -304,6 +311,7 @@ TEST(Logger, LogsExceptionWhenParseFails) {
 } // namespace ExceptionHandler
 
 
+}
 }
 }
 

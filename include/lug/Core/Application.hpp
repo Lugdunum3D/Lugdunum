@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <lug/Core/Export.hpp>
 #include <lug/Graphics/Graphics.hpp>
-#include <lug/Graphics/RenderWindow.hpp>
+#include <lug/Graphics/Render/Window.hpp>
 #include <lug/System/Time.hpp>
 
 namespace lug {
@@ -66,25 +66,25 @@ public:
     /**
      * @brief      Gets the Window attached to the Application.
      *
-     * @return     The lug::Graphics::RenderWindow.
+     * @return     The lug::Graphics::Render::Window.
      */
-    lug::Graphics::RenderWindow* getWindow();
-    const lug::Graphics::RenderWindow* getWindow() const;
+    lug::Graphics::Render::Window* getWindow();
+    const lug::Graphics::Render::Window* getWindow() const;
 
     /**
      * @brief      Sets the render window information.
      *
      * @param      initInfo  The initialize information.
      */
-    void setRenderWindowInfo(lug::Graphics::RenderWindow::InitInfo& initInfo);
+    void setRenderWindowInfo(lug::Graphics::Render::Window::InitInfo& initInfo);
 
     /**
      * @brief      Gets the render window information.
      *
      * @return     The render window information.
      */
-    const lug::Graphics::RenderWindow::InitInfo& getRenderWindowInfo() const;
-    lug::Graphics::RenderWindow::InitInfo& getRenderWindowInfo();
+    const lug::Graphics::Render::Window::InitInfo& getRenderWindowInfo() const;
+    lug::Graphics::Render::Window::InitInfo& getRenderWindowInfo();
 
     /**
      * @brief      Sets the graphics information.
@@ -113,7 +113,30 @@ public:
      *
      * @return     Wether the application was successfully initialized.
      */
-    virtual bool init(int argc, char* argv[]);
+    bool init(int argc, char* argv[]);
+
+    /**
+     * @brief      Begin the initialisation of the application with the informations filled in the
+     *             lug::Graphics::Graphics::InitInfo structure.
+     *
+     *             The lug::Graphics::Graphics::InitInfo structure can be modified by calling #getGraphicsInfo or #setGraphicsInfo. @n
+     *
+     * @param[in]  argc  The argc argument as received from the main function.
+     * @param[in]  argv  The argv argument as received from the main function.
+     *
+     * @return     Wether the application was successfully initialized.
+     */
+    bool beginInit(int argc, char* argv[]);
+
+    /**
+     * @brief      Finish the initialisation of the application with the informations filled in the
+     *             lug::Graphics::RenderWindow::InitInfo structure.
+     *
+     *             The lug::Graphics::RenderWindow::InitInfo structure can be modified by calling #getRenderWindowInfo or #setRenderWindowInfo.
+     *
+     * @return     Wether the application was successfully initialized.
+     */
+    bool finishInit();
 
     /**
      * @brief      Run the application.
@@ -159,15 +182,15 @@ private:
     lug::Graphics::Graphics::InitInfo _graphicsInitInfo{
         lug::Graphics::Renderer::Type::Vulkan,      // type
         {                                           // rendererInitInfo
-            {                                       // mandatoryModules
-                lug::Graphics::Module::Type::Core
-            },
-            {},                                     // optionalModules
-            true                                    // use dedicaced GPU
-        }
+            "shaders/"                              // shaders root
+        },
+        {                                           // mandatoryModules
+            lug::Graphics::Module::Type::Core
+        },
+        {},                                         // optionalModules
     };
 
-    lug::Graphics::RenderWindow::InitInfo _renderWindowInitInfo{
+    lug::Graphics::Render::Window::InitInfo _renderWindowInitInfo{
         {                               // windowInitInfo
             800,                        // width
             600,                        // height
@@ -178,7 +201,7 @@ private:
         {}                              // renderViewsInitInfo
     };
 
-    lug::Graphics::RenderWindow* _window{nullptr};
+    lug::Graphics::Render::Window* _window{nullptr};
 
 protected:
     lug::Graphics::Graphics _graphics;

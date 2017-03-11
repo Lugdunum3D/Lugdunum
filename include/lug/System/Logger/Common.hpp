@@ -6,23 +6,13 @@
 #if defined(False)
     #undef False
 
-    #if defined(LUG_FMT_EXTERNAL)
-        #include <fmt/format.h>
-        #include <fmt/ostream.h>
-    #else
-        #include <lug/Ext/fmt/format.h>
-        #include <lug/Ext/fmt/ostream.h>
-    #endif
+    #include <fmt/format.h>
+    #include <fmt/ostream.h>
 
     #define False 0
 #else
-    #if defined(LUG_FMT_EXTERNAL)
-        #include <fmt/format.h>
-        #include <fmt/ostream.h>
-    #else
-        #include <lug/Ext/fmt/format.h>
-        #include <lug/Ext/fmt/ostream.h>
-    #endif
+    #include <fmt/format.h>
+    #include <fmt/ostream.h>
 #endif
 
 #define LUG_LOG_LEVELS(PROCESS)     \
@@ -36,6 +26,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 #define LUG_LOG_ENUM(CHANNEL) CHANNEL,
 enum class Level : uint8_t {
@@ -45,5 +36,6 @@ enum class Level : uint8_t {
 
 LUG_SYSTEM_API std::ostream& operator<<(std::ostream& os, Level level);
 
+} // Logger
 } // System
 } // lug

@@ -13,6 +13,10 @@ template <
     class MemoryMarkingPolicy
 >
 void* Arena<Allocator, ThreadPolicy, BoundsCheckingPolicy, MemoryMarkingPolicy>::allocate(size_t size, size_t alignment, size_t offset, const char* file, size_t line) {
+    // TODO: Use file and line
+    (void)(file);
+    (void)(line);
+
     const size_t newSize = size + BoundsCheckingPolicy::SizeFront + BoundsCheckingPolicy::SizeBack;
 
     _threadGuard.enter();

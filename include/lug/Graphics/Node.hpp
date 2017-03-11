@@ -47,11 +47,14 @@ public:
 
     void translate(const Math::Vec3f& direction, TransformSpace space = TransformSpace::Local);
     void rotate(float angle, const Math::Vec3f& axis, TransformSpace space = TransformSpace::Local);
+    void rotate(const Math::Quatf& quat, TransformSpace space = TransformSpace::Local);
     void scale(const Math::Vec3f& scale);
 
-    // TODO: Look at
-    // void lookAt(const Math::Vec3f& pos, const Math::Vec3f& target, TransformSpace space = TransformSpace::Local);
-    // TODO: set position / rotate / scale
+    void setPosition(const Math::Vec3f& position, TransformSpace space = TransformSpace::Local);
+    void setRotation(const Math::Quatf& rotation, TransformSpace space = TransformSpace::Local);
+    void setDirection(const Math::Vec3f& spaceTargetDirection, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space = TransformSpace::Local);
+
+    void lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space = TransformSpace::Local);
 
     virtual void needUpdate();
 

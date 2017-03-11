@@ -1,7 +1,7 @@
 #include <chrono>
 #include <lug/Core/Application.hpp>
 #include <lug/System/Clock.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Core {
@@ -9,15 +9,28 @@ namespace Core {
 Application::Application(const Application::Info& info) : _info{info}, _graphics{info.name, info.version} {}
 
 bool Application::init(int argc, char* argv[]) {
+    return beginInit(argc, argv) && finishInit();
+}
+
+bool Application::beginInit(int argc, char* argv[]) {
     // TODO: Use argc and argv to parse the command line
     (void)(argc);
     (void)(argv);
 
-    if (!_graphics.init(_graphicsInitInfo)) {
+    if (!_graphics.beginInit(_graphicsInitInfo)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Application::finishInit() {
+    if (!_graphics.finishInit()) {
         return false;
     }
 
     _window = _graphics.getRenderer()->createWindow(_renderWindowInitInfo);
+
     if (!_window) {
         return false;
     }
@@ -30,6 +43,8 @@ bool Application::run() {
     uint32_t frames = 0;
     System::Clock clock;
     while (!_closed && _window && _window->isOpen()) {
+        const auto elapsedTime = clock.reset();
+
         // Poll events
         {
             lug::Window::Event event;
@@ -39,17 +54,17 @@ bool Application::run() {
         }
 
         beginFrame();
-        onFrame(clock.getElapsedTime());
+        onFrame(elapsedTime);
         endFrame();
 
-        elapsed += clock.getElapsedTime().getSeconds();
+        elapsed += elapsedTime.getSeconds<float>();
         frames++;
+
         if (elapsed >= 1.0f) {
-            LUG_LOG.info("FPS: {}", frames);
+            LUG_LOG.info("FPS: {}", frames / elapsed);
             frames = 0;
             elapsed = 0;
         }
-        clock.reset();
     }
 
     return true;

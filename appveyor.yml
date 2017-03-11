@@ -188,7 +188,7 @@ configuration:
 
 build:
   # parallel: true                  # enable MSBuild parallel builds
-  project: Lugdunum.sln      # path to Visual Studio solution or project
+  project: Lugdunum.sln             # path to Visual Studio solution or project
   # publish_wap: true               # package Web Application Projects (WAP) for Web Deploy
   # publish_wap_xcopy: true         # package Web Application Projects (WAP) for XCopy deployment
   # publish_azure: true             # package Azure Cloud Service projects and push to artifacts
@@ -219,7 +219,7 @@ build_script:
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DENABLE_TEST=TRUE -DTEST_OUTPUT="$env:TEST_OUTPUT" -DENABLE_CI=true ..
+    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DBUILD_TESTS=TRUE -DTEST_OUTPUT="$env:TEST_OUTPUT" ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
@@ -231,8 +231,6 @@ build_script:
 # scripts to run after build
 after_build:
 - ps: |
-    Copy-Item .\lib\googletest\googlemock\gtest\$env:CONFIGURATION\gtest.dll .\test\$env:CONFIGURATION\
-    Copy-Item .\lib\googletest\googlemock\$env:CONFIGURATION\gmock.dll .\test\$env:CONFIGURATION\
     Copy-Item .\lib\$env:CONFIGURATION\*.dll .\test\$env:CONFIGURATION\
 
 test_script:

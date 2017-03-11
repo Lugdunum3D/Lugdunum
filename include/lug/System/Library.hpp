@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lug/System/Export.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
     #ifndef WIN32_LEAN_AND_MEAN

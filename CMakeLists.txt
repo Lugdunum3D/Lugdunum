@@ -1,13 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
-# define a macro that helps defining an option
-macro(lug_set_option var default type docstring)
-    if(NOT DEFINED ${var})
-        set(${var} ${default})
-    endif()
-
-    set(${var} ${${var}} CACHE ${type} ${docstring} FORCE)
-endmacro()
+# include the macros files
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Macros.cmake)
 
 if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "In-source builds not allowed. Please make a new directory (called a build directory) and run CMake from there. You may need to remove CMakeCache.txt.")
@@ -17,38 +11,8 @@ endif()
 lug_set_option(CMAKE_BUILD_TYPE Release STRING "Choose the type of build (Debug or Release)")
 
 if(ANDROID)
-    set(ANDROID_ABI arm64-v8a)
-    message(STATUS "ANDROID_ABI : ${ANDROID_ABI}")
-
-    set(ANDROID_TOOLCHAIN clang)
-    message(STATUS "ANDROID_TOOLCHAIN : ${ANDROID_TOOLCHAIN}")
-
-    lug_set_option(ANDROID_PLATFORM android-24 STRING "Target specific android version target (default : android-24)")
-    if(NOT ANDROID_PLATFORM MATCHES android-2[3-9])
-        message(FATAL_ERROR "Invalid android version target : ${ANDROID_PLATFORM}")
-    endif()
-    message(STATUS "ANDROID_PLATFORM : ${ANDROID_PLATFORM}")
-
-    if(ANDROID_PLATFORM MATCHES android-23)
-        message(STATUS "target android-23, forcing static lib")
-        set(BUILD_SHARED_LIBS false)
-    endif()
-    lug_set_option(ANDROID_STL c++_shared STRING "Choose which Android STL to use (default : c++_shared)")
-    if(NOT ANDROID_STL STREQUAL c++_static AND NOT ANDROID_STL STREQUAL c++_shared)
-        message(FATAL_ERROR "Invalid STL : ${ANDROID_STL}")
-    endif()
-
-    if(ANDROID_PLATFORM STREQUAL android-23 AND ANDROID_STL STREQUAL c++_shared)
-        message(FATAL_ERROR "android-23 and c++_shared are mutually exclusive")
-    endif()
-    message(STATUS "ANDROID_STL : ${ANDROID_STL}")
-
-    set(ANDROID_CPP_FEATURES "rtti exceptions")
-    message(STATUS "ANDROID_CPP_FEATURES : ${ANDROID_CPP_FEATURES}")
-
-    set(LIB_SUFFIX "/${ANDROID_ABI}")
+    populate_android_infos()
 endif()
-
 
 # project name
 project(Lugdunum C CXX)
@@ -59,24 +23,40 @@ set(VERSION_MINOR 1)
 set(VERSION_PATCH 0)
 mark_as_advanced(VERSION_MAJOR VERSION_MINOR VERSION_PATCH)
 
-# include the configuration file
+# use cmake modules
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+
+# include the configuration files
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake)
+
+if(LUG_OS_ANDROID)
+    set(CMAKE_INSTALL_PREFIX "${ANDROID_NDK}/sources/lugdunum")
+endif()
 
 # add the include path
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 lug_set_option(BUILD_SHARED_LIBS TRUE BOOL "TRUE to build Lugdunum as shared libraries, FALSE to build it as static libraries")
-lug_set_option(ENABLE_TEST FALSE BOOL "TRUE to enable unit tests, FALSE to disable unit tests")
-lug_set_option(ENABLE_CI FALSE BOOL "TRUE to enable CI platform includes")
+lug_set_option(BUILD_TESTS FALSE BOOL "TRUE to enable unit tests, FALSE to disable unit tests")
 lug_set_option(BUILD_DOCUMENTATION FALSE BOOL "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
-
-if(NOT BUILD_SHARED_LIBS)
-    add_definitions(-DLUG_STATIC)
-endif()
 
 # enable project folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
+
+# find fmt
+find_package(Fmt)
+
+if (NOT FMT_INCLUDE_DIR)
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/fmt")
+        message(FATAL_ERROR "Can't find fmt, call `git submodule update --recursive`")
+    endif()
+
+    set(FMT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/fmt/include)
+    message(STATUS "Found Fmt: ${FMT_INCLUDE_DIR}")
+endif()
+
+include_directories(${FMT_INCLUDE_DIR})
 
 # add the subdirectories
 add_subdirectory(src/lug/)
@@ -98,15 +78,9 @@ install(DIRECTORY resources
 )
 
 # unit test
-if(ENABLE_TEST)
+if(BUILD_TESTS)
     # Note: enable_testing() MUST be on the top level CMakeLists.txt
     enable_testing()
-
-    add_definitions(-DGTEST_CREATE_SHARED_LIBRARY=1)
-
-    set(BUILD_GMOCK ON)
-    add_subdirectory(lib/googletest)
-
     add_subdirectory(test/)
 endif()
 

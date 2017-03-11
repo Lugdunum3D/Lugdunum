@@ -3,6 +3,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 FileHandler::FileHandler(const std::string& name, const std::string& filename, bool truncate) : Handler(name) {
     std::ios_base::openmode mode = std::ofstream::out;
@@ -31,5 +32,6 @@ void FileHandler::flush() {
     _ofs.flush();
 }
 
-} // namespace lug
-} // namespace System
+} // Logger
+} // System
+} // lug

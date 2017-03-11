@@ -1,10 +1,9 @@
 #pragma once
 
 #include <lug/Core/Application.hpp>
-#include <lug/Graphics/Scene.hpp>
-#include <lug/Graphics/Camera.hpp>
+#include <lug/Graphics/Scene/Scene.hpp>
 
-class Application : public lug::Core::Application {
+class Application : public ::lug::Core::Application {
 public:
     Application();
 
@@ -16,19 +15,16 @@ public:
 
     ~Application() override final;
 
-    bool init(int argc, char* argv[]) override final;
+    bool init(int argc, char* argv[]);
 
     void onEvent(const lug::Window::Event& event) override final;
     void onFrame(const lug::System::Time& elapsedTime) override final;
 
 private:
-    std::unique_ptr<lug::Graphics::Scene> _scene;
+    std::unique_ptr<lug::Graphics::Scene::Scene> _scene;
 
     // Temporary store mesh because we don't have resource manager yet
-    std::unique_ptr<lug::Graphics::Mesh> _cube;
-    std::unique_ptr<lug::Graphics::Mesh> _plane;
+    std::unique_ptr<lug::Graphics::Render::Model> _model;
 
-    std::unique_ptr<lug::Graphics::Model> _model;
-
-    lug::Graphics::SceneNode* _cubeNode;
+    float _rotation{0.0f};
 };

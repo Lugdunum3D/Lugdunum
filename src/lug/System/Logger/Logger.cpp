@@ -1,10 +1,9 @@
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 #include <lug/System/Logger/Handler.hpp>
 
 namespace lug {
 namespace System {
-
-Logger Logger::logger("internal");
+namespace Logger {
 
 #define LUG_LOG_ENUM(CHANNEL) case Level::CHANNEL: return os << #CHANNEL;
 std::ostream& operator<<(std::ostream& os, Level level) {
@@ -52,5 +51,11 @@ void Logger::flush() {
     }
 }
 
+Logger& Logger::getInternalLogger() {
+    static Logger logger("internal");
+    return logger;
+}
+
+} // namespace Logger
 } // namespace System
 } // namespace lug

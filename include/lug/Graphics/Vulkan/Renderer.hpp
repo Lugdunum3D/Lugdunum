@@ -6,16 +6,16 @@
 #include <unordered_map>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Renderer.hpp>
-#include <lug/Graphics/Vulkan/Buffer.hpp>
-#include <lug/Graphics/Vulkan/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/Device.hpp>
-#include <lug/Graphics/Vulkan/DeviceMemory.hpp>
-#include <lug/Graphics/Vulkan/Instance.hpp>
-#include <lug/Graphics/Vulkan/Loader.hpp>
-#include <lug/Graphics/Vulkan/Mesh.hpp>
-#include <lug/Graphics/Vulkan/Pipeline.hpp>
-#include <lug/Graphics/Vulkan/Queue.hpp>
-#include <lug/Graphics/Vulkan/RenderWindow.hpp>
+#include <lug/Graphics/Vulkan/API/Buffer.hpp>
+#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
+#include <lug/Graphics/Vulkan/API/Device.hpp>
+#include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/API/Instance.hpp>
+#include <lug/Graphics/Vulkan/API/Loader.hpp>
+#include <lug/Graphics/Vulkan/API/Pipeline.hpp>
+#include <lug/Graphics/Vulkan/API/Queue.hpp>
+#include <lug/Graphics/Vulkan/Render/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -44,8 +44,18 @@ public:
         // TODO: Better support for queues
     };
 
+    struct Preferencies {
+        PhysicalDeviceInfo* device;
+
+        struct Swapchain {
+            std::vector<VkPresentModeKHR> presentModes;                 // By order of preferency
+            std::vector<VkFormat> formats;                              // By order of preferency
+            std::vector<VkCompositeAlphaFlagBitsKHR> compositeAlphas;   // By order of preferency
+        } swapchain;
+    };
+
 public:
-    Renderer() = default;
+    explicit Renderer(Graphics& graphics);
 
     Renderer(const Renderer&) = delete;
     Renderer(Renderer&&) = delete;
@@ -55,21 +65,22 @@ public:
 
     ~Renderer();
 
-    std::set<Module::Type> init(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) override final;
+    bool beginInit(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) override final;
+    bool finishInit() override final;
 
     bool isInstanceLayerLoaded(const char* name) const;
     bool isInstanceExtensionLoaded(const char* name) const;
     bool isDeviceExtensionLoaded(const char* name) const;
 
-    ::lug::Graphics::RenderWindow* createWindow(RenderWindow::InitInfo& initInfo) override final;
-    ::lug::Graphics::RenderWindow* getWindow() override final;
+    ::lug::Graphics::Render::Window* createWindow(Render::Window::InitInfo& initInfo) override final;
+    ::lug::Graphics::Render::Window* getWindow() override final;
 
-    const Instance& getInstance() const;
-    const Device& getDevice() const;
-    std::vector<Queue>& getQueues();
-    const std::vector<Queue>& getQueues() const;
-    Queue* getQueue(VkQueueFlags flags, bool supportPresentation);
-    const Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
+    const API::Instance& getInstance() const;
+    const API::Device& getDevice() const;
+    std::vector<API::Queue>& getQueues();
+    const std::vector<API::Queue>& getQueues() const;
+    API::Queue* getQueue(VkQueueFlags flags, bool supportPresentation);
+    const API::Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
 
     bool isSameQueue(VkQueueFlags flagsA, bool supportPresentationA, VkQueueFlags flagsB, bool supportPresentationB) const;
 
@@ -79,17 +90,23 @@ public:
     PhysicalDeviceInfo* getPhysicalDeviceInfo();
     const PhysicalDeviceInfo* getPhysicalDeviceInfo() const;
 
+    std::vector<PhysicalDeviceInfo>& getPhysicalDeviceInfos();
+    const std::vector<PhysicalDeviceInfo>& getPhysicalDeviceInfos() const;
+
+    Preferencies& getPreferencies();
+    const Preferencies& getPreferencies() const;
+
     void destroy();
 
     bool beginFrame() override final;
     bool endFrame() override final;
 
 private:
-    bool initInstance(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo, std::set<Module::Type> &loadedModules);
-    bool initDevice(const Renderer::InitInfo& initInfo, std::set<Module::Type> &loadedModules);
+    bool initInstance(const char* appName, uint32_t appVersion);
+    bool initDevice();
 
-    bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules);
-    bool checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, std::set<Module::Type> &loadedModules, bool finalization);
+    bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck);
+    bool checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, bool finalization, bool quiet);
 
     template <typename Info>
     std::vector<const char*> checkRequirementsLayers(const Info& info, const std::vector<const char*>& layers, std::vector<const char*>& layersFound);
@@ -98,11 +115,11 @@ private:
     std::vector<const char*> checkRequirementsExtensions(const Info& info, const std::vector<const char*>& extensions, std::vector<const char*>& extensionsFound);
 
 private:
-    Loader _loader; // Need to be at the beginning, we don't want to unload Vulkan functions too early
+    API::Loader _loader;
 
-    Instance _instance{};
-    Device _device{};
-    std::vector<Queue> _queues{};
+    API::Instance _instance{};
+    API::Device _device{};
+    std::vector<API::Queue> _queues{};
 
     InstanceInfo _instanceInfo{};
     PhysicalDeviceInfo* _physicalDeviceInfo{nullptr};
@@ -110,14 +127,33 @@ private:
 
     VkDebugReportCallbackEXT _debugReportCallback{VK_NULL_HANDLE};
 
-    std::unique_ptr<::lug::Graphics::Vulkan::RenderWindow> _window;
+    std::unique_ptr<Render::Window> _window;
 
     std::vector<const char*> _loadedInstanceLayers{};
     std::vector<const char*> _loadedInstanceExtensions{};
     std::vector<const char*> _loadedDeviceExtensions{};
     VkPhysicalDeviceFeatures _loadedDeviceFeatures{};
     std::set<int8_t> _loadedQueueFamiliesIdx{};
-    std::vector<Mesh*> _attachedMeshes{};
+    std::vector<Render::Mesh*> _attachedMeshes{};
+
+    Preferencies _preferencies{
+        nullptr,                                    // device
+
+        {                                           // swapchain
+            {                                       // presentModes
+                VK_PRESENT_MODE_MAILBOX_KHR,
+                VK_PRESENT_MODE_FIFO_KHR
+            },
+            {                                       // formats
+                VK_FORMAT_B8G8R8A8_UNORM,
+                VK_FORMAT_R8G8B8A8_UNORM
+            },
+            {                                       // compositeAlphas
+                VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+                VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
+            }
+        }
+    };
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;

@@ -18,7 +18,7 @@ public:
 
     ~Clock() = default;
 
-    void reset();
+    Time reset();
     Time getElapsedTime() const;
 
 private:

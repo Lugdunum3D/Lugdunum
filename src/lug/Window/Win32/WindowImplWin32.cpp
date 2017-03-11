@@ -1,6 +1,6 @@
 #include <cstdlib>
 #include <lug/Window/Win32/WindowImplWin32.hpp>
-#include <lug/System/Logger.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Window {

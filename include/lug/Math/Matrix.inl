@@ -329,7 +329,7 @@ inline typename std::enable_if<(Rows == 4) && EnableBool, Matrix<Rows, Columns, 
 
 template <uint8_t Rows, uint8_t Columns, typename T>
 inline Matrix<Columns, Rows, T> Matrix<Rows, Columns, T>::transpose() const {
-    Matrix<Columns, Rows, T> transposeMatrix;
+    Matrix<Columns, Rows, T> transposeMatrix(0);
 
     for (uint8_t row = 0; row < Rows; ++row) {
         for (uint8_t col = 0; col < Columns; ++col) {
@@ -447,7 +447,7 @@ typename std::enable_if<(Rows > 4) && EnableBool, T>::type Matrix<Rows, Columns,
     static_assert(Rows == Columns, "The matrix has to be a square matrix to calculate the determinant");
 
     T determinant = 0;
-    Matrix<Rows - 1, Columns - 1, T> minorMatrix;
+    Matrix<Rows - 1, Columns - 1, T> minorMatrix(0);
 
     constexpr uint8_t k = 0;
     for (uint8_t i = 0; i < Rows; ++i) {
@@ -485,7 +485,7 @@ inline typename std::enable_if<(Rows == Columns) && EnableBool, Matrix<Rows, Col
 {
     static_assert(Rows == Columns, "The identity matrix has to be a square matrix");
 
-    Matrix<Rows, Columns, T> matrix;
+    Matrix<Rows, Columns, T> matrix(0);
 
     for (uint8_t i = 0; i < Rows; ++i) {
         matrix(i, i) = 1;
@@ -564,7 +564,7 @@ template <uint8_t RowsLeft, uint8_t ColumnsLeft, uint8_t RowsRight, uint8_t Colu
 inline Matrix<RowsLeft, ColumnsRight, T> operator*(const Matrix<RowsLeft, ColumnsLeft, T>& lhs, const Matrix<RowsRight, ColumnsRight, T>& rhs) {
     static_assert(ColumnsLeft == RowsRight, "Columns of the right operand and Rows of the left operand must be of the same size to multiply matrices");
 
-    Matrix<RowsLeft, ColumnsRight, T> matrix;
+    Matrix<RowsLeft, ColumnsRight, T> matrix(0);
 
     for (uint8_t i = 0; i < RowsLeft; ++i) {
         for (uint8_t j = 0; j < ColumnsRight; ++j) {

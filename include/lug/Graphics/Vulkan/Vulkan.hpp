@@ -17,6 +17,11 @@
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>
 
+#if defined(LUG_SYSTEM_LINUX)
+    // Fuck you X11
+    #undef None
+#endif
+
 #define LUG_EXPORTED_VULKAN_FUNCTIONS(macro)    \
     macro(vkGetInstanceProcAddr)
 
@@ -170,36 +175,33 @@ struct PhysicalDeviceInfo {
     VkPhysicalDeviceProperties properties;
     VkPhysicalDeviceFeatures features;
 
-    std::vector<VkQueueFamilyProperties> queueFamilies;
-
     VkPhysicalDeviceMemoryProperties memoryProperties;
+
+    std::vector<VkQueueFamilyProperties> queueFamilies;
 
     std::vector<VkExtensionProperties> extensions;
 
     std::unordered_map<VkFormat, VkFormatProperties> formatProperties;
 
-    struct SwapChainInfo {
+    struct Swapchain {
         VkSurfaceCapabilitiesKHR capabilities;
 
         std::vector<VkSurfaceFormatKHR> formats;
         std::vector<VkPresentModeKHR> presentModes;
-    } swapChain;
+    } swapchain;
 
     bool containsExtension(const char* extensionName) const;
     bool containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const;
 };
 
-LUG_GRAPHICS_API const char* resultToStr(VkResult result);
+struct LUG_GRAPHICS_API Version {
+    uint32_t major;
+    uint32_t minor;
+    uint32_t patch;
+
+    static Version fromInt(uint32_t version);
+};
 
 } // Vulkan
 } // Graphics
 } // lug
-
-/**
- * PSA: This is outside of the namespace because VkResult is in the root namespace
- */
-std::ostream& operator<<(std::ostream& ss, const VkResult& result);
-inline std::ostream& operator<<(std::ostream& ss, const VkResult& result) {
-    ss << ::lug::Graphics::Vulkan::resultToStr(result);
-    return ss;
-}
