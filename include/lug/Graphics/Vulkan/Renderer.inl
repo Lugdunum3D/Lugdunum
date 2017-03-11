@@ -49,8 +49,8 @@ inline API::Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentati
         }
     }
 
-    if (!returnQueue || flags == VK_QUEUE_TRANSFER_BIT) {
-        return getQueue(VK_QUEUE_GRAPHICS_BIT, supportPresentation);
+    if (!returnQueue && flags & VK_QUEUE_TRANSFER_BIT) {
+        return getQueue((flags & ~VK_QUEUE_TRANSFER_BIT) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
     }
 
     return returnQueue;
@@ -67,8 +67,8 @@ inline const API::Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPres
         }
     }
 
-    if (!returnQueue || flags == VK_QUEUE_TRANSFER_BIT) {
-        return getQueue(VK_QUEUE_GRAPHICS_BIT, supportPresentation);
+    if (!returnQueue && flags & VK_QUEUE_TRANSFER_BIT) {
+        return getQueue((flags & ~VK_QUEUE_TRANSFER_BIT) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
     }
 
     return returnQueue;
