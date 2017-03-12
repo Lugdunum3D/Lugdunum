@@ -44,13 +44,13 @@ public:
         // TODO: Better support for queues
     };
 
-    struct Preferencies {
+    struct Preferences {
         PhysicalDeviceInfo* device;
 
         struct Swapchain {
-            std::vector<VkPresentModeKHR> presentModes;                 // By order of preferency
-            std::vector<VkFormat> formats;                              // By order of preferency
-            std::vector<VkCompositeAlphaFlagBitsKHR> compositeAlphas;   // By order of preferency
+            std::vector<VkPresentModeKHR> presentModes;                 // By order of preference
+            std::vector<VkFormat> formats;                              // By order of preference
+            std::vector<VkCompositeAlphaFlagBitsKHR> compositeAlphas;   // By order of preference
         } swapchain;
     };
 
@@ -93,8 +93,8 @@ public:
     std::vector<PhysicalDeviceInfo>& getPhysicalDeviceInfos();
     const std::vector<PhysicalDeviceInfo>& getPhysicalDeviceInfos() const;
 
-    Preferencies& getPreferencies();
-    const Preferencies& getPreferencies() const;
+    Preferences& getPreferences();
+    const Preferences& getPreferences() const;
 
     void destroy();
 
@@ -136,7 +136,7 @@ private:
     std::set<int8_t> _loadedQueueFamiliesIdx{};
     std::vector<Render::Mesh*> _attachedMeshes{};
 
-    Preferencies _preferencies{
+    Preferences _preferences{
         nullptr,                                    // device
 
         {                                           // swapchain

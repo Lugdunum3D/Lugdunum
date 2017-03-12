@@ -319,8 +319,8 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
 bool Renderer::initDevice() {
     VkResult result;
 
-    if (_preferencies.device) {
-        _physicalDeviceInfo = _preferencies.device;
+    if (_preferences.device) {
+        _physicalDeviceInfo = _preferences.device;
 
         // Set the loaded informations of the device
         {

@@ -319,8 +319,8 @@ bool Window::initSwapchain() {
 
     LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
 
-    // TODO: Find a way to put Preferencies elsewhere
-    Renderer::Preferencies::Swapchain& swapchainPreferencies = _renderer.getPreferencies().swapchain;
+    // TODO: Find a way to put Preferences elsewhere
+    Renderer::Preferences::Swapchain& swapchainPreferences = _renderer.getPreferences().swapchain;
 
     VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAX_ENUM_KHR;
     VkSurfaceFormatKHR swapchainFormat{
@@ -336,7 +336,7 @@ bool Window::initSwapchain() {
     {
         // Check the present mode
         {
-            for (auto presentMode : swapchainPreferencies.presentModes) {
+            for (auto presentMode : swapchainPreferences.presentModes) {
                 if (std::find(info->swapchain.presentModes.begin(), info->swapchain.presentModes.end(), presentMode) != info->swapchain.presentModes.end()) {
                     LUG_LOG.info("RendererWindow: Use present mode {}", API::RTTI::toStr(presentMode));
 
@@ -353,7 +353,7 @@ bool Window::initSwapchain() {
 
         // Check the formats
         {
-            for (auto format : swapchainPreferencies.formats) {
+            for (auto format : swapchainPreferences.formats) {
                 if (std::find_if(info->swapchain.formats.begin(), info->swapchain.formats.end(), [&swapchainFormat, &format](const VkSurfaceFormatKHR& lhs) {
                     return lhs.colorSpace == swapchainFormat.colorSpace && format == lhs.format;
                 }) != info->swapchain.formats.end()) {
@@ -372,7 +372,7 @@ bool Window::initSwapchain() {
 
         // Check composite alpha
         {
-            for (auto compositeAlphaPreferency : swapchainPreferencies.compositeAlphas) {
+            for (auto compositeAlphaPreferency : swapchainPreferences.compositeAlphas) {
                 if (info->swapchain.capabilities.supportedCompositeAlpha & compositeAlphaPreferency) {
                     LUG_LOG.info("RendererWindow: Use composite alpha {}", API::RTTI::toStr(compositeAlphaPreferency));
 

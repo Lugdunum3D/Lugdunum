@@ -102,10 +102,10 @@ inline const std::vector<PhysicalDeviceInfo>& Renderer::getPhysicalDeviceInfos()
     return _physicalDeviceInfos;
 }
 
-inline Renderer::Preferencies& Renderer::getPreferencies() {
-    return _preferencies;
+inline Renderer::Preferences& Renderer::getPreferences() {
+    return _preferences;
 }
 
-inline const Renderer::Preferencies& Renderer::getPreferencies() const {
-    return _preferencies;
+inline const Renderer::Preferences& Renderer::getPreferences() const {
+    return _preferences;
 }
