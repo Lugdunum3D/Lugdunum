@@ -14,12 +14,6 @@ layout(set = 0, binding = 0) uniform cameraUniform {
     mat4 proj;
 };
 
-layout(set = 1, binding = 0) uniform testUniform {
-    vec3 lightAmbient;
-    vec3 lightDiffuse;
-    vec3 lightSpecular;
-};
-
 layout (location = 0) out vec3 verticePos;
 layout (location = 1) out vec3 verticeColor;
 layout (location = 2) out vec3 verticeNormal;
