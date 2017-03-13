@@ -428,18 +428,19 @@ bool WindowImpl::pollEvent(Event& event) {
         case KeyPress:
             event.type          = Event::Type::KeyPressed;
             event.key.code      = keysymToLugKey(XLookupKeysym((&xEvent.xkey), 0)); // TODO: indexes?
-            event.key.ctrl      = xEvent.xkey.state & ControlMask;
-            event.key.shift     = xEvent.xkey.state & ShiftMask;
-            event.key.system    = xEvent.xkey.state & Mod4Mask;
+            event.key.ctrl      = (xEvent.xkey.state & ControlMask) != 0;
+            event.key.alt       = (xEvent.xkey.state & Mod1Mask) != 0;
+            event.key.shift     = (xEvent.xkey.state & ShiftMask) != 0;
+            event.key.system    = (xEvent.xkey.state & Mod4Mask) != 0;
             break;
 
         case KeyRelease:
             event.type          = Event::Type::KeyReleased;
             event.key.code      = keysymToLugKey(XLookupKeysym((&xEvent.xkey), 0)); // TODO: indexes?
-            event.key.alt       = xEvent.xkey.state & Mod1Mask;
-            event.key.ctrl      = xEvent.xkey.state & ControlMask;
-            event.key.shift     = xEvent.xkey.state & ShiftMask;
-            event.key.system    = xEvent.xkey.state & Mod4Mask;
+            event.key.ctrl      = (xEvent.xkey.state & ControlMask) != 0;
+            event.key.alt       = (xEvent.xkey.state & Mod1Mask) != 0;
+            event.key.shift     = (xEvent.xkey.state & ShiftMask) != 0;
+            event.key.system    = (xEvent.xkey.state & Mod4Mask) != 0;
             break;
 
         case ConfigureNotify:
@@ -453,17 +454,48 @@ bool WindowImpl::pollEvent(Event& event) {
             }
 
         case ButtonPress:
-            event.type              = Event::Type::ButtonPressed;
-            event.button.code       = buttoncodeToLugButton(xEvent.xbutton.button);
-            event.button.coord.x    = xEvent.xbutton.x;
-            event.button.coord.y    = xEvent.xbutton.y;
+            switch (xEvent.xbutton.button) {
+                case Button4:
+                    event.type = Event::Type::MouseWheel;
+                    event.button.scrollOffset.xOffset = 0;
+                    event.button.scrollOffset.yOffset = 1;
+                    break;
+                case Button5:
+                    event.type = Event::Type::MouseWheel;
+                    event.button.scrollOffset.xOffset = 0;
+                    event.button.scrollOffset.yOffset = -1;
+                    break;
+                case 6:
+                    event.type = Event::Type::MouseWheel;
+                    event.button.scrollOffset.xOffset = 1;
+                    event.button.scrollOffset.yOffset = 0;
+                    break;
+                case 7:
+                    event.type = Event::Type::MouseWheel;
+                    event.button.scrollOffset.xOffset = -1;
+                    event.button.scrollOffset.yOffset = 0;
+                    break;
+                default:
+                    event.type = Event::Type::ButtonPressed;
+                    event.button.code = buttoncodeToLugButton(xEvent.xbutton.button);
+            }
+            event.button.coord.x = xEvent.xbutton.x;
+            event.button.coord.y = xEvent.xbutton.y;
+            event.button.ctrl = (xEvent.xbutton.state & ControlMask) != 0;
+            event.button.shift = (xEvent.xbutton.state & ShiftMask) != 0;
             break;
 
         case ButtonRelease:
-            event.type              = Event::Type::ButtonReleased;
-            event.button.code       = buttoncodeToLugButton(xEvent.xbutton.button);
-            event.button.coord.x    = xEvent.xbutton.x;
-            event.button.coord.y    = xEvent.xbutton.y;
+            if (xEvent.xbutton.button != Button4 && xEvent.xbutton.button != Button5 &&
+                xEvent.xbutton.button != 6 && xEvent.xbutton.button != 7) {
+                event.type = Event::Type::ButtonReleased;
+                event.button.code = buttoncodeToLugButton(xEvent.xbutton.button);
+                event.button.coord.x = xEvent.xbutton.x;
+                event.button.coord.y = xEvent.xbutton.y;
+            }
+            else {
+                return false;
+            }
             break;
 
         case MotionNotify:
