@@ -71,6 +71,8 @@ struct LUG_WINDOW_API Event {
         ButtonReleased, ///< ButtonReleased event
         MouseMoved,     ///< MouseMoved event
         MouseWheel,     ///< MouseWheelRotated event
+        MouseLeave,
+        MouseEnter
     };
 
     Type type;          ///< The type of the event

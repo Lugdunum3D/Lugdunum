@@ -47,6 +47,8 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
                                     KeyReleaseMask |
                                     ButtonPressMask |
                                     ButtonReleaseMask |
+                                    EnterWindowMask |
+                                    LeaveWindowMask |
                                     PointerMotionMask);
     XStoreName(_display, _window, initInfo.title.c_str());
     XMapWindow(_display, _window);
@@ -352,7 +354,9 @@ static Bool selectEvents(Display*, XEvent* event, XPointer) {
             event->type == ButtonPress ||
             event->type == ButtonRelease ||
             event->type == MotionNotify ||
-            event->type == ConfigureNotify);
+            event->type == ConfigureNotify ||
+            event->type == LeaveNotify ||
+            event->type == EnterNotify);
 }
 
 /**
@@ -501,6 +505,18 @@ bool WindowImpl::pollEvent(Event& event) {
         case MotionNotify:
             event.type              = Event::Type::MouseMoved;
             event.button.code       = buttoncodeToLugButton(xEvent.xbutton.button);
+            event.button.coord.x    = xEvent.xbutton.x;
+            event.button.coord.y    = xEvent.xbutton.y;
+            break;
+
+        case LeaveNotify:
+            event.type = Event::Type::MouseLeave;
+            event.button.coord.x    = xEvent.xbutton.x;
+            event.button.coord.y    = xEvent.xbutton.y;
+            break;
+
+        case EnterNotify:
+            event.type = Event::Type::MouseEnter;
             event.button.coord.x    = xEvent.xbutton.x;
             event.button.coord.y    = xEvent.xbutton.y;
             break;
