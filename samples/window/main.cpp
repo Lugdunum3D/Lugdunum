@@ -202,7 +202,12 @@ int main() {
     while (window->isOpen()) {
         lug::Window::Event event;
         while (window->pollEvent(event)) {
-            logger->info("Event received: {}", static_cast<uint32_t>(event.type));
+            /*
+             * AVOID MOUSE MOVE SPAM !!!
+             */
+            if (event.type != lug::Window::Event::Type::MouseMoved) {
+                logger->info("Event received: {}", static_cast<uint32_t>(event.type));
+            }
 
             if (event.type == lug::Window::Event::Type::Close) {
                 logger->info("Closing the app");
@@ -249,16 +254,35 @@ int main() {
                 logger->info(buttonEnumMap[event.button.code] + " is released at position {} {}", event.button.coord.x, event.button.coord.y);
             }
             
-//            // Checking MouseWheel events
-//            if (event.type == lug::Window::Event::Type::MouseWheel) {
-//                logger->info("Mouse scroll wheel offset {} {}", event.button.scrollOffset.xOffset, event.button.scrollOffset.yOffset);
-//                if (event.button.ctrl) {
-//                    logger->info("MODIFIER CTRL");
-//                }
-//                if (event.button.shift) {
-//                    logger->info("MODIFIER SHIFT");
-//                }
-//            }
+            // Checking MouseWheel events
+            if (event.type == lug::Window::Event::Type::MouseWheel) {
+                logger->info("Mouse scroll wheel offset {} {}", event.button.scrollOffset.xOffset, event.button.scrollOffset.yOffset);
+                if (event.button.ctrl) {
+                    logger->info("MODIFIER CTRL");
+                }
+                if (event.button.shift) {
+                    logger->info("MODIFIER SHIFT");
+                }
+            }
+
+            if (event.type == lug::Window::Event::Type::MouseLeave) {
+                logger->info("Mouse just left the window.");
+                if (event.button.ctrl) {
+                    logger->info("MODIFIER CTRL");
+                }
+                if (event.button.shift) {
+                    logger->info("MODIFIER SHIFT");
+                }
+            }
+            if (event.type == lug::Window::Event::Type::MouseEnter) {
+                logger->info("Mouse just entered the window.");
+                if (event.button.ctrl) {
+                    logger->info("MODIFIER CTRL");
+                }
+                if (event.button.shift) {
+                    logger->info("MODIFIER SHIFT");
+                }
+            }
 
 //            // Checking MouseMoved events
 //            if (event.type == lug::Window::Event::Type::MouseMoved) {
