@@ -92,7 +92,7 @@ bool Application::init(int argc, char* argv[]) {
 }
 
 void Application::onEvent(const lug::Window::Event& event) {
-    if (event.type == lug::Window::EventType::CLOSE) {
+    if (event.type == lug::Window::Event::Type::Close) {
         close();
     }
 }
