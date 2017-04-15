@@ -27,7 +27,7 @@ Window::~Window() {
 
 bool Window::pollEvent(lug::Window::Event& event) {
     if (lug::Window::Window::pollEvent(event)) {
-        if (event.type == lug::Window::EventType::RESIZE) {
+        if (event.type == lug::Window::Event::Type::Resize) {
             _swapchain.setOutOfDate(true);
 
             // Update the RenderView

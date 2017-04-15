@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lug/Window/Window.hpp> // I include Window.hpp before Xlib because Xlib is dumb
+#include <X11/XKBlib.h>
 #include <X11/Xlib.h>
 
 namespace lug {
@@ -21,12 +22,14 @@ public:
     void close();
 
     bool pollEvent(lug::Window::Event& event);
+    void setKeyRepeat(bool state);
 
     Display* getDisplay() const;
     ::Window getWindow() const;
 
 private:
     void setWindowDecorations(Style style);
+    bool shouldIgnoreRepeated(XEvent& xEvent);
 
 private:
     Window* _parent{nullptr};
@@ -37,6 +40,8 @@ private:
     Atom _wmProtocols;
     Atom _wmDeleteWindow;
     Atom _wmHints;
+
+    bool _keyRepeat{true};
 };
 
 } // namespace priv
