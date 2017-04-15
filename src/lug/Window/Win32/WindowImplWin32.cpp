@@ -260,12 +260,12 @@ HINSTANCE WindowImpl::getHinstance() const {
     return _hinstance;
 }
 
-void WindowImpl::processWindowEvents(UINT message, WPARAM /*wParam*/, LPARAM /*lParam*/) {
+void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam) {
     Event e;
 
     switch (message) {
     case WM_SIZE:
-        e.type = EventType::RESIZE;
+        e.type = Event::Type::Resize;
 
         // The handle is not set on first call
         if (!_handle)
