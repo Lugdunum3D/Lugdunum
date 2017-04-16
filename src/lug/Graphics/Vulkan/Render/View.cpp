@@ -11,11 +11,12 @@ namespace Render {
 
 View::View(const Renderer& renderer, const ::lug::Graphics::Render::Target* renderTarget) : ::lug::Graphics::Render::View(renderTarget), _renderer(renderer) {}
 
-bool View::init(View::InitInfo& initInfo,
-                        const API::Device* device,
-                        API::Queue* presentQueue,
-                        API::DescriptorPool* descriptorPool,
-                        const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
+bool View::init(
+    View::InitInfo& initInfo,
+    const API::Device* device,
+    API::Queue* presentQueue,
+    API::DescriptorPool* descriptorPool,
+    const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
     ::lug::Graphics::Render::View::init(initInfo);
 
     if (_info.renderTechniqueType == lug::Graphics::Render::Technique::Type::Forward) {
@@ -28,6 +29,7 @@ bool View::init(View::InitInfo& initInfo,
     }
 
     _drawCompleteSemaphores.resize(imageViews.size());
+
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
         // Work complete semaphore
         {
@@ -38,6 +40,7 @@ bool View::init(View::InitInfo& initInfo,
                 createInfo.flags = 0
             };
             VkResult result = vkCreateSemaphore(static_cast<VkDevice>(*device), &createInfo, nullptr, &semaphore);
+
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
                 return false;
@@ -57,6 +60,7 @@ bool View::render(const API::Semaphore& imageReadySemaphore, uint32_t currentIma
         LUG_LOG.warn("View: Attempt to render with no camera attached");
         return true; // Not fatal, return success anyway
     }
+
     _camera->update(this);
     return _renderTechnique->render(_camera->getRenderQueue(), imageReadySemaphore, _drawCompleteSemaphores[currentImageIndex], currentImageIndex);
 }
@@ -70,6 +74,7 @@ bool View::endFrame() {
         // Call isDirty(false) for each objects in the RenderQueue
         _camera->getRenderQueue().removeDirtyProperty();
     }
+
     return true;
 }
 

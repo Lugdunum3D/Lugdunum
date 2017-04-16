@@ -5,8 +5,7 @@ namespace lug {
 namespace Graphics {
 namespace Render {
 
-Camera::Camera(const std::string& name) : Node(name) {
-}
+Camera::Camera(const std::string& name) : Node(name) {}
 
 void Camera::needUpdate() {
     Node::needUpdate();
@@ -35,8 +34,8 @@ void Camera::updateProj() {
     _projMatrix = Math::Geometry::perspective(
         Math::Geometry::radians(_fov),
         _renderView->getViewport().getRatio(),
-        _near, _far
-    );
+        _near,
+        _far);
 
     _needUpdateProj = false;
 }

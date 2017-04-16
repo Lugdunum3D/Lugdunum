@@ -9,7 +9,8 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-Buffer::Buffer(VkBuffer buffer,
+Buffer::Buffer(
+    VkBuffer buffer,
     const Device* device,
     DeviceMemory* deviceMemory) : _buffer(buffer), _device(device), _deviceMemory(deviceMemory) {
     vkGetBufferMemoryRequirements(static_cast<VkDevice>(*device), _buffer, &_requirements);
@@ -59,6 +60,7 @@ void Buffer::bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
 
 void* Buffer::mapMemory(VkDeviceSize size, VkDeviceSize offset) {
     void* data = nullptr;
+
     vkMapMemory(static_cast<VkDevice>(*_device), static_cast<VkDeviceMemory>(*_deviceMemory), offset, size, 0, &data);
 
     return data;
@@ -68,13 +70,14 @@ void Buffer::unmapMemory() {
     vkUnmapMemory(static_cast<VkDevice>(*_device), static_cast<VkDeviceMemory>(*_deviceMemory));
 }
 
-void Buffer::updateData(void *data, uint32_t size, uint32_t memoryOffset) {
-    void *gpuData = mapMemory(size, memoryOffset);
+void Buffer::updateData(void* data, uint32_t size, uint32_t memoryOffset) {
+    void* gpuData = mapMemory(size, memoryOffset);
+
     memcpy(gpuData, data, size);
     unmapMemory();
 }
 
-void Buffer::updateDataTransfer(const CommandBuffer* commandBuffer, void *data, uint32_t size, uint32_t offset) {
+void Buffer::updateDataTransfer(const CommandBuffer* commandBuffer, void* data, uint32_t size, uint32_t offset) {
     vkCmdUpdateBuffer(static_cast<VkCommandBuffer>(*commandBuffer), _buffer, offset, size, data);
 }
 
@@ -83,16 +86,15 @@ const VkMemoryRequirements& Buffer::getRequirements() const {
 }
 
 std::unique_ptr<Buffer> Buffer::create(
-        const Device* device,
-        uint32_t queueFamilyIndexCount,
-        const uint32_t* pQueueFamilyIndices,
-        VkDeviceSize size,
-        VkBufferUsageFlags usage,
-        VkBufferCreateFlags createFlags,
-        VkSharingMode sharingMode
-) {
+    const Device* device,
+    uint32_t queueFamilyIndexCount,
+    const uint32_t* pQueueFamilyIndices,
+    VkDeviceSize size,
+    VkBufferUsageFlags usage,
+    VkBufferCreateFlags createFlags,
+    VkSharingMode sharingMode) {
     // Create buffer
-    VkBufferCreateInfo createInfo {
+    VkBufferCreateInfo createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = createFlags,

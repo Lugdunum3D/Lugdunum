@@ -15,7 +15,6 @@ Clock::Clock(Clock&& clock)
     _startTime = clock._startTime;
 }
 
-
 Clock& Clock::operator=(const Clock& clock)
 {
     _startTime = clock._startTime;
@@ -34,6 +33,7 @@ Time Clock::getElapsedTime() const {
 
 Time Clock::reset() {
     auto old = Time(Time::getCurrentTime().getMicroseconds() - _startTime.getMicroseconds());
+
     _startTime = Time::getCurrentTime();
     return old;
 }

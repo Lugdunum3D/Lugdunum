@@ -43,11 +43,12 @@ Queue::~Queue() {
     destroy();
 }
 
-bool Queue::submit(const CommandBuffer& commandBuffer,
-                   const std::vector<VkSemaphore>& signalSemaphores,
-                   const std::vector<VkSemaphore>& waitSemaphores,
-                   const std::vector<VkPipelineStageFlags>& waitDstStageMasks,
-                   VkFence fence) const {
+bool Queue::submit(
+    const CommandBuffer& commandBuffer,
+    const std::vector<VkSemaphore>& signalSemaphores,
+    const std::vector<VkSemaphore>& waitSemaphores,
+    const std::vector<VkPipelineStageFlags>& waitDstStageMasks,
+    VkFence fence) const {
 
     LUG_ASSERT(waitSemaphores.size() == waitDstStageMasks.size(), "waitDstStageMasks should be the same size as waitSemaphores");
 
@@ -66,6 +67,7 @@ bool Queue::submit(const CommandBuffer& commandBuffer,
     };
 
     VkResult result = vkQueueSubmit(_queue, 1, &submitInfo, fence);
+
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
         return false;
@@ -76,6 +78,7 @@ bool Queue::submit(const CommandBuffer& commandBuffer,
 
 bool Queue::waitIdle() const {
     VkResult result = vkQueueWaitIdle(_queue);
+
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
         return false;

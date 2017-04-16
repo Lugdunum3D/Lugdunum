@@ -41,13 +41,18 @@ void RenderPass::destroy() {
     }
 }
 
-void RenderPass::begin(const CommandBuffer* commandBuffer,
-                        const Framebuffer& framebuffer,
-                        const Math::Vec2f& renderExtent,
-                        const Math::Vec2f& renderOffset,
-                        VkSubpassContents contents) {
+void RenderPass::begin(
+    const CommandBuffer* commandBuffer,
+    const Framebuffer& framebuffer,
+    const Math::Vec2f& renderExtent,
+    const Math::Vec2f& renderOffset,
+    VkSubpassContents contents) {
+
     VkClearValue clearColors[2];
-    clearColors[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+
+    clearColors[0].color = {
+        {0.0f, 0.0f, 0.0f, 1.0f}
+    };
     clearColors[1].depthStencil = {
         1.0f, // Depth clear value
         0 // Stecil clear value (We don't care yet)
@@ -78,10 +83,9 @@ std::unique_ptr<RenderPass> RenderPass::create(const Device* device, VkFormat co
         device,
         {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
         VK_IMAGE_TILING_OPTIMAL,
-        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-    );
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
-    VkAttachmentDescription attachments [2]{
+    VkAttachmentDescription attachments[2]{
         // Color attachment
         {
             attachments[0].flags = 0,
@@ -145,6 +149,7 @@ std::unique_ptr<RenderPass> RenderPass::create(const Device* device, VkFormat co
 
     VkRenderPass renderPass = VK_NULL_HANDLE;
     VkResult result = vkCreateRenderPass(static_cast<VkDevice>(*device), &createInfo, nullptr, &renderPass);
+
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create render pass: {}", result);
         return nullptr;

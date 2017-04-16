@@ -6,12 +6,14 @@ namespace System {
 namespace Logger {
 
 #define LUG_LOG_ENUM(CHANNEL) case Level::CHANNEL: return os << #CHANNEL;
+
 std::ostream& operator<<(std::ostream& os, Level level) {
     switch (level) {
         LUG_LOG_LEVELS(LUG_LOG_ENUM)
-    };
+    }
     return os << "Unknown";
 }
+
 #undef LUG_LOG_ENUM
 
 Logger::Logger(const std::string& loggerName) : _name(loggerName) {}
@@ -53,6 +55,7 @@ void Logger::flush() {
 
 Logger& Logger::getInternalLogger() {
     static Logger logger("internal");
+
     return logger;
 }
 

@@ -26,8 +26,10 @@ void* Stack::allocate(size_t size, size_t alignment, size_t offset) {
     while (_current) {
         // Try to allocate memory on the current page
         _current = static_cast<char*>(_current) + newOffset;
+
         if (_current <= _currentPage->end) {
             size_t sizeLeft = static_cast<char*>(_currentPage->end) - static_cast<char*>(_current) + 1;
+
             if (std::align(alignment, newSize - newOffset, _current, sizeLeft)) {
                 _current = static_cast<char*>(_current) + newSize - newOffset;
 
@@ -53,7 +55,7 @@ void Stack::free(void* ptr) {
     void* const oldCurrent = reinterpret_cast<void**>(static_cast<char*>(ptr) - sizeof(size_t))[-1];
 
     // We need to find the correct page from which this pointer come from
-    while  (_currentPage && (_currentPage->start > oldCurrent || _currentPage->end < oldCurrent)) {
+    while (_currentPage && (_currentPage->start > oldCurrent || _currentPage->end < oldCurrent)) {
         _currentPage = _currentPage->prev;
     }
 

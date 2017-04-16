@@ -41,13 +41,16 @@ bool Application::finishInit() {
 bool Application::run() {
     float elapsed = 0;
     uint32_t frames = 0;
+
     System::Clock clock;
+
     while (!_closed && _window && _window->isOpen()) {
         const auto elapsedTime = clock.reset();
 
         // Poll events
         {
             lug::Window::Event event;
+
             while (_window->pollEvent(event)) {
                 onEvent(event);
             }

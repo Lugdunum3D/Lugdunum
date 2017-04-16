@@ -12,9 +12,11 @@ void* Basic::allocate(size_t size, size_t alignment, size_t offset) const {
     return aligned_alloc(alignment + offset, size);
 #elif defined(LUG_SYSTEM_ANDROID)
     void* ret = nullptr;
+
     if (!posix_memalign(&ret, alignment + offset, size)) {
         return ret;
     }
+
     return nullptr;
 #elif defined(LUG_SYSTEM_WINDOWS)
     return _aligned_malloc(alignment + offset, size);
@@ -36,7 +38,6 @@ size_t Basic::getSize(void* ptr) const {
     return malloc_usable_size(ptr);
 #endif
 }
-
 
 } // Allocator
 } // Memory

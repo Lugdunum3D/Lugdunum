@@ -6,9 +6,10 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Mesh::Mesh(const std::string& name,
-            const std::vector<uint32_t>& queueFamilyIndices,
-            const API::Device* device) : ::lug::Graphics::Render::Mesh(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {}
+Mesh::Mesh(
+    const std::string& name,
+    const std::vector<uint32_t>& queueFamilyIndices,
+    const API::Device* device) : ::lug::Graphics::Render::Mesh(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {}
 
 Mesh::~Mesh() {
     destroy();
@@ -20,15 +21,17 @@ bool Mesh::load() {
         return true;
     }
 
-
     {
         _vertexBuffer = API::Buffer::create(_device, (uint32_t)_queueFamilyIndices.size(), _queueFamilyIndices.data(), (uint32_t)vertices.size() * sizeof(Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-        if (!_vertexBuffer)
+
+        if (!_vertexBuffer) {
             return false;
+        }
 
         auto& requirements = _vertexBuffer->getRequirements();
         uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
         _vertexDeviceMemory = API::DeviceMemory::allocate(_device, requirements.size, memoryTypeIndex);
+
         if (!_vertexDeviceMemory) {
             return false;
         }
@@ -39,12 +42,15 @@ bool Mesh::load() {
 
     {
         _indexBuffer = API::Buffer::create(_device, (uint32_t)_queueFamilyIndices.size(), _queueFamilyIndices.data(), (uint32_t)indices.size() * sizeof(uint32_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-        if (!_indexBuffer)
+
+        if (!_indexBuffer) {
             return false;
+        }
 
         auto& requirements = _indexBuffer->getRequirements();
         uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
         _indexDeviceMemory = API::DeviceMemory::allocate(_device, requirements.size, memoryTypeIndex);
+
         if (!_indexDeviceMemory) {
             return false;
         }
@@ -62,6 +68,7 @@ void Mesh::destroy() {
     if (_vertexBuffer) {
         _vertexBuffer->destroy();
     }
+
     if (_indexBuffer) {
         _indexBuffer->destroy();
     }

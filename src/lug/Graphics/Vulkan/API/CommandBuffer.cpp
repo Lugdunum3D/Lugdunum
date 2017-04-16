@@ -43,6 +43,7 @@ bool CommandBuffer::begin(VkCommandBufferUsageFlags flags) {
     };
 
     VkResult result = vkBeginCommandBuffer(_commandBuffer, &beginInfo);
+
     if (result != VK_SUCCESS) {
         LUG_LOG.error("CommandBuffer: Can't begin the command buffer: {}", result);
         return false;
@@ -53,6 +54,7 @@ bool CommandBuffer::begin(VkCommandBufferUsageFlags flags) {
 
 bool CommandBuffer::end() {
     VkResult result = vkEndCommandBuffer(_commandBuffer);
+
     if (result != VK_SUCCESS) {
         LUG_LOG.error("CommandBuffer: Can't end the command buffer: {}", result);
         return false;
@@ -63,6 +65,7 @@ bool CommandBuffer::end() {
 
 bool CommandBuffer::reset(bool releaseRessources) {
     VkResult result = vkResetCommandBuffer(_commandBuffer, releaseRessources ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT : 0);
+
     if (result != VK_SUCCESS) {
         LUG_LOG.error("CommandBuffer: Can't reset the command buffer: {}", result);
         return false;

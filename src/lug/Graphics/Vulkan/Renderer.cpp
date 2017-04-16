@@ -13,14 +13,14 @@ namespace Graphics {
 namespace Vulkan {
 
 const std::unordered_map<Module::Type, Renderer::Requirements> Renderer::modulesRequirements = {
-    #define LUG_INIT_GRAPHICS_MODULES_REQUIREMENTS(name)                                 \
-    {                                                                                   \
-        Module::Type::name, ::lug::Graphics::Vulkan::Requirements::name::requirements    \
+#define LUG_INIT_GRAPHICS_MODULES_REQUIREMENTS(name)                                  \
+    {                                                                                 \
+        Module::Type::name, ::lug::Graphics::Vulkan::Requirements::name::requirements \
     },
 
     LUG_GRAPHICS_MODULES(LUG_INIT_GRAPHICS_MODULES_REQUIREMENTS)
 
-    #undef LUG_INIT_GRAPHICS_MODULES_REQUIREMENTS
+#undef LUG_INIT_GRAPHICS_MODULES_REQUIREMENTS
 };
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
@@ -149,6 +149,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
         {
             uint32_t extensionsCount = 0;
             result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, nullptr);
+
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't enumerate instance extensions: {}", result);
                 return false;
@@ -156,6 +157,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
 
             _instanceInfo.extensions.resize(extensionsCount);
             result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, _instanceInfo.extensions.data());
+
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't enumerate instance extensions: {}", result);
                 return false;
@@ -166,6 +168,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
         {
             uint32_t layersCount = 0;
             result = vkEnumerateInstanceLayerProperties(&layersCount, nullptr);
+
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
                 return false;
@@ -173,6 +176,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
 
             _instanceInfo.layers.resize(layersCount);
             result = vkEnumerateInstanceLayerProperties(&layersCount, _instanceInfo.layers.data());
+
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
                 return false;
@@ -253,6 +257,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
     {
         uint32_t physicalDevicesCount = 0;
         result = vkEnumeratePhysicalDevices(static_cast<VkInstance>(_instance), &physicalDevicesCount, nullptr);
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate physical devices: {}", result);
             return false;
@@ -262,6 +267,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
 
         std::vector<VkPhysicalDevice> physicalDevices(physicalDevicesCount);
         result = vkEnumeratePhysicalDevices(static_cast<VkInstance>(_instance), &physicalDevicesCount, physicalDevices.data());
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate physical devices: {}", result);
             return false;
@@ -288,6 +294,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
             {
                 uint32_t extensionsCount = 0;
                 result = vkEnumerateDeviceExtensionProperties(physicalDevices[idx], nullptr, &extensionsCount, nullptr);
+
                 if (result != VK_SUCCESS) {
                     LUG_LOG.error("RendererVulkan: Can't enumerate device extensions: {}", result);
                     return false;
@@ -295,6 +302,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
 
                 _physicalDeviceInfos[idx].extensions.resize(extensionsCount);
                 result = vkEnumerateDeviceExtensionProperties(physicalDevices[idx], nullptr, &extensionsCount, _physicalDeviceInfos[idx].extensions.data());
+
                 if (result != VK_SUCCESS) {
                     LUG_LOG.error("RendererVulkan: Can't enumerate device extensions: {}", result);
                     return false;
@@ -303,10 +311,10 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
 
             // Load images formats properties
             {
-                #define LUG_LOAD_IMAGE_FORMAT_PROPERTIES(formatEnum) \
-                    vkGetPhysicalDeviceFormatProperties(physicalDevices[idx], formatEnum, &_physicalDeviceInfos[idx].formatProperties[formatEnum]);
+#define LUG_LOAD_IMAGE_FORMAT_PROPERTIES(formatEnum) \
+    vkGetPhysicalDeviceFormatProperties(physicalDevices[idx], formatEnum, &_physicalDeviceInfos[idx].formatProperties[formatEnum]);
                 LUG_VULKAN_FORMAT(LUG_LOAD_IMAGE_FORMAT_PROPERTIES)
-                #undef LUG_LOAD_IMAGE_FORMAT_PROPERTIES
+#undef LUG_LOAD_IMAGE_FORMAT_PROPERTIES
             }
 
             // TODO: Get additional informations (images properties, etc)
@@ -354,6 +362,7 @@ bool Renderer::initDevice() {
 
             // TODO: Add score
             matchedDeviceIdx = matchedDevicesIdx[0];
+
             for (uint8_t idx : matchedDevicesIdx) {
                 if (_physicalDeviceInfos[idx].properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
                     matchedDeviceIdx = idx;
@@ -404,6 +413,7 @@ bool Renderer::initDevice() {
 
         VkDevice device{VK_NULL_HANDLE};
         result = vkCreateDevice(_physicalDeviceInfo->handle, &createInfo, nullptr, &device);
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't create the device: {}", result);
             return false;
@@ -425,6 +435,7 @@ bool Renderer::initDevice() {
         _queues.resize(_loadedQueueFamiliesIdx.size());
 
         uint8_t i = 0;
+
         for (auto idx : _loadedQueueFamiliesIdx) {
             VkQueue queue;
             vkGetDeviceQueue(static_cast<VkDevice>(_device), idx, 0, &queue);
@@ -458,7 +469,7 @@ bool Renderer::initDevice() {
     return true;
 }
 
-bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck) {
+bool Renderer::checkRequirementsInstance(const std::set<Module::Type>& modulesToCheck) {
     bool requirementsCheck = true;
 
     for (const auto moduleType : modulesToCheck) {
@@ -518,7 +529,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type> &modulesTo
     return requirementsCheck;
 }
 
-bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type> &modulesToCheck, bool finalization, bool quiet) {
+bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceInfo, const std::set<Module::Type>& modulesToCheck, bool finalization, bool quiet) {
     bool requirementsCheck = true;
 
     for (const auto moduleType : modulesToCheck) {
@@ -553,39 +564,39 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
         }
 
         // TODO: Log error
-        #define LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES(featureName)                                                                                                \
-            {                                                                                                                                                                   \
-                if (requirements.mandatoryFeatures.featureName == VK_TRUE) {                                                                                                    \
-                    if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                                                   \
-                        features.featureName = VK_TRUE;                                                                                                                         \
-                    } else {                                                                                                                                                    \
-                        if (!quiet) {                                                                                                                                           \
-                            LUG_LOG.warn("Device {}: Can't load mandatory feature '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, #featureName, moduleType);   \
-                        }                                                                                                                                                       \
-                                                                                                                                                                                \
-                        moduleRequirementsCheck = false;                                                                                                                        \
-                    }                                                                                                                                                           \
-                }                                                                                                                                                               \
-            }
+#define LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES(featureName)                                                                                              \
+    {                                                                                                                                                                 \
+        if (requirements.mandatoryFeatures.featureName == VK_TRUE) {                                                                                                  \
+            if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                                                 \
+                features.featureName = VK_TRUE;                                                                                                                       \
+            } else {                                                                                                                                                  \
+                if (!quiet) {                                                                                                                                         \
+                    LUG_LOG.warn("Device {}: Can't load mandatory feature '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, #featureName, moduleType); \
+                }                                                                                                                                                     \
+                moduleRequirementsCheck = false;                                                                                                                      \
+            }                                                                                                                                                         \
+        }                                                                                                                                                             \
+    }
         LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES);
-        #undef LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES
+#undef LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES
 
         // TODO: Log error
-        #define LUG_CHECK_VULKAN_PHYSICAL_DEVICE_OPTIONNAL_FEATURES(featureName)                                                                                            \
-            {                                                                                                                                                               \
-                if (requirements.optionalFeatures.featureName == VK_TRUE) {                                                                                                 \
-                    if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                                               \
-                        features.featureName = VK_TRUE;                                                                                                                     \
-                    } else if (!quiet) {                                                                                                                                    \
-                        LUG_LOG.warn("Device {}: Can't load optional feature '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, #featureName, moduleType);    \
-                    }                                                                                                                                                       \
-                }                                                                                                                                                           \
-            }
+#define LUG_CHECK_VULKAN_PHYSICAL_DEVICE_OPTIONNAL_FEATURES(featureName)                                                                                         \
+    {                                                                                                                                                            \
+        if (requirements.optionalFeatures.featureName == VK_TRUE) {                                                                                              \
+            if (physicalDeviceInfo.features.featureName == VK_TRUE) {                                                                                            \
+                features.featureName = VK_TRUE;                                                                                                                  \
+            } else if (!quiet) {                                                                                                                                 \
+                LUG_LOG.warn("Device {}: Can't load optional feature '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, #featureName, moduleType); \
+            }                                                                                                                                                    \
+        }                                                                                                                                                        \
+    }
         LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_CHECK_VULKAN_PHYSICAL_DEVICE_OPTIONNAL_FEATURES);
-        #undef LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES
+#undef LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES
 
         for (const auto& queueFlags : requirements.mandatoryQueueFlags) {
             int8_t idx = 0;
+
             if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
                 queueFamiliesIdx.insert(idx);
             } else {
@@ -599,6 +610,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 
         for (const auto& queueFlags : requirements.optionalQueueFlags) {
             int8_t idx = 0;
+
             if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
                 queueFamiliesIdx.insert(idx);
             } else if (!quiet) {
@@ -610,9 +622,9 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
             if (moduleRequirementsCheck) {
                 _loadedDeviceExtensions.insert(_loadedDeviceExtensions.end(), extensions.begin(), extensions.end());
 
-                #define LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES(featureName) _loadedDeviceFeatures.featureName = _loadedDeviceFeatures.featureName || features.featureName;
+#define LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES(featureName) _loadedDeviceFeatures.featureName = _loadedDeviceFeatures.featureName || features.featureName;
                 LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES);
-                #undef LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES
+#undef LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES
 
                 _loadedQueueFamiliesIdx.insert(queueFamiliesIdx.begin(), queueFamiliesIdx.end());
             } else {
@@ -626,7 +638,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
     return requirementsCheck;
 }
 
-template <typename Info>
+template<typename Info>
 inline std::vector<const char*> Renderer::checkRequirementsLayers(const Info& info, const std::vector<const char*>& layers, std::vector<const char*>& layersFound) {
     std::vector<const char*> layersNotFound{};
 
@@ -641,7 +653,7 @@ inline std::vector<const char*> Renderer::checkRequirementsLayers(const Info& in
     return layersNotFound;
 }
 
-template <typename Info>
+template<typename Info>
 inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info& info, const std::vector<const char*>& extensions, std::vector<const char*>& extensionsFound) {
     std::vector<const char*> extensionsNotFound{};
 

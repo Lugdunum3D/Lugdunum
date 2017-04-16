@@ -7,9 +7,10 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Model::Model(const std::string& name,
-            const std::vector<uint32_t>& queueFamilyIndices,
-            const API::Device* device) : ::lug::Graphics::Render::Model(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {}
+Model::Model(
+    const std::string& name,
+    const std::vector<uint32_t>& queueFamilyIndices,
+    const API::Device* device) : ::lug::Graphics::Render::Model(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {}
 
 Model::~Model() {
     destroy();
@@ -25,14 +26,17 @@ bool Model::load() {
     uint32_t indicesNb = getIndicesSize();
 
     // Create vertex buffer
-   {
+    {
         _vertexBuffer = API::Buffer::create(_device, (uint32_t)_queueFamilyIndices.size(), _queueFamilyIndices.data(), verticesNb * sizeof(Mesh::Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-        if (!_vertexBuffer)
+
+        if (!_vertexBuffer) {
             return false;
+        }
 
         auto& requirements = _vertexBuffer->getRequirements();
         uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
         _vertexDeviceMemory = API::DeviceMemory::allocate(_device, requirements.size, memoryTypeIndex);
+
         if (!_vertexDeviceMemory) {
             return false;
         }
@@ -43,12 +47,15 @@ bool Model::load() {
     // Create index buffer
     {
         _indexBuffer = API::Buffer::create(_device, (uint32_t)_queueFamilyIndices.size(), _queueFamilyIndices.data(), indicesNb * sizeof(uint32_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-        if (!_indexBuffer)
+
+        if (!_indexBuffer) {
             return false;
+        }
 
         auto& requirements = _indexBuffer->getRequirements();
         uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
         _indexDeviceMemory = API::DeviceMemory::allocate(_device, requirements.size, memoryTypeIndex);
+
         if (!_indexDeviceMemory) {
             return false;
         }
@@ -93,6 +100,7 @@ void Model::destroy() {
     if (_vertexBuffer) {
         _vertexBuffer->destroy();
     }
+
     if (_indexBuffer) {
         _indexBuffer->destroy();
     }

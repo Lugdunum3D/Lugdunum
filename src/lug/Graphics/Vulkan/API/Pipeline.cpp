@@ -10,9 +10,12 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-Pipeline::Pipeline(VkPipeline pipeline, const Device* device,
-    std::unique_ptr<PipelineLayout> layout, std::unique_ptr<RenderPass> renderPass)
-: _pipeline(pipeline), _device(device), _layout(std::move(layout)), _renderPass(std::move(renderPass)) {}
+Pipeline::Pipeline(
+    VkPipeline pipeline,
+    const Device* device,
+    std::unique_ptr<PipelineLayout> layout,
+    std::unique_ptr<RenderPass> renderPass)
+    : _pipeline(pipeline), _device(device), _layout(std::move(layout)), _renderPass(std::move(renderPass)) {}
 
 Pipeline::Pipeline(Pipeline&& pipeline) {
     _pipeline = pipeline._pipeline;
@@ -149,7 +152,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         vertexInputInfo.pVertexBindingDescriptions = &vertexInputBindingDesc,
         vertexInputInfo.vertexAttributeDescriptionCount = 4,
         vertexInputInfo.pVertexAttributeDescriptions = vertexInputAttributesDesc
-   };
+    };
 
     // Input assembly state
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{
@@ -188,7 +191,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         multisampling.alphaToOneEnable = VK_FALSE
     };
 
-    VkPipelineDepthStencilStateCreateInfo depthStencil {
+    VkPipelineDepthStencilStateCreateInfo depthStencil{
         depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
         depthStencil.pNext = nullptr,
         depthStencil.flags = 0,

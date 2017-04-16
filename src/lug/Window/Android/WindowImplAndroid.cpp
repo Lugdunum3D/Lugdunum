@@ -9,7 +9,7 @@ AInputQueue* WindowImpl::inputQueue = nullptr;
 ANativeWindow* WindowImpl::nativeWindow = nullptr;
 ANativeActivity* WindowImpl::activity = nullptr;
 
-WindowImpl::WindowImpl(Window* win): _parent{win} {}
+WindowImpl::WindowImpl(Window* win) : _parent{win} {}
 
 bool WindowImpl::init(const Window::InitInfo&) {
     _parent->_mode.width = ANativeWindow_getWidth(nativeWindow);
@@ -27,7 +27,8 @@ ANativeWindow* WindowImpl::getWindow() {
 bool WindowImpl::pollEvent(lug::Window::Event& event) {
 
     if (inputQueue != nullptr) {
-        AInputEvent *androidEvent = nullptr;
+        AInputEvent* androidEvent = nullptr;
+
         while (AInputQueue_getEvent(inputQueue, &androidEvent) >= 0) {
             if (AInputQueue_preDispatchEvent(inputQueue, androidEvent)) {
                 continue;

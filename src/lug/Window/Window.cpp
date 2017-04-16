@@ -220,7 +220,7 @@ void Window::close() {
 }
 
 bool Window::isKeyPressed(Keyboard::Key key) const {
-    return (_keyState.at(key));
+    return _keyState.at(key);
 }
 
 } // namespace Window

@@ -5,7 +5,7 @@ namespace Graphics {
 namespace Scene {
 
 MeshInstance::MeshInstance(const std::string& name, Render::Mesh* mesh, ModelInstance* modelInstance) :
-                            MovableObject(name, MovableObject::Type::Mesh), _mesh(mesh), _modelInstance(modelInstance) {}
+    MovableObject(name, MovableObject::Type::Mesh), _mesh(mesh), _modelInstance(modelInstance) {}
 
 MeshInstance::~MeshInstance() {
     // TODO: Remove this, the MeshInstance should not delete the mesh, it's not the owner !

@@ -10,7 +10,7 @@ namespace Vulkan {
 namespace API {
 
 Swapchain::Swapchain(VkSwapchainKHR swapchain, const Device* device, const VkSurfaceFormatKHR& swapchainFormat, const VkExtent2D& extent) :
-                    _swapchain(swapchain), _device(device), _format(swapchainFormat), _extent(extent) {}
+    _swapchain(swapchain), _device(device), _format(swapchainFormat), _extent(extent) {}
 
 Swapchain::Swapchain(Swapchain&& swapchain) {
     _swapchain = swapchain._swapchain;
@@ -66,6 +66,7 @@ bool Swapchain::init() {
         std::vector<VkImage> images;
 
         result = vkGetSwapchainImagesKHR(static_cast<VkDevice>(*_device), _swapchain, &imagesCount, nullptr);
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate swapchain images: {}", result);
             return false;
@@ -73,6 +74,7 @@ bool Swapchain::init() {
 
         images.resize(imagesCount);
         result = vkGetSwapchainImagesKHR(static_cast<VkDevice>(*_device), _swapchain, &imagesCount, images.data());
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Can't enumerate swapchain images: {}", result);
             return false;
@@ -80,6 +82,7 @@ bool Swapchain::init() {
 
         // Copy VkImage vector to Image vector
         _images.resize(imagesCount);
+
         for (uint8_t i = 0; i < images.size(); ++i) {
             _images[i] = Image(images[i], _device, {_extent.width, _extent.height}, true);
         }
@@ -88,12 +91,15 @@ bool Swapchain::init() {
     // Create image views
     {
         _imagesViews.resize(_images.size());
+
         for (uint8_t i = 0; i < _images.size(); ++i) {
             std::unique_ptr<ImageView> imageView = ImageView::create(_device, &_images[i], _format.format);
+
             if (!imageView) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain image view");
                 return false;
             }
+
             _imagesViews[i] = std::move(imageView);
         }
     }
@@ -101,10 +107,11 @@ bool Swapchain::init() {
     return true;
 }
 
-bool Swapchain::getNextImage(uint32_t *imageIndex, VkSemaphore semaphore) {
+bool Swapchain::getNextImage(uint32_t* imageIndex, VkSemaphore semaphore) {
     // Get next image
     // TODO: remove UINT64_MAX timeout and ask next image later if VK_NOT_READY is returned
     VkResult result = vkAcquireNextImageKHR(static_cast<VkDevice>(*_device), _swapchain, UINT64_MAX, semaphore, VK_NULL_HANDLE, imageIndex);
+
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         _outOfDate = true;
         return false;
@@ -130,10 +137,12 @@ bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaph
     };
 
     VkResult result = vkQueuePresentKHR(static_cast<VkQueue>(*presentQueue), &presentInfo);
+
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: present(): Can't acquire swapchain next image: {}", result);
         return false;
     }
+
     return true;
 }
 

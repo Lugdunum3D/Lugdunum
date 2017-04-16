@@ -28,10 +28,13 @@ namespace Technique {
 using MeshInstance = ::lug::Graphics::Scene::MeshInstance;
 
 Forward::Forward(const Renderer& renderer, const Render::View* renderView, const API::Device* device, API::Queue* presentQueue) :
-                 Technique(renderer, renderView, device, presentQueue) {}
+    Technique(renderer, renderView, device, presentQueue) {}
 
-bool Forward::render(const ::lug::Graphics::Render::Queue& renderQueue, const API::Semaphore& imageReadySemaphore,
-                     const API::Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) {
+bool Forward::render(
+    const ::lug::Graphics::Render::Queue& renderQueue,
+    const API::Semaphore& imageReadySemaphore,
+    const API::Semaphore& drawCompleteSemaphore,
+    uint32_t currentImageIndex) {
     FrameData& frameData = _framesData[currentImageIndex];
 
     auto& viewport = _renderView->getViewport();
@@ -43,9 +46,12 @@ bool Forward::render(const ::lug::Graphics::Render::Queue& renderQueue, const AP
     for (auto subBuffer: frameData.freeSubBuffers) {
         subBuffer->free();
     }
+
     frameData.freeSubBuffers.clear();
 
-    if (!cmdBuffer.reset() || !cmdBuffer.begin()) return false;
+    if (!cmdBuffer.reset() || !cmdBuffer.begin()) {
+        return false;
+    }
 
     // Init render pass
     {
@@ -70,6 +76,7 @@ bool Forward::render(const ::lug::Graphics::Render::Queue& renderQueue, const AP
     BufferPool::SubBuffer* cameraBuffer = _subBuffers[_renderView->getCamera()->getName()];
     {
         Camera* camera = static_cast<Camera*>(_renderView->getCamera());
+
         if (camera->isDirty() && cameraBuffer) {
             frameData.freeSubBuffers.push_back(cameraBuffer);
             cameraBuffer = nullptr;
@@ -123,8 +130,7 @@ bool Forward::render(const ::lug::Graphics::Render::Queue& renderQueue, const AP
             &cmdBuffer,
             frameData.frameBuffer,
             {viewport.extent.width, viewport.extent.height},
-            {viewport.offset.x, viewport.offset.y}
-        );
+            {viewport.offset.x, viewport.offset.y});
 
         cameraBuffer->descriptorSet->bind(_pipelines[Light::Light::Type::Directional]->getLayout(), &cmdBuffer, 0, 1, &cameraBuffer->offset);
 
@@ -134,7 +140,6 @@ bool Forward::render(const ::lug::Graphics::Render::Queue& renderQueue, const AP
             const float blendConstants[4] = {0.0f, 0.0f, 0.0f, 0.0f};
             vkCmdSetBlendConstants(static_cast<VkCommandBuffer>(cmdBuffer), blendConstants);
         }
-
 
         for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
 
@@ -170,13 +175,18 @@ bool Forward::render(const ::lug::Graphics::Render::Queue& renderQueue, const AP
                     Math::Mat4x4f pushConstants[] = {
                         meshInstance->getParent()->getTransform()
                     };
-                    vkCmdPushConstants(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkPipelineLayout>(*lightPipeline->getLayout()), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
+                    vkCmdPushConstants(
+                        static_cast<VkCommandBuffer>(cmdBuffer),
+                        static_cast<VkPipelineLayout>(*lightPipeline->getLayout()),
+                        VK_SHADER_STAGE_VERTEX_BIT,
+                        0,
+                        sizeof(pushConstants),
+                        pushConstants);
 
                     vkCmdBindVertexBuffers(static_cast<VkCommandBuffer>(cmdBuffer), 0, 1, &vertexBuffer, &vertexBufferOffset);
                     vkCmdBindIndexBuffer(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkBuffer>(*vkMesh->getIndexBuffer()), indexBufferOffset, VK_INDEX_TYPE_UINT32);
                     vkCmdDrawIndexed(static_cast<VkCommandBuffer>(cmdBuffer), (uint32_t)vkMesh->indices.size(), 1, 0, 0, 0);
-                }
-                else {
+                } else {
                     Model::Mesh* modelMesh = static_cast<Model::Mesh*>(mesh);
                     Scene::ModelInstance* modelInstance = meshInstance->getModelInstance();
                     Model* model = static_cast<Model*>(modelInstance->getModel());
@@ -188,19 +198,27 @@ bool Forward::render(const ::lug::Graphics::Render::Queue& renderQueue, const AP
                     Math::Mat4x4f pushConstants[] = {
                         modelInstance->getParent()->getTransform()
                     };
-                    vkCmdPushConstants(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkPipelineLayout>(*lightPipeline->getLayout()), VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(pushConstants), pushConstants);
+                    vkCmdPushConstants(
+                        static_cast<VkCommandBuffer>(cmdBuffer),
+                        static_cast<VkPipelineLayout>(*lightPipeline->getLayout()),
+                        VK_SHADER_STAGE_VERTEX_BIT,
+                        0,
+                        sizeof(pushConstants),
+                        pushConstants);
 
                     vkCmdBindVertexBuffers(static_cast<VkCommandBuffer>(cmdBuffer), 0, 1, &vertexBuffer, &vertexBufferOffset);
                     vkCmdBindIndexBuffer(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkBuffer>(*model->getIndexBuffer()), indexBufferOffset, VK_INDEX_TYPE_UINT32);
                     vkCmdDrawIndexed(static_cast<VkCommandBuffer>(cmdBuffer), (uint32_t)modelMesh->indices.size(), 1, 0, 0, 0);
                 }
-
             }
         }
-       renderPass->end(&cmdBuffer);
+
+        renderPass->end(&cmdBuffer);
     }
 
-    if (!cmdBuffer.end()) return false;
+    if (!cmdBuffer.end()) {
+        return false;
+    }
 
     return _presentQueue->submit(
         cmdBuffer,
@@ -208,15 +226,27 @@ bool Forward::render(const ::lug::Graphics::Render::Queue& renderQueue, const AP
         {static_cast<VkSemaphore>(imageReadySemaphore)},
         {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
         static_cast<VkFence>(frameData.fence)
-    );
+        );
 }
 
 bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
     auto colorFormat = _renderView->getFormat().format;
 
-    _pipelines[Light::Light::Type::Directional] = API::Pipeline::createGraphicsPipeline(_device, _renderer.getInfo().shadersRoot + "shader.vert.spv", _renderer.getInfo().shadersRoot + "shader-directional.frag.spv", colorFormat);
-    _pipelines[Light::Light::Type::Point] = API::Pipeline::createGraphicsPipeline(_device, _renderer.getInfo().shadersRoot + "shader.vert.spv", _renderer.getInfo().shadersRoot + "shader-point.frag.spv", colorFormat);
-    _pipelines[Light::Light::Type::Spot] = API::Pipeline::createGraphicsPipeline(_device, _renderer.getInfo().shadersRoot + "shader.vert.spv", _renderer.getInfo().shadersRoot + "shader-spot.frag.spv", colorFormat);
+    _pipelines[Light::Light::Type::Directional] = API::Pipeline::createGraphicsPipeline(
+        _device,
+        _renderer.getInfo().shadersRoot + "shader.vert.spv",
+        _renderer.getInfo().shadersRoot + "shader-directional.frag.spv",
+        colorFormat);
+    _pipelines[Light::Light::Type::Point] = API::Pipeline::createGraphicsPipeline(
+        _device,
+        _renderer.getInfo().shadersRoot + "shader.vert.spv",
+        _renderer.getInfo().shadersRoot + "shader-point.frag.spv",
+        colorFormat);
+    _pipelines[Light::Light::Type::Spot] = API::Pipeline::createGraphicsPipeline(
+        _device,
+        _renderer.getInfo().shadersRoot + "shader.vert.spv",
+        _renderer.getInfo().shadersRoot + "shader-spot.frag.spv",
+        colorFormat);
 
     if (!_pipelines[Light::Light::Type::Directional] ||
         !_pipelines[Light::Light::Type::Point] ||
@@ -225,6 +255,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
     }
 
     _framesData.resize(imageViews.size());
+
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
         // Fence
         {
@@ -235,6 +266,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
                 createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT
             };
             VkResult result = vkCreateFence(static_cast<VkDevice>(*_device), &createInfo, nullptr, &fence);
+
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain fence: {}", result);
                 return false;
@@ -246,6 +278,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
         // Create command buffers
         {
             _framesData[i].cmdBuffers = _presentQueue->getCommandPool().createCommandBuffers();
+
             if (_framesData[i].cmdBuffers.size() == 0) {
                 return false;
             }
@@ -253,12 +286,13 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
     }
 
     std::vector<uint32_t> queueFamilyIndices = {(uint32_t)_presentQueue->getFamilyIdx()};
-    _cameraPool = std::make_unique<BufferPool>((uint32_t)_framesData.size(),
-                                                (uint32_t)sizeof(Math::Mat4x4f) * 2,
-                                                _device,
-                                                queueFamilyIndices,
-                                                descriptorPool,
-                                                _pipelines[Light::Light::Type::Directional]->getLayout()->getDescriptorSetLayouts()[0].get());
+    _cameraPool = std::make_unique<BufferPool>(
+        (uint32_t)_framesData.size(),
+        (uint32_t)sizeof(Math::Mat4x4f) * 2,
+        _device,
+        queueFamilyIndices,
+        descriptorPool,
+        _pipelines[Light::Light::Type::Directional]->getLayout()->getDescriptorSetLayouts()[0].get());
 
 
     uint32_t largestLightSize = 0;
@@ -267,12 +301,13 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
         largestLightSize = (uint32_t)(std::max)(sizeof(Light::Directional::LightData), sizeof(Light::Point::LightData));
         largestLightSize = (std::max)(largestLightSize, (uint32_t)sizeof(Light::Spot::LightData));
     }
-    _lightsPool = std::make_unique<BufferPool>((uint32_t)_framesData.size() * 50,
-                                                largestLightSize,
-                                                _device,
-                                                queueFamilyIndices,
-                                                descriptorPool,
-                                                _pipelines[Light::Light::Type::Directional]->getLayout()->getDescriptorSetLayouts()[1].get());
+    _lightsPool = std::make_unique<BufferPool>(
+        (uint32_t)_framesData.size() * 50,
+        largestLightSize,
+        _device,
+        queueFamilyIndices,
+        descriptorPool,
+        _pipelines[Light::Light::Type::Directional]->getLayout()->getDescriptorSetLayouts()[1].get());
 
     return initDepthBuffers(imageViews) && initFramebuffers(imageViews);
 }
@@ -293,10 +328,12 @@ void Forward::destroy() {
 }
 
 bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
-    VkFormat imagesFormat = API::Image::findSupportedFormat(_device,
-                                                       {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-                                                       VK_IMAGE_TILING_OPTIMAL,
-                                                       VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    VkFormat imagesFormat = API::Image::findSupportedFormat(
+        _device,
+        {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+
     if (imagesFormat == VK_FORMAT_UNDEFINED) {
         LUG_LOG.error("Forward: Can't find supported format for depth buffer");
         return false;
@@ -307,11 +344,12 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
     }
 
     _framesData.resize(imageViews.size());
+
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
         std::unique_ptr<API::Image> image = nullptr;
         std::unique_ptr<API::ImageView> imageView = nullptr;
 
-        VkExtent3D extent {
+        VkExtent3D extent{
             extent.width = imageViews[i]->getExtent().width,
             extent.height = imageViews[i]->getExtent().height,
             extent.depth = 1
@@ -320,6 +358,7 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
         // Create depth buffer image
         {
             image = API::Image::create(_device, imagesFormat, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+
             if (!image) {
                 LUG_LOG.error("Forward: Can't create depth buffer image");
                 return false;
@@ -332,6 +371,7 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
                 uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, imageRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
                 // Allocate image requirements size for all images
                 _depthBufferMemory = API::DeviceMemory::allocate(_device, imageRequirements.size * imageViews.size(), memoryTypeIndex);
+
                 if (!_depthBufferMemory) {
                     LUG_LOG.error("Forward: Can't allocate device memory for depth buffer images");
                     return false;
@@ -345,6 +385,7 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
         // Create depth buffer image view
         {
             imageView = API::ImageView::create(_device, image.get(), imagesFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
             if (!imageView) {
                 LUG_LOG.error("Forward: Can't create depth buffer image view");
                 return false;
@@ -354,6 +395,7 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
         _framesData[i].depthBuffer.image = std::move(image);
         _framesData[i].depthBuffer.imageView = std::move(imageView);
     }
+
     return true;
 }
 
@@ -381,14 +423,17 @@ bool Forward::initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>
 
         VkFramebuffer fb;
         result = vkCreateFramebuffer(static_cast<VkDevice>(*_device), &framebufferInfo, nullptr, &fb);
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererVulkan: Failed to create framebuffer: {}", result);
             return false;
         }
+
         // TODO: Remove the extent initializer list when struct Extent is externalised
         _framesData[i].frameBuffer.destroy();
         _framesData[i].frameBuffer = API::Framebuffer(fb, _device, {imageViews[i]->getExtent().width, imageViews[i]->getExtent().height});
     }
+
     return true;
 }
 

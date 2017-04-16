@@ -8,10 +8,11 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-PipelineLayout::PipelineLayout(std::vector<std::unique_ptr<DescriptorSetLayout>>& descriptorSetLayouts,
-                                VkPipelineLayout pipelineLayout,
-                                const Device* device) :
-                                _pipelineLayout(pipelineLayout), _device(device), _descriptorSetLayouts(std::move(descriptorSetLayouts)) {}
+PipelineLayout::PipelineLayout(
+    std::vector<std::unique_ptr<DescriptorSetLayout>>& descriptorSetLayouts,
+    VkPipelineLayout pipelineLayout,
+    const Device* device) :
+    _pipelineLayout(pipelineLayout), _device(device), _descriptorSetLayouts(std::move(descriptorSetLayouts)) {}
 
 PipelineLayout::PipelineLayout(PipelineLayout&& pipelineLayout) {
     _pipelineLayout = pipelineLayout._pipelineLayout;
@@ -60,7 +61,7 @@ std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
             {
                 bindings[0].binding = 0,
                 bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-                bindings[0].descriptorCount = 1 ,
+                bindings[0].descriptorCount = 1,
                 bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 bindings[0].pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
             }
@@ -76,7 +77,7 @@ std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
             {
                 bindings[0].binding = 0,
                 bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-                bindings[0].descriptorCount = 1 ,
+                bindings[0].descriptorCount = 1,
                 bindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
                 bindings[0].pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
             }

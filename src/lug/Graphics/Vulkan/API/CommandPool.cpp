@@ -49,6 +49,7 @@ std::vector<CommandBuffer> CommandPool::createCommandBuffers(VkCommandBufferLeve
 
     std::vector<VkCommandBuffer> commandBuffers(count);
     VkResult result = vkAllocateCommandBuffers(static_cast<VkDevice>(*_device), &allocateInfo, commandBuffers.data());
+
     if (result != VK_SUCCESS) {
         LUG_LOG.error("CommandPool: Can't allocate command buffers: {}", result);
         return {};
@@ -65,6 +66,7 @@ std::vector<CommandBuffer> CommandPool::createCommandBuffers(VkCommandBufferLeve
 
 bool CommandPool::reset(bool releaseRessources) {
     VkResult result = vkResetCommandPool(static_cast<VkDevice>(*_device), _commandPool, releaseRessources ? VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT : 0);
+
     if (result != VK_SUCCESS) {
         LUG_LOG.error("CommandPool: Can't reset the pool: {}", result);
         return false;

@@ -21,7 +21,7 @@ bool Graphics::init(const InitInfo& initInfo) {
 bool Graphics::beginInit(const InitInfo& initInfo) {
     _initInfo = initInfo;
 
-    switch(_initInfo.rendererType) {
+    switch (_initInfo.rendererType) {
         case Renderer::Type::Vulkan:
             _renderer = std::make_unique<Vulkan::Renderer>(*this);
             break;
@@ -106,8 +106,7 @@ std::unique_ptr<Render::Mesh> Graphics::createMesh(const std::string& name) {
         Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(_renderer.get());
         std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(0, true)->getFamilyIdx() };
         mesh = std::make_unique<Vulkan::Render::Mesh>(name, queueFamilyIndices, &renderer->getDevice());
-    }
-    else {
+    } else {
         LUG_LOG.error("Graphics: Unknown render type");
     }
 
@@ -126,8 +125,7 @@ std::unique_ptr<Render::Model> Graphics::createModel(const std::string& name, co
         Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(_renderer.get());
         std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(0, true)->getFamilyIdx() };
         model = std::make_unique<Vulkan::Render::Model>(name, queueFamilyIndices, &renderer->getDevice());
-    }
-    else {
+    } else {
         LUG_LOG.error("Graphics: Unknown render type");
         return nullptr;
     }
@@ -138,7 +136,6 @@ std::unique_ptr<Render::Model> Graphics::createModel(const std::string& name, co
             return nullptr;
         }
     }
-
 
     return model;
 }
@@ -153,8 +150,7 @@ std::unique_ptr<Render::Camera> Graphics::createCamera(const std::string& name) 
 
     if (_initInfo.rendererType == Renderer::Type::Vulkan) {
         camera = std::make_unique<Vulkan::Render::Camera>(name);
-    }
-    else {
+    } else {
         LUG_LOG.error("Graphics: Unknown render type");
     }
 

@@ -14,12 +14,14 @@ namespace Graphics {
 namespace Scene {
 
 // TODO: Move in helper class
-std::string  getFileExtension(const std::string& fileName) {
+std::string getFileExtension(const std::string& fileName) {
     std::size_t size = fileName.rfind('.', fileName.length());
-    if (size != std::string::npos)
-        return (fileName.substr(size + 1, fileName.length() - size));
 
-    return ("");
+    if (size != std::string::npos) {
+        return fileName.substr(size + 1, fileName.length() - size);
+    }
+
+    return "";
 }
 
 bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
@@ -34,7 +36,8 @@ bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
 
     LUG_LOG.info("Loading model {}", file);
 
-    const aiScene* scene = importer.ReadFile(file,
+    const aiScene* scene = importer.ReadFile(
+        file,
         aiProcess_FlipWindingOrder |
         aiProcess_CalcTangentSpace |
         aiProcess_Triangulate |
@@ -48,8 +51,7 @@ bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
         aiProcess_FindInvalidData |
         aiProcess_OptimizeMeshes |
         aiProcess_GenSmoothNormals |
-        aiProcess_PreTransformVertices
-    );
+        aiProcess_PreTransformVertices);
 
     if (!scene) {
         LUG_LOG.error("ModelLoader::loadFromFile: Failed to load model {}: {}", file, importer.GetErrorString());
@@ -78,15 +80,13 @@ bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
             // Color
             if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
                 vertex.color = {color.r, color.g, color.b};
-            }
-            else if (assimpMesh->HasVertexColors(j)) {
+            } else if (assimpMesh->HasVertexColors(j)) {
                 vertex.color = {
                     assimpMesh->mColors[j]->r,
                     assimpMesh->mColors[j]->g,
                     assimpMesh->mColors[j]->b
                 };
-            }
-            else {
+            } else {
                 vertex.color = {1.0f, 1.0f, 1.0f};
             }
 
@@ -97,8 +97,7 @@ bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
                     -assimpMesh->mTextureCoords[0][j].y
                 };
 
-            }
-            else {
+            } else {
                 vertex.uv = {0.0f, 0.0f};
             }
 
@@ -109,8 +108,7 @@ bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
                     assimpMesh->mNormals[j].y,
                     assimpMesh->mNormals[j].z
                 };
-            }
-            else {
+            } else {
                 vertex.normal = {1.0f, 1.0f, 1.0f};
             }
 
@@ -119,7 +117,8 @@ bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
         }
 
         for (uint32_t j = 0; j < assimpMesh->mNumFaces; j++) {
-            auto &&face = assimpMesh->mFaces[j];
+            auto&& face = assimpMesh->mFaces[j];
+
             for (int k = 0; k < 3; k++) {
                 mesh->indices.push_back(face.mIndices[k]);
                 indicesOffset++;

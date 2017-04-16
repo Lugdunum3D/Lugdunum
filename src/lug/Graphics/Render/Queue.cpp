@@ -19,20 +19,18 @@ void Queue::addMovableObject(Scene::MovableObject* object) {
         _lights[_lightsNb] = static_cast<Light::Light*>(object);
         ++_lightsNb;
         return;
-    }
-    else if (object->getType() == Scene::MovableObject::Type::Mesh) {
+    } else if (object->getType() == Scene::MovableObject::Type::Mesh) {
         _meshs[_meshsNb] = static_cast<Scene::MeshInstance*>(object);
         ++_meshsNb;
         return;
-    }
-    else if (object->getType() == Scene::MovableObject::Type::Model) {
+    } else if (object->getType() == Scene::MovableObject::Type::Model) {
         Scene::ModelInstance* modelInstance = static_cast<Scene::ModelInstance*>(object);
         auto& meshsInstances = modelInstance->getMeshsInstances();
+
         for (auto& meshInstance: meshsInstances) {
             addMovableObject(meshInstance.get());
         }
-    }
-    else if (object->getType() != Scene::MovableObject::Type::Camera) {
+    } else if (object->getType() != Scene::MovableObject::Type::Camera) {
         LUG_LOG.warn("Queue::addMovableObject: Unknow object type");
     }
 }

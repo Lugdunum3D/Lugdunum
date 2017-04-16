@@ -20,6 +20,7 @@ bool FreeList::grow(void* start, void* end, size_t alignment, size_t offset) {
         }
 
         size_t size = static_cast<char*>(end) - static_cast<char*>(start) + 1;
+
         if (!std::align(alignment, _size - offset, start, size)) {
             return false;
         }
@@ -33,6 +34,7 @@ bool FreeList::grow(void* start, void* end, size_t alignment, size_t offset) {
         _nextFree = it;
 
         size_t size = static_cast<char*>(end) - static_cast<char*>(start) + 1;
+
         for (size_t i = 1, count = size / _size; i < count; ++i) {
             void* const next = static_cast<char*>(static_cast<void*>(it)) + _size;
 
@@ -58,6 +60,7 @@ void* FreeList::allocate() {
 
 void FreeList::free(void* ptr) {
     Element* const head = static_cast<Element*>(ptr);
+
     head->next = _nextFree;
     _nextFree = head;
 }

@@ -19,7 +19,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Window::Window(Renderer &renderer) : _renderer(renderer) {}
+Window::Window(Renderer& renderer) : _renderer(renderer) {}
 
 Window::~Window() {
     destroyRender();
@@ -62,6 +62,7 @@ bool Window::beginFrame() {
 
             for (auto& renderView: _renderViews) {
                 View* renderView_ = static_cast<View*>(renderView.get());
+
                 if (!renderView_->getRenderTechnique()->initDepthBuffers(_swapchain.getImagesViews()) ||
                     !renderView_->getRenderTechnique()->initFramebuffers(_swapchain.getImagesViews())) {
                     return false;
@@ -89,29 +90,33 @@ bool Window::beginFrame() {
     std::vector<VkSemaphore> imageReadyVkSemaphores;
     imageReadyVkSemaphores.reserve(frameData.imageReadySemaphores.size());
 
-    std::transform(frameData.imageReadySemaphores.begin(), frameData.imageReadySemaphores.end(),
+    std::transform(
+        frameData.imageReadySemaphores.begin(),
+        frameData.imageReadySemaphores.end(),
         std::back_inserter(imageReadyVkSemaphores),
-        [](const API::Semaphore& semaphore) {
-            return static_cast<VkSemaphore>(semaphore);
-        }
-    );
+        [] (const API::Semaphore& semaphore) {
+                        return static_cast<VkSemaphore>(semaphore);
+                    }
+        );
 
     return _presentQueue->submit(
         cmdBuffer,
         imageReadyVkSemaphores,
         {static_cast<VkSemaphore>(acquireImageData->completeSemaphore)},
         {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT}
-    );
+        );
 }
 
 bool Window::endFrame() {
     FrameData& frameData = _framesData[_currentImageIndex];
+
     API::CommandBuffer& cmdBuffer = frameData.cmdBuffers[1];
     std::vector<VkSemaphore> waitSemaphores(_renderViews.size());
     uint32_t i = 0;
 
     for (auto& renderView: _renderViews) {
         View* renderView_ = static_cast<View*>(renderView.get());
+
         // Render views with no camera don't signal the semaphore as they don't draw
         if (renderView_->getCamera()) {
             waitSemaphores[i++] = static_cast<VkSemaphore>(renderView_->getDrawCompleteSemaphore(_currentImageIndex));
@@ -147,18 +152,24 @@ lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::Ini
 bool Window::render() {
     FrameData& frameData = _framesData[_currentImageIndex];
     uint32_t i = 0;
-    for (auto &renderView: _renderViews) {
-        if (!static_cast<View*>(renderView.get())->render(frameData.imageReadySemaphores[i++], _currentImageIndex)) return false;
+
+    for (auto& renderView: _renderViews) {
+        if (!static_cast<View*>(renderView.get())->render(frameData.imageReadySemaphores[i++], _currentImageIndex)) {
+            return false;
+        }
     }
 
     return true;
 }
 
 std::unique_ptr<Window>
-Window::create(Renderer &renderer, Window::InitInfo& initInfo) {
+
+Window::create(Renderer& renderer, Window::InitInfo& initInfo) {
     std::unique_ptr<Window> window(new Window(renderer));
 
-    if (!window->init(initInfo)) return nullptr;
+    if (!window->init(initInfo)) {
+        return nullptr;
+    }
 
     return window;
 }
@@ -188,6 +199,7 @@ bool Window::initDescriptorPool() {
     VkDescriptorPool descriptorPool{VK_NULL_HANDLE};
 
     VkResult result = vkCreateDescriptorPool(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &descriptorPool);
+
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create the descriptor pool: {}", result);
         return false;
@@ -253,6 +265,7 @@ bool Window::initSwapchainCapabilities() {
     // Get swapchain capabilities
     {
         result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(info->handle, _surface, &info->swapchain.capabilities);
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't get surface capabilities: {}", result);
             return false;
@@ -260,6 +273,7 @@ bool Window::initSwapchainCapabilities() {
 
         uint32_t formatsCount = 0;
         result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, _surface, &formatsCount, nullptr);
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve formats count: {}", result);
             return false;
@@ -267,6 +281,7 @@ bool Window::initSwapchainCapabilities() {
 
         info->swapchain.formats.resize(formatsCount);
         result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, _surface, &formatsCount, info->swapchain.formats.data());
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve formats: {}", result);
             return false;
@@ -274,6 +289,7 @@ bool Window::initSwapchainCapabilities() {
 
         uint32_t presentModesCount = 0;
         result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, _surface, &presentModesCount, nullptr);
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve present modes count: {}", result);
             return false;
@@ -281,6 +297,7 @@ bool Window::initSwapchainCapabilities() {
 
         info->swapchain.presentModes.resize(presentModesCount);
         result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, _surface, &presentModesCount, info->swapchain.presentModes.data());
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve present modes: {}", result);
             return false;
@@ -301,17 +318,18 @@ bool Window::initPresentQueue() {
         for (auto& queue : _renderer.getQueues()) {
             VkBool32 supported = 0;
             result = vkGetPhysicalDeviceSurfaceSupportKHR(info->handle, queue.getFamilyIdx(), _surface, &supported);
+
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererWindow: Can't check if queue supports presentation: {}", result);
                 return false;
             }
+
             queue.supportsPresentation(!!supported);
         }
     }
 
     return true;
 }
-
 
 bool Window::initSwapchain() {
     VkResult result;
@@ -442,19 +460,23 @@ bool Window::initSwapchain() {
         std::vector<uint32_t> queueFamilyIndices(1);
 
         _presentQueue = _renderer.getQueue(0, true);
+
         if (!_presentQueue) {
             LUG_LOG.error("RendererWindow: Can't find presentation queue");
             return false;
         }
+
         queueFamilyIndices[0] = _presentQueue->getFamilyIdx();
 
         // Check if the presentation and graphics queue are the same
         if (!_renderer.isSameQueue(0, true, VK_QUEUE_GRAPHICS_BIT, false)) {
             const API::Queue* graphicsQueue = _renderer.getQueue(VK_QUEUE_GRAPHICS_BIT, false);
+
             if (!graphicsQueue) {
                 LUG_LOG.error("RendererWindow: Can't find graphics queue");
                 return false;
             }
+
             queueFamilyIndices.push_back(graphicsQueue->getFamilyIdx());
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         }
@@ -464,6 +486,7 @@ bool Window::initSwapchain() {
 
         VkSwapchainKHR swapchainKHR;
         result = vkCreateSwapchainKHR(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &swapchainKHR);
+
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't initialize swapchain: {}", result);
             return false;
@@ -473,6 +496,7 @@ bool Window::initSwapchain() {
         _presentQueue->waitIdle();
         {
             uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+
             for (uint32_t i = 0; i < frameDataSize; ++i) {
                 for (uint32_t j = 0; j < _framesData[i].cmdBuffers.size(); ++j) {
                     _framesData[i].cmdBuffers[j].reset();
@@ -488,6 +512,7 @@ bool Window::initSwapchain() {
 
 bool Window::initFramesData() {
     uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+
     if (_framesData.size() == frameDataSize) {
         return true;
     }
@@ -505,6 +530,7 @@ bool Window::initFramesData() {
                 createInfo.flags = 0
             };
             VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
+
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
                 return false;
@@ -521,9 +547,11 @@ bool Window::initFramesData() {
                 createInfo.flags = 0
             };
             _framesData[i].imageReadySemaphores.resize(_initInfo.renderViewsInitInfo.size());
+
             for (uint32_t j = 0; j < _initInfo.renderViewsInitInfo.size(); ++j) {
                 VkSemaphore semaphore;
                 VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
+
                 if (result != VK_SUCCESS) {
                     LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
                     return false;
@@ -547,6 +575,7 @@ bool Window::initFramesData() {
                 createInfo.flags = 0
             };
             VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
+
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
                 return false;
@@ -562,35 +591,49 @@ bool Window::initFramesData() {
 
 bool Window::buildCommandBuffers() {
     uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+
     for (uint32_t i = 0; i < frameDataSize; ++i) {
         // Build command buffer image present to color attachment
         {
             API::CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[0];
-            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT )) return false;
 
-            _swapchain.getImages()[i].changeLayout(cmdBuffer,
-                                0,
-                                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                                VK_IMAGE_LAYOUT_UNDEFINED,
-                                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT )) {
+                return false;
+            }
 
-            if (!cmdBuffer.end()) return false;
+            _swapchain.getImages()[i].changeLayout(
+                cmdBuffer,
+                0,
+                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                VK_IMAGE_LAYOUT_UNDEFINED,
+                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+
+            if (!cmdBuffer.end()) {
+                return false;
+            }
         }
 
         // Build command buffer image color attachment to present
         {
             API::CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[1];
-            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT )) return false;
 
-            _swapchain.getImages()[i].changeLayout(cmdBuffer,
-                                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                                VK_ACCESS_MEMORY_READ_BIT,
-                                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT )) {
+                return false;
+            }
 
-            if (!cmdBuffer.end()) return false;
+            _swapchain.getImages()[i].changeLayout(
+                cmdBuffer,
+                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                VK_ACCESS_MEMORY_READ_BIT,
+                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+
+            if (!cmdBuffer.end()) {
+                return false;
+            }
         }
     }
+
     return true;
 }
 
@@ -642,7 +685,9 @@ bool Window::initRender() {
     }
 
     for (auto& renderViewInitInfo : _initInfo.renderViewsInitInfo) {
-        if (!createView(renderViewInitInfo)) return false;
+        if (!createView(renderViewInitInfo)) {
+            return false;
+        }
     }
 
     return true;

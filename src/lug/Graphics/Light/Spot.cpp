@@ -4,7 +4,7 @@ namespace lug {
 namespace Graphics {
 namespace Light {
 
-Spot::Spot(const std::string& name): Light(name, Light::Type::Spot) {}
+Spot::Spot(const std::string& name) : Light(name, Light::Type::Spot) {}
 
 void Spot::setPosition(const Math::Vec3f& position) {
     _position = position;

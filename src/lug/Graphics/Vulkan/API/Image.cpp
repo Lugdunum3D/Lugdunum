@@ -8,11 +8,11 @@ namespace Vulkan {
 namespace API {
 
 Image::Image(VkImage image, const Device* device, const Extent& extent, bool swapchainImage, VkImageAspectFlags aspect) :
-            _image(image), _device(device), _swapchainImage(swapchainImage), _aspect(aspect), _extent(extent) {
-                if (_image != VK_NULL_HANDLE) {
-                    vkGetImageMemoryRequirements(static_cast<VkDevice>(*device), _image, &_requirements);
-                }
-            }
+    _image(image), _device(device), _swapchainImage(swapchainImage), _aspect(aspect), _extent(extent) {
+    if (_image != VK_NULL_HANDLE) {
+        vkGetImageMemoryRequirements(static_cast<VkDevice>(*device), _image, &_requirements);
+    }
+}
 
 Image::Image(Image&& image) {
     _image = image._image;
@@ -55,13 +55,16 @@ Image::~Image() {
     }
 }
 
-void Image::changeLayout(CommandBuffer& commandBuffer,
-                VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask,
-                VkImageLayout oldLayout, VkImageLayout newLayout,
-                VkPipelineStageFlags srcStageMask,
-                VkPipelineStageFlags dstStageMask,
-                uint32_t srcQueueFamilyIndex,
-                uint32_t dstQueueFamilyIndex) {
+void Image::changeLayout(
+    CommandBuffer& commandBuffer,
+    VkAccessFlags srcAccessMask,
+    VkAccessFlags dstAccessMask,
+    VkImageLayout oldLayout,
+    VkImageLayout newLayout,
+    VkPipelineStageFlags srcStageMask,
+    VkPipelineStageFlags dstStageMask,
+    uint32_t srcQueueFamilyIndex,
+    uint32_t dstQueueFamilyIndex) {
 
     VkImageMemoryBarrier imageBarrier{
         imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
@@ -82,16 +85,17 @@ void Image::changeLayout(CommandBuffer& commandBuffer,
     imageBarrier.subresourceRange.baseArrayLayer = 0;
     imageBarrier.subresourceRange.layerCount = 1;
 
-    vkCmdPipelineBarrier(static_cast<VkCommandBuffer>(commandBuffer), // commandBuffer
-                        srcStageMask, // srcStageMask
-                        dstStageMask, // dstStageMask
-                        VK_DEPENDENCY_BY_REGION_BIT, // dependencyFlags
-                        0, // memoryBarrierCount
-                        nullptr, // pMemoryBarriers
-                        0, // bufferMemoryBarrierCount
-                        nullptr, // pBufferMemoryBarriers
-                        1, // imageMemoryBarrierCount
-                        &imageBarrier); // pImageMemoryBarriers
+    vkCmdPipelineBarrier(
+        static_cast<VkCommandBuffer>(commandBuffer), // commandBuffer
+        srcStageMask,                                // srcStageMask
+        dstStageMask,                                // dstStageMask
+        VK_DEPENDENCY_BY_REGION_BIT,                 // dependencyFlags
+        0,                                           // memoryBarrierCount
+        nullptr,                                     // pMemoryBarriers
+        0,                                           // bufferMemoryBarrierCount
+        nullptr,                                     // pBufferMemoryBarriers
+        1,                                           // imageMemoryBarrierCount
+        &imageBarrier);                              // pImageMemoryBarriers
 }
 
 void Image::destroy() {
@@ -121,9 +125,9 @@ std::unique_ptr<Image> Image::create(
     VkSampleCountFlagBits samples,
     VkImageTiling tiling,
     VkImageCreateFlags createFlag,
-    VkImageType imageType
-) {
-    VkImageCreateInfo createInfo {
+    VkImageType imageType) {
+
+    VkImageCreateInfo createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = createFlag,
@@ -140,6 +144,7 @@ std::unique_ptr<Image> Image::create(
         createInfo.pQueueFamilyIndices = nullptr,
         createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED
     };
+
     createInfo.extent.width = extent.width;
     createInfo.extent.height = extent.height;
     createInfo.extent.depth = extent.depth;
@@ -178,8 +183,7 @@ bool Image::isFormatSupported(const Device* device, VkFormat format, VkImageTili
 
     if (tiling == VK_IMAGE_TILING_LINEAR && (formatProperties.linearTilingFeatures & features) == features) {
         return true;
-    }
-    else if (tiling == VK_IMAGE_TILING_OPTIMAL && (formatProperties.optimalTilingFeatures & features) == features) {
+    } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (formatProperties.optimalTilingFeatures & features) == features) {
         return false;
     }
 

@@ -34,9 +34,12 @@ std::unique_ptr<MovableCamera> Scene::createMovableCamera(const std::string& nam
 
 std::unique_ptr<Light::Light> Scene::createLight(const std::string& name, Light::Light::Type type) {
     switch (type) {
-        case Light::Light::Type::Directional:    return std::make_unique<Light::Directional>(name);
-        case Light::Light::Type::Point:          return std::make_unique<Light::Point>(name);
-        case Light::Light::Type::Spot:           return std::make_unique<Light::Spot>(name);
+        case Light::Light::Type::Directional:
+            return std::make_unique<Light::Directional>(name);
+        case Light::Light::Type::Point:
+            return std::make_unique<Light::Point>(name);
+        case Light::Light::Type::Spot:
+            return std::make_unique<Light::Spot>(name);
     }
 
     return nullptr;

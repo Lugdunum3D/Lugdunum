@@ -42,6 +42,7 @@ void AndroidApp::shutdowApplication() {
         _savedState = nullptr;
         _savedStateSize = 0;
     }
+
     delete this;
 }
 
@@ -54,7 +55,7 @@ void AndroidApp::onStart(ANativeActivity*) {}
 
 void AndroidApp::onResume(ANativeActivity*) {}
 
-void *AndroidApp::onSaveInstanceState(ANativeActivity*, size_t*) {
+void* AndroidApp::onSaveInstanceState(ANativeActivity*, size_t*) {
     return nullptr;
 }
 
@@ -70,7 +71,7 @@ void AndroidApp::onDestroy(ANativeActivity* ) {
 
 void AndroidApp::onWindowFocusChanged(ANativeActivity*, int) {}
 
-void AndroidApp::onNativeWindowCreated(ANativeActivity* , ANativeWindow* window) {
+void AndroidApp::onNativeWindowCreated(ANativeActivity*, ANativeWindow* window) {
     lug::Window::priv::WindowImpl::nativeWindow = window;
 }
 
@@ -99,7 +100,7 @@ void AndroidApp::onLowMemory(ANativeActivity*) {}
 } // Main
 } // lug
 
-void  ANativeActivity_onCreate(ANativeActivity* activity, void* savedState, size_t savedStateSize) {
+void ANativeActivity_onCreate(ANativeActivity* activity, void* savedState, size_t savedStateSize) {
     activity->instance = new lug::Main::AndroidApp(activity, savedState, savedStateSize);
     lug::Window::priv::WindowImpl::activity = activity;
 }

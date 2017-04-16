@@ -6,7 +6,7 @@ namespace lug {
 namespace System {
 namespace Logger {
 
-Handler::Handler(const std::string& name):
+Handler::Handler(const std::string& name) :
     _name(name),
     _formatter(std::make_unique<Formatter>("[%H:%M:%S][%l] %v\n")),
     _level(Level::Debug) {}

@@ -47,9 +47,9 @@ std::unique_ptr<ImageView> ImageView::create(
     const Image* image,
     VkFormat format,
     VkImageAspectFlags imageAspect,
-    VkImageViewType viewType
-) {
-    VkImageViewCreateInfo createInfo {
+    VkImageViewType viewType) {
+
+    VkImageViewCreateInfo createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = 0,

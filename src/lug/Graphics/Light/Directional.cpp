@@ -4,7 +4,7 @@ namespace lug {
 namespace Graphics {
 namespace Light {
 
-Directional::Directional(const std::string& name): Light(name, Light::Type::Directional) {}
+Directional::Directional(const std::string& name) : Light(name, Light::Type::Directional) {}
 
 void Directional::setDirection(const Math::Vec3f& direction) {
     _direction = direction;

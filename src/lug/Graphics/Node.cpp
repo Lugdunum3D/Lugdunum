@@ -114,7 +114,9 @@ void Node::setRotation(const Math::Quatf& rotation, TransformSpace space) {
 }
 
 void Node::setDirection(const Math::Vec3f& spaceTargetDirection, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space) {
-    if (spaceTargetDirection.length() == 0.0f) return;
+    if (spaceTargetDirection.length() == 0.0f) {
+        return;
+    }
 
     // The direction we want the local direction point to
     Math::Vec3f targetDirection = Math::normalize(spaceTargetDirection);
@@ -135,6 +137,7 @@ void Node::setDirection(const Math::Vec3f& spaceTargetDirection, const Math::Vec
     Math::Quatf unitZToTarget = Math::Quatf::fromAxes(xVec, yVec, targetDirection);
 
     Math::Quatf targetOrientation;
+
     if (localDirectionVector == Math::Vec3f{0.0f, 0.0f, -1.0f}) {
         targetOrientation = Math::Quatf(-unitZToTarget.y(), -unitZToTarget.z(), unitZToTarget.w(), unitZToTarget.x());
     } else {
@@ -172,8 +175,7 @@ void Node::update() {
         _absolutePosition = _parent->getAbsoluteRotation().transform() * (_parent->getAbsoluteScale() * _position) + _parent->getAbsolutePosition();
         _absoluteRotation = _parent->getAbsoluteRotation() * _rotation;
         _absoluteScale = _parent->getAbsoluteScale() * _scale;
-    }
-    else {
+    } else {
         _absolutePosition = _position;
         _absoluteRotation = _rotation;
         _absoluteScale = _scale;
