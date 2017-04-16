@@ -1,5 +1,6 @@
 #include <unordered_map>
-#include <lug/System/Logger.hpp>
+
+#include <lug/System/Logger/Logger.hpp>
 #include <lug/Window/Keyboard.hpp>
 #include <lug/Window/Window.hpp>
 
@@ -151,20 +152,26 @@ auto createKeyEnumMap() {
 }
 
 int main() {
-    auto window = lug::Window::Window::create(800, 600, "Default Window", lug::Window::Style::Default);
+    auto window = lug::Window::Window::create({
+        800,                        // width
+        600,                        // height
+        "Default Window",           // title
+        lug::Window::Style::Default // style
+    });
 
-    auto logger = lug::System::makeLogger("LugdunumSamples");
+
+    auto logger = lug::System::Logger::makeLogger("LugdunumSamples");
 
     auto keyEnumMap = createKeyEnumMap();
 
 #if defined(LUG_SYSTEM_ANDROID)
-    auto handler = lug::System::makeHandler<lug::System::LogCatHandler>("LogCat");
+    auto handler = lug::System::Logger::makeHandler<lug::System::Logger::LogCatHandler>("LogCat");
 #else
-    auto handler = lug::System::makeHandler<lug::System::StdoutHandler>("Stdout");
+    auto handler = lug::System::Logger::makeHandler<lug::System::Logger::StdoutHandler>("Stdout");
 #endif
 
     logger->addHandler(handler);
-    lug::System::Logger::logger.addHandler(handler);
+    LUG_LOG.addHandler(handler);
 
     if (!window) {
         logger->fatal("Window was not created");
@@ -229,13 +236,6 @@ int main() {
             }
 
         }
-
-//        // Checking that keys states are correctly set
-//        for (auto it = keyEnumMap.begin(); it != keyEnumMap.end(); ++it) {
-//            if (window->isKeyPressed(it->first)) {
-//                logger->info(it->second + " is set to pressed");
-//            }
-//        }
     }
 
     return 0;

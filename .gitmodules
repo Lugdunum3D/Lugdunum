@@ -1,6 +1,4 @@
-[submodule "lib/googletest"]
-	path = lib/googletest
-	url = https://github.com/google/googletest.git
-[submodule "lib/fmt"]
-	path = lib/fmt
-	url = git@github.com:fmtlib/fmt.git
+[submodule "thirdparty"]
+	path = thirdparty
+	url = https://github.com/Lugdunum3D/Lugdunum-ThirdParty.git
+	branch = master

@@ -3,12 +3,14 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Core)
 
 # all source files
 set(SRC
-
+     ${SRCROOT}/Application.cpp
 )
 source_group("src" FILES ${SRC})
 
 # all header files
 set(INC
+    ${INCROOT}/Application.hpp
+    ${INCROOT}/Application.inl
     ${INCROOT}/Export.hpp
 )
 source_group("inc" FILES ${INC})

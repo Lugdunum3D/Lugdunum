@@ -6,6 +6,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 namespace priv {
 
 std::string UserChars::format(Message*) const {
@@ -20,10 +21,13 @@ std::string LevelFlag::format(Message* message) const {
     if (!message) {
         return "NoMsg!";
     }
+
     std::stringstream ss;
     ss << std::left << std::setfill(' ') << std::setw(7) << message->level;
     std::string tmp(ss.str());
-    std::transform(tmp.begin(), tmp.end(), tmp.begin(), toupper);
+    std::transform(tmp.begin(), tmp.end(), tmp.begin(), [](char c) {
+        return static_cast<char>(toupper(c));
+    });
     return tmp;
 }
 
@@ -31,11 +35,11 @@ std::string MessageFlag::format(Message* message) const {
     if (!message) {
         return "NoMsg!";
     }
+
     return message->raw.str();
 }
 
 } // namespace priv
-
 
 std::string Formatter::handleFlagy(const std::tm* now) {
     std::stringstream ss;
@@ -81,35 +85,37 @@ std::string Formatter::handleFlagS(const std::tm* now) {
 
 inline void Formatter::handleFlag(char flag) {
     priv::Token token;
+
     switch (flag) {
-    case 'y':
-        token.basic = &Formatter::handleFlagy;
-    break;
-    case 'Y':
-        token.basic = &Formatter::handleFlagY;
-    break;
-    case 'm':
-        token.basic = &Formatter::handleFlagm;
-    break;
-    case 'd':
-        token.basic = &Formatter::handleFlagd;
-    break;
-    case 'H':
-        token.basic = &Formatter::handleFlagH;
-    break;
-    case 'M':
-        token.basic = &Formatter::handleFlagM;
-    break;
-    case 'S':
-        token.basic = &Formatter::handleFlagS;
-    break;
-    case 'v':
-        token.advanced = std::make_unique<priv::MessageFlag>();
-    break;
-    case 'l':
-        token.advanced = std::make_unique<priv::LevelFlag>();
-    break;
+        case 'y':
+            token.basic = &Formatter::handleFlagy;
+            break;
+        case 'Y':
+            token.basic = &Formatter::handleFlagY;
+            break;
+        case 'm':
+            token.basic = &Formatter::handleFlagm;
+            break;
+        case 'd':
+            token.basic = &Formatter::handleFlagd;
+            break;
+        case 'H':
+            token.basic = &Formatter::handleFlagH;
+            break;
+        case 'M':
+            token.basic = &Formatter::handleFlagM;
+            break;
+        case 'S':
+            token.basic = &Formatter::handleFlagS;
+            break;
+        case 'v':
+            token.advanced = std::make_unique<priv::MessageFlag>();
+            break;
+        case 'l':
+            token.advanced = std::make_unique<priv::LevelFlag>();
+            break;
     }
+
     _formatChain.push_back(std::move(token));
 }
 
@@ -117,6 +123,7 @@ inline void Formatter::compilePattern(const std::string& pattern) {
     std::unique_ptr<priv::UserChars> chars;
 
     auto end = pattern.end();
+
     for (auto it = pattern.begin(); it != end; ++it) {
         if (*it == '%') {
             if (chars) {
@@ -135,6 +142,7 @@ inline void Formatter::compilePattern(const std::string& pattern) {
             if (!chars) {
                 chars = std::make_unique<priv::UserChars>();
             }
+
             chars->addChar(*it);
         }
     }
@@ -143,29 +151,28 @@ inline void Formatter::compilePattern(const std::string& pattern) {
         // Append raw chars found so far
         _formatChain.push_back(priv::Token(std::move(chars)));
     }
-
 }
 
 Formatter::Formatter(const std::string& pattern) {
     compilePattern(pattern);
 }
 
-Formatter::~Formatter () = default;
+Formatter::~Formatter() = default;
 
 void Formatter::format(priv::Message& msg) {
     std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
     std::time_t tt = std::chrono::system_clock::to_time_t(now);
     std::tm tf;
 
-    #if defined(LUG_SYSTEM_WINDOWS)
-        // Use windows secure versions of localtime
-        localtime_s(&tf, &tt);
-    #else
-        // Use linux secure versions of localtime
-        // TODO: test on android
-        // It could not work (what is the localtime secure version for android ?)
-        localtime_r(&tt, &tf);
-    #endif
+#if defined(LUG_SYSTEM_WINDOWS)
+    // Use windows secure versions of localtime
+    localtime_s(&tf, &tt);
+#else
+    // Use linux secure versions of localtime
+    // TODO: test on android
+    // It could not work (what is the localtime secure version for android ?)
+    localtime_r(&tt, &tf);
+#endif
 
     format(msg, &tf);
 }
@@ -182,5 +189,6 @@ void Formatter::format(priv::Message& msg, const std::tm* now) {
     }
 }
 
-} // namespace lug
-} // namespace System
+} // Logger
+} // System
+} // lug

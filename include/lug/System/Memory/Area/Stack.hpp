@@ -31,7 +31,7 @@ private:
 
 #include <lug/System/Memory/Area/Stack.inl>
 
-}
-}
-}
-}
+} // Area
+} // Memory
+} // System
+} // lug

@@ -7,7 +7,7 @@ namespace lug {
 namespace Window {
 namespace priv {
 
-class WindowImpl {
+class LUG_WINDOW_API WindowImpl {
 public:
     WindowImpl(Window*);
     ~WindowImpl();
@@ -17,11 +17,14 @@ public:
     WindowImpl& operator=(const WindowImpl&) = delete;
     WindowImpl& operator=(WindowImpl&&) = delete;
 
-    bool create(const std::string& title, Style style);
+    bool init(const Window::InitInfo& initInfo);
     void close();
 
     bool pollEvent(lug::Window::Event&);
     void setKeyRepeat(bool state);
+
+    HWND getHandle() const;
+    HINSTANCE getHinstance() const;
 
 private:
     void processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam);
@@ -39,6 +42,7 @@ private:
     std::queue<lug::Window::Event> _events;
 
     HWND _handle{nullptr};         ///< Win32 handle of the window
+    HINSTANCE _hinstance{nullptr}; ///< Win32 instance
     LONG_PTR _callback{0};         ///< Stores the original event callback function of the control
     HCURSOR _cursor{nullptr};      ///< The system cursor to display into the window
     HICON _icon{nullptr};          ///< Custom icon assigned to the window

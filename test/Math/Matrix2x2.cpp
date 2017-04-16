@@ -30,10 +30,17 @@ TEST(Matrix2x2, GeneralOperators) {
     Vec2f vectorA = matrixM * vectorU;
     Vec2f vectorB = vectorV * matrixM;
 
+    (void)(vectorA);
+    (void)(vectorB);
+
     Mat2x2f matrixN = x / matrixM;
     Mat2x2f matrixO = matrixM / x;
     Mat2x2f matrixP = x * matrixM;
     Mat2x2f matrixQ = matrixM * x;
+
+    (void)(matrixN);
+    (void)(matrixO);
+    (void)(matrixP);
 
     EXPECT_TRUE(!(matrixM != matrixQ));
     EXPECT_TRUE(matrixM == matrixL);

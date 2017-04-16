@@ -16,7 +16,9 @@ public:
     using Values = ValArray<Rows * Columns, T>;
 
 public:
-    explicit Matrix(T value = 0);
+    constexpr Matrix() = default;
+
+    explicit Matrix(T value);
     Matrix(const Values& values);
     Matrix(std::initializer_list<T> list);
     Matrix(const Matrix<Rows, Columns, T>& matrix) = default;

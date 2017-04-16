@@ -26,7 +26,7 @@ private:
 
 #include <lug/System/Memory/Policies/MemoryMarker.inl>
 
-}
-}
-}
-}
+} // Policies
+} // Memory
+} // System
+} // lug

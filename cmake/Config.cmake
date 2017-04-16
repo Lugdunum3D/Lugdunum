@@ -28,5 +28,16 @@ if(LUG_OS_WINDOWS)
 elseif(LUG_OS_LINUX)
     set(INSTALL_MISC_DIR share/lug)
 elseif(LUG_OS_ANDROID)
-    set(INSTALL_MISC_DIR ${ANDROID_NDK}/sources/lugdunum)
+    set(INSTALL_MISC_DIR .)
 endif()
+
+# define the architecture
+if (CMAKE_CL_64)
+  set(ARCH_DIR "x64")
+else()
+  set(ARCH_DIR "x86")
+endif()
+
+# use c++14
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 14)

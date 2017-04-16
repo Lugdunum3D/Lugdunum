@@ -37,6 +37,7 @@ struct LUG_WINDOW_API Event {
     enum class LUG_WINDOW_API Type : uint32_t {
         Close,          ///< Window close event
         Destroy,        ///< Window destroy event
+	Resize,         ///< Window resize event
         KeyPressed,     ///< KeyPressed event
         KeyReleased,    ///< KeyReleased event
         CharEntered,    ///< CharEntered event
@@ -53,5 +54,5 @@ struct LUG_WINDOW_API Event {
     };
 };
 
-}
-}
+} // Window
+} // lug

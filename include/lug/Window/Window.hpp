@@ -57,23 +57,28 @@ enum class LUG_WINDOW_API Style : uint16_t {
  */
 class LUG_WINDOW_API Window {
 public:
+    struct InitInfo {
+        uint16_t width;
+        uint16_t height;
+        std::string title;
+        ::lug::Window::Style style;
+    };
+
+public:
     Window(const Window&) = delete;
     Window(Window&&) = delete;
     Window& operator=(const Window&) = delete;
     Window& operator=(Window&&) = delete;
-    ~Window();
+    virtual ~Window();
 
     /**
      * @brief      Utility to create a window
      *
-     * @param[in]  width   The width desired
-     * @param[in]  height  The height desired
-     * @param[in]  title   The title of the window
-     * @param[in]  style   The style to apply
+     * @param[in]  initInfo   See #InitInfo
      *
      * @return     A pointer to the created window handle. The ownership is transfered to the caller.
      */
-    static std::unique_ptr<Window> create(uint16_t width, uint16_t height, const std::string& title, Style style);
+    static std::unique_ptr<Window> create(const InitInfo& initInfo);
 
     /**
      * @brief      Determines if the window is open.
@@ -90,7 +95,7 @@ public:
      *
      * @return     True if an event was polled, false otherwise.
      */
-    bool pollEvent(lug::Window::Event& event);
+    virtual bool pollEvent(lug::Window::Event&);
 
     /**
      * @brief      Close the window gracefully.
@@ -115,10 +120,9 @@ public:
      */
     bool isKeyPressed(Keyboard::Key key) const;
 
-private:
+protected:
     Window();
-
-    bool createWindow(uint16_t width, uint16_t height, const std::string& title, Style style);
+    bool init(const InitInfo& initInfo);
 
     /**
      * @brief      Inits every key in @p _keyState to false

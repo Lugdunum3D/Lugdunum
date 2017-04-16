@@ -7,6 +7,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 using namespace ::testing;
 
@@ -61,6 +62,6 @@ TEST(FileHandler, Test) {
     LoggingFacility::clear();
 }
 
-
+}
 }
 }

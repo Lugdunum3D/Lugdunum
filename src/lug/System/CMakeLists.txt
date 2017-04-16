@@ -3,7 +3,9 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/System)
 
 # all source files
 set(SRC
+    ${SRCROOT}/Clock.cpp
     ${SRCROOT}/Exception.cpp
+    ${SRCROOT}/Time.cpp
     ${SRCROOT}/Logger/FileHandler.cpp
     ${SRCROOT}/Logger/Formatter.cpp
     ${SRCROOT}/Logger/Handler.cpp
@@ -18,10 +20,16 @@ set(SRC
 
 # all header files
 set(INC
+    ${INCROOT}/Clock.hpp
     ${INCROOT}/Debug.hpp
     ${INCROOT}/Exception.hpp
     ${INCROOT}/Export.hpp
-    ${INCROOT}/Logger.hpp
+    ${INCROOT}/Library.hpp
+    ${INCROOT}/Library.inl
+    ${INCROOT}/Time.hpp
+    ${INCROOT}/Time.inl
+    ${INCROOT}/Logger/Logger.hpp
+    ${INCROOT}/Logger/Logger.inl
     ${INCROOT}/Logger/Common.hpp
     ${INCROOT}/Logger/FileHandler.hpp
     ${INCROOT}/Logger/Formatter.hpp

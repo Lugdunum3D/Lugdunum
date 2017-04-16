@@ -6,6 +6,7 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 class LUG_SYSTEM_API OstreamHandler : public Handler {
 public:
@@ -52,5 +53,6 @@ public:
     ~StderrHandler() = default;
 };
 
-} // lug
+} // Logger
 } // System
+} // lug

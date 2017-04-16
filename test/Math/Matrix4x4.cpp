@@ -42,10 +42,17 @@ TEST(Matrix4x4, GeneralOperators) {
     Vec4f vectorA = matrixM * vectorU;
     Vec4f vectorB = vectorV * matrixM;
 
+    (void)(vectorA);
+    (void)(vectorB);
+
     Mat4x4f matrixN = x / matrixM;
     Mat4x4f matrixO = matrixM / x;
     Mat4x4f matrixP = x * matrixM;
     Mat4x4f matrixQ = matrixM * x;
+
+    (void)(matrixN);
+    (void)(matrixO);
+    (void)(matrixP);
 
     EXPECT_TRUE(!(matrixM != matrixQ));
     EXPECT_TRUE(matrixM == matrixL);

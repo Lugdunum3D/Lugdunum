@@ -60,7 +60,7 @@ private:
 
 #include <lug/System/Memory/Allocator/Chunk.inl>
 
-}
-}
-}
-}
+} // Allocator
+} // Memory
+} // System
+} // lug

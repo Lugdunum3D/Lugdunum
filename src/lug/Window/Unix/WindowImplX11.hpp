@@ -8,7 +8,7 @@ namespace lug {
 namespace Window {
 namespace priv {
 
-class WindowImpl {
+class LUG_WINDOW_API WindowImpl {
 public:
     WindowImpl(Window*);
     ~WindowImpl() = default;
@@ -18,11 +18,14 @@ public:
     WindowImpl& operator=(const WindowImpl&) = delete;
     WindowImpl& operator=(WindowImpl&&) = delete;
 
-    bool create(const std::string& title, Style style);
+    bool init(const Window::InitInfo& initInfo);
     void close();
 
     bool pollEvent(lug::Window::Event& event);
     void setKeyRepeat(bool state);
+
+    Display* getDisplay() const;
+    ::Window getWindow() const;
 
 private:
     void setWindowDecorations(Style style);

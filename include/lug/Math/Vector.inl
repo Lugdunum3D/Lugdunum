@@ -12,7 +12,7 @@ inline Vector<Rows, T>::Vector(typename Vector<Rows, T>::BaseMatrix&& matrix) : 
 
 template <uint8_t Rows, typename T>
 inline Vector<Rows, T>::Vector(const Vector<Rows - 1, T>& vector, T value) {
-    for (uint8_t row = 0; row < Rows; ++row) {
+    for (uint8_t row = 0; row < Rows - 1; ++row) {
         (*this)(row) = vector(row);
     }
 
@@ -20,8 +20,15 @@ inline Vector<Rows, T>::Vector(const Vector<Rows - 1, T>& vector, T value) {
 }
 
 template <uint8_t Rows, typename T>
+inline Vector<Rows, T>::Vector(const Vector<Rows + 1, T>& vector) {
+    for (uint8_t row = 0; row < Rows; ++row) {
+        (*this)(row) = vector(row);
+    }
+}
+
+template <uint8_t Rows, typename T>
 inline Vector<Rows, T> Vector<Rows, T>::operator*=(const Matrix<Rows, Rows, T>& rhs) {
-    Vector<Rows, T> tmp{};
+    Vector<Rows, T> tmp(0);
 
     for (uint8_t row = 0; row < Rows; ++row) {
         for (uint8_t col = 0; col < Rows; ++col) {
@@ -35,8 +42,25 @@ inline Vector<Rows, T> Vector<Rows, T>::operator*=(const Matrix<Rows, Rows, T>& 
 }
 
 template <uint8_t Rows, typename T>
+inline Vector<Rows, T> Vector<Rows, T>::operator*=(const Vector<Rows, T>& rhs) {
+    BaseMatrix::_values *= rhs.getValues();
+    return *this;
+}
+
+template <uint8_t Rows, typename T>
+inline Vector<Rows, T> Vector<Rows, T>::operator/=(const Vector<Rows, T>& rhs) {
+    BaseMatrix::_values /= rhs.getValues();
+    return *this;
+}
+
+template <uint8_t Rows, typename T>
 inline constexpr T Vector<Rows, T>::length() const {
-    return T(std::sqrt((BaseMatrix::_values * BaseMatrix::_values).sum()));
+    return T(std::sqrt(squaredLength()));
+}
+
+template <uint8_t Rows, typename T>
+inline constexpr T Vector<Rows, T>::squaredLength() const {
+    return T((BaseMatrix::_values * BaseMatrix::_values).sum());
 }
 
 template <uint8_t Rows, typename T>
@@ -69,6 +93,16 @@ inline constexpr Vector<Rows, T> normalize(const Vector<Rows, T>& lhs) {
 }
 
 template <uint8_t Rows, typename T>
+inline Vector<Rows, T> operator*(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs) {
+    return {lhs.getValues() * rhs.getValues()};
+}
+
+template <uint8_t Rows, typename T>
+inline Vector<Rows, T> operator/(const Vector<Rows, T>& lhs, const Vector<Rows, T>& rhs) {
+    return {lhs.getValues() / rhs.getValues()};
+}
+
+template <uint8_t Rows, typename T>
 inline Vector<Rows, T> operator*(const Vector<Rows, T>& lhs, const Matrix<Rows, Rows, T>& rhs) {
     Vector<Rows, T> vector{lhs};
 
@@ -84,4 +118,14 @@ inline Vector<Rows, T> operator*(const Matrix<Rows, Rows, T>& lhs, const Vector<
     vector *= lhs;
 
     return vector;
+}
+
+template <typename T>
+inline Vector<3, T> operator*(const Vector<3, T>& lhs, const Matrix<4, 4, T>& rhs) {
+    return Vector<4, T>{lhs, T(1)} * rhs;
+}
+
+template <typename T>
+inline Vector<3, T> operator*(const Matrix<4, 4, T>& lhs, const Vector<3, T>& rhs) {
+    return lhs * Vector<4, T>{rhs, T(1)};
 }

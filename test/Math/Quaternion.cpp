@@ -58,27 +58,27 @@ TEST(Quaternion, Dot) {
 }
 
 TEST(Quaternion, Base) {
-    Quatf one{1.0f, 0.0f, 0.0f, 0.0f};
-    Quatf i{0.0f, 1.0f, 0.0f, 0.0f};
-    Quatf j{0.0f, 0.0f, 1.0f, 0.0f};
-    Quatf k{0.0f, 0.0f, 0.0f, 1.0f};
+    Quatf quatOne{1.0f, 0.0f, 0.0f, 0.0f};
+    Quatf quatI{0.0f, 1.0f, 0.0f, 0.0f};
+    Quatf quatJ{0.0f, 0.0f, 1.0f, 0.0f};
+    Quatf quatK{0.0f, 0.0f, 0.0f, 1.0f};
 
-    ASSERT_EQ(one.length(), 1.0f);
-    ASSERT_EQ(i.length(), 1.0f);
-    ASSERT_EQ(j.length(), 1.0f);
-    ASSERT_EQ(k.length(), 1.0f);
+    ASSERT_EQ(quatOne.length(), 1.0f);
+    ASSERT_EQ(quatI.length(), 1.0f);
+    ASSERT_EQ(quatJ.length(), 1.0f);
+    ASSERT_EQ(quatK.length(), 1.0f);
 
-    QUAT_ASSERT_NEAR(i * i, -one, 0.01f);
-    QUAT_ASSERT_NEAR(j * j, -one, 0.01f);
-    QUAT_ASSERT_NEAR(k * k, -one, 0.01f);
-    QUAT_ASSERT_NEAR(i * j * k, -one, 0.01f);
+    QUAT_ASSERT_NEAR(quatI * quatI, -quatOne, 0.01f);
+    QUAT_ASSERT_NEAR(quatJ * quatJ, -quatOne, 0.01f);
+    QUAT_ASSERT_NEAR(quatK * quatK, -quatOne, 0.01f);
+    QUAT_ASSERT_NEAR(quatI * quatJ * quatK, -quatOne, 0.01f);
 
-    QUAT_ASSERT_NEAR(i * j, k, 0.01f);
-    QUAT_ASSERT_NEAR(j * i, -k, 0.01f);
-    QUAT_ASSERT_NEAR(j * k, i, 0.01f);
-    QUAT_ASSERT_NEAR(k * j, -i, 0.01f);
-    QUAT_ASSERT_NEAR(k * i, j, 0.01f);
-    QUAT_ASSERT_NEAR(i * k, -j, 0.01f);
+    QUAT_ASSERT_NEAR(quatI * quatJ, quatK, 0.01f);
+    QUAT_ASSERT_NEAR(quatJ * quatI, -quatK, 0.01f);
+    QUAT_ASSERT_NEAR(quatJ * quatK, quatI, 0.01f);
+    QUAT_ASSERT_NEAR(quatK * quatJ, -quatI, 0.01f);
+    QUAT_ASSERT_NEAR(quatK * quatI, quatJ, 0.01f);
+    QUAT_ASSERT_NEAR(quatI * quatK, -quatJ, 0.01f);
 }
 
 TEST(Quaternion, Normalize) {
@@ -98,6 +98,28 @@ TEST(Quaternion, ToAxisAngle) {
     ASSERT_NEAR(0.0f, axis.z(), 0.01f);
 
     ASSERT_NEAR(10.0f, Geometry::degrees(angle), 0.01f);
+}
+
+TEST(Quaternion, DirectionTo) {
+    Vec3f a{1.0f, 0.0f, 0.0f};
+    Vec3f b{-1.0f, 0.0f, 0.0f};
+    Vec3f c{1.0f, 1.0f, 0.0f};
+
+    const auto rotAToB = directionTo(a, b);
+    a = rotAToB.transform() * a;
+
+    for (uint8_t row = 0; row < a.getRows(); ++row) {
+        ASSERT_NEAR(Math::normalize(a)(row), Math::normalize(b)(row), 0.01f)
+            << "row = " << static_cast<int>(row);
+    }
+
+    const auto rotBToC = directionTo(b, c);
+    b = rotBToC.transform() * b;
+
+    for (uint8_t row = 0; row < b.getRows(); ++row) {
+        ASSERT_NEAR(Math::normalize(b)(row), Math::normalize(c)(row), 0.01f)
+            << "row = " << static_cast<int>(row);
+    }
 }
 
 } // Math

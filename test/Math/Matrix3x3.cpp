@@ -35,10 +35,17 @@ TEST(Matrix3x3, GeneralOperators) {
     Vec3f vectorA = matrixM * vectorU;
     Vec3f vectorB = vectorV * matrixM;
 
+    (void)(vectorA);
+    (void)(vectorB);
+
     Mat3x3f matrixN = x / matrixM;
     Mat3x3f matrixO = matrixM / x;
     Mat3x3f matrixP = x * matrixM;
     Mat3x3f matrixQ = matrixM * x;
+
+    (void)(matrixN);
+    (void)(matrixO);
+    (void)(matrixP);
 
     EXPECT_TRUE(!(matrixM != matrixQ));
     EXPECT_TRUE(matrixM == matrixL);

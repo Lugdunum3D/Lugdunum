@@ -10,10 +10,11 @@
 
 namespace lug {
 namespace System {
+namespace Logger {
 
 class LUG_SYSTEM_API Handler {
 public:
-    Handler(const std::string& name);
+    explicit Handler(const std::string& name);
 
     Handler(const Handler&) = delete;
     Handler(Handler&&) = delete;
@@ -45,6 +46,7 @@ T* makeHandler(const std::string& handlerName, Args&&... args);
 
 #include <lug/System/Logger/Handler.inl>
 
-} // lug
+} // Logger
 } // System
+} // lug
 

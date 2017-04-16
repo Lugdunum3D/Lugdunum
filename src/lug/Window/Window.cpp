@@ -1,23 +1,15 @@
 #include <lug/Window/Window.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
-
-#include <lug/Window/Win32/WindowImplWin32.hpp>
-
+    #include <lug/Window/Win32/WindowImplWin32.hpp>
 #elif defined(LUG_SYSTEM_LINUX)
-
-#include <lug/Window/Unix/WindowImplX11.hpp>
-
+    #include <lug/Window/Unix/WindowImplX11.hpp>
 #elif defined(LUG_SYSTEM_ANDROID)
-
-#include <lug/Window/Android/WindowImplAndroid.hpp>
-
+    #include <lug/Window/Android/WindowImplAndroid.hpp>
 #else
-
-// Theorically this should never happen since the Config.cmake will
-// warn the user before, but #error anyway
-#error "Unsupported operating system or environment"
-
+    // Theorically this should never happen since the Config.cmake will
+    // warn the user before, but #error anyway
+    #error "Unsupported operating system or environment"
 #endif
 
 namespace lug {
@@ -31,24 +23,24 @@ Window::~Window() {
     close();
 }
 
-std::unique_ptr<Window> Window::create(uint16_t width, uint16_t height, const std::string& title, Style style) {
+std::unique_ptr<Window> Window::create(const InitInfo& initInfo) {
     std::unique_ptr<Window> win(new Window());
 
-    if (!win->createWindow(width, height, title, style)) {
+    if (!win->init(initInfo)) {
         return nullptr;
     }
 
     return win;
 }
 
-bool Window::createWindow(uint16_t width, uint16_t height, const std::string& title, Style style) {
+bool Window::init(const InitInfo& initInfo) {
     if (_impl != nullptr) {
 
         // Specifiy the width and height of our window, for now it's the only thing we can specify along with the title and style that is
-        _mode.width = width;
-        _mode.height = height;
+        _mode.width = initInfo.width;
+        _mode.height = initInfo.height;
 
-        return _impl->create(title, style);
+        return _impl->init(initInfo);
     }
 
     return false;
@@ -228,7 +220,7 @@ void Window::close() {
 }
 
 bool Window::isKeyPressed(Keyboard::Key key) const {
-    return (_keyState.at(key));
+    return _keyState.at(key);
 }
 
 } // namespace Window

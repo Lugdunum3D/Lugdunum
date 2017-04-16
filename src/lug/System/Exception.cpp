@@ -1,13 +1,12 @@
 #include <lug/System/Exception.hpp>
 #include <sstream>
 
-lug::System::Exception::Exception(const char *typeName, const std::string &description, const char* file, const char* function, uint32_t line)
+lug::System::Exception::Exception(const char* typeName, const std::string& description, const char* file, const char* function, uint32_t line)
     : _typeName{typeName}, _description{description}, _file{file}, _function{function}, _line{line} {}
 
 const std::string& lug::System::Exception::getTypeName() const {
     return _typeName;
 }
-
 
 const std::string& lug::System::Exception::getDescription() const {
     return _description;
