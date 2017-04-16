@@ -15,6 +15,7 @@ Application::~Application() {
     // TODO: Remove this when the ResourceManager is done
     lug::Graphics::Renderer* renderer = _graphics.getRenderer();
     lug::Graphics::Vulkan::Renderer* vkRender = static_cast<lug::Graphics::Vulkan::Renderer*>(renderer);
+
     for (auto& queue: vkRender->getQueues()) {
         queue.waitIdle();
     }
@@ -29,10 +30,10 @@ bool Application::init(int argc, char* argv[]) {
     {
         _cube = _graphics.createMesh("Cube");
 
-        //1. pos
-        //2. color
-        //3. normal
-        //4. texture uv
+        // 1. pos
+        // 2. color
+        // 3. normal
+        // 4. texture uv
         _cube->vertices = {
             // Back
             {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},

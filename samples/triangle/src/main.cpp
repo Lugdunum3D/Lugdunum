@@ -1,13 +1,13 @@
 #include <lug/System/Logger/Logger.hpp>
 #if defined(LUG_SYSTEM_ANDROID)
-	#include <lug/System/Logger/LogCatHandler.hpp>
+    #include <lug/System/Logger/LogCatHandler.hpp>
 #else
-	#include <lug/System/Logger/OstreamHandler.hpp>
+    #include <lug/System/Logger/OstreamHandler.hpp>
 #endif
 
 #include "Application.hpp"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
 #if defined(LUG_SYSTEM_ANDROID)
     LUG_LOG.addHandler(lug::System::Logger::makeHandler<lug::System::Logger::LogCatHandler>("logcat"));
 #else

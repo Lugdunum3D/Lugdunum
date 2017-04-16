@@ -73,6 +73,7 @@ Application::~Application() {
     // TODO: Remove this when the ResourceManager is done
     lug::Graphics::Renderer* renderer = _graphics.getRenderer();
     lug::Graphics::Vulkan::Renderer* vkRender = static_cast<lug::Graphics::Vulkan::Renderer*>(renderer);
+
     for (auto& queue: vkRender->getQueues()) {
         queue.waitIdle();
     }
@@ -89,6 +90,7 @@ bool Application::init(int argc, char* argv[]) {
         // is licensed under CC Attribution
         // https://skfb.ly/IXwu
         _model = _graphics.createModel("model", "models/LowPoly/Low poly.obj");
+
         if (!_model) {
             return false;
         }
