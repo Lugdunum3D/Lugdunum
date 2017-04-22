@@ -1,3 +1,8 @@
+![](./doc/lugdunum.png)
+
+
+---
+
 # Lugdunum3D
 
 A modern cross-platform 3D rendering engine built with Vulkan and modern C++14.
