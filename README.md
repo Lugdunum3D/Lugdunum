@@ -1,4 +1,4 @@
-![](./doc/lugdunum.png)
+![](https://github.com/Lugdunum3D/Visual-Identity/blob/master/logo/dist/png/600dpi/long.png)
 
 
 ---
@@ -6,6 +6,14 @@
 # Lugdunum3D
 
 A modern cross-platform 3D rendering engine built with Vulkan and modern C++14.
+
+[Building for Linux, Windows and Android](https://github.com/Lugdunum3D/Lugdunum/blob/dev/doc/build.md)
+
+[Dependencies](https://github.com/Lugdunum3D/Lugdunum/blob/dev/doc/dependencies.md)
+
+[Quickstart](https://github.com/Lugdunum3D/Lugdunum/blob/dev/doc/quickstart.md)
+
+[C++ Guideline](https://github.com/Lugdunum3D/Lugdunum/blob/dev/doc/guidelines.md)
 
 ## Status
 
