@@ -17,6 +17,10 @@ A modern cross-platform 3D rendering engine built with Vulkan and modern C++14.
 
 ## Status
 
+| Compiler        | Operating System                     | Architecture | Version String |
+|-----------------|--------------------------------------|--------------|----------------|
+| Clang 3.8       | Android NDK r14b with Unified Header | arm64-v8a    | Android clang version 3.8.275480  (based on LLVM 3.8.275480) |
+
 ### master
 
 [![CircleCI](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/master.svg?style=shield)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/master)
