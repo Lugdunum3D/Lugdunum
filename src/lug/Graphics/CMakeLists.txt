@@ -215,9 +215,15 @@ if(LUG_OS_ANDROID)
     list(APPEND EXT_LIBRARIES z android ${ASSIMP_LIBRARY_ANDROID})
 endif()
 
+# Find glTF2-loader
+
+find_package(GLTF2Loader REQUIRED)
+include_directories(${GLTF2_LOADER_INCLUDE_DIR})
+
+
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${EXT_LIBRARIES} ${ASSIMP_LIBRARY}
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${ASSIMP_LIBRARY} ${GLTF2_LOADER_LIBRARY}
 )
