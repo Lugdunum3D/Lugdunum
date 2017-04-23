@@ -22,7 +22,9 @@ A modern cross-platform 3D rendering engine built with Vulkan and modern C++14.
 | Clang 3.8        | Android NDK r14b with Unified Header | arm64-v8a    | Android clang version 3.8.275480  (based on LLVM 3.8.275480) |
 | Visual Studio 2015 | Windows 10 Build 16170             | x64          | MSVC 19.0.24215.1 |
 | Visual Studio 2017 | Windows 10 Build 16170             | x64          | MSVC 19.10.25017.0 |
-| GCC 6.2.0          | Ubuntu 16.04.1 kernel 4.8          | x64          | gcc version 6.2.0 20160901 |
+| GCC 6.2.0          | Linux Ubuntu 16.04.1 with kernel 4.8 | x64        | gcc version 6.2.0 20160901 |
+| GCC 6.2.0          | Linux Tegra-Ubuntu 4.4.15          | aarch64      | gcc version 6.2.0 20160901 |
+
 
 ### master
 
