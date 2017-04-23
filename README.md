@@ -36,3 +36,9 @@ A modern cross-platform 3D rendering engine built with Vulkan and modern C++14.
 
 [![CircleCI](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/dev.svg?style=shield)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/dev)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/sbtif9ybs1elbhqv/branch/dev?svg=true)](https://ci.appveyor.com/project/Lugdunum/lugdunum/branch/dev)
+
+## Sample
+
+### Hello
+This a basic sample with two renderviews showing the same scene from two different cameras 
+![](doc/sample_hello.gif)
