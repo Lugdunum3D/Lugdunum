@@ -14,7 +14,7 @@
 
 namespace lug {
 namespace Window {
-    Window::Window() : _impl{new priv::WindowImpl(this)} {
+Window::Window() : _impl{new priv::WindowImpl(this)} {
     initKeyState();
     initMouseState();
 }
@@ -181,8 +181,7 @@ void Window::initKeyState() {
     _keyState[Keyboard::Key::F15] = false;
 }
 
-void Window::initMouseState()
-{
+void Window::initMouseState() {
     _mouseState[Mouse::Button::Left] = false;
     _mouseState[Mouse::Button::Right] = false;
     _mouseState[Mouse::Button::Middle] = false;
@@ -211,15 +210,14 @@ bool Window::pollEvent(Event& event) {
         }
 
         if (event.type == Event::Type::ButtonPressed) {
-            _mouseState[event.button.code] = true;
-        }
-        else if (event.type == Event::Type::ButtonReleased) {
-            _mouseState[event.button.code] = false;
+            _mouseState[event.mouse.code] = true;
+        } else if (event.type == Event::Type::ButtonReleased) {
+            _mouseState[event.mouse.code] = false;
         }
 
         if (event.type == Event::Type::MouseMoved) {
-            _mouseCoord.x = event.button.coord.x;
-            _mouseCoord.y = event.button.coord.y;
+            _mouseCoord.x = event.mouse.coord.x;
+            _mouseCoord.y = event.mouse.coord.y;
         }
 
         return value;

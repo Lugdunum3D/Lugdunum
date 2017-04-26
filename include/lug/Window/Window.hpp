@@ -132,11 +132,11 @@ public:
     /**
     * @brief      Used to retrieve the mouses position
     *
-    * @param[in]  x   The parametre that will be set to the mouse's position on the x axis.
-    * @param[in]  y   The parametre that will be set to the mouse's position on the x axis.
+    * @param[in]  x   The parameter that will be set to the mouse's position on the x axis.
+    * @param[in]  y   The parameter that will be set to the mouse's position on the x axis.
     *
     */
-    void getMousePos(uint32_t & x, uint32_t & y) const;
+    void getMousePos(uint32_t &x, uint32_t &y) const;
 
 protected:
     Window();
@@ -173,7 +173,7 @@ protected:
     std::unordered_map<Mouse::Button, bool> _mouseState;
 
     /**
-    * Ued to store the mouse's position, used by #getMousePos.
+    * Used to store the mouse's position, used by #getMousePos.
     */
     struct {
         uint32_t x;

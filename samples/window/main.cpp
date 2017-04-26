@@ -6,9 +6,9 @@
 #include <lug/Window/Window.hpp>
 
 #if defined(LUG_SYSTEM_ANDROID)
-    #include <lug/System/Logger/LogCatHandler.hpp>
+#include <lug/System/Logger/LogCatHandler.hpp>
 #else
-    #include <lug/System/Logger/OstreamHandler.hpp>
+#include <lug/System/Logger/OstreamHandler.hpp>
 #endif
 
 auto createKeyEnumMap() {
@@ -225,15 +225,6 @@ int main() {
                 window->close();
             }
 
-//            // Checking to see if mouse position is stored correctly
-//            {
-//                uint32_t x;
-//                uint32_t y;
-//
-//                window->getMousePos(x, y);
-//                logger->info("Mouse is at position {} {}", x, y);
-//            }
-
             // Checking KeyPressed events
             if (event.type == lug::Window::Event::Type::KeyPressed) {
                 logger->info(keyEnumMap[event.key.code] + " is pressed");
@@ -253,13 +244,14 @@ int main() {
             if (event.type == lug::Window::Event::Type::ButtonReleased) {
                 logger->info(buttonEnumMap[event.button.code] + " is released at position {} {}", event.button.coord.x, event.button.coord.y);
             }
-            
+
             // Checking MouseWheel events
             if (event.type == lug::Window::Event::Type::MouseWheel) {
                 logger->info("Mouse scroll wheel offset {} {}", event.button.scrollOffset.xOffset, event.button.scrollOffset.yOffset);
                 if (event.button.ctrl) {
                     logger->info("MODIFIER CTRL");
                 }
+
                 if (event.button.shift) {
                     logger->info("MODIFIER SHIFT");
                 }
@@ -270,24 +262,27 @@ int main() {
                 if (event.button.ctrl) {
                     logger->info("MODIFIER CTRL");
                 }
-                if (event.button.shift) {
-                    logger->info("MODIFIER SHIFT");
-                }
-            }
-            if (event.type == lug::Window::Event::Type::MouseEnter) {
-                logger->info("Mouse just entered the window.");
-                if (event.button.ctrl) {
-                    logger->info("MODIFIER CTRL");
-                }
+
                 if (event.button.shift) {
                     logger->info("MODIFIER SHIFT");
                 }
             }
 
-//            // Checking MouseMoved events
-//            if (event.type == lug::Window::Event::Type::MouseMoved) {
-//                logger->info("Mouse moved at position {} {}", event.button.coord.x, event.button.coord.y);
-//            }
+            if (event.type == lug::Window::Event::Type::MouseEnter) {
+                logger->info("Mouse just entered the window.");
+                if (event.button.ctrl) {
+                    logger->info("MODIFIER CTRL");
+                }
+
+                if (event.button.shift) {
+                    logger->info("MODIFIER SHIFT");
+                }
+            }
+
+            //            // Checking MouseMoved events
+            //            if (event.type == lug::Window::Event::Type::MouseMoved) {
+            //                logger->info("Mouse moved at position {} {}", event.button.coord.x, event.button.coord.y);
+            //            }
 
             if (event.type == lug::Window::Event::Type::CharEntered) {
                 logger->info("Char event received: {}", static_cast<char>(event.character.val));
@@ -299,12 +294,15 @@ int main() {
                 if (event.key.ctrl) {
                     logger->info("MODIFIER CTRL");
                 }
+
                 if (event.key.alt) {
                     logger->info("MODIFIER ALT");
                 }
+
                 if (event.key.shift) {
                     logger->info("MODIFIER SHIFT");
                 }
+
                 if (event.key.system) {
                     logger->info("MODIFIER SYSTEM");
                 }
@@ -312,19 +310,19 @@ int main() {
 
         }
 
-//        // Checking that keys states are correctly set
-//        for (auto it = keyEnumMap.begin(); it != keyEnumMap.end(); ++it) {
-//            if (window->isKeyPressed(it->first)) {
-//                logger->info(it->second + " is set to pressed");
-//            }
-//        }
+        // Checking that keys states are correctly set
+        for (auto it = keyEnumMap.begin(); it != keyEnumMap.end(); ++it) {
+            if (window->isKeyPressed(it->first)) {
+                logger->info(it->second + " is set to pressed");
+            }
+        }
 
-//        // Checking that mouse button states are correctly set
-//        for (auto it = buttonEnumMap.begin(); it != buttonEnumMap.end(); ++it) {
-//            if (window->isMousePressed(it->first)) {
-//                logger->info(it->second + " is set to pressed");
-//            }
-//        }
+        // Checking that mouse button states are correctly set
+        for (auto it = buttonEnumMap.begin(); it != buttonEnumMap.end(); ++it) {
+            if (window->isMousePressed(it->first)) {
+                logger->info(it->second + " is set to pressed");
+            }
+        }
     }
 
     return 0;

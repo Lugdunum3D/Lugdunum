@@ -14,17 +14,18 @@ namespace Window {
  * @brief      Represents a keyboard event
  */
 struct LUG_WINDOW_API KeyEvent {
-    Keyboard::Key code;   ///< The key that triggered the event
-    bool alt;                              ///< True if alt was pressed, False otherwise
-    bool ctrl;                             ///< True if ctrl was pressed, False otherwise
-    bool shift;                            ///< True if shift was pressed, False otherwise
-    bool system;                           ///< True if system was pressed, False otherwise
+    Keyboard::Key code; ///< The key that triggered the event
+    bool alt;           ///< True if alt was pressed, False otherwise
+    bool ctrl;          ///< True if ctrl was pressed, False otherwise
+    bool shift;         ///< True if shift was pressed, False otherwise
+    bool system;        ///< True if system was pressed, False otherwise
 };
 
 /**
 * @brief      Represents a mouse event
 */
 struct LUG_WINDOW_API MouseEvent {
+
     union {
         Mouse::Button code; ///< The button that triggered the event
         struct {
@@ -35,14 +36,14 @@ struct LUG_WINDOW_API MouseEvent {
     struct {
         int32_t x;
         int32_t y;
-    } coord;                ///< The mouse coordinate if the event was triggered by movement
-    bool ctrl;     ///< True if ctrl was pressed, False otherwise
-    bool shift;    ///< True if shift was pressed, False otherwise
-    bool lMouse;   ///< True if left mouse button was pressed, False otherwise
-    bool rMouse;   ///< True if right mouse button was pressed, False otherwise
-    bool mMouse;   ///< True if middle mouse button was pressed, False otherwise
-    bool x1Mouse;  ///< True if extra 1 mouse button was pressed, False otherwise
-    bool x2Mouse;  ///< True if extra 2 mouse button was pressed, False otherwise
+    } coord;        ///< The mouse coordinate if the event was triggered by movement
+    bool ctrl;      ///< True if ctrl was pressed, False otherwise
+    bool shift;     ///< True if shift was pressed, False otherwise
+    bool left;      ///< True if left mouse button was pressed, False otherwise
+    bool right;    ///< True if right mouse button was pressed, False otherwise
+    bool middle;    ///< True if middle mouse button was pressed, False otherwise
+    bool x1;        ///< True if extra 1 mouse button was pressed, False otherwise
+    bool x2;        ///< True if extra 2 mouse button was pressed, False otherwise
 };
 
 /**
@@ -71,8 +72,8 @@ struct LUG_WINDOW_API Event {
         ButtonReleased, ///< ButtonReleased event
         MouseMoved,     ///< MouseMoved event
         MouseWheel,     ///< MouseWheelRotated event
-        MouseLeave,
-        MouseEnter
+        MouseLeave,     ///< Mouse left window event
+        MouseEnter      ///< Mouse entered window event
     };
 
     Type type;          ///< The type of the event
@@ -83,7 +84,7 @@ struct LUG_WINDOW_API Event {
     union {
         KeyEvent key;           ///< A KeyEvent
         CharEvent character;    ///< A CharEvent
-        MouseEvent button;      ///< A MouseEvent
+        MouseEvent mouse;      ///< A MouseEvent
     };
 };
 

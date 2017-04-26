@@ -23,9 +23,7 @@ enum class LUG_WINDOW_API Button : int {
     Right,      // The right mouse button
     Middle,     // The middle (wheel) mouse button
     XButton1,   // The first extra mouse button
-    XButton2,   // The second extra mouse button
-
-    ENUM_LENGTH
+    XButton2    // The second extra mouse button
 };
 
 } // namespace Mouse
