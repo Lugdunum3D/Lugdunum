@@ -454,41 +454,41 @@ bool WindowImpl::pollEvent(Event& event) {
             switch (xEvent.xbutton.button) {
                 case Button4:
                     event.type = Event::Type::MouseWheel;
-                    event.button.scrollOffset.xOffset = 0;
-                    event.button.scrollOffset.yOffset = 1;
+                    event.mouse.scrollOffset.xOffset = 0;
+                    event.mouse.scrollOffset.yOffset = 1;
                     break;
                 case Button5:
                     event.type = Event::Type::MouseWheel;
-                    event.button.scrollOffset.xOffset = 0;
-                    event.button.scrollOffset.yOffset = -1;
+                    event.mouse.scrollOffset.xOffset = 0;
+                    event.mouse.scrollOffset.yOffset = -1;
                     break;
                 case 6:
                     event.type = Event::Type::MouseWheel;
-                    event.button.scrollOffset.xOffset = 1;
-                    event.button.scrollOffset.yOffset = 0;
+                    event.mouse.scrollOffset.xOffset = 1;
+                    event.mouse.scrollOffset.yOffset = 0;
                     break;
                 case 7:
                     event.type = Event::Type::MouseWheel;
-                    event.button.scrollOffset.xOffset = -1;
-                    event.button.scrollOffset.yOffset = 0;
+                    event.mouse.scrollOffset.xOffset = -1;
+                    event.mouse.scrollOffset.yOffset = 0;
                     break;
                 default:
                     event.type = Event::Type::ButtonPressed;
-                    event.button.code = buttonCodeToLugButton(xEvent.xbutton.button);
+                    event.mouse.code = buttonCodeToLugButton(xEvent.xbutton.button);
             }
-            event.button.coord.x = xEvent.xbutton.x;
-            event.button.coord.y = xEvent.xbutton.y;
-            event.button.ctrl = (xEvent.xbutton.state & ControlMask) != 0;
-            event.button.shift = (xEvent.xbutton.state & ShiftMask) != 0;
+            event.mouse.coord.x = xEvent.xbutton.x;
+            event.mouse.coord.y = xEvent.xbutton.y;
+            event.mouse.ctrl = (xEvent.xbutton.state & ControlMask) != 0;
+            event.mouse.shift = (xEvent.xbutton.state & ShiftMask) != 0;
             break;
 
         case ButtonRelease:
             if (xEvent.xbutton.button != Button4 && xEvent.xbutton.button != Button5 &&
                 xEvent.xbutton.button != 6 && xEvent.xbutton.button != 7) {
                 event.type = Event::Type::ButtonReleased;
-                event.button.code = buttonCodeToLugButton(xEvent.xbutton.button);
-                event.button.coord.x = xEvent.xbutton.x;
-                event.button.coord.y = xEvent.xbutton.y;
+                event.mouse.code = buttonCodeToLugButton(xEvent.xbutton.button);
+                event.mouse.coord.x = xEvent.xbutton.x;
+                event.mouse.coord.y = xEvent.xbutton.y;
             } else {
                 return false;
             }
@@ -496,21 +496,21 @@ bool WindowImpl::pollEvent(Event& event) {
 
         case MotionNotify:
             event.type              = Event::Type::MouseMoved;
-            event.button.code       = buttonCodeToLugButton(xEvent.xbutton.button);
-            event.button.coord.x    = xEvent.xbutton.x;
-            event.button.coord.y    = xEvent.xbutton.y;
+            event.mouse.code       = buttonCodeToLugButton(xEvent.xbutton.button);
+            event.mouse.coord.x    = xEvent.xbutton.x;
+            event.mouse.coord.y    = xEvent.xbutton.y;
             break;
 
         case LeaveNotify:
             event.type = Event::Type::MouseLeave;
-            event.button.coord.x    = xEvent.xbutton.x;
-            event.button.coord.y    = xEvent.xbutton.y;
+            event.mouse.coord.x    = xEvent.xbutton.x;
+            event.mouse.coord.y    = xEvent.xbutton.y;
             break;
 
         case EnterNotify:
             event.type = Event::Type::MouseEnter;
-            event.button.coord.x    = xEvent.xbutton.x;
-            event.button.coord.y    = xEvent.xbutton.y;
+            event.mouse.coord.x    = xEvent.xbutton.x;
+            event.mouse.coord.y    = xEvent.xbutton.y;
             break;
 
         default:
