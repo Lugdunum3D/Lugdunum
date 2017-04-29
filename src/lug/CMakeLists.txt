@@ -11,8 +11,8 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/modules/")
 set(LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib")
 
 # add the librairies subdirectories
-add_subdirectory(Core)
-add_subdirectory(Graphics)
+# add_subdirectory(Core)
+# add_subdirectory(Graphics)
 add_subdirectory(System)
 add_subdirectory(Window)
 add_subdirectory(Math)

@@ -653,10 +653,10 @@ void WindowImpl::configMouseWheelEvent(MouseEvent & mouse, UINT message, WPARAM 
 //        yOffset = -(static_cast<SHORT>(HIWORD(wParam) / static_cast<double>(WHEEL_DELTA)));
 //    }
     if (message == WM_MOUSEWHEEL) {
-        xOffset = GET_WHEEL_DELTA_WPARAM(wParam);
+        xOffset = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
     }
     else if (message == WM_MOUSEHWHEEL) {
-        yOffset = -(GET_WHEEL_DELTA_WPARAM(wParam));
+        yOffset = -(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA;
     }
     mouse.scrollOffset.xOffset = xOffset;
     mouse.scrollOffset.yOffset = yOffset;
