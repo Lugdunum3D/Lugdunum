@@ -647,15 +647,9 @@ void WindowImpl::configMouseWheelEvent(MouseEvent & mouse, UINT message, WPARAM 
     double xOffset = 0.0;
     double yOffset = 0.0;
 
-//    if (message == WM_MOUSEWHEEL) {
-//        xOffset = static_cast<SHORT>(HIWORD(wParam) / static_cast<double>(WHEEL_DELTA));
-//    } else if (message == WM_MOUSEHWHEEL) {
-//        yOffset = -(static_cast<SHORT>(HIWORD(wParam) / static_cast<double>(WHEEL_DELTA)));
-//    }
     if (message == WM_MOUSEWHEEL) {
         xOffset = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
-    }
-    else if (message == WM_MOUSEHWHEEL) {
+    } else if (message == WM_MOUSEHWHEEL) {
         yOffset = -(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA;
     }
     mouse.scrollOffset.xOffset = xOffset;
