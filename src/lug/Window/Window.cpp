@@ -47,6 +47,7 @@ bool Window::init(const InitInfo& initInfo) {
 }
 
 void Window::initKeyState() {
+    _keyState[Keyboard::Key::Unknown] = false;
     // Basic keys
     _keyState[Keyboard::Key::A] = false;
     _keyState[Keyboard::Key::B] = false;
