@@ -20,13 +20,6 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
         return false;
     }
 
-    /*int minor = XkbMinorVersion;
-    int major = XkbMajorVersion;
-
-    if (XkbLibraryVersion(&minor, &major)) {
-        XkbSetAutoRepeatRate(_display, XkbUseCoreKbd, 1000, 100);
-    }*/
-
     int screen = DefaultScreen(_display);
     ::Window parent = RootWindow(_display, screen);
 
@@ -72,8 +65,8 @@ void WindowImpl::close() {
     }
 }
 
-static Mouse::Button buttoncodeToLugButton(unsigned int buttoncode) {
-    switch (buttoncode) {
+static Mouse::Button buttonCodeToLugButton(unsigned int buttonCode) {
+    switch (buttonCode) {
         case Button1:       return Mouse::Button::Left;
         case Button2:       return Mouse::Button::Middle;
         case Button3:       return Mouse::Button::Right;
@@ -481,7 +474,7 @@ bool WindowImpl::pollEvent(Event& event) {
                     break;
                 default:
                     event.type = Event::Type::ButtonPressed;
-                    event.button.code = buttoncodeToLugButton(xEvent.xbutton.button);
+                    event.button.code = buttonCodeToLugButton(xEvent.xbutton.button);
             }
             event.button.coord.x = xEvent.xbutton.x;
             event.button.coord.y = xEvent.xbutton.y;
@@ -493,18 +486,17 @@ bool WindowImpl::pollEvent(Event& event) {
             if (xEvent.xbutton.button != Button4 && xEvent.xbutton.button != Button5 &&
                 xEvent.xbutton.button != 6 && xEvent.xbutton.button != 7) {
                 event.type = Event::Type::ButtonReleased;
-                event.button.code = buttoncodeToLugButton(xEvent.xbutton.button);
+                event.button.code = buttonCodeToLugButton(xEvent.xbutton.button);
                 event.button.coord.x = xEvent.xbutton.x;
                 event.button.coord.y = xEvent.xbutton.y;
-            }
-            else {
+            } else {
                 return false;
             }
             break;
 
         case MotionNotify:
             event.type              = Event::Type::MouseMoved;
-            event.button.code       = buttoncodeToLugButton(xEvent.xbutton.button);
+            event.button.code       = buttonCodeToLugButton(xEvent.xbutton.button);
             event.button.coord.x    = xEvent.xbutton.x;
             event.button.coord.y    = xEvent.xbutton.y;
             break;
