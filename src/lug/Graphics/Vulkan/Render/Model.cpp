@@ -21,7 +21,7 @@ bool Model::load() {
         LUG_LOG.warn("RendererVulkan: Attempt to load a Model that is already loaded");
         return true;
     }
-
+/*
     uint32_t verticesNb = getVerticesSize();
     uint32_t indicesNb = getIndicesSize();
 
@@ -90,7 +90,7 @@ bool Model::load() {
         _indexBuffer->updateData(indices, indicesNb * sizeof(uint32_t));
         delete[] indices;
     }
-
+*/
     _loaded = true;
 
     return true;
