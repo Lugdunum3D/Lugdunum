@@ -51,7 +51,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
     return VK_FALSE;
 }
 
-Renderer::Renderer(Graphics& graphics) : ::lug::Graphics::Renderer(graphics) {}
+Renderer::Renderer(Graphics& graphics) : ::lug::Graphics::Renderer(graphics, Renderer::Type::Vulkan) {}
 
 Renderer::~Renderer() {
     destroy();

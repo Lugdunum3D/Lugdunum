@@ -22,7 +22,7 @@ public:
     };
 
 public:
-    Renderer(Graphics& graphics);
+    Renderer(Graphics& graphics, Type type);
 
     Renderer(const Renderer&) = delete;
     Renderer(Renderer&&) = delete;
@@ -42,9 +42,11 @@ public:
     virtual Render::Window* getWindow() = 0;
 
     const InitInfo& getInfo() const;
+    Type getType() const;
 
 protected:
     Graphics& _graphics;
+    Type _type;
     InitInfo _initInfo;
 };
 
