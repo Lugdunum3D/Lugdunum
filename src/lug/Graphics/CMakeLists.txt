@@ -12,6 +12,9 @@ set(SRC
 
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/Node.cpp
+    ${SRCROOT}/GltfLoader.cpp
+    ${SRCROOT}/Resource.cpp
+    ${SRCROOT}/ResourceManager.cpp
 
     ${SRCROOT}/Render/Camera.cpp
     ${SRCROOT}/Render/Mesh.cpp
@@ -71,6 +74,8 @@ set(INC
     ${INCROOT}/Export.hpp
     ${INCROOT}/Graphics.hpp
     ${INCROOT}/Graphics.inl
+    ${INCROOT}/Resource.hpp
+    ${INCROOT}/Resource.inl
 
     ${INCROOT}/Light/Directional.hpp
     ${INCROOT}/Light/Light.hpp
