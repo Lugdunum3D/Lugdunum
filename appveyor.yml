@@ -215,11 +215,36 @@ before_package:
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
+# Build & install lugdunum
 - ps: |
+    md install -Force | Out-Null
+
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DBUILD_TESTS=TRUE -DTEST_OUTPUT="$env:TEST_OUTPUT" ..
+    & cmake -G "$generator" -DCMAKE_INSTALL_PREFIX="$pwd\..\install" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DBUILD_TESTS=TRUE -DTEST_OUTPUT="$env:TEST_OUTPUT" ..
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
+    & cmake --build . --config $env:CONFIGURATION
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
+    & cmake --build . --config $env:CONFIGURATION --target install
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
+
+    cd ..
+
+# Build samples
+- ps: |
+    cd samples
+
+    md build -Force | Out-Null
+    cd build
+
+    & cmake -G "$generator" -DLUG_ROOT="$pwd\..\..\install" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DBUILD_SHADERS=false ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
@@ -228,13 +253,17 @@ build_script:
         throw "Exec: $ErrorMessage"
     }
 
+    cd ..\..
+
 # scripts to run after build
 after_build:
 - ps: |
-    Copy-Item .\lib\$env:CONFIGURATION\*.dll .\test\$env:CONFIGURATION\
+    Copy-Item .\build\lib\$env:CONFIGURATION\*.dll .\build\test\$env:CONFIGURATION\
 
 test_script:
 - ps: |
+    cd build
+
     & ctest -C $env:CONFIGURATION -O "Testing/Temporary/TestOutput.txt" --output-on-failure
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
