@@ -12,7 +12,7 @@ function build_samples() {
     cd ~/Lugdunum/samples
 
     mkdir build && cd build
-    (cmake .. -DBUILD_SHADERS=false && make all) || return 1
+    (cmake .. -DBUILD_SHADERS=false) || return 1
     (make all) || return 1
 
     return 0
