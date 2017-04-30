@@ -15,15 +15,12 @@ set(SRC
 
     ${SRCROOT}/Render/Camera.cpp
     ${SRCROOT}/Render/Mesh.cpp
-    ${SRCROOT}/Render/Model.cpp
     ${SRCROOT}/Render/Queue.cpp
     ${SRCROOT}/Render/View.cpp
 
     ${SRCROOT}/Renderer.cpp
 
     ${SRCROOT}/Scene/MeshInstance.cpp
-    ${SRCROOT}/Scene/ModelInstance.cpp
-    ${SRCROOT}/Scene/ModelLoader.cpp
     ${SRCROOT}/Scene/MovableCamera.cpp
     ${SRCROOT}/Scene/MovableObject.cpp
     ${SRCROOT}/Scene/Node.cpp
@@ -55,7 +52,6 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/BufferPool.cpp
     ${SRCROOT}/Vulkan/Render/Camera.cpp
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
-    ${SRCROOT}/Vulkan/Render/Model.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Forward.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Technique.cpp
     ${SRCROOT}/Vulkan/Render/View.cpp
@@ -91,7 +87,6 @@ set(INC
     ${INCROOT}/Render/Camera.inl
     ${INCROOT}/Render/Mesh.hpp
     ${INCROOT}/Render/Mesh.inl
-    ${INCROOT}/Render/Model.hpp
     ${INCROOT}/Render/Queue.hpp
     ${INCROOT}/Render/Queue.inl
     ${INCROOT}/Render/Target.hpp
@@ -106,9 +101,6 @@ set(INC
 
     ${INCROOT}/Scene/MeshInstance.hpp
     ${INCROOT}/Scene/MeshInstance.inl
-    ${INCROOT}/Scene/ModelInstance.hpp
-    ${INCROOT}/Scene/ModelInstance.inl
-    ${INCROOT}/Scene/ModelLoader.hpp
     ${INCROOT}/Scene/MovableCamera.hpp
     ${INCROOT}/Scene/MovableObject.hpp
     ${INCROOT}/Scene/MovableObject.inl
@@ -149,8 +141,6 @@ set(INC
     ${INCROOT}/Vulkan/Render/Camera.hpp
     ${INCROOT}/Vulkan/Render/Mesh.hpp
     ${INCROOT}/Vulkan/Render/Mesh.inl
-    ${INCROOT}/Vulkan/Render/Model.hpp
-    ${INCROOT}/Vulkan/Render/Model.inl
     ${INCROOT}/Vulkan/Render/Technique/Forward.hpp
     ${INCROOT}/Vulkan/Render/Technique/Technique.hpp
     ${INCROOT}/Vulkan/Render/View.hpp
@@ -175,48 +165,11 @@ endif()
 
 include_directories(${VULKAN_INCLUDE_DIR})
 
-# Find assimp
-if(NOT LUG_OS_ANDROID)
-    find_package(Assimp)
-endif()
-
-if (NOT ASSIMP_FOUND)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/assimp")
-        message(FATAL_ERROR "Can't find assimp, call `git submodule update --recursive`")
-    endif()
-
-    set(ASSIMP_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/assimp/include")
-
-    if (LUG_OS_WINDOWS)
-        set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/windows/${ARCH_DIR}")
-        find_package(Assimp REQUIRED)
-    elseif (LUG_OS_LINUX)
-        set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/linux")
-        find_package(Assimp REQUIRED)
-    elseif (LUG_OS_ANDROID)
-        set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/android")
-        set(ASSIMP_LIBRARY "${ASSIMP_ROOT}/libassimp.so")
-
-        # Install the libassimp.so alongside lug-graphics.so
-        install(FILES ${ASSIMP_LIBRARY}
-            DESTINATION lib${LIB_SUFFIX}
-        )
-
-        set(ASSIMP_LIBRARY_ANDROID "${ASSIMP_ROOT}/libandroid_jniiosystem.a")
-    endif()
-
-    message(STATUS "Found Assimp library: ${ASSIMP_LIBRARY}")
-    message(STATUS "Found Assimp includes: ${ASSIMP_INCLUDE_DIR}")
-endif()
-
-include_directories(${ASSIMP_INCLUDE_DIR})
-
 if(LUG_OS_ANDROID)
-    list(APPEND EXT_LIBRARIES z android ${ASSIMP_LIBRARY_ANDROID})
+    list(APPEND EXT_LIBRARIES android)
 endif()
 
 # Find glTF2-loader
-
 find_package(GLTF2Loader)
 
 if (NOT GLTF2_LOADER_FOUND)
@@ -241,10 +194,9 @@ endif()
 
 include_directories(${GLTF2_LOADER_INCLUDE_DIR})
 
-
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${EXT_LIBRARIES} ${ASSIMP_LIBRARY} ${GLTF2_LOADER_LIBRARY}
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2_LOADER_LIBRARY}
 )

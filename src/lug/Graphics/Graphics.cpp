@@ -2,10 +2,8 @@
 #include <sstream>
 #include <lug/Graphics/Graphics.hpp>
 #include <lug/Graphics/Module.hpp>
-#include <lug/Graphics/Scene/ModelLoader.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
-#include <lug/Graphics/Vulkan/Render/Model.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
@@ -92,52 +90,6 @@ void Graphics::unsupportedModule(Module::Type type) {
 
 std::unique_ptr<Scene::Scene> Graphics::createScene() {
     return std::make_unique<Scene::Scene>();
-}
-
-std::unique_ptr<Render::Mesh> Graphics::createMesh(const std::string& name) {
-    if (!_renderer) {
-        LUG_LOG.error("Graphics: Can't create a mesh, the renderer is not initialized");
-        return nullptr;
-    }
-
-    std::unique_ptr<Render::Mesh> mesh = nullptr;
-
-    if (_initInfo.rendererType == Renderer::Type::Vulkan) {
-        Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(_renderer.get());
-        std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(0, true)->getFamilyIdx() };
-        mesh = std::make_unique<Vulkan::Render::Mesh>(name, queueFamilyIndices, &renderer->getDevice());
-    } else {
-        LUG_LOG.error("Graphics: Unknown render type");
-    }
-
-    return mesh;
-}
-
-std::unique_ptr<Render::Model> Graphics::createModel(const std::string& name, const std::string& fileName) {
-    if (!_renderer) {
-        LUG_LOG.error("Graphics: Can't create a model, the renderer is not initialized");
-        return nullptr;
-    }
-
-    std::unique_ptr<Render::Model> model = nullptr;
-
-    if (_initInfo.rendererType == Renderer::Type::Vulkan) {
-        Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(_renderer.get());
-        std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(0, true)->getFamilyIdx() };
-        model = std::make_unique<Vulkan::Render::Model>(name, queueFamilyIndices, &renderer->getDevice());
-    } else {
-        LUG_LOG.error("Graphics: Unknown render type");
-        return nullptr;
-    }
-
-    if (fileName.size() != 0) {
-        if (!Scene::ModelLoader::loadFromFile(model.get(), fileName) ||
-            !model->load()) {
-            return nullptr;
-        }
-    }
-
-    return model;
 }
 
 std::unique_ptr<Render::Camera> Graphics::createCamera(const std::string& name) {

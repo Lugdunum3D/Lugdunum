@@ -7,7 +7,6 @@
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Render/Camera.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
-#include <lug/Graphics/Render/Model.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
 
@@ -105,26 +104,6 @@ public:
      * @return     A pointer to the scene instance. The ownership is given to the caller.
      */
     std::unique_ptr<Scene::Scene> createScene();
-
-    /**
-     * @brief      Creates a mesh.
-     *
-     * @param[in]  name  The name of the mesh.
-     *
-     * @return     A pointer to the scene instance. The ownership is given to the caller. @n
-     *             Returns @p nullptr if the mesh creation fails.
-     */
-    std::unique_ptr<Render::Mesh> createMesh(const std::string& name);
-
-    /**
-     * @brief      Creates a model.
-     *
-     * @param[in]  name  The name of the model.
-     *
-     * @return     A pointer to the scene instance. The ownership is given to the caller. @n
-     *             Returns @p nullptr if the model creation fails.
-     */
-    std::unique_ptr<Render::Model> createModel(const std::string& name, const std::string& fileName = "");
 
     /**
      * @brief      Creates a camera.

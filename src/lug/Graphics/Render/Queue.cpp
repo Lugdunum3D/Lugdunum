@@ -2,7 +2,6 @@
 #include <cstring>
 #include <lug/Graphics/Light/Light.hpp>
 #include <lug/Graphics/Scene/MeshInstance.hpp>
-#include <lug/Graphics/Scene/ModelInstance.hpp>
 #include <lug/Graphics/Scene/MovableObject.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
@@ -23,13 +22,6 @@ void Queue::addMovableObject(Scene::MovableObject* object) {
         _meshs[_meshsNb] = static_cast<Scene::MeshInstance*>(object);
         ++_meshsNb;
         return;
-    } else if (object->getType() == Scene::MovableObject::Type::Model) {
-        Scene::ModelInstance* modelInstance = static_cast<Scene::ModelInstance*>(object);
-        auto& meshsInstances = modelInstance->getMeshsInstances();
-
-        for (auto& meshInstance: meshsInstances) {
-            addMovableObject(meshInstance.get());
-        }
     } else if (object->getType() != Scene::MovableObject::Type::Camera) {
         LUG_LOG.warn("Queue::addMovableObject: Unknow object type");
     }
