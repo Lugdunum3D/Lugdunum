@@ -49,8 +49,10 @@ macro(add_shaders target)
         endforeach(shader)
     endif()
 
-    add_custom_target(shaders DEPENDS ${SHADERS_DEPENDS})
-    add_dependencies(${target} shaders)
+    set(target_shaders "shaders-${target}")
+
+    add_custom_target(${target_shaders} DEPENDS ${SHADERS_DEPENDS})
+    add_dependencies(${target} ${target_shaders})
 endmacro()
 
 # resources
@@ -149,11 +151,11 @@ macro(lug_add_sample target)
 
     # copy lugdunum resources
     if(THIS_LUG_RESOURCES)
-        add_resources(${target} lug_resources ${LUG_RESOURCES_DIR} ${THIS_LUG_RESOURCES})
+        add_resources(${target} "lug-resources-${target}" ${LUG_RESOURCES_DIR} ${THIS_LUG_RESOURCES})
     endif()
 
     # copy resources
     if(THIS_OTHER_RESOURCES)
-        add_resources(${target} sample_resources "${CMAKE_SOURCE_DIR}/resources" ${THIS_OTHER_RESOURCES})
+        add_resources(${target} "sample-resources-${target}" "${CMAKE_SOURCE_DIR}/resources" ${THIS_OTHER_RESOURCES})
     endif()
 endmacro()
