@@ -647,7 +647,6 @@ bool Window::init(Window::InitInfo& initInfo) {
 
     if (_initInfo.renderViewsInitInfo.size() == 0) {
         _initInfo.renderViewsInitInfo.push_back({
-            lug::Graphics::Render::Technique::Type::Forward,    // renderTechniqueType
             {                                                   // viewport
                 {                                               // offset
                     0.0f,                                       // x

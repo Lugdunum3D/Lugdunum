@@ -4,7 +4,6 @@
 #include <memory>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Camera.hpp>
-#include <lug/Graphics/Render/Technique/Type.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -48,7 +47,6 @@ public:
     };
 
     struct InitInfo {
-        Technique::Type renderTechniqueType;
         Viewport viewport;
         Scissor scissor;
         std::unique_ptr<Camera> camera;

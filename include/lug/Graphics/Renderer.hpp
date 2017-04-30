@@ -5,6 +5,7 @@
 #include <string>
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Render/Window.hpp>
+#include <lug/Graphics/Render/Technique/Type.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -19,6 +20,7 @@ public:
 
     struct InitInfo {
         std::string shadersRoot;
+        Render::Technique::Type renderTechnique;
     };
 
 public:

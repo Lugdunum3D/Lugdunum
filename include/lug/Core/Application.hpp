@@ -180,14 +180,15 @@ private:
 
 
     lug::Graphics::Graphics::InitInfo _graphicsInitInfo{
-        lug::Graphics::Renderer::Type::Vulkan,      // type
-        {                                           // rendererInitInfo
-            "shaders/"                              // shaders root
+        lug::Graphics::Renderer::Type::Vulkan,              // type
+        {                                                   // rendererInitInfo
+            "shaders/",                                     // shaders root
+            lug::Graphics::Render::Technique::Type::Forward // renderTechnique
         },
-        {                                           // mandatoryModules
+        {                                                   // mandatoryModules
             lug::Graphics::Module::Type::Core
         },
-        {},                                         // optionalModules
+        {},                                                 // optionalModules
     };
 
     lug::Graphics::Render::Window::InitInfo _renderWindowInitInfo{

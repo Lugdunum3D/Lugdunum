@@ -1,5 +1,6 @@
 #include <lug/Graphics/Vulkan/Render/View.hpp>
 #include <lug/Graphics/Render/Queue.hpp>
+#include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/System/Logger/Logger.hpp>
@@ -19,7 +20,7 @@ bool View::init(
     const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
     ::lug::Graphics::Render::View::init(initInfo);
 
-    if (_info.renderTechniqueType == lug::Graphics::Render::Technique::Type::Forward) {
+    if (_renderer.getInfo().renderTechnique == lug::Graphics::Render::Technique::Type::Forward) {
         _renderTechnique = std::make_unique<Render::Technique::Forward>(_renderer, this, device, presentQueue);
     }
 

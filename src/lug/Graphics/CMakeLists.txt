@@ -96,6 +96,7 @@ set(INC
     ${INCROOT}/Render/Camera.hpp
     ${INCROOT}/Render/Camera.inl
     ${INCROOT}/Render/Material.hpp
+    ${INCROOT}/Render/Material.inl
     ${INCROOT}/Render/Mesh.hpp
     ${INCROOT}/Render/Mesh.inl
     ${INCROOT}/Render/Queue.hpp

@@ -51,6 +51,10 @@ public:
     Material& operator=(Material&&) = delete;
 
     virtual ~Material() = default;
+
+    const std::string& getName() const;
+    void setName(const std::string &name);
+
 private:
     std::string _name;
 
@@ -60,6 +64,8 @@ private:
     OcclusionTextureInfo _occlusionTexture;
     TextureInfo _emissiveTexture;
 };
+
+#include <lug/Graphics/Render/Material.inl>
 
 } // Render
 } // Graphics
