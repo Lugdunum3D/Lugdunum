@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <type_traits>
 
 #include <lug/Graphics/Export.hpp>
 
@@ -56,8 +57,25 @@ public:
      */
     template <typename T>
     class SharedPtr {
+        static_assert(
+            std::is_base_of<Resource, T>::value,
+            "T must inherit from Resource"
+        );
+
     public:
-        constexpr SharedPtr(std::nullptr_t) {}
+        constexpr SharedPtr(T* pointer);
+
+        SharedPtr(const SharedPtr<T>& rhs);
+        SharedPtr(SharedPtr<T>&& rhs);
+
+        SharedPtr<T>& operator=(const SharedPtr<T>& rhs);
+        SharedPtr<T>& operator=(SharedPtr<T>&& rhs);
+
+        ~SharedPtr();
+
+        T& operator*() const;
+        T* operator->() const;
+
     private:
         T* _resource{nullptr};
     };
@@ -69,13 +87,28 @@ public:
      */
     template <typename T>
     class WeakPtr {
+        static_assert(
+            std::is_base_of<Resource, T>::value,
+            "T must inherit from Resource"
+        );
+
     public:
-        constexpr WeakPtr(std::nullptr_t) {}
+        constexpr WeakPtr(T* pointer);
+        constexpr WeakPtr(const SharedPtr<T>& rhs);
+
+        WeakPtr(const WeakPtr<T>& rhs);
+        WeakPtr(WeakPtr<T>&& rhs);
+
+        WeakPtr<T>& operator=(const WeakPtr<T>& rhs);
+        WeakPtr<T>& operator=(WeakPtr<T>&& rhs);
+
+        ~WeakPtr();
 
         /**
          * @brief      Transforms a WeakPtr to a SharedPtr
          */
         SharedPtr<T> lock();
+
     private:
         T* _resource{nullptr};
     };
