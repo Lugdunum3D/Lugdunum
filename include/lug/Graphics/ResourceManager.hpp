@@ -23,7 +23,7 @@ public:
      * @brief      Constructs a ResourceManager, from a Renderer instance.
      * @param      renderer  The renderer.
      */
-    ResourceManager(Renderer* renderer);
+    ResourceManager(Renderer& renderer);
 
     ResourceManager(const ResourceManager&) = delete;
     ResourceManager(ResourceManager&&) = delete;
@@ -54,7 +54,7 @@ public:
     Resource::SharedPtr<Resource> loadFile(const std::string& filename);
 
 private:
-    Renderer* _renderer{nullptr};
+    Renderer& _renderer;
     std::vector<std::unique_ptr<Resource>> _resources;
 
     /**

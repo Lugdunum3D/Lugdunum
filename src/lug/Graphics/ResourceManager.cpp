@@ -5,8 +5,8 @@
 namespace lug {
 namespace Graphics {
 
-ResourceManager::ResourceManager(Renderer* renderer) : _renderer(renderer) {
-    if (_renderer->getType() == Renderer::Type::Vulkan) {
+ResourceManager::ResourceManager(Renderer& renderer) : _renderer(renderer) {
+    if (_renderer.getType() == Renderer::Type::Vulkan) {
         _loaders["gltf"] = std::make_unique<GltfLoader>();
         _loaders["glb"] = std::make_unique<GltfLoader>();
     }
@@ -20,12 +20,13 @@ Resource::SharedPtr<Resource> ResourceManager::loadFile(const std::string& filen
     }
 
     std::string extension = filename.substr(extensionPos + 1);
-    // TODO: Get extension
+
     auto loader = _loaders.find(extension);
     if (loader == _loaders.end()) {
         LUG_LOG.error("ResourceManager: Can't find loader for extension {}", extension);
         return nullptr;
     }
+
     return loader->second->loadFile(filename);
 }
 

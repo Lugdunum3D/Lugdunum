@@ -50,6 +50,7 @@ public:
     Material& operator=(const Material&) = delete;
     Material& operator=(Material&&) = delete;
 
+    virtual ~Material() = default;
 private:
     std::string _name;
 

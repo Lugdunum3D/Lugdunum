@@ -21,7 +21,7 @@ public:
     Loader& operator=(const Loader&) = delete;
     Loader& operator=(Loader&&) = delete;
 
-    ~Loader() = default;
+    virtual ~Loader() = default;
 
     /**
      * @brief      Loads a Resource from a file.

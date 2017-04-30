@@ -35,6 +35,8 @@ public:
     Material& operator=(const Material&) = delete;
     Material& operator=(Material&&) = delete;
 
+    ~Material() = default;
+
 private:
     API::DeviceMemory _deviceMemory;
     API::Buffer _buffer;

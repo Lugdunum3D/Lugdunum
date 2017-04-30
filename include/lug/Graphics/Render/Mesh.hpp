@@ -5,6 +5,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Resource.hpp>
+#include <lug/Graphics/Render/Material.hpp>
 #include <lug/Math/Vector.hpp>
 
 namespace lug {
@@ -24,8 +25,8 @@ public:
             } type;
 
             struct Buffer {
-                char* data;
-                uint32_t size;
+                char* data{nullptr};
+                uint32_t size{0};
             } buffer;
         };
 
@@ -37,19 +38,19 @@ public:
             Triangles = 4,
             TriangleStrip = 5,
             TriangleFan = 6
-        } mode;
+        } mode{Mode::Triangles};
 
         std::vector<Attribute> attributes;
 
-        Attribute* position;
-        Attribute* normal;
-        std::vector<Attribute*> texCoords;
-        Attribute* tangent;
-        Attribute* indices;
+        Attribute* position{nullptr};
+        Attribute* normal{nullptr};
+        std::vector<Attribute*> texCoords{};
+        Attribute* tangent{nullptr};
+        Attribute* indices{nullptr};
 
-        //Material* material;
+        Material* material{nullptr};
 
-        void* _data; // Specific to each Renderer
+        void* _data{nullptr}; // Specific to each Renderer
     };
 
 public:
