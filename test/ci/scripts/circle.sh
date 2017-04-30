@@ -19,14 +19,14 @@ case $CIRCLE_NODE_INDEX in
         export CXX=clang++
         mkdir build && cd build
         cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS
-        make all test && sudo make install && build_samples
+        make all test && sudo make install # && build_samples
     ;;
 
     1)
         export CXX=g++
         mkdir build && cd build
         cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS
-        make all test && sudo make install && build_samples
+        make all test && sudo make install # && build_samples
     ;;
 esac
 
