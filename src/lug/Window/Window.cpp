@@ -14,9 +14,9 @@
 
 namespace lug {
 namespace Window {
-
 Window::Window() : _impl{new priv::WindowImpl(this)} {
     initKeyState();
+    initMouseState();
 }
 
 Window::~Window() {
@@ -47,6 +47,7 @@ bool Window::init(const InitInfo& initInfo) {
 }
 
 void Window::initKeyState() {
+    _keyState[Keyboard::Key::Unknown] = false;
     // Basic keys
     _keyState[Keyboard::Key::A] = false;
     _keyState[Keyboard::Key::B] = false;
@@ -181,6 +182,14 @@ void Window::initKeyState() {
     _keyState[Keyboard::Key::F15] = false;
 }
 
+void Window::initMouseState() {
+    _mouseState[Mouse::Button::Left] = false;
+    _mouseState[Mouse::Button::Right] = false;
+    _mouseState[Mouse::Button::Middle] = false;
+    _mouseState[Mouse::Button::XButton1] = false;
+    _mouseState[Mouse::Button::XButton2] = false;
+}
+
 bool Window::isOpen() const {
     return _impl != nullptr;
 }
@@ -200,6 +209,18 @@ bool Window::pollEvent(Event& event) {
         } else if (event.type == Event::Type::KeyReleased) {
             _keyState[event.key.code] = false;
         }
+
+        if (event.type == Event::Type::ButtonPressed) {
+            _mouseState[event.mouse.code] = true;
+        } else if (event.type == Event::Type::ButtonReleased) {
+            _mouseState[event.mouse.code] = false;
+        }
+
+        if (event.type == Event::Type::MouseMoved) {
+            _mouseCoord.x = event.mouse.coord.x;
+            _mouseCoord.y = event.mouse.coord.y;
+        }
+
         return value;
     }
     return false;
@@ -221,6 +242,15 @@ void Window::close() {
 
 bool Window::isKeyPressed(Keyboard::Key key) const {
     return _keyState.at(key);
+}
+
+bool Window::isMousePressed(Mouse::Button button) const {
+    return (_mouseState.at(button));
+}
+
+void Window::getMousePos(uint32_t & x, uint32_t & y) const {
+    x = _mouseCoord.x;
+    y = _mouseCoord.y;
 }
 
 } // namespace Window

@@ -4,6 +4,8 @@
 #include <queue>
 #include <lug/System/Logger/Logger.hpp>
 #include <lug/Window/Unix/WmHints.hpp>
+#include <X11/Xlib.h>
+#include <lug/Window/Event.hpp>
 
 namespace lug {
 namespace Window {
@@ -16,13 +18,6 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
 
     if (_display == nullptr) {
         return false;
-    }
-
-    int minor = XkbMinorVersion;
-    int major = XkbMajorVersion;
-
-    if (XkbLibraryVersion(&minor, &major)) {
-        XkbSetAutoRepeatRate(_display, XkbUseCoreKbd, 1000, 100);
     }
 
     int screen = DefaultScreen(_display);
@@ -39,7 +34,15 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
         return false;
     }
 
-    XSelectInput(_display, _window, ExposureMask | StructureNotifyMask | KeyPressMask | KeyReleaseMask);
+    XSelectInput(_display, _window, ExposureMask |
+                                    StructureNotifyMask |
+                                    KeyPressMask |
+                                    KeyReleaseMask |
+                                    ButtonPressMask |
+                                    ButtonReleaseMask |
+                                    EnterWindowMask |
+                                    LeaveWindowMask |
+                                    PointerMotionMask);
     XStoreName(_display, _window, initInfo.title.c_str());
     XMapWindow(_display, _window);
 
@@ -59,6 +62,15 @@ void WindowImpl::close() {
         XCloseDisplay(_display);
         _display = nullptr;
         _window = 0;
+    }
+}
+
+static Mouse::Button buttonCodeToLugButton(unsigned int buttonCode) {
+    switch (buttonCode) {
+        case Button1:       return Mouse::Button::Left;
+        case Button2:       return Mouse::Button::Middle;
+        case Button3:       return Mouse::Button::Right;
+        default:            return Mouse::Button::Unknown;
     }
 }
 
@@ -327,8 +339,17 @@ static Keyboard::Key keysymToLugKey(KeySym key) {
     }
 }
 
-Bool selectEvents(Display*, XEvent* event, XPointer) {
-    return (event->type == ClientMessage || event->type == DestroyNotify || event->type == KeyPress || event->type == KeyRelease || event->type == ConfigureNotify);
+static Bool selectEvents(Display*, XEvent* event, XPointer) {
+    return (event->type == ClientMessage ||
+            event->type == DestroyNotify ||
+            event->type == KeyPress ||
+            event->type == KeyRelease ||
+            event->type == ButtonPress ||
+            event->type == ButtonRelease ||
+            event->type == MotionNotify ||
+            event->type == ConfigureNotify ||
+            event->type == LeaveNotify ||
+            event->type == EnterNotify);
 }
 
 /**
@@ -396,24 +417,29 @@ bool WindowImpl::pollEvent(Event& event) {
             }
 
             break;
+
         case DestroyNotify:
             event.type = Event::Type::Close;
             break;
+
         case KeyPress:
             event.type          = Event::Type::KeyPressed;
             event.key.code      = keysymToLugKey(XLookupKeysym((&xEvent.xkey), 0)); // TODO: indexes?
-            event.key.ctrl      = xEvent.xkey.state & ControlMask;
-            event.key.shift     = xEvent.xkey.state & ShiftMask;
-            event.key.system    = xEvent.xkey.state & Mod4Mask;
+            event.key.ctrl      = (xEvent.xkey.state & ControlMask) != 0;
+            event.key.alt       = (xEvent.xkey.state & Mod1Mask) != 0;
+            event.key.shift     = (xEvent.xkey.state & ShiftMask) != 0;
+            event.key.system    = (xEvent.xkey.state & Mod4Mask) != 0;
             break;
+
         case KeyRelease:
             event.type          = Event::Type::KeyReleased;
             event.key.code      = keysymToLugKey(XLookupKeysym((&xEvent.xkey), 0)); // TODO: indexes?
-            event.key.alt       = xEvent.xkey.state & Mod1Mask;
-            event.key.ctrl      = xEvent.xkey.state & ControlMask;
-            event.key.shift     = xEvent.xkey.state & ShiftMask;
-            event.key.system    = xEvent.xkey.state & Mod4Mask;
+            event.key.ctrl      = (xEvent.xkey.state & ControlMask) != 0;
+            event.key.alt       = (xEvent.xkey.state & Mod1Mask) != 0;
+            event.key.shift     = (xEvent.xkey.state & ShiftMask) != 0;
+            event.key.system    = (xEvent.xkey.state & Mod4Mask) != 0;
             break;
+
         case ConfigureNotify:
             if (xEvent.xconfigure.width != _parent->_mode.width || xEvent.xconfigure.height != _parent->_mode.height) {
                 _parent->_mode.width = xEvent.xconfigure.width;
@@ -424,7 +450,69 @@ bool WindowImpl::pollEvent(Event& event) {
                 return false;
             }
 
+        case ButtonPress:
+            switch (xEvent.xbutton.button) {
+                case Button4:
+                    event.type = Event::Type::MouseWheel;
+                    event.mouse.scrollOffset.xOffset = 0;
+                    event.mouse.scrollOffset.yOffset = 1;
+                    break;
+                case Button5:
+                    event.type = Event::Type::MouseWheel;
+                    event.mouse.scrollOffset.xOffset = 0;
+                    event.mouse.scrollOffset.yOffset = -1;
+                    break;
+                case 6:
+                    event.type = Event::Type::MouseWheel;
+                    event.mouse.scrollOffset.xOffset = 1;
+                    event.mouse.scrollOffset.yOffset = 0;
+                    break;
+                case 7:
+                    event.type = Event::Type::MouseWheel;
+                    event.mouse.scrollOffset.xOffset = -1;
+                    event.mouse.scrollOffset.yOffset = 0;
+                    break;
+                default:
+                    event.type = Event::Type::ButtonPressed;
+                    event.mouse.code = buttonCodeToLugButton(xEvent.xbutton.button);
+            }
+            event.mouse.coord.x = xEvent.xbutton.x;
+            event.mouse.coord.y = xEvent.xbutton.y;
+            event.mouse.ctrl = (xEvent.xbutton.state & ControlMask) != 0;
+            event.mouse.shift = (xEvent.xbutton.state & ShiftMask) != 0;
             break;
+
+        case ButtonRelease:
+            if (xEvent.xbutton.button != Button4 && xEvent.xbutton.button != Button5 &&
+                xEvent.xbutton.button != 6 && xEvent.xbutton.button != 7) {
+                event.type = Event::Type::ButtonReleased;
+                event.mouse.code = buttonCodeToLugButton(xEvent.xbutton.button);
+                event.mouse.coord.x = xEvent.xbutton.x;
+                event.mouse.coord.y = xEvent.xbutton.y;
+            } else {
+                return false;
+            }
+            break;
+
+        case MotionNotify:
+            event.type              = Event::Type::MouseMoved;
+            event.mouse.code       = buttonCodeToLugButton(xEvent.xbutton.button);
+            event.mouse.coord.x    = xEvent.xbutton.x;
+            event.mouse.coord.y    = xEvent.xbutton.y;
+            break;
+
+        case LeaveNotify:
+            event.type = Event::Type::MouseLeave;
+            event.mouse.coord.x    = xEvent.xbutton.x;
+            event.mouse.coord.y    = xEvent.xbutton.y;
+            break;
+
+        case EnterNotify:
+            event.type = Event::Type::MouseEnter;
+            event.mouse.coord.x    = xEvent.xbutton.x;
+            event.mouse.coord.y    = xEvent.xbutton.y;
+            break;
+
         default:
             return false;
     }
