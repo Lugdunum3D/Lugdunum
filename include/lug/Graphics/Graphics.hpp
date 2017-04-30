@@ -7,7 +7,6 @@
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Render/Camera.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
-#include <lug/Graphics/Render/Model.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
 

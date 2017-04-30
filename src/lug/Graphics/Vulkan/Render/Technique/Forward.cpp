@@ -6,12 +6,10 @@
 #include <lug/Graphics/Light/Spot.hpp>
 #include <lug/Graphics/Render/Queue.hpp>
 #include <lug/Graphics/Scene/MeshInstance.hpp>
-#include <lug/Graphics/Scene/ModelInstance.hpp>
 #include <lug/Graphics/Scene/Node.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
-#include <lug/Graphics/Vulkan/Render/Model.hpp>
 #include <lug/Graphics/Vulkan/Render/View.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Math/Matrix.hpp>
@@ -161,7 +159,7 @@ bool Forward::render(
             BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
             lightBuffer->descriptorSet->bind(_pipelines[Light::Light::Type::Directional]->getLayout(), &cmdBuffer, 1, 1, &lightBuffer->offset);
 
-            for (std::size_t j = 0; j < renderQueue.getMeshsNb(); ++j) {
+            /*for (std::size_t j = 0; j < renderQueue.getMeshsNb(); ++j) {
                 MeshInstance* meshInstance = renderQueue.getMeshs()[j];
                 lug::Graphics::Render::Mesh* mesh = static_cast<lug::Graphics::Render::Mesh*>(meshInstance->getMesh());
 
@@ -210,7 +208,7 @@ bool Forward::render(
                     vkCmdBindIndexBuffer(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkBuffer>(*model->getIndexBuffer()), indexBufferOffset, VK_INDEX_TYPE_UINT32);
                     vkCmdDrawIndexed(static_cast<VkCommandBuffer>(cmdBuffer), (uint32_t)modelMesh->indices.size(), 1, 0, 0, 0);
                 }
-            }
+            }*/
         }
 
         renderPass->end(&cmdBuffer);

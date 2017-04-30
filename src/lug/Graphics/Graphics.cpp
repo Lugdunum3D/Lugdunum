@@ -4,7 +4,6 @@
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
-#include <lug/Graphics/Vulkan/Render/Model.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/System/Logger/Logger.hpp>
 

@@ -15,14 +15,12 @@ set(SRC
 
     ${SRCROOT}/Render/Camera.cpp
     ${SRCROOT}/Render/Mesh.cpp
-    ${SRCROOT}/Render/Model.cpp
     ${SRCROOT}/Render/Queue.cpp
     ${SRCROOT}/Render/View.cpp
 
     ${SRCROOT}/Renderer.cpp
 
     ${SRCROOT}/Scene/MeshInstance.cpp
-    ${SRCROOT}/Scene/ModelInstance.cpp
     ${SRCROOT}/Scene/MovableCamera.cpp
     ${SRCROOT}/Scene/MovableObject.cpp
     ${SRCROOT}/Scene/Node.cpp
@@ -54,7 +52,6 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/BufferPool.cpp
     ${SRCROOT}/Vulkan/Render/Camera.cpp
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
-    ${SRCROOT}/Vulkan/Render/Model.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Forward.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Technique.cpp
     ${SRCROOT}/Vulkan/Render/View.cpp
@@ -90,7 +87,6 @@ set(INC
     ${INCROOT}/Render/Camera.inl
     ${INCROOT}/Render/Mesh.hpp
     ${INCROOT}/Render/Mesh.inl
-    ${INCROOT}/Render/Model.hpp
     ${INCROOT}/Render/Queue.hpp
     ${INCROOT}/Render/Queue.inl
     ${INCROOT}/Render/Target.hpp
@@ -105,8 +101,6 @@ set(INC
 
     ${INCROOT}/Scene/MeshInstance.hpp
     ${INCROOT}/Scene/MeshInstance.inl
-    ${INCROOT}/Scene/ModelInstance.hpp
-    ${INCROOT}/Scene/ModelInstance.inl
     ${INCROOT}/Scene/MovableCamera.hpp
     ${INCROOT}/Scene/MovableObject.hpp
     ${INCROOT}/Scene/MovableObject.inl
@@ -147,8 +141,6 @@ set(INC
     ${INCROOT}/Vulkan/Render/Camera.hpp
     ${INCROOT}/Vulkan/Render/Mesh.hpp
     ${INCROOT}/Vulkan/Render/Mesh.inl
-    ${INCROOT}/Vulkan/Render/Model.hpp
-    ${INCROOT}/Vulkan/Render/Model.inl
     ${INCROOT}/Vulkan/Render/Technique/Forward.hpp
     ${INCROOT}/Vulkan/Render/Technique/Technique.hpp
     ${INCROOT}/Vulkan/Render/View.hpp
