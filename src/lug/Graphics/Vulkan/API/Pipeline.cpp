@@ -104,7 +104,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         fragmentShaderStage.pSpecializationInfo = nullptr
     };
 
-    VkPipelineShaderStageCreateInfo shaderStages[]{
+    /*VkPipelineShaderStageCreateInfo shaderStages[]{
         vertexShaderStage,
         fragmentShaderStage
     };
@@ -152,7 +152,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         vertexInputInfo.pVertexBindingDescriptions = &vertexInputBindingDesc,
         vertexInputInfo.vertexAttributeDescriptionCount = 4,
         vertexInputInfo.pVertexAttributeDescriptions = vertexInputAttributesDesc
-    };
+    };*/
 
     // Input assembly state
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo{
@@ -277,7 +277,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         dynamicStateInfo.pDynamicStates = dynamicStates
     };
 
-    VkGraphicsPipelineCreateInfo createInfo{
+    /*VkGraphicsPipelineCreateInfo createInfo{
         createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = 0,
@@ -310,7 +310,8 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         return nullptr;
     }
 
-    return std::unique_ptr<Pipeline>(new Pipeline(pipeline, device, std::move(pipelineLayout), std::move(renderPass)));
+    return std::unique_ptr<Pipeline>(new Pipeline(pipeline, device, std::move(pipelineLayout), std::move(renderPass)));*/
+    return nullptr;
 }
 
 } // API

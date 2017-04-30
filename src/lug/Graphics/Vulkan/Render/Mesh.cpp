@@ -9,13 +9,16 @@ namespace Render {
 Mesh::Mesh(
     const std::string& name,
     const std::vector<uint32_t>& queueFamilyIndices,
-    const API::Device* device) : ::lug::Graphics::Render::Mesh(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {}
+    const API::Device* device) : ::lug::Graphics::Render::Mesh(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {
+    (void)_device;
+    (void)_queueFamilyIndices;
+}
 
 Mesh::~Mesh() {
     destroy();
 }
 
-bool Mesh::load() {
+/*bool Mesh::load() {
     if (_loaded) {
         LUG_LOG.warn("RendererVulkan: Attempt to load a mesh that is already loaded");
         return true;
@@ -63,15 +66,15 @@ bool Mesh::load() {
 
     return true;
 }
-
+*/
 void Mesh::destroy() {
-    if (_vertexBuffer) {
+    /*if (_vertexBuffer) {
         _vertexBuffer->destroy();
     }
 
     if (_indexBuffer) {
         _indexBuffer->destroy();
-    }
+    }*/
 }
 
 } // Render

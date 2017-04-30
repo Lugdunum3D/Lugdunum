@@ -2,30 +2,54 @@
 
 #include <cstdint>
 #include <vector>
+
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Resource.hpp>
 #include <lug/Math/Vector.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Render {
 
-class LUG_GRAPHICS_API Mesh {
+class LUG_GRAPHICS_API Mesh : public Resource {
 public:
-    struct Material {
-        Math::Vec3f ambient;
-        Math::Vec3f diffuse;
-        Math::Vec3f specular;
-    };
+    struct PrimitiveSet {
+        struct Attribute {
+            enum class Type : uint8_t {
+                Indice,
+                Position,
+                Normal,
+                TexCoord,
+                Tangent
+            } type;
 
-    struct Vertex {
-        Math::Vec3f pos;
-        Math::Vec3f color;
-        Math::Vec3f normal;
-        Math::Vec2f uv;
+            struct Buffer {
+                char* data;
+                uint32_t size;
+            } buffer;
+        };
 
-        bool operator==(const Vertex& vertex) const {
-            return pos == vertex.pos && color == vertex.color && normal == vertex.normal && uv == vertex.uv;
-        }
+        enum class Mode : uint8_t {
+            Points = 0,
+            Lines = 1,
+            LineLoop = 2,
+            LineStrip = 3,
+            Triangles = 4,
+            TriangleStrip = 5,
+            TriangleFan = 6
+        } mode;
+
+        std::vector<Attribute> attributes;
+
+        Attribute* position;
+        Attribute* normal;
+        std::vector<Attribute*> texCoords;
+        Attribute* tangent;
+        Attribute* indices;
+
+        //Material* material;
+
+        void* _data; // Specific to each Renderer
     };
 
 public:
@@ -37,24 +61,14 @@ public:
     Mesh& operator=(const Mesh&) = delete;
     Mesh& operator=(Mesh&&) = delete;
 
+    virtual ~Mesh() = default;
+
     const std::string& getName() const;
     void setName(const std::string &name);
 
-    virtual ~Mesh() = default;
-
-    virtual bool load() = 0;
-
-    virtual bool isModelMesh() const;
-
-public:
-    std::vector<Vertex> vertices;
-    std::vector<uint32_t> indices;
-
 protected:
-    Material _baseMaterial;
-
-    bool _loaded{false};
     std::string _name;
+    std::vector<PrimitiveSet> _primitiveSets;
 };
 
 #include <lug/Graphics/Render/Mesh.inl>

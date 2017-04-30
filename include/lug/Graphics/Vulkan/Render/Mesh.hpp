@@ -15,6 +15,12 @@ namespace Render {
 
 class LUG_GRAPHICS_API Mesh : public ::lug::Graphics::Render::Mesh {
 public:
+    struct PrimitiveSetData {
+        //API::Pipeline::Handle::PrimitivePart pipelineIdPrimitivePart;
+        std::vector<API::Buffer> buffers;
+    };
+
+public:
     explicit Mesh(const std::string& name, const std::vector<uint32_t>& queueFamilyIndices, const API::Device* device);
 
     Mesh(const Mesh&) = delete;
@@ -25,20 +31,10 @@ public:
 
     ~Mesh() override final;
 
-    // TODO: Add reload() function
-    bool load() override final;
-
     void destroy();
 
-    const API::Buffer* getVertexBuffer() const;
-    const API::Buffer* getIndexBuffer() const;
-
 private:
-    std::unique_ptr<API::Buffer> _vertexBuffer;
-    std::unique_ptr<API::Buffer> _indexBuffer;
-
-    std::unique_ptr<API::DeviceMemory> _vertexDeviceMemory{nullptr};
-    std::unique_ptr<API::DeviceMemory> _indexDeviceMemory{nullptr};
+    API::DeviceMemory _deviceMemory;
 
     // Queue family indices used by the vertex and index buffers
     std::vector<uint32_t> _queueFamilyIndices;
