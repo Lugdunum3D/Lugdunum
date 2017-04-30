@@ -426,28 +426,13 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
             }
             break;
 
-        case WM_KEYUP:
-        case WM_SYSKEYUP:
-            e.type = Event::Type::KeyReleased;
-            configKeyEvent(e.key, wParam, lParam);
-            break;
-
-        case WM_CHAR:
-            if (_keyRepeat || ((lParam & (1 << 30)) == 0)) {
-                e.type = Event::Type::CharEntered;
-                e.character.val = static_cast<wchar_t>(wParam);
-            } else {
-                return;
-            }
-            break;
-
         case WM_RBUTTONDOWN:
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_XBUTTONDOWN:
             e.type = Event::Type::ButtonPressed;
             configMouseEvent(e.mouse, wParam, lParam);
-            configMouseButtonEvent(e.mouse, message, wParam);
+            configMouseButtonEvent(e.mouse, message, wParam, lParam);
             break;
 
         case WM_RBUTTONUP:
@@ -456,7 +441,7 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
         case WM_XBUTTONUP:
             e.type = Event::Type::ButtonReleased;
             configMouseEvent(e.mouse, wParam, lParam);
-            configMouseButtonEvent(e.mouse, message, wParam);
+            configMouseButtonEvent(e.mouse, message, wParam, lParam);
            break;
 
         case WM_MOUSEMOVE:
