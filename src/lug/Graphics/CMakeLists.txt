@@ -17,6 +17,7 @@ set(SRC
     ${SRCROOT}/ResourceManager.cpp
 
     ${SRCROOT}/Render/Camera.cpp
+    ${SRCROOT}/Render/Material.cpp
     ${SRCROOT}/Render/Mesh.cpp
     ${SRCROOT}/Render/Queue.cpp
     ${SRCROOT}/Render/View.cpp
@@ -74,8 +75,12 @@ set(INC
     ${INCROOT}/Export.hpp
     ${INCROOT}/Graphics.hpp
     ${INCROOT}/Graphics.inl
+    ${INCROOT}/Loader.hpp
+    ${INCROOT}/GltfLoader.hpp
     ${INCROOT}/Resource.hpp
     ${INCROOT}/Resource.inl
+    ${INCROOT}/ResourceManager.hpp
+    ${INCROOT}/ResourceManager.inl
 
     ${INCROOT}/Light/Directional.hpp
     ${INCROOT}/Light/Light.hpp
@@ -90,6 +95,7 @@ set(INC
 
     ${INCROOT}/Render/Camera.hpp
     ${INCROOT}/Render/Camera.inl
+    ${INCROOT}/Render/Material.hpp
     ${INCROOT}/Render/Mesh.hpp
     ${INCROOT}/Render/Mesh.inl
     ${INCROOT}/Render/Queue.hpp
@@ -144,6 +150,7 @@ set(INC
 
     ${INCROOT}/Vulkan/Render/BufferPool.hpp
     ${INCROOT}/Vulkan/Render/Camera.hpp
+    ${INCROOT}/Vulkan/Render/Material.hpp
     ${INCROOT}/Vulkan/Render/Mesh.hpp
     ${INCROOT}/Vulkan/Render/Mesh.inl
     ${INCROOT}/Vulkan/Render/Technique/Forward.hpp
