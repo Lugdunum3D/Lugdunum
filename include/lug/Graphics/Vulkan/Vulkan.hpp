@@ -15,6 +15,9 @@
 #endif
 
 #define VK_NO_PROTOTYPES
+#ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+#endif
 #include <vulkan/vulkan.h>
 
 #if defined(LUG_SYSTEM_LINUX)
