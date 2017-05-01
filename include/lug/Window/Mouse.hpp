@@ -2,6 +2,9 @@
 
 #include <lug/Window/Export.hpp>
 #if defined(LUG_SYSTEM_WINDOWS)
+#ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+#endif
 #include <Windows.h>
 #elif defined(LUG_SYSTEM_LINUX)
 #include <X11/keysym.h>
