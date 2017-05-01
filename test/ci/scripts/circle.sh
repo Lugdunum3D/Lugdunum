@@ -1,15 +1,19 @@
 #!/bin/bash
 
-function build_samples() {
+function build_lugdunum() {
     cd ~/Lugdunum
 
-    for sample in `find samples -mindepth 1 -maxdepth 1 ! -name "compiler" -type d`
-    do
-        echo "Building $sample"
-        cd ~/Lugdunum/$sample
-        mkdir build && cd build
-        (cmake .. -DBUILD_SHADERS=false && make all) || return 1
-    done
+    mkdir build && cd build
+    (cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS) || return 1
+    (make all test && sudo make install) || return 1
+}
+
+function build_samples() {
+    cd ~/Lugdunum/samples
+
+    mkdir build && cd build
+    (cmake .. -DBUILD_SHADERS=false) || return 1
+    (make all) || return 1
 
     return 0
 }
@@ -17,16 +21,12 @@ function build_samples() {
 case $CIRCLE_NODE_INDEX in
     0)
         export CXX=clang++
-        mkdir build && cd build
-        cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS
-        make all test && sudo make install && build_samples
+        build_lugdunum && build_samples
     ;;
 
     1)
         export CXX=g++
-        mkdir build && cd build
-        cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS
-        make all test && sudo make install && build_samples
+        build_lugdunum && build_samples
     ;;
 esac
 

@@ -86,7 +86,7 @@ init:
 
 environment:
     Toolset: v140
-    TEST_OUTPUT: '%APPVEYOR_BUILD_FOLDER%\build\test'
+    TEST_OUTPUT: '%APPVEYOR_BUILD_FOLDER%/build/test'
 
 # environment variables
 # environment:
@@ -168,7 +168,6 @@ install:
 
 # build platform, i.e. x86, x64, Any CPU. This setting is optional.
 platform:
-  - x86
   - x64
 
 # to add several platforms to build matrix:
@@ -215,11 +214,36 @@ before_package:
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
+# Build & install lugdunum
 - ps: |
+    md install -Force | Out-Null
+
     md build -Force | Out-Null
     cd build
 
-    & cmake -G "$generator" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DBUILD_TESTS=TRUE -DTEST_OUTPUT="$env:TEST_OUTPUT" ..
+    & cmake -G "$generator" -DCMAKE_INSTALL_PREFIX="$pwd/../install" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DBUILD_TESTS=TRUE -DTEST_OUTPUT="$env:TEST_OUTPUT" ..
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
+    & cmake --build . --config $env:CONFIGURATION
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
+    & cmake --build . --config $env:CONFIGURATION --target install
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
+
+    cd ..
+
+# Build samples
+- ps: |
+    cd samples
+
+    md build -Force | Out-Null
+    cd build
+
+    & cmake -G "$generator" -DLUG_ROOT="$pwd/../../install" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DBUILD_SHADERS=false ..
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
     }
@@ -228,13 +252,17 @@ build_script:
         throw "Exec: $ErrorMessage"
     }
 
+    cd ../..
+
 # scripts to run after build
 after_build:
 - ps: |
-    Copy-Item .\lib\$env:CONFIGURATION\*.dll .\test\$env:CONFIGURATION\
+    Copy-Item ./build/lib/$env:CONFIGURATION/*.dll ./build/test/$env:CONFIGURATION/
 
 test_script:
 - ps: |
+    cd build
+
     & ctest -C $env:CONFIGURATION -O "Testing/Temporary/TestOutput.txt" --output-on-failure
     if ($LastExitCode -ne 0) {
         throw "Exec: $ErrorMessage"
@@ -243,9 +271,9 @@ test_script:
 on_finish:
 - ps : |
     Get-ChildItem -Directory $env:TEST_OUTPUT | ForEach-Object {
-        if (Test-Path "$env:TEST_OUTPUT\${_}UnitTests.xml") {
+        if (Test-Path "$env:TEST_OUTPUT/${_}UnitTests.xml") {
             $wc = New-Object 'System.Net.WebClient'
-            $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "$env:TEST_OUTPUT\${_}UnitTests.xml"))
+            $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path "$env:TEST_OUTPUT/${_}UnitTests.xml"))
         }
     }
 
