@@ -7,6 +7,7 @@
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/BufferView.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/Render/Pipeline.hpp>
 
 namespace lug {
 namespace Graphics {

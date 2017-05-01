@@ -6,12 +6,8 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Mesh::Mesh(
-    const std::string& name,
-    const std::vector<uint32_t>& queueFamilyIndices,
-    const API::Device* device) : ::lug::Graphics::Render::Mesh(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {
-    (void)_device;
-    (void)_queueFamilyIndices;
+Mesh::Mesh(const std::string& name) : ::lug::Graphics::Render::Mesh(name) {
+    
 }
 
 Mesh::~Mesh() {
