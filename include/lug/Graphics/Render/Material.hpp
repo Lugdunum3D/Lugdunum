@@ -11,13 +11,43 @@ namespace Graphics {
 namespace Render {
 
 /**
- * @brief     Class for Material
+ * @brief     Class for Material. Is a Resource.
  */
 class LUG_GRAPHICS_API Material : public Resource {
 public:
+    /**
+     * @brief      Handle of a material. Describes how is the material composed,
+     *             with textures, no textures, etc, to be used to construct unique
+     *             pipelines.
+     */
+    struct Handle {
+        union {
+            struct {
+                uint32_t baseColorInfo : 2;             ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
+                uint32_t metallicRoughnessInfo : 2;     ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
+                uint32_t normalInfo : 2;                ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
+                uint32_t occlusionInfo : 2;             ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
+                uint32_t emissiveInfo : 2;              ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
+            };
+
+            uint32_t value;
+        };
+
+        explicit operator uint32_t() {
+            return value;
+        }
+    };
+
     struct TextureInfo {
         //Texture* texture;
         uint32_t texCoord;
+    };
+
+    struct Factors {
+        Math::Vec4f baseColor;  ///< Overall color of the material.
+        Math::Vec3f emissive;   ///< Color of the emissive factor.
+        float metallic;         ///< How metal-like the material is. 0 is non-metal (e.g. wood, plastic), 1 is metallic.
+        float roughness;        ///< How rough the material is. 0 is smooth and 1 is rough (matte).
     };
 
     struct NormalTextureInfo : public TextureInfo {
@@ -27,13 +57,6 @@ public:
     struct OcclusionTextureInfo : public TextureInfo {
         float strength;
     };
-
-    struct Factors {
-        Math::Vec4f baseColor;
-        Math::Vec3f emissive;
-        float metallic;
-        float roughness;
-    } _factors;
 
 public:
     /**
@@ -58,6 +81,7 @@ public:
 private:
     std::string _name;
 
+    Factors _factors;
     TextureInfo _baseColorTexture;
     TextureInfo _metallicRoughnessTexture;
     NormalTextureInfo _normalTexture;

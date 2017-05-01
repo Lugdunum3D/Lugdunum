@@ -12,8 +12,16 @@ namespace lug {
 namespace Graphics {
 namespace Render {
 
+/**
+ * @brief      A Mesh, which itsef is a Resource.
+ *             A mesh is composed of a vector of PrimitiveSet.
+ * @see        Mesh::PrimitiveSet
+ */
 class LUG_GRAPHICS_API Mesh : public Resource {
 public:
+    /**
+     * @brief      Describes part of a Mesh.
+     */
     struct PrimitiveSet {
         struct Attribute {
             enum class Type : uint8_t {
@@ -24,12 +32,18 @@ public:
                 Tangent
             } type;
 
+            /**
+             * @brief      Access to the data of the attribute.
+             */
             struct Buffer {
-                char* data{nullptr};
-                uint32_t size{0};
+                char* data{nullptr};    ///< The data of the buffer.
+                uint32_t size{0};       ///< The size of the above data buffer, in bytes.
             } buffer;
         };
 
+        /**
+         * @brief      Type of the primitive set, defaults to Triangles.
+         */
         enum class Mode : uint8_t {
             Points = 0,
             Lines = 1,
@@ -69,6 +83,7 @@ public:
 
 protected:
     std::string _name;
+
     std::vector<PrimitiveSet> _primitiveSets;
 };
 
