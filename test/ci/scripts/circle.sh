@@ -7,7 +7,7 @@ function build_samples() {
     do
         echo "Building $sample"
         cd ~/Lugdunum/$sample
-        mkdir build && cd build
+        mkdir cibuild && cd cibuild
         (cmake .. -DBUILD_SHADERS=false && make all) || return 1
     done
 

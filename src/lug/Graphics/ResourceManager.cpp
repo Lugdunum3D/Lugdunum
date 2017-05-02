@@ -1,5 +1,7 @@
-#include <lug/Graphics/GltfLoader.hpp>
 #include <lug/Graphics/ResourceManager.hpp>
+
+#include <lug/Graphics/GltfLoader.hpp>
+#include <lug/Graphics/Renderer.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {

@@ -6,6 +6,7 @@
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Render/Window.hpp>
 #include <lug/Graphics/Render/Technique/Type.hpp>
+#include <lug/Graphics/ResourceManager.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -50,6 +51,7 @@ protected:
     Graphics& _graphics;
     Type _type;
     InitInfo _initInfo;
+    std::unique_ptr<ResourceManager> _resourceManager{nullptr};
 };
 
 #include <lug/Graphics/Renderer.inl>

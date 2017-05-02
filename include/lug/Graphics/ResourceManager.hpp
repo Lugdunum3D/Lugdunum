@@ -1,15 +1,17 @@
 #pragma once
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Loader.hpp>
-#include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Resource.hpp>
 
 namespace lug {
 namespace Graphics {
+
+class Renderer;
 
 /**
  * @brief      Class for resource manager.

@@ -129,6 +129,8 @@ bool Renderer::finishInit() {
     LUG_LOG.info("RendererVulkan: Use device {}", _physicalDeviceInfo->properties.deviceName);
 #endif
 
+
+    _resourceManager = std::make_unique<::lug::Graphics::ResourceManager>(*this);
     return true;
 }
 
