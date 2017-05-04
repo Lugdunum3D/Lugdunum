@@ -13,9 +13,6 @@ namespace Builder {
 
 Mesh::Mesh(lug::Graphics::Renderer& renderer) : lug::Graphics::Builder::Mesh(renderer) {}
 
-/*static void createBuffers(lug::Graphics::Render::Mesh::PrimitiveSet& primitiveSet) {
-}
-*/
 static std::unique_ptr<API::Buffer> createAttributeBuffer(
     Vulkan::Renderer* renderer,
     int& meshMemoryTypeIndex,
@@ -69,7 +66,6 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
     Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(&_renderer);
     auto& device = renderer->getDevice();
 
-    (void)mesh;
     for (auto& builderPrimitiveSet : _primitiveSets) {
         Render::Mesh::PrimitiveSetData* primitiveSetData = new Render::Mesh::PrimitiveSetData();
         lug::Graphics::Render::Mesh::PrimitiveSet targetPrimitiveSet;
@@ -83,6 +79,14 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
 
         for (uint32_t i = 0; i < attributesNb; ++i) {
             targetPrimitiveSet.attributes[i] = builderAttributes[i];
+
+            // Pipeline::Handle::PrimitivePart support only 3 texture coordinates
+            if (targetPrimitiveSet.attributes[i].type == lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::TexCoord &&
+                targetPrimitiveSet.texCoords.size() == 3) {
+                LUG_LOG.warn("Vulkan::Mesh::build: More than 3 texture coordinates, others will be ignored");
+                continue;
+            }
+
             switch (targetPrimitiveSet.attributes[i].type) {
                 case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice:
                     targetPrimitiveSet.indices = &targetPrimitiveSet.attributes[i];
@@ -112,9 +116,13 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
             }
 
             primitiveSetData->buffers.push_back(std::move(buffer));
-
-            // TODO: Add primitiveSetData->pipelineIdPrimitivePart
         }
+
+        primitiveSetData->pipelineIdPrimitivePart.positionVertexData = targetPrimitiveSet.position != nullptr;
+        primitiveSetData->pipelineIdPrimitivePart.normalVertexData = targetPrimitiveSet.normal != nullptr;
+        primitiveSetData->pipelineIdPrimitivePart.tangentVertexData = targetPrimitiveSet.tangent != nullptr;
+        primitiveSetData->pipelineIdPrimitivePart.countTexCoord = targetPrimitiveSet.texCoords.size();
+        primitiveSetData->pipelineIdPrimitivePart.primitiveMode = static_cast<uint32_t>(targetPrimitiveSet.mode);
 
         targetPrimitiveSet._data = (void*)primitiveSetData;
         mesh->_primitiveSets.push_back(targetPrimitiveSet);
