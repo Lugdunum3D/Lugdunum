@@ -23,7 +23,7 @@ public:
         PrimitiveSet(PrimitiveSet&&) = default;
 
         PrimitiveSet& operator=(const PrimitiveSet&) = default;
-        PrimitiveSet& operator=(PrimitiveSet&) = default;
+        PrimitiveSet& operator=(PrimitiveSet&&) = default;
 
         ~PrimitiveSet() = default;
 
