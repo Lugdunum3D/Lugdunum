@@ -19,7 +19,7 @@ Mesh::Mesh(lug::Graphics::Renderer& renderer) : lug::Graphics::Builder::Mesh(ren
 static std::unique_ptr<API::Buffer> createAttributeBuffer(
     Vulkan::Renderer* renderer,
     int& meshMemoryTypeIndex,
-    uint32_t& meshMemorySize,
+    VkDeviceSize& meshMemorySize,
     Render::Mesh::PrimitiveSet::Attribute& attribute) {
 
     auto& device = renderer->getDevice();
@@ -63,7 +63,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
     // Constructor of Mesh is private, we can't use std::make_unique
     std::unique_ptr<Resource> resource{new Vulkan::Render::Mesh(_name)};
     Vulkan::Render::Mesh* mesh = static_cast<Vulkan::Render::Mesh*>(resource.get());
-    uint32_t meshMemorySize = 0;
+    VkDeviceSize meshMemorySize = 0;
     int meshMemoryTypeIndex = -1;
 
     Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(&_renderer);
@@ -78,7 +78,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
         targetPrimitiveSet.material = builderPrimitiveSet.getMaterial();
 
         auto& builderAttributes = builderPrimitiveSet.getAttributes();
-        uint32_t attributesNb = builderAttributes.size();
+        uint32_t attributesNb = static_cast<uint32_t>(builderAttributes.size());
         targetPrimitiveSet.attributes.resize(attributesNb);
 
         for (uint32_t i = 0; i < attributesNb; ++i) {
@@ -124,7 +124,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
 
     // Bind attributes buffers to mesh device memory
     {
-        uint32_t deviceMemoryOffset = 0;
+        VkDeviceSize deviceMemoryOffset = 0;
         for (auto& primitiveSet : mesh->_primitiveSets) {
             Render::Mesh::PrimitiveSetData* primitiveSetData = static_cast<Render::Mesh::PrimitiveSetData*>(primitiveSet._data);
             for (auto& buffer : primitiveSetData->buffers) {

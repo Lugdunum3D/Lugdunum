@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include <lug/Graphics/Builder/Mesh.hpp>
 
 namespace lug {
@@ -23,7 +21,7 @@ void Mesh::PrimitiveSet::addAttributeBuffer(void* data, uint32_t size, Render::M
     attribute.buffer.size = size;
     attribute.buffer.data = new char[size];
 
-    std::copy(static_cast<char*>(data), static_cast<char*>(data) + size, attribute.buffer.data);
+    std::memcpy(attribute.buffer.data, static_cast<char*>(data), size);
 
     _attributes.push_back(std::move(attribute));
 }
