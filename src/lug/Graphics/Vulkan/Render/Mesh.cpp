@@ -7,7 +7,7 @@ namespace Vulkan {
 namespace Render {
 
 Mesh::Mesh(const std::string& name) : ::lug::Graphics::Render::Mesh(name) {
-    
+
 }
 
 Mesh::~Mesh() {
@@ -64,13 +64,20 @@ Mesh::~Mesh() {
 }
 */
 void Mesh::destroy() {
-    /*if (_vertexBuffer) {
-        _vertexBuffer->destroy();
+    for (auto& primitiveSet : _primitiveSets) {
+        if (!primitiveSet._data) {
+            continue;
+        }
+        PrimitiveSetData* primitiveSetData = static_cast<PrimitiveSetData*>(primitiveSet._data);
+        for (auto& buffer : primitiveSetData->buffers) {
+            buffer->destroy();
+        }
+        delete primitiveSetData;
     }
 
-    if (_indexBuffer) {
-        _indexBuffer->destroy();
-    }*/
+    if (_deviceMemory != nullptr) {
+        _deviceMemory->destroy();
+    }
 }
 
 } // Render

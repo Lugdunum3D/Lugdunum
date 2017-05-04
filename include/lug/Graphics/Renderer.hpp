@@ -47,6 +47,8 @@ public:
     const InitInfo& getInfo() const;
     Type getType() const;
 
+    ResourceManager* getResourceManager() const;
+
 protected:
     Graphics& _graphics;
     Type _type;

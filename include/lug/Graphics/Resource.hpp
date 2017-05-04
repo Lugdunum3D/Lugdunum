@@ -21,6 +21,7 @@ public:
         SceneNode,  ///< A scene node (a scene is composed of scene nodes, to make a tree)
         Material,   ///< A material
         Mesh,       ///< A mesh
+        Light,      ///< A light
         Texture,    ///< A texture
         Pipeline,   ///< A graphical pipeline
         Camera      ///< A camera
@@ -114,14 +115,15 @@ public:
     };
 
 public:
-    Resource() = default;
-    ~Resource() = default;
+    Resource(Type type);
 
     Resource(const Resource&) = delete;
     Resource(Resource&&) = delete;
 
     Resource& operator=(const Resource&) = delete;
     Resource& operator=(Resource&&) = delete;
+
+    virtual ~Resource() = default;
 
     /**
      * @brief      Returns the type of the Resource.

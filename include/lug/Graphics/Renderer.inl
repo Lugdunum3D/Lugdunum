@@ -5,3 +5,7 @@ inline const Renderer::InitInfo& Renderer::getInfo() const {
 inline Renderer::Type Renderer::getType() const {
     return _type;
 }
+
+inline ResourceManager* Renderer::getResourceManager() const {
+    return _resourceManager.get();
+}
