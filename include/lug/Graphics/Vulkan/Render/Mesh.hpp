@@ -12,18 +12,23 @@
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+namespace Builder {
+class Mesh;
+} // Builder
+
 namespace Render {
 
 class LUG_GRAPHICS_API Mesh : public ::lug::Graphics::Render::Mesh {
+    friend class ::lug::Graphics::Vulkan::Builder::Mesh;
+
 public:
     struct PrimitiveSetData {
         Pipeline::Handle::PrimitivePart pipelineIdPrimitivePart;
-        std::vector<API::Buffer> buffers;
+        std::vector<std::unique_ptr<API::Buffer>> buffers;
     };
 
 public:
-    explicit Mesh(const std::string& name);
-
     Mesh(const Mesh&) = delete;
     Mesh(Mesh&& mesh) = delete;
 
@@ -35,7 +40,10 @@ public:
     void destroy();
 
 private:
-    API::DeviceMemory _deviceMemory;
+    explicit Mesh(const std::string& name);
+
+private:
+    std::unique_ptr<API::DeviceMemory> _deviceMemory{nullptr};
 };
 
 #include <lug/Graphics/Vulkan/Render/Mesh.inl>

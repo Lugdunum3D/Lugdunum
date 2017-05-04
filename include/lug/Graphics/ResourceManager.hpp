@@ -39,11 +39,21 @@ public:
      * @brief      Retrieve a resource from the ResourceManager.
      * @param[in]  handle  The handle of the resource.
      * @tparam     T       The type of the resource.
-     * @return     A resource, as a custom SharedPtr<T>, which will allow us to do reference
+     * @return     The resource, as a custom SharedPtr<T>, which will allow us to do reference
      *             counting later.
      */
-    template <typename T>
+    template <typename T = Resource>
     Resource::SharedPtr<T> get(Resource::Handle handle);
+    
+    /**
+     * @brief      Add a resource to the ResourceManager.
+     * @param[in]  resource The resource to add resource.
+     * @tparam     T        The type of the resource.
+     * @return     The resource, as a custom SharedPtr<T>, which will allow us to do reference
+     *             counting later.
+     */
+    template <typename T = Resource>
+    Resource::SharedPtr<T> add(std::unique_ptr<Resource> resource);
 
     /**
      * @brief      Loads a resource from a file.
