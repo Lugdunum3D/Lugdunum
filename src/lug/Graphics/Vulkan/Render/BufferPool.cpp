@@ -55,7 +55,12 @@ BufferPool::SubBuffer* BufferPool::allocate() {
 
         // Allocate memory for buffer
         const VkMemoryRequirements& bufferRequirements = chunk->buffer->getRequirements();
-        uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        int memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+        if (memoryTypeIndex == -1) {
+            LUG_LOG.error("BufferPool::allocate: Can't allocate memory: memory type not supported");
+        }
+
         chunk->bufferMemory = API::DeviceMemory::allocate(_device, chunk->size, memoryTypeIndex);
 
         if (!chunk->bufferMemory) {

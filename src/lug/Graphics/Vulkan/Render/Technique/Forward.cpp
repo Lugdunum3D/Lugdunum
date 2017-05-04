@@ -366,7 +366,12 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
 
             // Initialize depth buffer memory (This memory is common for all depth buffer images)
             if (!_depthBufferMemory) {
-                uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, imageRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+                int memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, imageRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+                if (memoryTypeIndex == -1) {
+                    LUG_LOG.error("Forward: Can't allocate depth buffers memory: memory type not supported");
+                }
+
                 // Allocate image requirements size for all images
                 _depthBufferMemory = API::DeviceMemory::allocate(_device, imageRequirements.size * imageViews.size(), memoryTypeIndex);
 
