@@ -203,8 +203,8 @@ if (NOT GLTF2_LOADER_FOUND)
     endif()
     find_package(GLTF2Loader REQUIRED)
 
-    message(STATUS "Found GLTF2Loader library: ${GLTF2_LOADER_LIBRARY}")
-    message(STATUS "Found GLTF2Loader includes: ${GLTF2_LOADER_INCLUDE_DIR}")
+    message(STATUS "Found glTF2-loader library: ${GLTF2_LOADER_LIBRARY}")
+    message(STATUS "Found glTF2-loader includes: ${GLTF2_LOADER_INCLUDE_DIR}")
 endif()
 
 include_directories(${GLTF2_LOADER_INCLUDE_DIR})

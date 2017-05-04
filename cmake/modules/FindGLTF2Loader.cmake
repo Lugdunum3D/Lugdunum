@@ -21,8 +21,6 @@ find_library(GLTF2_LOADER_LIBRARY
 )
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(glTF2-loader DEFAULT_MSG GLTF2_LOADER_INCLUDE_DIR)
-find_package_handle_standard_args(glTF2-loader DEFAULT_MSG GLTF2_LOADER_LIBRARY)
+find_package_handle_standard_args(glTF2_loader FOUND_VAR GLTF2_LOADER_FOUND REQUIRED_VARS GLTF2_LOADER_INCLUDE_DIR GLTF2_LOADER_LIBRARY)
 
-mark_as_advanced(GLTF2_LOADER_INCLUDE_DIR)
-mark_as_advanced(GLTF2_LOADER_LIBRARY)
+mark_as_advanced(GLTF2_LOADER_INCLUDE_DIR GLTF2_LOADER_LIBRARY)
