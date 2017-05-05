@@ -173,6 +173,7 @@ if (NOT VULKAN_INCLUDE_DIR)
     set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/vulkan/include)
 endif()
 
+message(STATUS "Found Vulkan header: ${VULKAN_INCLUDE_DIR}")
 include_directories(${VULKAN_INCLUDE_DIR})
 
 # Find assimp
