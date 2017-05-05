@@ -217,7 +217,7 @@
     macro(VK_QUEUE_TRANSFER_BIT)      \
     macro(VK_QUEUE_SPARSE_BINDING_BIT)
 
-#if !defined (LUG_SYSTEM_ANDROID)
+#if VK_HEADER_VERSION >= 39
 #define LUG_VULKAN_FORMAT_FEATURE_BIT(macro)                    \
     macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT)                  \
     macro(VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT)                  \
@@ -233,8 +233,8 @@
     macro(VK_FORMAT_FEATURE_BLIT_DST_BIT)                       \
     macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)    \
     macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_IMG) \
-   macro(VK_FORMAT_FEATURE_TRANSFER_SRC_BIT_KHR)               \
-   macro(VK_FORMAT_FEATURE_TRANSFER_DST_BIT_KHR)
+    macro(VK_FORMAT_FEATURE_TRANSFER_SRC_BIT_KHR)               \
+    macro(VK_FORMAT_FEATURE_TRANSFER_DST_BIT_KHR)
 #else
 #define LUG_VULKAN_FORMAT_FEATURE_BIT(macro)                    \
     macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT)                  \
@@ -250,9 +250,7 @@
     macro(VK_FORMAT_FEATURE_BLIT_SRC_BIT)                       \
     macro(VK_FORMAT_FEATURE_BLIT_DST_BIT)                       \
     macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)    \
-    macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_IMG) \
-//    macro(VK_FORMAT_FEATURE_TRANSFER_SRC_BIT_KHR)             \ android NDK r14b only provide VK_HEADER_VERSION < 39
-//    macro(VK_FORMAT_FEATURE_TRANSFER_DST_BIT_KHR)
+    macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_IMG)
 #endif
 
 #define LUG_VULKAN_MEMORY_HEAP_BIT(macro) \
