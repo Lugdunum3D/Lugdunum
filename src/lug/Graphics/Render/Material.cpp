@@ -13,7 +13,6 @@ Material::Material(const std::string& name): Resource(Resource::Type::Material),
     (void)_factors;
 }
 
-
 } // Render
 } // Graphics
 } // lug
