@@ -8,12 +8,20 @@
 
 namespace lug {
 namespace Graphics {
+
+// For friend
+namespace Builder {
+class Material;
+} // Builder
+
 namespace Render {
 
 /**
  * @brief     Class for Material. Is a Resource.
  */
 class LUG_GRAPHICS_API Material : public Resource {
+    friend class ::lug::Graphics::Builder::Material;
+
 public:
     /**
      * @brief      Handle of a material. Describes how is the material composed,
@@ -78,7 +86,7 @@ public:
     const std::string& getName() const;
     void setName(const std::string &name);
 
-private:
+protected:
     std::string _name;
 
     Factors _factors;

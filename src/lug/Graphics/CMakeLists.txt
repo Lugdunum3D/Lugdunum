@@ -5,6 +5,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Graphics.cpp
 
+    ${SRCROOT}/Builder/Material.cpp
     ${SRCROOT}/Builder/Mesh.cpp
 
     ${SRCROOT}/Light/Directional.cpp
@@ -55,10 +56,12 @@ set(SRC
     ${SRCROOT}/Vulkan/API/ShaderModule.cpp
     ${SRCROOT}/Vulkan/API/Swapchain.cpp
 
+    ${SRCROOT}/Vulkan/Builder/Material.cpp
     ${SRCROOT}/Vulkan/Builder/Mesh.cpp
 
     ${SRCROOT}/Vulkan/Render/BufferPool.cpp
     ${SRCROOT}/Vulkan/Render/Camera.cpp
+    ${SRCROOT}/Vulkan/Render/Material.cpp
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
     ${SRCROOT}/Vulkan/Render/Pipeline.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Forward.cpp
@@ -87,6 +90,7 @@ set(INC
     ${INCROOT}/ResourceManager.hpp
     ${INCROOT}/ResourceManager.inl
 
+    ${INCROOT}/Builder/Material.hpp
     ${INCROOT}/Builder/Mesh.hpp
 
     ${INCROOT}/Light/Directional.hpp
@@ -156,6 +160,7 @@ set(INC
     ${INCROOT}/Vulkan/API/Swapchain.hpp
     ${INCROOT}/Vulkan/API/Swapchain.inl
 
+    ${INCROOT}/Vulkan/Builder/Material.hpp
     ${INCROOT}/Vulkan/Builder/Mesh.hpp
 
     ${INCROOT}/Vulkan/Render/BufferPool.hpp
