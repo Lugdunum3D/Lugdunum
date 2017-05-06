@@ -55,6 +55,12 @@ Resource::SharedPtr<T>::~SharedPtr() {
     _resource = nullptr;
 }
 
+template <typename T>
+template <typename RhsT>
+Resource::SharedPtr<T> Resource::SharedPtr<T>::cast(const Resource::SharedPtr<RhsT>& rhs) {
+    return dynamic_cast<T*>(rhs._resource);
+}
+
 // Weak ptr
 
 template <typename T>
@@ -94,6 +100,12 @@ Resource::WeakPtr<T>::~WeakPtr() {
 template <typename T>
 Resource::SharedPtr<T> Resource::WeakPtr<T>::lock() {
     return _resource;
+}
+
+template <typename T>
+template <typename RhsT>
+Resource::WeakPtr<T> Resource::WeakPtr<T>::cast(const Resource::WeakPtr<RhsT>& rhs) {
+    return dynamic_cast<T*>(rhs._resource);
 }
 
 // Resource

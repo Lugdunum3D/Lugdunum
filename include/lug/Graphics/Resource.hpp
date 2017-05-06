@@ -62,6 +62,9 @@ public:
      */
     template <typename T>
     class SharedPtr {
+        template <typename RhsT>
+        friend class SharedPtr;
+
         static_assert(
             std::is_base_of<Resource, T>::value,
             "T must inherit from Resource"
@@ -81,6 +84,15 @@ public:
         T& operator*() const;
         T* operator->() const;
 
+    public:
+        /**
+         * @brief      Dynamic casting of a SharedPtr to another one (RhsT to T)
+         *
+         * @tparam     RhsT     The type of the old SharedPtr
+         */
+        template <typename RhsT>
+        static SharedPtr<T> cast(const SharedPtr<RhsT>& rhs);
+
     private:
         T* _resource{nullptr};
     };
@@ -92,6 +104,9 @@ public:
      */
     template <typename T>
     class WeakPtr {
+        template <typename RhsT>
+        friend class WeakPtr;
+
         static_assert(
             std::is_base_of<Resource, T>::value,
             "T must inherit from Resource"
@@ -113,6 +128,15 @@ public:
          * @brief      Transforms a WeakPtr to a SharedPtr
          */
         SharedPtr<T> lock();
+
+    public:
+        /**
+         * @brief      Dynamic casting of a WeakPtr to another one (RhsT to T)
+         *
+         * @tparam     RhsT     The type of the old WeakPtr
+         */
+        template <typename RhsT>
+        static WeakPtr<T> cast(const WeakPtr<RhsT>& rhs);
 
     private:
         T* _resource{nullptr};
