@@ -8,10 +8,14 @@
 namespace lug {
 namespace Graphics {
 
+class ResourceManager;
+
 /**
  * @brief      Class for resource.
  */
 class LUG_GRAPHICS_API Resource {
+    friend class lug::Graphics::ResourceManager;
+
 public:
     /**
      * @brief      Type of the resource.
