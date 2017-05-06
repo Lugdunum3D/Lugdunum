@@ -84,6 +84,12 @@ public:
         T& operator*() const;
         T* operator->() const;
 
+        explicit operator bool() {
+            return _resource != nullptr;
+        }
+
+        T* get() const;
+
     public:
         /**
          * @brief      Dynamic casting of a SharedPtr to another one (RhsT to T)
