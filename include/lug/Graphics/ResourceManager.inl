@@ -23,6 +23,8 @@ Resource::SharedPtr<T> ResourceManager::add(std::unique_ptr<Resource> resource) 
         "T must inherit from Resource"
     );
 
+    resource->_handle.index = _resources.size();
     _resources.push_back(std::move(resource));
+
     return dynamic_cast<T*>(_resources.back().get());
 }
