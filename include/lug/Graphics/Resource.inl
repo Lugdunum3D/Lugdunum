@@ -56,6 +56,11 @@ Resource::SharedPtr<T>::~SharedPtr() {
 }
 
 template <typename T>
+T* Resource::SharedPtr<T>::get() const {
+    return _resource;
+}
+
+template <typename T>
 template <typename RhsT>
 Resource::SharedPtr<T> Resource::SharedPtr<T>::cast(const Resource::SharedPtr<RhsT>& rhs) {
     return dynamic_cast<T*>(rhs._resource);
