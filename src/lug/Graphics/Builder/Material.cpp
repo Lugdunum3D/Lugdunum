@@ -26,36 +26,31 @@ void Material::setRoughnessFactor(float factor) {
     _factors.roughness = factor;
 }
 
-void Material::setBaseColorTexture(const std::string& textureName, uint32_t texCoord) {
-    (void)textureName;
+void Material::setBaseColorTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord) {
+    _baseColorTexture.texture = texture;
     _baseColorTexture.texCoord = texCoord;
-    // TODO(Nokitoo): add texture name
 }
 
-void Material::setMetallicRoughnessTexture(const std::string& textureName, uint32_t texCoord) {
-    (void)textureName;
+void Material::setMetallicRoughnessTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord) {
+    _metallicRoughnessTexture.texture = texture;
     _metallicRoughnessTexture.texCoord = texCoord;
-    // TODO(Nokitoo): add texture name
 }
 
-void Material::setNormalTexture(const std::string& textureName, uint32_t texCoord, float scale) {
-    (void)textureName;
+void Material::setNormalTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord, float scale) {
+    _normalTexture.texture = texture;
     _normalTexture.texCoord = texCoord;
     _normalTexture.scale = scale;
-    // TODO(Nokitoo): add texture name
 }
 
-void Material::setOcclusionTexture(const std::string& textureName, uint32_t texCoord, float strength) {
-    (void)textureName;
+void Material::setOcclusionTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord, float strength) {
+    _occlusionTexture.texture = texture;
     _occlusionTexture.texCoord = texCoord;
     _occlusionTexture.strength = strength;
-    // TODO(Nokitoo): add texture name
 }
 
-void Material::setEmissiveTexture(const std::string& textureName, uint32_t texCoord) {
-    (void)textureName;
+void Material::setEmissiveTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord) {
+    _emissiveTexture.texture = texture;
     _emissiveTexture.texCoord = texCoord;
-    // TODO(Nokitoo): add texture name
 }
 
 } // Builder
