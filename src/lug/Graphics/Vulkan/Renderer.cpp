@@ -1,5 +1,6 @@
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Graphics.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Instance.hpp>
 #include <lug/Graphics/Vulkan/API/Loader.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
@@ -88,7 +89,7 @@ void Renderer::destroy() {
     _loader.unload();
 }
 
-bool Renderer::beginInit(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) {
+bool Renderer::beginInit(const std::string& appName, const Core::Version& appVersion, const Renderer::InitInfo& initInfo) {
     _initInfo = initInfo;
 
     if (!initInstance(appName, appVersion)) {
@@ -132,7 +133,7 @@ bool Renderer::finishInit() {
     return true;
 }
 
-bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
+bool Renderer::initInstance(const std::string& appName, const Core::Version& appVersion) {
     VkResult result;
 
     // Load vulkan core functions
@@ -193,37 +194,20 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
 
         checkRequirementsInstance(_graphics.getLoadedOptionalModules());
 
-        // Create the application information for vkCreateInstance
-        VkApplicationInfo applicationInfo{
-            applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-            applicationInfo.pNext = nullptr,
-            applicationInfo.pApplicationName = appName,
-            applicationInfo.applicationVersion = appVersion,
-            applicationInfo.pEngineName = "Lugdunum3D",
-            applicationInfo.engineVersion = VK_MAKE_VERSION(LUG_VERSION_MAJOR, LUG_VERSION_MINOR, LUG_VERSION_PATCH),
-            applicationInfo.apiVersion = 0
-        };
+        // Build the instance
+        API::Builder::Instance instanceBuilder;
 
-        // Create the instance creation information for vkCreateInstance
-        VkInstanceCreateInfo createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0,
-            createInfo.pApplicationInfo = &applicationInfo,
-            createInfo.enabledLayerCount = static_cast<uint32_t>(_loadedInstanceLayers.size()),
-            createInfo.ppEnabledLayerNames = _loadedInstanceLayers.data(),
-            createInfo.enabledExtensionCount = static_cast<uint32_t>(_loadedInstanceExtensions.size()),
-            createInfo.ppEnabledExtensionNames = _loadedInstanceExtensions.data()
-        };
+        instanceBuilder.setApplicationInfo(appName, appVersion);
+        instanceBuilder.setEngineInfo(LUG_NAME, {LUG_VERSION_MAJOR, LUG_VERSION_MINOR, LUG_VERSION_PATCH});
 
-        VkInstance instance{VK_NULL_HANDLE};
-        result = vkCreateInstance(&createInfo, nullptr, &instance);
-        if (result != VK_SUCCESS) {
+        instanceBuilder.setLayers(_loadedInstanceLayers);
+        instanceBuilder.setExtensions(_loadedInstanceExtensions);
+
+        if (!instanceBuilder.build(_instance, &result)) {
             LUG_LOG.error("RendererVulkan: Can't create the instance: {}", result);
             return false;
         }
 
-        _instance = API::Instance(instance);
     }
 
     // Create report callback if necessary

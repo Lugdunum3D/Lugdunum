@@ -197,14 +197,6 @@ struct PhysicalDeviceInfo {
     bool containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const;
 };
 
-struct LUG_GRAPHICS_API Version {
-    uint32_t major;
-    uint32_t minor;
-    uint32_t patch;
-
-    static Version fromInt(uint32_t version);
-};
-
 } // Vulkan
 } // Graphics
 } // lug

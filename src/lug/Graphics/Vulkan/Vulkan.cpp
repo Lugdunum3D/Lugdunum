@@ -55,15 +55,6 @@ bool PhysicalDeviceInfo::containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx
     return idx != -1;
 }
 
-Version Version::fromInt(uint32_t version)
-{
-    return {
-        (version >> 22) & 0x3FF, // major
-        (version >> 12) & 0x3FF, // minor
-        version & 0xFFF // patch
-    };
-}
-
 } // Vulkan
 } // Graphics
 } // lug

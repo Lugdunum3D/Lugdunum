@@ -11,6 +11,7 @@ source_group("src" FILES ${SRC})
 set(INC
     ${INCROOT}/Application.hpp
     ${INCROOT}/Application.inl
+    ${INCROOT}/Version.hpp
     ${INCROOT}/Export.hpp
 )
 source_group("inc" FILES ${INC})

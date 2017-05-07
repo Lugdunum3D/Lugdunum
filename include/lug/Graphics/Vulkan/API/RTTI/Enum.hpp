@@ -320,12 +320,3 @@ LUG_GRAPHICS_API std::vector<const char*> VkCompositeAlphaFlagsKHRToStr(VkCompos
 } // Vulkan
 } // Graphics
 } // lug
-
-/**
- * PSA: This is outside of the namespace because VkResult is in the root namespace
- */
-std::ostream& operator<<(std::ostream& ss, const VkResult& result);
-inline std::ostream& operator<<(std::ostream& ss, const VkResult& result) {
-    ss << ::lug::Graphics::Vulkan::API::RTTI::toStr(result);
-    return ss;
-}

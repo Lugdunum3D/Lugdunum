@@ -29,6 +29,8 @@ set(SRC
     ${SRCROOT}/Scene/Node.cpp
     ${SRCROOT}/Scene/Scene.cpp
 
+    ${SRCROOT}/Vulkan/API/Builder/Instance.cpp
+
     ${SRCROOT}/Vulkan/API/Buffer.cpp
     ${SRCROOT}/Vulkan/API/CommandBuffer.cpp
     ${SRCROOT}/Vulkan/API/CommandPool.cpp
@@ -116,6 +118,9 @@ set(INC
     ${INCROOT}/Scene/Node.inl
     ${INCROOT}/Scene/Scene.hpp
     ${INCROOT}/Scene/Scene.inl
+
+    ${INCROOT}/Vulkan/API/Builder/Instance.hpp
+    ${INCROOT}/Vulkan/API/Builder/Instance.inl
 
     ${INCROOT}/Vulkan/API/Buffer.hpp
     ${INCROOT}/Vulkan/API/CommandBuffer.hpp

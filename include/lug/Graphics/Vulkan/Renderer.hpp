@@ -4,6 +4,7 @@
 #include <cstring>
 #include <algorithm>
 #include <unordered_map>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
@@ -65,7 +66,7 @@ public:
 
     ~Renderer();
 
-    bool beginInit(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) override final;
+    bool beginInit(const std::string& appName, const Core::Version& appVersion, const Renderer::InitInfo& initInfo) override final;
     bool finishInit() override final;
 
     bool isInstanceLayerLoaded(const char* name) const;
@@ -102,7 +103,7 @@ public:
     bool endFrame() override final;
 
 private:
-    bool initInstance(const char* appName, uint32_t appVersion);
+    bool initInstance(const std::string& appName, const Core::Version& appVersion);
     bool initDevice();
 
     bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck);

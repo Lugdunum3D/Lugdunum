@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <memory>
 #include <set>
+
+#include <lug/Core/Version.hpp>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Render/Camera.hpp>
@@ -41,7 +43,7 @@ public:
      * @param[in]  appName     The application name.
      * @param[in]  appVersion  The application version.
      */
-    Graphics(const char* appName, uint32_t appVersion);
+    Graphics(const std::string& appName, const Core::Version& appVersion);
 
     Graphics(const Graphics&) = delete;
     Graphics(Graphics&&) = delete;
@@ -137,8 +139,8 @@ public:
     std::unique_ptr<Render::Camera> createCamera(const std::string& name);
 
 private:
-    const char* _appName;
-    uint32_t _appVersion;
+    std::string _appName;
+    Core::Version _appVersion;
 
     InitInfo _initInfo;
 
