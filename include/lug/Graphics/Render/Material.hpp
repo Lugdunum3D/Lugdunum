@@ -24,7 +24,7 @@ class LUG_GRAPHICS_API Material : public Resource {
 
 public:
     struct TextureInfo {
-        //Texture* texture;
+        Resource::SharedPtr<Resource> texture; // TODO: Change the template type to Texture
         uint32_t texCoord;
     };
 

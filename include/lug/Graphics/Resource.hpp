@@ -71,7 +71,7 @@ public:
         );
 
     public:
-        constexpr SharedPtr(T* pointer);
+        constexpr SharedPtr(T* pointer = nullptr);
 
         SharedPtr(const SharedPtr<T>& rhs);
         SharedPtr(SharedPtr<T>&& rhs);
@@ -119,7 +119,7 @@ public:
         );
 
     public:
-        constexpr WeakPtr(T* pointer);
+        constexpr WeakPtr(T* pointer = nullptr);
         constexpr WeakPtr(const SharedPtr<T>& rhs);
 
         WeakPtr(const WeakPtr<T>& rhs);

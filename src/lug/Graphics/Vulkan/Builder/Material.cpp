@@ -23,6 +23,12 @@ Resource::SharedPtr<::lug::Graphics::Render::Material> Material::build() {
     material->_occlusionTexture = _occlusionTexture;
     material->_emissiveTexture = _emissiveTexture;
 
+    material->_pipelineIdMaterialPart.baseColorInfo = material->_baseColorTexture.texture ? material->_baseColorTexture.texCoord : 0b11;
+    material->_pipelineIdMaterialPart.metallicRoughnessInfo = material->_metallicRoughnessTexture.texture ? material->_metallicRoughnessTexture.texCoord : 0b11;
+    material->_pipelineIdMaterialPart.normalInfo = material->_normalTexture.texture ? material->_normalTexture.texCoord : 0b11;
+    material->_pipelineIdMaterialPart.occlusionInfo = material->_occlusionTexture.texture ? material->_occlusionTexture.texCoord : 0b11;
+    material->_pipelineIdMaterialPart.emissiveInfo = material->_emissiveTexture.texture ? material->_emissiveTexture.texCoord : 0b11;
+
     // TODO(Nokitoo): load vulkan textures
 
     return _renderer.getResourceManager()->add<::lug::Graphics::Render::Material>(std::move(resource));
