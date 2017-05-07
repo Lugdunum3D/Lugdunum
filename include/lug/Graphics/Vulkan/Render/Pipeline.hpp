@@ -59,28 +59,10 @@ public:
             }
         };
 
-        /**
-         * @brief      Describes the pipeline.
-         */
-        struct PipelinePart {
-            union {
-                struct {
-                    uint32_t technique : 1;
-                };
-
-                uint32_t value;
-            };
-
-            explicit operator uint32_t() {
-                return value;
-            }
-        };
-
         union {
             struct {
                 uint32_t primitivePart : 8;
                 uint32_t materialPart : 3;
-                uint32_t pipelinePart : 1;
             };
 
             uint32_t value;
@@ -95,16 +77,14 @@ public:
          *
          * @param[in]  primitivePart  The primitive part. It should be created manually beforehand.
          * @param[in]  materialPart   The material part. It should be created manually beforehand.
-         * @param[in]  pipelinePart   The pipeline part. It should be created manually beforehand.
          *
          * @return     The created handle.
          */
-        static Handle create(PrimitivePart primitivePart, MaterialPart materialPart, PipelinePart pipelinePart) {
+        static Handle create(PrimitivePart primitivePart, MaterialPart materialPart) {
             Handle handle;
 
             handle.primitivePart = static_cast<uint32_t>(primitivePart);
             handle.materialPart = static_cast<uint32_t>(materialPart);
-            handle.pipelinePart = static_cast<uint32_t>(pipelinePart);
 
             return handle;
         };
