@@ -43,12 +43,18 @@ public:
         };
 
         /**
-         * @brief      Describes the material.
+         * @brief      Describes the material. How is the material composed,
+         *             with textures, no textures, etc, to be used to construct unique
+         *             pipelines.
          */
         struct MaterialPart {
             union {
                 struct {
-                    uint32_t countMaterialTextures : 3;
+                    uint32_t baseColorInfo : 2;             ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
+                    uint32_t metallicRoughnessInfo : 2;     ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
+                    uint32_t normalInfo : 2;                ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
+                    uint32_t occlusionInfo : 2;             ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
+                    uint32_t emissiveInfo : 2;              ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
                 };
 
                 uint32_t value;
@@ -62,7 +68,7 @@ public:
         union {
             struct {
                 uint32_t primitivePart : 8;
-                uint32_t materialPart : 3;
+                uint32_t materialPart : 10;
             };
 
             uint32_t value;
