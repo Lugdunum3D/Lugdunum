@@ -23,29 +23,6 @@ class LUG_GRAPHICS_API Material : public Resource {
     friend class ::lug::Graphics::Builder::Material;
 
 public:
-    /**
-     * @brief      Handle of a material. Describes how is the material composed,
-     *             with textures, no textures, etc, to be used to construct unique
-     *             pipelines.
-     */
-    struct Handle {
-        union {
-            struct {
-                uint32_t baseColorInfo : 2;             ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
-                uint32_t metallicRoughnessInfo : 2;     ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
-                uint32_t normalInfo : 2;                ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
-                uint32_t occlusionInfo : 2;             ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
-                uint32_t emissiveInfo : 2;              ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
-            };
-
-            uint32_t value;
-        };
-
-        explicit operator uint32_t() {
-            return value;
-        }
-    };
-
     struct TextureInfo {
         //Texture* texture;
         uint32_t texCoord;
