@@ -122,7 +122,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
         primitiveSetData->pipelineIdPrimitivePart.countTexCoord = targetPrimitiveSet.texCoords.size();
         primitiveSetData->pipelineIdPrimitivePart.primitiveMode = static_cast<uint32_t>(targetPrimitiveSet.mode);
 
-        targetPrimitiveSet._data = (void*)primitiveSetData;
+        targetPrimitiveSet._data = static_cast<void*>(primitiveSetData);
         mesh->_primitiveSets.push_back(targetPrimitiveSet);
     }
 
