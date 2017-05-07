@@ -61,7 +61,7 @@ public:
             TriangleFan = 6     ///<
         } mode{Mode::Triangles};
 
-        std::vector<Attribute> attributes;
+        std::vector<Attribute> attributes{};
 
         Attribute* indices{nullptr};
         Attribute* position{nullptr};
