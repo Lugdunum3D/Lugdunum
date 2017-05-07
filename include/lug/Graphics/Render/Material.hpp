@@ -25,22 +25,22 @@ class LUG_GRAPHICS_API Material : public Resource {
 public:
     struct TextureInfo {
         Resource::SharedPtr<Resource> texture; // TODO: Change the template type to Texture
-        uint32_t texCoord;
+        uint32_t texCoord{0};
     };
 
     struct Factors {
-        Math::Vec4f baseColor;  ///< Overall color of the material.
-        Math::Vec3f emissive;   ///< Color of the emissive factor.
-        float metallic;         ///< How metal-like the material is. 0 is non-metal (e.g. wood, plastic), 1 is metallic.
-        float roughness;        ///< How rough the material is. 0 is smooth and 1 is rough (matte).
+        Math::Vec4f baseColor{1.0f};    ///< Overall color of the material.
+        Math::Vec3f emissive{0.0f};     ///< Color of the emissive factor.
+        float metallic{0.0f};           ///< How metal-like the material is. 0 is non-metal (e.g. wood, plastic), 1 is metallic.
+        float roughness{0.0f};          ///< How rough the material is. 0 is smooth and 1 is rough (matte).
     };
 
     struct NormalTextureInfo : public TextureInfo {
-        float scale;
+        float scale{0.0f};
     };
 
     struct OcclusionTextureInfo : public TextureInfo {
-        float strength;
+        float strength{0.0f};
     };
 
 public:
