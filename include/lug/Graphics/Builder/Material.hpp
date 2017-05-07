@@ -36,12 +36,12 @@ public:
     void setMetallicFactor(float factor);
     void setRoughnessFactor(float factor);
 
-    // TODO(Nokitoo): replace textureName with gltf2-loader texture struct ?
-    void setBaseColorTexture(const std::string& textureName, uint32_t texCoord);
-    void setMetallicRoughnessTexture(const std::string& textureName, uint32_t texCoord);
-    void setNormalTexture(const std::string& textureName, uint32_t texCoord, float scale = 1.0f);
-    void setOcclusionTexture(const std::string& textureName, uint32_t texCoord, float strength = 1.0f);
-    void setEmissiveTexture(const std::string& textureName, uint32_t texCoord);
+    // TODO: Replace Resource::SharedPtr<Resource> texture by Resource::SharedPtr<Texture>
+    void setBaseColorTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0);
+    void setMetallicRoughnessTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0);
+    void setNormalTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0, float scale = 1.0f);
+    void setOcclusionTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0, float strength = 1.0f);
+    void setEmissiveTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0);
 
     virtual Resource::SharedPtr<Render::Material> build() = 0;
 
