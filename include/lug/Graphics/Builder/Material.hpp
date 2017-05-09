@@ -49,11 +49,11 @@ protected:
     Renderer& _renderer;
 
     std::string _name;
-    Render::Material::Factors _factors;
+    Render::Material::Constants _constants;
     Render::Material::TextureInfo _baseColorTexture;
     Render::Material::TextureInfo _metallicRoughnessTexture;
-    Render::Material::NormalTextureInfo _normalTexture;
-    Render::Material::OcclusionTextureInfo _occlusionTexture;
+    Render::Material::TextureInfo _normalTexture;
+    Render::Material::TextureInfo _occlusionTexture;
     Render::Material::TextureInfo _emissiveTexture;
 };
 

@@ -10,7 +10,7 @@ Material::Material(const std::string& name): Resource(Resource::Type::Material),
     (void)_normalTexture;
     (void)_occlusionTexture;
     (void)_emissiveTexture;
-    (void)_factors;
+    (void)_constants;
 }
 
 

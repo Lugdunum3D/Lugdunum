@@ -16,7 +16,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Material> Material::build() {
     Vulkan::Render::Material* material = static_cast<Vulkan::Render::Material*>(resource.get());
 
     material->_name = _name;
-    material->_factors = _factors;
+    material->_constants = _constants;
     material->_baseColorTexture = _baseColorTexture;
     material->_metallicRoughnessTexture = _metallicRoughnessTexture;
     material->_normalTexture = _normalTexture;
