@@ -2,6 +2,7 @@
 #include <lug/Graphics/Graphics.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Instance.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Loader.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
@@ -412,22 +413,14 @@ bool Renderer::initDevice() {
 
     // Create command pools
     {
+        API::CommandPool commandPool;
         for (auto& queue : _queues) {
-            VkCommandPoolCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, // TODO: Maybe change that
-                createInfo.queueFamilyIndex = queue.getFamilyIdx()
-            };
-
-            VkCommandPool commandPool{VK_NULL_HANDLE};
-            result = vkCreateCommandPool(static_cast<VkDevice>(_device), &createInfo, nullptr, &commandPool);
-            if (result != VK_SUCCESS) {
+            API::Builder::CommandPool commandPoolBuilder(_device, queue);
+            if (!commandPoolBuilder.build(commandPool, &result)) {
                 LUG_LOG.error("RendererVulkan: Can't create a command pool: {}", result);
                 return false;
             }
-
-            queue.setCommandPool(API::CommandPool(commandPool, &_device, &queue));
+            queue.setCommandPool(std::move(commandPool));
         }
     }
     return true;

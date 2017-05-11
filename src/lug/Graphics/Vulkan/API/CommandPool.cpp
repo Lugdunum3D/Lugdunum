@@ -8,7 +8,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-CommandPool::CommandPool(VkCommandPool commandPool, Device* device, Queue* queue) : _commandPool(commandPool), _device(device), _queue(queue) {}
+CommandPool::CommandPool(VkCommandPool commandPool, const Device* device, const Queue* queue) : _commandPool(commandPool), _device(device), _queue(queue) {}
 
 CommandPool::CommandPool(CommandPool&& commandPool) {
     _commandPool = commandPool._commandPool;

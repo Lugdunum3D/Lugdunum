@@ -50,7 +50,7 @@ private:
     VkQueueFlags _flags{0};
     bool _presentation{false};
 
-    CommandPool _commandPool{VK_NULL_HANDLE, nullptr, this};
+    CommandPool _commandPool;
 };
 
 #include <lug/Graphics/Vulkan/API/Queue.inl>

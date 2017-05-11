@@ -31,6 +31,7 @@ set(SRC
 
     ${SRCROOT}/Vulkan/API/Builder/Device.cpp
     ${SRCROOT}/Vulkan/API/Builder/Instance.cpp
+    ${SRCROOT}/Vulkan/API/Builder/CommandPool.cpp
 
     ${SRCROOT}/Vulkan/API/Buffer.cpp
     ${SRCROOT}/Vulkan/API/CommandBuffer.cpp
@@ -124,6 +125,8 @@ set(INC
     ${INCROOT}/Vulkan/API/Builder/Device.inl
     ${INCROOT}/Vulkan/API/Builder/Instance.hpp
     ${INCROOT}/Vulkan/API/Builder/Instance.inl
+    ${INCROOT}/Vulkan/API/Builder/CommandPool.hpp
+    ${INCROOT}/Vulkan/API/Builder/CommandPool.inl
 
     ${INCROOT}/Vulkan/API/Buffer.hpp
     ${INCROOT}/Vulkan/API/CommandBuffer.hpp
