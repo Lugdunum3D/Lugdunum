@@ -34,21 +34,49 @@ LUG_ENUM_TO_STR_FUNCTION(VkSurfaceTransformFlagBitsKHR, LUG_VULKAN_SURFACE_TRANS
 LUG_ENUM_TO_STR_FUNCTION(VkCompositeAlphaFlagBitsKHR, LUG_VULKAN_COMPOSITE_ALPHA_KHR_BIT)
 
 
-#define LUG_FLAGS_TO_STR(enum)   \
+#define LUG_FLAGS_TO_STR_VEC(enum)   \
     if (flag & enum) {           \
         retVal.push_back(#enum); \
     }                            \
     flag &= ~enum;
 
-#define LUG_FLAGS_TO_STR_FUNCTION(type, macro)                                               \
-    std::vector<const char*> type ## ToStr(type flag) {                                      \
+#define LUG_FLAGS_TO_STR_VEC_FUNCTION(type, macro)                                           \
+    std::vector<const char*> type ## ToStrVec(type flag) {                                   \
         std::vector<const char*> retVal;                                                     \
                                                                                              \
-        macro(LUG_FLAGS_TO_STR)                                                              \
+        macro(LUG_FLAGS_TO_STR_VEC)                                                         \
         if (flag) {                                                                          \
             LUG_EXCEPT(RTTIException, "One value of the flag " #type " is not implemented"); \
         }                                                                                    \
         return retVal;                                                                       \
+    }
+
+LUG_FLAGS_TO_STR_VEC_FUNCTION(VkMemoryPropertyFlags, LUG_VULKAN_MEMORY_PROPERTY_BIT)
+LUG_FLAGS_TO_STR_VEC_FUNCTION(VkQueueFlags, LUG_VULKAN_QUEUE_BIT)
+LUG_FLAGS_TO_STR_VEC_FUNCTION(VkFormatFeatureFlags, LUG_VULKAN_FORMAT_FEATURE_BIT)
+LUG_FLAGS_TO_STR_VEC_FUNCTION(VkMemoryHeapFlags, LUG_VULKAN_MEMORY_HEAP_BIT)
+LUG_FLAGS_TO_STR_VEC_FUNCTION(VkImageUsageFlags, LUG_VULKAN_IMAGE_USAGE_BIT)
+LUG_FLAGS_TO_STR_VEC_FUNCTION(VkSampleCountFlags, LUG_VULKAN_SAMPLE_COUNT_BIT)
+LUG_FLAGS_TO_STR_VEC_FUNCTION(VkSurfaceTransformFlagsKHR, LUG_VULKAN_SURFACE_TRANSFORM_KHR_BIT)
+LUG_FLAGS_TO_STR_VEC_FUNCTION(VkCompositeAlphaFlagsKHR, LUG_VULKAN_COMPOSITE_ALPHA_KHR_BIT)
+
+#define LUG_FLAGS_TO_STR(enum)  \
+    if (flag & enum) {          \
+        val += #enum;           \
+        if ((flag & ~enum))     \
+            val += " | ";       \
+    }                           \
+    flag &= ~enum;
+
+#define LUG_FLAGS_TO_STR_FUNCTION(type, macro)                                              \
+    std::string type ## ToStr(type flag) {                                                  \
+        std::string val;                                                                    \
+                                                                                            \
+        macro(LUG_FLAGS_TO_STR)                                                             \
+        if (flag) {                                                                         \
+            LUG_EXCEPT(RTTIException, "One value of the flag " #type " is not implemented");\
+        }                                                                                   \
+        return val;                                                                         \
     }
 
 LUG_FLAGS_TO_STR_FUNCTION(VkMemoryPropertyFlags, LUG_VULKAN_MEMORY_PROPERTY_BIT)
