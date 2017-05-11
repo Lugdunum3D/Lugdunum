@@ -1,5 +1,6 @@
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Graphics.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Instance.hpp>
 #include <lug/Graphics/Vulkan/API/Loader.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
@@ -365,45 +366,24 @@ bool Renderer::initDevice() {
     }
 
     // Create device
+    std::set<int8_t> loadedQueueFamiliesIdx;
     {
-        float queuePriority = 1.0f;
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfo(_loadedQueueFamiliesIdx.size());
+        // Build the device
+        API::Builder::Device deviceBuilder(*_physicalDeviceInfo);
 
-        {
-            uint8_t i = 0;
+        deviceBuilder.setExtensions(_loadedDeviceExtensions);
+        deviceBuilder.setFeatures(_loadedDeviceFeatures);
 
-            for (auto idx : _loadedQueueFamiliesIdx) {
-                queueCreateInfo[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-                queueCreateInfo[i].queueFamilyIndex = idx;
-                queueCreateInfo[i].queueCount = 1;
-                queueCreateInfo[i].pQueuePriorities = &queuePriority;
-
-                ++i;
-            }
-        }
-
-        VkDeviceCreateInfo createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0,
-            createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfo.size()),
-            createInfo.pQueueCreateInfos = queueCreateInfo.data(),
-            createInfo.enabledLayerCount = 0, // Deprecated
-            createInfo.ppEnabledLayerNames = nullptr, // Deprecated
-            createInfo.enabledExtensionCount = static_cast<uint32_t>(_loadedDeviceExtensions.size()),
-            createInfo.ppEnabledExtensionNames = _loadedDeviceExtensions.data(),
-            createInfo.pEnabledFeatures = &_loadedDeviceFeatures
-        };
-
-        VkDevice device{VK_NULL_HANDLE};
-        result = vkCreateDevice(_physicalDeviceInfo->handle, &createInfo, nullptr, &device);
-
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't create the device: {}", result);
+        loadedQueueFamiliesIdx.insert(deviceBuilder.addQueue(VK_QUEUE_GRAPHICS_BIT, 1));
+        loadedQueueFamiliesIdx.insert(deviceBuilder.addQueue(VK_QUEUE_TRANSFER_BIT, 1));
+        if (loadedQueueFamiliesIdx.find(-1) != loadedQueueFamiliesIdx.end()) {
             return false;
         }
 
-        _device = API::Device(device, _physicalDeviceInfo);
+        if (!deviceBuilder.build(_device, &result)) {
+            LUG_LOG.error("RendererVulkan: Can't create the device: {}", result);
+            return false;
+        }
     }
 
     // Load vulkan device functions
@@ -416,11 +396,11 @@ bool Renderer::initDevice() {
 
     // Create queues
     {
-        _queues.resize(_loadedQueueFamiliesIdx.size());
+        _queues.resize(loadedQueueFamiliesIdx.size());
 
         uint8_t i = 0;
 
-        for (auto idx : _loadedQueueFamiliesIdx) {
+        for (auto idx : loadedQueueFamiliesIdx) {
             VkQueue queue;
             vkGetDeviceQueue(static_cast<VkDevice>(_device), idx, 0, &queue);
 
@@ -578,30 +558,6 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
         LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_CHECK_VULKAN_PHYSICAL_DEVICE_OPTIONNAL_FEATURES);
 #undef LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES
 
-        for (const auto& queueFlags : requirements.mandatoryQueueFlags) {
-            int8_t idx = 0;
-
-            if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
-                queueFamiliesIdx.insert(idx);
-            } else {
-                if (!quiet) {
-                    LUG_LOG.warn("Device {}: Can't find mandatory queue type for module '{}'", physicalDeviceInfo.properties.deviceName, moduleType);
-                }
-
-                moduleRequirementsCheck = false;
-            }
-        }
-
-        for (const auto& queueFlags : requirements.optionalQueueFlags) {
-            int8_t idx = 0;
-
-            if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
-                queueFamiliesIdx.insert(idx);
-            } else if (!quiet) {
-                LUG_LOG.warn("Device {}: Can't find optional queue type for module '{}'", physicalDeviceInfo.properties.deviceName, moduleType);
-            }
-        }
-
         if (finalization) {
             if (moduleRequirementsCheck) {
                 _loadedDeviceExtensions.insert(_loadedDeviceExtensions.end(), extensions.begin(), extensions.end());
@@ -609,8 +565,6 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 #define LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES(featureName) _loadedDeviceFeatures.featureName = _loadedDeviceFeatures.featureName || features.featureName;
                 LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES);
 #undef LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES
-
-                _loadedQueueFamiliesIdx.insert(queueFamiliesIdx.begin(), queueFamiliesIdx.end());
             } else {
                 _graphics.unsupportedModule(moduleType);
             }

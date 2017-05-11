@@ -37,9 +37,6 @@ public:
         const VkPhysicalDeviceFeatures mandatoryFeatures;
         const VkPhysicalDeviceFeatures optionalFeatures;
 
-        const std::vector<VkQueueFlags> mandatoryQueueFlags;
-        const std::vector<VkQueueFlags> optionalQueueFlags;
-
         // TODO: PhysicalDeviceLimits / PhysicalDeviceSparseProperties
         // TODO: Memory properties
         // TODO: Better support for queues
@@ -134,7 +131,6 @@ private:
     std::vector<const char*> _loadedInstanceExtensions{};
     std::vector<const char*> _loadedDeviceExtensions{};
     VkPhysicalDeviceFeatures _loadedDeviceFeatures{};
-    std::set<int8_t> _loadedQueueFamiliesIdx{};
     std::vector<Render::Mesh*> _attachedMeshes{};
 
     Preferences _preferences{

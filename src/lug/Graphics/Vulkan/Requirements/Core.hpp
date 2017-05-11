@@ -156,15 +156,7 @@ const Renderer::Requirements requirements{
         VK_FALSE, // sparseResidencyAliased
         VK_FALSE, // variableMultisampleRate
         VK_FALSE, // inheritedQueries
-    },
-
-    // mandatoryQueueFamilies
-    {
-        VK_QUEUE_GRAPHICS_BIT
-    },
-
-    // optionalQueueFamilies
-    {}
+    }
 };
 
 } // Core

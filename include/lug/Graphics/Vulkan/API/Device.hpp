@@ -8,9 +8,15 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
+namespace Builder {
+class Device;
+} // Builder
+
 class LUG_GRAPHICS_API Device {
+    friend class Builder::Device;
+
 public:
-    explicit Device(VkDevice device = VK_NULL_HANDLE, PhysicalDeviceInfo* physicalDeviceInfo = {});
+    Device() = default;
 
     Device(const Device&) = delete;
     Device(Device&& device);
@@ -32,8 +38,11 @@ public:
     const PhysicalDeviceInfo* getPhysicalDeviceInfo() const;
 
 private:
+    explicit Device(VkDevice device, const PhysicalDeviceInfo* physicalDeviceInfo);
+
+private:
     VkDevice _device{VK_NULL_HANDLE};
-    PhysicalDeviceInfo* _physicalDeviceInfo{nullptr};
+    const PhysicalDeviceInfo* _physicalDeviceInfo{nullptr};
 };
 
 #include <lug/Graphics/Vulkan/API/Device.inl>

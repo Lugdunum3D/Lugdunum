@@ -6,7 +6,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-Device::Device(VkDevice device, PhysicalDeviceInfo* physicalDeviceInfo) : _device(device), _physicalDeviceInfo(physicalDeviceInfo) {}
+Device::Device(VkDevice device, const PhysicalDeviceInfo* physicalDeviceInfo) : _device(device), _physicalDeviceInfo(physicalDeviceInfo) {}
 
 Device::Device(Device&& device) {
     _device = device._device;

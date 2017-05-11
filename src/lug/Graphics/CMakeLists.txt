@@ -29,6 +29,7 @@ set(SRC
     ${SRCROOT}/Scene/Node.cpp
     ${SRCROOT}/Scene/Scene.cpp
 
+    ${SRCROOT}/Vulkan/API/Builder/Device.cpp
     ${SRCROOT}/Vulkan/API/Builder/Instance.cpp
 
     ${SRCROOT}/Vulkan/API/Buffer.cpp
@@ -119,6 +120,8 @@ set(INC
     ${INCROOT}/Scene/Scene.hpp
     ${INCROOT}/Scene/Scene.inl
 
+    ${INCROOT}/Vulkan/API/Builder/Device.hpp
+    ${INCROOT}/Vulkan/API/Builder/Device.inl
     ${INCROOT}/Vulkan/API/Builder/Instance.hpp
     ${INCROOT}/Vulkan/API/Builder/Instance.inl
 
