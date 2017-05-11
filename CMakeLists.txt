@@ -58,6 +58,31 @@ endif()
 
 include_directories(${FMT_INCLUDE_DIR})
 
+# find shaderc
+find_package(Shaderc)
+
+if (NOT SHADERC_INCLUDE_DIR)
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/shaderc")
+        message(FATAL_ERROR "Can't find shaderc, call `git submodule update --recursive`")
+    endif()
+
+    set(SHADERC_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/shaderc/include")
+
+    if (LUG_OS_WINDOWS)
+        set(SHADERC_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/shaderc/lib/windows/${ARCH_DIR}")
+    elseif (LUG_OS_LINUX)
+        set(SHADERC_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/shaderc/lib/linux")
+    elseif (LUG_OS_ANDROID)
+        set(SHADERC_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/shaderc/lib/android")
+    endif()
+    find_package(Shaderc REQUIRED)
+
+    message(STATUS "Found shaderc library: ${SHADERC_LIBRARY}")
+    message(STATUS "Found shaderc includes: ${SHADERC_INCLUDE_DIR}")
+endif()
+
+include_directories(${SHADERC_INCLUDE_DIR})
+
 # add the subdirectories
 add_subdirectory(src/lug/)
 

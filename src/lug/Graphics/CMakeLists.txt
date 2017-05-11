@@ -64,6 +64,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/Material.cpp
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
     ${SRCROOT}/Vulkan/Render/Pipeline.cpp
+    ${SRCROOT}/Vulkan/Render/Pipeline/ShaderBuilder.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Forward.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Technique.cpp
     ${SRCROOT}/Vulkan/Render/View.cpp
@@ -169,6 +170,7 @@ set(INC
     ${INCROOT}/Vulkan/Render/Mesh.hpp
     ${INCROOT}/Vulkan/Render/Mesh.inl
     ${INCROOT}/Vulkan/Render/Pipeline.hpp
+    ${INCROOT}/Vulkan/Render/Pipeline.inl
     ${INCROOT}/Vulkan/Render/Technique/Forward.hpp
     ${INCROOT}/Vulkan/Render/Technique/Technique.hpp
     ${INCROOT}/Vulkan/Render/View.hpp
@@ -226,5 +228,5 @@ include_directories(${GLTF2_LOADER_INCLUDE_DIR})
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2_LOADER_LIBRARY}
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2_LOADER_LIBRARY} ${SHADERC_LIBRARY}
 )

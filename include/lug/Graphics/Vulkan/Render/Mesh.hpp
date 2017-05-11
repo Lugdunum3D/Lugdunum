@@ -24,7 +24,7 @@ class LUG_GRAPHICS_API Mesh : public ::lug::Graphics::Render::Mesh {
 
 public:
     struct PrimitiveSetData {
-        Pipeline::Handle::PrimitivePart pipelineIdPrimitivePart;
+        Pipeline::Id::PrimitivePart pipelineIdPrimitivePart;
         std::vector<std::unique_ptr<API::Buffer>> buffers;
     };
 

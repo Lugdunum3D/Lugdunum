@@ -25,7 +25,7 @@ class LUG_GRAPHICS_API Material final : public ::lug::Graphics::Render::Material
     friend class ::lug::Graphics::Vulkan::Builder::Material;
 
 public:
-    Pipeline::Handle::MaterialPart _pipelineIdMaterialPart;
+    Pipeline::Id::MaterialPart _pipelineIdMaterialPart;
 
 public:
     Material(const Material&) = delete;
