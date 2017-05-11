@@ -15,6 +15,7 @@
 #include <lug/Graphics/Vulkan/API/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Render/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
@@ -154,6 +155,8 @@ private:
             }
         }
     };
+
+    std::unordered_map<Render::Pipeline::Id, Resource::WeakPtr<Render::Pipeline>> _pipelines;
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;
