@@ -61,7 +61,7 @@ include_directories(${FMT_INCLUDE_DIR})
 # find shaderc
 find_package(Shaderc)
 
-if (NOT SHADERC_INCLUDE_DIR)
+if (NOT SHADERC_FOUND)
     if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/shaderc")
         message(FATAL_ERROR "Can't find shaderc, call `git submodule update --recursive`")
     endif()
