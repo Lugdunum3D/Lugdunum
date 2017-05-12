@@ -200,33 +200,33 @@ if(LUG_OS_ANDROID)
 endif()
 
 # Find glTF2-loader
-find_package(GLTF2Loader)
+find_package(GLTF2-Loader)
 
-if (NOT GLTF2_LOADER_FOUND)
+if (NOT GLTF2-LOADER_FOUND)
     if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader")
         message(FATAL_ERROR "Can't find glTF2-loader, call `git submodule update --recursive`")
     endif()
 
-    set(GLTF2_LOADER_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/include")
+    set(GLTF2-LOADER_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/include")
 
     if (LUG_OS_WINDOWS)
-        set(GLTF2_LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/windows/${ARCH_DIR}")
+        set(GLTF2-LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/windows/${ARCH_DIR}")
     elseif (LUG_OS_LINUX)
-        set(GLTF2_LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/linux")
+        set(GLTF2-LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/linux")
     elseif (LUG_OS_ANDROID)
-        set(GLTF2_LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/android")
+        set(GLTF2-LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/android")
     endif()
     find_package(GLTF2Loader REQUIRED)
 
-    message(STATUS "Found glTF2-loader library: ${GLTF2_LOADER_LIBRARY}")
-    message(STATUS "Found glTF2-loader includes: ${GLTF2_LOADER_INCLUDE_DIR}")
+    message(STATUS "Found glTF2-loader library: ${GLTF2-LOADER_LIBRARY}")
+    message(STATUS "Found glTF2-loader includes: ${GLTF2-LOADER_INCLUDE_DIR}")
 endif()
 
-include_directories(${GLTF2_LOADER_INCLUDE_DIR})
+include_directories(${GLTF2-LOADER_INCLUDE_DIR})
 
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2_LOADER_LIBRARY} ${SHADERC_LIBRARY}
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY}
 )

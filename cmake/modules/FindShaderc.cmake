@@ -21,6 +21,6 @@ find_library(SHADERC_LIBRARY
 )
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(shaderc FOUND_VAR SHADERC_FOUND REQUIRED_VARS SHADERC_INCLUDE_DIR SHADERC_LIBRARY)
+find_package_handle_standard_args(Shaderc FOUND_VAR SHADERC_FOUND REQUIRED_VARS SHADERC_LIBRARY SHADERC_INCLUDE_DIR)
 
 mark_as_advanced(SHADERC_INCLUDE_DIR SHADERC_LIBRARY)
