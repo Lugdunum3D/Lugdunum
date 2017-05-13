@@ -44,6 +44,19 @@ lug_set_option(BUILD_DOCUMENTATION FALSE BOOL "Create and install the HTML based
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
 
+# find Vulkan
+find_package(Vulkan)
+if (NOT VULKAN_INCLUDE_DIR)
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/vulkan")
+        message(FATAL_ERROR "Can't find vulkan, call `git submodule update --recursive`")
+    endif()
+
+    set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/vulkan/include)
+    message(STATUS "Found Vulkan: ${VULKAN_INCLUDE_DIR}")
+endif()
+
+include_directories(${VULKAN_INCLUDE_DIR})
+
 # find fmt
 find_package(Fmt)
 
