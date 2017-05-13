@@ -30,7 +30,7 @@ find_library(GLTF2-LOADER_LIBRARY_RELEASE
 # if both are found, set GLTF2-LOADER_LIBRARY to contain both
 if (GLTF2-LOADER_LIBRARY_DEBUG AND GLTF2-LOADER_LIBRARY_RELEASE)
     set(GLTF2-LOADER_LIBRARY debug ${GLTF2-LOADER_LIBRARY_DEBUG}
-                             release ${GLTF2-LOADER_LIBRARY_RELEASE})
+                             optimized ${GLTF2-LOADER_LIBRARY_RELEASE})
 endif()
 
 # if only one debug/release variant is found, set the other to be equal to the found one
