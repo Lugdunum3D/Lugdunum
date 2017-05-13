@@ -216,7 +216,7 @@ if (NOT GLTF2-LOADER_FOUND)
     elseif (LUG_OS_ANDROID)
         set(GLTF2-LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/android")
     endif()
-    find_package(GLTF2Loader REQUIRED)
+    find_package(GLTF2-Loader REQUIRED)
 
     message(STATUS "Found glTF2-loader library: ${GLTF2-LOADER_LIBRARY}")
     message(STATUS "Found glTF2-loader includes: ${GLTF2-LOADER_INCLUDE_DIR}")
