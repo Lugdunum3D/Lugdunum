@@ -125,3 +125,7 @@ inline Resource::SharedPtr<Render::Pipeline> Renderer::getPipeline(Render::Pipel
 
     return nullptr;
 }
+
+inline Render::Window* Renderer::getRenderWindow() const {
+    return _window.get();
+}
