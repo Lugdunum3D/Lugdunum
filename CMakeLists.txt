@@ -70,6 +70,7 @@ install(DIRECTORY include
 
 # setup the install of misc files
 install(FILES README.md DESTINATION ${INSTALL_MISC_DIR})
+install(FILES LICENSE.txt DESTINATION ${INSTALL_MISC_DIR})
 install(FILES cmake/modules/FindLUG.cmake DESTINATION ${INSTALL_MISC_DIR}/cmake/modules)
 
 # setup the install of resources (only shaders for the moment)
@@ -107,5 +108,3 @@ if(BUILD_DOCUMENTATION)
 
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION ${INSTALL_MISC_DIR}/doc)
 endif()
-
-# TODO: setup the install for license
