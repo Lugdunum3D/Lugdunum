@@ -9,10 +9,15 @@ namespace Vulkan {
 namespace API {
 
 class CommandPool;
+namespace Builder {
+class CommandBuffer;
+} // Builder
 
 class LUG_GRAPHICS_API CommandBuffer {
+    friend class Builder::CommandBuffer;
+
 public:
-    explicit CommandBuffer(VkCommandBuffer commandBuffer = VK_NULL_HANDLE, CommandPool* commandPool = nullptr);
+    CommandBuffer() = default;
 
     CommandBuffer(const CommandBuffer&) = delete;
     CommandBuffer(CommandBuffer&& CommandBuffer);
@@ -26,6 +31,8 @@ public:
         return _commandBuffer;
     }
 
+    const CommandPool* getCommandPool() const;
+
     // Add begin, end, etc
     bool begin(VkCommandBufferUsageFlags flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
     bool end();
@@ -34,9 +41,14 @@ public:
     void destroy();
 
 private:
+    explicit CommandBuffer(VkCommandBuffer commandBuffer, const CommandPool* commandPool);
+
+private:
     VkCommandBuffer _commandBuffer{VK_NULL_HANDLE};
-    CommandPool* _commandPool{nullptr};
+    const CommandPool* _commandPool{nullptr};
 };
+
+#include <lug/Graphics/Vulkan/API/CommandBuffer.inl>
 
 } // API
 } // Vulkan

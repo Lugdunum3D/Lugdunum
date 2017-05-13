@@ -2,6 +2,7 @@
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/Render/View.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/System/Debug.hpp>
@@ -538,6 +539,11 @@ bool Window::initFramesData() {
     _framesData.resize(frameDataSize);
     _acquireImageDatas.resize(frameDataSize + 1);
 
+    VkResult result{VK_SUCCESS};
+    API::Builder::CommandBuffer commandBufferBuilderInstance(_renderer.getDevice(), _commandPool);
+
+    commandBufferBuilderInstance.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
     for (uint32_t i = 0; i < frameDataSize; ++i) {
         // All draws finished semaphore
         {
@@ -547,7 +553,7 @@ bool Window::initFramesData() {
                 createInfo.pNext = nullptr,
                 createInfo.flags = 0
             };
-            VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
+            result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
 
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
@@ -568,7 +574,7 @@ bool Window::initFramesData() {
 
             for (uint32_t j = 0; j < _initInfo.renderViewsInitInfo.size(); ++j) {
                 VkSemaphore semaphore;
-                VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
+                result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
 
                 if (result != VK_SUCCESS) {
                     LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
@@ -580,7 +586,11 @@ bool Window::initFramesData() {
         }
 
         // Command buffers
-        _framesData[i].cmdBuffers = _commandPool.createCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, 2);
+        _framesData[i].cmdBuffers.resize(2); // The builder will build according to the array size.
+        if (!commandBufferBuilderInstance.build(_framesData[i].cmdBuffers, &result)) {
+            LUG_LOG.error("Window::initFramesData: Can't create the command buffer: {}", result);
+            return false;
+        }
     }
 
     for (uint32_t i = 0; i < frameDataSize + 1; ++i) {
@@ -592,7 +602,7 @@ bool Window::initFramesData() {
                 createInfo.pNext = nullptr,
                 createInfo.flags = 0
             };
-            VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
+            result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
 
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
@@ -615,7 +625,7 @@ bool Window::buildCommandBuffers() {
         {
             API::CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[0];
 
-            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT )) {
+            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)) {
                 return false;
             }
 
@@ -635,7 +645,7 @@ bool Window::buildCommandBuffers() {
         {
             API::CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[1];
 
-            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT )) {
+            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)) {
                 return false;
             }
 

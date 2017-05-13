@@ -8,6 +8,7 @@
 #include <lug/Graphics/Scene/MeshInstance.hpp>
 #include <lug/Graphics/Scene/ModelInstance.hpp>
 #include <lug/Graphics/Scene/Node.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
@@ -124,7 +125,7 @@ bool Forward::render(
 
     // Render objects
     {
-        // ALl the lights pipelines have the same renderPass
+        // All the lights pipelines have the same renderPass
         API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional]->getRenderPass();
 
         renderPass->begin(
@@ -275,6 +276,9 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
         return false;
     }
 
+    API::Builder::CommandBuffer commandBufferBuilderInstance(_renderer.getDevice(), _commandPool);
+    commandBufferBuilderInstance.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
         // Fence
         {
@@ -295,12 +299,11 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
         }
 
         // Create command buffers
-        {
-            _framesData[i].cmdBuffers = _commandPool.createCommandBuffers();
+        _framesData[i].cmdBuffers.resize(1); // The builder will build according to the array size.
 
-            if (_framesData[i].cmdBuffers.size() == 0) {
-                return false;
-            }
+        if (!commandBufferBuilderInstance.build(_framesData[i].cmdBuffers, &result)) {
+            LUG_LOG.error("Forward::init: Can't create the command buffer: {}", result);
+            return false;
         }
     }
 

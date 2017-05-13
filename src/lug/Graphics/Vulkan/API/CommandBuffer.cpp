@@ -8,7 +8,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-CommandBuffer::CommandBuffer(VkCommandBuffer commandBuffer, CommandPool* commandPool) : _commandBuffer(commandBuffer), _commandPool(commandPool) {}
+CommandBuffer::CommandBuffer(VkCommandBuffer commandBuffer, const CommandPool* commandPool) : _commandBuffer(commandBuffer), _commandPool(commandPool) {}
 
 CommandBuffer::CommandBuffer(CommandBuffer&& commandBuffer) {
     _commandBuffer = commandBuffer._commandBuffer;

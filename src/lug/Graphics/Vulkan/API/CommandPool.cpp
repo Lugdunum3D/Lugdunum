@@ -1,6 +1,7 @@
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Queue.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -36,32 +37,6 @@ CommandPool& CommandPool::operator=(CommandPool&& commandPool) {
 
 CommandPool::~CommandPool() {
     destroy();
-}
-
-std::vector<CommandBuffer> CommandPool::createCommandBuffers(VkCommandBufferLevel level, uint32_t count) {
-    VkCommandBufferAllocateInfo allocateInfo{
-        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        allocateInfo.pNext = nullptr,
-        allocateInfo.commandPool = _commandPool,
-        allocateInfo.level = level,
-        allocateInfo.commandBufferCount = count
-    };
-
-    std::vector<VkCommandBuffer> commandBuffers(count);
-    VkResult result = vkAllocateCommandBuffers(static_cast<VkDevice>(*_device), &allocateInfo, commandBuffers.data());
-
-    if (result != VK_SUCCESS) {
-        LUG_LOG.error("CommandPool: Can't allocate command buffers: {}", result);
-        return {};
-    }
-
-    std::vector<CommandBuffer> commandBuffersReturn(count);
-
-    for (uint32_t i = 0; i < count; ++i) {
-        commandBuffersReturn[i] = CommandBuffer(commandBuffers[i], this);
-    }
-
-    return commandBuffersReturn;
 }
 
 bool CommandPool::reset(bool releaseRessources) {

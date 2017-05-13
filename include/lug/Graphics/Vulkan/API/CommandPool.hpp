@@ -40,9 +40,6 @@ public:
     const Device* getDevice() const;
     const Queue* getQueue() const;
 
-    // TODO: free
-    std::vector<CommandBuffer> createCommandBuffers(VkCommandBufferLevel level = VK_COMMAND_BUFFER_LEVEL_PRIMARY, uint32_t count = 1);
-
     bool reset(bool releaseRessources = false);
 
     // Warning: Command buffers created with this pool must have been destroyed
