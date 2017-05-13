@@ -31,7 +31,7 @@ public:
 
     bool init(View::InitInfo& initInfo,
                 const API::Device* device,
-                API::Queue* presentQueue,
+                const API::Queue* presentQueue,
                 API::DescriptorPool* descriptorPool,
                 const std::vector<std::unique_ptr<API::ImageView>>& imageViews);
 
@@ -52,7 +52,7 @@ private:
     std::unique_ptr<Technique::Technique> _renderTechnique{nullptr};
 
     std::vector<API::Semaphore> _drawCompleteSemaphores;
-    API::Queue* _presentQueue;
+    const API::Queue* _presentQueue;
 };
 
 #include <lug/Graphics/Vulkan/Render/View.inl>

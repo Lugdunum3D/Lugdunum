@@ -7,7 +7,6 @@
 #include <lug/Graphics/Vulkan/API/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Pipeline.hpp>
-#include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
 
 namespace lug {
@@ -29,7 +28,7 @@ namespace Technique {
 
 class LUG_GRAPHICS_API Technique {
 public:
-    Technique(const Renderer& renderer, const View* renderView, const API::Device* device, API::Queue* presentQueue);
+    Technique(const Renderer& renderer, const View* renderView, const API::Device* device);
 
     Technique(const Technique&) = delete;
     Technique(Technique&&) = delete;
@@ -50,8 +49,6 @@ protected:
     const Renderer& _renderer;
     const View* _renderView;
     const API::Device* _device{nullptr};
-
-    API::Queue* _presentQueue{nullptr};
 };
 
 } // Technique

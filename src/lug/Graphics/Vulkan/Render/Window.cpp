@@ -2,6 +2,7 @@
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/Render/View.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/System/Debug.hpp>
 #include <lug/System/Logger/Logger.hpp>
@@ -308,23 +309,47 @@ bool Window::initSwapchainCapabilities() {
 }
 
 bool Window::initPresentQueue() {
-    VkResult result;
     PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
 
     LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
 
-    // Get present queues
+    // Get present queue families
     {
-        for (auto& queue : _renderer.getQueues()) {
+        VkResult result;
+        for (auto& queueFamily : _renderer.getDevice().getQueueFamilies()) {
             VkBool32 supported = 0;
-            result = vkGetPhysicalDeviceSurfaceSupportKHR(info->handle, queue.getFamilyIdx(), _surface, &supported);
+            result = vkGetPhysicalDeviceSurfaceSupportKHR(info->handle, queueFamily.getIdx(), _surface, &supported);
 
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererWindow: Can't check if queue supports presentation: {}", result);
                 return false;
             }
 
-            queue.supportsPresentation(!!supported);
+            queueFamily.supportsPresentation(!!supported);
+        }
+    }
+
+    // Get present queue family and retrieve the first queue
+    {
+        _presentQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
+        if (!_presentQueueFamily) {
+            LUG_LOG.error("Window::initPresentQueue: Can't find VK_QUEUE_GRAPHICS_BIT queue family");
+            return false;
+        }
+        _presentQueue = &_presentQueueFamily->getQueues().front();
+        if (!_presentQueue) {
+            LUG_LOG.error("Window::initPresentQueue: Can't find presentation queue");
+            return false;
+        }
+    }
+
+    // Create command pool of present queue
+    {
+        VkResult result;
+        API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *_presentQueueFamily);
+        if (!commandPoolBuilder.build(_commandPool, &result)) {
+            LUG_LOG.error("Window::initPresentQueue: Can't create a command pool: {}", result);
+            return false;
         }
     }
 
@@ -459,25 +484,18 @@ bool Window::initSwapchain() {
 
         std::vector<uint32_t> queueFamilyIndices(1);
 
-        _presentQueue = _renderer.getQueue(0, true);
-
-        if (!_presentQueue) {
-            LUG_LOG.error("RendererWindow: Can't find presentation queue");
-            return false;
-        }
-
-        queueFamilyIndices[0] = _presentQueue->getFamilyIdx();
+        queueFamilyIndices[0] = _presentQueueFamily->getIdx();
 
         // Check if the presentation and graphics queue are the same
-        if (!_renderer.isSameQueue(0, true, VK_QUEUE_GRAPHICS_BIT, false)) {
-            const API::Queue* graphicsQueue = _renderer.getQueue(VK_QUEUE_GRAPHICS_BIT, false);
+        const API::QueueFamily* graphicsQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
+        if (graphicsQueueFamily != _presentQueueFamily) {
 
-            if (!graphicsQueue) {
+            if (!graphicsQueueFamily) {
                 LUG_LOG.error("RendererWindow: Can't find graphics queue");
                 return false;
             }
 
-            queueFamilyIndices.push_back(graphicsQueue->getFamilyIdx());
+            queueFamilyIndices.push_back(graphicsQueueFamily->getIdx());
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
         }
 
@@ -562,7 +580,7 @@ bool Window::initFramesData() {
         }
 
         // Command buffers
-        _framesData[i].cmdBuffers = _renderer.getQueue(0, true)->getCommandPool().createCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, 2);
+        _framesData[i].cmdBuffers = _commandPool.createCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, 2);
     }
 
     for (uint32_t i = 0; i < frameDataSize + 1; ++i) {

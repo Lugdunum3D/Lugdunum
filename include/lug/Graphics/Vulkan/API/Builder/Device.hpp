@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <lug/Core/Version.hpp>
@@ -15,9 +16,15 @@ namespace Builder {
 
 class Device {
 private:
-    struct QueueCreateInfo {
-        int8_t queueFamilyIndex;
-        std::vector<float> queuePriorities;
+    struct Queue {
+        VkQueueFlags flagsUsed{};
+        std::vector<std::string> names;
+    };
+
+    struct QueueFamily {
+        VkQueueFlags flags{};
+        uint32_t queuesUsed{0};
+        std::vector<Queue> queues;
     };
 
 public:
@@ -35,11 +42,14 @@ public:
     void setExtensions(std::vector<const char*> extensions);
     void setFeatures(VkPhysicalDeviceFeatures features);
 
-    int8_t addQueue(VkQueueFlags queueFlags, uint8_t queueCount);
+    uint8_t addQueues(VkQueueFlags queueFlags, const std::vector<std::string>& queuesNames);
 
     // Build methods
     bool build(API::Device& device, VkResult* returnResult = nullptr);
     std::unique_ptr<API::Device> build(VkResult* returnResult = nullptr);
+
+private:
+    bool addQueue(VkQueueFlags queueFlags, const std::string& queueName);
 
 private:
     const PhysicalDeviceInfo& _physicalDeviceInfo;
@@ -48,7 +58,7 @@ private:
     std::vector<const char*> _extensions;
     VkPhysicalDeviceFeatures _features{};
 
-    std::vector<QueueCreateInfo> _queueCreateInfos;
+    std::vector<QueueFamily> _queueFamiliesInfos;
 };
 
 #include <lug/Graphics/Vulkan/API/Builder/Device.inl>

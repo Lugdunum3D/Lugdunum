@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/API/Device.hpp>
+#include <lug/System/Logger/Logger.hpp>
 #include <lug/System/Debug.hpp>
 
 namespace lug {
@@ -30,17 +31,72 @@ Device::~Device() {
     destroy();
 }
 
+const PhysicalDeviceInfo* Device::getPhysicalDeviceInfo() const {
+    LUG_ASSERT(_physicalDeviceInfo != nullptr, "Device::_physicalDeviceInfo should not be null");
+    return _physicalDeviceInfo;
+}
+
+const std::vector<QueueFamily>& Device::getQueueFamilies() const {
+    return _queueFamilies;
+}
+
+std::vector<QueueFamily>& Device::getQueueFamilies() {
+    return _queueFamilies;
+}
+
+const API::QueueFamily* Device::getQueueFamily(VkQueueFlags flags, bool supportPresentation) const {
+    const API::QueueFamily* returnQueue = nullptr;
+
+    for (auto& queueFamily : _queueFamilies) {
+        if ((queueFamily.getFlags() & flags) == flags && (!supportPresentation || queueFamily.supportsPresentation())) {
+            if (returnQueue == nullptr || queueFamily.getFlags() == flags || (supportPresentation && flags == 0 && queueFamily.getFlags() & VK_QUEUE_GRAPHICS_BIT)) {
+                returnQueue = &queueFamily;
+            }
+        }
+    }
+
+    if (!returnQueue && flags & VK_QUEUE_TRANSFER_BIT) {
+        return getQueueFamily((flags & ~VK_QUEUE_TRANSFER_BIT) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
+    }
+
+    return returnQueue;
+}
+
+API::QueueFamily* Device::getQueueFamily(VkQueueFlags flags, bool supportPresentation) {
+    API::QueueFamily* returnQueue = nullptr;
+
+    for (auto& queueFamily : _queueFamilies) {
+        if ((queueFamily.getFlags() & flags) == flags && (!supportPresentation || queueFamily.supportsPresentation())) {
+            if (returnQueue == nullptr || queueFamily.getFlags() == flags || (supportPresentation && flags == 0 && queueFamily.getFlags() & VK_QUEUE_GRAPHICS_BIT)) {
+                returnQueue = &queueFamily;
+            }
+        }
+    }
+
+    if (!returnQueue && flags & VK_QUEUE_TRANSFER_BIT) {
+        return getQueueFamily((flags & ~VK_QUEUE_TRANSFER_BIT) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
+    }
+
+    return returnQueue;
+}
+
+bool Device::waitIdle() const {
+    VkResult result = vkDeviceWaitIdle(_device);
+
+    if (result != VK_SUCCESS) {
+        LUG_LOG.error("Device::waitIdle: Can't wait for queue work: {}", result);
+        return false;
+    }
+
+    return true;
+}
+
 void Device::destroy() {
     if (_device != VK_NULL_HANDLE) {
         vkDeviceWaitIdle(_device);
         vkDestroyDevice(_device, nullptr);
         _device = VK_NULL_HANDLE;
     }
-}
-
-const PhysicalDeviceInfo* Device::getPhysicalDeviceInfo() const {
-    LUG_ASSERT(_physicalDeviceInfo != nullptr, "Device::_physicalDeviceInfo should not be null");
-    return _physicalDeviceInfo;
 }
 
 } // API

@@ -61,18 +61,8 @@ Renderer::~Renderer() {
 }
 
 void Renderer::destroy() {
-    for (auto& queue : _queues) {
-        queue.waitIdle();
-    }
-
     // Destroy the window
     _window.reset();
-
-    for (auto& queue : _queues) {
-        queue.destroy();
-    }
-
-    _queues.clear();
 
     _device.destroy();
 
@@ -105,20 +95,12 @@ bool Renderer::beginInit(const std::string& appName, const Core::Version& appVer
 bool Renderer::finishInit() {
     // Is it a second time finishInit?
     if (static_cast<VkDevice>(_device)) {
-        for (auto& queue : _queues) {
-            queue.waitIdle();
-        }
+        _device.waitIdle();
 
         // Destroy the render part of the window
         if (_window) {
             _window->destroyRender();
         }
-
-        for (auto& queue : _queues) {
-            queue.destroy();
-        }
-
-        _queues.clear();
 
         _device.destroy();
     }
@@ -367,7 +349,6 @@ bool Renderer::initDevice() {
     }
 
     // Create device
-    std::set<int8_t> loadedQueueFamiliesIdx;
     {
         // Build the device
         API::Builder::Device deviceBuilder(*_physicalDeviceInfo);
@@ -375,9 +356,8 @@ bool Renderer::initDevice() {
         deviceBuilder.setExtensions(_loadedDeviceExtensions);
         deviceBuilder.setFeatures(_loadedDeviceFeatures);
 
-        loadedQueueFamiliesIdx.insert(deviceBuilder.addQueue(VK_QUEUE_GRAPHICS_BIT, 1));
-        loadedQueueFamiliesIdx.insert(deviceBuilder.addQueue(VK_QUEUE_TRANSFER_BIT, 1));
-        if (loadedQueueFamiliesIdx.find(-1) != loadedQueueFamiliesIdx.end()) {
+        if (!deviceBuilder.addQueues(VK_QUEUE_GRAPHICS_BIT, {"queue_graphics"}) ||
+            !deviceBuilder.addQueues(VK_QUEUE_TRANSFER_BIT, {"queue_transfer"})) {
             return false;
         }
 
@@ -395,34 +375,6 @@ bool Renderer::initDevice() {
         }
     }
 
-    // Create queues
-    {
-        _queues.resize(loadedQueueFamiliesIdx.size());
-
-        uint8_t i = 0;
-
-        for (auto idx : loadedQueueFamiliesIdx) {
-            VkQueue queue;
-            vkGetDeviceQueue(static_cast<VkDevice>(_device), idx, 0, &queue);
-
-            _queues[i] = API::Queue(idx, queue, _physicalDeviceInfo->queueFamilies[idx].queueFlags);
-
-            ++i;
-        }
-    }
-
-    // Create command pools
-    {
-        API::CommandPool commandPool;
-        for (auto& queue : _queues) {
-            API::Builder::CommandPool commandPoolBuilder(_device, queue);
-            if (!commandPoolBuilder.build(commandPool, &result)) {
-                LUG_LOG.error("RendererVulkan: Can't create a command pool: {}", result);
-                return false;
-            }
-            queue.setCommandPool(std::move(commandPool));
-        }
-    }
     return true;
 }
 

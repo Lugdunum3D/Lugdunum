@@ -4,11 +4,13 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Light/Light.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
+#include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorSet.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/API/Fence.hpp>
 #include <lug/Graphics/Vulkan/API/Image.hpp>
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
+#include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Vulkan/Render/BufferPool.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Technique.hpp>
 #include <lug/System/Clock.hpp>
@@ -38,7 +40,7 @@ private:
     };
 
 public:
-    Forward(const Renderer& renderer, const View* renderView, const API::Device* device, API::Queue* presentQueue);
+    Forward(const Renderer& renderer, const View* renderView, const API::Device* device);
 
     Forward(const Forward&) = delete;
     Forward(Forward&&) = delete;
@@ -66,6 +68,9 @@ private:
     std::vector<FrameData> _framesData;
 
     std::unordered_map<std::string, BufferPool::SubBuffer*> _subBuffers;
+
+    const API::Queue* _graphicsQueue{nullptr};
+    API::CommandPool _commandPool;
 };
 
 } // Technique

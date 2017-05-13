@@ -50,6 +50,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Pipeline.cpp
     ${SRCROOT}/Vulkan/API/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/API/Queue.cpp
+    ${SRCROOT}/Vulkan/API/QueueFamily.cpp
     ${SRCROOT}/Vulkan/API/RTTI/Enum.cpp
     ${SRCROOT}/Vulkan/API/RenderPass.cpp
     ${SRCROOT}/Vulkan/API/Semaphore.cpp
@@ -149,6 +150,8 @@ set(INC
     ${INCROOT}/Vulkan/API/PipelineLayout.hpp
     ${INCROOT}/Vulkan/API/Queue.hpp
     ${INCROOT}/Vulkan/API/Queue.inl
+    ${INCROOT}/Vulkan/API/QueueFamily.hpp
+    ${INCROOT}/Vulkan/API/QueueFamily.inl
     ${INCROOT}/Vulkan/API/RTTI/Enum.hpp
     ${INCROOT}/Vulkan/API/RenderPass.hpp
     ${INCROOT}/Vulkan/API/Semaphore.hpp

@@ -6,7 +6,7 @@
 
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/Queue.hpp>
+#include <lug/Graphics/Vulkan/API/QueueFamily.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -16,7 +16,7 @@ namespace Builder {
 
 class CommandPool {
 public:
-    CommandPool(const API::Device& device, const API::Queue& queue);
+    CommandPool(const API::Device& device, const API::QueueFamily& queueFamily);
 
     CommandPool(const CommandPool&&) = delete;
     CommandPool(CommandPool&&) = delete;
@@ -35,7 +35,7 @@ public:
 
 private:
     const API::Device& _device;
-    const API::Queue& _queue;
+    const API::QueueFamily& _queueFamily;
     VkCommandPoolCreateFlags _flags{VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT};
 };
 

@@ -14,13 +14,13 @@ View::View(const Renderer& renderer, const ::lug::Graphics::Render::Target* rend
 bool View::init(
     View::InitInfo& initInfo,
     const API::Device* device,
-    API::Queue* presentQueue,
+    const API::Queue* presentQueue,
     API::DescriptorPool* descriptorPool,
     const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
     ::lug::Graphics::Render::View::init(initInfo);
 
     if (_info.renderTechniqueType == lug::Graphics::Render::Technique::Type::Forward) {
-        _renderTechnique = std::make_unique<Render::Technique::Forward>(_renderer, this, device, presentQueue);
+        _renderTechnique = std::make_unique<Render::Technique::Forward>(_renderer, this, device);
     }
 
     if (_renderTechnique && !_renderTechnique->init(descriptorPool, imageViews)) {

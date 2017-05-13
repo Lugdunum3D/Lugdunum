@@ -8,6 +8,7 @@
 #include <lug/Graphics/Scene/MeshInstance.hpp>
 #include <lug/Graphics/Scene/ModelInstance.hpp>
 #include <lug/Graphics/Scene/Node.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
@@ -27,8 +28,8 @@ namespace Technique {
 
 using MeshInstance = ::lug::Graphics::Scene::MeshInstance;
 
-Forward::Forward(const Renderer& renderer, const Render::View* renderView, const API::Device* device, API::Queue* presentQueue) :
-    Technique(renderer, renderView, device, presentQueue) {}
+Forward::Forward(const Renderer& renderer, const Render::View* renderView, const API::Device* device) :
+    Technique(renderer, renderView, device) {}
 
 bool Forward::render(
     const ::lug::Graphics::Render::Queue& renderQueue,
@@ -220,7 +221,7 @@ bool Forward::render(
         return false;
     }
 
-    return _presentQueue->submit(
+    return _graphicsQueue->submit(
         cmdBuffer,
         {static_cast<VkSemaphore>(drawCompleteSemaphore)},
         {static_cast<VkSemaphore>(imageReadySemaphore)},
@@ -256,6 +257,24 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
 
     _framesData.resize(imageViews.size());
 
+    const API::QueueFamily* graphicsQueueFamily = _device->getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
+    if (!graphicsQueueFamily) {
+        LUG_LOG.error("Forward::init: Can't find VK_QUEUE_GRAPHICS_BIT queue family");
+        return false;
+    }
+    _graphicsQueue = graphicsQueueFamily->getQueue("queue_graphics");
+    if (!_graphicsQueue) {
+        LUG_LOG.error("Forward::init: Can't find queue with name queue_graphics");
+        return false;
+    }
+
+    API::Builder::CommandPool commandPoolBuilder(*_device, *graphicsQueueFamily);
+    VkResult result;
+    if (!commandPoolBuilder.build(_commandPool, &result)) {
+        LUG_LOG.error("Forward::init: Can't create a command pool: {}", result);
+        return false;
+    }
+
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
         // Fence
         {
@@ -265,10 +284,10 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
                 createInfo.pNext = nullptr,
                 createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT
             };
-            VkResult result = vkCreateFence(static_cast<VkDevice>(*_device), &createInfo, nullptr, &fence);
+            result = vkCreateFence(static_cast<VkDevice>(*_device), &createInfo, nullptr, &fence);
 
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain fence: {}", result);
+                LUG_LOG.error("Forward::init: Can't create swapchain fence: {}", result);
                 return false;
             }
 
@@ -277,7 +296,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
 
         // Create command buffers
         {
-            _framesData[i].cmdBuffers = _presentQueue->getCommandPool().createCommandBuffers();
+            _framesData[i].cmdBuffers = _commandPool.createCommandBuffers();
 
             if (_framesData[i].cmdBuffers.size() == 0) {
                 return false;
@@ -285,7 +304,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
         }
     }
 
-    std::vector<uint32_t> queueFamilyIndices = {(uint32_t)_presentQueue->getFamilyIdx()};
+    std::vector<uint32_t> queueFamilyIndices = {(uint32_t)graphicsQueueFamily->getIdx()};
     _cameraPool = std::make_unique<BufferPool>(
         (uint32_t)_framesData.size(),
         (uint32_t)sizeof(Math::Mat4x4f) * 2,
@@ -313,7 +332,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
 }
 
 void Forward::destroy() {
-    _presentQueue->waitIdle();
+    _graphicsQueue->waitIdle();
 
     for (auto& pipeline: _pipelines) {
         pipeline.second->destroy();

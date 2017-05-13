@@ -6,7 +6,7 @@ namespace Vulkan {
 namespace API {
 namespace Builder {
 
-CommandPool::CommandPool(const API::Device& device, const API::Queue& queue) : _device{device}, _queue(queue) {}
+CommandPool::CommandPool(const API::Device& device, const API::QueueFamily& queueFamily) : _device{device}, _queueFamily(queueFamily) {}
 
 bool CommandPool::build(API::CommandPool& commandPool, VkResult* returnResult) {
     // Create the commandPool creation information for vkCreateCommandPool
@@ -14,7 +14,7 @@ bool CommandPool::build(API::CommandPool& commandPool, VkResult* returnResult) {
         createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = _flags,
-        createInfo.queueFamilyIndex = _queue.getFamilyIdx(),
+        createInfo.queueFamilyIndex = _queueFamily.getIdx()
     };
 
     // Create the commandPool

@@ -74,13 +74,8 @@ public:
     ::lug::Graphics::Render::Window* getWindow() override final;
 
     const API::Instance& getInstance() const;
+    API::Device& getDevice();
     const API::Device& getDevice() const;
-    std::vector<API::Queue>& getQueues();
-    const std::vector<API::Queue>& getQueues() const;
-    API::Queue* getQueue(VkQueueFlags flags, bool supportPresentation);
-    const API::Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
-
-    bool isSameQueue(VkQueueFlags flagsA, bool supportPresentationA, VkQueueFlags flagsB, bool supportPresentationB) const;
 
     InstanceInfo& getInstanceInfo();
     const InstanceInfo& getInstanceInfo() const;
@@ -117,7 +112,6 @@ private:
 
     API::Instance _instance{};
     API::Device _device{};
-    std::vector<API::Queue> _queues{};
 
     InstanceInfo _instanceInfo{};
     PhysicalDeviceInfo* _physicalDeviceInfo{nullptr};
