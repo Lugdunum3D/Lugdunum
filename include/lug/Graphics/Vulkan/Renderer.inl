@@ -109,3 +109,19 @@ inline Renderer::Preferences& Renderer::getPreferences() {
 inline const Renderer::Preferences& Renderer::getPreferences() const {
     return _preferences;
 }
+
+inline void Renderer::addPipeline(Resource::SharedPtr<Render::Pipeline> pipeline) {
+    _pipelines[pipeline->getId()] = pipeline;
+}
+
+inline bool Renderer::containsPipeline(Render::Pipeline::Id id) const {
+    return _pipelines.find(id) != _pipelines.end() && _pipelines.at(id).lock();
+}
+
+inline Resource::SharedPtr<Render::Pipeline> Renderer::getPipeline(Render::Pipeline::Id id) const {
+    if (containsPipeline(id)) {
+        return _pipelines.at(id).lock();
+    }
+
+    return nullptr;
+}
