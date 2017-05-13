@@ -64,7 +64,7 @@ max_jobs: 1
 #---------------------------------#
 
 # Build worker image (VM template)
-image: Visual Studio 2015
+image: Visual Studio 2017
 
 # scripts that are called at very beginning, before repo cloning
 init:
@@ -203,7 +203,7 @@ before_build:
 - ps: |
     Write-Output "Configuration: $env:CONFIGURATION"
     Write-Output "Platform: $env:PLATFORM"
-    $generator = "Visual Studio 14 2015"
+    $generator = "Visual Studio 15 2017"
     if ($env:PLATFORM -eq "x64")
     {
       $generator = "$generator Win64"
