@@ -85,6 +85,10 @@ public:
             return value;
         }
 
+        bool operator==(const Id& other) const {
+            return value == other.value;
+        }
+
         PrimitivePart getPrimitivePart() {
             PrimitivePart tmp;
             tmp.value = primitivePart;

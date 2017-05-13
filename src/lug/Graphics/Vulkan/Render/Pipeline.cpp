@@ -17,7 +17,9 @@ bool Pipeline::init() {
 }
 
 Resource::SharedPtr<Pipeline> Pipeline::create(Renderer& renderer, Id id) {
-    // TODO: Check if the Pipeline already exist in the Renderer
+    if (renderer.containsPipeline(id)) {
+        return renderer.getPipeline(id);
+    }
 
     std::unique_ptr<Resource> resource{new Pipeline(id)};
     Pipeline* pipeline = static_cast<Pipeline*>(resource.get());
@@ -27,8 +29,7 @@ Resource::SharedPtr<Pipeline> Pipeline::create(Renderer& renderer, Id id) {
     }
 
     Resource::SharedPtr<Pipeline> sharedPtrPipeline = renderer.getResourceManager()->add<Pipeline>(std::move(resource));
-
-    // TODO: Add pipeline to Renderer
+    renderer.addPipeline(sharedPtrPipeline);
 
     return sharedPtrPipeline;
 }

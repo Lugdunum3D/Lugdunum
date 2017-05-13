@@ -103,7 +103,8 @@ Resource::WeakPtr<T>::~WeakPtr() {
 }
 
 template <typename T>
-Resource::SharedPtr<T> Resource::WeakPtr<T>::lock() {
+Resource::SharedPtr<T> Resource::WeakPtr<T>::lock() const {
+    // TODO: Check that the resource count is greater than 0
     return _resource;
 }
 

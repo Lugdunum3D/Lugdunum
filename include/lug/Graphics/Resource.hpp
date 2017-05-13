@@ -50,7 +50,7 @@ public:
             return value;
         }
 
-        bool operator==(const Handle& other) {
+        bool operator==(const Handle& other) const {
             return value == other.value;
         }
     };
@@ -133,7 +133,7 @@ public:
         /**
          * @brief      Transforms a WeakPtr to a SharedPtr
          */
-        SharedPtr<T> lock();
+        SharedPtr<T> lock() const;
 
     public:
         /**
