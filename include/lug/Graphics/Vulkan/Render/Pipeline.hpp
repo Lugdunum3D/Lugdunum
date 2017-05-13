@@ -8,6 +8,7 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Technique/Type.hpp>
 #include <lug/Graphics/Resource.hpp>
+#include <lug/Graphics/Vulkan/API/Pipeline.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -145,7 +146,7 @@ public:
     };
 
 public:
-    Pipeline(Id id);
+    Pipeline(Renderer& renderer, Id id);
 
     Pipeline(const Pipeline&) = delete;
     Pipeline(Pipeline&&) = delete;
@@ -169,7 +170,10 @@ private:
     static Resource::SharedPtr<Pipeline> create(Renderer& renderer, Id id);
 
 private:
+    Renderer& _renderer;
     Id _id;
+
+    API::Pipeline _pipeline;
 };
 
 #include <lug/Graphics/Vulkan/Render/Pipeline.inl>

@@ -101,6 +101,8 @@ public:
     bool containsPipeline(Render::Pipeline::Id id) const;
     Resource::SharedPtr<Render::Pipeline> getPipeline(Render::Pipeline::Id id) const;
 
+    Render::Window* getRenderWindow() const;
+
     void destroy();
 
     bool beginFrame() override final;
