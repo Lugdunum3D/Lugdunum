@@ -29,11 +29,11 @@ public:
 
     ~QueueFamily() = default;
 
-    explicit operator int8_t() const {
+    explicit operator uint32_t() const {
         return _idx;
     }
 
-    int8_t getIdx() const;
+    uint32_t getIdx() const;
     VkQueueFlags getFlags() const;
 
     const std::vector<Queue>& getQueues() const;
@@ -43,10 +43,10 @@ public:
     void supportsPresentation(bool presentation);
 
 private:
-    explicit QueueFamily(int8_t idx, VkQueueFlags flags);
+    explicit QueueFamily(uint32_t idx, VkQueueFlags flags);
 
 private:
-    int8_t _idx{-1};
+    uint32_t _idx{0};
     bool _presentation{false};
     VkQueueFlags _flags{0};
 

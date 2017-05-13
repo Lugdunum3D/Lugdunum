@@ -16,9 +16,15 @@ class Device;
 class Queue;
 class RenderPass;
 
+namespace Builder {
+class Swapchain;
+} // Builder
+
 class LUG_GRAPHICS_API Swapchain {
+    friend class Builder::Swapchain;
+
 public:
-    explicit Swapchain(VkSwapchainKHR swapchain = VK_NULL_HANDLE, const Device* device = nullptr, const VkSurfaceFormatKHR& swapchainFormat = {}, const VkExtent2D& extent = {});
+    Swapchain() = default;
 
     Swapchain(const Swapchain&) = delete;
     Swapchain(Swapchain&& Swapchain);
@@ -46,6 +52,9 @@ public:
     void setOutOfDate(bool outOfDate);
     bool isOutOfDate() const;
     bool init();
+
+private:
+    explicit Swapchain(VkSwapchainKHR swapchain, const Device* device, const VkSurfaceFormatKHR& swapchainFormat, const VkExtent2D& extent);
 
 private:
     VkSwapchainKHR _swapchain{VK_NULL_HANDLE};

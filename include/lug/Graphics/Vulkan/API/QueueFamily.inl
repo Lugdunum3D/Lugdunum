@@ -1,4 +1,4 @@
-inline int8_t QueueFamily::getIdx() const {
+inline uint32_t QueueFamily::getIdx() const {
     return _idx;
 }
 

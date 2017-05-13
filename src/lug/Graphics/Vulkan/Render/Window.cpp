@@ -4,6 +4,7 @@
 #include <lug/Graphics/Vulkan/Render/View.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/System/Debug.hpp>
 #include <lug/System/Logger/Logger.hpp>
@@ -358,38 +359,35 @@ bool Window::initPresentQueue() {
 }
 
 bool Window::initSwapchain() {
-    VkResult result;
     PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
 
     LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
 
     // TODO: Find a way to put Preferences elsewhere
     Renderer::Preferences::Swapchain& swapchainPreferences = _renderer.getPreferences().swapchain;
-
-    VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAX_ENUM_KHR;
-    VkSurfaceFormatKHR swapchainFormat{
-        swapchainFormat.format = VK_FORMAT_MAX_ENUM,
-        swapchainFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
-    };
-    VkCompositeAlphaFlagBitsKHR compositeAlpha = static_cast<VkCompositeAlphaFlagBitsKHR>(0);
+    VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
     uint32_t minImageCount = 3;
-    VkExtent2D extent{};
-    VkSurfaceTransformFlagsKHR transform{};
+
+    API::Builder::Swapchain swapchainBuilder(_renderer.getDevice());
+    swapchainBuilder.setImageColorSpace(colorSpace);
+
 
     // Check requirements for swapchain
     {
         // Check the present mode
         {
+            bool presentModeFound = false;
             for (auto presentMode : swapchainPreferences.presentModes) {
                 if (std::find(info->swapchain.presentModes.begin(), info->swapchain.presentModes.end(), presentMode) != info->swapchain.presentModes.end()) {
                     LUG_LOG.info("RendererWindow: Use present mode {}", API::RTTI::toStr(presentMode));
 
-                    swapchainPresentMode = presentMode;
+                    swapchainBuilder.setPresentMode(presentMode);
+                    presentModeFound = true;
                     break;
                 }
             }
 
-            if (swapchainPresentMode == VK_PRESENT_MODE_MAX_ENUM_KHR) {
+            if (!presentModeFound) {
                 LUG_LOG.error("RendererWindow: Missing present mode supported by Lugdunum");
                 return false;
             }
@@ -397,18 +395,20 @@ bool Window::initSwapchain() {
 
         // Check the formats
         {
+            bool formatFound = false;
             for (auto format : swapchainPreferences.formats) {
-                if (std::find_if(info->swapchain.formats.begin(), info->swapchain.formats.end(), [&swapchainFormat, &format](const VkSurfaceFormatKHR& lhs) {
-                    return lhs.colorSpace == swapchainFormat.colorSpace && format == lhs.format;
+                if (std::find_if(info->swapchain.formats.begin(), info->swapchain.formats.end(), [&colorSpace, &format](const VkSurfaceFormatKHR& lhs) {
+                    return lhs.colorSpace == colorSpace && format == lhs.format;
                 }) != info->swapchain.formats.end()) {
                     LUG_LOG.info("RendererWindow: Use format {}", API::RTTI::toStr(format));
 
-                    swapchainFormat.format = format;
+                    swapchainBuilder.setImageFormat(format);
+                    formatFound = true;
                     break;
                 }
             }
 
-            if (swapchainFormat.format == VK_FORMAT_MAX_ENUM) {
+            if (!formatFound) {
                 LUG_LOG.error("RendererWindow: Missing swapchain format supported by Lugdunum");
                 return false;
             }
@@ -416,16 +416,18 @@ bool Window::initSwapchain() {
 
         // Check composite alpha
         {
+            bool compositeAlphaFound = false;
             for (auto compositeAlphaPreferency : swapchainPreferences.compositeAlphas) {
                 if (info->swapchain.capabilities.supportedCompositeAlpha & compositeAlphaPreferency) {
                     LUG_LOG.info("RendererWindow: Use composite alpha {}", API::RTTI::toStr(compositeAlphaPreferency));
 
-                    compositeAlpha = compositeAlphaPreferency;
+                    swapchainBuilder.setCompositeAlpha(compositeAlphaPreferency);
+                    compositeAlphaFound = true;
                     break;
                 }
             }
 
-            if (!compositeAlpha) {
+            if (!compositeAlphaFound) {
                 LUG_LOG.error("RendererWindow: Missing composite alpha supported by Lugdunum");
                 return false;
             }
@@ -437,56 +439,38 @@ bool Window::initSwapchain() {
             return false;
         }
 
+        swapchainBuilder.setMinImageCount(minImageCount);
+
         // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
         if (info->swapchain.capabilities.currentExtent.height == 0xFFFFFFFF
             && info->swapchain.capabilities.currentExtent.width == 0xFFFFFFFF) {
-            extent.height = _mode.height;
-            extent.width = _mode.width;
+            swapchainBuilder.setImageExtent(
+                {
+                    _mode.width,
+                    _mode.height
+                });
         } else {
-            extent.height = info->swapchain.capabilities.currentExtent.height;
-            extent.width = info->swapchain.capabilities.currentExtent.width;
+            swapchainBuilder.setImageExtent(
+                {
+                    info->swapchain.capabilities.currentExtent.width,
+                    info->swapchain.capabilities.currentExtent.height
+                });
         }
 
         // Find the transformation of the surface
         if (info->swapchain.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
             // We prefer a non-rotated transform
-            transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+            swapchainBuilder.setPreTransform(VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
         } else {
-            transform = info->swapchain.capabilities.currentTransform;
+            swapchainBuilder.setPreTransform(info->swapchain.capabilities.currentTransform);
         }
     }
 
+    swapchainBuilder.setSurface(_surface);
+    swapchainBuilder.setOldSwapchain(static_cast<VkSwapchainKHR>(_swapchain));
+
     // Create the swapchain
     {
-        VkSwapchainCreateInfoKHR createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0,
-            createInfo.surface = _surface,
-            createInfo.minImageCount = minImageCount,
-            createInfo.imageFormat = swapchainFormat.format,
-            createInfo.imageColorSpace = swapchainFormat.colorSpace,
-            {}, // createInfo.imageExtent
-            createInfo.imageArrayLayers = 1,
-            createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-            createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
-            createInfo.queueFamilyIndexCount = 0,
-            createInfo.pQueueFamilyIndices = nullptr,
-            createInfo.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(transform),
-            createInfo.compositeAlpha = compositeAlpha,
-            createInfo.presentMode = swapchainPresentMode,
-            createInfo.clipped = VK_TRUE,
-            createInfo.oldSwapchain = static_cast<VkSwapchainKHR>(_swapchain)
-        };
-
-        // Thank you clang
-        createInfo.imageExtent.width = extent.width;
-        createInfo.imageExtent.height = extent.height;
-
-        std::vector<uint32_t> queueFamilyIndices(1);
-
-        queueFamilyIndices[0] = _presentQueueFamily->getIdx();
-
         // Check if the presentation and graphics queue are the same
         const API::QueueFamily* graphicsQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
         if (graphicsQueueFamily != _presentQueueFamily) {
@@ -496,18 +480,15 @@ bool Window::initSwapchain() {
                 return false;
             }
 
-            queueFamilyIndices.push_back(graphicsQueueFamily->getIdx());
-            createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+            swapchainBuilder.setQueueFamilyIndices({_presentQueueFamily->getIdx(), graphicsQueueFamily->getIdx()});
+        }
+        else {
+            swapchainBuilder.setQueueFamilyIndices({_presentQueueFamily->getIdx()});
         }
 
-        createInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
-        createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
-
-        VkSwapchainKHR swapchainKHR;
-        result = vkCreateSwapchainKHR(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &swapchainKHR);
-
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererWindow: Can't initialize swapchain: {}", result);
+        VkResult result;
+        if (!swapchainBuilder.build(_swapchain, &result)) {
+            LUG_LOG.error("Window::initPresentQueue: Can't create a command pool: {}", result);
             return false;
         }
 
@@ -522,8 +503,6 @@ bool Window::initSwapchain() {
                 }
             }
         }
-
-        _swapchain = API::Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat, extent);
 
         return _swapchain.init();
     }
