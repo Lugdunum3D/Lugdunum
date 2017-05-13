@@ -30,7 +30,7 @@ find_library(SHADERC_LIBRARY_RELEASE
 # if both are found, set GLTF2-LOADER_LIBRARY to contain both
 if (SHADERC_LIBRARY_DEBUG AND SHADERC_LIBRARY_RELEASE)
     set(SHADERC_LIBRARY debug ${SHADERC_LIBRARY_DEBUG}
-                        release ${SHADERC_LIBRARY_RELEASE})
+                        optimized ${SHADERC_LIBRARY_RELEASE})
 endif()
 
 # if only one debug/release variant is found, set the other to be equal to the found one
