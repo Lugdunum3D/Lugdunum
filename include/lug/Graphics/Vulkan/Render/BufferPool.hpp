@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <set>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
@@ -67,7 +68,7 @@ public:
     BufferPool(uint32_t countPerChunk,
                 uint32_t subBufferSize,
                 const API::Device* device,
-                const std::vector<uint32_t>& queueFamilyIndices,
+                const std::set<uint32_t>& queueFamilyIndices,
                 API::DescriptorPool* descriptorPool,
                 const API::DescriptorSetLayout* descriptorSetLayout);
 
@@ -88,7 +89,7 @@ private:
     std::vector<std::unique_ptr<Chunk>> _chunks;
 
     const API::Device* _device;
-    std::vector<uint32_t> _queueFamilyIndices;
+    std::set<uint32_t> _queueFamilyIndices;
     API::DescriptorPool* _descriptorPool;
     const API::DescriptorSetLayout* _descriptorSetLayout;
 };

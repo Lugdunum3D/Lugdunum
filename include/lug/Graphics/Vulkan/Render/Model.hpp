@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Model.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
@@ -15,7 +16,7 @@ namespace Render {
 
 class LUG_GRAPHICS_API Model : public ::lug::Graphics::Render::Model {
 public:
-    explicit Model(const std::string& name, const std::vector<uint32_t>& queueFamilyIndices, const API::Device* device);
+    explicit Model(const std::string& name, const std::set<uint32_t>& queueFamilyIndices, const API::Device* device);
 
     Model(const Model&) = delete;
     Model(Model&& Model) = delete;
@@ -41,7 +42,7 @@ private:
     std::unique_ptr<API::DeviceMemory> _indexDeviceMemory{nullptr};
 
     // Queue family indices used by the vertex and index buffers
-    std::vector<uint32_t> _queueFamilyIndices;
+    std::set<uint32_t> _queueFamilyIndices;
 
     const API::Device* _device{nullptr};
 };

@@ -11,8 +11,7 @@ namespace API {
 
 Buffer::Buffer(
     VkBuffer buffer,
-    const Device* device,
-    DeviceMemory* deviceMemory) : _buffer(buffer), _device(device), _deviceMemory(deviceMemory) {
+    const Device* device) : _buffer(buffer), _device(device) {
     vkGetBufferMemoryRequirements(static_cast<VkDevice>(*device), _buffer, &_requirements);
 }
 
@@ -83,37 +82,6 @@ void Buffer::updateDataTransfer(const CommandBuffer* commandBuffer, void* data, 
 
 const VkMemoryRequirements& Buffer::getRequirements() const {
     return _requirements;
-}
-
-std::unique_ptr<Buffer> Buffer::create(
-    const Device* device,
-    uint32_t queueFamilyIndexCount,
-    const uint32_t* pQueueFamilyIndices,
-    VkDeviceSize size,
-    VkBufferUsageFlags usage,
-    VkBufferCreateFlags createFlags,
-    VkSharingMode sharingMode) {
-    // Create buffer
-    VkBufferCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = createFlags,
-        createInfo.size = size,
-        createInfo.usage = usage,
-        createInfo.sharingMode = sharingMode,
-        createInfo.queueFamilyIndexCount = queueFamilyIndexCount,
-        createInfo.pQueueFamilyIndices = pQueueFamilyIndices
-    };
-
-    VkBuffer bufferHandle = VK_NULL_HANDLE;
-    VkResult result = vkCreateBuffer(static_cast<VkDevice>(*device), &createInfo, nullptr, &bufferHandle);
-
-    if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create buffer: {}", result);
-        return nullptr;
-    }
-
-    return std::unique_ptr<Buffer>(new Buffer(bufferHandle, device));
 }
 
 uint32_t Buffer::getSizeAligned(const Device* device, uint32_t size) {

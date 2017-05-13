@@ -307,7 +307,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
         }
     }
 
-    std::vector<uint32_t> queueFamilyIndices = {graphicsQueueFamily->getIdx()};
+    std::set<uint32_t> queueFamilyIndices = {graphicsQueueFamily->getIdx()};
     _cameraPool = std::make_unique<BufferPool>(
         (uint32_t)_framesData.size(),
         (uint32_t)sizeof(Math::Mat4x4f) * 2,

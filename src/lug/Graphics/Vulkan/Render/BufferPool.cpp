@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/Render/BufferPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -13,7 +14,7 @@ BufferPool::BufferPool(
     uint32_t countPerChunk,
     uint32_t subBufferSize,
     const API::Device* device,
-    const std::vector<uint32_t>& queueFamilyIndices,
+    const std::set<uint32_t>& queueFamilyIndices,
     API::DescriptorPool* descriptorPool,
     const API::DescriptorSetLayout* descriptorSetLayout) :
     _countPerChunk(countPerChunk), _subBufferSize(subBufferSize), _device(device), _queueFamilyIndices(queueFamilyIndices),
@@ -40,16 +41,17 @@ BufferPool::SubBuffer* BufferPool::allocate() {
 
     std::unique_ptr<BufferPool::Chunk> chunk = std::make_unique<BufferPool::Chunk>();
     {
+        VkResult result;
+
         // Create buffer
         chunk->size = subBufferSizeAligned * _countPerChunk;
-        chunk->buffer = API::Buffer::create(
-            _device,
-            (uint32_t)_queueFamilyIndices.size(),
-            _queueFamilyIndices.data(),
-            chunk->size,
-            VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
-
-        if (!chunk->buffer) {
+        API::Builder::Buffer bufferBuilderInstance(*_device);
+        bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
+        bufferBuilderInstance.setSize(chunk->size);
+        bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+        chunk->buffer = bufferBuilderInstance.build(&result);
+        if (result != VK_SUCCESS || !chunk->buffer) {
+            LUG_LOG.error("BufferPool::allocate: Can't create buffer: {}", result);
             return nullptr;
         }
 

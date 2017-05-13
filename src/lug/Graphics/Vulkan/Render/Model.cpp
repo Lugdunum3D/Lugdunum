@@ -1,5 +1,6 @@
 #include <cstring>
 #include <lug/Graphics/Vulkan/Render/Model.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -9,7 +10,7 @@ namespace Render {
 
 Model::Model(
     const std::string& name,
-    const std::vector<uint32_t>& queueFamilyIndices,
+    const std::set<uint32_t>& queueFamilyIndices,
     const API::Device* device) : ::lug::Graphics::Render::Model(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {}
 
 Model::~Model() {
@@ -24,12 +25,18 @@ bool Model::load() {
 
     uint32_t verticesNb = getVerticesSize();
     uint32_t indicesNb = getIndicesSize();
+    VkResult result;
 
     // Create vertex buffer
     {
-        _vertexBuffer = API::Buffer::create(_device, (uint32_t)_queueFamilyIndices.size(), _queueFamilyIndices.data(), verticesNb * sizeof(Mesh::Vertex), VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        API::Builder::Buffer bufferBuilderInstance(*_device);
+        bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
+        bufferBuilderInstance.setSize(verticesNb * sizeof(Mesh::Vertex));
+        bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        _vertexBuffer = bufferBuilderInstance.build(&result);
 
-        if (!_vertexBuffer) {
+        if (result != VK_SUCCESS || !_vertexBuffer) {
+            LUG_LOG.error("Model::load: Can't create vertex buffer: {}", result);
             return false;
         }
 
@@ -46,9 +53,14 @@ bool Model::load() {
 
     // Create index buffer
     {
-        _indexBuffer = API::Buffer::create(_device, (uint32_t)_queueFamilyIndices.size(), _queueFamilyIndices.data(), indicesNb * sizeof(uint32_t), VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        API::Builder::Buffer bufferBuilderInstance(*_device);
+        bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
+        bufferBuilderInstance.setSize(indicesNb * sizeof(uint32_t));
+        bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        _indexBuffer = bufferBuilderInstance.build(&result);
 
-        if (!_indexBuffer) {
+        if (result != VK_SUCCESS || !_indexBuffer) {
+            LUG_LOG.error("Model::load: Can't create index buffer: {}", result);
             return false;
         }
 

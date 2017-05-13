@@ -2,6 +2,7 @@
 
 #include <iterator>
 #include <sstream>
+#include <map>
 
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Scene/ModelLoader.hpp>
@@ -106,7 +107,7 @@ std::unique_ptr<Render::Mesh> Graphics::createMesh(const std::string& name) {
 
     if (_initInfo.rendererType == Renderer::Type::Vulkan) {
         Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(_renderer.get());
-        std::vector<uint32_t> queueFamilyIndices = { renderer->getDevice().getQueueFamily(0, true)->getIdx() };
+        std::set<uint32_t> queueFamilyIndices = {renderer->getDevice().getQueueFamily(0, true)->getIdx()};
         mesh = std::make_unique<Vulkan::Render::Mesh>(name, queueFamilyIndices, &renderer->getDevice());
     } else {
         LUG_LOG.error("Graphics: Unknown render type");
@@ -125,7 +126,7 @@ std::unique_ptr<Render::Model> Graphics::createModel(const std::string& name, co
 
     if (_initInfo.rendererType == Renderer::Type::Vulkan) {
         Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(_renderer.get());
-        std::vector<uint32_t> queueFamilyIndices = { renderer->getDevice().getQueueFamily(0, true)->getIdx() };
+        std::set<uint32_t> queueFamilyIndices = {renderer->getDevice().getQueueFamily(0, true)->getIdx()};
         model = std::make_unique<Vulkan::Render::Model>(name, queueFamilyIndices, &renderer->getDevice());
     } else {
         LUG_LOG.error("Graphics: Unknown render type");

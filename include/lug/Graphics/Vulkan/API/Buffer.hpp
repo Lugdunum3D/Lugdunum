@@ -13,9 +13,15 @@ class CommandBuffer;
 class Device;
 class DeviceMemory;
 
+namespace Builder {
+class Buffer;
+}
+
 class LUG_GRAPHICS_API Buffer {
+    friend class Builder::Buffer;
+
 public:
-    explicit Buffer(VkBuffer Buffer = VK_NULL_HANDLE, const Device* device = nullptr, DeviceMemory* deviceMemory = nullptr);
+    Buffer() = default;
 
     Buffer(const Buffer&) = delete;
     Buffer(Buffer&& buffer);
@@ -41,15 +47,8 @@ public:
 
     const VkMemoryRequirements& getRequirements() const;
 
-    static std::unique_ptr<Buffer> create(
-        const Device* device,
-        uint32_t queueFamilyIndexCount,
-        const uint32_t* pQueueFamilyIndices,
-        VkDeviceSize size,
-        VkBufferUsageFlags usage,
-        VkBufferCreateFlags createFlags = 0,
-        VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE
-    );
+private:
+    explicit Buffer(VkBuffer Buffer, const Device* device);
 
 private:
     VkBuffer _buffer{VK_NULL_HANDLE};
