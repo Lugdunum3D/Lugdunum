@@ -48,6 +48,10 @@ static std::unique_ptr<API::Buffer> createAttributeBuffer(
         return nullptr;
     }
 
+    if (meshMemorySize % requirements.alignment) {
+        meshMemorySize += requirements.alignment - meshMemorySize % requirements.alignment;
+    }
+
     meshMemoryTypeIndex = attributeMemoryTypeIndex;
     meshMemorySize += requirements.size;
 
@@ -134,9 +138,13 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
         for (auto& primitiveSet : mesh->_primitiveSets) {
             Render::Mesh::PrimitiveSetData* primitiveSetData = static_cast<Render::Mesh::PrimitiveSetData*>(primitiveSet._data);
             for (auto& buffer : primitiveSetData->buffers) {
-                buffer->bindMemory(mesh->_deviceMemory.get(), deviceMemoryOffset);
-
                 auto& requirements = buffer->getRequirements();
+
+                if (deviceMemoryOffset % requirements.alignment) {
+                    deviceMemoryOffset += requirements.alignment - deviceMemoryOffset % requirements.alignment;
+                }
+
+                buffer->bindMemory(mesh->_deviceMemory.get(), deviceMemoryOffset);
                 deviceMemoryOffset += requirements.size;
             }
         }
