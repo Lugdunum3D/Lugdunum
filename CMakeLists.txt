@@ -44,14 +44,17 @@ lug_set_option(BUILD_DOCUMENTATION FALSE BOOL "Create and install the HTML based
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
 
+# set the path of thirdparty
+lug_set_option(LUG_THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/thirdparty" STRING "Choose the path for the thirdparty directory")
+
 # find Vulkan
 find_package(Vulkan)
 if (NOT VULKAN_INCLUDE_DIR)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/vulkan")
-        message(FATAL_ERROR "Can't find vulkan, call `git submodule update --recursive`")
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/vulkan")
+        message(FATAL_ERROR "Can't find vulkan in the thirdparty directory")
     endif()
 
-    set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/vulkan/include)
+    set(VULKAN_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/vulkan/include)
     message(STATUS "Found Vulkan: ${VULKAN_INCLUDE_DIR}")
 endif()
 
@@ -61,11 +64,11 @@ include_directories(${VULKAN_INCLUDE_DIR})
 find_package(Fmt)
 
 if (NOT FMT_INCLUDE_DIR)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/fmt")
-        message(FATAL_ERROR "Can't find fmt, call `git submodule update --recursive`")
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/fmt")
+        message(FATAL_ERROR "Can't find fmt in the thirdparty directory")
     endif()
 
-    set(FMT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/fmt/include)
+    set(FMT_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/fmt/include)
     message(STATUS "Found Fmt: ${FMT_INCLUDE_DIR}")
 endif()
 
@@ -75,19 +78,11 @@ include_directories(${FMT_INCLUDE_DIR})
 find_package(Shaderc)
 
 if (NOT SHADERC_FOUND)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/shaderc")
-        message(FATAL_ERROR "Can't find shaderc, call `git submodule update --recursive`")
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/shaderc")
+        message(FATAL_ERROR "Can't find shaderc in the thirdparty directory")
     endif()
 
-    set(SHADERC_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/shaderc/include")
-
-    if (LUG_OS_WINDOWS)
-        set(SHADERC_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/shaderc/lib/windows/${ARCH_DIR}")
-    elseif (LUG_OS_LINUX)
-        set(SHADERC_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/shaderc/lib/linux")
-    elseif (LUG_OS_ANDROID)
-        set(SHADERC_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/shaderc/lib/android")
-    endif()
+    set(SHADERC_ROOT "${LUG_THIRDPARTY_DIR}/shaderc")
     find_package(Shaderc REQUIRED)
 
     message(STATUS "Found shaderc library: ${SHADERC_LIBRARY}")
