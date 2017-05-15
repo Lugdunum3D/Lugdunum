@@ -12,6 +12,7 @@ dependencies:
 
   pre:
     - ./test/ci/scripts/circle_dependencies.sh
+    - ./test/ci/scripts/circle_thirdparty.sh
 
 test:
   override:
