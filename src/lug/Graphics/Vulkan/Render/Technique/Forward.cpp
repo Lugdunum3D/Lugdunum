@@ -366,11 +366,16 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
 
             auto& imageRequirements = image->getRequirements();
 
+            size_t realSize = imageRequirements.size;
+            if (realSize % imageRequirements.alignment) {
+                realSize += imageRequirements.alignment - realSize % imageRequirements.alignment;
+            }
+
             // Initialize depth buffer memory (This memory is common for all depth buffer images)
             if (!_depthBufferMemory) {
                 uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, imageRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
                 // Allocate image requirements size for all images
-                _depthBufferMemory = API::DeviceMemory::allocate(_device, imageRequirements.size * imageViews.size(), memoryTypeIndex);
+                _depthBufferMemory = API::DeviceMemory::allocate(_device, realSize * imageViews.size(), memoryTypeIndex);
 
                 if (!_depthBufferMemory) {
                     LUG_LOG.error("Forward: Can't allocate device memory for depth buffer images");
@@ -379,7 +384,7 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
             }
 
             // Bind memory to image
-            image->bindMemory(_depthBufferMemory.get(), imageRequirements.size * i);
+            image->bindMemory(_depthBufferMemory.get(), realSize * i);
         }
 
         // Create depth buffer image view
