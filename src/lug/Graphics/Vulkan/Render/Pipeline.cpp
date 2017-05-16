@@ -109,7 +109,7 @@ bool Pipeline::init() {
 
             std::vector<VkDescriptorSetLayoutBinding> bindings = {cameraBinding};
 
-            descriptorSetLayouts.push_back(API::DescriptorSetLayout::create(&_renderer.getDevice(), bindings.data(), bindings.size()));
+            descriptorSetLayouts.push_back(API::DescriptorSetLayout::create(&_renderer.getDevice(), bindings.data(), static_cast<uint32_t>(bindings.size())));
         }
 
         // Bindings set 1 : Light uniform buffer (F)
@@ -124,7 +124,7 @@ bool Pipeline::init() {
 
             std::vector<VkDescriptorSetLayoutBinding> bindings = {lightBinding};
 
-            descriptorSetLayouts.push_back(API::DescriptorSetLayout::create(&_renderer.getDevice(), bindings.data(), bindings.size()));
+            descriptorSetLayouts.push_back(API::DescriptorSetLayout::create(&_renderer.getDevice(), bindings.data(), static_cast<uint32_t>(bindings.size())));
         }
 
         // Bindings set 2 : Material uniform buffer (F) + Material Samplers (F)
@@ -202,7 +202,7 @@ bool Pipeline::init() {
                 bindings.push_back(textureBinding);
             }
 
-            descriptorSetLayouts.push_back(API::DescriptorSetLayout::create(&_renderer.getDevice(), bindings.data(), bindings.size()));
+            descriptorSetLayouts.push_back(API::DescriptorSetLayout::create(&_renderer.getDevice(), bindings.data(), static_cast<uint32_t>(bindings.size())));
         }
 
         if (!descriptorSetLayouts[0] || !descriptorSetLayouts[1] || !descriptorSetLayouts[2]) {
@@ -229,7 +229,7 @@ bool Pipeline::init() {
             createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
             createInfo.pNext = nullptr,
             createInfo.flags = 0,
-            createInfo.setLayoutCount = vkDescriptorSetLayouts.size(),
+            createInfo.setLayoutCount = static_cast<uint32_t>(vkDescriptorSetLayouts.size()),
             createInfo.pSetLayouts = vkDescriptorSetLayouts.data(),
             createInfo.pushConstantRangeCount = 1,
             createInfo.pPushConstantRanges = pushConstants
@@ -358,9 +358,9 @@ bool Pipeline::init() {
             vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
             vertexInputInfo.pNext = nullptr,
             vertexInputInfo.flags = 0,
-            vertexInputInfo.vertexBindingDescriptionCount = vertexInputBindingDescs.size(),
+            vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(vertexInputBindingDescs.size()),
             vertexInputInfo.pVertexBindingDescriptions = vertexInputBindingDescs.data(),
-            vertexInputInfo.vertexAttributeDescriptionCount = vertexInputAttributesDescs.size(),
+            vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(vertexInputAttributesDescs.size()),
             vertexInputInfo.pVertexAttributeDescriptions = vertexInputAttributesDescs.data()
         };
 
