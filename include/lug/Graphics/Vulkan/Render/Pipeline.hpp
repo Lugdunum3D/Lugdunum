@@ -121,7 +121,7 @@ public:
     };
 
 public:
-    class ShaderBuilder {
+    class LUG_GRAPHICS_API ShaderBuilder {
     public:
         enum class Type : uint8_t {
             Vertex,
