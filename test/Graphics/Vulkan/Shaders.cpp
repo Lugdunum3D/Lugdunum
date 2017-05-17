@@ -6,6 +6,7 @@
 namespace lug {
 namespace Graphics {
 
+#if defined(ENABLE_LONG_TESTS)
 static void tryToCompileShader(Render::Technique::Type technique, Vulkan::Render::Pipeline::ShaderBuilder::Type type, Vulkan::Render::Pipeline::Id id) {
     Vulkan::Render::Pipeline::ShaderBuilder::buildShader("./shaders/", technique, type, id);
 }
@@ -81,6 +82,8 @@ INSTANTIATE_TEST_CASE_P(
     AllPipelineIds,
     VulkanShaders,
     testing::ValuesIn(generatePipelineIds()));
+
+#endif
 
 } // Graphics
 } // lug

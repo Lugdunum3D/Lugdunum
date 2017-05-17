@@ -38,6 +38,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 lug_set_option(BUILD_SHARED_LIBS TRUE BOOL "TRUE to build Lugdunum as shared libraries, FALSE to build it as static libraries")
 lug_set_option(BUILD_TESTS FALSE BOOL "TRUE to enable unit tests, FALSE to disable unit tests")
+lug_set_option(BUILD_LONG_TESTS FALSE BOOL "TRUE to enable long unit tests, FALSE to disable long unit tests")
 lug_set_option(BUILD_DOCUMENTATION FALSE BOOL "Create and install the HTML based API documentation (requires Doxygen)" ${DOXYGEN_FOUND})
 
 # enable project folders
