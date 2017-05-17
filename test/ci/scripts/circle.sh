@@ -18,14 +18,14 @@ case $CIRCLE_NODE_INDEX in
     0)
         export CXX=clang++
         mkdir build && cd build
-        cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS
+        cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DLUG_THIRDPARTY_DIR=$HOME/.local/thirdparty
         make all test && sudo make install # && build_samples
     ;;
 
     1)
         export CXX=g++
         mkdir build && cd build
-        cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS
+        cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DLUG_THIRDPARTY_DIR=$HOME/.local/thirdparty
         make all test && sudo make install # && build_samples
     ;;
 esac

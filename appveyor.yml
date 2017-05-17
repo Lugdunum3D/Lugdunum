@@ -115,7 +115,8 @@ matrix:
   fast_finish: true     # set this flag to immediately finish build once one of the jobs fails.
 
 # build cache to preserve files/folders between builds
-# cache:
+cache:
+  - thirdparty -> thirdparty.yml
   # - packages -> **\packages.config  # preserve "packages" directory in the root of build folder but will reset it if packages.config is modified
   # - projectA\libs
   # - node_modules                    # local npm modules
@@ -139,18 +140,20 @@ matrix:
 install:
   - git submodule update --init --recursive
   - ps: |
-      cd ..
-      git clone https://github.com/Lugdunum3D/Lugdunum-ThirdParty.git
+      if((Test-Path thirdparty) -eq 0)
+      {
+        cd ..
+        git clone https://github.com/Lugdunum3D/Lugdunum-ThirdParty.git
 
-      cd Lugdunum-ThirdParty
-      git checkout automatization
+        cd Lugdunum-ThirdParty
+        git checkout automatization
 
-      pip install -r requirements.txt
+        pip install -r requirements.txt
 
-      python build.py -vvv --path ../lugdunum/thirdparty ../lugdunum/thirdparty.yml
+        python build.py -vvv --path ../lugdunum/thirdparty ../lugdunum/thirdparty.yml
 
-      cd ../lugdunum
-
+        cd ../lugdunum
+      }
   # # by default, all script lines are interpreted as batch
   # - echo This is batch
   # # to run script as a PowerShell command prepend it with ps:
