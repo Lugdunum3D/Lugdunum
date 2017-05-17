@@ -11,4 +11,4 @@ source ./venv/bin/activate
 pip install -r requirements.txt
 
 # Build thirdparty
-python ./build.py -vvv --path ~/Lugdunum/thirdparty --build-types Release
+python ./build.py -vvv --build-types Release --path ~/Lugdunum/thirdparty ~/Lugdunum/thirdparty.yml
