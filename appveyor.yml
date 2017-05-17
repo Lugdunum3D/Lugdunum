@@ -138,7 +138,6 @@ cache:
 
 # scripts that run after cloning repository
 install:
-  - git submodule update --init --recursive
   - ps: |
       if((Test-Path thirdparty) -eq 0)
       {
@@ -154,6 +153,7 @@ install:
 
         cd ../lugdunum
       }
+
   # # by default, all script lines are interpreted as batch
   # - echo This is batch
   # # to run script as a PowerShell command prepend it with ps:
