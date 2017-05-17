@@ -20,10 +20,10 @@ date_cache=$(date -r "$cache_dir" +%s)
 
 echo "date_script: $date_script, date_cache: $date_cache"
 if [[ $date_script -gt $date_cache ]]; then
-    echo "$0 is newer than $cache_dir, invalidating cache"
+    echo "$dependency is newer than $cache_dir, invalidating cache"
     invalidate=true
 else
-    echo "$0 is older than $cache_dir, cache is valid"
+    echo "$dependency is older than $cache_dir, cache is valid"
 fi
 
 if [[ ! -d "$cache_dir" || "$invalidate" = true ]]; then
