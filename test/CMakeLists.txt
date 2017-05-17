@@ -8,6 +8,10 @@ set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}")
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR})
 
+if (BUILD_LONG_TESTS)
+    add_definitions(-DENABLE_LONG_TESTS)
+endif()
+
 # Find gmock
 find_package(GMock)
 if (NOT GMOCK_FOUND)
