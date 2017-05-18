@@ -33,7 +33,6 @@ if [[ ! -d "$cache_dir" || "$invalidate" = true ]]; then
     # Clone the repository
     git clone https://github.com/Lugdunum3D/Lugdunum-ThirdParty.git ~/Lugdunum-ThirdParty
     cd ~/Lugdunum-ThirdParty
-    git checkout automatization
 
     # Setup the python environement
     virtualenv venv
