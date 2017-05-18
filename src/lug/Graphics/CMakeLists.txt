@@ -192,19 +192,12 @@ endif()
 find_package(GLTF2-Loader)
 
 if (NOT GLTF2-LOADER_FOUND)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader")
-        message(FATAL_ERROR "Can't find glTF2-loader, call `git submodule update --recursive`")
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/glTF2-loader")
+        message(FATAL_ERROR "Can't find glTF2-loader in the thirdparty directory")
     endif()
 
-    set(GLTF2-LOADER_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/include")
+    set(GLTF2-LOADER_ROOT "${LUG_THIRDPARTY_DIR}/glTF2-loader")
 
-    if (LUG_OS_WINDOWS)
-        set(GLTF2-LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/windows/${ARCH_DIR}")
-    elseif (LUG_OS_LINUX)
-        set(GLTF2-LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/linux")
-    elseif (LUG_OS_ANDROID)
-        set(GLTF2-LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/android")
-    endif()
     find_package(GLTF2-Loader REQUIRED)
 
     message(STATUS "Found glTF2-loader library: ${GLTF2-LOADER_LIBRARY}")
