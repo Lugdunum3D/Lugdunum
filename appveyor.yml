@@ -145,7 +145,6 @@ install:
         git clone https://github.com/Lugdunum3D/Lugdunum-ThirdParty.git
 
         cd Lugdunum-ThirdParty
-        git checkout automatization
 
         pip install -r requirements.txt
 
