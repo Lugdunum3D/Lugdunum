@@ -12,9 +12,14 @@ namespace API {
 
 class Device;
 
+namespace Builder {
+class DescriptorPool;
+} // Builder
+
 class LUG_GRAPHICS_API DescriptorPool {
+    friend Builder::DescriptorPool;
 public:
-    explicit DescriptorPool(VkDescriptorPool descriptorPool = VK_NULL_HANDLE, const Device *device = nullptr);
+    DescriptorPool() = default;
 
     DescriptorPool(const DescriptorPool&) = delete;
     // Warning: Don't move DescriptorPool after creating a DescriptorSet
@@ -33,6 +38,9 @@ public:
     std::vector<DescriptorSet> createDescriptorSets(const std::vector<VkDescriptorSetLayout>& descriptorSetLayouts);
 
     void destroy();
+
+private:
+    explicit DescriptorPool(VkDescriptorPool descriptorPool, const Device *device);
 
 private:
     VkDescriptorPool _descriptorPool{VK_NULL_HANDLE};

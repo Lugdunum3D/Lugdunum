@@ -80,7 +80,7 @@ private:
     VkSurfaceKHR _surface{VK_NULL_HANDLE};
     API::Swapchain _swapchain{};
 
-    std::unique_ptr<API::DescriptorPool> _descriptorPool{nullptr};
+    API::DescriptorPool _descriptorPool{};
 
     const API::Queue* _presentQueue{nullptr};
     const API::QueueFamily* _presentQueueFamily{nullptr};
@@ -90,7 +90,7 @@ private:
 
     std::vector<AcquireImageData> _acquireImageDatas;
 
-    API::CommandPool _commandPool;
+    API::CommandPool _commandPool{};
 };
 
 #include <lug/Graphics/Vulkan/Render/Window.inl>

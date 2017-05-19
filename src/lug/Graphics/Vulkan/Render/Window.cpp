@@ -4,6 +4,7 @@
 #include <lug/Graphics/Vulkan/Render/View.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DescriptorPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/System/Debug.hpp>
@@ -143,7 +144,7 @@ bool Window::endFrame() {
 lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::InitInfo& initInfo) {
     std::unique_ptr<View> renderView = std::make_unique<View>(_renderer, this);
 
-    if (!renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, _descriptorPool.get(), _swapchain.getImagesViews())) {
+    if (!renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, &_descriptorPool, _swapchain.getImagesViews())) {
         return nullptr;
     }
 
@@ -177,38 +178,34 @@ Window::create(Renderer& renderer, Window::InitInfo& initInfo) {
     return window;
 }
 
+/**
+ * @brief      Create the descriptor pool
+ *             This is in Window because we need to know the number of RenderTechnique (Actually the number of render views)
+ *             Each RenderTechnique has 50 descriptors for the lights and 1 for the camera
+ *
+ * @return     True if the creation was successful, false otherwise
+ */
 bool Window::initDescriptorPool() {
-    // Create descriptor pool
-    // This is in Window because we need to know the number of RenderTechnique (Actually the number of render views)
-    // Each RenderTechnique has got 50 descriptors for the lights and 1 for the camera
+    API::Builder::DescriptorPool descriptorPoolBuilder(_renderer.getDevice());
 
-    VkDescriptorPoolSize poolSize[] = {
+    // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
+    descriptorPoolBuilder.setFlags(0);
+
+    // Only ForwardRenderTechnique has 1 descriptor sets (for lights) and 1 (for the camera)
+    descriptorPoolBuilder.setMaxSets((uint32_t)_initInfo.renderViewsInitInfo.size() * (1 + 1) * 3);
+
+    VkDescriptorPoolSize poolSize{
         // Dynamic uniform buffers descriptors (1 for camera and 1 for lights in ForwardRenderTechnique)
-        {
-            poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-            poolSize[0].descriptorCount = (uint32_t)_initInfo.renderViewsInitInfo.size() * 3 * 2
-        }
+        poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+        poolSize.descriptorCount = (uint32_t)_initInfo.renderViewsInitInfo.size() * (1 + 1) * 3
     };
+    descriptorPoolBuilder.setPoolSizes({poolSize});
 
-    VkDescriptorPoolCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0, // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
-        createInfo.maxSets = (uint32_t)_initInfo.renderViewsInitInfo.size() * (1 + 1) * 3, // Only ForwardRenderTechnique has 1 descriptor sets (for lights) and 1 (for the camera)
-        createInfo.poolSizeCount = 1,
-        createInfo.pPoolSizes = poolSize
-    };
-
-    VkDescriptorPool descriptorPool{VK_NULL_HANDLE};
-
-    VkResult result = vkCreateDescriptorPool(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &descriptorPool);
-
-    if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create the descriptor pool: {}", result);
+    VkResult result;
+    if (!descriptorPoolBuilder.build(_descriptorPool, &result)) {
+        LUG_LOG.error("Window::initDescriptorPool: Can't create the descriptor pool: {}", result);
         return false;
     }
-
-    _descriptorPool = std::make_unique<API::DescriptorPool>(descriptorPool, &_renderer.getDevice());
 
     return true;
 }
@@ -720,7 +717,7 @@ void Window::destroyRender() {
 
     _framesData.clear();
 
-    _descriptorPool->destroy();
+    _descriptorPool.destroy();
 
     _acquireImageDatas.clear();
 }
