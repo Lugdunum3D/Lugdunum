@@ -1,5 +1,6 @@
 #include <lug/Graphics/Vulkan/Render/BufferPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DescriptorSet.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
@@ -75,13 +76,13 @@ BufferPool::SubBuffer* BufferPool::allocate() {
         }
 
         // Create and update descriptor set
-        std::vector<API::DescriptorSet> descriptorSets = _descriptorPool->createDescriptorSets({static_cast<VkDescriptorSetLayout>(*_descriptorSetLayout)});
-
-        if (descriptorSets.size() == 0) {
+        API::Builder::DescriptorSet descriptorSetBuilder(*_device, *_descriptorPool);
+        descriptorSetBuilder.setDescriptorSetLayouts({static_cast<VkDescriptorSetLayout>(*_descriptorSetLayout)});
+        if (!descriptorSetBuilder.build(chunk->descriptorSet, &result)) {
+            LUG_LOG.error("BufferPool::allocate: Can't create descriptor set: {}", result);
             return nullptr;
         }
 
-        chunk->descriptorSet = std::move(descriptorSets[0]);
         chunk->descriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 0, chunk->buffer.get(), 0, subBufferSizeAligned);
     }
 

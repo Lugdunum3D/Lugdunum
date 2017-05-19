@@ -35,8 +35,6 @@ public:
         return _descriptorPool;
     }
 
-    std::vector<DescriptorSet> createDescriptorSets(const std::vector<VkDescriptorSetLayout>& descriptorSetLayouts);
-
     void destroy();
 
 private:

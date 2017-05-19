@@ -33,6 +33,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Builder/CommandBuffer.cpp
     ${SRCROOT}/Vulkan/API/Builder/CommandPool.cpp
     ${SRCROOT}/Vulkan/API/Builder/DescriptorPool.cpp
+    ${SRCROOT}/Vulkan/API/Builder/DescriptorSet.cpp
     ${SRCROOT}/Vulkan/API/Builder/Device.cpp
     ${SRCROOT}/Vulkan/API/Builder/DeviceMemory.cpp
     ${SRCROOT}/Vulkan/API/Builder/Instance.cpp
@@ -135,6 +136,8 @@ set(INC
     ${INCROOT}/Vulkan/API/Builder/CommandPool.inl
     ${INCROOT}/Vulkan/API/Builder/DescriptorPool.hpp
     ${INCROOT}/Vulkan/API/Builder/DescriptorPool.inl
+    ${INCROOT}/Vulkan/API/Builder/DescriptorSet.hpp
+    ${INCROOT}/Vulkan/API/Builder/DescriptorSet.inl
     ${INCROOT}/Vulkan/API/Builder/Device.hpp
     ${INCROOT}/Vulkan/API/Builder/Device.inl
     ${INCROOT}/Vulkan/API/Builder/DeviceMemory.hpp

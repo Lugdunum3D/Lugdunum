@@ -11,9 +11,15 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
+namespace Builder {
+class DescriptorSet;
+} // Builder
+
 class LUG_GRAPHICS_API DescriptorSet {
+friend Builder::DescriptorSet;
+
 public:
-    explicit DescriptorSet(VkDescriptorSet descriptorSet = VK_NULL_HANDLE, const Device* device = nullptr);
+    DescriptorSet() = default;
 
     DescriptorSet(const DescriptorSet&) = delete;
     DescriptorSet(DescriptorSet&& DescriptorSet);
@@ -52,6 +58,9 @@ public:
     void update(VkDescriptorType descriptorType, uint32_t dstBinding, const Buffer* buffer, uint32_t offset, uint32_t range);
 
     void destroy();
+
+private:
+    explicit DescriptorSet(VkDescriptorSet descriptorSet, const Device* device);
 
 private:
     VkDescriptorSet _descriptorSet{VK_NULL_HANDLE};
