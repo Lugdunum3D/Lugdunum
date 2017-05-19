@@ -38,9 +38,9 @@ public:
     void destroy();
 
     void bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
-    void* mapMemory(VkDeviceSize size, VkDeviceSize offset = 0);
+    void* mapMemory(VkDeviceSize size);
     void unmapMemory();
-    void updateData(void *data, uint32_t size, uint32_t memoryOffset = 0);
+    void updateData(void *data, uint32_t size);
     void updateDataTransfer(const CommandBuffer* commandBuffer, void *data, uint32_t size, uint32_t offset = 0);
 
     static uint32_t getSizeAligned(const Device* device, uint32_t size);
@@ -53,7 +53,9 @@ private:
 private:
     VkBuffer _buffer{VK_NULL_HANDLE};
     const Device* _device{nullptr};
+
     DeviceMemory* _deviceMemory{nullptr};
+    VkDeviceSize _deviceMemoryOffset{0};
 
     VkMemoryRequirements _requirements{};
 };

@@ -38,11 +38,10 @@ private:
     std::unique_ptr<API::Buffer> _vertexBuffer;
     std::unique_ptr<API::Buffer> _indexBuffer;
 
-    std::unique_ptr<API::DeviceMemory> _vertexDeviceMemory{nullptr};
-    std::unique_ptr<API::DeviceMemory> _indexDeviceMemory{nullptr};
-
     // Queue family indices used by the vertex and index buffers
     std::set<uint32_t> _queueFamilyIndices;
+
+    API::DeviceMemory _deviceMemory;
 
     const API::Device* _device{nullptr};
 };

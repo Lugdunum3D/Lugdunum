@@ -107,6 +107,7 @@ void Image::destroy() {
 
 void Image::bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
     _deviceMemory = deviceMemory;
+    _deviceMemoryOffset = memoryOffset;
     vkBindImageMemory(static_cast<VkDevice>(*_device), _image, static_cast<VkDeviceMemory>(*deviceMemory), memoryOffset);
 }
 

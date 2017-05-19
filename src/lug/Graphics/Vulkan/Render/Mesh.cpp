@@ -1,5 +1,6 @@
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -23,6 +24,7 @@ bool Mesh::load() {
     }
     VkResult result;
 
+    // Create vertex buffer
     {
         API::Builder::Buffer bufferBuilderInstance(*_device);
         bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
@@ -34,19 +36,9 @@ bool Mesh::load() {
             LUG_LOG.error("Mesh::load: Can't create vertex buffer: {}", result);
             return false;
         }
-
-        auto& requirements = _vertexBuffer->getRequirements();
-        uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-        _vertexDeviceMemory = API::DeviceMemory::allocate(_device, requirements.size, memoryTypeIndex);
-
-        if (!_vertexDeviceMemory) {
-            return false;
-        }
-
-        _vertexBuffer->bindMemory(_vertexDeviceMemory.get());
-        _vertexBuffer->updateData(vertices.data(), (uint32_t)vertices.size() * sizeof(Vertex));
     }
 
+    // Create index buffer
     {
         API::Builder::Buffer bufferBuilderInstance(*_device);
         bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
@@ -58,18 +50,26 @@ bool Mesh::load() {
             LUG_LOG.error("Mesh::load: Can't create index buffer: {}", result);
             return false;
         }
+    }
 
-        auto& requirements = _indexBuffer->getRequirements();
-        uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-        _indexDeviceMemory = API::DeviceMemory::allocate(_device, requirements.size, memoryTypeIndex);
+    // Create device memory
+    {
+        API::Builder::DeviceMemory deviceMemoryBuilder(*_device);
+        deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
-        if (!_indexDeviceMemory) {
+        if (!deviceMemoryBuilder.addBuffer(*_vertexBuffer) ||
+            !deviceMemoryBuilder.addBuffer(*_indexBuffer)) {
+            LUG_LOG.error("Model::load: Can't add buffer to device memory");
             return false;
         }
-
-        _indexBuffer->bindMemory(_indexDeviceMemory.get());
-        _indexBuffer->updateData(indices.data(), (uint32_t)indices.size() * sizeof(uint32_t));
+        if (!deviceMemoryBuilder.build(_deviceMemory, &result)) {
+            LUG_LOG.error("Model::load: Can't create a device memory: {}", result);
+            return false;
+        }
     }
+
+    _vertexBuffer->updateData(vertices.data(), (uint32_t)vertices.size() * sizeof(Vertex));
+    _indexBuffer->updateData(indices.data(), (uint32_t)indices.size() * sizeof(uint32_t));
 
     _loaded = true;
 

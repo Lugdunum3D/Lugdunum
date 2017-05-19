@@ -10,6 +10,7 @@
 #include <lug/Graphics/Scene/Node.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
@@ -367,9 +368,12 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
 
     _framesData.resize(imageViews.size());
 
+    API::Builder::DeviceMemory deviceMemoryBuilder(*_device);
+    deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    // Create images and add them to API::Builder::DeviceMemory
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
         std::unique_ptr<API::Image> image = nullptr;
-        std::unique_ptr<API::ImageView> imageView = nullptr;
 
         VkExtent3D extent{
             extent.width = imageViews[i]->getExtent().width,
@@ -386,32 +390,37 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
                 return false;
             }
 
-            auto& imageRequirements = image->getRequirements();
-
-            size_t realSize = imageRequirements.size;
-            if (realSize % imageRequirements.alignment) {
-                realSize += imageRequirements.alignment - realSize % imageRequirements.alignment;
+            if (!deviceMemoryBuilder.addImage(*image)) {
+                LUG_LOG.error("Forward::initDepthBuffers: Can't add image to device memory");
+                return false;
             }
-
-            // Initialize depth buffer memory (This memory is common for all depth buffer images)
-            if (!_depthBufferMemory) {
-                uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, imageRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-                // Allocate image requirements size for all images
-                _depthBufferMemory = API::DeviceMemory::allocate(_device, realSize * imageViews.size(), memoryTypeIndex);
-
-                if (!_depthBufferMemory) {
-                    LUG_LOG.error("Forward: Can't allocate device memory for depth buffer images");
-                    return false;
-                }
-            }
-
-            // Bind memory to image
-            image->bindMemory(_depthBufferMemory.get(), realSize * i);
         }
+
+        _framesData[i].depthBuffer.image = std::move(image);
+    }
+
+    // Initialize depth buffer memory (This memory is common for all depth buffer images)
+    {
+        VkResult result;
+        _depthBufferMemory = deviceMemoryBuilder.build(&result);
+
+        if (result != VK_SUCCESS || !_depthBufferMemory) {
+            LUG_LOG.error("Forward::initDepthBuffers: Can't create device memory: {}", result);
+            return false;
+        }
+    }
+
+    // Create images views
+    for (uint32_t i = 0; i < imageViews.size(); ++i) {
+        std::unique_ptr<API::ImageView> imageView = nullptr;
 
         // Create depth buffer image view
         {
-            imageView = API::ImageView::create(_device, image.get(), imagesFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+            imageView = API::ImageView::create(
+                _device,
+                _framesData[i].depthBuffer.image.get(),
+                imagesFormat,
+                VK_IMAGE_ASPECT_DEPTH_BIT);
 
             if (!imageView) {
                 LUG_LOG.error("Forward: Can't create depth buffer image view");
@@ -419,9 +428,9 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
             }
         }
 
-        _framesData[i].depthBuffer.image = std::move(image);
         _framesData[i].depthBuffer.imageView = std::move(imageView);
     }
+
 
     return true;
 }

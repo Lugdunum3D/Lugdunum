@@ -1,5 +1,6 @@
 #include <lug/Graphics/Vulkan/Render/BufferPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -55,17 +56,23 @@ BufferPool::SubBuffer* BufferPool::allocate() {
             return nullptr;
         }
 
-        // Allocate memory for buffer
-        const VkMemoryRequirements& bufferRequirements = chunk->buffer->getRequirements();
-        uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(_device, bufferRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-        chunk->bufferMemory = API::DeviceMemory::allocate(_device, chunk->size, memoryTypeIndex);
+        // Create chunk buffer memory
+        {
+            API::Builder::DeviceMemory deviceMemoryBuilder(*_device);
+            deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-        if (!chunk->bufferMemory) {
-            return nullptr;
+            if (!deviceMemoryBuilder.addBuffer(*chunk->buffer)) {
+                LUG_LOG.error("BufferPool::allocate: Can't add buffer to device memory");
+                return nullptr;
+            }
+
+            chunk->bufferMemory = deviceMemoryBuilder.build(&result);
+
+            if (result != VK_SUCCESS || !chunk->bufferMemory) {
+                LUG_LOG.error("BufferPool::allocate: Can't create device memory: {}", result);
+                return nullptr;
+            }
         }
-
-        // Bind memory to buffer
-        chunk->buffer->bindMemory(chunk->bufferMemory.get(), 0);
 
         // Create and update descriptor set
         std::vector<API::DescriptorSet> descriptorSets = _descriptorPool->createDescriptorSets({static_cast<VkDescriptorSetLayout>(*_descriptorSetLayout)});

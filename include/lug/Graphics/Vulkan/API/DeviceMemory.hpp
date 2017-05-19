@@ -9,11 +9,17 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
+namespace Builder {
+    class DeviceMemory;
+};
+
 class Device;
 
 class LUG_GRAPHICS_API DeviceMemory {
+    friend class Builder::DeviceMemory;
+
 public:
-    explicit DeviceMemory(VkDeviceMemory deviceMemory = VK_NULL_HANDLE, const Device* device = nullptr);
+    DeviceMemory() = default;
 
     DeviceMemory(const DeviceMemory&) = delete;
     DeviceMemory(DeviceMemory&& deviceMemory);
@@ -29,8 +35,10 @@ public:
 
     void destroy();
 
-    static std::unique_ptr<DeviceMemory> allocate(const Device* device, VkDeviceSize size, uint32_t memoryTypeIndex);
-    static uint32_t findMemoryType(const Device* device, const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags requiredFlags);
+    static uint32_t findMemoryType(const Device* device, uint32_t memoryTypeBits, VkMemoryPropertyFlags requiredFlags);
+
+private:
+    explicit DeviceMemory(VkDeviceMemory deviceMemory, const Device* device);
 
 private:
     VkDeviceMemory _deviceMemory{VK_NULL_HANDLE};

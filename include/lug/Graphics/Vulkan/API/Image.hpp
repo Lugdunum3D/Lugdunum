@@ -77,7 +77,10 @@ private:
 private:
     VkImage _image{VK_NULL_HANDLE};
     const Device* _device{nullptr};
+
     DeviceMemory* _deviceMemory{nullptr};
+    VkDeviceSize _deviceMemoryOffset{0};
+
     bool _swapchainImage;
 
     VkImageAspectFlags _aspect;

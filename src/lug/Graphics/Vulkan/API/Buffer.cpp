@@ -20,10 +20,12 @@ Buffer::Buffer(Buffer&& buffer) {
     _device = buffer._device;
     _deviceMemory = buffer._deviceMemory;
     _requirements = buffer._requirements;
+    _deviceMemoryOffset = buffer._deviceMemoryOffset;
     buffer._buffer = VK_NULL_HANDLE;
     buffer._device = nullptr;
     buffer._deviceMemory = nullptr;
     buffer._requirements = {};
+    buffer._deviceMemoryOffset = 0;
 }
 
 Buffer& Buffer::operator=(Buffer&& buffer) {
@@ -33,10 +35,12 @@ Buffer& Buffer::operator=(Buffer&& buffer) {
     _device = buffer._device;
     _deviceMemory = buffer._deviceMemory;
     _requirements = buffer._requirements;
+    _deviceMemoryOffset = buffer._deviceMemoryOffset;
     buffer._buffer = VK_NULL_HANDLE;
     buffer._device = nullptr;
     buffer._deviceMemory = nullptr;
     buffer._requirements = {};
+    buffer._deviceMemoryOffset = 0;
 
     return *this;
 }
@@ -54,13 +58,14 @@ void Buffer::destroy() {
 
 void Buffer::bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
     _deviceMemory = deviceMemory;
+    _deviceMemoryOffset = memoryOffset;
     vkBindBufferMemory(static_cast<VkDevice>(*_device), static_cast<VkBuffer>(_buffer), static_cast<VkDeviceMemory>(*deviceMemory), memoryOffset);
 }
 
-void* Buffer::mapMemory(VkDeviceSize size, VkDeviceSize offset) {
+void* Buffer::mapMemory(VkDeviceSize size) {
     void* data = nullptr;
 
-    vkMapMemory(static_cast<VkDevice>(*_device), static_cast<VkDeviceMemory>(*_deviceMemory), offset, size, 0, &data);
+    vkMapMemory(static_cast<VkDevice>(*_device), static_cast<VkDeviceMemory>(*_deviceMemory), _deviceMemoryOffset, size, 0, &data);
 
     return data;
 }
@@ -69,8 +74,8 @@ void Buffer::unmapMemory() {
     vkUnmapMemory(static_cast<VkDevice>(*_device), static_cast<VkDeviceMemory>(*_deviceMemory));
 }
 
-void Buffer::updateData(void* data, uint32_t size, uint32_t memoryOffset) {
-    void* gpuData = mapMemory(size, memoryOffset);
+void Buffer::updateData(void* data, uint32_t size) {
+    void* gpuData = mapMemory(size);
 
     memcpy(gpuData, data, size);
     unmapMemory();
