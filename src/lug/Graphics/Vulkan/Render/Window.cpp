@@ -201,7 +201,7 @@ bool Window::initDescriptorPool() {
     };
     descriptorPoolBuilder.setPoolSizes({poolSize});
 
-    VkResult result;
+    VkResult result{VK_SUCCESS};
     if (!descriptorPoolBuilder.build(_descriptorPool, &result)) {
         LUG_LOG.error("Window::initDescriptorPool: Can't create the descriptor pool: {}", result);
         return false;
@@ -257,7 +257,7 @@ bool Window::initSurface() {
 }
 
 bool Window::initSwapchainCapabilities() {
-    VkResult result;
+    VkResult result{VK_SUCCESS};
     PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
 
     LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
@@ -314,7 +314,7 @@ bool Window::initPresentQueue() {
 
     // Get present queue families
     {
-        VkResult result;
+        VkResult result{VK_SUCCESS};
         for (auto& queueFamily : _renderer.getDevice().getQueueFamilies()) {
             VkBool32 supported = 0;
             result = vkGetPhysicalDeviceSurfaceSupportKHR(info->handle, queueFamily.getIdx(), _surface, &supported);
@@ -344,7 +344,7 @@ bool Window::initPresentQueue() {
 
     // Create command pool of present queue
     {
-        VkResult result;
+        VkResult result{VK_SUCCESS};
         API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *_presentQueueFamily);
         if (!commandPoolBuilder.build(_commandPool, &result)) {
             LUG_LOG.error("Window::initPresentQueue: Can't create a command pool: {}", result);
@@ -483,7 +483,7 @@ bool Window::initSwapchain() {
             swapchainBuilder.setQueueFamilyIndices({_presentQueueFamily->getIdx()});
         }
 
-        VkResult result;
+        VkResult result{VK_SUCCESS};
         if (!swapchainBuilder.build(_swapchain, &result)) {
             LUG_LOG.error("Window::initPresentQueue: Can't create a command pool: {}", result);
             return false;

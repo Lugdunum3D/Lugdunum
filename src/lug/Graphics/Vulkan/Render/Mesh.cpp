@@ -22,7 +22,7 @@ bool Mesh::load() {
         LUG_LOG.warn("RendererVulkan: Attempt to load a mesh that is already loaded");
         return true;
     }
-    VkResult result;
+    VkResult result{VK_SUCCESS};
 
     // Create vertex buffer
     {

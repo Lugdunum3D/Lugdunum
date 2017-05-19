@@ -271,7 +271,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
     }
 
     API::Builder::CommandPool commandPoolBuilder(*_device, *graphicsQueueFamily);
-    VkResult result;
+    VkResult result{VK_SUCCESS};
     if (!commandPoolBuilder.build(_commandPool, &result)) {
         LUG_LOG.error("Forward::init: Can't create a command pool: {}", result);
         return false;
@@ -401,10 +401,10 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
 
     // Initialize depth buffer memory (This memory is common for all depth buffer images)
     {
-        VkResult result;
+        VkResult result{VK_SUCCESS};
         _depthBufferMemory = deviceMemoryBuilder.build(&result);
 
-        if (result != VK_SUCCESS || !_depthBufferMemory) {
+        if (!_depthBufferMemory) {
             LUG_LOG.error("Forward::initDepthBuffers: Can't create device memory: {}", result);
             return false;
         }
@@ -431,7 +431,6 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
         _framesData[i].depthBuffer.imageView = std::move(imageView);
     }
 
-
     return true;
 }
 
@@ -439,7 +438,7 @@ bool Forward::initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>
     // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
     API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional]->getRenderPass();
 
-    VkResult result;
+    VkResult result{VK_SUCCESS};
     _framesData.resize(imageViews.size());
 
     for (size_t i = 0; i < imageViews.size(); i++) {

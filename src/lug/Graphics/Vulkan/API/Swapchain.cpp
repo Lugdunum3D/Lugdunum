@@ -58,7 +58,7 @@ void Swapchain::destroy() {
 }
 
 bool Swapchain::init() {
-    VkResult result;
+    VkResult result{VK_SUCCESS};
 
     // Get swapchain images
     {

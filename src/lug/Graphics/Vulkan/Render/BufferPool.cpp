@@ -43,7 +43,7 @@ BufferPool::SubBuffer* BufferPool::allocate() {
 
     std::unique_ptr<BufferPool::Chunk> chunk = std::make_unique<BufferPool::Chunk>();
     {
-        VkResult result;
+        VkResult result{VK_SUCCESS};
 
         // Create buffer
         chunk->size = subBufferSizeAligned * _countPerChunk;
@@ -69,7 +69,7 @@ BufferPool::SubBuffer* BufferPool::allocate() {
 
             chunk->bufferMemory = deviceMemoryBuilder.build(&result);
 
-            if (result != VK_SUCCESS || !chunk->bufferMemory) {
+            if (!chunk->bufferMemory) {
                 LUG_LOG.error("BufferPool::allocate: Can't create device memory: {}", result);
                 return nullptr;
             }

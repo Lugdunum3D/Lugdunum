@@ -118,7 +118,7 @@ bool Renderer::finishInit() {
 }
 
 bool Renderer::initInstance(const std::string& appName, const Core::Version& appVersion) {
-    VkResult result;
+    VkResult result{VK_SUCCESS};
 
     // Load vulkan core functions
     {
@@ -293,7 +293,7 @@ bool Renderer::initInstance(const std::string& appName, const Core::Version& app
 }
 
 bool Renderer::initDevice() {
-    VkResult result;
+    VkResult result{VK_SUCCESS};
 
     if (_preferences.device) {
         _physicalDeviceInfo = _preferences.device;

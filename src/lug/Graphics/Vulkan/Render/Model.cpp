@@ -26,7 +26,7 @@ bool Model::load() {
 
     uint32_t verticesNb = getVerticesSize();
     uint32_t indicesNb = getIndicesSize();
-    VkResult result;
+    VkResult result{VK_SUCCESS};
 
     // Create vertex buffer
     {
