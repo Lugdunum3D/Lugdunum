@@ -47,6 +47,26 @@ void Logger::handle(priv::Message& msg) {
     }
 }
 
+void Logger::muteLevel(std::string source, Level level) {
+    //TODO (Clipsey): Make this more optimal
+    try {
+        this->_srcLevels[source].at(level);
+    } catch {
+        this->_srcLevels[source].push_back(level);
+    }
+}
+
+void Logger::unmuteLevel(std::string source, Level level) {
+    //TODO (Clipsey): Make this more optimal
+    try {
+        auto at = this->_srcLevels[source].at(level);
+        this->_srcLevels[source].erase(at);
+    } catch {
+        //HACK (Clipsey): This is not the nicest way to do this.
+        return;
+    }
+}
+
 void Logger::flush() {
     for (auto& handler : _handlers) {
         handler->flush();

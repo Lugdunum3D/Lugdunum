@@ -3,6 +3,8 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include <lug/System/Export.hpp>
 #include <lug/System/Logger/Common.hpp>
@@ -34,28 +36,32 @@ public:
     void defaultErrHandler(const std::exception& ex);
 
     template<typename T>
-    void log(Level lvl, const T& msg);
+    void log(std::string source, Level lvl, const T& msg);
 
     template<typename... Args, typename T>
-    void log(Level lvl, const T& fmt, Args&&... args);
+    void log(std::string source, Level lvl, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void debug(const T& fmt, Args&&... args);
+    void debug(std::string source, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void info(const T& fmt, Args&&... args);
+    void info(std::string source, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void warn(const T& fmt, Args&&... args);
+    void warn(std::string source, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void error(const T& fmt, Args&&... args);
+    void error(std::string source, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void fatal(const T& fmt, Args&&... args);
+    void fatal(std::string source, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void assrt(const T& fmt, Args&&... args);
+    void assrt(std::string source, const T& fmt, Args&&... args);
+
+    void muteLevel(std::string source, Level level);
+    void unmuteLevel(std::string source, Level level);
+    bool getLoggingAllowed(std::string source, Level level);
 
     const std::string& getName() const;
     void handle(priv::Message& msg);
@@ -66,6 +72,9 @@ public:
 protected:
     const std::string _name;
     std::set<Handler*> _handlers;
+
+private:
+    std::unordered_map<std::string, std::vector<Level>> _srcLevels;
 };
 
 #include <lug/System/Logger/Logger.inl>
@@ -75,4 +84,3 @@ protected:
 } // Logger
 } // System
 } // lug
-
