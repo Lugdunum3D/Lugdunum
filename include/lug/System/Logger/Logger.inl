@@ -55,13 +55,10 @@ inline void Logger::assrt(std::string source, const T& fmt, Args&&... args) {
 }
 
 inline bool Logger::getLoggingAllowed(std::string source, Level level) {
-    //TODO (Clipsey): Make this more optimal
-    try {
-        this->_srcLevels[source].at(level);
+    if (std::find(this->_srcLevels[source].begin(), this->_srcLevels[source].end(), level) != this->_srcLevels[source].end()) {
         return false;
-    } catch {
-        return true;
     }
+    return true;
 }
 
 

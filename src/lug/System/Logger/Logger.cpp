@@ -27,7 +27,7 @@ void Logger::addHandler(const std::string& name) {
 }
 
 void Logger::defaultErrHandler(const std::string& msg) {
-    log(Level::Fatal, "Exception in logger {}: {}", _name, msg);
+    log("Logger", Level::Fatal, "Exception in logger {}: {}", _name, msg);
 }
 
 void Logger::defaultErrHandler(const std::exception& ex) {
@@ -48,22 +48,15 @@ void Logger::handle(priv::Message& msg) {
 }
 
 void Logger::muteLevel(std::string source, Level level) {
-    //TODO (Clipsey): Make this more optimal
-    try {
-        this->_srcLevels[source].at(level);
-    } catch {
+    if (std::find(this->_srcLevels[source].begin(), this->_srcLevels[source].end(), level) == this->_srcLevels[source].end()) {
         this->_srcLevels[source].push_back(level);
     }
 }
 
 void Logger::unmuteLevel(std::string source, Level level) {
-    //TODO (Clipsey): Make this more optimal
-    try {
-        auto at = this->_srcLevels[source].at(level);
-        this->_srcLevels[source].erase(at);
-    } catch {
-        //HACK (Clipsey): This is not the nicest way to do this.
-        return;
+    auto find = std::find(this->_srcLevels[source].begin(), this->_srcLevels[source].end(), level);
+    if (find != this->_srcLevels[source].end()) {
+        this->_srcLevels[source].erase(find);
     }
 }
 

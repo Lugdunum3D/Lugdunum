@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
 
 #include <lug/System/Export.hpp>
 #include <lug/System/Logger/Common.hpp>
