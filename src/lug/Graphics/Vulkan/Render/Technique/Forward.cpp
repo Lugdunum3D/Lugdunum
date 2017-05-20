@@ -87,6 +87,10 @@ bool Forward::render(
 
         if (!cameraBuffer) {
             cameraBuffer = _cameraPool->allocate();
+            if (!cameraBuffer) {
+                return false;
+            }
+
             _subBuffers[camera->getName()] = cameraBuffer;
 
             Math::Mat4x4f cameraData[] = {
@@ -113,6 +117,10 @@ bool Forward::render(
 
             if (!lightBuffer) {
                 lightBuffer = _lightsPool->allocate();
+                if (!lightBuffer) {
+                    return false;
+                }
+
                 _subBuffers[light->getName()] = lightBuffer;
 
                 uint32_t lightSize = 0;
@@ -344,7 +352,7 @@ void Forward::destroy() {
 
     _framesData.clear();
 
-    _depthBufferMemory->destroy();
+    _depthBufferMemory.destroy();
 
     _cameraPool.reset();
     _lightsPool.reset();
@@ -360,10 +368,6 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
     if (imagesFormat == VK_FORMAT_UNDEFINED) {
         LUG_LOG.error("Forward: Can't find supported format for depth buffer");
         return false;
-    }
-
-    if (_depthBufferMemory) {
-        _depthBufferMemory.reset();
     }
 
     _framesData.resize(imageViews.size());
@@ -402,9 +406,7 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
     // Initialize depth buffer memory (This memory is common for all depth buffer images)
     {
         VkResult result{VK_SUCCESS};
-        _depthBufferMemory = deviceMemoryBuilder.build(&result);
-
-        if (!_depthBufferMemory) {
+        if (!deviceMemoryBuilder.build(_depthBufferMemory, &result)) {
             LUG_LOG.error("Forward::initDepthBuffers: Can't create device memory: {}", result);
             return false;
         }

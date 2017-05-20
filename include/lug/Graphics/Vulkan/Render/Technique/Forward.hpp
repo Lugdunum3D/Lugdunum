@@ -61,7 +61,7 @@ private:
     std::unique_ptr<BufferPool> _cameraPool;
     std::unique_ptr<BufferPool> _lightsPool;
 
-    std::unique_ptr<API::DeviceMemory> _depthBufferMemory{nullptr};
+    API::DeviceMemory _depthBufferMemory;
 
     std::unordered_map<Light::Light::Type, std::unique_ptr<API::Pipeline>> _pipelines;
 

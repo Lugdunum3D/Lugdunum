@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <list>
 #include <memory>
 #include <set>
 #include <lug/Graphics/Export.hpp>
@@ -46,9 +47,10 @@ public:
 
 private:
     struct Chunk {
-        std::unique_ptr<API::DeviceMemory> bufferMemory;
+        API::DeviceMemory bufferMemory;
         API::DescriptorSet descriptorSet;
-        std::unique_ptr<API::Buffer> buffer;
+        API::Buffer buffer;
+
         // Warning: Do not resize chunk.subBuffers
         std::vector<SubBuffer> subBuffers;
         std::vector<SubBuffer*> subBuffersFree;
@@ -85,7 +87,9 @@ public:
 private:
     uint32_t _countPerChunk;
     uint32_t _subBufferSize;
-    std::vector<std::unique_ptr<Chunk>> _chunks;
+
+    // Use a list to avoid the change of adress of a chunk if we add another chunk to the list
+    std::list<Chunk> _chunks;
 
     const API::Device* _device;
     std::set<uint32_t> _queueFamilyIndices;

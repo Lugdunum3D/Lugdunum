@@ -34,9 +34,8 @@ bool Model::load() {
         bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
         bufferBuilderInstance.setSize(verticesNb * sizeof(Mesh::Vertex));
         bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-        _vertexBuffer = bufferBuilderInstance.build(&result);
 
-        if (result != VK_SUCCESS || !_vertexBuffer) {
+        if (!bufferBuilderInstance.build(_vertexBuffer, &result)) {
             LUG_LOG.error("Model::load: Can't create vertex buffer: {}", result);
             return false;
         }
@@ -48,9 +47,8 @@ bool Model::load() {
         bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
         bufferBuilderInstance.setSize(indicesNb * sizeof(uint32_t));
         bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-        _indexBuffer = bufferBuilderInstance.build(&result);
 
-        if (result != VK_SUCCESS || !_indexBuffer) {
+        if (!bufferBuilderInstance.build(_indexBuffer, &result)) {
             LUG_LOG.error("Model::load: Can't create index buffer: {}", result);
             return false;
         }
@@ -61,8 +59,8 @@ bool Model::load() {
         API::Builder::DeviceMemory deviceMemoryBuilder(*_device);
         deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
-        if (!deviceMemoryBuilder.addBuffer(*_vertexBuffer) ||
-            !deviceMemoryBuilder.addBuffer(*_indexBuffer)) {
+        if (!deviceMemoryBuilder.addBuffer(_vertexBuffer) ||
+            !deviceMemoryBuilder.addBuffer(_indexBuffer)) {
             LUG_LOG.error("Model::load: Can't add buffer to device memory");
             return false;
         }
@@ -82,7 +80,7 @@ bool Model::load() {
             offset += static_cast<uint32_t>(mesh->vertices.size());
         }
 
-        if (!_vertexBuffer->updateData(vertices, verticesNb * sizeof(Mesh::Vertex))) {
+        if (!_vertexBuffer.updateData(vertices, verticesNb * sizeof(Mesh::Vertex))) {
             LUG_LOG.error("Model::load: Can't update the vertex buffer");
             return false;
         }
@@ -100,7 +98,7 @@ bool Model::load() {
             offset += static_cast<uint32_t>(mesh->indices.size());
         }
 
-        if (!_indexBuffer->updateData(indices, indicesNb * sizeof(uint32_t))) {
+        if (!_indexBuffer.updateData(indices, indicesNb * sizeof(uint32_t))) {
             LUG_LOG.error("Model::load: Can't update the vertex buffer");
             return false;
         }
@@ -114,13 +112,8 @@ bool Model::load() {
 }
 
 void Model::destroy() {
-    if (_vertexBuffer) {
-        _vertexBuffer->destroy();
-    }
-
-    if (_indexBuffer) {
-        _indexBuffer->destroy();
-    }
+    _vertexBuffer.destroy();
+    _indexBuffer.destroy();
 }
 
 } // Render

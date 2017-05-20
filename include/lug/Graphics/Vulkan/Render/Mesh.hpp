@@ -35,8 +35,8 @@ public:
     const API::Buffer* getIndexBuffer() const;
 
 private:
-    std::unique_ptr<API::Buffer> _vertexBuffer;
-    std::unique_ptr<API::Buffer> _indexBuffer;
+    API::Buffer _vertexBuffer;
+    API::Buffer _indexBuffer;
 
     // Queue family indices used by the vertex and index buffers
     std::set<uint32_t> _queueFamilyIndices;

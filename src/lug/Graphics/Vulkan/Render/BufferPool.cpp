@@ -30,7 +30,7 @@ BufferPool::SubBuffer* BufferPool::allocate() {
     // Search free sub-buffer
     {
         for (auto& chunk: _chunks) {
-            BufferPool::SubBuffer* subBuffer = chunk->getFreeSubBuffer();
+            BufferPool::SubBuffer* subBuffer = chunk.getFreeSubBuffer();
 
             if (subBuffer) {
                 return subBuffer;
@@ -46,8 +46,8 @@ BufferPool::SubBuffer* BufferPool::allocate() {
         subBufferSizeAligned += alignment - subBufferSizeAligned % alignment;
     }
 
-    std::unique_ptr<BufferPool::Chunk> chunk = std::make_unique<BufferPool::Chunk>();
     {
+        BufferPool::Chunk chunk{};
         VkResult result{VK_SUCCESS};
 
         // Create buffer
@@ -57,8 +57,7 @@ BufferPool::SubBuffer* BufferPool::allocate() {
         bufferBuilderInstance.setSize(subBufferSizeAligned * _countPerChunk);
         bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
-        chunk->buffer = bufferBuilderInstance.build(&result);
-        if (result != VK_SUCCESS || !chunk->buffer) {
+        if (!bufferBuilderInstance.build(chunk.buffer, &result)) {
             LUG_LOG.error("BufferPool::allocate: Can't create buffer: {}", result);
             return nullptr;
         }
@@ -68,14 +67,12 @@ BufferPool::SubBuffer* BufferPool::allocate() {
             API::Builder::DeviceMemory deviceMemoryBuilder(*_device);
             deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-            if (!deviceMemoryBuilder.addBuffer(*chunk->buffer)) {
+            if (!deviceMemoryBuilder.addBuffer(chunk.buffer)) {
                 LUG_LOG.error("BufferPool::allocate: Can't add buffer to device memory");
                 return nullptr;
             }
 
-            chunk->bufferMemory = deviceMemoryBuilder.build(&result);
-
-            if (!chunk->bufferMemory) {
+            if (!deviceMemoryBuilder.build(chunk.bufferMemory, &result)) {
                 LUG_LOG.error("BufferPool::allocate: Can't create device memory: {}", result);
                 return nullptr;
             }
@@ -84,38 +81,40 @@ BufferPool::SubBuffer* BufferPool::allocate() {
         // Create and update descriptor set
         API::Builder::DescriptorSet descriptorSetBuilder(*_device, *_descriptorPool);
         descriptorSetBuilder.setDescriptorSetLayouts({static_cast<VkDescriptorSetLayout>(*_descriptorSetLayout)});
-        if (!descriptorSetBuilder.build(chunk->descriptorSet, &result)) {
+        if (!descriptorSetBuilder.build(chunk.descriptorSet, &result)) {
             LUG_LOG.error("BufferPool::allocate: Can't create descriptor set: {}", result);
             return nullptr;
         }
 
-        chunk->descriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 0, chunk->buffer.get(), 0, _subBufferSize);
+        chunk.descriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 0, &chunk.buffer, 0, _subBufferSize);
+
+        _chunks.push_back(std::move(chunk));
     }
 
     // Init new chunk sub-buffers
     {
-        chunk->subBuffers.resize(_countPerChunk);
-        chunk->subBuffersFree.resize(_countPerChunk);
+        auto& chunk = _chunks.back();
+
+        chunk.subBuffers.resize(_countPerChunk);
+        chunk.subBuffersFree.resize(_countPerChunk);
         uint32_t offset = 0;
 
         for (uint32_t i = 0; i < _countPerChunk; ++i) {
             SubBuffer subBuffer{
-                &chunk->descriptorSet,
-                chunk->buffer.get(),
+                &chunk.descriptorSet,
+                &chunk.buffer,
                 offset,
                 static_cast<uint32_t>(subBufferSizeAligned),
-                chunk.get()
+                &chunk
             };
-            chunk->subBuffers[i] = std::move(subBuffer);
+            chunk.subBuffers[i] = std::move(subBuffer);
 
             // Warning: Do not resize chunk->subBuffers
-            chunk->subBuffersFree[i] = &chunk->subBuffers[i];
+            chunk.subBuffersFree[i] = &chunk.subBuffers[i];
 
-            offset += subBufferSizeAligned;
+            offset += static_cast<uint32_t>(subBufferSizeAligned);
         }
     }
-
-    _chunks.push_back(std::move(chunk));
 
     return allocate();
 }

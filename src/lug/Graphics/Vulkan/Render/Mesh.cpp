@@ -30,9 +30,8 @@ bool Mesh::load() {
         bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
         bufferBuilderInstance.setSize((uint32_t)vertices.size() * sizeof(Vertex));
         bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-        _vertexBuffer = bufferBuilderInstance.build(&result);
 
-        if (result != VK_SUCCESS || !_vertexBuffer) {
+        if (!bufferBuilderInstance.build(_vertexBuffer, &result)) {
             LUG_LOG.error("Mesh::load: Can't create vertex buffer: {}", result);
             return false;
         }
@@ -44,9 +43,8 @@ bool Mesh::load() {
         bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
         bufferBuilderInstance.setSize((uint32_t)indices.size() * sizeof(uint32_t));
         bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
-        _indexBuffer = bufferBuilderInstance.build(&result);
 
-        if (result != VK_SUCCESS || !_indexBuffer) {
+        if (!bufferBuilderInstance.build(_indexBuffer, &result)) {
             LUG_LOG.error("Mesh::load: Can't create index buffer: {}", result);
             return false;
         }
@@ -57,8 +55,8 @@ bool Mesh::load() {
         API::Builder::DeviceMemory deviceMemoryBuilder(*_device);
         deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
-        if (!deviceMemoryBuilder.addBuffer(*_vertexBuffer) ||
-            !deviceMemoryBuilder.addBuffer(*_indexBuffer)) {
+        if (!deviceMemoryBuilder.addBuffer(_vertexBuffer) ||
+            !deviceMemoryBuilder.addBuffer(_indexBuffer)) {
             LUG_LOG.error("Model::load: Can't add buffer to device memory");
             return false;
         }
@@ -68,12 +66,12 @@ bool Mesh::load() {
         }
     }
 
-    if (!_vertexBuffer->updateData(vertices.data(), (uint32_t)vertices.size() * sizeof(Vertex))) {
+    if (!_vertexBuffer.updateData(vertices.data(), (uint32_t)vertices.size() * sizeof(Vertex))) {
         LUG_LOG.error("Model::load: Can't update the vertex buffer");
         return false;
     }
 
-    if (!_indexBuffer->updateData(indices.data(), (uint32_t)indices.size() * sizeof(uint32_t))) {
+    if (!_indexBuffer.updateData(indices.data(), (uint32_t)indices.size() * sizeof(uint32_t))) {
         LUG_LOG.error("Model::load: Can't update the index buffer");
         return false;
     }
@@ -84,13 +82,8 @@ bool Mesh::load() {
 }
 
 void Mesh::destroy() {
-    if (_vertexBuffer) {
-        _vertexBuffer->destroy();
-    }
-
-    if (_indexBuffer) {
-        _indexBuffer->destroy();
-    }
+    _vertexBuffer.destroy();
+    _indexBuffer.destroy();
 }
 
 } // Render
