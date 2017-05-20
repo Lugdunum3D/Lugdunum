@@ -21,7 +21,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/Config.cmake)
 # use sample' macros
 include(${CMAKE_CURRENT_SOURCE_DIR}/../Macros.cmake)
 
-lug_add_sample(base
+lug_add_sample(logging
                SOURCES main.cpp
                DEPENDS system window
 )
