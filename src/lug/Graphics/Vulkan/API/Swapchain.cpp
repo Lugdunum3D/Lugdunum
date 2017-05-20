@@ -85,7 +85,7 @@ bool Swapchain::init() {
         _images.resize(imagesCount);
 
         for (uint8_t i = 0; i < images.size(); ++i) {
-            _images[i] = Image(images[i], _device, {_extent.width, _extent.height}, true);
+            _images[i] = Image(images[i], _device, {_extent.width, _extent.height}, _format.format, true);
         }
     }
 

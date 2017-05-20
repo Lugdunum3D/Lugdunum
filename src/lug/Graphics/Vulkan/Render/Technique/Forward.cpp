@@ -11,6 +11,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Image.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
@@ -376,16 +377,11 @@ void Forward::destroy() {
 }
 
 bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
-    VkFormat imagesFormat = API::Image::findSupportedFormat(
-        _device,
-        {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    API::Builder::Image imageBuilder(*_device);
 
-    if (imagesFormat == VK_FORMAT_UNDEFINED) {
-        LUG_LOG.error("Forward: Can't find supported format for depth buffer");
-        return false;
-    }
+    imageBuilder.setUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    imageBuilder.setPreferedFormats({VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT});
+    imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
     _framesData.resize(imageViews.size());
 
@@ -394,30 +390,27 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
 
     // Create images and add them to API::Builder::DeviceMemory
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
-        std::unique_ptr<API::Image> image = nullptr;
-
         VkExtent3D extent{
             extent.width = imageViews[i].getImage()->getExtent().width,
             extent.height = imageViews[i].getImage()->getExtent().height,
             extent.depth = 1
         };
 
+        imageBuilder.setExtent(extent);
+
         // Create depth buffer image
         {
-            image = API::Image::create(_device, imagesFormat, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-
-            if (!image) {
-                LUG_LOG.error("Forward: Can't create depth buffer image");
+            VkResult result{VK_SUCCESS};
+            if (!imageBuilder.build(_framesData[i].depthBuffer.image, &result)) {
+                LUG_LOG.error("Forward::initDepthBuffers: Can't create depth buffer image: {}", result);
                 return false;
             }
 
-            if (!deviceMemoryBuilder.addImage(*image)) {
+            if (!deviceMemoryBuilder.addImage(_framesData[i].depthBuffer.image)) {
                 LUG_LOG.error("Forward::initDepthBuffers: Can't add image to device memory");
                 return false;
             }
         }
-
-        _framesData[i].depthBuffer.image = std::move(image);
     }
 
     // Initialize depth buffer memory (This memory is common for all depth buffer images)
@@ -433,12 +426,12 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
 
         // Create depth buffer image view
-        VkResult result{VK_SUCCESS};
-        API::Builder::ImageView imageViewBuilder(*_device, *_framesData[i].depthBuffer.image);
+        API::Builder::ImageView imageViewBuilder(*_device, _framesData[i].depthBuffer.image);
 
-        imageViewBuilder.setFormat(imagesFormat);
+        imageViewBuilder.setFormat(_framesData[i].depthBuffer.image.getFormat());
         imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_DEPTH_BIT);
 
+        VkResult result{VK_SUCCESS};
         if (!imageViewBuilder.build(_framesData[i].depthBuffer.imageView, &result)) {
             LUG_LOG.error("Forward::initDepthBuffers: Can't create depth buffer image view: {}", result);
             return false;

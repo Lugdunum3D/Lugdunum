@@ -24,7 +24,7 @@ namespace Technique {
 class LUG_GRAPHICS_API Forward final : public Technique {
 private:
     struct DepthBuffer {
-        std::unique_ptr<API::Image> image;
+        API::Image image;
         API::ImageView imageView;
     };
 

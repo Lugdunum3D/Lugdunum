@@ -36,6 +36,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Builder/DescriptorSet.cpp
     ${SRCROOT}/Vulkan/API/Builder/Device.cpp
     ${SRCROOT}/Vulkan/API/Builder/DeviceMemory.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Image.cpp
     ${SRCROOT}/Vulkan/API/Builder/ImageView.cpp
     ${SRCROOT}/Vulkan/API/Builder/Instance.cpp
     ${SRCROOT}/Vulkan/API/Builder/Swapchain.cpp
@@ -145,6 +146,8 @@ set(INC
     ${INCROOT}/Vulkan/API/Builder/Device.inl
     ${INCROOT}/Vulkan/API/Builder/DeviceMemory.hpp
     ${INCROOT}/Vulkan/API/Builder/DeviceMemory.inl
+    ${INCROOT}/Vulkan/API/Builder/Image.hpp
+    ${INCROOT}/Vulkan/API/Builder/Image.inl
     ${INCROOT}/Vulkan/API/Builder/ImageView.hpp
     ${INCROOT}/Vulkan/API/Builder/ImageView.inl
     ${INCROOT}/Vulkan/API/Builder/Instance.hpp
