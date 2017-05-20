@@ -51,7 +51,7 @@ void DescriptorSet::bind(
         dynamicOffsets);
 }
 
-void DescriptorSet::update(VkDescriptorType descriptorType, uint32_t dstBinding, const Buffer* buffer, uint32_t offset, uint32_t range) {
+void DescriptorSet::update(VkDescriptorType descriptorType, uint32_t dstBinding, const Buffer* buffer, VkDeviceSize offset, VkDeviceSize range) {
     VkDescriptorBufferInfo bufferInfo{
         bufferInfo.buffer = static_cast<VkBuffer>(*buffer),
         bufferInfo.offset = offset,

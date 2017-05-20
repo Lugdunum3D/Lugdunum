@@ -49,7 +49,6 @@ private:
         std::unique_ptr<API::DeviceMemory> bufferMemory;
         API::DescriptorSet descriptorSet;
         std::unique_ptr<API::Buffer> buffer;
-        uint32_t size;
         // Warning: Do not resize chunk.subBuffers
         std::vector<SubBuffer> subBuffers;
         std::vector<SubBuffer*> subBuffersFree;

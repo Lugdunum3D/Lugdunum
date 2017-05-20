@@ -39,18 +39,24 @@ BufferPool::SubBuffer* BufferPool::allocate() {
     }
 
     // No free sub-buffer found, allocate new chunk
-    uint32_t subBufferSizeAligned = API::Buffer::getSizeAligned(_device, _subBufferSize);
+    const auto& alignment = _device->getPhysicalDeviceInfo()->properties.limits.minUniformBufferOffsetAlignment;
+    VkDeviceSize subBufferSizeAligned = _subBufferSize;
+
+    if (subBufferSizeAligned % alignment) {
+        subBufferSizeAligned += alignment - subBufferSizeAligned % alignment;
+    }
 
     std::unique_ptr<BufferPool::Chunk> chunk = std::make_unique<BufferPool::Chunk>();
     {
         VkResult result{VK_SUCCESS};
 
         // Create buffer
-        chunk->size = subBufferSizeAligned * _countPerChunk;
         API::Builder::Buffer bufferBuilderInstance(*_device);
+
         bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
-        bufferBuilderInstance.setSize(chunk->size);
+        bufferBuilderInstance.setSize(subBufferSizeAligned * _countPerChunk);
         bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+
         chunk->buffer = bufferBuilderInstance.build(&result);
         if (result != VK_SUCCESS || !chunk->buffer) {
             LUG_LOG.error("BufferPool::allocate: Can't create buffer: {}", result);
@@ -83,7 +89,7 @@ BufferPool::SubBuffer* BufferPool::allocate() {
             return nullptr;
         }
 
-        chunk->descriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 0, chunk->buffer.get(), 0, subBufferSizeAligned);
+        chunk->descriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 0, chunk->buffer.get(), 0, _subBufferSize);
     }
 
     // Init new chunk sub-buffers
@@ -97,7 +103,7 @@ BufferPool::SubBuffer* BufferPool::allocate() {
                 &chunk->descriptorSet,
                 chunk->buffer.get(),
                 offset,
-                subBufferSizeAligned,
+                static_cast<uint32_t>(subBufferSizeAligned),
                 chunk.get()
             };
             chunk->subBuffers[i] = std::move(subBuffer);

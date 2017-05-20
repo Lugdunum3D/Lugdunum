@@ -38,14 +38,13 @@ public:
     void destroy();
 
     void bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
-    void* mapMemory(VkDeviceSize size);
-    void unmapMemory();
-    void updateData(void *data, uint32_t size);
+
+    bool updateData(void *data, VkDeviceSize size, VkDeviceSize offset = 0);
     void updateDataTransfer(const CommandBuffer* commandBuffer, void *data, uint32_t size, uint32_t offset = 0);
 
-    static uint32_t getSizeAligned(const Device* device, uint32_t size);
-
     const VkMemoryRequirements& getRequirements() const;
+    DeviceMemory* getDeviceMemory() const;
+    VkDeviceSize getDeviceMemoryOffset() const;
 
 private:
     explicit Buffer(VkBuffer Buffer, const Device* device);
@@ -59,6 +58,8 @@ private:
 
     VkMemoryRequirements _requirements{};
 };
+
+#include <lug/Graphics/Vulkan/API/Buffer.inl>
 
 } // API
 } // Vulkan

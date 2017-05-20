@@ -55,7 +55,7 @@ public:
      * @param[in]  offset          The offset in the buffer
      * @param[in]  range           The range of the set
      */
-    void update(VkDescriptorType descriptorType, uint32_t dstBinding, const Buffer* buffer, uint32_t offset, uint32_t range);
+    void update(VkDescriptorType descriptorType, uint32_t dstBinding, const Buffer* buffer, VkDeviceSize offset, VkDeviceSize range);
 
     void destroy();
 

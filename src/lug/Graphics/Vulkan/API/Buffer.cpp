@@ -63,44 +63,21 @@ void Buffer::bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
     vkBindBufferMemory(static_cast<VkDevice>(*_device), static_cast<VkBuffer>(_buffer), static_cast<VkDeviceMemory>(*deviceMemory), memoryOffset);
 }
 
-void* Buffer::mapMemory(VkDeviceSize size) {
-    void* data = nullptr;
+bool Buffer::updateData(void* data, VkDeviceSize size, VkDeviceSize offset) {
+    void* gpuData = _deviceMemory->mapBuffer(*this, size, offset);
 
-    vkMapMemory(static_cast<VkDevice>(*_device), static_cast<VkDeviceMemory>(*_deviceMemory), _deviceMemoryOffset, size, 0, &data);
-
-    return data;
-}
-
-void Buffer::unmapMemory() {
-    vkUnmapMemory(static_cast<VkDevice>(*_device), static_cast<VkDeviceMemory>(*_deviceMemory));
-}
-
-void Buffer::updateData(void* data, uint32_t size) {
-    void* gpuData = mapMemory(size);
+    if (!gpuData) {
+        return false;
+    }
 
     memcpy(gpuData, data, size);
-    unmapMemory();
+    _deviceMemory->unmap();
+
+    return true;
 }
 
 void Buffer::updateDataTransfer(const CommandBuffer* commandBuffer, void* data, uint32_t size, uint32_t offset) {
     vkCmdUpdateBuffer(static_cast<VkCommandBuffer>(*commandBuffer), _buffer, offset, size, data);
-}
-
-const VkMemoryRequirements& Buffer::getRequirements() const {
-    return _requirements;
-}
-
-uint32_t Buffer::getSizeAligned(const Device* device, uint32_t size) {
-    uint32_t alignment = (uint32_t)device->getPhysicalDeviceInfo()->properties.limits.minUniformBufferOffsetAlignment;
-    uint32_t sizeAligned = 0;
-
-    if (size % alignment != 0) {
-        sizeAligned = static_cast<uint32_t>(size + alignment - (size % alignment));
-    } else {
-        sizeAligned = static_cast<uint32_t>(size);
-    }
-
-    return sizeAligned;
 }
 
 } // API

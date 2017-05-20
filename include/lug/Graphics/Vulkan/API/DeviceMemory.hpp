@@ -14,6 +14,8 @@ namespace Builder {
 };
 
 class Device;
+class Buffer;
+class Image;
 
 class LUG_GRAPHICS_API DeviceMemory {
     friend class Builder::DeviceMemory;
@@ -35,13 +37,24 @@ public:
 
     void destroy();
 
+    void* map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const;
+    void* mapBuffer(const API::Buffer& buffer, VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const;
+    void* mapImage(const API::Image& image, VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0) const;
+
+    void unmap() const;
+
+    VkDeviceSize getSize() const;
+
 private:
-    explicit DeviceMemory(VkDeviceMemory deviceMemory, const Device* device);
+    explicit DeviceMemory(VkDeviceMemory deviceMemory, const Device* device, VkDeviceSize size);
 
 private:
     VkDeviceMemory _deviceMemory{VK_NULL_HANDLE};
     const Device* _device{nullptr};
+    VkDeviceSize _size{0};
 };
+
+#include <lug/Graphics/Vulkan/API/DeviceMemory.inl>
 
 } // API
 } // Vulkan

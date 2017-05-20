@@ -148,6 +148,7 @@ set(INC
     ${INCROOT}/Vulkan/API/Builder/Swapchain.inl
 
     ${INCROOT}/Vulkan/API/Buffer.hpp
+    ${INCROOT}/Vulkan/API/Buffer.inl
     ${INCROOT}/Vulkan/API/CommandBuffer.hpp
     ${INCROOT}/Vulkan/API/CommandPool.hpp
     ${INCROOT}/Vulkan/API/CommandPool.inl
@@ -157,6 +158,7 @@ set(INC
     ${INCROOT}/Vulkan/API/Device.hpp
     ${INCROOT}/Vulkan/API/Device.inl
     ${INCROOT}/Vulkan/API/DeviceMemory.hpp
+    ${INCROOT}/Vulkan/API/DeviceMemory.inl
     ${INCROOT}/Vulkan/API/Fence.hpp
     ${INCROOT}/Vulkan/API/Framebuffer.hpp
     ${INCROOT}/Vulkan/API/Image.hpp

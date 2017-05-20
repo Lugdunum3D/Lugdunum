@@ -60,7 +60,7 @@ bool DeviceMemory::build(API::DeviceMemory& deviceMemory, VkResult* returnResult
         return false;
     }
 
-    deviceMemory = API::DeviceMemory(vkDeviceMemory, &_device);
+    deviceMemory = API::DeviceMemory(vkDeviceMemory, &_device, size);
 
     // Bind all the buffers into the memory
     for (uint32_t i = 0; i < _buffers.size(); ++i) {
