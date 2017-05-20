@@ -495,22 +495,21 @@ bool WindowImpl::pollEvent(Event& event) {
             break;
 
         case MotionNotify:
-            event.type              = Event::Type::MouseMoved;
-            event.mouse.code       = buttonCodeToLugButton(xEvent.xbutton.button);
-            event.mouse.coord.x    = xEvent.xbutton.x;
-            event.mouse.coord.y    = xEvent.xbutton.y;
+            event.type = Event::Type::MouseMoved;
+            event.mouse.coord.x = xEvent.xbutton.x;
+            event.mouse.coord.y = xEvent.xbutton.y;
             break;
 
         case LeaveNotify:
             event.type = Event::Type::MouseLeave;
-            event.mouse.coord.x    = xEvent.xbutton.x;
-            event.mouse.coord.y    = xEvent.xbutton.y;
+            event.mouse.coord.x = xEvent.xbutton.x;
+            event.mouse.coord.y = xEvent.xbutton.y;
             break;
 
         case EnterNotify:
             event.type = Event::Type::MouseEnter;
-            event.mouse.coord.x    = xEvent.xbutton.x;
-            event.mouse.coord.y    = xEvent.xbutton.y;
+            event.mouse.coord.x = xEvent.xbutton.x;
+            event.mouse.coord.y = xEvent.xbutton.y;
             break;
 
         default:
