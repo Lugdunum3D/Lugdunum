@@ -3,7 +3,7 @@ inline void Logger::log(std::string source, Level lvl, const T& msg) {
     try {
         if (getLoggingAllowed(source, lvl)) {
             priv::Message logMsg(_name, lvl);
-            logMsg.raw.write("{}", msg);
+            logMsg.raw.write(source + ": {}", msg);
             handle(logMsg);
         }
     } catch (const std::exception& ex) {
@@ -16,7 +16,8 @@ inline void Logger::log(std::string source, Level lvl, const T& fmt, Args&&... a
     try {
         if (getLoggingAllowed(source, lvl)) {
             priv::Message logMsg(_name, lvl);
-            logMsg.raw.write(fmt, std::forward<Args>(args)...);
+            std::string wrt = fmt::format(source + ": " + fmt::format(fmt, std::forward<Args>(args)...));
+            logMsg.raw.write(wrt);
             handle(logMsg);
         }
     } catch (const std::exception& ex) {
@@ -55,6 +56,9 @@ inline void Logger::assrt(std::string source, const T& fmt, Args&&... args) {
 }
 
 inline bool Logger::getLoggingAllowed(std::string source, Level level) {
+    if (std::find(this->_srcLevels[source].begin(), this->_srcLevels[source].end(), Level::Off) != this->_srcLevels[source].end()) {
+        return false;
+    }
     if (std::find(this->_srcLevels[source].begin(), this->_srcLevels[source].end(), level) != this->_srcLevels[source].end()) {
         return false;
     }

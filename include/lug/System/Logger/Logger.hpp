@@ -60,6 +60,8 @@ public:
     template<typename T, typename... Args>
     void assrt(std::string source, const T& fmt, Args&&... args);
 
+    void turnOff(std::string source);
+    void turnOn(std::string source);
     void muteLevel(std::string source, Level level);
     void unmuteLevel(std::string source, Level level);
     bool getLoggingAllowed(std::string source, Level level);

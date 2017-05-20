@@ -306,7 +306,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
     VkResult result = vkCreateGraphicsPipelines(static_cast<VkDevice>(*device), VK_NULL_HANDLE, 1, &createInfo, nullptr, &pipeline);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create graphics pipeline: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't create graphics pipeline: {}", result);
         return nullptr;
     }
 

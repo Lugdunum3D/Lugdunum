@@ -151,7 +151,7 @@ std::unique_ptr<RenderPass> RenderPass::create(const Device* device, VkFormat co
     VkResult result = vkCreateRenderPass(static_cast<VkDevice>(*device), &createInfo, nullptr, &renderPass);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create render pass: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't create render pass: {}", result);
         return nullptr;
     }
 

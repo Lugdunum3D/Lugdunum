@@ -51,7 +51,7 @@ std::unique_ptr<DescriptorSetLayout> DescriptorSetLayout::create(const Device* d
     VkResult result = vkCreateDescriptorSetLayout(static_cast<VkDevice>(*device), &createInfo, nullptr, &descriptorSetLayout);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create descriptor set layout: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't create descriptor set layout: {}", result);
         return nullptr;
     }
 

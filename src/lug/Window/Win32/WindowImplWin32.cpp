@@ -389,7 +389,7 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
                 _parent->_mode.width = static_cast<uint16_t>(rect.right - rect.left);
                 _parent->_mode.height = static_cast<uint16_t>(rect.bottom - rect.top);
             } else {
-                LUG_LOG.error("WindowImpl::Win32::processWindowEvents Can't get window rect");
+                LUG_LOG.error("WindowImpl::Win32::processWindowEvents", "Can't get window rect");
             }
             break;
 

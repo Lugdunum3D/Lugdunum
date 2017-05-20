@@ -47,6 +47,14 @@ void Logger::handle(priv::Message& msg) {
     }
 }
 
+void Logger::turnOn(std::string source) {
+    unmuteLevel(source, Level::Off);
+}
+
+void Logger::turnOff(std::string source) {
+    muteLevel(source, Level::Off);
+}
+
 void Logger::muteLevel(std::string source, Level level) {
     if (std::find(this->_srcLevels[source].begin(), this->_srcLevels[source].end(), level) == this->_srcLevels[source].end()) {
         this->_srcLevels[source].push_back(level);

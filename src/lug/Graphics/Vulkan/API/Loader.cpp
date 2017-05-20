@@ -36,7 +36,7 @@ bool Loader::loadCoreFunctions() {
     {                                                                               \
         name = reinterpret_cast<PFN_##name>(vkGetInstanceProcAddr(nullptr, #name)); \
         if (!name) {                                                                \
-            LUG_LOG.error("Vulkan: Can't load symbol {}", #name);                   \
+            LUG_LOG.error("Vulkan", "Can't load symbol {}", #name);                   \
             return false;                                                           \
         }                                                                           \
     }
@@ -53,7 +53,7 @@ bool Loader::loadInstanceFunctions(const Instance& instance) {
     {                                                             \
         name = instance.getProcAddr<PFN_##name>(#name);           \
         if (!name) {                                              \
-            LUG_LOG.error("Vulkan: Can't load symbol {}", #name); \
+            LUG_LOG.error("Vulkan", "Can't load symbol {}", #name); \
             return false;                                         \
         }                                                         \
     }
@@ -70,7 +70,7 @@ bool Loader::loadDeviceFunctions(const Device& device) {
     {                                                             \
         name = device.getProcAddr<PFN_##name>(#name);             \
         if (!name) {                                              \
-            LUG_LOG.error("Vulkan: Can't load symbol {}", #name); \
+            LUG_LOG.error("Vulkan", "Can't load symbol {}", #name); \
             return false;                                         \
         }                                                         \
     }

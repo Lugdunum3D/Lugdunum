@@ -50,7 +50,7 @@ std::unique_ptr<DeviceMemory> DeviceMemory::allocate(const Device* device, VkDev
     VkResult result = vkAllocateMemory(static_cast<VkDevice>(*device), &allocateInfo, nullptr, &memory);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't allocate device memory: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't allocate device memory: {}", result);
         return nullptr;
     }
 

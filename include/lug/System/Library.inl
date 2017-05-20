@@ -36,9 +36,9 @@ inline Handle open(const char* name) {
 
     if (!handle) {
 #if defined(LUG_SYSTEM_WINDOWS)
-        LUG_LOG.warn("Library: Can't load the library: {}: {}", name, getLastErrorWindows());
+        LUG_LOG.warn("Library", "Can't load the library: {}: {}", name, getLastErrorWindows());
 #else
-        LUG_LOG.warn("Library: Can't load the library: {}", dlerror());
+        LUG_LOG.warn("Library", "Can't load the library: {}", dlerror());
 #endif
     }
 
@@ -69,9 +69,9 @@ inline Function sym(Handle handle, const char *name) {
 
     if (!sym) {
 #if defined(LUG_SYSTEM_WINDOWS)
-        LUG_LOG.warn("Library: Can't load the symbol {}: {}", name, getLastErrorWindows());
+        LUG_LOG.warn("Library", "Can't load the symbol {}: {}", name, getLastErrorWindows());
 #else
-        LUG_LOG.warn("Library: Can't load the symbol {}: {}", name, dlerror());
+        LUG_LOG.warn("Library", "Can't load the symbol {}: {}", name, dlerror());
 #endif
     }
 

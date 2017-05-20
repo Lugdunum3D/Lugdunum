@@ -17,7 +17,7 @@ Mesh::~Mesh() {
 
 bool Mesh::load() {
     if (_loaded) {
-        LUG_LOG.warn("RendererVulkan: Attempt to load a mesh that is already loaded");
+        LUG_LOG.warn("RendererVulkan", "Attempt to load a mesh that is already loaded");
         return true;
     }
 

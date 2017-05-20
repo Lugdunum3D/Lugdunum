@@ -69,7 +69,7 @@ bool Queue::submit(
     VkResult result = vkQueueSubmit(_queue, 1, &submitInfo, fence);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't enumerate instance layers: {}", result);
         return false;
     }
 
@@ -80,7 +80,7 @@ bool Queue::waitIdle() const {
     VkResult result = vkQueueWaitIdle(_queue);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't enumerate instance layers: {}", result);
         return false;
     }
 

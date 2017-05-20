@@ -41,7 +41,7 @@ bool Fence::reset()
     VkResult result = vkResetFences(static_cast<VkDevice>(*_device), 1, &_fence);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererWindow: Can't initialize surface: {}", result);
+        LUG_LOG.error("RendererWindow", "Can't initialize surface: {}", result);
         return false;
     }
 
@@ -53,7 +53,7 @@ bool Fence::wait() const
     VkResult result = vkWaitForFences(static_cast<VkDevice>(*_device), 1, &_fence, VK_TRUE, UINT64_MAX);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererWindow: Can't initialize surface: {}", result);
+        LUG_LOG.error("RendererWindow", "Can't initialize surface: {}", result);
         return false;
     }
 

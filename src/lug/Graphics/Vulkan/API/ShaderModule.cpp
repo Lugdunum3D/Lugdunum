@@ -50,14 +50,14 @@ std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, cons
     AAsset* asset = AAssetManager_open((lug::Window::priv::WindowImpl::activity)->assetManager, file.c_str(), AASSET_MODE_STREAMING);
 
     if (!asset) {
-        LUG_LOG.error("RendererVulkan: Can't open Android asset \"{}\"", file);
+        LUG_LOG.error("RendererVulkan", "Can't open Android asset \"{}\"", file);
         return nullptr;
     }
 
     size_t shaderCodeSize = AAsset_getLength(asset);
 
     if (shaderCodeSize <= 0) {
-        LUG_LOG.error("RendererVulkan: Android asset \"{}\" is empty", file);
+        LUG_LOG.error("RendererVulkan", "Android asset \"{}\" is empty", file);
         return nullptr;
     }
 
@@ -70,7 +70,7 @@ std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, cons
 
     if (!shaderCode.good()) {
         // TODO: use errno to print the correct error
-        LUG_LOG.error("RendererVulkan: Can't open file \"{}\"", file);
+        LUG_LOG.error("RendererVulkan", "Can't open file \"{}\"", file);
         return nullptr;
     }
 
@@ -96,7 +96,7 @@ std::unique_ptr<ShaderModule> ShaderModule::create(const std::string& file, cons
     VkResult result = vkCreateShaderModule(static_cast<VkDevice>(*device), &createInfo, nullptr, &shaderModule);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create shader module \"{}\": {}", file, result);
+        LUG_LOG.error("RendererVulkan", "Can't create shader module \"{}\": {}", file, result);
         return nullptr;
     }
 

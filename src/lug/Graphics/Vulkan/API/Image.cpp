@@ -153,7 +153,7 @@ std::unique_ptr<Image> Image::create(
     VkResult result = vkCreateImage(static_cast<VkDevice>(*device), &createInfo, nullptr, &imageHandle);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create image: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't create image: {}", result);
         return nullptr;
     }
 
@@ -167,7 +167,7 @@ VkFormat Image::findSupportedFormat(const Device* device, const std::vector<VkFo
         }
     }
 
-    LUG_LOG.error("Image: Can't find supported format format given features");
+    LUG_LOG.error("Image", "Can't find supported format format given features");
     return VK_FORMAT_UNDEFINED;
 }
 
@@ -175,7 +175,7 @@ bool Image::isFormatSupported(const Device* device, VkFormat format, VkImageTili
     const PhysicalDeviceInfo* physicalDeviceInfo = device->getPhysicalDeviceInfo();
 
     if (physicalDeviceInfo->formatProperties.find(format) == physicalDeviceInfo->formatProperties.end()) {
-        LUG_LOG.warn("Image::isFormatSupported: the format does not exists in physicalDeviceInfo->formatProperties");
+        LUG_LOG.warn("Image::isFormatSupported", "the format does not exists in physicalDeviceInfo->formatProperties");
         return false;
     }
 

@@ -31,7 +31,7 @@ void Queue::addMovableObject(Scene::MovableObject* object) {
             addMovableObject(meshInstance.get());
         }
     } else if (object->getType() != Scene::MovableObject::Type::Camera) {
-        LUG_LOG.warn("Queue::addMovableObject: Unknow object type");
+        LUG_LOG.warn("Queue::addMovableObject", "Unknow object type");
     }
 }
 
