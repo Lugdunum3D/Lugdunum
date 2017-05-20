@@ -82,7 +82,11 @@ bool Model::load() {
             offset += static_cast<uint32_t>(mesh->vertices.size());
         }
 
-        _vertexBuffer->updateData(vertices, verticesNb * sizeof(Mesh::Vertex));
+        if (!_vertexBuffer->updateData(vertices, verticesNb * sizeof(Mesh::Vertex))) {
+            LUG_LOG.error("Model::load: Can't update the vertex buffer");
+            return false;
+        }
+
         delete[] vertices;
     }
 
@@ -96,7 +100,11 @@ bool Model::load() {
             offset += static_cast<uint32_t>(mesh->indices.size());
         }
 
-        _indexBuffer->updateData(indices, indicesNb * sizeof(uint32_t));
+        if (!_indexBuffer->updateData(indices, indicesNb * sizeof(uint32_t))) {
+            LUG_LOG.error("Model::load: Can't update the vertex buffer");
+            return false;
+        }
+
         delete[] indices;
     }
 

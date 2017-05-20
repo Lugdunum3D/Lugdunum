@@ -68,8 +68,15 @@ bool Mesh::load() {
         }
     }
 
-    _vertexBuffer->updateData(vertices.data(), (uint32_t)vertices.size() * sizeof(Vertex));
-    _indexBuffer->updateData(indices.data(), (uint32_t)indices.size() * sizeof(uint32_t));
+    if (!_vertexBuffer->updateData(vertices.data(), (uint32_t)vertices.size() * sizeof(Vertex))) {
+        LUG_LOG.error("Model::load: Can't update the vertex buffer");
+        return false;
+    }
+
+    if (!_indexBuffer->updateData(indices.data(), (uint32_t)indices.size() * sizeof(uint32_t))) {
+        LUG_LOG.error("Model::load: Can't update the index buffer");
+        return false;
+    }
 
     _loaded = true;
 
