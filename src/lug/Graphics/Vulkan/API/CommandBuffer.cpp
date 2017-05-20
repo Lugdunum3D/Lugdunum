@@ -34,7 +34,7 @@ CommandBuffer::~CommandBuffer() {
     destroy();
 }
 
-bool CommandBuffer::begin(VkCommandBufferUsageFlags flags) {
+bool CommandBuffer::begin(VkCommandBufferUsageFlags flags) const {
     VkCommandBufferBeginInfo beginInfo{
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         beginInfo.pNext = nullptr,
@@ -52,7 +52,7 @@ bool CommandBuffer::begin(VkCommandBufferUsageFlags flags) {
     return true;
 }
 
-bool CommandBuffer::end() {
+bool CommandBuffer::end() const {
     VkResult result = vkEndCommandBuffer(_commandBuffer);
 
     if (result != VK_SUCCESS) {
@@ -63,7 +63,7 @@ bool CommandBuffer::end() {
     return true;
 }
 
-bool CommandBuffer::reset(bool releaseRessources) {
+bool CommandBuffer::reset(bool releaseRessources) const {
     VkResult result = vkResetCommandBuffer(_commandBuffer, releaseRessources ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT : 0);
 
     if (result != VK_SUCCESS) {

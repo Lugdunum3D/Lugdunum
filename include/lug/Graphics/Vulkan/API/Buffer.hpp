@@ -40,7 +40,6 @@ public:
     void bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
 
     bool updateData(void *data, VkDeviceSize size, VkDeviceSize offset = 0);
-    void updateDataTransfer(const CommandBuffer* commandBuffer, void *data, uint32_t size, uint32_t offset = 0);
 
     const VkMemoryRequirements& getRequirements() const;
     DeviceMemory* getDeviceMemory() const;

@@ -34,19 +34,6 @@ public:
     }
 
     /**
-     * @brief      Bind the descriptor set
-     *
-     * @param[in]  pipelineLayout  The pipeline layout to bind the descriptor set to
-     * @param[in]  commandBuffer   The command buffer to submit the command to
-     * @param[in]  setNb           The number of the set
-     */
-    void bind(const PipelineLayout* pipelineLayout,
-                const CommandBuffer* commandBuffer,
-                uint32_t setNb,
-                uint32_t dynamicOffsetsCount = 0,
-                const uint32_t* dynamicOffsets = nullptr);
-
-    /**
      * @brief      Update the descriptor set
      *
      * @param[in]  descriptorType  The descriptor type

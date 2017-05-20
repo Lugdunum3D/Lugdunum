@@ -76,10 +76,6 @@ bool Buffer::updateData(void* data, VkDeviceSize size, VkDeviceSize offset) {
     return true;
 }
 
-void Buffer::updateDataTransfer(const CommandBuffer* commandBuffer, void* data, uint32_t size, uint32_t offset) {
-    vkCmdUpdateBuffer(static_cast<VkCommandBuffer>(*commandBuffer), _buffer, offset, size, data);
-}
-
 } // API
 } // Vulkan
 } // Graphics

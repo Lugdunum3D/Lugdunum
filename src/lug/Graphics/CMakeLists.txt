@@ -40,6 +40,8 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Builder/Swapchain.cpp
 
     ${SRCROOT}/Vulkan/API/Buffer.cpp
+    ${SRCROOT}/Vulkan/API/CommandBuffer/Buffer.cpp
+    ${SRCROOT}/Vulkan/API/CommandBuffer/DescriptorSet.cpp
     ${SRCROOT}/Vulkan/API/CommandBuffer.cpp
     ${SRCROOT}/Vulkan/API/CommandPool.cpp
     ${SRCROOT}/Vulkan/API/DescriptorPool.cpp
@@ -149,6 +151,8 @@ set(INC
 
     ${INCROOT}/Vulkan/API/Buffer.hpp
     ${INCROOT}/Vulkan/API/Buffer.inl
+    ${INCROOT}/Vulkan/API/CommandBuffer/Buffer.inl
+    ${INCROOT}/Vulkan/API/CommandBuffer/DescriptorSet.inl
     ${INCROOT}/Vulkan/API/CommandBuffer.hpp
     ${INCROOT}/Vulkan/API/CommandPool.hpp
     ${INCROOT}/Vulkan/API/CommandPool.inl

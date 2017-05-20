@@ -98,7 +98,7 @@ bool Forward::render(
                 camera->getProjectionMatrix()
             };
 
-            cameraBuffer->buffer->updateDataTransfer(&cmdBuffer, cameraData, sizeof(cameraData), cameraBuffer->offset);
+            cmdBuffer.updateBuffer(*cameraBuffer->buffer, cameraData, sizeof(cameraData), cameraBuffer->offset);
             camera->isDirty(false);
         }
     }
@@ -127,7 +127,7 @@ bool Forward::render(
                 void* lightData;
 
                 lightData = light->getData(lightSize);
-                lightBuffer->buffer->updateDataTransfer(&cmdBuffer, lightData, lightSize, lightBuffer->offset);
+                cmdBuffer.updateBuffer(*lightBuffer->buffer, lightData, lightSize, lightBuffer->offset);
             }
         }
     }
@@ -143,7 +143,15 @@ bool Forward::render(
             {viewport.extent.width, viewport.extent.height},
             {viewport.offset.x, viewport.offset.y});
 
-        cameraBuffer->descriptorSet->bind(_pipelines[Light::Light::Type::Directional]->getLayout(), &cmdBuffer, 0, 1, &cameraBuffer->offset);
+        API::CommandBuffer::CmdBindDescriptors cameraBind {
+            /* cameraBind.pipelineLayout */ *_pipelines[Light::Light::Type::Directional]->getLayout(),
+            cameraBind.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+            cameraBind.firstSet = 0,
+            /* cameraBind.descriptorSets */ {cameraBuffer->descriptorSet},
+            /* cameraBind.dynamicOffsets */ {cameraBuffer->offset},
+        };
+
+        cmdBuffer.bindDescriptorSets(std::move(cameraBind));
 
         // Blend constants are used as dst blend factor
         // We set them to 0 so that there is no blending
@@ -170,7 +178,15 @@ bool Forward::render(
             lightPipeline->bind(&cmdBuffer);
 
             BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
-            lightBuffer->descriptorSet->bind(_pipelines[Light::Light::Type::Directional]->getLayout(), &cmdBuffer, 1, 1, &lightBuffer->offset);
+
+            API::CommandBuffer::CmdBindDescriptors lightBind {
+                /* cameraBind.pipelineLayout */ *_pipelines[Light::Light::Type::Directional]->getLayout(),
+                lightBind.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+                lightBind.firstSet = 1,
+                /* lightBind.descriptorSets */ {lightBuffer->descriptorSet},
+                /* lightBind.dynamicOffsets */ {lightBuffer->offset},
+            };
+            cmdBuffer.bindDescriptorSets(std::move(lightBind));
 
             for (std::size_t j = 0; j < renderQueue.getMeshsNb(); ++j) {
                 MeshInstance* meshInstance = renderQueue.getMeshs()[j];

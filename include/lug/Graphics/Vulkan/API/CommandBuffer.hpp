@@ -13,6 +13,10 @@ namespace Builder {
 class CommandBuffer;
 } // Builder
 
+class Buffer;
+class DescriptorSet;
+class PipelineLayout;
+
 class LUG_GRAPHICS_API CommandBuffer {
     friend class Builder::CommandBuffer;
 
@@ -34,10 +38,13 @@ public:
     const CommandPool* getCommandPool() const;
 
     // Add begin, end, etc
-    bool begin(VkCommandBufferUsageFlags flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-    bool end();
+    bool begin(VkCommandBufferUsageFlags flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT) const;
+    bool end() const;
 
-    bool reset(bool releaseRessources = false);
+    #include <lug/Graphics/Vulkan/API/CommandBuffer/Buffer.inl>
+    #include <lug/Graphics/Vulkan/API/CommandBuffer/DescriptorSet.inl>
+
+    bool reset(bool releaseRessources = false) const;
     void destroy();
 
 private:
