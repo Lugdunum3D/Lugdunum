@@ -1,7 +1,7 @@
 template<typename T>
 inline void Logger::log(std::string source, Level lvl, const T& msg) {
     try {
-        if (getLoggingAllowed(source, lvl)) {
+        if (shouldLog(source, lvl)) {
             priv::Message logMsg(_name, lvl);
             logMsg.raw.write(source + ": {}", msg);
             handle(logMsg);
@@ -14,7 +14,7 @@ inline void Logger::log(std::string source, Level lvl, const T& msg) {
 template<typename... Args, typename T>
 inline void Logger::log(std::string source, Level lvl, const T& fmt, Args&&... args) {
     try {
-        if (getLoggingAllowed(source, lvl)) {
+        if (shouldLog(source, lvl)) {
             priv::Message logMsg(_name, lvl);
             std::string wrt = fmt::format(source + ": " + fmt::format(fmt, std::forward<Args>(args)...));
             logMsg.raw.write(wrt);
@@ -55,7 +55,8 @@ inline void Logger::assrt(std::string source, const T& fmt, Args&&... args) {
     log(source, Level::Assert, fmt, std::forward<Args>(args)...);
 }
 
-inline bool Logger::getLoggingAllowed(std::string source, Level level) {
+inline bool Logger::shouldLog(std::string source, Level level) {
+    #if LOG_MODE == 0
     if (std::find(this->_srcLevels[source].begin(), this->_srcLevels[source].end(), Level::Off) != this->_srcLevels[source].end()) {
         return false;
     }
@@ -63,6 +64,12 @@ inline bool Logger::getLoggingAllowed(std::string source, Level level) {
         return false;
     }
     return true;
+    #else
+    if (_srcLevel[source] >= level) {
+        return true;
+    }
+    return false;
+    #endif
 }
 
 

@@ -47,6 +47,7 @@ void Logger::handle(priv::Message& msg) {
     }
 }
 
+#if LOG_MODE == 0
 void Logger::turnOn(std::string source) {
     unmuteLevel(source, Level::Off);
 }
@@ -67,6 +68,11 @@ void Logger::unmuteLevel(std::string source, Level level) {
         this->_srcLevels[source].erase(find);
     }
 }
+#else
+void Logger::setSourceLevel(std::string source, Level level) {
+    _srcLevel[source] = level;
+}
+#endif
 
 void Logger::flush() {
     for (auto& handler : _handlers) {

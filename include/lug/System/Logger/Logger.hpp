@@ -12,6 +12,8 @@
 #include <lug/System/Logger/LoggingFacility.hpp>
 #include <lug/System/Logger/Message.hpp>
 
+#define LOG_MODE 0
+
 namespace lug {
 namespace System {
 namespace Logger {
@@ -60,11 +62,16 @@ public:
     template<typename T, typename... Args>
     void assrt(std::string source, const T& fmt, Args&&... args);
 
+    #if LOG_MODE == 0
     void turnOff(std::string source);
     void turnOn(std::string source);
     void muteLevel(std::string source, Level level);
     void unmuteLevel(std::string source, Level level);
-    bool getLoggingAllowed(std::string source, Level level);
+    #else
+    void setSourceLevel(std::string source)
+    #endif
+    bool shouldLog(std::string source, Level level);
+
 
     const std::string& getName() const;
     void handle(priv::Message& msg);
@@ -77,7 +84,11 @@ protected:
     std::set<Handler*> _handlers;
 
 private:
+    #if LOG_MODE == 0
     std::unordered_map<std::string, std::vector<Level>> _srcLevels;
+    #else
+    std::unordered_map<std::string, Level> _srcLevel;
+    #endif
 };
 
 #include <lug/System/Logger/Logger.inl>
