@@ -16,7 +16,7 @@ bool View::init(
     const API::Device* device,
     const API::Queue* presentQueue,
     API::DescriptorPool* descriptorPool,
-    const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
+    const std::vector<API::ImageView>& imageViews) {
     ::lug::Graphics::Render::View::init(initInfo);
 
     if (_info.renderTechniqueType == lug::Graphics::Render::Technique::Type::Forward) {

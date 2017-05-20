@@ -25,7 +25,7 @@ class LUG_GRAPHICS_API Forward final : public Technique {
 private:
     struct DepthBuffer {
         std::unique_ptr<API::Image> image;
-        std::unique_ptr<API::ImageView> imageView;
+        API::ImageView imageView;
     };
 
     struct FrameData {
@@ -51,11 +51,11 @@ public:
     ~Forward() = default;
 
     bool render(const ::lug::Graphics::Render::Queue& renderQueue, const API::Semaphore& imageReadySemaphore, const API::Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) override final;
-    bool init(API::DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<API::ImageView>>& imageViews) override final;
+    bool init(API::DescriptorPool* descriptorPool, const std::vector<API::ImageView>& imageViews) override final;
     void destroy() override final;
 
-    bool initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) override final;
-    bool initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) override final;
+    bool initDepthBuffers(const std::vector<API::ImageView>& imageViews) override final;
+    bool initFramebuffers(const std::vector<API::ImageView>& imageViews) override final;
 
 private:
     std::unique_ptr<BufferPool> _cameraPool;

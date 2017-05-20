@@ -39,11 +39,11 @@ public:
     virtual ~Technique() = default;
 
     virtual bool render(const ::lug::Graphics::Render::Queue& renderQueue, const API::Semaphore& imageReadySemaphore, const API::Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) = 0;
-    virtual bool init(API::DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<API::ImageView>>& imageViews) = 0;
+    virtual bool init(API::DescriptorPool* descriptorPool, const std::vector<API::ImageView>& imageViews) = 0;
     virtual void destroy() = 0;
 
-    virtual bool initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) = 0;
-    virtual bool initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) = 0;
+    virtual bool initDepthBuffers(const std::vector<API::ImageView>& imageViews) = 0;
+    virtual bool initFramebuffers(const std::vector<API::ImageView>& imageViews) = 0;
 
 protected:
     const Renderer& _renderer;

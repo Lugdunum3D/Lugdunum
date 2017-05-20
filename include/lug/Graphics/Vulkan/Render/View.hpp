@@ -33,7 +33,7 @@ public:
                 const API::Device* device,
                 const API::Queue* presentQueue,
                 API::DescriptorPool* descriptorPool,
-                const std::vector<std::unique_ptr<API::ImageView>>& imageViews);
+                const std::vector<API::ImageView>& imageViews);
 
     bool render(const API::Semaphore& imageReadySemaphore, uint32_t currentImageIndex);
     void destroy() override final;

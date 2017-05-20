@@ -10,7 +10,7 @@ inline std::vector<Image>& Swapchain::getImages() {
     return _images;
 }
 
-inline const std::vector<std::unique_ptr<ImageView>>& Swapchain::getImagesViews() const {
+inline const std::vector<ImageView>& Swapchain::getImagesViews() const {
     return _imagesViews;
 }
 

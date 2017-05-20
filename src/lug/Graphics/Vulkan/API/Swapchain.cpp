@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Vulkan/API/RenderPass.hpp>
@@ -58,10 +59,10 @@ void Swapchain::destroy() {
 }
 
 bool Swapchain::init() {
-    VkResult result{VK_SUCCESS};
 
     // Get swapchain images
     {
+        VkResult result{VK_SUCCESS};
         uint32_t imagesCount = 0;
         std::vector<VkImage> images;
 
@@ -93,14 +94,15 @@ bool Swapchain::init() {
         _imagesViews.resize(_images.size());
 
         for (uint8_t i = 0; i < _images.size(); ++i) {
-            std::unique_ptr<ImageView> imageView = ImageView::create(_device, &_images[i], _format.format);
+            VkResult result{VK_SUCCESS};
+            API::Builder::ImageView imageViewBuilder(*_device, _images[i]);
 
-            if (!imageView) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain image view");
+            imageViewBuilder.setFormat(_format.format);
+
+            if (!imageViewBuilder.build(_imagesViews[i], &result)) {
+                LUG_LOG.error("Forward::initDepthBuffers: Can't create swapchain image view: {}", result);
                 return false;
             }
-
-            _imagesViews[i] = std::move(imageView);
         }
     }
 

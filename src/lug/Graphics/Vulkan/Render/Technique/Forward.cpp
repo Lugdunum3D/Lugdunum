@@ -11,6 +11,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
@@ -256,7 +257,7 @@ bool Forward::render(
         );
 }
 
-bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
+bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::ImageView>& imageViews) {
     auto colorFormat = _renderView->getFormat().format;
 
     _pipelines[Light::Light::Type::Directional] = API::Pipeline::createGraphicsPipeline(
@@ -374,7 +375,7 @@ void Forward::destroy() {
     _lightsPool.reset();
 }
 
-bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
+bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
     VkFormat imagesFormat = API::Image::findSupportedFormat(
         _device,
         {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
@@ -396,8 +397,8 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
         std::unique_ptr<API::Image> image = nullptr;
 
         VkExtent3D extent{
-            extent.width = imageViews[i]->getExtent().width,
-            extent.height = imageViews[i]->getExtent().height,
+            extent.width = imageViews[i].getImage()->getExtent().width,
+            extent.height = imageViews[i].getImage()->getExtent().height,
             extent.depth = 1
         };
 
@@ -430,29 +431,24 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
 
     // Create images views
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
-        std::unique_ptr<API::ImageView> imageView = nullptr;
 
         // Create depth buffer image view
-        {
-            imageView = API::ImageView::create(
-                _device,
-                _framesData[i].depthBuffer.image.get(),
-                imagesFormat,
-                VK_IMAGE_ASPECT_DEPTH_BIT);
+        VkResult result{VK_SUCCESS};
+        API::Builder::ImageView imageViewBuilder(*_device, *_framesData[i].depthBuffer.image);
 
-            if (!imageView) {
-                LUG_LOG.error("Forward: Can't create depth buffer image view");
-                return false;
-            }
+        imageViewBuilder.setFormat(imagesFormat);
+        imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_DEPTH_BIT);
+
+        if (!imageViewBuilder.build(_framesData[i].depthBuffer.imageView, &result)) {
+            LUG_LOG.error("Forward::initDepthBuffers: Can't create depth buffer image view: {}", result);
+            return false;
         }
-
-        _framesData[i].depthBuffer.imageView = std::move(imageView);
     }
 
     return true;
 }
 
-bool Forward::initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
+bool Forward::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
     // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
     API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional]->getRenderPass();
 
@@ -461,8 +457,8 @@ bool Forward::initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>
 
     for (size_t i = 0; i < imageViews.size(); i++) {
         VkImageView attachments[2]{
-            static_cast<VkImageView>(*imageViews[i]),
-            static_cast<VkImageView>(*_framesData[i].depthBuffer.imageView)
+            static_cast<VkImageView>(imageViews[i]),
+            static_cast<VkImageView>(_framesData[i].depthBuffer.imageView)
         };
 
         VkFramebufferCreateInfo framebufferInfo = {};
@@ -470,8 +466,8 @@ bool Forward::initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>
         framebufferInfo.renderPass = static_cast<VkRenderPass>(*renderPass);
         framebufferInfo.attachmentCount = 2;
         framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = imageViews[i]->getExtent().width;
-        framebufferInfo.height = imageViews[i]->getExtent().height;
+        framebufferInfo.width = imageViews[i].getImage()->getExtent().width;
+        framebufferInfo.height = imageViews[i].getImage()->getExtent().height;
         framebufferInfo.layers = 1;
 
         VkFramebuffer fb;
@@ -484,7 +480,7 @@ bool Forward::initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>
 
         // TODO: Remove the extent initializer list when struct Extent is externalised
         _framesData[i].frameBuffer.destroy();
-        _framesData[i].frameBuffer = API::Framebuffer(fb, _device, {imageViews[i]->getExtent().width, imageViews[i]->getExtent().height});
+        _framesData[i].frameBuffer = API::Framebuffer(fb, _device, {imageViews[i].getImage()->getExtent().width, imageViews[i].getImage()->getExtent().height});
     }
 
     return true;
