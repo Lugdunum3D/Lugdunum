@@ -59,6 +59,7 @@ void Buffer::destroy() {
 void Buffer::bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
     _deviceMemory = deviceMemory;
     _deviceMemoryOffset = memoryOffset;
+
     vkBindBufferMemory(static_cast<VkDevice>(*_device), static_cast<VkBuffer>(_buffer), static_cast<VkDeviceMemory>(*deviceMemory), memoryOffset);
 }
 

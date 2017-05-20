@@ -36,9 +36,6 @@ public:
     std::unique_ptr<API::DeviceMemory> build(VkResult* returnResult = nullptr);
 
 private:
-    bool addRequirement(const VkMemoryRequirements& requirements);
-
-private:
     const API::Device& _device;
 
     VkMemoryPropertyFlags _memoryFlags{VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT};
@@ -46,9 +43,6 @@ private:
 
     std::vector<API::Buffer*> _buffers;
     std::vector<API::Image*> _images;
-
-    // Size of all aligned buffers/images
-    VkDeviceSize _size{0};
 };
 
 #include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.inl>
