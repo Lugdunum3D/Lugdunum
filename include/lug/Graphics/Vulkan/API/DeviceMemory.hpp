@@ -35,8 +35,6 @@ public:
 
     void destroy();
 
-    static uint32_t findMemoryType(const Device* device, uint32_t memoryTypeBits, VkMemoryPropertyFlags requiredFlags);
-
 private:
     explicit DeviceMemory(VkDeviceMemory deviceMemory, const Device* device);
 

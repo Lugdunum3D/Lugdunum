@@ -35,6 +35,9 @@ public:
     bool build(API::DeviceMemory& instance, VkResult* returnResult = nullptr);
     std::unique_ptr<API::DeviceMemory> build(VkResult* returnResult = nullptr);
 
+public:
+    static uint32_t findMemoryType(const API::Device& device, uint32_t memoryTypeBits, VkMemoryPropertyFlags requiredFlags);
+
 private:
     const API::Device& _device;
 

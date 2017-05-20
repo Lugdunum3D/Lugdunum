@@ -11,7 +11,7 @@ namespace Builder {
 DeviceMemory::DeviceMemory(const API::Device& device) : _device{device} {}
 
 bool DeviceMemory::build(API::DeviceMemory& deviceMemory, VkResult* returnResult) {
-    uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(&_device, _memoryTypeBits, _memoryFlags);
+    uint32_t memoryTypeIndex = DeviceMemory::findMemoryType(_device, _memoryTypeBits, _memoryFlags);
 
     // Find the total size and the offset for each elements
     VkDeviceSize size = 0;
@@ -100,6 +100,22 @@ bool DeviceMemory::addImage(API::Image& image) {
 
     _images.push_back(&image);
     return true;
+}
+
+uint32_t DeviceMemory::findMemoryType(const API::Device& device, uint32_t memoryTypeBits, VkMemoryPropertyFlags requiredFlags) {
+    const PhysicalDeviceInfo* physicalDeviceInfo = device.getPhysicalDeviceInfo();
+
+    for (uint32_t i = 0; i < physicalDeviceInfo->memoryProperties.memoryTypeCount; i++) {
+        if (memoryTypeBits & (1 << i)) {
+            const VkMemoryType& type = physicalDeviceInfo->memoryProperties.memoryTypes[i];
+
+            if (type.propertyFlags & requiredFlags) {
+                return i;
+            }
+        }
+    }
+
+    return 0;
 }
 
 } // Builder

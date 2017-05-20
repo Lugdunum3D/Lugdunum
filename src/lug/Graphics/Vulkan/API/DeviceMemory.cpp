@@ -38,22 +38,6 @@ void DeviceMemory::destroy() {
     }
 }
 
-uint32_t DeviceMemory::findMemoryType(const Device* device, uint32_t memoryTypeBits, VkMemoryPropertyFlags requiredFlags) {
-    const PhysicalDeviceInfo* physicalDeviceInfo = device->getPhysicalDeviceInfo();
-
-    for (uint32_t i = 0; i < physicalDeviceInfo->memoryProperties.memoryTypeCount; i++) {
-        if (memoryTypeBits & (1 << i)) {
-            const VkMemoryType& type = physicalDeviceInfo->memoryProperties.memoryTypes[i];
-
-            if (type.propertyFlags & requiredFlags) {
-                return i;
-            }
-        }
-    }
-
-    return 0;
-}
-
 } // API
 } // Vulkan
 } // Graphics
