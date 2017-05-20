@@ -1,3 +1,4 @@
+#include <lug/Graphics/Vulkan/API/Builder/DescriptorSetLayout.hpp>
 #include <lug/Graphics/Vulkan/API/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Math/Matrix.hpp>
@@ -9,7 +10,7 @@ namespace Vulkan {
 namespace API {
 
 PipelineLayout::PipelineLayout(
-    std::vector<std::unique_ptr<DescriptorSetLayout>>& descriptorSetLayouts,
+    std::vector<DescriptorSetLayout>& descriptorSetLayouts,
     VkPipelineLayout pipelineLayout,
     const Device* device) :
     _pipelineLayout(pipelineLayout), _device(device), _descriptorSetLayouts(std::move(descriptorSetLayouts)) {}
@@ -52,47 +53,50 @@ void PipelineLayout::destroy() {
 }
 
 std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
-    std::vector<std::unique_ptr<DescriptorSetLayout>> descriptorSetLayouts;
+    std::vector<DescriptorSetLayout> descriptorSetLayouts(2);
+    VkResult result{VK_SUCCESS};
+    Builder::DescriptorSetLayout descriptorSetLayoutBuilderInstance(*device);
+
 
     // Bindings set 0
     {
-        VkDescriptorSetLayoutBinding bindings[] = {
-            // Camera uniform buffer
-            {
-                bindings[0].binding = 0,
-                bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-                bindings[0].descriptorCount = 1,
-                bindings[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                bindings[0].pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-            }
+        // Camera uniform buffer
+        VkDescriptorSetLayoutBinding binding{
+            binding.binding = 0,
+            binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+            binding.descriptorCount = 1,
+            binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+            binding.pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         };
 
-        descriptorSetLayouts.push_back(DescriptorSetLayout::create(device, bindings, 1));
+        descriptorSetLayoutBuilderInstance.setBindings({binding});
+        if (!descriptorSetLayoutBuilderInstance.build(descriptorSetLayouts[0], &result)) {
+            LUG_LOG.error("PipelineLayout::create: Can't create pipeline descriptor sets layout 0: {}", result);
+            return nullptr;
+        }
     }
 
     // Bindings set 1
     {
-        VkDescriptorSetLayoutBinding bindings[] = {
-            // Light uniform buffer
-            {
-                bindings[0].binding = 0,
-                bindings[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-                bindings[0].descriptorCount = 1,
-                bindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
-                bindings[0].pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
-            }
+        // Light uniform buffer
+        VkDescriptorSetLayoutBinding binding{
+            binding.binding = 0,
+            binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+            binding.descriptorCount = 1,
+            binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+            binding.pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
         };
-        descriptorSetLayouts.push_back(DescriptorSetLayout::create(device, bindings, 1));
-    }
 
-    if (!descriptorSetLayouts[0] || !descriptorSetLayouts[1]) {
-        LUG_LOG.error("RendererVulkan: Can't create pipeline descriptor sets layout");
-        return nullptr;
+        descriptorSetLayoutBuilderInstance.setBindings({binding});
+        if (!descriptorSetLayoutBuilderInstance.build(descriptorSetLayouts[1], &result)) {
+            LUG_LOG.error("PipelineLayout::create: Can't create pipeline descriptor sets layout 1: {}", result);
+            return nullptr;
+        }
     }
 
     VkDescriptorSetLayout vkDescriptorSetLayouts[] = {
-        static_cast<VkDescriptorSetLayout>(*descriptorSetLayouts[0]),
-        static_cast<VkDescriptorSetLayout>(*descriptorSetLayouts[1])
+        static_cast<VkDescriptorSetLayout>(descriptorSetLayouts[0]),
+        static_cast<VkDescriptorSetLayout>(descriptorSetLayouts[1])
     };
 
     VkPushConstantRange pushConstants[] = {
@@ -115,7 +119,7 @@ std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
     };
 
     VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
-    VkResult result = vkCreatePipelineLayout(static_cast<VkDevice>(*device), &createInfo, nullptr, &pipelineLayout);
+    result = vkCreatePipelineLayout(static_cast<VkDevice>(*device), &createInfo, nullptr, &pipelineLayout);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create pipeline layout: {}", result);

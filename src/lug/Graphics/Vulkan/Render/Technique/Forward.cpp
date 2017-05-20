@@ -341,7 +341,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
         _device,
         queueFamilyIndices,
         descriptorPool,
-        _pipelines[Light::Light::Type::Directional]->getLayout()->getDescriptorSetLayouts()[0].get());
+        &_pipelines[Light::Light::Type::Directional]->getLayout()->getDescriptorSetLayouts()[0]);
 
 
     uint32_t largestLightSize = 0;
@@ -356,7 +356,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
         _device,
         queueFamilyIndices,
         descriptorPool,
-        _pipelines[Light::Light::Type::Directional]->getLayout()->getDescriptorSetLayouts()[1].get());
+        &_pipelines[Light::Light::Type::Directional]->getLayout()->getDescriptorSetLayouts()[1]);
 
     return initDepthBuffers(imageViews) && initFramebuffers(imageViews);
 }

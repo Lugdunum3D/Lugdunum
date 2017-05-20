@@ -34,6 +34,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Builder/CommandPool.cpp
     ${SRCROOT}/Vulkan/API/Builder/DescriptorPool.cpp
     ${SRCROOT}/Vulkan/API/Builder/DescriptorSet.cpp
+    ${SRCROOT}/Vulkan/API/Builder/DescriptorSetLayout.cpp
     ${SRCROOT}/Vulkan/API/Builder/Device.cpp
     ${SRCROOT}/Vulkan/API/Builder/DeviceMemory.cpp
     ${SRCROOT}/Vulkan/API/Builder/Image.cpp
@@ -142,6 +143,8 @@ set(INC
     ${INCROOT}/Vulkan/API/Builder/DescriptorPool.inl
     ${INCROOT}/Vulkan/API/Builder/DescriptorSet.hpp
     ${INCROOT}/Vulkan/API/Builder/DescriptorSet.inl
+    ${INCROOT}/Vulkan/API/Builder/DescriptorSetLayout.hpp
+    ${INCROOT}/Vulkan/API/Builder/DescriptorSetLayout.inl
     ${INCROOT}/Vulkan/API/Builder/Device.hpp
     ${INCROOT}/Vulkan/API/Builder/Device.inl
     ${INCROOT}/Vulkan/API/Builder/DeviceMemory.hpp
@@ -165,6 +168,7 @@ set(INC
     ${INCROOT}/Vulkan/API/DescriptorPool.hpp
     ${INCROOT}/Vulkan/API/DescriptorSet.hpp
     ${INCROOT}/Vulkan/API/DescriptorSetLayout.hpp
+    ${INCROOT}/Vulkan/API/DescriptorSetLayout.inl
     ${INCROOT}/Vulkan/API/Device.hpp
     ${INCROOT}/Vulkan/API/Device.inl
     ${INCROOT}/Vulkan/API/DeviceMemory.hpp

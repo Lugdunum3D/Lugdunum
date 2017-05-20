@@ -11,9 +11,15 @@ namespace API {
 
 class Device;
 
+namespace Builder {
+class DescriptorSetLayout;
+}
+
 class LUG_GRAPHICS_API DescriptorSetLayout {
+    friend Builder::DescriptorSetLayout;
+
 public:
-    explicit DescriptorSetLayout(VkDescriptorSetLayout DescriptorSetLayout = VK_NULL_HANDLE, const Device* device = nullptr);
+    DescriptorSetLayout() = default;
 
     DescriptorSetLayout(const DescriptorSetLayout&) = delete;
     DescriptorSetLayout(DescriptorSetLayout&& device);
@@ -27,14 +33,24 @@ public:
         return _descriptorSetLayout;
     }
 
+    /**
+     * @brief      Gets the device associated with this DescriptorSetLayout.
+     *
+     * @return     The device.
+     */
+    const Device* getDevice() const;
+
     void destroy();
 
-    static std::unique_ptr<DescriptorSetLayout> create(const Device* device, VkDescriptorSetLayoutBinding layoutBindings[], uint32_t bindingCount);
+private:
+    explicit DescriptorSetLayout(VkDescriptorSetLayout DescriptorSetLayout, const Device* device);
 
 private:
     VkDescriptorSetLayout _descriptorSetLayout{VK_NULL_HANDLE};
     const Device* _device{nullptr};
 };
+
+#include <lug/Graphics/Vulkan/API/DescriptorSetLayout.inl>
 
 } // API
 } // Vulkan

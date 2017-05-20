@@ -14,7 +14,7 @@ class Device;
 
 class LUG_GRAPHICS_API PipelineLayout {
 public:
-    explicit PipelineLayout(std::vector<std::unique_ptr<DescriptorSetLayout>>& descriptorSetLayouts,
+    explicit PipelineLayout(std::vector<DescriptorSetLayout>& descriptorSetLayouts,
                             VkPipelineLayout pipelineLayout = VK_NULL_HANDLE,
                             const Device* device = nullptr);
 
@@ -30,7 +30,7 @@ public:
         return _pipelineLayout;
     }
 
-    const std::vector<std::unique_ptr<DescriptorSetLayout>>& getDescriptorSetLayouts() {
+    const std::vector<DescriptorSetLayout>& getDescriptorSetLayouts() {
         return _descriptorSetLayouts;
     }
 
@@ -41,7 +41,7 @@ public:
 private:
     VkPipelineLayout _pipelineLayout{VK_NULL_HANDLE};
     const Device* _device{nullptr};
-    std::vector<std::unique_ptr<DescriptorSetLayout>> _descriptorSetLayouts;
+    std::vector<DescriptorSetLayout> _descriptorSetLayouts;
 };
 
 } // API
