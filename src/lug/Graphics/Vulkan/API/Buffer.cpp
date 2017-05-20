@@ -109,7 +109,7 @@ std::unique_ptr<Buffer> Buffer::create(
     VkResult result = vkCreateBuffer(static_cast<VkDevice>(*device), &createInfo, nullptr, &bufferHandle);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create buffer: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't create buffer: {}", result);
         return nullptr;
     }
 

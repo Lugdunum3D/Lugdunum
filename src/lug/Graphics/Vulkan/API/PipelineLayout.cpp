@@ -86,7 +86,7 @@ std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
     }
 
     if (!descriptorSetLayouts[0] || !descriptorSetLayouts[1]) {
-        LUG_LOG.error("RendererVulkan: Can't create pipeline descriptor sets layout");
+        LUG_LOG.error("RendererVulkan", "Can't create pipeline descriptor sets layout");
         return nullptr;
     }
 
@@ -118,7 +118,7 @@ std::unique_ptr<PipelineLayout> PipelineLayout::create(const Device* device) {
     VkResult result = vkCreatePipelineLayout(static_cast<VkDevice>(*device), &createInfo, nullptr, &pipelineLayout);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create pipeline layout: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't create pipeline layout: {}", result);
         return nullptr;
     }
 

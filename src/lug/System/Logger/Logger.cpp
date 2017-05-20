@@ -27,7 +27,7 @@ void Logger::addHandler(const std::string& name) {
 }
 
 void Logger::defaultErrHandler(const std::string& msg) {
-    log(Level::Fatal, "Exception in logger {}: {}", _name, msg);
+    log("Logger", Level::Fatal, "Exception in logger {}: {}", _name, msg);
 }
 
 void Logger::defaultErrHandler(const std::exception& ex) {
@@ -46,6 +46,33 @@ void Logger::handle(priv::Message& msg) {
         }
     }
 }
+
+#if LOG_MODE == 0
+void Logger::turnOn(std::string source) {
+    unmuteLevel(source, Level::Off);
+}
+
+void Logger::turnOff(std::string source) {
+    muteLevel(source, Level::Off);
+}
+
+void Logger::muteLevel(std::string source, Level level) {
+    if (std::find(this->_srcLevels[source].begin(), this->_srcLevels[source].end(), level) == this->_srcLevels[source].end()) {
+        this->_srcLevels[source].push_back(level);
+    }
+}
+
+void Logger::unmuteLevel(std::string source, Level level) {
+    auto find = std::find(this->_srcLevels[source].begin(), this->_srcLevels[source].end(), level);
+    if (find != this->_srcLevels[source].end()) {
+        this->_srcLevels[source].erase(find);
+    }
+}
+#else
+void Logger::setSourceLevel(std::string source, Level level) {
+    _srcLevel[source] = level;
+}
+#endif
 
 void Logger::flush() {
     for (auto& handler : _handlers) {

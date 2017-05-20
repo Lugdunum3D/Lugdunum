@@ -68,7 +68,7 @@ bool Swapchain::init() {
         result = vkGetSwapchainImagesKHR(static_cast<VkDevice>(*_device), _swapchain, &imagesCount, nullptr);
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't enumerate swapchain images: {}", result);
+            LUG_LOG.error("RendererVulkan", "Can't enumerate swapchain images: {}", result);
             return false;
         }
 
@@ -76,7 +76,7 @@ bool Swapchain::init() {
         result = vkGetSwapchainImagesKHR(static_cast<VkDevice>(*_device), _swapchain, &imagesCount, images.data());
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't enumerate swapchain images: {}", result);
+            LUG_LOG.error("RendererVulkan", "Can't enumerate swapchain images: {}", result);
             return false;
         }
 
@@ -96,7 +96,7 @@ bool Swapchain::init() {
             std::unique_ptr<ImageView> imageView = ImageView::create(_device, &_images[i], _format.format);
 
             if (!imageView) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain image view");
+                LUG_LOG.error("RendererVulkan", "Can't create swapchain image view");
                 return false;
             }
 
@@ -116,7 +116,7 @@ bool Swapchain::getNextImage(uint32_t* imageIndex, VkSemaphore semaphore) {
         _outOfDate = true;
         return false;
     } else if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: getNextImage(): Can't acquire swapchain next image: {}", result);
+        LUG_LOG.error("RendererVulkan: getNextImage()", "Can't acquire swapchain next image: {}", result);
         return false;
     }
 
@@ -139,7 +139,7 @@ bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaph
     VkResult result = vkQueuePresentKHR(static_cast<VkQueue>(*presentQueue), &presentInfo);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: present(): Can't acquire swapchain next image: {}", result);
+        LUG_LOG.error("RendererVulkan", "present(): Can't acquire swapchain next image: {}", result);
         return false;
     }
 

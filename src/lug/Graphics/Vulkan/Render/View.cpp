@@ -24,7 +24,7 @@ bool View::init(
     }
 
     if (_renderTechnique && !_renderTechnique->init(descriptorPool, imageViews)) {
-        LUG_LOG.warn("View: Failed to init render technique");
+        LUG_LOG.warn("View", "Failed to init render technique");
         return false;
     }
 
@@ -42,7 +42,7 @@ bool View::init(
             VkResult result = vkCreateSemaphore(static_cast<VkDevice>(*device), &createInfo, nullptr, &semaphore);
 
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                LUG_LOG.error("RendererVulkan", "Can't create swapchain semaphore: {}", result);
                 return false;
             }
 
@@ -57,7 +57,7 @@ bool View::init(
 
 bool View::render(const API::Semaphore& imageReadySemaphore, uint32_t currentImageIndex) {
     if (!_camera) {
-        LUG_LOG.warn("View: Attempt to render with no camera attached");
+        LUG_LOG.warn("View", "Attempt to render with no camera attached");
         return true; // Not fatal, return success anyway
     }
 

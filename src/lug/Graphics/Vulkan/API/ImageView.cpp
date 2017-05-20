@@ -77,7 +77,7 @@ std::unique_ptr<ImageView> ImageView::create(
     VkResult result = vkCreateImageView(static_cast<VkDevice>(*device), &createInfo, nullptr, &imageViewHandle);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create image view: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't create image view: {}", result);
         return nullptr;
     }
 

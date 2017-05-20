@@ -64,7 +64,7 @@ bool Application::run() {
         frames++;
 
         if (elapsed >= 1.0f) {
-            LUG_LOG.info("FPS: {}", frames / elapsed);
+            LUG_LOG.info("FPS", "{}", frames / elapsed);
             frames = 0;
             elapsed = 0;
         }

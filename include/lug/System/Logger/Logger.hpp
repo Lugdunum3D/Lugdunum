@@ -3,11 +3,16 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
+#include <vector>
+#include <algorithm>
 
 #include <lug/System/Export.hpp>
 #include <lug/System/Logger/Common.hpp>
 #include <lug/System/Logger/LoggingFacility.hpp>
 #include <lug/System/Logger/Message.hpp>
+
+#define LOG_MODE 0
 
 namespace lug {
 namespace System {
@@ -34,28 +39,39 @@ public:
     void defaultErrHandler(const std::exception& ex);
 
     template<typename T>
-    void log(Level lvl, const T& msg);
+    void log(std::string source, Level lvl, const T& msg);
 
     template<typename... Args, typename T>
-    void log(Level lvl, const T& fmt, Args&&... args);
+    void log(std::string source, Level lvl, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void debug(const T& fmt, Args&&... args);
+    void debug(std::string source, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void info(const T& fmt, Args&&... args);
+    void info(std::string source, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void warn(const T& fmt, Args&&... args);
+    void warn(std::string source, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void error(const T& fmt, Args&&... args);
+    void error(std::string source, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void fatal(const T& fmt, Args&&... args);
+    void fatal(std::string source, const T& fmt, Args&&... args);
 
     template<typename T, typename... Args>
-    void assrt(const T& fmt, Args&&... args);
+    void assrt(std::string source, const T& fmt, Args&&... args);
+
+    #if LOG_MODE == 0
+    void turnOff(std::string source);
+    void turnOn(std::string source);
+    void muteLevel(std::string source, Level level);
+    void unmuteLevel(std::string source, Level level);
+    #else
+    void setSourceLevel(std::string source)
+    #endif
+    bool shouldLog(std::string source, Level level);
+
 
     const std::string& getName() const;
     void handle(priv::Message& msg);
@@ -66,6 +82,13 @@ public:
 protected:
     const std::string _name;
     std::set<Handler*> _handlers;
+
+private:
+    #if LOG_MODE == 0
+    std::unordered_map<std::string, std::vector<Level>> _srcLevels;
+    #else
+    std::unordered_map<std::string, Level> _srcLevel;
+    #endif
 };
 
 #include <lug/System/Logger/Logger.inl>
@@ -75,4 +98,3 @@ protected:
 } // Logger
 } // System
 } // lug
-

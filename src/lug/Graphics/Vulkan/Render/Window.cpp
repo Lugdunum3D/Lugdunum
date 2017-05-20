@@ -201,7 +201,7 @@ bool Window::initDescriptorPool() {
     VkResult result = vkCreateDescriptorPool(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &descriptorPool);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create the descriptor pool: {}", result);
+        LUG_LOG.error("RendererVulkan", "Can't create the descriptor pool: {}", result);
         return false;
     }
 
@@ -249,7 +249,7 @@ bool Window::initSurface() {
 #endif
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererWindow: Can't initialize surface: {}", result);
+        LUG_LOG.error("RendererWindow", "Can't initialize surface: {}", result);
         return false;
     }
 
@@ -267,7 +267,7 @@ bool Window::initSwapchainCapabilities() {
         result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(info->handle, _surface, &info->swapchain.capabilities);
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererWindow: Can't get surface capabilities: {}", result);
+            LUG_LOG.error("RendererWindow", "Can't get surface capabilities: {}", result);
             return false;
         }
 
@@ -275,7 +275,7 @@ bool Window::initSwapchainCapabilities() {
         result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, _surface, &formatsCount, nullptr);
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererWindow: Can't retrieve formats count: {}", result);
+            LUG_LOG.error("RendererWindow", "Can't retrieve formats count: {}", result);
             return false;
         }
 
@@ -283,7 +283,7 @@ bool Window::initSwapchainCapabilities() {
         result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, _surface, &formatsCount, info->swapchain.formats.data());
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererWindow: Can't retrieve formats: {}", result);
+            LUG_LOG.error("RendererWindow", "Can't retrieve formats: {}", result);
             return false;
         }
 
@@ -291,7 +291,7 @@ bool Window::initSwapchainCapabilities() {
         result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, _surface, &presentModesCount, nullptr);
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererWindow: Can't retrieve present modes count: {}", result);
+            LUG_LOG.error("RendererWindow", "Can't retrieve present modes count: {}", result);
             return false;
         }
 
@@ -299,7 +299,7 @@ bool Window::initSwapchainCapabilities() {
         result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, _surface, &presentModesCount, info->swapchain.presentModes.data());
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererWindow: Can't retrieve present modes: {}", result);
+            LUG_LOG.error("RendererWindow", "Can't retrieve present modes: {}", result);
             return false;
         }
     }
@@ -356,7 +356,7 @@ bool Window::initSwapchain() {
         {
             for (auto presentMode : swapchainPreferences.presentModes) {
                 if (std::find(info->swapchain.presentModes.begin(), info->swapchain.presentModes.end(), presentMode) != info->swapchain.presentModes.end()) {
-                    LUG_LOG.info("RendererWindow: Use present mode {}", API::RTTI::toStr(presentMode));
+                    LUG_LOG.info("RendererWindow", "Use present mode {}", API::RTTI::toStr(presentMode));
 
                     swapchainPresentMode = presentMode;
                     break;
@@ -364,7 +364,7 @@ bool Window::initSwapchain() {
             }
 
             if (swapchainPresentMode == VK_PRESENT_MODE_MAX_ENUM_KHR) {
-                LUG_LOG.error("RendererWindow: Missing present mode supported by Lugdunum");
+                LUG_LOG.error("RendererWindow", "Missing present mode supported by Lugdunum");
                 return false;
             }
         }
@@ -375,7 +375,7 @@ bool Window::initSwapchain() {
                 if (std::find_if(info->swapchain.formats.begin(), info->swapchain.formats.end(), [&swapchainFormat, &format](const VkSurfaceFormatKHR& lhs) {
                     return lhs.colorSpace == swapchainFormat.colorSpace && format == lhs.format;
                 }) != info->swapchain.formats.end()) {
-                    LUG_LOG.info("RendererWindow: Use format {}", API::RTTI::toStr(format));
+                    LUG_LOG.info("RendererWindow", "Use format {}", API::RTTI::toStr(format));
 
                     swapchainFormat.format = format;
                     break;
@@ -383,7 +383,7 @@ bool Window::initSwapchain() {
             }
 
             if (swapchainFormat.format == VK_FORMAT_MAX_ENUM) {
-                LUG_LOG.error("RendererWindow: Missing swapchain format supported by Lugdunum");
+                LUG_LOG.error("RendererWindow", "Missing swapchain format supported by Lugdunum");
                 return false;
             }
         }
@@ -392,7 +392,7 @@ bool Window::initSwapchain() {
         {
             for (auto compositeAlphaPreferency : swapchainPreferences.compositeAlphas) {
                 if (info->swapchain.capabilities.supportedCompositeAlpha & compositeAlphaPreferency) {
-                    LUG_LOG.info("RendererWindow: Use composite alpha {}", API::RTTI::toStr(compositeAlphaPreferency));
+                    LUG_LOG.info("RendererWindow", "Use composite alpha {}", API::RTTI::toStr(compositeAlphaPreferency));
 
                     compositeAlpha = compositeAlphaPreferency;
                     break;
@@ -400,14 +400,14 @@ bool Window::initSwapchain() {
             }
 
             if (!compositeAlpha) {
-                LUG_LOG.error("RendererWindow: Missing composite alpha supported by Lugdunum");
+                LUG_LOG.error("RendererWindow", "Missing composite alpha supported by Lugdunum");
                 return false;
             }
         }
 
         // Check image counts
         if (info->swapchain.capabilities.maxImageCount > 0 && info->swapchain.capabilities.maxImageCount < minImageCount) {
-            LUG_LOG.error("RendererWindow: Not enough images ({} required), found {}", minImageCount, info->swapchain.capabilities.maxImageCount);
+            LUG_LOG.error("RendererWindow", "Not enough images ({} required), found {}", minImageCount, info->swapchain.capabilities.maxImageCount);
             return false;
         }
 
@@ -462,7 +462,7 @@ bool Window::initSwapchain() {
         _presentQueue = _renderer.getQueue(0, true);
 
         if (!_presentQueue) {
-            LUG_LOG.error("RendererWindow: Can't find presentation queue");
+            LUG_LOG.error("RendererWindow", "Can't find presentation queue");
             return false;
         }
 
@@ -473,7 +473,7 @@ bool Window::initSwapchain() {
             const API::Queue* graphicsQueue = _renderer.getQueue(VK_QUEUE_GRAPHICS_BIT, false);
 
             if (!graphicsQueue) {
-                LUG_LOG.error("RendererWindow: Can't find graphics queue");
+                LUG_LOG.error("RendererWindow", "Can't find graphics queue");
                 return false;
             }
 
@@ -488,7 +488,7 @@ bool Window::initSwapchain() {
         result = vkCreateSwapchainKHR(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &swapchainKHR);
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererWindow: Can't initialize swapchain: {}", result);
+            LUG_LOG.error("RendererWindow", "Can't initialize swapchain: {}", result);
             return false;
         }
 
@@ -532,7 +532,7 @@ bool Window::initFramesData() {
             VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
 
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                LUG_LOG.error("RendererVulkan", "Can't create swapchain semaphore: {}", result);
                 return false;
             }
 
@@ -553,7 +553,7 @@ bool Window::initFramesData() {
                 VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
 
                 if (result != VK_SUCCESS) {
-                    LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                    LUG_LOG.error("RendererVulkan", "Can't create swapchain semaphore: {}", result);
                     return false;
                 }
 
@@ -577,7 +577,7 @@ bool Window::initFramesData() {
             VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
 
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                LUG_LOG.error("RendererVulkan", "Can't create swapchain semaphore: {}", result);
                 return false;
             }
 

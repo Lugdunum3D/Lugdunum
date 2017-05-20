@@ -34,7 +34,7 @@ bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
 
     importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE, aiPrimitiveType_POINT | aiPrimitiveType_LINE);
 
-    LUG_LOG.info("Loading model {}", file);
+    LUG_LOG.info("ModelLoader", "Loading model {}", file);
 
     const aiScene* scene = importer.ReadFile(
         file,
@@ -54,7 +54,7 @@ bool ModelLoader::loadFromFile(Render::Model* model, const std::string& file) {
         aiProcess_PreTransformVertices);
 
     if (!scene) {
-        LUG_LOG.error("ModelLoader::loadFromFile: Failed to load model {}: {}", file, importer.GetErrorString());
+        LUG_LOG.error("ModelLoader::loadFromFile", "Failed to load model {}: {}", file, importer.GetErrorString());
         return false;
     }
 

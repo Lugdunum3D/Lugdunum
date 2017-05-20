@@ -268,7 +268,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<std::u
             VkResult result = vkCreateFence(static_cast<VkDevice>(*_device), &createInfo, nullptr, &fence);
 
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain fence: {}", result);
+                LUG_LOG.error("RendererVulkan", "Can't create swapchain fence: {}", result);
                 return false;
             }
 
@@ -335,7 +335,7 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
         VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
     if (imagesFormat == VK_FORMAT_UNDEFINED) {
-        LUG_LOG.error("Forward: Can't find supported format for depth buffer");
+        LUG_LOG.error("Forward", "Can't find supported format for depth buffer");
         return false;
     }
 
@@ -360,7 +360,7 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
             image = API::Image::create(_device, imagesFormat, extent, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
             if (!image) {
-                LUG_LOG.error("Forward: Can't create depth buffer image");
+                LUG_LOG.error("Forward", "Can't create depth buffer image");
                 return false;
             }
 
@@ -378,7 +378,7 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
                 _depthBufferMemory = API::DeviceMemory::allocate(_device, realSize * imageViews.size(), memoryTypeIndex);
 
                 if (!_depthBufferMemory) {
-                    LUG_LOG.error("Forward: Can't allocate device memory for depth buffer images");
+                    LUG_LOG.error("Forward", "Can't allocate device memory for depth buffer images");
                     return false;
                 }
             }
@@ -392,7 +392,7 @@ bool Forward::initDepthBuffers(const std::vector<std::unique_ptr<API::ImageView>
             imageView = API::ImageView::create(_device, image.get(), imagesFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 
             if (!imageView) {
-                LUG_LOG.error("Forward: Can't create depth buffer image view");
+                LUG_LOG.error("Forward", "Can't create depth buffer image view");
                 return false;
             }
         }
@@ -430,7 +430,7 @@ bool Forward::initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>
         result = vkCreateFramebuffer(static_cast<VkDevice>(*_device), &framebufferInfo, nullptr, &fb);
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Failed to create framebuffer: {}", result);
+            LUG_LOG.error("RendererVulkan", "Failed to create framebuffer: {}", result);
             return false;
         }
 

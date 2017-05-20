@@ -15,7 +15,7 @@ void Camera::update(const ::lug::Graphics::Render::View* renderView) {
     if (_scene) {
         _scene->fetchVisibleObjects(renderView, this, _renderQueue);
     } else {
-        LUG_LOG.warn("Camera: Attempt to update with no scene attached");
+        LUG_LOG.warn("Camera", "Attempt to update with no scene attached");
     }
 }
 

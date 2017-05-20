@@ -49,7 +49,7 @@ std::vector<DescriptorSet> DescriptorPool::createDescriptorSets(const std::vecto
 
     // TODO: Handle VK_ERROR_FRAGMENTED_POOL and negative values to create a new descriptor pool
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("DescriptorPool: Can't allocate descriptor sets: {}", result);
+        LUG_LOG.error("DescriptorPool", "Can't allocate descriptor sets: {}", result);
         return {};
     }
 

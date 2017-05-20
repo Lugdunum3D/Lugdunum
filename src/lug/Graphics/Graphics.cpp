@@ -26,7 +26,7 @@ bool Graphics::beginInit(const InitInfo& initInfo) {
             _renderer = std::make_unique<Vulkan::Renderer>(*this);
             break;
         default:
-            LUG_LOG.error("Graphics: Can't init renderer with specified render type");
+            LUG_LOG.error("Graphics", "Can't init renderer with specified render type");
             break;
     }
 
@@ -48,24 +48,24 @@ bool Graphics::finishInit() {
     // Check if all mandatory modules are loaded
     {
         if (_loadedMandatoryModules.size() != _initInfo.mandatoryModules.size()) {
-            LUG_LOG.error("Graphics: Can't init the engine with all the mandatory modules");
+            LUG_LOG.error("Graphics", "Can't init the engine with all the mandatory modules");
             return false;
         }
     }
 
 #if defined(LUG_DEBUG)
-    LUG_LOG.info("Graphics: Successfully init");
+    LUG_LOG.info("Graphics", "Successfully init");
 
     {
         std::stringstream ss{};
         std::copy(_loadedMandatoryModules.begin(), _loadedMandatoryModules.end(), std::ostream_iterator<Module::Type>(ss, " "));
-        LUG_LOG.info("Graphics: Mandatory modules loaded : {}", ss.str());
+        LUG_LOG.info("Graphics", "Mandatory modules loaded : {}", ss.str());
     }
 
     {
         std::stringstream ss{};
         std::copy(_loadedOptionalModules.begin(), _loadedOptionalModules.end(), std::ostream_iterator<Module::Type>(ss, " "));
-        LUG_LOG.info("Graphics: Optional modules loaded : {}", ss.str());
+        LUG_LOG.info("Graphics", "Optional modules loaded : {}", ss.str());
     }
 #endif
 
@@ -96,7 +96,7 @@ std::unique_ptr<Scene::Scene> Graphics::createScene() {
 
 std::unique_ptr<Render::Mesh> Graphics::createMesh(const std::string& name) {
     if (!_renderer) {
-        LUG_LOG.error("Graphics: Can't create a mesh, the renderer is not initialized");
+        LUG_LOG.error("Graphics", "Can't create a mesh, the renderer is not initialized");
         return nullptr;
     }
 
@@ -107,7 +107,7 @@ std::unique_ptr<Render::Mesh> Graphics::createMesh(const std::string& name) {
         std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(0, true)->getFamilyIdx() };
         mesh = std::make_unique<Vulkan::Render::Mesh>(name, queueFamilyIndices, &renderer->getDevice());
     } else {
-        LUG_LOG.error("Graphics: Unknown render type");
+        LUG_LOG.error("Graphics", "Unknown render type");
     }
 
     return mesh;
@@ -115,7 +115,7 @@ std::unique_ptr<Render::Mesh> Graphics::createMesh(const std::string& name) {
 
 std::unique_ptr<Render::Model> Graphics::createModel(const std::string& name, const std::string& fileName) {
     if (!_renderer) {
-        LUG_LOG.error("Graphics: Can't create a model, the renderer is not initialized");
+        LUG_LOG.error("Graphics", "Can't create a model, the renderer is not initialized");
         return nullptr;
     }
 
@@ -126,7 +126,7 @@ std::unique_ptr<Render::Model> Graphics::createModel(const std::string& name, co
         std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(0, true)->getFamilyIdx() };
         model = std::make_unique<Vulkan::Render::Model>(name, queueFamilyIndices, &renderer->getDevice());
     } else {
-        LUG_LOG.error("Graphics: Unknown render type");
+        LUG_LOG.error("Graphics", "Unknown render type");
         return nullptr;
     }
 
@@ -142,7 +142,7 @@ std::unique_ptr<Render::Model> Graphics::createModel(const std::string& name, co
 
 std::unique_ptr<Render::Camera> Graphics::createCamera(const std::string& name) {
     if (!_renderer) {
-        LUG_LOG.error("Graphics: Can't create a camera, the renderer is not initialized");
+        LUG_LOG.error("Graphics", "Can't create a camera, the renderer is not initialized");
         return nullptr;
     }
 
@@ -151,7 +151,7 @@ std::unique_ptr<Render::Camera> Graphics::createCamera(const std::string& name) 
     if (_initInfo.rendererType == Renderer::Type::Vulkan) {
         camera = std::make_unique<Vulkan::Render::Camera>(name);
     } else {
-        LUG_LOG.error("Graphics: Unknown render type");
+        LUG_LOG.error("Graphics", "Unknown render type");
     }
 
     return camera;

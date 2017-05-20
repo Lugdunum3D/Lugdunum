@@ -46,7 +46,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
         level = System::Logger::Level::Debug;
     }
 
-    LUG_LOG.log(level, "DebugReport: {}: {}", layerPrefix, msg);
+    LUG_LOG.log("VULKAN", level, "DebugReport: {}: {}", layerPrefix, msg);
 
     return VK_FALSE;
 }
@@ -92,7 +92,7 @@ bool Renderer::beginInit(const char* appName, uint32_t appVersion, const Rendere
     _initInfo = initInfo;
 
     if (!initInstance(appName, appVersion)) {
-        LUG_LOG.error("RendererVulkan: Can't init the instance");
+        LUG_LOG.error("RendererVulkan", "Can't init the instance");
         return false;
     }
 
@@ -121,12 +121,12 @@ bool Renderer::finishInit() {
     }
 
     if (!initDevice()) {
-        LUG_LOG.error("RendererVulkan: Can't init the device");
+        LUG_LOG.error("RendererVulkan", "Can't init the device");
         return false;
     }
 
 #if defined(LUG_DEBUG)
-    LUG_LOG.info("RendererVulkan: Use device {}", _physicalDeviceInfo->properties.deviceName);
+    LUG_LOG.info("RendererVulkan", "Use device {}", _physicalDeviceInfo->properties.deviceName);
 #endif
 
     return true;
@@ -138,7 +138,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
     // Load vulkan core functions
     {
         if (!_loader.loadCoreFunctions()) {
-            LUG_LOG.error("RendererVulkan: Can't load core vulkan functions");
+            LUG_LOG.error("RendererVulkan", "Can't load core vulkan functions");
             return false;
         }
     }
@@ -151,7 +151,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
             result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, nullptr);
 
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't enumerate instance extensions: {}", result);
+                LUG_LOG.error("RendererVulkan", "Can't enumerate instance extensions: {}", result);
                 return false;
             }
 
@@ -159,7 +159,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
             result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, _instanceInfo.extensions.data());
 
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't enumerate instance extensions: {}", result);
+                LUG_LOG.error("RendererVulkan", "Can't enumerate instance extensions: {}", result);
                 return false;
             }
         }
@@ -170,7 +170,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
             result = vkEnumerateInstanceLayerProperties(&layersCount, nullptr);
 
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
+                LUG_LOG.error("RendererVulkan", "Can't enumerate instance layers: {}", result);
                 return false;
             }
 
@@ -178,7 +178,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
             result = vkEnumerateInstanceLayerProperties(&layersCount, _instanceInfo.layers.data());
 
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
+                LUG_LOG.error("RendererVulkan", "Can't enumerate instance layers: {}", result);
                 return false;
             }
         }
@@ -219,7 +219,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
         VkInstance instance{VK_NULL_HANDLE};
         result = vkCreateInstance(&createInfo, nullptr, &instance);
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't create the instance: {}", result);
+            LUG_LOG.error("RendererVulkan", "Can't create the instance: {}", result);
             return false;
         }
 
@@ -240,7 +240,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
             if (vkCreateDebugReportCallbackEXT) {
                 vkCreateDebugReportCallbackEXT(static_cast<VkInstance>(_instance), &createInfo, nullptr, &_debugReportCallback);
             } else {
-                LUG_LOG.warn("RendererVulkan: Can't load function vkCreateDebugReportCallbackEXT");
+                LUG_LOG.warn("RendererVulkan", "Can't load function vkCreateDebugReportCallbackEXT");
             }
         }
     }
@@ -248,7 +248,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
     // Load vulkan instance functions
     {
         if (!_loader.loadInstanceFunctions(_instance)) {
-            LUG_LOG.error("RendererVulkan: Can't load instance vulkan functions");
+            LUG_LOG.error("RendererVulkan", "Can't load instance vulkan functions");
             return false;
         }
     }
@@ -259,7 +259,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
         result = vkEnumeratePhysicalDevices(static_cast<VkInstance>(_instance), &physicalDevicesCount, nullptr);
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't enumerate physical devices: {}", result);
+            LUG_LOG.error("RendererVulkan", "Can't enumerate physical devices: {}", result);
             return false;
         }
 
@@ -269,7 +269,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
         result = vkEnumeratePhysicalDevices(static_cast<VkInstance>(_instance), &physicalDevicesCount, physicalDevices.data());
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't enumerate physical devices: {}", result);
+            LUG_LOG.error("RendererVulkan", "Can't enumerate physical devices: {}", result);
             return false;
         }
 
@@ -296,7 +296,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
                 result = vkEnumerateDeviceExtensionProperties(physicalDevices[idx], nullptr, &extensionsCount, nullptr);
 
                 if (result != VK_SUCCESS) {
-                    LUG_LOG.error("RendererVulkan: Can't enumerate device extensions: {}", result);
+                    LUG_LOG.error("RendererVulkan", "Can't enumerate device extensions: {}", result);
                     return false;
                 }
 
@@ -304,7 +304,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
                 result = vkEnumerateDeviceExtensionProperties(physicalDevices[idx], nullptr, &extensionsCount, _physicalDeviceInfos[idx].extensions.data());
 
                 if (result != VK_SUCCESS) {
-                    LUG_LOG.error("RendererVulkan: Can't enumerate device extensions: {}", result);
+                    LUG_LOG.error("RendererVulkan", "Can't enumerate device extensions: {}", result);
                     return false;
                 }
             }
@@ -356,7 +356,7 @@ bool Renderer::initDevice() {
             }
 
             if (matchedDevicesIdx.size() == 0) {
-                LUG_LOG.error("RendererVulkan: Can't find a compatible device");
+                LUG_LOG.error("RendererVulkan", "Can't find a compatible device");
                 return false;
             }
 
@@ -415,7 +415,7 @@ bool Renderer::initDevice() {
         result = vkCreateDevice(_physicalDeviceInfo->handle, &createInfo, nullptr, &device);
 
         if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't create the device: {}", result);
+            LUG_LOG.error("RendererVulkan", "Can't create the device: {}", result);
             return false;
         }
 
@@ -425,7 +425,7 @@ bool Renderer::initDevice() {
     // Load vulkan device functions
     {
         if (!_loader.loadDeviceFunctions(_device)) {
-            LUG_LOG.error("RendererVulkan: Can't load device vulkan functions");
+            LUG_LOG.error("RendererVulkan", "Can't load device vulkan functions");
             return false;
         }
     }
@@ -459,7 +459,7 @@ bool Renderer::initDevice() {
             VkCommandPool commandPool{VK_NULL_HANDLE};
             result = vkCreateCommandPool(static_cast<VkDevice>(_device), &createInfo, nullptr, &commandPool);
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create a command pool: {}", result);
+                LUG_LOG.error("RendererVulkan", "Can't create a command pool: {}", result);
                 return false;
             }
 
@@ -486,7 +486,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type>& modulesTo
             moduleRequirementsCheck = moduleRequirementsCheck && layersNotFound.size() == 0;
 
             for (const char* const layerName : layersNotFound) {
-                LUG_LOG.warn("Can't load mandatory layer '{}' for module '{}'", layerName, moduleType);
+                LUG_LOG.warn("RendererVulkan", "Can't load mandatory layer '{}' for module '{}'", layerName, moduleType);
             }
         }
 
@@ -494,7 +494,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type>& modulesTo
             const std::vector<const char*> layersNotFound = checkRequirementsLayers(_instanceInfo, requirements.optionalInstanceLayers, layers);
 
             for (const char* layerName : layersNotFound) {
-                LUG_LOG.warn("Can't load optional layer '{}' for module '{}'", layerName, moduleType);
+                LUG_LOG.warn("RendererVulkan",  "Can't load optional layer '{}' for module '{}'", layerName, moduleType);
             }
         }
 
@@ -504,7 +504,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type>& modulesTo
             moduleRequirementsCheck = moduleRequirementsCheck && extensionsNotFound.size() == 0;
 
             for (const char* const extensionName : extensionsNotFound) {
-                LUG_LOG.warn("Can't load mandatory extension '{}' for module '{}'", extensionName, moduleType);
+                LUG_LOG.warn("RendererVulkan",  "Can't load mandatory extension '{}' for module '{}'", extensionName, moduleType);
             }
         }
 
@@ -512,7 +512,7 @@ bool Renderer::checkRequirementsInstance(const std::set<Module::Type>& modulesTo
             const std::vector<const char*> extensionsNotFound = checkRequirementsExtensions(_instanceInfo, requirements.optionalInstanceExtensions, extensions);
 
             for (const char* extensionName : extensionsNotFound) {
-                LUG_LOG.warn("Can't load optional extension '{}' for module '{}'", extensionName, moduleType);
+                LUG_LOG.warn("RendererVulkan",  "Can't load optional extension '{}' for module '{}'", extensionName, moduleType);
             }
         }
 
@@ -548,7 +548,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 
             if (!quiet) {
                 for (const char* const extensionName : extensionsNotFound) {
-                    LUG_LOG.warn("Device {}: Can't load mandatory extension '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, extensionName, moduleType);
+                    LUG_LOG.warn("RendererVulkan",  "Device {}: Can't load mandatory extension '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, extensionName, moduleType);
                 }
             }
         }
@@ -558,7 +558,7 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 
             if (!quiet) {
                 for (const char* extensionName : extensionsNotFound) {
-                    LUG_LOG.warn("Device {}: Can't load optional extension '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, extensionName, moduleType);
+                    LUG_LOG.warn("RendererVulkan",  "Device {}: Can't load optional extension '{}' for module '{}'", physicalDeviceInfo.properties.deviceName, extensionName, moduleType);
                 }
             }
         }
