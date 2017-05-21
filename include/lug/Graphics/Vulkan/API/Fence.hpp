@@ -10,9 +10,15 @@ namespace API {
 
 class Device;
 
+namespace Builder {
+class Fence;
+}
+
 class LUG_GRAPHICS_API Fence {
+    friend Builder::Fence;
+
 public:
-    explicit Fence(VkFence fence = VK_NULL_HANDLE, const Device* device = nullptr);
+    Fence() = default;
 
     Fence(const Fence&) = delete;
     Fence(Fence&& fence);
@@ -31,6 +37,9 @@ public:
     bool wait() const;
 
     void destroy();
+
+private:
+    explicit Fence(VkFence fence, const Device* device);
 
 private:
     VkFence _fence{VK_NULL_HANDLE};

@@ -31,29 +31,26 @@ Fence::~Fence() {
     destroy();
 }
 
-VkResult Fence::getStatus() const
-{
+VkResult Fence::getStatus() const {
     return vkGetFenceStatus(static_cast<VkDevice>(*_device), _fence);
 }
 
-bool Fence::reset()
-{
+bool Fence::reset() {
     VkResult result = vkResetFences(static_cast<VkDevice>(*_device), 1, &_fence);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererWindow: Can't initialize surface: {}", result);
+        LUG_LOG.error("Fence::reset: Can't reset fence: {}", result);
         return false;
     }
 
     return true;
 }
 
-bool Fence::wait() const
-{
+bool Fence::wait() const {
     VkResult result = vkWaitForFences(static_cast<VkDevice>(*_device), 1, &_fence, VK_TRUE, UINT64_MAX);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererWindow: Can't initialize surface: {}", result);
+        LUG_LOG.error("Fence::wait: Can't wait for fence: {}", result);
         return false;
     }
 
@@ -65,6 +62,7 @@ void Fence::destroy() {
         vkDestroyFence(static_cast<VkDevice>(*_device), _fence, nullptr);
         _fence = VK_NULL_HANDLE;
     }
+    _device = nullptr;
 }
 
 } // API

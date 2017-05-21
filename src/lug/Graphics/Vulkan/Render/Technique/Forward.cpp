@@ -11,6 +11,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Fence.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Image.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
@@ -303,26 +304,17 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
         return false;
     }
 
+    API::Builder::Fence fenceBuilderInstance(*_device);
+    fenceBuilderInstance.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
+
     API::Builder::CommandBuffer commandBufferBuilderInstance(_renderer.getDevice(), _commandPool);
     commandBufferBuilderInstance.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
-        // Fence
-        {
-            VkFence fence;
-            VkFenceCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT
-            };
-            result = vkCreateFence(static_cast<VkDevice>(*_device), &createInfo, nullptr, &fence);
-
-            if (result != VK_SUCCESS) {
-                LUG_LOG.error("Forward::init: Can't create swapchain fence: {}", result);
-                return false;
-            }
-
-            _framesData[i].fence = API::Fence(fence, _device);
+        // Create the Fence
+        if (!fenceBuilderInstance.build(_framesData[i].fence, &result)) {
+            LUG_LOG.error("Forward::init: Can't create swapchain fence: {}", result);
+            return false;
         }
 
         // Create command buffers
