@@ -35,6 +35,7 @@ public:
     void setSampleCount(VkSampleCountFlagBits sampleCount);
     void setTiling(VkImageTiling tiling);
     void setUsage(VkImageUsageFlags usage);
+    void setExclusive(bool exclusive);
     void setQueueFamilyIndices(const std::set<uint32_t>& queueFamilyIndices);
 
     // Build methods
@@ -54,6 +55,7 @@ private:
     VkSampleCountFlagBits _sampleCount{VK_SAMPLE_COUNT_1_BIT};
     VkImageTiling _tiling{VK_IMAGE_TILING_OPTIMAL};
     VkImageUsageFlags _usage{VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT};
+    bool _exclusive{false};
     std::set<uint32_t> _queueFamilyIndices;
     VkImageLayout _initialLayout{VK_IMAGE_LAYOUT_UNDEFINED};
 };

@@ -13,6 +13,11 @@ Swapchain::Swapchain(const API::Device& device): _device(device) {}
 
 bool Swapchain::build(API::Swapchain& swapchain, VkResult* returnResult) {
     std::vector<uint32_t> queueFamilyIndices(_queueFamilyIndices.begin(), _queueFamilyIndices.end());
+    VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    // If we have move than one queueFamilyIndices and exclusive was not manually set
+    if (queueFamilyIndices.size() > 1 && !_exclusive) {
+        sharingMode = VK_SHARING_MODE_CONCURRENT;
+    }
 
     // Create the swapchain creation information for vkCreateSwapchain
     VkSwapchainCreateInfoKHR createInfo{
@@ -26,9 +31,9 @@ bool Swapchain::build(API::Swapchain& swapchain, VkResult* returnResult) {
         {}, // createInfo.imageExtent
         createInfo.imageArrayLayers = 1,
         createInfo.imageUsage = _imageUsage,
-        createInfo.imageSharingMode = queueFamilyIndices.size() <= 1 ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT,
+        createInfo.imageSharingMode = sharingMode,
         createInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size()),
-        createInfo.pQueueFamilyIndices = queueFamilyIndices.data(),
+        createInfo.pQueueFamilyIndices = queueFamilyIndices.data(),  // Convert the set to raw data,  // Convert the set to raw data
         createInfo.preTransform = _preTransform,
         createInfo.compositeAlpha = _compositeAlpha,
         createInfo.presentMode = _presentMode,

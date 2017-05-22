@@ -33,6 +33,7 @@ public:
     void setImageColorSpace(VkColorSpaceKHR imageColorSpace);
     void setImageExtent(VkExtent2D imageExtent);
     void setImageUsage(VkImageUsageFlags imageUsage);
+    void setExclusive(bool exclusive);
     void setQueueFamilyIndices(const std::set<uint32_t>& queueFamilyIndices);
     void setPreTransform(VkSurfaceTransformFlagBitsKHR preTransform);
     void setCompositeAlpha(VkCompositeAlphaFlagBitsKHR compositeAlpha);
@@ -53,6 +54,7 @@ private:
     VkColorSpaceKHR _imageColorSpace{VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
     VkExtent2D _imageExtent{};
     VkImageUsageFlags _imageUsage{VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT};
+    bool _exclusive{false};
     std::set<uint32_t> _queueFamilyIndices;
     VkSurfaceTransformFlagBitsKHR _preTransform{VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR};
     VkCompositeAlphaFlagBitsKHR _compositeAlpha{VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR};

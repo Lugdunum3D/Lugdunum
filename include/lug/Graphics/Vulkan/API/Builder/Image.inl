@@ -38,6 +38,10 @@ inline void Image::setUsage(VkImageUsageFlags usage) {
     _usage = usage;
 }
 
+inline void Image::setExclusive(bool exclusive) {
+    _exclusive = exclusive;
+}
+
 inline void Image::setQueueFamilyIndices(const std::set<uint32_t>& queueFamilyIndices) {
     _queueFamilyIndices = queueFamilyIndices;
 }

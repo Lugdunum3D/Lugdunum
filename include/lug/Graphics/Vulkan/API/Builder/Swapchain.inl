@@ -22,6 +22,10 @@ inline void Swapchain::setImageUsage(VkImageUsageFlags imageUsage) {
     _imageUsage = imageUsage;
 }
 
+inline void Swapchain::setExclusive(bool exclusive) {
+    _exclusive = exclusive;
+}
+
 inline void Swapchain::setQueueFamilyIndices(const std::set<uint32_t>& queueFamilyIndices) {
     _queueFamilyIndices = queueFamilyIndices;
 }

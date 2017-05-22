@@ -14,6 +14,11 @@ Image::Image(const API::Device& device): _device(device) {}
 
 bool Image::build(API::Image& image, VkResult* returnResult) {
     std::vector<uint32_t> queueFamilyIndices(_queueFamilyIndices.begin(), _queueFamilyIndices.end());
+    VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    // If we have move than one queueFamilyIndices and exclusive was not manually set
+    if (queueFamilyIndices.size() > 1 && !_exclusive) {
+        sharingMode = VK_SHARING_MODE_CONCURRENT;
+    }
 
     VkFormat imageFormat = API::Image::findSupportedFormat(&_device, _preferedFormats, _tiling, _featureFlags);
     if (imageFormat == VK_FORMAT_UNDEFINED) {
@@ -34,9 +39,9 @@ bool Image::build(API::Image& image, VkResult* returnResult) {
         createInfo.samples = _sampleCount,
         createInfo.tiling = _tiling,
         createInfo.usage = _usage,
-        createInfo.sharingMode = queueFamilyIndices.size() <= 1 ? VK_SHARING_MODE_EXCLUSIVE : VK_SHARING_MODE_CONCURRENT,
+        createInfo.sharingMode = sharingMode,
         createInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size()),
-        createInfo.pQueueFamilyIndices = queueFamilyIndices.data(),
+        createInfo.pQueueFamilyIndices = queueFamilyIndices.data(),  // Convert the set to raw data,  // Convert the set to raw data,
         createInfo.initialLayout = _initialLayout
     };
 
