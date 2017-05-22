@@ -484,12 +484,6 @@ bool Window::initSwapchain() {
             swapchainBuilder.setQueueFamilyIndices({_presentQueueFamily->getIdx()});
         }
 
-        VkResult result{VK_SUCCESS};
-        if (!swapchainBuilder.build(_swapchain, &result)) {
-            LUG_LOG.error("Window::initPresentQueue: Can't create a command pool: {}", result);
-            return false;
-        }
-
         // Reset command buffers because they use the swapchain images
         _presentQueue->waitIdle();
         {
@@ -500,6 +494,12 @@ bool Window::initSwapchain() {
                     _framesData[i].cmdBuffers[j].reset();
                 }
             }
+        }
+
+        VkResult result{VK_SUCCESS};
+        if (!swapchainBuilder.build(_swapchain, &result)) {
+            LUG_LOG.error("Window::initPresentQueue: Can't create a command pool: {}", result);
+            return false;
         }
 
         return _swapchain.init();
