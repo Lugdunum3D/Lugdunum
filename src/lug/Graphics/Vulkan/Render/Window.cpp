@@ -498,7 +498,7 @@ bool Window::initSwapchain() {
 
         VkResult result{VK_SUCCESS};
         if (!swapchainBuilder.build(_swapchain, &result)) {
-            LUG_LOG.error("Window::initPresentQueue: Can't create a command pool: {}", result);
+            LUG_LOG.error("Window::initPresentQueue: Can't create swapchain: {}", result);
             return false;
         }
 
