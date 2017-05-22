@@ -41,6 +41,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Builder/Image.cpp
     ${SRCROOT}/Vulkan/API/Builder/ImageView.cpp
     ${SRCROOT}/Vulkan/API/Builder/Instance.cpp
+    ${SRCROOT}/Vulkan/API/Builder/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/API/Builder/Semaphore.cpp
     ${SRCROOT}/Vulkan/API/Builder/Swapchain.cpp
 
@@ -159,6 +160,8 @@ set(INC
     ${INCROOT}/Vulkan/API/Builder/ImageView.inl
     ${INCROOT}/Vulkan/API/Builder/Instance.hpp
     ${INCROOT}/Vulkan/API/Builder/Instance.inl
+    ${INCROOT}/Vulkan/API/Builder/PipelineLayout.hpp
+    ${INCROOT}/Vulkan/API/Builder/PipelineLayout.inl
     ${INCROOT}/Vulkan/API/Builder/Semaphore.hpp
     ${INCROOT}/Vulkan/API/Builder/Swapchain.hpp
     ${INCROOT}/Vulkan/API/Builder/Swapchain.inl
@@ -189,6 +192,7 @@ set(INC
     ${INCROOT}/Vulkan/API/Loader.hpp
     ${INCROOT}/Vulkan/API/Pipeline.hpp
     ${INCROOT}/Vulkan/API/PipelineLayout.hpp
+    ${INCROOT}/Vulkan/API/PipelineLayout.inl
     ${INCROOT}/Vulkan/API/Queue.hpp
     ${INCROOT}/Vulkan/API/Queue.inl
     ${INCROOT}/Vulkan/API/QueueFamily.hpp

@@ -1,6 +1,8 @@
+#include <lug/Graphics/Vulkan/API/Pipeline.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DescriptorSetLayout.hpp>
 #include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/API/ShaderModule.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/System/Logger/Logger.hpp>
@@ -233,10 +235,72 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
     colorBlending.blendConstants[2] = 0.0f;
     colorBlending.blendConstants[3] = 0.0f;
 
-    auto pipelineLayout = PipelineLayout::create(device);
+    VkResult result{VK_SUCCESS};
+    std::unique_ptr<API::PipelineLayout> pipelineLayout = nullptr;
+
+    // Create pipeline layout
+    {
+        std::vector<DescriptorSetLayout> descriptorSetLayouts(2);
+        Builder::DescriptorSetLayout descriptorSetLayoutBuilderInstance(*device);
+
+        // Bindings set 0
+        {
+            // Camera uniform buffer
+            VkDescriptorSetLayoutBinding binding{
+                binding.binding = 0,
+                binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+                binding.descriptorCount = 1,
+                binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                binding.pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+            };
+
+            descriptorSetLayoutBuilderInstance.setBindings({binding});
+            if (!descriptorSetLayoutBuilderInstance.build(descriptorSetLayouts[0], &result)) {
+                LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create pipeline descriptor sets layout 0: {}", result);
+                return nullptr;
+            }
+        }
+
+        // Bindings set 1
+        {
+            // Light uniform buffer
+            VkDescriptorSetLayoutBinding binding{
+                binding.binding = 0,
+                binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+                binding.descriptorCount = 1,
+                binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+                binding.pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
+            };
+
+            descriptorSetLayoutBuilderInstance.setBindings({binding});
+            if (!descriptorSetLayoutBuilderInstance.build(descriptorSetLayouts[1], &result)) {
+                LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create pipeline descriptor sets layout 1: {}", result);
+                return nullptr;
+            }
+        }
+
+        // Model transformation
+        VkPushConstantRange pushConstant{
+            pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+            pushConstant.offset = 0,
+            pushConstant.size = sizeof(Math::Mat4x4f)
+        };
+
+        API::Builder::PipelineLayout pipelineLayoutBuilderInstance(*device);
+        pipelineLayoutBuilderInstance.setPushConstants({pushConstant});
+        pipelineLayoutBuilderInstance.setDescriptorSetLayouts(std::move(descriptorSetLayouts));
+
+        pipelineLayout = pipelineLayoutBuilderInstance.build(&result);
+        if (!pipelineLayout) {
+            LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create pipeline layout: {}", result);
+            return nullptr;
+        }
+    }
+
     auto renderPass = RenderPass::create(device, colorFormat);
 
-    if (!pipelineLayout || !renderPass) {
+    if (!renderPass) {
+        LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create render pass: {}", result);
         return nullptr;
     }
 
@@ -303,7 +367,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
 
     // TODO: create with VkPipelineCache
     // TODO: create multiple pipelines with one call
-    VkResult result = vkCreateGraphicsPipelines(static_cast<VkDevice>(*device), VK_NULL_HANDLE, 1, &createInfo, nullptr, &pipeline);
+    result = vkCreateGraphicsPipelines(static_cast<VkDevice>(*device), VK_NULL_HANDLE, 1, &createInfo, nullptr, &pipeline);
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("RendererVulkan: Can't create graphics pipeline: {}", result);

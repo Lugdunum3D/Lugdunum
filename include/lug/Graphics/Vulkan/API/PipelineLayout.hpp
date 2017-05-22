@@ -12,11 +12,15 @@ namespace API {
 
 class Device;
 
+namespace Builder {
+class PipelineLayout;
+} // Builder
+
 class LUG_GRAPHICS_API PipelineLayout {
+    friend Builder::PipelineLayout;
+
 public:
-    explicit PipelineLayout(std::vector<DescriptorSetLayout>& descriptorSetLayouts,
-                            VkPipelineLayout pipelineLayout = VK_NULL_HANDLE,
-                            const Device* device = nullptr);
+    PipelineLayout() = default;
 
     PipelineLayout(const PipelineLayout&) = delete;
     PipelineLayout(PipelineLayout&& device);
@@ -30,19 +34,37 @@ public:
         return _pipelineLayout;
     }
 
-    const std::vector<DescriptorSetLayout>& getDescriptorSetLayouts() {
-        return _descriptorSetLayouts;
-    }
+    /**
+     * @brief      Gets the DescriptorSetLayouts of the PipelineLayout.
+     *             The PipelineLayout owns these DescriptorSetLayouts.
+     *
+     * @return     The DescriptorSetLayouts.
+     */
+    const std::vector<DescriptorSetLayout>& getDescriptorSetLayouts() const;
+
+    /**
+     * @brief      Gets the device assiciated with this PipelineLayout.
+     *
+     * @return     The device.
+     */
+    const Device* getDevice() const;
 
     void destroy();
 
-    static std::unique_ptr<PipelineLayout> create(const Device* device);
+private:
+    explicit PipelineLayout(
+        VkPipelineLayout pipelineLayout,
+        const Device* device,
+        std::vector<DescriptorSetLayout>&& descriptorSetLayouts
+    );
 
 private:
     VkPipelineLayout _pipelineLayout{VK_NULL_HANDLE};
     const Device* _device{nullptr};
-    std::vector<DescriptorSetLayout> _descriptorSetLayouts;
+    std::vector<DescriptorSetLayout> _descriptorSetLayouts{};
 };
+
+#include <lug/Graphics/Vulkan/API/PipelineLayout.inl>
 
 } // API
 } // Vulkan
