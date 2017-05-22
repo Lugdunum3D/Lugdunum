@@ -11,10 +11,10 @@ namespace Builder {
 Buffer::Buffer(const API::Device& device) : _device{device} {}
 
 bool Buffer::build(API::Buffer& buffer, VkResult* returnResult) {
-
+    std::vector<uint32_t> queueFamilyIndices(_queueFamilyIndices.begin(), _queueFamilyIndices.end());
     VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     // If we have move than one queueFamilyIndices and exclusive was not manually set
-    if (_queueFamilyIndices.size() > 1 && !_exclusive) {
+    if (queueFamilyIndices.size() > 1 && !_exclusive) {
         sharingMode = VK_SHARING_MODE_CONCURRENT;
     }
 
@@ -26,8 +26,8 @@ bool Buffer::build(API::Buffer& buffer, VkResult* returnResult) {
         createInfo.size = _size,
         createInfo.usage = _usage,
         createInfo.sharingMode = sharingMode,
-        createInfo.queueFamilyIndexCount = static_cast<uint32_t>(_queueFamilyIndices.size()),
-        createInfo.pQueueFamilyIndices = std::vector<uint32_t>(_queueFamilyIndices.begin(), _queueFamilyIndices.end()).data(),  // Convert the set to raw data
+        createInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size()),
+        createInfo.pQueueFamilyIndices = queueFamilyIndices.data(),  // Convert the set to raw data
     };
 
     // Create the buffer
