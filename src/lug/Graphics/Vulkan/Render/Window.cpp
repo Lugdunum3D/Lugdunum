@@ -5,6 +5,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/System/Debug.hpp>
@@ -515,77 +516,54 @@ bool Window::initFramesData() {
     _framesData.resize(frameDataSize);
     _acquireImageDatas.resize(frameDataSize + 1);
 
-    VkResult result{VK_SUCCESS};
     API::Builder::CommandBuffer commandBufferBuilderInstance(_renderer.getDevice(), _commandPool);
-
     commandBufferBuilderInstance.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
+    API::Builder::Semaphore semaphoreBuilderInstance(_renderer.getDevice());
 
     for (uint32_t i = 0; i < frameDataSize; ++i) {
         // All draws finished semaphore
         {
-            VkSemaphore semaphore;
-            VkSemaphoreCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = 0
-            };
-            result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
-
-            if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+            VkResult result{VK_SUCCESS};
+            if (!semaphoreBuilderInstance.build(_framesData[i].allDrawsFinishedSemaphore, &result)) {
+                LUG_LOG.error("Window::initFramesData: Can't create semaphore: {}", result);
                 return false;
             }
-
-            _framesData[i].allDrawsFinishedSemaphore = API::Semaphore(semaphore, &_renderer.getDevice());
         }
 
         // Image ready semaphores
         {
-            VkSemaphoreCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = 0
-            };
             _framesData[i].imageReadySemaphores.resize(_initInfo.renderViewsInitInfo.size());
 
             for (uint32_t j = 0; j < _initInfo.renderViewsInitInfo.size(); ++j) {
-                VkSemaphore semaphore;
-                result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
-
-                if (result != VK_SUCCESS) {
-                    LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                VkResult result{VK_SUCCESS};
+                if (!semaphoreBuilderInstance.build(_framesData[i].imageReadySemaphores[j], &result)) {
+                    LUG_LOG.error("Window::initFramesData: Can't create semaphore: {}", result);
                     return false;
                 }
-
-                _framesData[i].imageReadySemaphores[j] = API::Semaphore(semaphore, &_renderer.getDevice());
             }
         }
 
         // Command buffers
-        _framesData[i].cmdBuffers.resize(2); // The builder will build according to the array size.
-        if (!commandBufferBuilderInstance.build(_framesData[i].cmdBuffers, &result)) {
-            LUG_LOG.error("Window::initFramesData: Can't create the command buffer: {}", result);
-            return false;
+        {
+            VkResult result{VK_SUCCESS};
+            _framesData[i].cmdBuffers.resize(2); // The builder will build according to the array size.
+            if (!commandBufferBuilderInstance.build(_framesData[i].cmdBuffers, &result)) {
+                LUG_LOG.error("Window::initFramesData: Can't create the command buffer: {}", result);
+                return false;
+            }
         }
     }
 
     for (uint32_t i = 0; i < frameDataSize + 1; ++i) {
         // Acquire image semaphore
         {
-            VkSemaphore semaphore;
-            VkSemaphoreCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = 0
-            };
-            result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
-
-            if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+            VkResult result{VK_SUCCESS};
+            if (!semaphoreBuilderInstance.build(_acquireImageDatas[i].completeSemaphore, &result)) {
+                LUG_LOG.error("Window::initFramesData: Can't create semaphore: {}", result);
                 return false;
             }
 
-            _acquireImageDatas[i].completeSemaphore = API::Semaphore(semaphore, &_renderer.getDevice());
             _acquireImageDatas[i].imageIdx = -1;
         }
     }

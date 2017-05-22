@@ -10,9 +10,15 @@ namespace API {
 
 class Device;
 
+namespace Builder {
+class Semaphore;
+}
+
 class LUG_GRAPHICS_API Semaphore {
+    friend Builder::Semaphore;
+
 public:
-    explicit Semaphore(VkSemaphore semaphore = VK_NULL_HANDLE, const Device* device = nullptr);
+    Semaphore() = default;
 
     Semaphore(const Semaphore&) = delete;
     Semaphore(Semaphore&& semaphore);
@@ -27,6 +33,9 @@ public:
     }
 
     void destroy();
+
+private:
+    explicit Semaphore(VkSemaphore semaphore, const Device* device);
 
 private:
     VkSemaphore _semaphore{ VK_NULL_HANDLE };
