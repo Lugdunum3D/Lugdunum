@@ -10,7 +10,13 @@ namespace API {
 
 class Device;
 
+namespace Builder {
+class Framebuffer;
+}
+
 class LUG_GRAPHICS_API Framebuffer {
+    friend class Builder::Framebuffer;
+
 public:
     // TODO: Declare offset and extent outside
     struct Extent {
@@ -19,7 +25,7 @@ public:
     };
 
 public:
-    explicit Framebuffer(VkFramebuffer Framebuffer = VK_NULL_HANDLE, const Device* device = nullptr, const Extent& extent = {0, 0});
+    Framebuffer() = default;
 
     Framebuffer(const Framebuffer&) = delete;
     Framebuffer(Framebuffer&& Framebuffer);
@@ -38,6 +44,9 @@ public:
     }
 
     void destroy();
+
+private:
+    explicit Framebuffer(VkFramebuffer Framebuffer, const Device* device, const Extent& extent);
 
 private:
     VkFramebuffer _framebuffer{VK_NULL_HANDLE};

@@ -12,6 +12,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Fence.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Image.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
@@ -437,35 +438,23 @@ bool Forward::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
     // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
     API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional]->getRenderPass();
 
-    VkResult result{VK_SUCCESS};
     _framesData.resize(imageViews.size());
 
     for (size_t i = 0; i < imageViews.size(); i++) {
-        VkImageView attachments[2]{
-            static_cast<VkImageView>(imageViews[i]),
-            static_cast<VkImageView>(_framesData[i].depthBuffer.imageView)
-        };
+        // Create depth buffer image view
+        API::Builder::Framebuffer framebufferBuilder(*_device);
 
-        VkFramebufferCreateInfo framebufferInfo = {};
-        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        framebufferInfo.renderPass = static_cast<VkRenderPass>(*renderPass);
-        framebufferInfo.attachmentCount = 2;
-        framebufferInfo.pAttachments = attachments;
-        framebufferInfo.width = imageViews[i].getImage()->getExtent().width;
-        framebufferInfo.height = imageViews[i].getImage()->getExtent().height;
-        framebufferInfo.layers = 1;
+        framebufferBuilder.setRenderPass(renderPass);
+        framebufferBuilder.addAttachment(&imageViews[i]);
+        framebufferBuilder.addAttachment(&_framesData[i].depthBuffer.imageView);
+        framebufferBuilder.setWidth(imageViews[i].getImage()->getExtent().width);
+        framebufferBuilder.setHeight(imageViews[i].getImage()->getExtent().height);
 
-        VkFramebuffer fb;
-        result = vkCreateFramebuffer(static_cast<VkDevice>(*_device), &framebufferInfo, nullptr, &fb);
-
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Failed to create framebuffer: {}", result);
+        VkResult result{VK_SUCCESS};
+        if (!framebufferBuilder.build(_framesData[i].frameBuffer, &result)) {
+            LUG_LOG.error("Forward::initFramebuffers: Can't create framebuffer: {}", result);
             return false;
         }
-
-        // TODO: Remove the extent initializer list when struct Extent is externalised
-        _framesData[i].frameBuffer.destroy();
-        _framesData[i].frameBuffer = API::Framebuffer(fb, _device, {imageViews[i].getImage()->getExtent().width, imageViews[i].getImage()->getExtent().height});
     }
 
     return true;
