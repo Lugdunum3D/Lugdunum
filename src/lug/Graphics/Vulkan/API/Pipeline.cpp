@@ -1,9 +1,9 @@
 #include <lug/Graphics/Vulkan/API/Pipeline.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSetLayout.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/ShaderModule.hpp>
 #include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/ShaderModule.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
@@ -77,11 +77,34 @@ void Pipeline::bind(const CommandBuffer* commandBuffer) {
 }
 
 std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device, const std::string& vertexShaderFile, const std::string& fragmentShaderFile, VkFormat colorFormat) {
-    auto vertexShader = ShaderModule::create(vertexShaderFile, device);
-    auto fragmentShader = ShaderModule::create(fragmentShaderFile, device);
+    API::ShaderModule vertexShader;
+    {
+        Builder::ShaderModule shaderModuleBuilder(*device);
 
-    if (vertexShader == nullptr || fragmentShader == nullptr) {
-        return nullptr;
+        if (!shaderModuleBuilder.loadFromFile(vertexShaderFile)) {
+            return nullptr;
+        }
+
+        VkResult result{VK_SUCCESS};
+        if (!shaderModuleBuilder.build(vertexShader, &result)) {
+            LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create vertex shader: {}", result);
+            return nullptr;
+        }
+    }
+
+    API::ShaderModule fragmentShader;
+    {
+        Builder::ShaderModule shaderModuleBuilder(*device);
+
+        if (!shaderModuleBuilder.loadFromFile(fragmentShaderFile)) {
+            return nullptr;
+        }
+
+        VkResult result{VK_SUCCESS};
+        if (!shaderModuleBuilder.build(fragmentShader, &result)) {
+            LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create fragment shader: {}", result);
+            return nullptr;
+        }
     }
 
     // Vertex shader stage
@@ -90,7 +113,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         vertexShaderStage.pNext = nullptr,
         vertexShaderStage.flags = 0,
         vertexShaderStage.stage = VK_SHADER_STAGE_VERTEX_BIT,
-        vertexShaderStage.module = static_cast<VkShaderModule>(*vertexShader),
+        vertexShaderStage.module = static_cast<VkShaderModule>(vertexShader),
         vertexShaderStage.pName = "main",
         vertexShaderStage.pSpecializationInfo = nullptr
     };
@@ -101,7 +124,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         fragmentShaderStage.pNext = nullptr,
         fragmentShaderStage.flags = 0,
         fragmentShaderStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT,
-        fragmentShaderStage.module = static_cast<VkShaderModule>(*fragmentShader),
+        fragmentShaderStage.module = static_cast<VkShaderModule>(fragmentShader),
         fragmentShaderStage.pName = "main",
         fragmentShaderStage.pSpecializationInfo = nullptr
     };

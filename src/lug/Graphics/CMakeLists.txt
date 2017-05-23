@@ -43,6 +43,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Builder/Instance.cpp
     ${SRCROOT}/Vulkan/API/Builder/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/API/Builder/Semaphore.cpp
+    ${SRCROOT}/Vulkan/API/Builder/ShaderModule.cpp
     ${SRCROOT}/Vulkan/API/Builder/Swapchain.cpp
 
     ${SRCROOT}/Vulkan/API/Buffer.cpp
@@ -163,6 +164,7 @@ set(INC
     ${INCROOT}/Vulkan/API/Builder/PipelineLayout.hpp
     ${INCROOT}/Vulkan/API/Builder/PipelineLayout.inl
     ${INCROOT}/Vulkan/API/Builder/Semaphore.hpp
+    ${INCROOT}/Vulkan/API/Builder/ShaderModule.hpp
     ${INCROOT}/Vulkan/API/Builder/Swapchain.hpp
     ${INCROOT}/Vulkan/API/Builder/Swapchain.inl
 

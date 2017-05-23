@@ -12,9 +12,15 @@ namespace API {
 
 class Device;
 
+namespace Builder {
+class ShaderModule;
+}
+
 class LUG_GRAPHICS_API ShaderModule {
+    friend Builder::ShaderModule;
+
 public:
-    explicit ShaderModule(VkShaderModule shaderModule = VK_NULL_HANDLE, const Device* device = nullptr);
+    ShaderModule() = default;
 
     ShaderModule(const ShaderModule&) = delete;
     ShaderModule(ShaderModule&& shaderModule);
@@ -30,7 +36,8 @@ public:
 
     void destroy();
 
-    static std::unique_ptr<ShaderModule> create(const std::string& file, const Device* device);
+private:
+    explicit ShaderModule(VkShaderModule shaderModule, const Device* device);
 
 private:
     VkShaderModule _shaderModule{VK_NULL_HANDLE};
