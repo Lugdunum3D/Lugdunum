@@ -143,7 +143,7 @@ bool Forward::render(
 
         renderPass->begin(
             &cmdBuffer,
-            frameData.frameBuffer,
+            frameData.framebuffer,
             {viewport.extent.width, viewport.extent.height},
             {viewport.offset.x, viewport.offset.y});
 
@@ -451,7 +451,7 @@ bool Forward::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
         framebufferBuilder.setHeight(imageViews[i].getImage()->getExtent().height);
 
         VkResult result{VK_SUCCESS};
-        if (!framebufferBuilder.build(_framesData[i].frameBuffer, &result)) {
+        if (!framebufferBuilder.build(_framesData[i].framebuffer, &result)) {
             LUG_LOG.error("Forward::initFramebuffers: Can't create framebuffer: {}", result);
             return false;
         }

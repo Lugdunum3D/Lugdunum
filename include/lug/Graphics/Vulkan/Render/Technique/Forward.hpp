@@ -30,7 +30,7 @@ private:
 
     struct FrameData {
         DepthBuffer depthBuffer;
-        API::Framebuffer frameBuffer;
+        API::Framebuffer framebuffer;
         API::Fence fence;
 
         // There is actually only 1 command buffer
