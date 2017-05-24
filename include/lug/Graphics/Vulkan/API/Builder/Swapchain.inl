@@ -1,3 +1,7 @@
+inline void Swapchain::setPreferences(Renderer::Preferences::Swapchain& preferences) {
+    _preferences = &preferences;
+}
+
 inline void Swapchain::setSurface(VkSurfaceKHR surface) {
     _surface = surface;
 }

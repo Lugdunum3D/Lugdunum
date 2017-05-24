@@ -8,8 +8,6 @@
 #include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
-#include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
-#include <lug/System/Debug.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
@@ -338,109 +336,33 @@ bool Window::initPresentQueue() {
 bool Window::initSwapchain() {
     PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
 
-    LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
-
-    // TODO: Find a way to put Preferences elsewhere
-    Renderer::Preferences::Swapchain& swapchainPreferences = _renderer.getPreferences().swapchain;
-    VkColorSpaceKHR colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-    uint32_t minImageCount = 3;
-
     API::Builder::Swapchain swapchainBuilder(_renderer.getDevice());
-    swapchainBuilder.setImageColorSpace(colorSpace);
+    swapchainBuilder.setPreferences(_renderer.getPreferences().swapchain);
+    swapchainBuilder.setImageColorSpace(VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+    swapchainBuilder.setMinImageCount(3);
 
+    // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
+    if (info->swapchain.capabilities.currentExtent.height == 0xFFFFFFFF
+        && info->swapchain.capabilities.currentExtent.width == 0xFFFFFFFF) {
+        swapchainBuilder.setImageExtent(
+            {
+                _mode.width,
+                _mode.height
+            });
+    } else {
+        swapchainBuilder.setImageExtent(
+            {
+                info->swapchain.capabilities.currentExtent.width,
+                info->swapchain.capabilities.currentExtent.height
+            });
+    }
 
-    // Check requirements for swapchain
-    {
-        // Check the present mode
-        {
-            bool presentModeFound = false;
-            for (auto presentMode : swapchainPreferences.presentModes) {
-                if (std::find(info->swapchain.presentModes.begin(), info->swapchain.presentModes.end(), presentMode) != info->swapchain.presentModes.end()) {
-                    LUG_LOG.info("RendererWindow: Use present mode {}", API::RTTI::toStr(presentMode));
-
-                    swapchainBuilder.setPresentMode(presentMode);
-                    presentModeFound = true;
-                    break;
-                }
-            }
-
-            if (!presentModeFound) {
-                LUG_LOG.error("RendererWindow: Missing present mode supported by Lugdunum");
-                return false;
-            }
-        }
-
-        // Check the formats
-        {
-            bool formatFound = false;
-            for (auto format : swapchainPreferences.formats) {
-                if (std::find_if(info->swapchain.formats.begin(), info->swapchain.formats.end(), [&colorSpace, &format](const VkSurfaceFormatKHR& lhs) {
-                    return lhs.colorSpace == colorSpace && format == lhs.format;
-                }) != info->swapchain.formats.end()) {
-                    LUG_LOG.info("RendererWindow: Use format {}", API::RTTI::toStr(format));
-
-                    swapchainBuilder.setImageFormat(format);
-                    formatFound = true;
-                    break;
-                }
-            }
-
-            if (!formatFound) {
-                LUG_LOG.error("RendererWindow: Missing swapchain format supported by Lugdunum");
-                return false;
-            }
-        }
-
-        // Check composite alpha
-        {
-            bool compositeAlphaFound = false;
-            for (auto compositeAlphaPreferency : swapchainPreferences.compositeAlphas) {
-                if (info->swapchain.capabilities.supportedCompositeAlpha & compositeAlphaPreferency) {
-                    LUG_LOG.info("RendererWindow: Use composite alpha {}", API::RTTI::toStr(compositeAlphaPreferency));
-
-                    swapchainBuilder.setCompositeAlpha(compositeAlphaPreferency);
-                    compositeAlphaFound = true;
-                    break;
-                }
-            }
-
-            if (!compositeAlphaFound) {
-                LUG_LOG.error("RendererWindow: Missing composite alpha supported by Lugdunum");
-                return false;
-            }
-        }
-
-        // Check image counts
-        if (info->swapchain.capabilities.maxImageCount > 0 && info->swapchain.capabilities.maxImageCount < minImageCount) {
-            LUG_LOG.error("RendererWindow: Not enough images ({} required), found {}", minImageCount, info->swapchain.capabilities.maxImageCount);
-            return false;
-        }
-
-        swapchainBuilder.setMinImageCount(minImageCount);
-
-        // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
-        if (info->swapchain.capabilities.currentExtent.height == 0xFFFFFFFF
-            && info->swapchain.capabilities.currentExtent.width == 0xFFFFFFFF) {
-            swapchainBuilder.setImageExtent(
-                {
-                    _mode.width,
-                    _mode.height
-                });
-        } else {
-            swapchainBuilder.setImageExtent(
-                {
-                    info->swapchain.capabilities.currentExtent.width,
-                    info->swapchain.capabilities.currentExtent.height
-                });
-        }
-
-        // Find the transformation of the surface
-        if (info->swapchain.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
-            // We prefer a non-rotated transform
-            swapchainBuilder.setPreTransform(VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
-        } else {
-            swapchainBuilder.setPreTransform(info->swapchain.capabilities.currentTransform);
-        }
+    // Find the transformation of the surface
+    if (info->swapchain.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
+        // We prefer a non-rotated transform
+        swapchainBuilder.setPreTransform(VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+    } else {
+        swapchainBuilder.setPreTransform(info->swapchain.capabilities.currentTransform);
     }
 
     swapchainBuilder.setSurface(static_cast<VkSurfaceKHR>(_surface));

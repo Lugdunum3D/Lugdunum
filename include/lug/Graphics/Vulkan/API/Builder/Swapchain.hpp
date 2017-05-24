@@ -7,6 +7,7 @@
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/QueueFamily.hpp>
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
+#include <lug/Graphics/Vulkan/Renderer.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -27,6 +28,7 @@ public:
     ~Swapchain() = default;
 
     // Setters
+    void setPreferences(Renderer::Preferences::Swapchain& preferences);
     void setSurface(VkSurfaceKHR surface);
     void setMinImageCount(uint32_t minImageCount);
     void setImageFormat(VkFormat imageFormat);
@@ -46,19 +48,23 @@ public:
     std::unique_ptr<API::Swapchain> build(VkResult* returnResult = nullptr);
 
 private:
+    bool setFromPreferences();
+
+private:
     const API::Device& _device;
 
+    Renderer::Preferences::Swapchain* _preferences{nullptr};
     VkSurfaceKHR _surface{VK_NULL_HANDLE};
     uint32_t _minImageCount;
-    VkFormat _imageFormat{VK_FORMAT_B8G8R8A8_UNORM};
-    VkColorSpaceKHR _imageColorSpace{VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
+    VkFormat _imageFormat{VK_FORMAT_MAX_ENUM};
+    VkColorSpaceKHR _imageColorSpace{VK_COLOR_SPACE_MAX_ENUM_KHR};
     VkExtent2D _imageExtent{};
     VkImageUsageFlags _imageUsage{VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT};
     bool _exclusive{false};
     std::set<uint32_t> _queueFamilyIndices;
     VkSurfaceTransformFlagBitsKHR _preTransform{VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR};
-    VkCompositeAlphaFlagBitsKHR _compositeAlpha{VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR};
-    VkPresentModeKHR _presentMode{VK_PRESENT_MODE_MAILBOX_KHR};
+    VkCompositeAlphaFlagBitsKHR _compositeAlpha{VK_COMPOSITE_ALPHA_FLAG_BITS_MAX_ENUM_KHR};
+    VkPresentModeKHR _presentMode{VK_PRESENT_MODE_MAX_ENUM_KHR};
     VkBool32 _clipped{VK_TRUE};
     VkSwapchainKHR _oldSwapchain{VK_NULL_HANDLE};
 };
