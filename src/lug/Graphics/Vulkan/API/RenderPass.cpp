@@ -41,43 +41,6 @@ void RenderPass::destroy() {
     }
 }
 
-void RenderPass::begin(
-    const CommandBuffer* commandBuffer,
-    const Framebuffer& framebuffer,
-    const Math::Vec2f& renderExtent,
-    const Math::Vec2f& renderOffset,
-    VkSubpassContents contents) {
-
-    VkClearValue clearColors[2];
-
-    clearColors[0].color = {
-        {0.0f, 0.0f, 0.0f, 1.0f}
-    };
-    clearColors[1].depthStencil = {
-        1.0f, // Depth clear value
-        0 // Stecil clear value (We don't care yet)
-    };
-
-    VkRenderPassBeginInfo beginInfo{
-        beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        beginInfo.pNext = nullptr,
-        beginInfo.renderPass = static_cast<VkRenderPass>(_renderPass),
-        beginInfo.framebuffer = static_cast<VkFramebuffer>(framebuffer),
-        {}, // beginInfo.renderArea
-        beginInfo.clearValueCount = 2,
-        beginInfo.pClearValues = clearColors
-    };
-
-    beginInfo.renderArea.offset = {(int32_t)renderOffset.x(), (int32_t)renderOffset.y()};
-    beginInfo.renderArea.extent = {(uint32_t)renderExtent.x(), (uint32_t)renderExtent.y()};
-
-    vkCmdBeginRenderPass(static_cast<VkCommandBuffer>(*commandBuffer), &beginInfo, contents);
-}
-
-void RenderPass::end(const CommandBuffer* commandBuffer) {
-    vkCmdEndRenderPass(static_cast<VkCommandBuffer>(*commandBuffer));
-}
-
 } // API
 } // Vulkan
 } // Graphics

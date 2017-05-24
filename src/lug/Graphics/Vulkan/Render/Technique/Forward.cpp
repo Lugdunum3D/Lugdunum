@@ -141,11 +141,20 @@ bool Forward::render(
         // All the lights pipelines have the same renderPass
         API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional]->getRenderPass();
 
-        renderPass->begin(
-            &cmdBuffer,
-            frameData.framebuffer,
-            {viewport.extent.width, viewport.extent.height},
-            {viewport.offset.x, viewport.offset.y});
+        API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
+            /* beginRenderPass.framebuffer */ frameData.framebuffer,
+            /* beginRenderPass.renderArea */ {},
+            /* beginRenderPass.clearValues */ {}
+        };
+
+        beginRenderPass.renderArea.offset = {static_cast<int32_t>(viewport.offset.x), static_cast<int32_t>(viewport.offset.y)};
+        beginRenderPass.renderArea.extent = {static_cast<uint32_t>(viewport.extent.width), static_cast<uint32_t>(viewport.extent.height)};
+
+        beginRenderPass.clearValues.resize(2);
+        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        beginRenderPass.clearValues[1].depthStencil = {1.0f, 0};
+
+        cmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
 
         API::CommandBuffer::CmdBindDescriptors cameraBind {
             /* cameraBind.pipelineLayout */ *_pipelines[Light::Light::Type::Directional]->getLayout(),
@@ -244,7 +253,7 @@ bool Forward::render(
             }
         }
 
-        renderPass->end(&cmdBuffer);
+        cmdBuffer.endRenderPass();
     }
 
     if (!cmdBuffer.end()) {

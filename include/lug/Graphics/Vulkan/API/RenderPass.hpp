@@ -38,14 +38,6 @@ public:
 
     void destroy();
 
-    // TODO: Replace Math::Vec2f with Extent struct (not defined yet)
-    void begin(const CommandBuffer* commandBuffer,
-                const Framebuffer& framebuffer,
-                const Math::Vec2f& renderExtent = {0, 0},
-                const Math::Vec2f& renderOffset = {0, 0},
-                VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
-    void end(const CommandBuffer* commandBuffer);
-
 private:
     explicit RenderPass(VkRenderPass renderPass, const Device* device);
 
