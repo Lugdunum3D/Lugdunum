@@ -14,9 +14,15 @@ class CommandBuffer;
 class Device;
 class Framebuffer;
 
+namespace Builder {
+class RenderPass;
+} // Builder
+
 class LUG_GRAPHICS_API RenderPass {
+    friend class Builder::RenderPass;
+
 public:
-    explicit RenderPass(VkRenderPass renderPass = VK_NULL_HANDLE, const Device* device = nullptr);
+    RenderPass() = default;
 
     RenderPass(const RenderPass&) = delete;
     RenderPass(RenderPass&& device);
@@ -40,7 +46,9 @@ public:
                 VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE);
     void end(const CommandBuffer* commandBuffer);
 
-    static std::unique_ptr<RenderPass> create(const Device* device, VkFormat colorFormat);
+private:
+    explicit RenderPass(VkRenderPass renderPass, const Device* device);
+
 private:
     VkRenderPass _renderPass{VK_NULL_HANDLE};
     const Device* _device{nullptr};

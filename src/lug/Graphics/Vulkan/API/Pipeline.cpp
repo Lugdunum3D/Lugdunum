@@ -1,9 +1,11 @@
 #include <lug/Graphics/Vulkan/API/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSetLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/ShaderModule.hpp>
 #include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
+#include <lug/Graphics/Vulkan/API/Image.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
@@ -320,11 +322,60 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
         }
     }
 
-    auto renderPass = RenderPass::create(device, colorFormat);
+    std::unique_ptr<API::RenderPass> renderPass;
+    {
+        Builder::RenderPass renderPassBuilder(*device);
 
-    if (!renderPass) {
-        LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create render pass: {}", result);
-        return nullptr;
+        VkAttachmentDescription colorAttachment{
+            colorAttachment.flags = 0,
+            colorAttachment.format = colorFormat,
+            colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT,
+            colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            colorAttachment.initialLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+        };
+
+        auto colorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
+
+        VkFormat depthFormat = Image::findSupportedFormat(
+            device,
+            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+
+        VkAttachmentDescription depthAttachment{
+            depthAttachment.flags = 0,
+            depthAttachment.format = depthFormat,
+            depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT,
+            depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+        };
+
+        auto depthAttachmentIndex = renderPassBuilder.addAttachment(depthAttachment);
+
+        Builder::RenderPass::SubpassDescription subpassDescription{
+            subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
+            /* subpassDescription.inputAttachments */ {},
+            /* subpassDescription.colorAttachments */ {{colorAttachmentIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}},
+            /* subpassDescription.resolveAttachments */ {},
+            /* subpassDescription.depthStencilAttachment */ {depthAttachmentIndex, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL},
+            /* subpassDescription.preserveAttachments */ {},
+        };
+
+        renderPassBuilder.addSubpass(subpassDescription);
+
+        renderPass = renderPassBuilder.build(&result);
+        if (!renderPass) {
+            LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create render pass: {}", result);
+            return nullptr;
+        }
     }
 
     VkViewport viewport{
