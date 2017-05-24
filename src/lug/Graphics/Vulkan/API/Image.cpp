@@ -73,7 +73,7 @@ void Image::changeLayout(
     VkPipelineStageFlags srcStageMask,
     VkPipelineStageFlags dstStageMask,
     uint32_t srcQueueFamilyIndex,
-    uint32_t dstQueueFamilyIndex) {
+    uint32_t dstQueueFamilyIndex) const {
 
     VkImageMemoryBarrier imageBarrier{
         imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,

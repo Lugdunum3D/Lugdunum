@@ -481,7 +481,7 @@ bool Window::initSwapchain() {
             return false;
         }
 
-        return _swapchain.init();
+        return true;
     }
 }
 

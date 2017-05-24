@@ -6,7 +6,7 @@ inline bool Swapchain::isOutOfDate() const {
     return _outOfDate;
 }
 
-inline std::vector<Image>& Swapchain::getImages() {
+inline const std::vector<Image>& Swapchain::getImages() const {
     return _images;
 }
 

@@ -59,7 +59,7 @@ bool Swapchain::build(API::Swapchain& swapchain, VkResult* returnResult) {
 
     swapchain = API::Swapchain(vkSwapchain, &_device, {_imageFormat, _imageColorSpace}, _imageExtent);
 
-    return true;
+    return swapchain.init();
 }
 
 std::unique_ptr<API::Swapchain> Swapchain::build(VkResult* returnResult) {
