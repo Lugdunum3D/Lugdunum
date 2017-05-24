@@ -1,12 +1,14 @@
 #pragma once
 
 #include <memory>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
 #include <lug/Graphics/Vulkan/API/Fence.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
+#include <lug/Graphics/Vulkan/API/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
@@ -77,7 +79,7 @@ private:
     InitInfo _initInfo;
 
     Renderer& _renderer;
-    VkSurfaceKHR _surface{VK_NULL_HANDLE};
+    API::Surface _surface{};
     API::Swapchain _swapchain{};
 
     API::DescriptorPool _descriptorPool{};

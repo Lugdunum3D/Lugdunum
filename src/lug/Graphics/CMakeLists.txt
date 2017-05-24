@@ -46,6 +46,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Builder/RenderPass.cpp
     ${SRCROOT}/Vulkan/API/Builder/Semaphore.cpp
     ${SRCROOT}/Vulkan/API/Builder/ShaderModule.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Surface.cpp
     ${SRCROOT}/Vulkan/API/Builder/Swapchain.cpp
 
     ${SRCROOT}/Vulkan/API/Buffer.cpp
@@ -73,6 +74,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/RenderPass.cpp
     ${SRCROOT}/Vulkan/API/Semaphore.cpp
     ${SRCROOT}/Vulkan/API/ShaderModule.cpp
+    ${SRCROOT}/Vulkan/API/Surface.cpp
     ${SRCROOT}/Vulkan/API/Swapchain.cpp
 
     ${SRCROOT}/Vulkan/Render/BufferPool.cpp
@@ -171,6 +173,8 @@ set(INC
     ${INCROOT}/Vulkan/API/Builder/RenderPass.hpp
     ${INCROOT}/Vulkan/API/Builder/Semaphore.hpp
     ${INCROOT}/Vulkan/API/Builder/ShaderModule.hpp
+    ${INCROOT}/Vulkan/API/Builder/Surface.hpp
+    ${INCROOT}/Vulkan/API/Builder/Surface.inl
     ${INCROOT}/Vulkan/API/Builder/Swapchain.hpp
     ${INCROOT}/Vulkan/API/Builder/Swapchain.inl
 
@@ -210,6 +214,7 @@ set(INC
     ${INCROOT}/Vulkan/API/RenderPass.hpp
     ${INCROOT}/Vulkan/API/Semaphore.hpp
     ${INCROOT}/Vulkan/API/ShaderModule.hpp
+    ${INCROOT}/Vulkan/API/Surface.hpp
     ${INCROOT}/Vulkan/API/Swapchain.hpp
     ${INCROOT}/Vulkan/API/Swapchain.inl
 

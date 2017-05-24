@@ -6,6 +6,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/System/Debug.hpp>
@@ -216,40 +217,18 @@ bool Window::initDescriptorPool() {
  * @return Success
  */
 bool Window::initSurface() {
+    VkResult result{VK_SUCCESS};
+    API::Builder::Surface surfaceBuilder(_renderer.getInstance());
+
 #if defined(LUG_SYSTEM_WINDOWS) // Win32 surface
-    VkWin32SurfaceCreateInfoKHR createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.hinstance = _impl->getHinstance(),
-        createInfo.hwnd = _impl->getHandle()
-    };
-
-    VkResult result = vkCreateWin32SurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), &createInfo, nullptr, &_surface);
+    surfaceBuilder.setWindowInformations(_impl->getHinstance(), _impl->getHandle());
 #elif defined(LUG_SYSTEM_LINUX) // Linux surface
-    VkXlibSurfaceCreateInfoKHR createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.dpy = _impl->getDisplay(),
-        createInfo.window = _impl->getWindow()
-    };
-
-    VkResult result = vkCreateXlibSurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), &createInfo, nullptr, &_surface);
+    surfaceBuilder.setWindowInformations(_impl->getDisplay(), _impl->getWindow());
 #elif defined(LUG_SYSTEM_ANDROID) // Android Surface
-    VkAndroidSurfaceCreateInfoKHR createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.window = _impl->getWindow()
-    };
-
-    VkResult result = vkCreateAndroidSurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), &createInfo, nullptr, &_surface);
-#else
-    #error "Window::initSurface Unknow platform"
+    surfaceBuilder.setWindowInformations(_impl->getWindow());
 #endif
 
-    if (result != VK_SUCCESS) {
+    if (!surfaceBuilder.build(_surface, &result)) {
         LUG_LOG.error("RendererWindow: Can't initialize surface: {}", result);
         return false;
     }
@@ -265,7 +244,7 @@ bool Window::initSwapchainCapabilities() {
 
     // Get swapchain capabilities
     {
-        result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(info->handle, _surface, &info->swapchain.capabilities);
+        result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(info->handle, static_cast<VkSurfaceKHR>(_surface), &info->swapchain.capabilities);
 
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't get surface capabilities: {}", result);
@@ -273,7 +252,7 @@ bool Window::initSwapchainCapabilities() {
         }
 
         uint32_t formatsCount = 0;
-        result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, _surface, &formatsCount, nullptr);
+        result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, static_cast<VkSurfaceKHR>(_surface), &formatsCount, nullptr);
 
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve formats count: {}", result);
@@ -281,7 +260,7 @@ bool Window::initSwapchainCapabilities() {
         }
 
         info->swapchain.formats.resize(formatsCount);
-        result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, _surface, &formatsCount, info->swapchain.formats.data());
+        result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, static_cast<VkSurfaceKHR>(_surface), &formatsCount, info->swapchain.formats.data());
 
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve formats: {}", result);
@@ -289,7 +268,7 @@ bool Window::initSwapchainCapabilities() {
         }
 
         uint32_t presentModesCount = 0;
-        result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, _surface, &presentModesCount, nullptr);
+        result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, static_cast<VkSurfaceKHR>(_surface), &presentModesCount, nullptr);
 
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve present modes count: {}", result);
@@ -297,7 +276,7 @@ bool Window::initSwapchainCapabilities() {
         }
 
         info->swapchain.presentModes.resize(presentModesCount);
-        result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, _surface, &presentModesCount, info->swapchain.presentModes.data());
+        result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, static_cast<VkSurfaceKHR>(_surface), &presentModesCount, info->swapchain.presentModes.data());
 
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve present modes: {}", result);
@@ -318,7 +297,7 @@ bool Window::initPresentQueue() {
         VkResult result{VK_SUCCESS};
         for (auto& queueFamily : _renderer.getDevice().getQueueFamilies()) {
             VkBool32 supported = 0;
-            result = vkGetPhysicalDeviceSurfaceSupportKHR(info->handle, queueFamily.getIdx(), _surface, &supported);
+            result = vkGetPhysicalDeviceSurfaceSupportKHR(info->handle, queueFamily.getIdx(), static_cast<VkSurfaceKHR>(_surface), &supported);
 
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererWindow: Can't check if queue supports presentation: {}", result);
@@ -464,7 +443,7 @@ bool Window::initSwapchain() {
         }
     }
 
-    swapchainBuilder.setSurface(_surface);
+    swapchainBuilder.setSurface(static_cast<VkSurfaceKHR>(_surface));
     swapchainBuilder.setOldSwapchain(static_cast<VkSwapchainKHR>(_swapchain));
 
     // Create the swapchain
@@ -689,11 +668,7 @@ void Window::destroyRender() {
     _renderViews.clear();
 
     _swapchain.destroy();
-
-    if (_surface != VK_NULL_HANDLE) {
-        vkDestroySurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), _surface, nullptr);
-        _surface = VK_NULL_HANDLE;
-    }
+    _surface.destroy();
 
     _framesData.clear();
 
