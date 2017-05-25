@@ -75,8 +75,8 @@ bool Forward::render(
         scissor.offset = {(int32_t)_renderView->getScissor().offset.x, (int32_t)_renderView->getScissor().offset.y};
         scissor.extent = {(uint32_t)_renderView->getScissor().extent.width, (uint32_t)_renderView->getScissor().extent.height};
 
-        vkCmdSetViewport(static_cast<VkCommandBuffer>(cmdBuffer), 0, 1, &vkViewport);
-        vkCmdSetScissor(static_cast<VkCommandBuffer>(cmdBuffer), 0, 1, &scissor);
+        cmdBuffer.setViewport({vkViewport});
+        cmdBuffer.setScissor({scissor});
     }
 
     // Update camera buffer data
@@ -170,7 +170,7 @@ bool Forward::render(
         // We set them to 0 so that there is no blending
         {
             const float blendConstants[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-            vkCmdSetBlendConstants(static_cast<VkCommandBuffer>(cmdBuffer), blendConstants);
+            cmdBuffer.setBlendConstants(blendConstants);
         }
 
         for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
@@ -180,7 +180,7 @@ bool Forward::render(
                     // Blend constants are used as dst blend factor
                     // Now the depth buffer is filled, we can set the blend constants to 1 to enable blending
                     const float blendConstants[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-                    vkCmdSetBlendConstants(static_cast<VkCommandBuffer>(cmdBuffer), blendConstants);
+                    cmdBuffer.setBlendConstants(blendConstants);
                 }
             }
 
@@ -207,7 +207,6 @@ bool Forward::render(
 
                 if (!mesh->isModelMesh()) {
                     Mesh* vkMesh = static_cast<Mesh*>(mesh);
-                    VkBuffer vertexBuffer = static_cast<VkBuffer>(*vkMesh->getVertexBuffer());
                     VkDeviceSize vertexBufferOffset = 0;
                     VkDeviceSize indexBufferOffset = 0;
 
@@ -215,22 +214,27 @@ bool Forward::render(
                     Math::Mat4x4f pushConstants[] = {
                         meshInstance->getParent()->getTransform()
                     };
-                    vkCmdPushConstants(
-                        static_cast<VkCommandBuffer>(cmdBuffer),
-                        static_cast<VkPipelineLayout>(*lightPipeline->getLayout()),
-                        VK_SHADER_STAGE_VERTEX_BIT,
-                        0,
-                        sizeof(pushConstants),
-                        pushConstants);
 
-                    vkCmdBindVertexBuffers(static_cast<VkCommandBuffer>(cmdBuffer), 0, 1, &vertexBuffer, &vertexBufferOffset);
-                    vkCmdBindIndexBuffer(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkBuffer>(*vkMesh->getIndexBuffer()), indexBufferOffset, VK_INDEX_TYPE_UINT32);
-                    vkCmdDrawIndexed(static_cast<VkCommandBuffer>(cmdBuffer), (uint32_t)vkMesh->indices.size(), 1, 0, 0, 0);
+                    API::CommandBuffer::CmdPushConstants cmdPushConstants{
+                        cmdPushConstants.layout = static_cast<VkPipelineLayout>(*lightPipeline->getLayout()),
+                        cmdPushConstants.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+                        cmdPushConstants.offset = 0,
+                        cmdPushConstants.size = sizeof(pushConstants),
+                        cmdPushConstants.values = pushConstants
+                    };
+                    cmdBuffer.pushConstants(cmdPushConstants);
+
+                    cmdBuffer.bindVertexBuffers({vkMesh->getVertexBuffer()}, {vertexBufferOffset});
+                    cmdBuffer.bindIndexBuffer(*vkMesh->getIndexBuffer(), VK_INDEX_TYPE_UINT32, indexBufferOffset);
+
+                    API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed;
+                    cmdDrawIndexed.indexCount = static_cast<uint32_t>(vkMesh->indices.size());
+                    cmdDrawIndexed.instanceCount = 1;
+                    cmdBuffer.drawIndexed(cmdDrawIndexed);
                 } else {
                     Model::Mesh* modelMesh = static_cast<Model::Mesh*>(mesh);
                     Scene::ModelInstance* modelInstance = meshInstance->getModelInstance();
                     Model* model = static_cast<Model*>(modelInstance->getModel());
-                    const VkBuffer vertexBuffer = static_cast<VkBuffer>(*model->getVertexBuffer());
                     VkDeviceSize vertexBufferOffset = modelMesh->verticesOffset * sizeof(lug::Graphics::Render::Mesh::Vertex);
                     VkDeviceSize indexBufferOffset = modelMesh->indicesOffset * sizeof(uint32_t);
 
@@ -238,17 +242,22 @@ bool Forward::render(
                     Math::Mat4x4f pushConstants[] = {
                         modelInstance->getParent()->getTransform()
                     };
-                    vkCmdPushConstants(
-                        static_cast<VkCommandBuffer>(cmdBuffer),
-                        static_cast<VkPipelineLayout>(*lightPipeline->getLayout()),
-                        VK_SHADER_STAGE_VERTEX_BIT,
-                        0,
-                        sizeof(pushConstants),
-                        pushConstants);
+                    API::CommandBuffer::CmdPushConstants cmdPushConstants{
+                        cmdPushConstants.layout = static_cast<VkPipelineLayout>(*lightPipeline->getLayout()),
+                        cmdPushConstants.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+                        cmdPushConstants.offset = 0,
+                        cmdPushConstants.size = sizeof(pushConstants),
+                        cmdPushConstants.values = pushConstants
+                    };
+                    cmdBuffer.pushConstants(cmdPushConstants);
 
-                    vkCmdBindVertexBuffers(static_cast<VkCommandBuffer>(cmdBuffer), 0, 1, &vertexBuffer, &vertexBufferOffset);
-                    vkCmdBindIndexBuffer(static_cast<VkCommandBuffer>(cmdBuffer), static_cast<VkBuffer>(*model->getIndexBuffer()), indexBufferOffset, VK_INDEX_TYPE_UINT32);
-                    vkCmdDrawIndexed(static_cast<VkCommandBuffer>(cmdBuffer), (uint32_t)modelMesh->indices.size(), 1, 0, 0, 0);
+                    cmdBuffer.bindVertexBuffers({model->getVertexBuffer()}, {vertexBufferOffset});
+                    cmdBuffer.bindIndexBuffer(*model->getIndexBuffer(), VK_INDEX_TYPE_UINT32, indexBufferOffset);
+
+                    API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed;
+                    cmdDrawIndexed.indexCount = static_cast<uint32_t>(modelMesh->indices.size());
+                    cmdDrawIndexed.instanceCount = 1;
+                    cmdBuffer.drawIndexed(cmdDrawIndexed);
                 }
             }
         }

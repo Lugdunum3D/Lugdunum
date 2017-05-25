@@ -75,7 +75,7 @@ PipelineLayout* Pipeline::getLayout() const {
 }
 
 void Pipeline::bind(const CommandBuffer* commandBuffer) {
-    vkCmdBindPipeline(static_cast<VkCommandBuffer>(*commandBuffer), VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+    commandBuffer->bindPipeline(*this, VK_PIPELINE_BIND_POINT_GRAPHICS);
 }
 
 std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device, const std::string& vertexShaderFile, const std::string& fragmentShaderFile, VkFormat colorFormat) {
@@ -236,10 +236,10 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
     VkPipelineColorBlendAttachmentState colorBlendAttachment{
         colorBlendAttachment.blendEnable = VK_TRUE,
         colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE,
-        colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_CONSTANT_COLOR,
+        colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE,
         colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD,
-        colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE,
-        colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_CONSTANT_COLOR,
+        colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
+        colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO,
         colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD,
         colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
     };

@@ -49,15 +49,6 @@ public:
         return _extent;
     }
 
-    void changeLayout(CommandBuffer& commandBuffer,
-                    VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask,
-                    VkImageLayout oldLayout, VkImageLayout newLayout,
-                    VkImageAspectFlags aspect,
-                    VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                    VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                    uint32_t srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
-                    uint32_t dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED) const;
-
     void destroy();
 
     void bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);

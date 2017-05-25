@@ -26,6 +26,16 @@ void CommandBuffer::endRenderPass() {
     vkCmdEndRenderPass(static_cast<VkCommandBuffer>(_commandBuffer));
 }
 
+void CommandBuffer::drawIndexed(const CmdDrawIndexed& params) {
+    vkCmdDrawIndexed(
+        static_cast<VkCommandBuffer>(_commandBuffer),
+        params.indexCount,
+        params.instanceCount,
+        params.firstIndex,
+        params.vertexOffset,
+        params.firstInstance);
+}
+
 } // API
 } // Vulkan
 } // Graphics

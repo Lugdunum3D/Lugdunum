@@ -63,50 +63,6 @@ Image::~Image() {
     }
 }
 
-void Image::changeLayout(
-    CommandBuffer& commandBuffer,
-    VkAccessFlags srcAccessMask,
-    VkAccessFlags dstAccessMask,
-    VkImageLayout oldLayout,
-    VkImageLayout newLayout,
-    VkImageAspectFlags aspect,
-    VkPipelineStageFlags srcStageMask,
-    VkPipelineStageFlags dstStageMask,
-    uint32_t srcQueueFamilyIndex,
-    uint32_t dstQueueFamilyIndex) const {
-
-    VkImageMemoryBarrier imageBarrier{
-        imageBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
-        imageBarrier.pNext = nullptr,
-        imageBarrier.srcAccessMask = srcAccessMask,
-        imageBarrier.dstAccessMask = dstAccessMask,
-        imageBarrier.oldLayout = oldLayout,
-        imageBarrier.newLayout = newLayout,
-        imageBarrier.srcQueueFamilyIndex = srcQueueFamilyIndex,
-        imageBarrier.dstQueueFamilyIndex = dstQueueFamilyIndex,
-        imageBarrier.image = _image,
-        {} // imageBarrier.subresourceRange
-    };
-
-    imageBarrier.subresourceRange.aspectMask = aspect;
-    imageBarrier.subresourceRange.baseMipLevel = 0;
-    imageBarrier.subresourceRange.levelCount = 1;
-    imageBarrier.subresourceRange.baseArrayLayer = 0;
-    imageBarrier.subresourceRange.layerCount = 1;
-
-    vkCmdPipelineBarrier(
-        static_cast<VkCommandBuffer>(commandBuffer), // commandBuffer
-        srcStageMask,                                // srcStageMask
-        dstStageMask,                                // dstStageMask
-        VK_DEPENDENCY_BY_REGION_BIT,                 // dependencyFlags
-        0,                                           // memoryBarrierCount
-        nullptr,                                     // pMemoryBarriers
-        0,                                           // bufferMemoryBarrierCount
-        nullptr,                                     // pBufferMemoryBarriers
-        1,                                           // imageMemoryBarrierCount
-        &imageBarrier);                              // pImageMemoryBarriers
-}
-
 void Image::destroy() {
     if (_image != VK_NULL_HANDLE) {
         vkDestroyImage(static_cast<VkDevice>(*_device), _image, nullptr);

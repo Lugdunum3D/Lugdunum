@@ -484,13 +484,15 @@ bool Window::buildCommandBuffers() {
                 return false;
             }
 
-            _swapchain.getImages()[i].changeLayout(
-                cmdBuffer,
-                0,
-                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                VK_IMAGE_LAYOUT_UNDEFINED,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                VK_IMAGE_ASPECT_COLOR_BIT);
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
 
             if (!cmdBuffer.end()) {
                 return false;
@@ -505,13 +507,15 @@ bool Window::buildCommandBuffers() {
                 return false;
             }
 
-            _swapchain.getImages()[i].changeLayout(
-                cmdBuffer,
-                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                VK_ACCESS_MEMORY_READ_BIT,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-                VK_IMAGE_ASPECT_COLOR_BIT);
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
 
             if (!cmdBuffer.end()) {
                 return false;

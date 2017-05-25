@@ -16,6 +16,8 @@ class CommandBuffer;
 class Buffer;
 class DescriptorSet;
 class Framebuffer;
+class Image;
+class Pipeline;
 class PipelineLayout;
 class RenderPass;
 
@@ -46,6 +48,7 @@ public:
     #include <lug/Graphics/Vulkan/API/CommandBuffer/Buffer.inl>
     #include <lug/Graphics/Vulkan/API/CommandBuffer/DescriptorSet.inl>
     #include <lug/Graphics/Vulkan/API/CommandBuffer/RenderPass.inl>
+    #include <lug/Graphics/Vulkan/API/CommandBuffer/Pipeline.inl>
 
     bool reset(bool releaseRessources = false) const;
     void destroy();
