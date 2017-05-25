@@ -44,6 +44,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Builder/Instance.cpp
     ${SRCROOT}/Vulkan/API/Builder/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/API/Builder/RenderPass.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Sampler.cpp
     ${SRCROOT}/Vulkan/API/Builder/Semaphore.cpp
     ${SRCROOT}/Vulkan/API/Builder/ShaderModule.cpp
     ${SRCROOT}/Vulkan/API/Builder/Surface.cpp
@@ -72,6 +73,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/QueueFamily.cpp
     ${SRCROOT}/Vulkan/API/RTTI/Enum.cpp
     ${SRCROOT}/Vulkan/API/RenderPass.cpp
+    ${SRCROOT}/Vulkan/API/Sampler.cpp
     ${SRCROOT}/Vulkan/API/Semaphore.cpp
     ${SRCROOT}/Vulkan/API/ShaderModule.cpp
     ${SRCROOT}/Vulkan/API/Surface.cpp
@@ -171,6 +173,8 @@ set(INC
     ${INCROOT}/Vulkan/API/Builder/PipelineLayout.hpp
     ${INCROOT}/Vulkan/API/Builder/PipelineLayout.inl
     ${INCROOT}/Vulkan/API/Builder/RenderPass.hpp
+    ${INCROOT}/Vulkan/API/Builder/Sampler.hpp
+    ${INCROOT}/Vulkan/API/Builder/Sampler.inl
     ${INCROOT}/Vulkan/API/Builder/Semaphore.hpp
     ${INCROOT}/Vulkan/API/Builder/ShaderModule.hpp
     ${INCROOT}/Vulkan/API/Builder/Surface.hpp
@@ -212,6 +216,7 @@ set(INC
     ${INCROOT}/Vulkan/API/QueueFamily.inl
     ${INCROOT}/Vulkan/API/RTTI/Enum.hpp
     ${INCROOT}/Vulkan/API/RenderPass.hpp
+    ${INCROOT}/Vulkan/API/Sampler.hpp
     ${INCROOT}/Vulkan/API/Semaphore.hpp
     ${INCROOT}/Vulkan/API/ShaderModule.hpp
     ${INCROOT}/Vulkan/API/Surface.hpp
