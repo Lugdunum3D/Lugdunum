@@ -79,6 +79,8 @@ protected:
     std::vector<PrimitiveSet> _primitiveSets;
 };
 
+#include <lug/Graphics/Builder/Mesh.inl>
+
 } // Builder
 } // Graphics
 } // lug

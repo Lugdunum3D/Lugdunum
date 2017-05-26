@@ -92,7 +92,9 @@ set(INC
     ${INCROOT}/ResourceManager.inl
 
     ${INCROOT}/Builder/Material.hpp
+    ${INCROOT}/Builder/Material.inl
     ${INCROOT}/Builder/Mesh.hpp
+    ${INCROOT}/Builder/Mesh.inl
 
     ${INCROOT}/Light/Directional.hpp
     ${INCROOT}/Light/Light.hpp

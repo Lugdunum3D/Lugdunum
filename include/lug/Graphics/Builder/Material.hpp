@@ -57,6 +57,8 @@ protected:
     Render::Material::TextureInfo _emissiveTexture;
 };
 
+#include <lug/Graphics/Builder/Material.inl>
+
 } // Builder
 } // Graphics
 } // lug
