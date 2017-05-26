@@ -19,11 +19,11 @@ public:
     public:
         PrimitiveSet() = default;
 
-        PrimitiveSet(const PrimitiveSet&) = default;
+        PrimitiveSet(const PrimitiveSet&) = delete;
         PrimitiveSet(PrimitiveSet&&) = default;
 
-        PrimitiveSet& operator=(const PrimitiveSet&) = default;
-        PrimitiveSet& operator=(PrimitiveSet&&) = default;
+        PrimitiveSet& operator=(const PrimitiveSet&) = delete;
+        PrimitiveSet& operator=(PrimitiveSet&&) = delete;
 
         ~PrimitiveSet() = default;
 
@@ -51,11 +51,11 @@ public:
 public:
     explicit Mesh(Renderer& renderer);
 
-    Mesh(const Mesh&) = default;
-    Mesh(Mesh&&) = default;
+    Mesh(const Mesh&) = delete;
+    Mesh(Mesh&&) = delete;
 
-    Mesh& operator=(const Mesh&) = default;
-    Mesh& operator=(Mesh&&) = default;
+    Mesh& operator=(const Mesh&) = delete;
+    Mesh& operator=(Mesh&&) = delete;
 
     virtual ~Mesh() = default;
 

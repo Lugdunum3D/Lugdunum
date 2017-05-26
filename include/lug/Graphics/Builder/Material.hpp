@@ -17,11 +17,11 @@ class LUG_GRAPHICS_API Material {
 public:
     explicit Material(Renderer& renderer);
 
-    Material(const Material&) = default;
-    Material(Material&&) = default;
+    Material(const Material&) = delete;
+    Material(Material&&) = delete;
 
-    Material& operator=(const Material&) = default;
-    Material& operator=(Material&&) = default;
+    Material& operator=(const Material&) = delete;
+    Material& operator=(Material&&) = delete;
 
     virtual ~Material() = default;
 
