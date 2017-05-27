@@ -266,7 +266,7 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
     // Create pipeline layout
     {
         std::vector<DescriptorSetLayout> descriptorSetLayouts(2);
-        Builder::DescriptorSetLayout descriptorSetLayoutBuilderInstance(*device);
+        Builder::DescriptorSetLayout descriptorSetLayoutBuilder(*device);
 
         // Bindings set 0
         {
@@ -279,8 +279,8 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
                 binding.pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
             };
 
-            descriptorSetLayoutBuilderInstance.setBindings({binding});
-            if (!descriptorSetLayoutBuilderInstance.build(descriptorSetLayouts[0], &result)) {
+            descriptorSetLayoutBuilder.setBindings({binding});
+            if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[0], &result)) {
                 LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create pipeline descriptor sets layout 0: {}", result);
                 return nullptr;
             }
@@ -297,8 +297,8 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
                 binding.pImmutableSamplers = nullptr // Only used for descriptorType VK_DESCRIPTOR_TYPE_SAMPLER or VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER
             };
 
-            descriptorSetLayoutBuilderInstance.setBindings({binding});
-            if (!descriptorSetLayoutBuilderInstance.build(descriptorSetLayouts[1], &result)) {
+            descriptorSetLayoutBuilder.setBindings({binding});
+            if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[1], &result)) {
                 LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create pipeline descriptor sets layout 1: {}", result);
                 return nullptr;
             }
@@ -311,11 +311,11 @@ std::unique_ptr<Pipeline> Pipeline::createGraphicsPipeline(const Device* device,
             pushConstant.size = sizeof(Math::Mat4x4f)
         };
 
-        API::Builder::PipelineLayout pipelineLayoutBuilderInstance(*device);
-        pipelineLayoutBuilderInstance.setPushConstants({pushConstant});
-        pipelineLayoutBuilderInstance.setDescriptorSetLayouts(std::move(descriptorSetLayouts));
+        API::Builder::PipelineLayout pipelineLayoutBuilder(*device);
+        pipelineLayoutBuilder.setPushConstants({pushConstant});
+        pipelineLayoutBuilder.setDescriptorSetLayouts(std::move(descriptorSetLayouts));
 
-        pipelineLayout = pipelineLayoutBuilderInstance.build(&result);
+        pipelineLayout = pipelineLayoutBuilder.build(&result);
         if (!pipelineLayout) {
             LUG_LOG.error("Pipeline::createGraphicsPipeline: Can't create pipeline layout: {}", result);
             return nullptr;

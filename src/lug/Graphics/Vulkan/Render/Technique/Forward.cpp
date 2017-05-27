@@ -323,15 +323,15 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
         return false;
     }
 
-    API::Builder::Fence fenceBuilderInstance(*_device);
-    fenceBuilderInstance.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
+    API::Builder::Fence fenceBuilder(*_device);
+    fenceBuilder.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
 
-    API::Builder::CommandBuffer commandBufferBuilderInstance(_renderer.getDevice(), _commandPool);
-    commandBufferBuilderInstance.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+    API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _commandPool);
+    commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
         // Create the Fence
-        if (!fenceBuilderInstance.build(_framesData[i].fence, &result)) {
+        if (!fenceBuilder.build(_framesData[i].fence, &result)) {
             LUG_LOG.error("Forward::init: Can't create swapchain fence: {}", result);
             return false;
         }
@@ -339,7 +339,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
         // Create command buffers
         _framesData[i].cmdBuffers.resize(1); // The builder will build according to the array size.
 
-        if (!commandBufferBuilderInstance.build(_framesData[i].cmdBuffers, &result)) {
+        if (!commandBufferBuilder.build(_framesData[i].cmdBuffers, &result)) {
             LUG_LOG.error("Forward::init: Can't create the command buffer: {}", result);
             return false;
         }

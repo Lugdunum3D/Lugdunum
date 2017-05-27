@@ -417,16 +417,16 @@ bool Window::initFramesData() {
     _framesData.resize(frameDataSize);
     _acquireImageDatas.resize(frameDataSize + 1);
 
-    API::Builder::CommandBuffer commandBufferBuilderInstance(_renderer.getDevice(), _commandPool);
-    commandBufferBuilderInstance.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+    API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _commandPool);
+    commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    API::Builder::Semaphore semaphoreBuilderInstance(_renderer.getDevice());
+    API::Builder::Semaphore semaphoreBuilder(_renderer.getDevice());
 
     for (uint32_t i = 0; i < frameDataSize; ++i) {
         // All draws finished semaphore
         {
             VkResult result{VK_SUCCESS};
-            if (!semaphoreBuilderInstance.build(_framesData[i].allDrawsFinishedSemaphore, &result)) {
+            if (!semaphoreBuilder.build(_framesData[i].allDrawsFinishedSemaphore, &result)) {
                 LUG_LOG.error("Window::initFramesData: Can't create semaphore: {}", result);
                 return false;
             }
@@ -438,7 +438,7 @@ bool Window::initFramesData() {
 
             for (uint32_t j = 0; j < _initInfo.renderViewsInitInfo.size(); ++j) {
                 VkResult result{VK_SUCCESS};
-                if (!semaphoreBuilderInstance.build(_framesData[i].imageReadySemaphores[j], &result)) {
+                if (!semaphoreBuilder.build(_framesData[i].imageReadySemaphores[j], &result)) {
                     LUG_LOG.error("Window::initFramesData: Can't create semaphore: {}", result);
                     return false;
                 }
@@ -449,7 +449,7 @@ bool Window::initFramesData() {
         {
             VkResult result{VK_SUCCESS};
             _framesData[i].cmdBuffers.resize(2); // The builder will build according to the array size.
-            if (!commandBufferBuilderInstance.build(_framesData[i].cmdBuffers, &result)) {
+            if (!commandBufferBuilder.build(_framesData[i].cmdBuffers, &result)) {
                 LUG_LOG.error("Window::initFramesData: Can't create the command buffer: {}", result);
                 return false;
             }
@@ -460,7 +460,7 @@ bool Window::initFramesData() {
         // Acquire image semaphore
         {
             VkResult result{VK_SUCCESS};
-            if (!semaphoreBuilderInstance.build(_acquireImageDatas[i].completeSemaphore, &result)) {
+            if (!semaphoreBuilder.build(_acquireImageDatas[i].completeSemaphore, &result)) {
                 LUG_LOG.error("Window::initFramesData: Can't create semaphore: {}", result);
                 return false;
             }

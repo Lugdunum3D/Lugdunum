@@ -26,12 +26,12 @@ bool Mesh::load() {
 
     // Create vertex buffer
     {
-        API::Builder::Buffer bufferBuilderInstance(*_device);
-        bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
-        bufferBuilderInstance.setSize((uint32_t)vertices.size() * sizeof(Vertex));
-        bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        API::Builder::Buffer bufferBuilder(*_device);
+        bufferBuilder.setQueueFamilyIndices(_queueFamilyIndices);
+        bufferBuilder.setSize((uint32_t)vertices.size() * sizeof(Vertex));
+        bufferBuilder.setUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 
-        if (!bufferBuilderInstance.build(_vertexBuffer, &result)) {
+        if (!bufferBuilder.build(_vertexBuffer, &result)) {
             LUG_LOG.error("Mesh::load: Can't create vertex buffer: {}", result);
             return false;
         }
@@ -39,12 +39,12 @@ bool Mesh::load() {
 
     // Create index buffer
     {
-        API::Builder::Buffer bufferBuilderInstance(*_device);
-        bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
-        bufferBuilderInstance.setSize((uint32_t)indices.size() * sizeof(uint32_t));
-        bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+        API::Builder::Buffer bufferBuilder(*_device);
+        bufferBuilder.setQueueFamilyIndices(_queueFamilyIndices);
+        bufferBuilder.setSize((uint32_t)indices.size() * sizeof(uint32_t));
+        bufferBuilder.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 
-        if (!bufferBuilderInstance.build(_indexBuffer, &result)) {
+        if (!bufferBuilder.build(_indexBuffer, &result)) {
             LUG_LOG.error("Mesh::load: Can't create index buffer: {}", result);
             return false;
         }

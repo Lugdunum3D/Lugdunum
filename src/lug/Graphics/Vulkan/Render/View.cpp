@@ -31,12 +31,12 @@ bool View::init(
 
     _drawCompleteSemaphores.resize(imageViews.size());
 
-    API::Builder::Semaphore semaphoreBuilderInstance(*device);
+    API::Builder::Semaphore semaphoreBuilder(*device);
 
     // Work complete semaphores
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
         VkResult result{VK_SUCCESS};
-        if (!semaphoreBuilderInstance.build(_drawCompleteSemaphores[i], &result)) {
+        if (!semaphoreBuilder.build(_drawCompleteSemaphores[i], &result)) {
             LUG_LOG.error("View::init: Can't create semaphore: {}", result);
             return false;
         }

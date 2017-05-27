@@ -51,13 +51,13 @@ BufferPool::SubBuffer* BufferPool::allocate() {
         VkResult result{VK_SUCCESS};
 
         // Create buffer
-        API::Builder::Buffer bufferBuilderInstance(*_device);
+        API::Builder::Buffer bufferBuilder(*_device);
 
-        bufferBuilderInstance.setQueueFamilyIndices(_queueFamilyIndices);
-        bufferBuilderInstance.setSize(subBufferSizeAligned * _countPerChunk);
-        bufferBuilderInstance.setUsage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
+        bufferBuilder.setQueueFamilyIndices(_queueFamilyIndices);
+        bufferBuilder.setSize(subBufferSizeAligned * _countPerChunk);
+        bufferBuilder.setUsage(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT);
 
-        if (!bufferBuilderInstance.build(chunk.buffer, &result)) {
+        if (!bufferBuilder.build(chunk.buffer, &result)) {
             LUG_LOG.error("BufferPool::allocate: Can't create buffer: {}", result);
             return nullptr;
         }
