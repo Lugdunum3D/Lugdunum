@@ -26,7 +26,7 @@ public:
     ~DescriptorSetLayout() = default;
 
     // Setters
-    void setBindings(std::vector<VkDescriptorSetLayoutBinding> bindings);
+    void setBindings(const std::vector<VkDescriptorSetLayoutBinding>& bindings);
 
     // Build methods
     bool build(API::DescriptorSetLayout& instance, VkResult* returnResult = nullptr);

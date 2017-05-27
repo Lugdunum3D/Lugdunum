@@ -139,7 +139,7 @@ bool Forward::render(
     // Render objects
     {
         // All the lights pipelines have the same renderPass
-        API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional]->getRenderPass();
+        const API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional]->getRenderPass();
 
         API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
             /* beginRenderPass.framebuffer */ frameData.framebuffer,
@@ -454,7 +454,7 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
 
 bool Forward::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
     // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
-    API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional]->getRenderPass();
+    const API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional]->getRenderPass();
 
     _framesData.resize(imageViews.size());
 

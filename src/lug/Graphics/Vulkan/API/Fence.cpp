@@ -35,7 +35,7 @@ VkResult Fence::getStatus() const {
     return vkGetFenceStatus(static_cast<VkDevice>(*_device), _fence);
 }
 
-bool Fence::reset() {
+bool Fence::reset() const {
     VkResult result = vkResetFences(static_cast<VkDevice>(*_device), 1, &_fence);
 
     if (result != VK_SUCCESS) {

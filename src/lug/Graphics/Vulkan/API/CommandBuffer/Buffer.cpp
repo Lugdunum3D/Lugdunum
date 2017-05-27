@@ -7,7 +7,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-void CommandBuffer::updateBuffer(const API::Buffer& buffer, const void* data, VkDeviceSize size, VkDeviceSize offset) {
+void CommandBuffer::updateBuffer(const API::Buffer& buffer, const void* data, VkDeviceSize size, VkDeviceSize offset) const {
     vkCmdUpdateBuffer(_commandBuffer, static_cast<VkBuffer>(buffer), offset, size, data);
 }
 

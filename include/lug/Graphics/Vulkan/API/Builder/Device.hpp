@@ -39,7 +39,7 @@ public:
     ~Device() = default;
 
     // Setters
-    void setExtensions(std::vector<const char*> extensions);
+    void setExtensions(const std::vector<const char*>& extensions);
     void setFeatures(VkPhysicalDeviceFeatures features);
 
     uint8_t addQueues(VkQueueFlags queueFlags, const std::vector<std::string>& queuesNames);

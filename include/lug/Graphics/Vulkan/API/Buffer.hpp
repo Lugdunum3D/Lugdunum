@@ -37,12 +37,12 @@ public:
 
     void destroy();
 
-    void bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
+    void bindMemory(const DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
 
-    bool updateData(void *data, VkDeviceSize size, VkDeviceSize offset = 0);
+    bool updateData(const void *data, VkDeviceSize size, VkDeviceSize offset = 0) const;
 
     const VkMemoryRequirements& getRequirements() const;
-    DeviceMemory* getDeviceMemory() const;
+    const DeviceMemory* getDeviceMemory() const;
     VkDeviceSize getDeviceMemoryOffset() const;
 
 private:
@@ -52,7 +52,7 @@ private:
     VkBuffer _buffer{VK_NULL_HANDLE};
     const Device* _device{nullptr};
 
-    DeviceMemory* _deviceMemory{nullptr};
+    const DeviceMemory* _deviceMemory{nullptr};
     VkDeviceSize _deviceMemoryOffset{0};
 
     VkMemoryRequirements _requirements{};

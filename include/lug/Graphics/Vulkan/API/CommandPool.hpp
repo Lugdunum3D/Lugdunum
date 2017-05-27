@@ -40,7 +40,7 @@ public:
     const Device* getDevice() const;
     const Queue* getQueue() const;
 
-    bool reset(bool releaseRessources = false);
+    bool reset(bool releaseRessources = false) const;
 
     // Warning: Command buffers created with this pool must have been destroyed
     void destroy();

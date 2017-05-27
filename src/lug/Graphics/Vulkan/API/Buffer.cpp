@@ -56,14 +56,14 @@ void Buffer::destroy() {
     }
 }
 
-void Buffer::bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
+void Buffer::bindMemory(const DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
     _deviceMemory = deviceMemory;
     _deviceMemoryOffset = memoryOffset;
 
     vkBindBufferMemory(static_cast<VkDevice>(*_device), static_cast<VkBuffer>(_buffer), static_cast<VkDeviceMemory>(*deviceMemory), memoryOffset);
 }
 
-bool Buffer::updateData(void* data, VkDeviceSize size, VkDeviceSize offset) {
+bool Buffer::updateData(const void* data, VkDeviceSize size, VkDeviceSize offset) const {
     void* gpuData = _deviceMemory->mapBuffer(*this, size, offset);
 
     if (!gpuData) {

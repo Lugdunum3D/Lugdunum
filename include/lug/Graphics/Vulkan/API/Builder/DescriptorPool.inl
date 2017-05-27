@@ -6,6 +6,6 @@ inline void DescriptorPool::setMaxSets(uint32_t maxSets) {
     _maxSets = maxSets;
 }
 
-inline void DescriptorPool::setPoolSizes(std::vector<VkDescriptorPoolSize> poolSizes) {
-    _poolSizes = std::move(poolSizes);
+inline void DescriptorPool::setPoolSizes(const std::vector<VkDescriptorPoolSize>& poolSizes) {
+    _poolSizes = poolSizes;
 }

@@ -1,4 +1,4 @@
-inline void Framebuffer::setRenderPass(API::RenderPass* renderPass) {
+inline void Framebuffer::setRenderPass(const API::RenderPass* renderPass) {
     _renderPass = renderPass;
 }
 

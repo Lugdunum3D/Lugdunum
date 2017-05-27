@@ -28,7 +28,7 @@ public:
     ~Framebuffer() = default;
 
     // Setters
-    void setRenderPass(API::RenderPass* renderPass);
+    void setRenderPass(const API::RenderPass* renderPass);
     void addAttachment(const API::ImageView* attachment);
     void setWidth(uint32_t width);
     void setHeight(uint32_t height);
@@ -41,7 +41,7 @@ public:
 private:
     const API::Device& _device;
 
-    API::RenderPass* _renderPass{nullptr};
+    const API::RenderPass* _renderPass{nullptr};
     std::vector<const API::ImageView*> _attachments{};
     uint32_t _width{0};
     uint32_t _height{0};

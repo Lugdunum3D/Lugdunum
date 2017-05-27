@@ -39,7 +39,7 @@ CommandPool::~CommandPool() {
     destroy();
 }
 
-bool CommandPool::reset(bool releaseRessources) {
+bool CommandPool::reset(bool releaseRessources) const {
     VkResult result = vkResetCommandPool(static_cast<VkDevice>(*_device), _commandPool, releaseRessources ? VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT : 0);
 
     if (result != VK_SUCCESS) {

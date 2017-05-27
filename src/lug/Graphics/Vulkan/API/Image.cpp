@@ -70,14 +70,19 @@ void Image::destroy() {
     }
 }
 
-void Image::bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
+void Image::bindMemory(const DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
     _deviceMemory = deviceMemory;
     _deviceMemoryOffset = memoryOffset;
+
     vkBindImageMemory(static_cast<VkDevice>(*_device), _image, static_cast<VkDeviceMemory>(*deviceMemory), memoryOffset);
 }
 
 const VkMemoryRequirements& Image::getRequirements() const {
     return _requirements;
+}
+
+const DeviceMemory* Image::getDeviceMemory() const {
+    return _deviceMemory;
 }
 
 VkFormat Image::getFormat() const {

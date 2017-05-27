@@ -1,4 +1,4 @@
-inline void PipelineLayout::setPushConstants(std::vector<VkPushConstantRange> pushConstants) {
+inline void PipelineLayout::setPushConstants(const std::vector<VkPushConstantRange>& pushConstants) {
     _pushConstants = pushConstants;
 }
 

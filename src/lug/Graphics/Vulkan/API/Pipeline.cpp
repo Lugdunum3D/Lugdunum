@@ -66,11 +66,11 @@ void Pipeline::destroy() {
     }
 }
 
-RenderPass* Pipeline::getRenderPass() const {
+const RenderPass* Pipeline::getRenderPass() const {
     return _renderPass.get();
 }
 
-PipelineLayout* Pipeline::getLayout() const {
+const PipelineLayout* Pipeline::getLayout() const {
     return _layout.get();
 }
 

@@ -124,7 +124,7 @@ void CommandBuffer::pipelineBarrier(
     const CmdPipelineBarrier& parameters,
     VkDependencyFlags dependencyFlags,
     VkPipelineStageFlags srcStageMask,
-    VkPipelineStageFlags dstStageMask) {
+    VkPipelineStageFlags dstStageMask) const {
 
     std::vector<VkMemoryBarrier> vkMemoryBarriers;
     std::vector<VkBufferMemoryBarrier> vkBufferMemoryBarriers;
@@ -157,7 +157,7 @@ void CommandBuffer::bindPipeline(const API::Pipeline& pipeline, VkPipelineBindPo
 void CommandBuffer::bindVertexBuffers(
     const std::vector<const API::Buffer*>& buffers,
     const std::vector<VkDeviceSize>& offsets,
-    uint32_t firstBinding) {
+    uint32_t firstBinding) const {
 
     // Build a vector of VkBuffer from the API::Buffer
     std::vector<VkBuffer> vkBuffers(buffers.size());
@@ -174,7 +174,7 @@ void CommandBuffer::bindVertexBuffers(
         offsets.data());
 }
 
-void CommandBuffer::bindIndexBuffer(const API::Buffer& buffer, VkIndexType indexType, VkDeviceSize offset) {
+void CommandBuffer::bindIndexBuffer(const API::Buffer& buffer, VkIndexType indexType, VkDeviceSize offset) const {
     vkCmdBindIndexBuffer(
         static_cast<VkCommandBuffer>(_commandBuffer),
         static_cast<VkBuffer>(buffer),
@@ -182,7 +182,7 @@ void CommandBuffer::bindIndexBuffer(const API::Buffer& buffer, VkIndexType index
         indexType);
 }
 
-void CommandBuffer::setViewport(const std::vector<VkViewport>& viewports, uint32_t firstViewport) {
+void CommandBuffer::setViewport(const std::vector<VkViewport>& viewports, uint32_t firstViewport) const {
     vkCmdSetViewport(
         static_cast<VkCommandBuffer>(_commandBuffer),
         firstViewport,
@@ -190,7 +190,7 @@ void CommandBuffer::setViewport(const std::vector<VkViewport>& viewports, uint32
         viewports.data());
 }
 
-void CommandBuffer::setScissor(const std::vector<VkRect2D>& scissors, uint32_t firstScissor) {
+void CommandBuffer::setScissor(const std::vector<VkRect2D>& scissors, uint32_t firstScissor) const {
     vkCmdSetScissor(
         static_cast<VkCommandBuffer>(_commandBuffer),
         firstScissor,
@@ -198,11 +198,11 @@ void CommandBuffer::setScissor(const std::vector<VkRect2D>& scissors, uint32_t f
         scissors.data());
 }
 
-void CommandBuffer::setBlendConstants(const float blendConstants[4]) {
+void CommandBuffer::setBlendConstants(const float blendConstants[4]) const {
     vkCmdSetBlendConstants(static_cast<VkCommandBuffer>(_commandBuffer), blendConstants);
 }
 
-void CommandBuffer::pushConstants(const CmdPushConstants& parameters) {
+void CommandBuffer::pushConstants(const CmdPushConstants& parameters) const {
     vkCmdPushConstants(
         static_cast<VkCommandBuffer>(_commandBuffer),
         parameters.layout,

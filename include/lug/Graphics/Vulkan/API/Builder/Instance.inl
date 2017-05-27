@@ -12,10 +12,10 @@ inline void Instance::setRequiredVulkanVersion(const Core::Version& version) {
     _appInfo.apiVersion = version;
 }
 
-inline void Instance::setLayers(std::vector<const char*> layers) {
+inline void Instance::setLayers(const std::vector<const char*>& layers) {
     _layers = layers;
 }
 
-inline void Instance::setExtensions(std::vector<const char*> extensions) {
+inline void Instance::setExtensions(const std::vector<const char*>& extensions) {
     _extensions = extensions;
 }

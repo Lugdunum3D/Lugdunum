@@ -124,7 +124,7 @@ bool Swapchain::getNextImage(uint32_t* imageIndex, VkSemaphore semaphore) {
     return true;
 }
 
-bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore) {
+bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore) const {
     // Present image
     VkPresentInfoKHR presentInfo{
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,

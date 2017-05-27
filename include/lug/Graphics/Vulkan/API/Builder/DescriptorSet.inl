@@ -1,3 +1,3 @@
-inline void DescriptorSet::setDescriptorSetLayouts(std::vector<VkDescriptorSetLayout> descriptorSetLayouts) {
-    _descriptorSetLayouts = std::move(descriptorSetLayouts);
+inline void DescriptorSet::setDescriptorSetLayouts(const std::vector<VkDescriptorSetLayout>& descriptorSetLayouts) {
+    _descriptorSetLayouts = descriptorSetLayouts;
 }

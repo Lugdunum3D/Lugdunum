@@ -8,7 +8,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-void CommandBuffer::beginRenderPass(const API::RenderPass& renderPass, const CommandBuffer::CmdBeginRenderPass& parameters, VkSubpassContents contents) {
+void CommandBuffer::beginRenderPass(const API::RenderPass& renderPass, const CommandBuffer::CmdBeginRenderPass& parameters, VkSubpassContents contents) const {
     VkRenderPassBeginInfo beginInfo{
         beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         beginInfo.pNext = nullptr,
@@ -22,11 +22,11 @@ void CommandBuffer::beginRenderPass(const API::RenderPass& renderPass, const Com
     vkCmdBeginRenderPass(static_cast<VkCommandBuffer>(_commandBuffer), &beginInfo, contents);
 }
 
-void CommandBuffer::endRenderPass() {
+void CommandBuffer::endRenderPass() const {
     vkCmdEndRenderPass(static_cast<VkCommandBuffer>(_commandBuffer));
 }
 
-void CommandBuffer::drawIndexed(const CmdDrawIndexed& params) {
+void CommandBuffer::drawIndexed(const CmdDrawIndexed& params) const {
     vkCmdDrawIndexed(
         static_cast<VkCommandBuffer>(_commandBuffer),
         params.indexCount,

@@ -35,8 +35,8 @@ public:
 
     void destroy();
 
-    RenderPass* getRenderPass() const;
-    PipelineLayout* getLayout() const;
+    const RenderPass* getRenderPass() const;
+    const PipelineLayout* getLayout() const;
 
     static std::unique_ptr<Pipeline> createGraphicsPipeline(const Device* device, const std::string& vertexShaderFile, const std::string& fragmentShaderFile, VkFormat colorFormat);
 

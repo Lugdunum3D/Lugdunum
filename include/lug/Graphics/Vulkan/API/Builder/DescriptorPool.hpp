@@ -29,7 +29,7 @@ public:
     // Setters
     void setFlags(VkDescriptorPoolCreateFlags flags);
     void setMaxSets(uint32_t maxSets);
-    void setPoolSizes(std::vector<VkDescriptorPoolSize> poolSizes);
+    void setPoolSizes(const std::vector<VkDescriptorPoolSize>& poolSizes);
 
     // Build methods
     bool build(API::DescriptorPool& instance, VkResult* returnResult = nullptr);

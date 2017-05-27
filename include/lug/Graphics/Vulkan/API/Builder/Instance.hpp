@@ -41,8 +41,8 @@ public:
     void setEngineInfo(const std::string& name, const Core::Version& version = {0, 0, 0});
     void setRequiredVulkanVersion(const Core::Version& version = {0, 0, 0});
 
-    void setLayers(std::vector<const char*> layers);
-    void setExtensions(std::vector<const char*> extensions);
+    void setLayers(const std::vector<const char*>& layers);
+    void setExtensions(const std::vector<const char*>& extensions);
 
     // Build methods
     bool build(API::Instance& instance, VkResult* returnResult = nullptr);

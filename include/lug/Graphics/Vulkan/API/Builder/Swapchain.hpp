@@ -28,7 +28,7 @@ public:
     ~Swapchain() = default;
 
     // Setters
-    void setPreferences(Renderer::Preferences::Swapchain& preferences);
+    void setPreferences(const Renderer::Preferences::Swapchain& preferences);
     void setSurface(VkSurfaceKHR surface);
     void setMinImageCount(uint32_t minImageCount);
     void setImageFormat(VkFormat imageFormat);
@@ -53,7 +53,7 @@ private:
 private:
     const API::Device& _device;
 
-    Renderer::Preferences::Swapchain* _preferences{nullptr};
+    const Renderer::Preferences::Swapchain* _preferences{nullptr};
     VkSurfaceKHR _surface{VK_NULL_HANDLE};
     uint32_t _minImageCount;
     VkFormat _imageFormat{VK_FORMAT_MAX_ENUM};

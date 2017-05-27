@@ -1,3 +1,3 @@
-inline void DescriptorSetLayout::setBindings(std::vector<VkDescriptorSetLayoutBinding> bindings) {
-    _bindings = std::move(bindings);
+inline void DescriptorSetLayout::setBindings(const std::vector<VkDescriptorSetLayoutBinding>& bindings) {
+    _bindings = bindings;
 }

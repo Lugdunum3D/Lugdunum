@@ -1,4 +1,4 @@
-inline void Device::setExtensions(std::vector<const char*> extensions) {
+inline void Device::setExtensions(const std::vector<const char*>& extensions) {
     _extensions = extensions;
 }
 

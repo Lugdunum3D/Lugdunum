@@ -10,7 +10,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-void CommandBuffer::bindDescriptorSets(const CommandBuffer::CmdBindDescriptors& parameters) {
+void CommandBuffer::bindDescriptorSets(const CommandBuffer::CmdBindDescriptors& parameters) const {
     std::vector<VkDescriptorSet> descriptorSets;
 
     std::transform(

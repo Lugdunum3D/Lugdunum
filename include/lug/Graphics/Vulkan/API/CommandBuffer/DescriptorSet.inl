@@ -6,4 +6,4 @@ struct CmdBindDescriptors {
     std::vector<uint32_t> dynamicOffsets;
 };
 
-void bindDescriptorSets(const CmdBindDescriptors& parameters);
+void bindDescriptorSets(const CmdBindDescriptors& parameters) const;

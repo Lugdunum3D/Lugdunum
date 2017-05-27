@@ -1,4 +1,4 @@
-inline void Swapchain::setPreferences(Renderer::Preferences::Swapchain& preferences) {
+inline void Swapchain::setPreferences(const Renderer::Preferences::Swapchain& preferences) {
     _preferences = &preferences;
 }
 

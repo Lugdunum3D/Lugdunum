@@ -27,7 +27,7 @@ public:
     ~PipelineLayout() = default;
 
     // Setters
-    void setPushConstants(std::vector<VkPushConstantRange> pushConstants);
+    void setPushConstants(const std::vector<VkPushConstantRange>& pushConstants);
     void setDescriptorSetLayouts(std::vector<API::DescriptorSetLayout> descriptorSetLayouts);
 
     // Build methods

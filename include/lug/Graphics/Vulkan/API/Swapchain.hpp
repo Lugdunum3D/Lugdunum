@@ -41,7 +41,7 @@ public:
     void destroy();
 
     bool getNextImage(uint32_t *imageIndex, VkSemaphore semaphore = VK_NULL_HANDLE);
-    bool present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore = VK_NULL_HANDLE);
+    bool present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore = VK_NULL_HANDLE) const;
 
     const std::vector<Image>& getImages() const;
     const std::vector<ImageView>& getImagesViews() const;

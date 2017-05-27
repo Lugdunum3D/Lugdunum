@@ -33,7 +33,7 @@ public:
     }
 
     VkResult getStatus() const;
-    bool reset();
+    bool reset() const;
     bool wait() const;
 
     void destroy();

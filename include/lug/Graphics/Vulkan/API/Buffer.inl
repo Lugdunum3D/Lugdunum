@@ -2,7 +2,7 @@ inline const VkMemoryRequirements& Buffer::getRequirements() const {
     return _requirements;
 }
 
-inline DeviceMemory* Buffer::getDeviceMemory() const {
+inline const DeviceMemory* Buffer::getDeviceMemory() const {
     return _deviceMemory;
 }
 

@@ -51,9 +51,10 @@ public:
 
     void destroy();
 
-    void bindMemory(DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
+    void bindMemory(const DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
 
     const VkMemoryRequirements& getRequirements() const;
+    const DeviceMemory* getDeviceMemory() const;
     VkFormat getFormat() const;
 
     // Return first format supported by given features and tiling
@@ -68,7 +69,7 @@ private:
     VkImage _image{VK_NULL_HANDLE};
     const Device* _device{nullptr};
 
-    DeviceMemory* _deviceMemory{nullptr};
+    const DeviceMemory* _deviceMemory{nullptr};
     VkDeviceSize _deviceMemoryOffset{0};
 
     Extent _extent;

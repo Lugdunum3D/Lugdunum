@@ -28,7 +28,7 @@ public:
     ~DescriptorSet() = default;
 
     // Setters
-    void setDescriptorSetLayouts(std::vector<VkDescriptorSetLayout> descriptorSetLayouts);
+    void setDescriptorSetLayouts(const std::vector<VkDescriptorSetLayout>& descriptorSetLayouts);
 
     // Build methods
     bool build(API::DescriptorSet& instance, VkResult* returnResult = nullptr);
