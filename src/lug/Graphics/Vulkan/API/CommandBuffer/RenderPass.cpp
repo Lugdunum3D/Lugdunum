@@ -9,14 +9,14 @@ namespace Vulkan {
 namespace API {
 
 void CommandBuffer::beginRenderPass(const API::RenderPass& renderPass, const CommandBuffer::CmdBeginRenderPass& parameters, VkSubpassContents contents) const {
-    VkRenderPassBeginInfo beginInfo{
-        beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
-        beginInfo.pNext = nullptr,
-        beginInfo.renderPass = static_cast<VkRenderPass>(renderPass),
-        beginInfo.framebuffer = static_cast<VkFramebuffer>(parameters.framebuffer),
+    const VkRenderPassBeginInfo beginInfo{
+        /* beginInfo.sType */ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+        /* beginInfo.pNext */ nullptr,
+        /* beginInfo.renderPass */ static_cast<VkRenderPass>(renderPass),
+        /* beginInfo.framebuffer */ static_cast<VkFramebuffer>(parameters.framebuffer),
         /* beginInfo.renderArea */ parameters.renderArea,
-        beginInfo.clearValueCount = static_cast<uint32_t>(parameters.clearValues.size()),
-        beginInfo.pClearValues = parameters.clearValues.data()
+        /* beginInfo.clearValueCount */ static_cast<uint32_t>(parameters.clearValues.size()),
+        /* beginInfo.pClearValues */ parameters.clearValues.data()
     };
 
     vkCmdBeginRenderPass(static_cast<VkCommandBuffer>(_commandBuffer), &beginInfo, contents);
@@ -33,7 +33,8 @@ void CommandBuffer::drawIndexed(const CmdDrawIndexed& params) const {
         params.instanceCount,
         params.firstIndex,
         params.vertexOffset,
-        params.firstInstance);
+        params.firstInstance
+    );
 }
 
 } // API

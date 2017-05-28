@@ -19,15 +19,15 @@ bool Buffer::build(API::Buffer& buffer, VkResult* returnResult) {
     }
 
     // Create the buffer creation information for vkCreateBuffer
-    VkBufferCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = _flags,
-        createInfo.size = _size,
-        createInfo.usage = _usage,
-        createInfo.sharingMode = sharingMode,
-        createInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size()),
-        createInfo.pQueueFamilyIndices = queueFamilyIndices.data(),  // Convert the set to raw data
+    const VkBufferCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ _flags,
+        /* createInfo.size */ _size,
+        /* createInfo.usage */ _usage,
+        /* createInfo.sharingMode */ sharingMode,
+        /* createInfo.queueFamilyIndexCount */ static_cast<uint32_t>(queueFamilyIndices.size()),
+        /* createInfo.pQueueFamilyIndices */ queueFamilyIndices.data(),  // Convert the set to raw data
     };
 
     // Create the buffer

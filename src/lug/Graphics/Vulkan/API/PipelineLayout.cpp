@@ -11,7 +11,7 @@ namespace API {
 PipelineLayout::PipelineLayout(
     VkPipelineLayout pipelineLayout,
     const Device* device,
-    std::vector<DescriptorSetLayout>&& descriptorSetLayouts) :
+    std::vector<DescriptorSetLayout> descriptorSetLayouts) :
     _pipelineLayout(pipelineLayout), _device(device), _descriptorSetLayouts(std::move(descriptorSetLayouts)) {}
 
 PipelineLayout::PipelineLayout(PipelineLayout&& pipelineLayout) {

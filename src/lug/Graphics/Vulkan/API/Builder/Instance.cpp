@@ -8,26 +8,26 @@ namespace Builder {
 
 bool Instance::build(API::Instance& instance, VkResult* returnResult) {
     // Create the application information for vkCreateInstance
-    VkApplicationInfo applicationInfo {
-        applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        applicationInfo.pNext = nullptr,
-        applicationInfo.pApplicationName = _appInfo.appName.data(),
-        applicationInfo.applicationVersion = static_cast<uint32_t>(_appInfo.appVersion),
-        applicationInfo.pEngineName = _appInfo.engineName.data(),
-        applicationInfo.engineVersion = static_cast<uint32_t>(_appInfo.engineVersion),
-        applicationInfo.apiVersion = static_cast<uint32_t>(_appInfo.apiVersion),
+    const VkApplicationInfo applicationInfo {
+        /* applicationInfo.sType */ VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        /* applicationInfo.pNext */ nullptr,
+        /* applicationInfo.pApplicationName */ _appInfo.appName.data(),
+        /* applicationInfo.applicationVersion */ static_cast<uint32_t>(_appInfo.appVersion),
+        /* applicationInfo.pEngineName */ _appInfo.engineName.data(),
+        /* applicationInfo.engineVersion */ static_cast<uint32_t>(_appInfo.engineVersion),
+        /* applicationInfo.apiVersion */ static_cast<uint32_t>(_appInfo.apiVersion),
     };
 
     // Create the instance creation information for vkCreateInstance
-    VkInstanceCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.pApplicationInfo = &applicationInfo,
-        createInfo.enabledLayerCount = static_cast<uint32_t>(_layers.size()),
-        createInfo.ppEnabledLayerNames = _layers.data(),
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(_extensions.size()),
-        createInfo.ppEnabledExtensionNames = _extensions.data()
+    const VkInstanceCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ 0,
+        /* createInfo.pApplicationInfo */ &applicationInfo,
+        /* createInfo.enabledLayerCount */ static_cast<uint32_t>(_layers.size()),
+        /* createInfo.ppEnabledLayerNames */ _layers.data(),
+        /* createInfo.enabledExtensionCount */ static_cast<uint32_t>(_extensions.size()),
+        /* createInfo.ppEnabledExtensionNames */ _extensions.data()
     };
 
     // Create the instance

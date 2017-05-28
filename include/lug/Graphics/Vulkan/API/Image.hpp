@@ -51,19 +51,19 @@ public:
 
     void destroy();
 
-    void bindMemory(const DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
+    void bindMemory(const DeviceMemory& deviceMemory, VkDeviceSize memoryOffset = 0);
 
     const VkMemoryRequirements& getRequirements() const;
     const DeviceMemory* getDeviceMemory() const;
     VkFormat getFormat() const;
 
     // Return first format supported by given features and tiling
-    static VkFormat findSupportedFormat(const Device* device, const std::set<VkFormat>& formats, VkImageTiling tiling, VkFormatFeatureFlags features);
+    static VkFormat findSupportedFormat(const Device& device, const std::set<VkFormat>& formats, VkImageTiling tiling, VkFormatFeatureFlags features);
 
 private:
     explicit Image(VkImage Image, const Device* device, const Extent& extent, VkFormat format, bool swapchainImage);
 
-    static bool isFormatSupported(const Device* device, VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
+    static bool isFormatSupported(const Device& device, VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
 
 private:
     VkImage _image{VK_NULL_HANDLE};

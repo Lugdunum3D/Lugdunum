@@ -10,13 +10,13 @@ DescriptorPool::DescriptorPool(const API::Device& device) : _device{device} {}
 
 bool DescriptorPool::build(API::DescriptorPool& descriptorPool, VkResult* returnResult) {
     // Create the descriptorPool creation information for vkCreateDescriptorPool
-    VkDescriptorPoolCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = _flags,
-        createInfo.maxSets = _maxSets,
-        createInfo.poolSizeCount = static_cast<uint32_t>(_poolSizes.size()),
-        createInfo.pPoolSizes = _poolSizes.data(),
+    const VkDescriptorPoolCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ _flags,
+        /* createInfo.maxSets */ _maxSets,
+        /* createInfo.poolSizeCount */ static_cast<uint32_t>(_poolSizes.size()),
+        /* createInfo.pPoolSizes */ _poolSizes.data(),
     };
 
     // Create the descriptorPool

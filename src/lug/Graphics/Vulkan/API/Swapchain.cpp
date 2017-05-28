@@ -126,15 +126,15 @@ bool Swapchain::getNextImage(uint32_t* imageIndex, VkSemaphore semaphore) {
 
 bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore) const {
     // Present image
-    VkPresentInfoKHR presentInfo{
-        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-        presentInfo.pNext = nullptr,
-        presentInfo.waitSemaphoreCount = semaphore != VK_NULL_HANDLE ? 1 : 0,
-        presentInfo.pWaitSemaphores = semaphore != VK_NULL_HANDLE ? &semaphore : nullptr,
-        presentInfo.swapchainCount = 1,
-        presentInfo.pSwapchains = &_swapchain,
-        presentInfo.pImageIndices = &imageIndex,
-        presentInfo.pResults = nullptr
+    const VkPresentInfoKHR presentInfo{
+        /* presentInfo.sType */ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        /* presentInfo.pNext */ nullptr,
+        /* presentInfo.waitSemaphoreCount */ static_cast<uint32_t>(semaphore != VK_NULL_HANDLE ? 1 : 0),
+        /* presentInfo.pWaitSemaphores */ semaphore != VK_NULL_HANDLE ? &semaphore : nullptr,
+        /* presentInfo.swapchainCount */ 1,
+        /* presentInfo.pSwapchains */ &_swapchain,
+        /* presentInfo.pImageIndices */ &imageIndex,
+        /* presentInfo.pResults */ nullptr
     };
 
     VkResult result = vkQueuePresentKHR(static_cast<VkQueue>(*presentQueue), &presentInfo);

@@ -11,14 +11,13 @@ namespace Builder {
 DescriptorSetLayout::DescriptorSetLayout(const API::Device& device) : _device{device} {}
 
 bool DescriptorSetLayout::build(API::DescriptorSetLayout& descriptorSetLayout, VkResult* returnResult) {
-
     // Create the descriptorSetLayout creation information for vkCreateDescriptorSetLayout
-    VkDescriptorSetLayoutCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.bindingCount = static_cast<uint32_t>(_bindings.size()),
-        createInfo.pBindings = _bindings.data(),
+    const VkDescriptorSetLayoutCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ 0,
+        /* createInfo.bindingCount */ static_cast<uint32_t>(_bindings.size()),
+        /* createInfo.pBindings */ _bindings.data(),
     };
 
     // Create the descriptorSetLayout

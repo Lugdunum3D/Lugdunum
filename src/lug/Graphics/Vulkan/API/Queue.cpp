@@ -34,16 +34,16 @@ bool Queue::submit(
 
     VkCommandBuffer vkCommandBuffer = static_cast<VkCommandBuffer>(commandBuffer);
 
-    VkSubmitInfo submitInfo{
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        submitInfo.pNext = nullptr,
-        submitInfo.waitSemaphoreCount = waitSemaphores.size() > 0 ? (uint32_t)waitSemaphores.size() : 0,
-        submitInfo.pWaitSemaphores = waitSemaphores.size() > 0 ? waitSemaphores.data() : nullptr,
-        submitInfo.pWaitDstStageMask = waitDstStageMasks.size() > 0 ? waitDstStageMasks.data() : nullptr,
-        submitInfo.commandBufferCount = 1,
-        submitInfo.pCommandBuffers = &vkCommandBuffer,
-        submitInfo.signalSemaphoreCount = signalSemaphores.size() > 0 ? (uint32_t)signalSemaphores.size() : 0,
-        submitInfo.pSignalSemaphores = signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr
+    const VkSubmitInfo submitInfo{
+        /* submitInfo.sType */ VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        /* submitInfo.pNext */ nullptr,
+        /* submitInfo.waitSemaphoreCount */ waitSemaphores.size() > 0 ? (uint32_t)waitSemaphores.size() : 0,
+        /* submitInfo.pWaitSemaphores */ waitSemaphores.size() > 0 ? waitSemaphores.data() : nullptr,
+        /* submitInfo.pWaitDstStageMask */ waitDstStageMasks.size() > 0 ? waitDstStageMasks.data() : nullptr,
+        /* submitInfo.commandBufferCount */ 1,
+        /* submitInfo.pCommandBuffers */ &vkCommandBuffer,
+        /* submitInfo.signalSemaphoreCount */ signalSemaphores.size() > 0 ? (uint32_t)signalSemaphores.size() : 0,
+        /* submitInfo.pSignalSemaphores */ signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr
     };
 
     VkResult result = vkQueueSubmit(_queue, 1, &submitInfo, fence);

@@ -11,7 +11,6 @@ namespace Builder {
 Framebuffer::Framebuffer(const API::Device& device) : _device{device} {}
 
 bool Framebuffer::build(API::Framebuffer& framebuffer, VkResult* returnResult) {
-
     // Build a vector of VkImageView from the API::ImageView
     std::vector<VkImageView> vkImageViews(_attachments.size());
     std::transform(
@@ -20,16 +19,16 @@ bool Framebuffer::build(API::Framebuffer& framebuffer, VkResult* returnResult) {
     );
 
     // Create the framebuffer creation information for vkCreateFramebuffer
-    VkFramebufferCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.renderPass = static_cast<VkRenderPass>(*_renderPass),
-        createInfo.attachmentCount = static_cast<uint32_t>(vkImageViews.size()),
-        createInfo.pAttachments = vkImageViews.data(),
-        createInfo.width = _width,
-        createInfo.height = _height,
-        createInfo.layers = _layers
+    const VkFramebufferCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ 0,
+        /* createInfo.renderPass */ static_cast<VkRenderPass>(*_renderPass),
+        /* createInfo.attachmentCount */ static_cast<uint32_t>(vkImageViews.size()),
+        /* createInfo.pAttachments */ vkImageViews.data(),
+        /* createInfo.width */ _width,
+        /* createInfo.height */ _height,
+        /* createInfo.layers */ _layers
     };
 
     // Create the framebuffer

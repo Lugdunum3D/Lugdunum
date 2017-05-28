@@ -10,11 +10,11 @@ CommandPool::CommandPool(const API::Device& device, const API::QueueFamily& queu
 
 bool CommandPool::build(API::CommandPool& commandPool, VkResult* returnResult) {
     // Create the commandPool creation information for vkCreateCommandPool
-    VkCommandPoolCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = _flags,
-        createInfo.queueFamilyIndex = _queueFamily.getIdx()
+    const VkCommandPoolCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ _flags,
+        /* createInfo.queueFamilyIndex */ _queueFamily.getIdx()
     };
 
     // Create the commandPool

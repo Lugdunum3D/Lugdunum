@@ -67,17 +67,17 @@ RenderPass::SubpassIndex RenderPass::addSubpass(const RenderPass::SubpassDescrip
 
     _subpassesResources.push_back(std::move(resources));
 
-    VkSubpassDescription vkSubpassDescription{
-        vkSubpassDescription.flags = 0,
-        vkSubpassDescription.pipelineBindPoint = subpassDescription.pipelineBindPoint,
-        vkSubpassDescription.inputAttachmentCount = static_cast<uint32_t>(_subpassesResources.back().inputAttachments.size()),
-        vkSubpassDescription.pInputAttachments = _subpassesResources.back().inputAttachments.data(),
-        vkSubpassDescription.colorAttachmentCount = static_cast<uint32_t>(_subpassesResources.back().colorAttachments.size()),
-        vkSubpassDescription.pColorAttachments = _subpassesResources.back().colorAttachments.data(),
-        vkSubpassDescription.pResolveAttachments = _subpassesResources.back().resolveAttachments.data(),
-        vkSubpassDescription.pDepthStencilAttachment = &_subpassesResources.back().depthStencilAttachment,
-        vkSubpassDescription.preserveAttachmentCount = static_cast<uint32_t>(_subpassesResources.back().preserveAttachments.size()),
-        vkSubpassDescription.pPreserveAttachments = _subpassesResources.back().preserveAttachments.data(),
+    const VkSubpassDescription vkSubpassDescription{
+        /* vkSubpassDescription.flags */ 0,
+        /* vkSubpassDescription.pipelineBindPoint */ subpassDescription.pipelineBindPoint,
+        /* vkSubpassDescription.inputAttachmentCount */ static_cast<uint32_t>(_subpassesResources.back().inputAttachments.size()),
+        /* vkSubpassDescription.pInputAttachments */ _subpassesResources.back().inputAttachments.data(),
+        /* vkSubpassDescription.colorAttachmentCount */ static_cast<uint32_t>(_subpassesResources.back().colorAttachments.size()),
+        /* vkSubpassDescription.pColorAttachments */ _subpassesResources.back().colorAttachments.data(),
+        /* vkSubpassDescription.pResolveAttachments */ _subpassesResources.back().resolveAttachments.data(),
+        /* vkSubpassDescription.pDepthStencilAttachment */ &_subpassesResources.back().depthStencilAttachment,
+        /* vkSubpassDescription.preserveAttachmentCount */ static_cast<uint32_t>(_subpassesResources.back().preserveAttachments.size()),
+        /* vkSubpassDescription.pPreserveAttachments */ _subpassesResources.back().preserveAttachments.data(),
     };
 
     _subpasses.push_back(std::move(vkSubpassDescription));
@@ -99,14 +99,14 @@ void RenderPass::addSubpassDependency(const RenderPass::SubpassDependency& subpa
         return i;
     };
 
-    VkSubpassDependency vkSubpassDependency{
-        vkSubpassDependency.srcSubpass = findIndexSubpass(subpassDependency.srcSubpass),
-        vkSubpassDependency.dstSubpass = findIndexSubpass(subpassDependency.dstSubpass),
-        vkSubpassDependency.srcStageMask = subpassDependency.srcStageMask,
-        vkSubpassDependency.dstStageMask = subpassDependency.dstStageMask,
-        vkSubpassDependency.srcAccessMask = subpassDependency.srcAccessMask,
-        vkSubpassDependency.dstAccessMask = subpassDependency.dstAccessMask,
-        vkSubpassDependency.dependencyFlags = subpassDependency.dependencyFlags
+    const VkSubpassDependency vkSubpassDependency{
+        /* vkSubpassDependency.srcSubpass */ findIndexSubpass(subpassDependency.srcSubpass),
+        /* vkSubpassDependency.dstSubpass */ findIndexSubpass(subpassDependency.dstSubpass),
+        /* vkSubpassDependency.srcStageMask */ subpassDependency.srcStageMask,
+        /* vkSubpassDependency.dstStageMask */ subpassDependency.dstStageMask,
+        /* vkSubpassDependency.srcAccessMask */ subpassDependency.srcAccessMask,
+        /* vkSubpassDependency.dstAccessMask */ subpassDependency.dstAccessMask,
+        /* vkSubpassDependency.dependencyFlags */ subpassDependency.dependencyFlags
     };
 
     _dependencies.push_back(std::move(vkSubpassDependency));
@@ -117,16 +117,16 @@ bool RenderPass::build(API::RenderPass& renderPass, VkResult* returnResult) {
     const std::vector<VkSubpassDescription> subpasses{std::cbegin(_subpasses), std::cend(_subpasses)};
     const std::vector<VkSubpassDependency> dependencies{std::cbegin(_dependencies), std::cend(_dependencies)};
 
-    VkRenderPassCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.attachmentCount = static_cast<uint32_t>(attachments.size()),
-        createInfo.pAttachments = attachments.data(),
-        createInfo.subpassCount = static_cast<uint32_t>(subpasses.size()),
-        createInfo.pSubpasses = subpasses.data(),
-        createInfo.dependencyCount = static_cast<uint32_t>(dependencies.size()),
-        createInfo.pDependencies = dependencies.data()
+    const VkRenderPassCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ 0,
+        /* createInfo.attachmentCount */ static_cast<uint32_t>(attachments.size()),
+        /* createInfo.pAttachments */ attachments.data(),
+        /* createInfo.subpassCount */ static_cast<uint32_t>(subpasses.size()),
+        /* createInfo.pSubpasses */ subpasses.data(),
+        /* createInfo.dependencyCount */ static_cast<uint32_t>(dependencies.size()),
+        /* createInfo.pDependencies */ dependencies.data()
     };
 
     // Create the render pass

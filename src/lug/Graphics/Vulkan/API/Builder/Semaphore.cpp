@@ -11,12 +11,11 @@ namespace Builder {
 Semaphore::Semaphore(const API::Device& device) : _device{device} {}
 
 bool Semaphore::build(API::Semaphore& semaphore, VkResult* returnResult) {
-
     // Create the semaphore creation information for vkCreateSemaphore
-    VkSemaphoreCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0
+    const VkSemaphoreCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ 0
     };
 
     // Create the semaphore

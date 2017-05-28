@@ -104,30 +104,26 @@ bool Swapchain::build(API::Swapchain& swapchain, VkResult* returnResult) {
     }
 
     // Create the swapchain creation information for vkCreateSwapchain
-    VkSwapchainCreateInfoKHR createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.surface = _surface,
-        createInfo.minImageCount = _minImageCount,
-        createInfo.imageFormat = _imageFormat,
-        createInfo.imageColorSpace = _imageColorSpace,
-        {}, // createInfo.imageExtent
-        createInfo.imageArrayLayers = 1,
-        createInfo.imageUsage = _imageUsage,
-        createInfo.imageSharingMode = sharingMode,
-        createInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size()),
-        createInfo.pQueueFamilyIndices = queueFamilyIndices.data(),  // Convert the set to raw data,  // Convert the set to raw data
-        createInfo.preTransform = _preTransform,
-        createInfo.compositeAlpha = _compositeAlpha,
-        createInfo.presentMode = _presentMode,
-        createInfo.clipped = _clipped,
-        createInfo.oldSwapchain = _oldSwapchain
+    const VkSwapchainCreateInfoKHR createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ 0,
+        /* createInfo.surface */ _surface,
+        /* createInfo.minImageCount */ _minImageCount,
+        /* createInfo.imageFormat */ _imageFormat,
+        /* createInfo.imageColorSpace */ _imageColorSpace,
+        /* createInfo.imageExtent */ {_imageExtent.width, _imageExtent.height},
+        /* createInfo.imageArrayLayers */ 1,
+        /* createInfo.imageUsage */ _imageUsage,
+        /* createInfo.imageSharingMode */ sharingMode,
+        /* createInfo.queueFamilyIndexCount */ static_cast<uint32_t>(queueFamilyIndices.size()),
+        /* createInfo.pQueueFamilyIndices */ queueFamilyIndices.data(),  // Convert the set to raw data,  // Convert the set to raw data
+        /* createInfo.preTransform */ _preTransform,
+        /* createInfo.compositeAlpha */ _compositeAlpha,
+        /* createInfo.presentMode */ _presentMode,
+        /* createInfo.clipped */ _clipped,
+        /* createInfo.oldSwapchain */ _oldSwapchain
     };
-
-    createInfo.imageExtent.width = _imageExtent.width;
-    createInfo.imageExtent.height = _imageExtent.height;
-
 
     // Create the swapchain
     VkSwapchainKHR vkSwapchain{VK_NULL_HANDLE};

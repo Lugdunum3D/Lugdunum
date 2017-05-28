@@ -67,12 +67,12 @@ void ShaderModule::loadFromData(const std::vector<uint32_t>& data) {
 }
 
 bool ShaderModule::build(API::ShaderModule& shaderModule, VkResult* returnResult) {
-    VkShaderModuleCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.codeSize = static_cast<uint32_t>(_data.size()),
-        createInfo.pCode = _data.data()
+    const VkShaderModuleCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ 0,
+        /* createInfo.codeSize */ static_cast<uint32_t>(_data.size()),
+        /* createInfo.pCode */ _data.data()
     };
 
     VkShaderModule vkShaderModule = VK_NULL_HANDLE;

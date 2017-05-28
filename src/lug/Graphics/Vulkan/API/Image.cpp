@@ -70,11 +70,11 @@ void Image::destroy() {
     }
 }
 
-void Image::bindMemory(const DeviceMemory* deviceMemory, VkDeviceSize memoryOffset) {
-    _deviceMemory = deviceMemory;
+void Image::bindMemory(const DeviceMemory& deviceMemory, VkDeviceSize memoryOffset) {
+    _deviceMemory = &deviceMemory;
     _deviceMemoryOffset = memoryOffset;
 
-    vkBindImageMemory(static_cast<VkDevice>(*_device), _image, static_cast<VkDeviceMemory>(*deviceMemory), memoryOffset);
+    vkBindImageMemory(static_cast<VkDevice>(*_device), _image, static_cast<VkDeviceMemory>(deviceMemory), memoryOffset);
 }
 
 const VkMemoryRequirements& Image::getRequirements() const {
@@ -89,7 +89,7 @@ VkFormat Image::getFormat() const {
     return _format;
 }
 
-VkFormat Image::findSupportedFormat(const Device* device, const std::set<VkFormat>& formats, VkImageTiling tiling, VkFormatFeatureFlags features) {
+VkFormat Image::findSupportedFormat(const Device& device, const std::set<VkFormat>& formats, VkImageTiling tiling, VkFormatFeatureFlags features) {
     for (auto format: formats) {
         if (isFormatSupported(device, format, tiling, features)) {
             return format;
@@ -100,8 +100,8 @@ VkFormat Image::findSupportedFormat(const Device* device, const std::set<VkForma
     return VK_FORMAT_UNDEFINED;
 }
 
-bool Image::isFormatSupported(const Device* device, VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features) {
-    const PhysicalDeviceInfo* physicalDeviceInfo = device->getPhysicalDeviceInfo();
+bool Image::isFormatSupported(const Device& device, VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features) {
+    const PhysicalDeviceInfo* physicalDeviceInfo = device.getPhysicalDeviceInfo();
 
     if (physicalDeviceInfo->formatProperties.find(format) == physicalDeviceInfo->formatProperties.end()) {
         LUG_LOG.warn("Image::isFormatSupported: the format does not exists in physicalDeviceInfo->formatProperties");

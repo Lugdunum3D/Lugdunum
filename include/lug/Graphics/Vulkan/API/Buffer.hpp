@@ -37,7 +37,7 @@ public:
 
     void destroy();
 
-    void bindMemory(const DeviceMemory* deviceMemory, VkDeviceSize memoryOffset = 0);
+    void bindMemory(const DeviceMemory& deviceMemory, VkDeviceSize memoryOffset = 0);
 
     bool updateData(const void *data, VkDeviceSize size, VkDeviceSize offset = 0) const;
 

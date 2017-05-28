@@ -66,18 +66,24 @@ bool Forward::render(
 
     // Init render pass
     {
-        VkViewport vkViewport{
-            vkViewport.x = viewport.offset.x,
-            vkViewport.y = viewport.offset.y,
-            vkViewport.width = viewport.extent.width,
-            vkViewport.height = viewport.extent.height,
-            vkViewport.minDepth = viewport.minDepth,
-            vkViewport.maxDepth = viewport.maxDepth,
+        const VkViewport vkViewport{
+            /* vkViewport.x */ viewport.offset.x,
+            /* vkViewport.y */ viewport.offset.y,
+            /* vkViewport.width */ viewport.extent.width,
+            /* vkViewport.height */ viewport.extent.height,
+            /* vkViewport.minDepth */ viewport.minDepth,
+            /* vkViewport.maxDepth */ viewport.maxDepth,
         };
 
-        VkRect2D scissor{};
-        scissor.offset = {(int32_t)_renderView->getScissor().offset.x, (int32_t)_renderView->getScissor().offset.y};
-        scissor.extent = {(uint32_t)_renderView->getScissor().extent.width, (uint32_t)_renderView->getScissor().extent.height};
+        const VkRect2D scissor{
+            /* scissor.offset */ {
+                (int32_t)_renderView->getScissor().offset.x,
+                (int32_t)_renderView->getScissor().offset.y},
+            /* scissor.extent */ {
+                (uint32_t)_renderView->getScissor().extent.width,
+                (uint32_t)_renderView->getScissor().extent.height
+            }
+        };
 
         cmdBuffer.setViewport({vkViewport});
         cmdBuffer.setScissor({scissor});
@@ -101,7 +107,7 @@ bool Forward::render(
 
             _subBuffers[camera->getName()] = cameraBuffer;
 
-            Math::Mat4x4f cameraData[] = {
+            const Math::Mat4x4f cameraData[] = {
                 camera->getViewMatrix(),
                 camera->getProjectionMatrix()
             };
@@ -160,15 +166,15 @@ bool Forward::render(
 
         cmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
 
-        API::CommandBuffer::CmdBindDescriptors cameraBind {
+        const API::CommandBuffer::CmdBindDescriptors cameraBind {
             /* cameraBind.pipelineLayout */ *_pipelines[Light::Light::Type::Directional].getLayout(),
-            cameraBind.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-            cameraBind.firstSet = 0,
+            /* cameraBind.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+            /* cameraBind.firstSet */ 0,
             /* cameraBind.descriptorSets */ {cameraBuffer->descriptorSet},
             /* cameraBind.dynamicOffsets */ {cameraBuffer->offset},
         };
 
-        cmdBuffer.bindDescriptorSets(std::move(cameraBind));
+        cmdBuffer.bindDescriptorSets(cameraBind);
 
         // Blend constants are used as dst blend factor
         // We set them to 0 so that there is no blending
@@ -196,14 +202,15 @@ bool Forward::render(
 
             BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
 
-            API::CommandBuffer::CmdBindDescriptors lightBind {
+            const API::CommandBuffer::CmdBindDescriptors lightBind {
                 /* cameraBind.pipelineLayout */ *_pipelines[Light::Light::Type::Directional].getLayout(),
-                lightBind.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS,
-                lightBind.firstSet = 1,
+                /* lightBind.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+                /* lightBind.firstSet */ 1,
                 /* lightBind.descriptorSets */ {lightBuffer->descriptorSet},
                 /* lightBind.dynamicOffsets */ {lightBuffer->offset},
             };
-            cmdBuffer.bindDescriptorSets(std::move(lightBind));
+
+            cmdBuffer.bindDescriptorSets(lightBind);
 
             for (std::size_t j = 0; j < renderQueue.getMeshsNb(); ++j) {
                 MeshInstance* meshInstance = renderQueue.getMeshs()[j];
@@ -215,25 +222,28 @@ bool Forward::render(
                     VkDeviceSize indexBufferOffset = 0;
 
                     LUG_ASSERT(meshInstance->getParent() != nullptr, "A MeshInstance should have a parent");
-                    Math::Mat4x4f pushConstants[] = {
+
+                    const Math::Mat4x4f pushConstants[] = {
                         meshInstance->getParent()->getTransform()
                     };
 
-                    API::CommandBuffer::CmdPushConstants cmdPushConstants{
-                        cmdPushConstants.layout = static_cast<VkPipelineLayout>(*lightPipeline.getLayout()),
-                        cmdPushConstants.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-                        cmdPushConstants.offset = 0,
-                        cmdPushConstants.size = sizeof(pushConstants),
-                        cmdPushConstants.values = pushConstants
+                    const API::CommandBuffer::CmdPushConstants cmdPushConstants{
+                        /* cmdPushConstants.layout */ static_cast<VkPipelineLayout>(*lightPipeline.getLayout()),
+                        /* cmdPushConstants.stageFlags */ VK_SHADER_STAGE_VERTEX_BIT,
+                        /* cmdPushConstants.offset */ 0,
+                        /* cmdPushConstants.size */ sizeof(pushConstants),
+                        /* cmdPushConstants.values */ pushConstants
                     };
                     cmdBuffer.pushConstants(cmdPushConstants);
 
                     cmdBuffer.bindVertexBuffers({vkMesh->getVertexBuffer()}, {vertexBufferOffset});
                     cmdBuffer.bindIndexBuffer(*vkMesh->getIndexBuffer(), VK_INDEX_TYPE_UINT32, indexBufferOffset);
 
-                    API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed;
-                    cmdDrawIndexed.indexCount = static_cast<uint32_t>(vkMesh->indices.size());
-                    cmdDrawIndexed.instanceCount = 1;
+                    const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
+                        /* cmdDrawIndexed.indexCount */ static_cast<uint32_t>(vkMesh->indices.size()),
+                        /* cmdDrawIndexed.instanceCount */ 1,
+                    };
+
                     cmdBuffer.drawIndexed(cmdDrawIndexed);
                 } else {
                     Model::Mesh* modelMesh = static_cast<Model::Mesh*>(mesh);
@@ -243,24 +253,28 @@ bool Forward::render(
                     VkDeviceSize indexBufferOffset = modelMesh->indicesOffset * sizeof(uint32_t);
 
                     LUG_ASSERT(modelInstance->getParent() != nullptr, "A ModelInstance should have a parent");
-                    Math::Mat4x4f pushConstants[] = {
+
+                    const Math::Mat4x4f pushConstants[] = {
                         modelInstance->getParent()->getTransform()
                     };
-                    API::CommandBuffer::CmdPushConstants cmdPushConstants{
-                        cmdPushConstants.layout = static_cast<VkPipelineLayout>(*lightPipeline.getLayout()),
-                        cmdPushConstants.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-                        cmdPushConstants.offset = 0,
-                        cmdPushConstants.size = sizeof(pushConstants),
-                        cmdPushConstants.values = pushConstants
+
+                    const API::CommandBuffer::CmdPushConstants cmdPushConstants{
+                        /* cmdPushConstants.layout */ static_cast<VkPipelineLayout>(*lightPipeline.getLayout()),
+                        /* cmdPushConstants.stageFlags */ VK_SHADER_STAGE_VERTEX_BIT,
+                        /* cmdPushConstants.offset */ 0,
+                        /* cmdPushConstants.size */ sizeof(pushConstants),
+                        /* cmdPushConstants.values */ pushConstants
                     };
                     cmdBuffer.pushConstants(cmdPushConstants);
 
                     cmdBuffer.bindVertexBuffers({model->getVertexBuffer()}, {vertexBufferOffset});
                     cmdBuffer.bindIndexBuffer(*model->getIndexBuffer(), VK_INDEX_TYPE_UINT32, indexBufferOffset);
 
-                    API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed;
-                    cmdDrawIndexed.indexCount = static_cast<uint32_t>(modelMesh->indices.size());
-                    cmdDrawIndexed.instanceCount = 1;
+                    const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
+                        /* cmdDrawIndexed.indexCount */ static_cast<uint32_t>(modelMesh->indices.size()),
+                        /* cmdDrawIndexed.instanceCount */ 1,
+                    };
+
                     cmdBuffer.drawIndexed(cmdDrawIndexed);
                 }
             }
@@ -278,7 +292,8 @@ bool Forward::render(
         {static_cast<VkSemaphore>(drawCompleteSemaphore)},
         {static_cast<VkSemaphore>(imageReadySemaphore)},
         {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
-        static_cast<VkFence>(frameData.fence));
+        static_cast<VkFence>(frameData.fence)
+    );
 }
 
 bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::ImageView>& imageViews) {
@@ -435,7 +450,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
                 auto colorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
 
                 const VkFormat depthFormat = API::Image::findSupportedFormat(
-                    _device,
+                    *_device,
                     {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
                     VK_IMAGE_TILING_OPTIMAL,
                     VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
@@ -541,8 +556,8 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
         _device,
         queueFamilyIndices,
         descriptorPool,
-        &_pipelines[Light::Light::Type::Directional].getLayout()->getDescriptorSetLayouts()[0]);
-
+        &_pipelines[Light::Light::Type::Directional].getLayout()->getDescriptorSetLayouts()[0]
+    );
 
     uint32_t largestLightSize = 0;
     // Calculate largest light structure
@@ -550,13 +565,15 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
         largestLightSize = (uint32_t)(std::max)(sizeof(Light::Directional::LightData), sizeof(Light::Point::LightData));
         largestLightSize = (std::max)(largestLightSize, (uint32_t)sizeof(Light::Spot::LightData));
     }
+
     _lightsPool = std::make_unique<BufferPool>(
         (uint32_t)_framesData.size() * 50,
         largestLightSize,
         _device,
         queueFamilyIndices,
         descriptorPool,
-        &_pipelines[Light::Light::Type::Directional].getLayout()->getDescriptorSetLayouts()[1]);
+        &_pipelines[Light::Light::Type::Directional].getLayout()->getDescriptorSetLayouts()[1]
+    );
 
     return initDepthBuffers(imageViews) && initFramebuffers(imageViews);
 }
@@ -590,10 +607,10 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
 
     // Create images and add them to API::Builder::DeviceMemory
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
-        VkExtent3D extent{
-            extent.width = imageViews[i].getImage()->getExtent().width,
-            extent.height = imageViews[i].getImage()->getExtent().height,
-            extent.depth = 1
+        const VkExtent3D extent{
+            /* extent.width */ imageViews[i].getImage()->getExtent().width,
+            /* extent.height */ imageViews[i].getImage()->getExtent().height,
+            /* extent.depth */ 1
         };
 
         imageBuilder.setExtent(extent);

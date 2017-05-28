@@ -55,7 +55,7 @@ private:
     explicit PipelineLayout(
         VkPipelineLayout pipelineLayout,
         const Device* device,
-        std::vector<DescriptorSetLayout>&& descriptorSetLayouts
+        std::vector<DescriptorSetLayout> descriptorSetLayouts
     );
 
 private:

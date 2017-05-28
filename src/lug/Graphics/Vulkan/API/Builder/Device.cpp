@@ -56,30 +56,30 @@ bool Device::build(API::Device& device, VkResult* returnResult) {
         if (_queueFamiliesInfos[i].queuesUsed == 0) {
             continue;
         }
-        VkDeviceQueueCreateInfo queueCreateInfo {
-            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-            queueCreateInfo.pNext = nullptr,
-            queueCreateInfo.flags = 0,
-            queueCreateInfo.queueFamilyIndex = i,
-            queueCreateInfo.queueCount = _queueFamiliesInfos[i].queuesUsed,
-            queueCreateInfo.pQueuePriorities = priorities,
+        const VkDeviceQueueCreateInfo queueCreateInfo {
+            /* queueCreateInfo.sType */ VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+            /* queueCreateInfo.pNext */ nullptr,
+            /* queueCreateInfo.flags */ 0,
+            /* queueCreateInfo.queueFamilyIndex */ i,
+            /* queueCreateInfo.queueCount */ _queueFamiliesInfos[i].queuesUsed,
+            /* queueCreateInfo.pQueuePriorities */ priorities,
         };
 
-        queueCreateInfos.push_back(queueCreateInfo);
+        queueCreateInfos.push_back(std::move(queueCreateInfo));
     }
 
     // Create the device creation information for vkCreateDevice
-    VkDeviceCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size()),
-        createInfo.pQueueCreateInfos = queueCreateInfos.data(),
-        createInfo.enabledLayerCount = 0, // Deprecated
-        createInfo.ppEnabledLayerNames = nullptr, // Deprecated
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(_extensions.size()),
-        createInfo.ppEnabledExtensionNames = _extensions.data(),
-        createInfo.pEnabledFeatures = &_features
+    const VkDeviceCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ 0,
+        /* createInfo.queueCreateInfoCount */ static_cast<uint32_t>(queueCreateInfos.size()),
+        /* createInfo.pQueueCreateInfos */ queueCreateInfos.data(),
+        /* createInfo.enabledLayerCount */ 0, // Deprecated
+        /* createInfo.ppEnabledLayerNames */ nullptr, // Deprecated
+        /* createInfo.enabledExtensionCount */ static_cast<uint32_t>(_extensions.size()),
+        /* createInfo.ppEnabledExtensionNames */ _extensions.data(),
+        /* createInfo.pEnabledFeatures */ &_features
     };
 
     // Create the device

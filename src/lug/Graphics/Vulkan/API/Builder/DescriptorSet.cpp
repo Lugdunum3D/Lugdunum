@@ -24,12 +24,12 @@ std::unique_ptr<API::DescriptorSet> DescriptorSet::build(VkResult* returnResult)
 
 bool DescriptorSet::build(std::vector<API::DescriptorSet>& descriptorSets, VkResult* returnResult) {
     // Create the descriptorSet creation information for vkCreateDescriptorSet
-    VkDescriptorSetAllocateInfo allocateInfo{
-        allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
-        allocateInfo.pNext = nullptr,
-        allocateInfo.descriptorPool = static_cast<VkDescriptorPool>(_descriptorPool),
-        allocateInfo.descriptorSetCount = static_cast<uint32_t>(descriptorSets.size()),
-        allocateInfo.pSetLayouts = _descriptorSetLayouts.data(),
+    const VkDescriptorSetAllocateInfo allocateInfo{
+        /* allocateInfo.sType */ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        /* allocateInfo.pNext */ nullptr,
+        /* allocateInfo.descriptorPool */ static_cast<VkDescriptorPool>(_descriptorPool),
+        /* allocateInfo.descriptorSetCount */ static_cast<uint32_t>(descriptorSets.size()),
+        /* allocateInfo.pSetLayouts */ _descriptorSetLayouts.data(),
     };
 
     std::vector<VkDescriptorSet> vkDescriptorSets(descriptorSets.size());

@@ -216,7 +216,6 @@ set(INC
     ${INCROOT}/Vulkan/API/PipelineLayout.hpp
     ${INCROOT}/Vulkan/API/PipelineLayout.inl
     ${INCROOT}/Vulkan/API/Queue.hpp
-    ${INCROOT}/Vulkan/API/Queue.inl
     ${INCROOT}/Vulkan/API/QueueFamily.hpp
     ${INCROOT}/Vulkan/API/QueueFamily.inl
     ${INCROOT}/Vulkan/API/RTTI/Enum.hpp

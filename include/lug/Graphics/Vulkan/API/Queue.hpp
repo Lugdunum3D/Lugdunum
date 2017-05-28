@@ -29,14 +29,14 @@ public:
                 const std::vector<VkSemaphore>& signalSemaphores = {},
                 const std::vector<VkSemaphore>& waitSemaphores = {},
                 const std::vector<VkPipelineStageFlags>& waitDstStageMasks = {},
-                VkFence fence = VK_NULL_HANDLE) const;
+                VkFence fence = VK_NULL_HANDLE
+    ) const;
+
     bool waitIdle() const;
 
 private:
     VkQueue _queue{VK_NULL_HANDLE};
 };
-
-#include <lug/Graphics/Vulkan/API/Queue.inl>
 
 } // API
 } // Vulkan

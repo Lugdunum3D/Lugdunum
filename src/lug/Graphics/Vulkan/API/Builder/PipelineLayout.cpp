@@ -11,7 +11,6 @@ namespace Builder {
 PipelineLayout::PipelineLayout(const API::Device& device) : _device{device} {}
 
 bool PipelineLayout::build(API::PipelineLayout& pipelineLayout, VkResult* returnResult) {
-
     // Build a vector of VkDescriptorSetLayout from the API::DescriptorSetLayout
     std::vector<VkDescriptorSetLayout> vkDescriptorSetLayouts(_descriptorSetLayouts.size());
     std::transform(
@@ -20,14 +19,14 @@ bool PipelineLayout::build(API::PipelineLayout& pipelineLayout, VkResult* return
     );
 
     // Create the pipelineLayout creation information for vkCreatePipelineLayout
-    VkPipelineLayoutCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.setLayoutCount = static_cast<uint32_t>(vkDescriptorSetLayouts.size()),
-        createInfo.pSetLayouts = vkDescriptorSetLayouts.data(),
-        createInfo.pushConstantRangeCount = static_cast<uint32_t>(_pushConstants.size()),
-        createInfo.pPushConstantRanges = _pushConstants.data(),
+    const VkPipelineLayoutCreateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.flags */ 0,
+        /* createInfo.setLayoutCount */ static_cast<uint32_t>(vkDescriptorSetLayouts.size()),
+        /* createInfo.pSetLayouts */ vkDescriptorSetLayouts.data(),
+        /* createInfo.pushConstantRangeCount */ static_cast<uint32_t>(_pushConstants.size()),
+        /* createInfo.pPushConstantRanges */ _pushConstants.data(),
     };
 
     // Create the pipelineLayout

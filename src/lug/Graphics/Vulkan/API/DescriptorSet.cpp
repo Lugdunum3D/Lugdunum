@@ -41,23 +41,23 @@ void DescriptorSet::update(
     VkDeviceSize offset,
     VkDeviceSize range) const {
 
-    VkDescriptorBufferInfo bufferInfo{
-        bufferInfo.buffer = static_cast<VkBuffer>(*buffer),
-        bufferInfo.offset = offset,
-        bufferInfo.range = range,
+    const VkDescriptorBufferInfo bufferInfo{
+        /* bufferInfo.buffer */ static_cast<VkBuffer>(*buffer),
+        /* bufferInfo.offset */ offset,
+        /* bufferInfo.range */ range,
     };
 
     VkWriteDescriptorSet write{
-        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-        write.pNext = nullptr,
-        write.dstSet = _descriptorSet,
-        write.dstBinding = dstBinding,
-        write.dstArrayElement = 0,
-        write.descriptorCount = 1,
-        write.descriptorType = descriptorType,
-        write.pImageInfo = nullptr,
-        write.pBufferInfo = &bufferInfo,
-        write.pTexelBufferView = nullptr
+        /* write.sType */ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        /* write.pNext */ nullptr,
+        /* write.dstSet */ _descriptorSet,
+        /* write.dstBinding */ dstBinding,
+        /* write.dstArrayElement */ 0,
+        /* write.descriptorCount */ 1,
+        /* write.descriptorType */ descriptorType,
+        /* write.pImageInfo */ nullptr,
+        /* write.pBufferInfo */ &bufferInfo,
+        /* write.pTexelBufferView */ nullptr
     };
 
     vkUpdateDescriptorSets(static_cast<VkDevice>(*_device), 1, &write, 0, nullptr);

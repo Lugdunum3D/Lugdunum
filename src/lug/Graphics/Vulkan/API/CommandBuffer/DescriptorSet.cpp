@@ -32,7 +32,7 @@ void CommandBuffer::bindDescriptorSets(const CommandBuffer::CmdBindDescriptors& 
         descriptorSets.data(),
         static_cast<uint32_t>(parameters.dynamicOffsets.size()),
         parameters.dynamicOffsets.data()
-        );
+    );
 }
 
 } // API

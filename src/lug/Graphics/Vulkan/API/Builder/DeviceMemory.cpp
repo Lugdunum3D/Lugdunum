@@ -41,11 +41,11 @@ bool DeviceMemory::build(API::DeviceMemory& deviceMemory, VkResult* returnResult
     }
 
     // Create the device memory creation information for vkAllocateMemory
-    VkMemoryAllocateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.allocationSize = size,
-        createInfo.memoryTypeIndex = memoryTypeIndex
+    const VkMemoryAllocateInfo createInfo{
+        /* createInfo.sType */ VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        /* createInfo.pNext */ nullptr,
+        /* createInfo.allocationSize */ size,
+        /* createInfo.memoryTypeIndex */ memoryTypeIndex
     };
 
     // Create the device memory
@@ -64,12 +64,12 @@ bool DeviceMemory::build(API::DeviceMemory& deviceMemory, VkResult* returnResult
 
     // Bind all the buffers into the memory
     for (uint32_t i = 0; i < _buffers.size(); ++i) {
-        _buffers[i]->bindMemory(&deviceMemory, offsetBuffers[i]);
+        _buffers[i]->bindMemory(deviceMemory, offsetBuffers[i]);
     }
 
     // Bind all the images into the memory
     for (uint32_t i = 0; i < _images.size(); ++i) {
-        _images[i]->bindMemory(&deviceMemory, offsetImages[i]);
+        _images[i]->bindMemory(deviceMemory, offsetImages[i]);
     }
 
     return true;

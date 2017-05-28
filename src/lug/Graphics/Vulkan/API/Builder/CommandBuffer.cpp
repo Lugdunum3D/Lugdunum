@@ -24,12 +24,12 @@ std::unique_ptr<API::CommandBuffer> CommandBuffer::build(VkResult* returnResult)
 
 bool CommandBuffer::build(std::vector<API::CommandBuffer>& commandBuffers, VkResult* returnResult) {
     // Create the commandBuffer creation information for vkCreateCommandBuffer
-    VkCommandBufferAllocateInfo allocateInfo{
-        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        allocateInfo.pNext = nullptr,
-        allocateInfo.commandPool = static_cast<VkCommandPool>(_commandPool),
-        allocateInfo.level = _level,
-        allocateInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size()),
+    const VkCommandBufferAllocateInfo allocateInfo{
+        /* allocateInfo.sType */ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        /* allocateInfo.pNext */ nullptr,
+        /* allocateInfo.commandPool */ static_cast<VkCommandPool>(_commandPool),
+        /* allocateInfo.level */ _level,
+        /* allocateInfo.commandBufferCount */ static_cast<uint32_t>(commandBuffers.size()),
     };
 
     std::vector<VkCommandBuffer> vkCommandBuffers(commandBuffers.size());

@@ -71,7 +71,8 @@ void* DeviceMemory::mapBuffer(const API::Buffer& buffer, VkDeviceSize size, VkDe
         offset + buffer.getDeviceMemoryOffset(),
         size == VK_WHOLE_SIZE ? buffer.getRequirements().size - offset : size,
         0,
-        &data);
+        &data
+    );
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("DeviceMemory: Can't map memory of a buffer: {}", result);
