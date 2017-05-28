@@ -13,7 +13,7 @@
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/API/Instance.hpp>
 #include <lug/Graphics/Vulkan/API/Loader.hpp>
-#include <lug/Graphics/Vulkan/API/Pipeline.hpp>
+#include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
 #include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>

@@ -17,7 +17,7 @@ class Buffer;
 class DescriptorSet;
 class Framebuffer;
 class Image;
-class Pipeline;
+class GraphicsPipeline;
 class PipelineLayout;
 class RenderPass;
 

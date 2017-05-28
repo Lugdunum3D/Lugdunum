@@ -37,9 +37,9 @@ bool ShaderModule::loadFromFile(const std::string& filename) {
         return false;
     }
 
-    _content.resize(shaderCodeSize % 4 ? (shaderCodeSize + 4 - shaderCodeSize % 4) : (shaderCodeSize));
+    _data.resize(shaderCodeSize % 4 ? (shaderCodeSize + 4 - shaderCodeSize % 4) : (shaderCodeSize));
 
-    AAsset_read(asset, reinterpret_cast<char*>(_content.data()), shaderCodeSize);
+    AAsset_read(asset, reinterpret_cast<char*>(_data.data()), shaderCodeSize);
     AAsset_close(asset);
 #else
     std::ifstream shaderFile(filename, std::ios::binary);
@@ -53,17 +53,17 @@ bool ShaderModule::loadFromFile(const std::string& filename) {
     size_t shaderCodeSize = shaderFile.tellg();
     shaderFile.seekg(0, shaderFile.beg);
 
-    _content.resize(shaderCodeSize % 4 ? (shaderCodeSize + 4 - shaderCodeSize % 4) : (shaderCodeSize));
+    _data.resize(shaderCodeSize % 4 ? (shaderCodeSize + 4 - shaderCodeSize % 4) : (shaderCodeSize));
 
-    shaderFile.read(reinterpret_cast<char*>(_content.data()), shaderCodeSize);
+    shaderFile.read(reinterpret_cast<char*>(_data.data()), shaderCodeSize);
     shaderFile.close();
 #endif
 
     return true;
 }
 
-void ShaderModule::loadFromContent(const std::vector<uint32_t>& content) {
-    _content = content;
+void ShaderModule::loadFromData(const std::vector<uint32_t>& data) {
+    _data = data;
 }
 
 bool ShaderModule::build(API::ShaderModule& shaderModule, VkResult* returnResult) {
@@ -71,8 +71,8 @@ bool ShaderModule::build(API::ShaderModule& shaderModule, VkResult* returnResult
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         createInfo.pNext = nullptr,
         createInfo.flags = 0,
-        createInfo.codeSize = static_cast<uint32_t>(_content.size()),
-        createInfo.pCode = _content.data()
+        createInfo.codeSize = static_cast<uint32_t>(_data.size()),
+        createInfo.pCode = _data.data()
     };
 
     VkShaderModule vkShaderModule = VK_NULL_HANDLE;

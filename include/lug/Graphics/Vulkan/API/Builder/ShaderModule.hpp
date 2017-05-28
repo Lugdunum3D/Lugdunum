@@ -25,7 +25,7 @@ public:
     ~ShaderModule() = default;
 
     bool loadFromFile(const std::string& filename);
-    void loadFromContent(const std::vector<uint32_t>& content);
+    void loadFromData(const std::vector<uint32_t>& data);
 
     // Build methods
     bool build(API::ShaderModule& instance, VkResult* returnResult = nullptr);
@@ -33,7 +33,7 @@ public:
 
 private:
     const API::Device& _device;
-    std::vector<uint32_t> _content;
+    std::vector<uint32_t> _data;
 };
 
 } // Builder

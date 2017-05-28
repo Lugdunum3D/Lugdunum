@@ -6,7 +6,7 @@
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
-#include <lug/Graphics/Vulkan/API/Pipeline.hpp>
+#include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
 
 namespace lug {

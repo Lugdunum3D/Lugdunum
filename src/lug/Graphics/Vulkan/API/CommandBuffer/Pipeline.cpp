@@ -5,7 +5,7 @@
 
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/Image.hpp>
-#include <lug/Graphics/Vulkan/API/Pipeline.hpp>
+#include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -147,7 +147,7 @@ void CommandBuffer::pipelineBarrier(
     vkImageMemoryBarriers.data());
 }
 
-void CommandBuffer::bindPipeline(const API::Pipeline& pipeline, VkPipelineBindPoint pipelineBindPoint) const {
+void CommandBuffer::bindPipeline(const API::GraphicsPipeline& pipeline, VkPipelineBindPoint pipelineBindPoint) const {
     vkCmdBindPipeline(
         static_cast<VkCommandBuffer>(_commandBuffer),
         pipelineBindPoint,

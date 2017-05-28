@@ -60,7 +60,7 @@ void pipelineBarrier(
     VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
     VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT) const;
 
-void bindPipeline(const API::Pipeline& pipeline, VkPipelineBindPoint pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS) const;
+void bindPipeline(const API::GraphicsPipeline& pipeline, VkPipelineBindPoint pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS) const;
 void bindVertexBuffers(
     const std::vector<const API::Buffer*>& buffers,
     const std::vector<VkDeviceSize>& offsets,

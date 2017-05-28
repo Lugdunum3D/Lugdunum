@@ -63,7 +63,7 @@ private:
 
     API::DeviceMemory _depthBufferMemory;
 
-    std::unordered_map<Light::Light::Type, std::unique_ptr<API::Pipeline>> _pipelines;
+    std::unordered_map<Light::Light::Type, API::GraphicsPipeline> _pipelines;
 
     std::vector<FrameData> _framesData;
 

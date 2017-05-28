@@ -39,6 +39,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Builder/DeviceMemory.cpp
     ${SRCROOT}/Vulkan/API/Builder/Fence.cpp
     ${SRCROOT}/Vulkan/API/Builder/Framebuffer.cpp
+    ${SRCROOT}/Vulkan/API/Builder/GraphicsPipeline.cpp
     ${SRCROOT}/Vulkan/API/Builder/Image.cpp
     ${SRCROOT}/Vulkan/API/Builder/ImageView.cpp
     ${SRCROOT}/Vulkan/API/Builder/Instance.cpp
@@ -64,11 +65,11 @@ set(SRC
     ${SRCROOT}/Vulkan/API/DeviceMemory.cpp
     ${SRCROOT}/Vulkan/API/Fence.cpp
     ${SRCROOT}/Vulkan/API/Framebuffer.cpp
+    ${SRCROOT}/Vulkan/API/GraphicsPipeline.cpp
     ${SRCROOT}/Vulkan/API/Image.cpp
     ${SRCROOT}/Vulkan/API/ImageView.cpp
     ${SRCROOT}/Vulkan/API/Instance.cpp
     ${SRCROOT}/Vulkan/API/Loader.cpp
-    ${SRCROOT}/Vulkan/API/Pipeline.cpp
     ${SRCROOT}/Vulkan/API/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/API/Queue.cpp
     ${SRCROOT}/Vulkan/API/QueueFamily.cpp
@@ -165,6 +166,8 @@ set(INC
     ${INCROOT}/Vulkan/API/Builder/Fence.inl
     ${INCROOT}/Vulkan/API/Builder/Framebuffer.hpp
     ${INCROOT}/Vulkan/API/Builder/Framebuffer.inl
+    ${INCROOT}/Vulkan/API/Builder/GraphicsPipeline.hpp
+    ${INCROOT}/Vulkan/API/Builder/GraphicsPipeline.inl
     ${INCROOT}/Vulkan/API/Builder/Image.hpp
     ${INCROOT}/Vulkan/API/Builder/Image.inl
     ${INCROOT}/Vulkan/API/Builder/ImageView.hpp
@@ -203,13 +206,13 @@ set(INC
     ${INCROOT}/Vulkan/API/Fence.hpp
     ${INCROOT}/Vulkan/API/Fence.inl
     ${INCROOT}/Vulkan/API/Framebuffer.hpp
+    ${INCROOT}/Vulkan/API/GraphicsPipeline.hpp
     ${INCROOT}/Vulkan/API/Image.hpp
     ${INCROOT}/Vulkan/API/ImageView.hpp
     ${INCROOT}/Vulkan/API/ImageView.inl
     ${INCROOT}/Vulkan/API/Instance.hpp
     ${INCROOT}/Vulkan/API/Instance.inl
     ${INCROOT}/Vulkan/API/Loader.hpp
-    ${INCROOT}/Vulkan/API/Pipeline.hpp
     ${INCROOT}/Vulkan/API/PipelineLayout.hpp
     ${INCROOT}/Vulkan/API/PipelineLayout.inl
     ${INCROOT}/Vulkan/API/Queue.hpp
