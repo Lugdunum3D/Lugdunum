@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/API/Fence.hpp>
+
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/System/Logger/Logger.hpp>
 

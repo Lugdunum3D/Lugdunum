@@ -1,9 +1,6 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/API/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -14,6 +11,9 @@ namespace API {
 namespace Builder {
 class DescriptorSet;
 } // Builder
+
+class Buffer;
+class Device;
 
 class LUG_GRAPHICS_API DescriptorSet {
 friend Builder::DescriptorSet;

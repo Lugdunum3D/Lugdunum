@@ -21,7 +21,8 @@ void CommandBuffer::bindDescriptorSets(const CommandBuffer::CmdBindDescriptors& 
 
         [](const API::DescriptorSet* descriptorSet) {
             return static_cast<VkDescriptorSet>(*descriptorSet);
-        });
+        }
+    );
 
     vkCmdBindDescriptorSets(
         _commandBuffer,

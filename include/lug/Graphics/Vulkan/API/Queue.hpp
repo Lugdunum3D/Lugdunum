@@ -1,13 +1,14 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class CommandBuffer;
 
 class LUG_GRAPHICS_API Queue {
 public:

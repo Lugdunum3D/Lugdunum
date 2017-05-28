@@ -1,7 +1,6 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/API/Image.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -10,6 +9,7 @@ namespace Vulkan {
 namespace API {
 
 class Device;
+class Image;
 
 namespace Builder {
 class ImageView;

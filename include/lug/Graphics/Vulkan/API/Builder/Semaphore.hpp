@@ -3,12 +3,14 @@
 #include <memory>
 
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
+
 namespace Builder {
 
 class Semaphore {

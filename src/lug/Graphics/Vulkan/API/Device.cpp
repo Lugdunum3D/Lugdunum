@@ -1,6 +1,6 @@
 #include <lug/Graphics/Vulkan/API/Device.hpp>
+
 #include <lug/System/Logger/Logger.hpp>
-#include <lug/System/Debug.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -29,19 +29,6 @@ Device& Device::operator=(Device&& device) {
 
 Device::~Device() {
     destroy();
-}
-
-const PhysicalDeviceInfo* Device::getPhysicalDeviceInfo() const {
-    LUG_ASSERT(_physicalDeviceInfo != nullptr, "Device::_physicalDeviceInfo should not be null");
-    return _physicalDeviceInfo;
-}
-
-const std::vector<QueueFamily>& Device::getQueueFamilies() const {
-    return _queueFamilies;
-}
-
-std::vector<QueueFamily>& Device::getQueueFamilies() {
-    return _queueFamilies;
 }
 
 const API::QueueFamily* Device::getQueueFamily(VkQueueFlags flags, bool supportPresentation) const {

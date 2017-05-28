@@ -2,15 +2,15 @@
 
 #include <memory>
 
-#include <lug/Graphics/Vulkan/API/Instance.hpp>
 #include <lug/Graphics/Vulkan/API/Surface.hpp>
-#include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
 namespace Builder {
+
+class Instance;
 
 class Surface {
 public:

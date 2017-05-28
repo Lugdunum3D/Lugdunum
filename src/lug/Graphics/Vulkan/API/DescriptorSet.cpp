@@ -1,4 +1,6 @@
 #include <lug/Graphics/Vulkan/API/DescriptorSet.hpp>
+
+#include <lug/Graphics/Vulkan/API/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/System/Logger/Logger.hpp>
 

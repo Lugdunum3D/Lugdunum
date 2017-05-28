@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include <lug/Graphics/Vulkan/API/Device.hpp>
+
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
@@ -11,7 +13,8 @@ namespace Builder {
 Buffer::Buffer(const API::Device& device) : _device{device} {}
 
 bool Buffer::build(API::Buffer& buffer, VkResult* returnResult) {
-    std::vector<uint32_t> queueFamilyIndices(_queueFamilyIndices.begin(), _queueFamilyIndices.end());
+    const std::vector<uint32_t> queueFamilyIndices(_queueFamilyIndices.begin(), _queueFamilyIndices.end());
+
     VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     // If we have move than one queueFamilyIndices and exclusive was not manually set
     if (queueFamilyIndices.size() > 1 && !_exclusive) {

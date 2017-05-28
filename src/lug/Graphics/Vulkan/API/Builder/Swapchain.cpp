@@ -1,6 +1,5 @@
-#define NOMINMAX
-
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
+
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/System/Logger/Logger.hpp>
 

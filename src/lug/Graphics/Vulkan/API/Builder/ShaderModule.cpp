@@ -1,7 +1,6 @@
 #include <lug/Graphics/Vulkan/API/Builder/ShaderModule.hpp>
 
 #include <fstream>
-#include <vector>
 
 #if defined(LUG_SYSTEM_ANDROID)
     #include <android/asset_manager.h>
@@ -10,6 +9,7 @@
     #include <lug/Window/Window.hpp>
 #endif
 
+#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {

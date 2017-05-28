@@ -1,5 +1,6 @@
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Sampler.hpp>
+
+#include <lug/Graphics/Vulkan/API/Device.hpp>
 
 namespace lug {
 namespace Graphics {

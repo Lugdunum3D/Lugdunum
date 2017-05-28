@@ -1,6 +1,6 @@
 #include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
 
-#include <vector>
+#include <lug/Graphics/Vulkan/API/Device.hpp>
 
 namespace lug {
 namespace Graphics {

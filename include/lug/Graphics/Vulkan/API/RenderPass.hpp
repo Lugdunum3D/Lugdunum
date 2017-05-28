@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
-#include <lug/Math/Vector.hpp>
 
 namespace lug {
 namespace Graphics {

@@ -1,17 +1,17 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <vector>
-#include <algorithm>
 
 #include <lug/Graphics/Vulkan/API/PipelineLayout.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
+
 namespace Builder {
 
 class PipelineLayout {

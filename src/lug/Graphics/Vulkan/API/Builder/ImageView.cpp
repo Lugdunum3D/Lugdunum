@@ -1,6 +1,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 
-#include <vector>
+#include <lug/Graphics/Vulkan/API/Device.hpp>
+#include <lug/Graphics/Vulkan/API/Image.hpp>
 
 namespace lug {
 namespace Graphics {

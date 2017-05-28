@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorSetLayout.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>

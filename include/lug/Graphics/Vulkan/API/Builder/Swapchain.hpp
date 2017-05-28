@@ -2,10 +2,7 @@
 
 #include <memory>
 #include <set>
-#include <string>
 
-#include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/QueueFamily.hpp>
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 
@@ -13,6 +10,9 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
+
 namespace Builder {
 
 class Swapchain {

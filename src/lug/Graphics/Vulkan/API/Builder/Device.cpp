@@ -1,9 +1,8 @@
-#define NOMINMAX
+#include <lug/Graphics/Vulkan/API/Builder/Device.hpp>
 
+#define NOMINMAX
 #include <algorithm>
 
-#include <lug/Graphics/Vulkan/API/Builder/Device.hpp>
-#include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {

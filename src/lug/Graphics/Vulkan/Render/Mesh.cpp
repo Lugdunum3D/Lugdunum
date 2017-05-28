@@ -1,6 +1,7 @@
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -11,7 +12,7 @@ namespace Render {
 Mesh::Mesh(
     const std::string& name,
     const std::set<uint32_t>& queueFamilyIndices,
-    const API::Device* device) : ::lug::Graphics::Render::Mesh(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {}
+    const API::Device& device) : ::lug::Graphics::Render::Mesh(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {}
 
 Mesh::~Mesh() {
     destroy();
@@ -26,7 +27,7 @@ bool Mesh::load() {
 
     // Create vertex buffer
     {
-        API::Builder::Buffer bufferBuilder(*_device);
+        API::Builder::Buffer bufferBuilder(_device);
         bufferBuilder.setQueueFamilyIndices(_queueFamilyIndices);
         bufferBuilder.setSize((uint32_t)vertices.size() * sizeof(Vertex));
         bufferBuilder.setUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
@@ -39,7 +40,7 @@ bool Mesh::load() {
 
     // Create index buffer
     {
-        API::Builder::Buffer bufferBuilder(*_device);
+        API::Builder::Buffer bufferBuilder(_device);
         bufferBuilder.setQueueFamilyIndices(_queueFamilyIndices);
         bufferBuilder.setSize((uint32_t)indices.size() * sizeof(uint32_t));
         bufferBuilder.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
@@ -52,7 +53,7 @@ bool Mesh::load() {
 
     // Create device memory
     {
-        API::Builder::DeviceMemory deviceMemoryBuilder(*_device);
+        API::Builder::DeviceMemory deviceMemoryBuilder(_device);
         deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
         if (!deviceMemoryBuilder.addBuffer(_vertexBuffer) ||

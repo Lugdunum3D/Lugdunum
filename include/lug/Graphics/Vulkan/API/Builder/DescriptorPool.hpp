@@ -1,17 +1,17 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/QueueFamily.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
+
 namespace Builder {
 
 class DescriptorPool {

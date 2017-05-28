@@ -38,6 +38,7 @@ public:
 
     const std::vector<QueueFamily>& getQueueFamilies() const;
     std::vector<QueueFamily>& getQueueFamilies();
+
     const API::QueueFamily* getQueueFamily(VkQueueFlags flags, bool supportPresentation = false) const;
     API::QueueFamily* getQueueFamily(VkQueueFlags flags, bool supportPresentation = false);
 

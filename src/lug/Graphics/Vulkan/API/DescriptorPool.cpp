@@ -1,6 +1,6 @@
 #include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
+
 #include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

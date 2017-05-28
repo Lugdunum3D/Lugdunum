@@ -1,5 +1,7 @@
 #include <lug/Graphics/Vulkan/API/Image.hpp>
+
 #include <lug/Graphics/Vulkan/API/Device.hpp>
+#include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {

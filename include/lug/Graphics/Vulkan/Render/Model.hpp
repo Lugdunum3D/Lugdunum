@@ -5,18 +5,22 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Model.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+namespace API {
+class Device;
+}
+
 namespace Render {
 
 class LUG_GRAPHICS_API Model : public ::lug::Graphics::Render::Model {
 public:
-    explicit Model(const std::string& name, const std::set<uint32_t>& queueFamilyIndices, const API::Device* device);
+    explicit Model(const std::string& name, const std::set<uint32_t>& queueFamilyIndices, const API::Device& device);
 
     Model(const Model&) = delete;
     Model(Model&& Model) = delete;
@@ -43,7 +47,7 @@ private:
     // Queue family indices used by the vertex and index buffers
     std::set<uint32_t> _queueFamilyIndices;
 
-    const API::Device* _device{nullptr};
+    const API::Device& _device;
 };
 
 #include <lug/Graphics/Vulkan/Render/Model.inl>

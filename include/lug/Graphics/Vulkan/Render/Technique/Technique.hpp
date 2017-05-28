@@ -1,13 +1,7 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
-#include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
-#include <lug/Graphics/Vulkan/API/Semaphore.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -20,6 +14,11 @@ namespace Vulkan {
 
 class Renderer;
 
+namespace API {
+class DescriptorPool;
+class Semaphore;
+} // API
+
 namespace Render {
 
 class View;
@@ -28,7 +27,7 @@ namespace Technique {
 
 class LUG_GRAPHICS_API Technique {
 public:
-    Technique(const Renderer& renderer, const View* renderView, const API::Device* device);
+    Technique(const Renderer& renderer, const View& renderView);
 
     Technique(const Technique&) = delete;
     Technique(Technique&&) = delete;
@@ -47,8 +46,7 @@ public:
 
 protected:
     const Renderer& _renderer;
-    const View* _renderView;
-    const API::Device* _device{nullptr};
+    const View& _renderView;
 };
 
 } // Technique

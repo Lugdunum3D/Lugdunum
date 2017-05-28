@@ -1,8 +1,8 @@
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
+
 #include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Queue.hpp>
-#include <lug/Graphics/Vulkan/API/RenderPass.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {

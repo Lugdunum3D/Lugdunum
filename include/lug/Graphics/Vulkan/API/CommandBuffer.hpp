@@ -8,13 +8,13 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class CommandPool;
 namespace Builder {
 class CommandBuffer;
 } // Builder
 
 class Buffer;
 class DescriptorSet;
+class CommandPool;
 class Framebuffer;
 class Image;
 class GraphicsPipeline;

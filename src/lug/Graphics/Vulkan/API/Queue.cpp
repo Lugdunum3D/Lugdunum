@@ -1,6 +1,8 @@
 #include <lug/Graphics/Vulkan/API/Queue.hpp>
-#include <lug/System/Logger/Logger.hpp>
+
+#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/System/Debug.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

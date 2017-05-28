@@ -4,8 +4,6 @@
 #include <set>
 
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -18,6 +16,7 @@ namespace Builder {
 }
 
 class Device;
+class DeviceMemory;
 
 class LUG_GRAPHICS_API Image {
     friend class Builder::Image;

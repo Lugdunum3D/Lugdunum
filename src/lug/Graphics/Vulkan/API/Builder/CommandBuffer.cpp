@@ -1,5 +1,8 @@
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 
+#include <lug/Graphics/Vulkan/API/Device.hpp>
+#include <lug/Graphics/Vulkan/API/CommandPool.hpp>
+
 namespace lug {
 namespace Graphics {
 namespace Vulkan {

@@ -1,15 +1,16 @@
 #pragma once
 
-#include <cstdint>
 #include <set>
 
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Image.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
+
 namespace Builder {
 
 class Image {

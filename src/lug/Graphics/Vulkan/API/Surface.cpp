@@ -1,5 +1,7 @@
 #include <lug/Graphics/Vulkan/API/Surface.hpp>
 
+#include <lug/Graphics/Vulkan/API/Instance.hpp>
+
 namespace lug {
 namespace Graphics {
 namespace Vulkan {

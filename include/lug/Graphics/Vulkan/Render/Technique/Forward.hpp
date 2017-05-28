@@ -3,14 +3,14 @@
 #include <unordered_map>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Light/Light.hpp>
-#include <lug/Graphics/Vulkan/API/Buffer.hpp>
+#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorSet.hpp>
-#include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/API/Fence.hpp>
+#include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
 #include <lug/Graphics/Vulkan/API/Image.hpp>
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
-#include <lug/Graphics/Vulkan/API/Queue.hpp>
+#include <lug/Graphics/Vulkan/API/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/Render/BufferPool.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Technique.hpp>
 #include <lug/System/Clock.hpp>
@@ -18,6 +18,11 @@
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+namespace API {
+class Queue;
+} // API
+
 namespace Render {
 namespace Technique {
 
@@ -40,7 +45,7 @@ private:
     };
 
 public:
-    Forward(const Renderer& renderer, const View* renderView, const API::Device* device);
+    Forward(const Renderer& renderer, const View& renderView);
 
     Forward(const Forward&) = delete;
     Forward(Forward&&) = delete;

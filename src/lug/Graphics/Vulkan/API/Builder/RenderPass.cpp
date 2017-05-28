@@ -1,6 +1,9 @@
 #include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
 
+#include <algorithm>
 #include <vector>
+
+#include <lug/Graphics/Vulkan/API/Device.hpp>
 
 namespace lug {
 namespace Graphics {

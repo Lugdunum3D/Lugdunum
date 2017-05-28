@@ -1,8 +1,9 @@
+#include <lug/Graphics/Vulkan/API/Builder/Image.hpp>
+
 #include <vector>
 
+#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/System/Logger/Logger.hpp>
-
-#include <lug/Graphics/Vulkan/API/Builder/Image.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -13,7 +14,8 @@ namespace Builder {
 Image::Image(const API::Device& device): _device(device) {}
 
 bool Image::build(API::Image& image, VkResult* returnResult) {
-    std::vector<uint32_t> queueFamilyIndices(_queueFamilyIndices.begin(), _queueFamilyIndices.end());
+    const std::vector<uint32_t> queueFamilyIndices(_queueFamilyIndices.begin(), _queueFamilyIndices.end());
+
     VkSharingMode sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     // If we have move than one queueFamilyIndices and exclusive was not manually set
     if (queueFamilyIndices.size() > 1 && !_exclusive) {

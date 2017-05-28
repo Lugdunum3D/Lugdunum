@@ -1,16 +1,19 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
-#include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
-#include <lug/Graphics/Vulkan/API/Image.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Buffer;
+class Device;
+class Image;
+
 namespace Builder {
 
 class DeviceMemory {

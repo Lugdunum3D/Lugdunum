@@ -1,7 +1,6 @@
 #include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 
 #include <algorithm>
-#include <cstdint>
 
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/Image.hpp>

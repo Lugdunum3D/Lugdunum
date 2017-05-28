@@ -2,8 +2,6 @@
 #include <lug/Graphics/Graphics.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Instance.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
-#include <lug/Graphics/Vulkan/API/Loader.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>

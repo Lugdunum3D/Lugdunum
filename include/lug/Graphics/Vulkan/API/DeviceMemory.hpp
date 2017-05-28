@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 

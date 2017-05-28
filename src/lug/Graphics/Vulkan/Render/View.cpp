@@ -1,8 +1,12 @@
-#include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/Render/View.hpp>
+
+#include <algorithm>
+
 #include <lug/Graphics/Render/Queue.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
+#include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -14,14 +18,13 @@ View::View(const Renderer& renderer, const ::lug::Graphics::Render::Target* rend
 
 bool View::init(
     View::InitInfo& initInfo,
-    const API::Device* device,
     const API::Queue* presentQueue,
     API::DescriptorPool* descriptorPool,
     const std::vector<API::ImageView>& imageViews) {
     ::lug::Graphics::Render::View::init(initInfo);
 
     if (_info.renderTechniqueType == lug::Graphics::Render::Technique::Type::Forward) {
-        _renderTechnique = std::make_unique<Render::Technique::Forward>(_renderer, this, device);
+        _renderTechnique = std::make_unique<Render::Technique::Forward>(_renderer, *this);
     }
 
     if (_renderTechnique && !_renderTechnique->init(descriptorPool, imageViews)) {
@@ -31,7 +34,7 @@ bool View::init(
 
     _drawCompleteSemaphores.resize(imageViews.size());
 
-    API::Builder::Semaphore semaphoreBuilder(*device);
+    API::Builder::Semaphore semaphoreBuilder(_renderer.getDevice());
 
     // Work complete semaphores
     for (uint32_t i = 0; i < imageViews.size(); ++i) {

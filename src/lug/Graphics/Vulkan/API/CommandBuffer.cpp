@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
+
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/System/Logger/Logger.hpp>

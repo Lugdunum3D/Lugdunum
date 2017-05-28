@@ -5,18 +5,22 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+namespace API {
+class Device;
+} // API
+
 namespace Render {
 
 class LUG_GRAPHICS_API Mesh : public ::lug::Graphics::Render::Mesh {
 public:
-    explicit Mesh(const std::string& name, const std::set<uint32_t>& queueFamilyIndices, const API::Device* device);
+    explicit Mesh(const std::string& name, const std::set<uint32_t>& queueFamilyIndices, const API::Device& device);
 
     Mesh(const Mesh&) = delete;
     Mesh(Mesh&& mesh) = delete;
@@ -43,7 +47,7 @@ private:
 
     API::DeviceMemory _deviceMemory;
 
-    const API::Device* _device{nullptr};
+    const API::Device& _device;
 };
 
 #include <lug/Graphics/Vulkan/Render/Mesh.inl>

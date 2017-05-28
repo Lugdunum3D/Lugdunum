@@ -8,6 +8,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
+#include <lug/Graphics/Vulkan/API/Instance.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
@@ -144,7 +145,7 @@ bool Window::endFrame() {
 lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::InitInfo& initInfo) {
     std::unique_ptr<View> renderView = std::make_unique<View>(_renderer, this);
 
-    if (!renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, &_descriptorPool, _swapchain.getImagesViews())) {
+    if (!renderView->init(initInfo, _presentQueue, &_descriptorPool, _swapchain.getImagesViews())) {
         return nullptr;
     }
 

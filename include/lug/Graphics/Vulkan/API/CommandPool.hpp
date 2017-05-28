@@ -1,8 +1,6 @@
 #pragma once
 
-#include <vector>
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {

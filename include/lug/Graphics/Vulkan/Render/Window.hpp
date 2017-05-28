@@ -6,7 +6,6 @@
 #include <lug/Graphics/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
-#include <lug/Graphics/Vulkan/API/Fence.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/API/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
@@ -17,6 +16,10 @@ namespace Graphics {
 namespace Vulkan {
 
 class Renderer;
+
+namespace API {
+class QueueFamily;
+} // API
 
 namespace Render {
 

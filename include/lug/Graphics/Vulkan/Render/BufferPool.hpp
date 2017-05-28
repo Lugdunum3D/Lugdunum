@@ -6,14 +6,18 @@
 #include <set>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorSet.hpp>
-#include <lug/Graphics/Vulkan/API/DescriptorSetLayout.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+namespace API {
+class DescriptorPool;
+class DescriptorSetLayout;
+} // API
+
 namespace Render {
 
 class LUG_GRAPHICS_API BufferPool {
@@ -25,7 +29,7 @@ public:
 
     public:
         SubBuffer() = default;
-        SubBuffer(API::DescriptorSet* descriptorSet, API::Buffer* buffer, uint32_t offset, uint32_t size, Chunk* chunk);
+        SubBuffer(const API::DescriptorSet* descriptorSet, const API::Buffer* buffer, uint32_t offset, uint32_t size, Chunk* chunk);
 
         SubBuffer(const SubBuffer&) = default;
         SubBuffer(SubBuffer&& subBuffer) = default;
@@ -36,8 +40,8 @@ public:
         void free();
 
     public:
-        API::DescriptorSet* descriptorSet;
-        API::Buffer* buffer;
+        const API::DescriptorSet* descriptorSet;
+        const API::Buffer* buffer;
         uint32_t offset;
         uint32_t size;
 
@@ -68,9 +72,9 @@ private:
 public:
     BufferPool(uint32_t countPerChunk,
                 uint32_t subBufferSize,
-                const API::Device* device,
+                const API::Device& device,
                 const std::set<uint32_t>& queueFamilyIndices,
-                API::DescriptorPool* descriptorPool,
+                const API::DescriptorPool& descriptorPool,
                 const API::DescriptorSetLayout* descriptorSetLayout);
 
     BufferPool(const BufferPool&) = delete;
@@ -91,9 +95,9 @@ private:
     // Use a list to avoid the change of adress of a chunk if we add another chunk to the list
     std::list<Chunk> _chunks;
 
-    const API::Device* _device;
+    const API::Device& _device;
     std::set<uint32_t> _queueFamilyIndices;
-    API::DescriptorPool* _descriptorPool;
+    const API::DescriptorPool& _descriptorPool;
     const API::DescriptorSetLayout* _descriptorSetLayout;
 };
 

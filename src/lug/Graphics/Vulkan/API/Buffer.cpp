@@ -1,8 +1,9 @@
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
+
+#include <cstring>
+
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
-#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {

@@ -2,9 +2,6 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/View.hpp>
-#include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Technique.hpp>
 
@@ -13,6 +10,11 @@ namespace Graphics {
 namespace Vulkan {
 
 class Renderer;
+
+namespace API {
+class DescriptorPool;
+class Queue;
+} // API
 
 namespace Render {
 
@@ -30,7 +32,6 @@ public:
     ~View() = default;
 
     bool init(View::InitInfo& initInfo,
-                const API::Device* device,
                 const API::Queue* presentQueue,
                 API::DescriptorPool* descriptorPool,
                 const std::vector<API::ImageView>& imageViews);

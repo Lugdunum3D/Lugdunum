@@ -1,16 +1,16 @@
 #pragma once
 
 #include <memory>
-#include <string>
-#include <set>
 
 #include <lug/Graphics/Vulkan/API/Fence.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
+
 namespace Builder {
 
 class Fence {

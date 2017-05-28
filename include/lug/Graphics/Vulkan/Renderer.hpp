@@ -7,14 +7,9 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Renderer.hpp>
-#include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/API/Instance.hpp>
 #include <lug/Graphics/Vulkan/API/Loader.hpp>
-#include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
-#include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>

@@ -1,7 +1,5 @@
 #include <lug/Graphics/Vulkan/API/RenderPass.hpp>
-#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Image.hpp>
 #include <lug/System/Logger/Logger.hpp>
 

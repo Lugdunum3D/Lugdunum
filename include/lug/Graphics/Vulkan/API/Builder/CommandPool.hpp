@@ -1,17 +1,17 @@
 #pragma once
 
 #include <memory>
-#include <string>
-#include <vector>
 
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/QueueFamily.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
+class QueueFamily;
+
 namespace Builder {
 
 class CommandPool {

@@ -1,16 +1,17 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include <lug/Graphics/Vulkan/API/DescriptorSetLayout.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
+
 namespace Builder {
 
 class DescriptorSetLayout {

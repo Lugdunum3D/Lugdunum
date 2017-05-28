@@ -1,17 +1,17 @@
 #pragma once
 
 #include <memory>
-#include <string>
-#include <set>
 
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
-#include <lug/Graphics/Vulkan/API/Image.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
+class Image;
+
 namespace Builder {
 
 class ImageView {

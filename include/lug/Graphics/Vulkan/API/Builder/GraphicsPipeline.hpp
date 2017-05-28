@@ -6,17 +6,18 @@
 #include <vector>
 
 #include <lug/Graphics/Vulkan/API/Builder/ShaderModule.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
 #include <lug/Graphics/Vulkan/API/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/RenderPass.hpp>
-#include <lug/Graphics/Vulkan/API/ShaderModule.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
+
 namespace Builder {
 
 class LUG_GRAPHICS_API GraphicsPipeline {

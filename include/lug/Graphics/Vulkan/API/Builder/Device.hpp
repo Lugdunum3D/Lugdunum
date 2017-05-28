@@ -2,10 +2,8 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
-#include <lug/Core/Version.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 
 namespace lug {

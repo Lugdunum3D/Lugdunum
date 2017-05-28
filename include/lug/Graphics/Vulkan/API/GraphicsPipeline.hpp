@@ -1,6 +1,5 @@
 #pragma once
 
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/RenderPass.hpp>
 
@@ -8,6 +7,8 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Device;
 
 namespace Builder {
 class GraphicsPipeline;

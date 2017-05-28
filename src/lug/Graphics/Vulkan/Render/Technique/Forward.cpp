@@ -1,5 +1,7 @@
-#include <chrono>
+#include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
+
 #include <algorithm>
+
 #include <lug/Config.hpp>
 #include <lug/Graphics/Light/Directional.hpp>
 #include <lug/Graphics/Light/Point.hpp>
@@ -20,7 +22,6 @@
 #include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
-#include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Render/Model.hpp>
 #include <lug/Graphics/Vulkan/Render/View.hpp>
@@ -38,8 +39,8 @@ namespace Technique {
 
 using MeshInstance = ::lug::Graphics::Scene::MeshInstance;
 
-Forward::Forward(const Renderer& renderer, const Render::View* renderView, const API::Device* device) :
-    Technique(renderer, renderView, device) {}
+Forward::Forward(const Renderer& renderer, const Render::View& renderView) :
+    Technique(renderer, renderView) {}
 
 bool Forward::render(
     const ::lug::Graphics::Render::Queue& renderQueue,
@@ -48,7 +49,7 @@ bool Forward::render(
     uint32_t currentImageIndex) {
     FrameData& frameData = _framesData[currentImageIndex];
 
-    auto& viewport = _renderView->getViewport();
+    auto& viewport = _renderView.getViewport();
 
     frameData.fence.wait();
     frameData.fence.reset();
@@ -77,11 +78,11 @@ bool Forward::render(
 
         const VkRect2D scissor{
             /* scissor.offset */ {
-                (int32_t)_renderView->getScissor().offset.x,
-                (int32_t)_renderView->getScissor().offset.y},
+                (int32_t)_renderView.getScissor().offset.x,
+                (int32_t)_renderView.getScissor().offset.y},
             /* scissor.extent */ {
-                (uint32_t)_renderView->getScissor().extent.width,
-                (uint32_t)_renderView->getScissor().extent.height
+                (uint32_t)_renderView.getScissor().extent.width,
+                (uint32_t)_renderView.getScissor().extent.height
             }
         };
 
@@ -90,9 +91,9 @@ bool Forward::render(
     }
 
     // Update camera buffer data
-    BufferPool::SubBuffer* cameraBuffer = _subBuffers[_renderView->getCamera()->getName()];
+    BufferPool::SubBuffer* cameraBuffer = _subBuffers[_renderView.getCamera()->getName()];
     {
-        Camera* camera = static_cast<Camera*>(_renderView->getCamera());
+        Camera* camera = static_cast<Camera*>(_renderView.getCamera());
 
         if (camera->isDirty() && cameraBuffer) {
             frameData.freeSubBuffers.push_back(cameraBuffer);
@@ -297,11 +298,11 @@ bool Forward::render(
 }
 
 bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::ImageView>& imageViews) {
-    auto colorFormat = _renderView->getFormat().format;
+    auto colorFormat = _renderView.getFormat().format;
 
     {
         auto initLightPipeline = [this, &colorFormat](Light::Light::Type lightType, const char* vertexShader, const char* fragmentShader) {
-            API::Builder::GraphicsPipeline graphicsPipelineBuilder(*_device);
+            API::Builder::GraphicsPipeline graphicsPipelineBuilder(_renderer.getDevice());
 
             // Set shaders state
             if (!graphicsPipelineBuilder.setShaderFromFile(VK_SHADER_STAGE_VERTEX_BIT, "main", _renderer.getInfo().shadersRoot + vertexShader)
@@ -372,7 +373,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
             {
                 VkResult result{VK_SUCCESS};
                 std::vector<API::DescriptorSetLayout> descriptorSetLayouts(2);
-                API::Builder::DescriptorSetLayout descriptorSetLayoutBuilder(*_device);
+                API::Builder::DescriptorSetLayout descriptorSetLayoutBuilder(_renderer.getDevice());
 
                 // Bindings set 0
                 {
@@ -417,7 +418,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
                     /* pushConstant.size */ sizeof(Math::Mat4x4f)
                 };
 
-                API::Builder::PipelineLayout pipelineLayoutBuilder(*_device);
+                API::Builder::PipelineLayout pipelineLayoutBuilder(_renderer.getDevice());
 
                 pipelineLayoutBuilder.setPushConstants({pushConstant});
                 pipelineLayoutBuilder.setDescriptorSetLayouts(std::move(descriptorSetLayouts));
@@ -433,7 +434,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
 
             // Set render pass
             {
-                API::Builder::RenderPass renderPassBuilder(*_device);
+                API::Builder::RenderPass renderPassBuilder(_renderer.getDevice());
 
                 const VkAttachmentDescription colorAttachment{
                     /* colorAttachment.flags */ 0,
@@ -450,7 +451,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
                 auto colorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
 
                 const VkFormat depthFormat = API::Image::findSupportedFormat(
-                    *_device,
+                    _renderer.getDevice(),
                     {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
                     VK_IMAGE_TILING_OPTIMAL,
                     VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
@@ -509,7 +510,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
 
     _framesData.resize(imageViews.size());
 
-    const API::QueueFamily* graphicsQueueFamily = _device->getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
+    const API::QueueFamily* graphicsQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
     if (!graphicsQueueFamily) {
         LUG_LOG.error("Forward::init: Can't find VK_QUEUE_GRAPHICS_BIT queue family");
         return false;
@@ -520,14 +521,14 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
         return false;
     }
 
-    API::Builder::CommandPool commandPoolBuilder(*_device, *graphicsQueueFamily);
+    API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *graphicsQueueFamily);
     VkResult result{VK_SUCCESS};
     if (!commandPoolBuilder.build(_commandPool, &result)) {
         LUG_LOG.error("Forward::init: Can't create a command pool: {}", result);
         return false;
     }
 
-    API::Builder::Fence fenceBuilder(*_device);
+    API::Builder::Fence fenceBuilder(_renderer.getDevice());
     fenceBuilder.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
 
     API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _commandPool);
@@ -553,9 +554,9 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
     _cameraPool = std::make_unique<BufferPool>(
         (uint32_t)_framesData.size(),
         (uint32_t)sizeof(Math::Mat4x4f) * 2,
-        _device,
+        _renderer.getDevice(),
         queueFamilyIndices,
-        descriptorPool,
+        *descriptorPool,
         &_pipelines[Light::Light::Type::Directional].getLayout()->getDescriptorSetLayouts()[0]
     );
 
@@ -569,9 +570,9 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
     _lightsPool = std::make_unique<BufferPool>(
         (uint32_t)_framesData.size() * 50,
         largestLightSize,
-        _device,
+        _renderer.getDevice(),
         queueFamilyIndices,
-        descriptorPool,
+        *descriptorPool,
         &_pipelines[Light::Light::Type::Directional].getLayout()->getDescriptorSetLayouts()[1]
     );
 
@@ -594,7 +595,7 @@ void Forward::destroy() {
 }
 
 bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
-    API::Builder::Image imageBuilder(*_device);
+    API::Builder::Image imageBuilder(_renderer.getDevice());
 
     imageBuilder.setUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
     imageBuilder.setPreferedFormats({VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT});
@@ -602,7 +603,7 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
 
     _framesData.resize(imageViews.size());
 
-    API::Builder::DeviceMemory deviceMemoryBuilder(*_device);
+    API::Builder::DeviceMemory deviceMemoryBuilder(_renderer.getDevice());
     deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     // Create images and add them to API::Builder::DeviceMemory
@@ -643,7 +644,7 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
 
         // Create depth buffer image view
-        API::Builder::ImageView imageViewBuilder(*_device, _framesData[i].depthBuffer.image);
+        API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), _framesData[i].depthBuffer.image);
 
         imageViewBuilder.setFormat(_framesData[i].depthBuffer.image.getFormat());
         imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_DEPTH_BIT);
@@ -666,7 +667,7 @@ bool Forward::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
 
     for (size_t i = 0; i < imageViews.size(); i++) {
         // Create depth buffer image view
-        API::Builder::Framebuffer framebufferBuilder(*_device);
+        API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
 
         framebufferBuilder.setRenderPass(renderPass);
         framebufferBuilder.addAttachment(&imageViews[i]);

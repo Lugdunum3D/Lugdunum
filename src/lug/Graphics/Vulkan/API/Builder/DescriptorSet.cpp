@@ -1,5 +1,8 @@
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSet.hpp>
 
+#include <lug/Graphics/Vulkan/API/Device.hpp>
+#include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
+
 namespace lug {
 namespace Graphics {
 namespace Vulkan {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
+
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/API/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Image.hpp>
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>

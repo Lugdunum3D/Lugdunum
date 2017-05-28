@@ -1,11 +1,14 @@
 #pragma once
 
-#include <lug/Graphics/Vulkan/API/Instance.hpp>
+#include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
+
+class Instance;
 
 namespace Builder {
 class Surface;
