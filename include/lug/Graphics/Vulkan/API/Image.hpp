@@ -12,8 +12,8 @@ namespace Vulkan {
 namespace API {
 
 namespace Builder {
-    class Image;
-}
+class Image;
+} // Builder
 
 class Device;
 class DeviceMemory;

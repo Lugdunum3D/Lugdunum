@@ -1,4 +1,4 @@
-struct CmdPipelineBarrier{
+struct CmdPipelineBarrier {
     struct MemoryBarrier {
         VkAccessFlags srcAccessMask;
         VkAccessFlags dstAccessMask;
@@ -58,13 +58,15 @@ void pipelineBarrier(
     const CmdPipelineBarrier& parameters,
     VkDependencyFlags dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
     VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-    VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT) const;
+    VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
+) const;
 
 void bindPipeline(const API::GraphicsPipeline& pipeline, VkPipelineBindPoint pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS) const;
 void bindVertexBuffers(
     const std::vector<const API::Buffer*>& buffers,
     const std::vector<VkDeviceSize>& offsets,
-    uint32_t firstBinding = 0) const;
+    uint32_t firstBinding = 0
+) const;
 void bindIndexBuffer(const API::Buffer& buffer, VkIndexType indexType, VkDeviceSize offset = 0) const;
 
 void setViewport(const std::vector<VkViewport>& viewports, uint32_t firstViewport = 0) const;

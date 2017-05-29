@@ -16,7 +16,7 @@ class Buffer;
 class Device;
 
 class LUG_GRAPHICS_API DescriptorSet {
-friend Builder::DescriptorSet;
+    friend class Builder::DescriptorSet;
 
 public:
     DescriptorSet() = default;

@@ -12,14 +12,14 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
-
 namespace Builder {
 class PipelineLayout;
 } // Builder
 
+class Device;
+
 class LUG_GRAPHICS_API PipelineLayout {
-    friend Builder::PipelineLayout;
+    friend class Builder::PipelineLayout;
 
 public:
     PipelineLayout() = default;
@@ -63,6 +63,7 @@ private:
 private:
     VkPipelineLayout _pipelineLayout{VK_NULL_HANDLE};
     const Device* _device{nullptr};
+
     std::vector<DescriptorSetLayout> _descriptorSetLayouts{};
 };
 

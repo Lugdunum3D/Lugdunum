@@ -9,11 +9,11 @@ namespace Vulkan {
 namespace API {
 
 namespace Builder {
-    class DeviceMemory;
-};
+class DeviceMemory;
+} // Builder
 
-class Device;
 class Buffer;
+class Device;
 class Image;
 
 class LUG_GRAPHICS_API DeviceMemory {
@@ -50,6 +50,7 @@ private:
 private:
     VkDeviceMemory _deviceMemory{VK_NULL_HANDLE};
     const Device* _device{nullptr};
+
     VkDeviceSize _size{0};
 };
 

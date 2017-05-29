@@ -13,11 +13,11 @@ class CommandBuffer;
 } // Builder
 
 class Buffer;
-class DescriptorSet;
 class CommandPool;
+class DescriptorSet;
 class Framebuffer;
-class Image;
 class GraphicsPipeline;
+class Image;
 class PipelineLayout;
 class RenderPass;
 
@@ -58,6 +58,7 @@ private:
 
 private:
     VkCommandBuffer _commandBuffer{VK_NULL_HANDLE};
+
     const CommandPool* _commandPool{nullptr};
 };
 

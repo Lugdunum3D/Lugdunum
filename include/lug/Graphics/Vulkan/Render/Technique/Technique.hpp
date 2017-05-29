@@ -12,12 +12,12 @@ class Queue;
 
 namespace Vulkan {
 
-class Renderer;
-
 namespace API {
 class DescriptorPool;
 class Semaphore;
 } // API
+
+class Renderer;
 
 namespace Render {
 

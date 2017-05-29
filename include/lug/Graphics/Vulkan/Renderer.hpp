@@ -1,8 +1,8 @@
 #pragma once
 
-#include <memory>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
+#include <memory>
 #include <unordered_map>
 
 #include <lug/Graphics/Export.hpp>

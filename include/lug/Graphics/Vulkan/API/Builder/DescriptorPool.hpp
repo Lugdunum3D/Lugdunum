@@ -37,6 +37,7 @@ public:
 
 private:
     const API::Device& _device;
+
     VkDescriptorPoolCreateFlags _flags{VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT};
     uint32_t _maxSets{0};
     std::vector<VkDescriptorPoolSize> _poolSizes{};

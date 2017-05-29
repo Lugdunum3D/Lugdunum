@@ -37,6 +37,7 @@ public:
 
 private:
     const API::Device& _device;
+
     const API::Image& _image;
     VkFormat _format{VK_FORMAT_UNDEFINED};
     VkImageViewType _viewType{VK_IMAGE_VIEW_TYPE_2D};

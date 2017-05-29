@@ -10,8 +10,8 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
 class DescriptorPool;
+class Device;
 
 namespace Builder {
 
@@ -39,6 +39,7 @@ public:
 
 private:
     const API::Device& _device;
+
     const API::DescriptorPool& _descriptorPool;
     std::vector<VkDescriptorSetLayout> _descriptorSetLayouts{};
     std::vector<VkDescriptorSet> _poolSizes{};

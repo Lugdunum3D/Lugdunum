@@ -10,14 +10,14 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
-
 namespace Builder {
 class DescriptorSetLayout;
-}
+} // Builder
+
+class Device;
 
 class LUG_GRAPHICS_API DescriptorSetLayout {
-    friend Builder::DescriptorSetLayout;
+    friend class Builder::DescriptorSetLayout;
 
 public:
     DescriptorSetLayout() = default;

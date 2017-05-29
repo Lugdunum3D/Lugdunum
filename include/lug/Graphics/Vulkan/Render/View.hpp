@@ -9,12 +9,12 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-class Renderer;
-
 namespace API {
 class DescriptorPool;
 class Queue;
 } // API
+
+class Renderer;
 
 namespace Render {
 

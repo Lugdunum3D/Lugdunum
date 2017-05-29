@@ -8,11 +8,11 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
-
 namespace Builder {
 class GraphicsPipeline;
 } // Builder
+
+class Device;
 
 class LUG_GRAPHICS_API GraphicsPipeline {
     friend class Builder::GraphicsPipeline;

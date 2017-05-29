@@ -8,11 +8,11 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Instance;
-
 namespace Builder {
 class Surface;
 } // Builder
+
+class Instance;
 
 class Surface {
     friend class Builder::Surface;

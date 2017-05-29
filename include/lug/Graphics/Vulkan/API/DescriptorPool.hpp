@@ -8,14 +8,15 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
-
 namespace Builder {
 class DescriptorPool;
 } // Builder
 
+class Device;
+
 class LUG_GRAPHICS_API DescriptorPool {
-    friend Builder::DescriptorPool;
+    friend class Builder::DescriptorPool;
+
 public:
     DescriptorPool() = default;
 

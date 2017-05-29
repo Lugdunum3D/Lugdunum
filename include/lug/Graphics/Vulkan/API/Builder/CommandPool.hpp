@@ -35,6 +35,7 @@ public:
 
 private:
     const API::Device& _device;
+
     const API::QueueFamily& _queueFamily;
     VkCommandPoolCreateFlags _flags{VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT};
 };

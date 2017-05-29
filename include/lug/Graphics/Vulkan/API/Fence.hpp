@@ -8,14 +8,14 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
-
 namespace Builder {
 class Fence;
-}
+} // Builder
+
+class Device;
 
 class LUG_GRAPHICS_API Fence {
-    friend Builder::Fence;
+    friend class Builder::Fence;
 
 public:
     Fence() = default;

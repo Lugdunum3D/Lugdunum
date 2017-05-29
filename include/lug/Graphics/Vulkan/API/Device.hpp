@@ -52,6 +52,7 @@ private:
 
 private:
     VkDevice _device{VK_NULL_HANDLE};
+
     const PhysicalDeviceInfo* _physicalDeviceInfo{nullptr};
     std::vector<QueueFamily> _queueFamilies;
 };

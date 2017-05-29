@@ -8,15 +8,15 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
+namespace Builder {
+class ImageView;
+} // Builder
+
 class Device;
 class Image;
 
-namespace Builder {
-class ImageView;
-}
-
 class LUG_GRAPHICS_API ImageView {
-friend Builder::ImageView;
+    friend class Builder::ImageView;
 
 public:
     ImageView() = default;
@@ -55,6 +55,7 @@ private:
 private:
     VkImageView _imageView{VK_NULL_HANDLE};
     const Device* _device{nullptr};
+
     const Image* _image{nullptr};
 };
 

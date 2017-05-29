@@ -12,13 +12,13 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
-class Queue;
-class RenderPass;
-
 namespace Builder {
 class Swapchain;
 } // Builder
+
+class Device;
+class Queue;
+class RenderPass;
 
 class LUG_GRAPHICS_API Swapchain {
     friend class Builder::Swapchain;

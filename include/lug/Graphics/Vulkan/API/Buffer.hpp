@@ -10,13 +10,13 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
+namespace Builder {
+class Buffer;
+} // Builder
+
 class CommandBuffer;
 class Device;
 class DeviceMemory;
-
-namespace Builder {
-class Buffer;
-}
 
 class LUG_GRAPHICS_API Buffer {
     friend class Builder::Buffer;

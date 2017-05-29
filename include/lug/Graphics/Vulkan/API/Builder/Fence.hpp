@@ -34,6 +34,7 @@ public:
 
 private:
     const API::Device& _device;
+
     VkFenceCreateFlags _flags{0};
 };
 

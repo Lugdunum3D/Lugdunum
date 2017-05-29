@@ -1,4 +1,4 @@
-    #pragma once
+#pragma once
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
@@ -8,11 +8,11 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
-
 namespace Builder {
 class Framebuffer;
-}
+} // Builder
+
+class Device;
 
 class LUG_GRAPHICS_API Framebuffer {
     friend class Builder::Framebuffer;

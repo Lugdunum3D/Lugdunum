@@ -9,8 +9,8 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Instance;
 class Device;
+class Instance;
 
 class LUG_GRAPHICS_API Loader {
 public:

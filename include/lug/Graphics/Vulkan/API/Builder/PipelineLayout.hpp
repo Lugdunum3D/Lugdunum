@@ -36,6 +36,7 @@ public:
 
 private:
     const API::Device& _device;
+
     std::vector<VkPushConstantRange> _pushConstants{};
     std::vector<API::DescriptorSetLayout> _descriptorSetLayouts{};
 };

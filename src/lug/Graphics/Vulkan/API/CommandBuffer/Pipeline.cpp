@@ -54,8 +54,8 @@ static VkAccessFlags getImageDstAccessMask(VkImageLayout newLayout) {
 
 static void setupMemoryBarriers(
     std::vector<VkMemoryBarrier>& vkMemoryBarriers,
-    const std::vector<CommandBuffer::CmdPipelineBarrier::MemoryBarrier>& memoryBarriers) {
-
+    const std::vector<CommandBuffer::CmdPipelineBarrier::MemoryBarrier>& memoryBarriers
+) {
     vkMemoryBarriers.resize(memoryBarriers.size());
     for (uint8_t i = 0; i < memoryBarriers.size(); ++i){
         vkMemoryBarriers[i].sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
@@ -67,8 +67,8 @@ static void setupMemoryBarriers(
 
 static void setupBufferBarriers(
     std::vector<VkBufferMemoryBarrier>& vkBufferMemoryBarriers,
-    const std::vector<CommandBuffer::CmdPipelineBarrier::BufferMemoryBarrier>& bufferMemoryBarriers) {
-
+    const std::vector<CommandBuffer::CmdPipelineBarrier::BufferMemoryBarrier>& bufferMemoryBarriers
+) {
     vkBufferMemoryBarriers.resize(bufferMemoryBarriers.size());
     for (uint8_t i = 0; i < bufferMemoryBarriers.size(); ++i){
         vkBufferMemoryBarriers[i].sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -85,8 +85,8 @@ static void setupBufferBarriers(
 
 static void setupImageBarriers(
     std::vector<VkImageMemoryBarrier>& vkImageMemoryBarriers,
-    const std::vector<CommandBuffer::CmdPipelineBarrier::ImageMemoryBarrier>& imageMemoryBarriers) {
-
+    const std::vector<CommandBuffer::CmdPipelineBarrier::ImageMemoryBarrier>& imageMemoryBarriers
+) {
     vkImageMemoryBarriers.resize(imageMemoryBarriers.size());
     for (uint8_t i = 0; i < imageMemoryBarriers.size(); ++i){
         vkImageMemoryBarriers[i].sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -123,7 +123,8 @@ void CommandBuffer::pipelineBarrier(
     const CmdPipelineBarrier& parameters,
     VkDependencyFlags dependencyFlags,
     VkPipelineStageFlags srcStageMask,
-    VkPipelineStageFlags dstStageMask) const {
+    VkPipelineStageFlags dstStageMask
+) const {
 
     std::vector<VkMemoryBarrier> vkMemoryBarriers;
     std::vector<VkBufferMemoryBarrier> vkBufferMemoryBarriers;
@@ -158,7 +159,8 @@ void CommandBuffer::bindPipeline(const API::GraphicsPipeline& pipeline, VkPipeli
 void CommandBuffer::bindVertexBuffers(
     const std::vector<const API::Buffer*>& buffers,
     const std::vector<VkDeviceSize>& offsets,
-    uint32_t firstBinding) const {
+    uint32_t firstBinding
+) const {
 
     // Build a vector of VkBuffer from the API::Buffer
     std::vector<VkBuffer> vkBuffers(buffers.size());

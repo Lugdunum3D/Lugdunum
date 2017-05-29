@@ -4,6 +4,7 @@
 #include <list>
 #include <memory>
 #include <set>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorSet.hpp>
@@ -21,7 +22,7 @@ class DescriptorSetLayout;
 namespace Render {
 
 class LUG_GRAPHICS_API BufferPool {
-struct Chunk;
+    struct Chunk;
 
 public:
     class SubBuffer{

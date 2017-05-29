@@ -12,6 +12,9 @@ struct CmdDrawIndexed {
     uint32_t firstInstance = 0;
 };
 
-void beginRenderPass(const API::RenderPass& renderPass, const CmdBeginRenderPass& parameters, VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE) const;
+void beginRenderPass(const API::RenderPass& renderPass,
+    const CmdBeginRenderPass& parameters,
+    VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE
+) const;
 void endRenderPass() const;
 void drawIndexed(const CmdDrawIndexed& params) const;

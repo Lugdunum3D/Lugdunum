@@ -8,14 +8,14 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
-
 namespace Builder {
 class ShaderModule;
-}
+} // Builder
+
+class Device;
 
 class LUG_GRAPHICS_API ShaderModule {
-    friend Builder::ShaderModule;
+    friend class Builder::ShaderModule;
 
 public:
     ShaderModule() = default;

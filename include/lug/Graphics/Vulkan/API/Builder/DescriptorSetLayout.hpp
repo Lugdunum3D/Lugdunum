@@ -35,6 +35,7 @@ public:
 
 private:
     const API::Device& _device;
+
     std::vector<VkDescriptorSetLayoutBinding> _bindings{};
 };
 

@@ -15,11 +15,11 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-class Renderer;
-
 namespace API {
 class QueueFamily;
 } // API
+
+class Renderer;
 
 namespace Render {
 

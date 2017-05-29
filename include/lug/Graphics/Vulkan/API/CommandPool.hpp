@@ -8,12 +8,12 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
-class Queue;
-
 namespace Builder {
 class CommandPool;
 } // Builder
+
+class Device;
+class Queue;
 
 class LUG_GRAPHICS_API CommandPool {
     friend class Builder::CommandPool;
@@ -49,6 +49,7 @@ private:
 private:
     VkCommandPool _commandPool{VK_NULL_HANDLE};
     const Device* _device{nullptr};
+
     const Queue* _queue{nullptr};
 };
 

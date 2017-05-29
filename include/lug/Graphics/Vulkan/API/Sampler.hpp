@@ -8,14 +8,14 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
-
 namespace Builder {
 class Sampler;
-}
+} // Builder
+
+class Device;
 
 class LUG_GRAPHICS_API Sampler {
-    friend Builder::Sampler;
+    friend class Builder::Sampler;
 
 public:
     Sampler() = default;
@@ -38,7 +38,7 @@ private:
     explicit Sampler(VkSampler sampler, const Device* device);
 
 private:
-    VkSampler _sampler{ VK_NULL_HANDLE };
+    VkSampler _sampler{VK_NULL_HANDLE};
     const Device* _device{nullptr};
 };
 

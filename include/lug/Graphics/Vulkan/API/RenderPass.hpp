@@ -10,13 +10,13 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class CommandBuffer;
-class Device;
-class Framebuffer;
-
 namespace Builder {
 class RenderPass;
 } // Builder
+
+class CommandBuffer;
+class Device;
+class Framebuffer;
 
 class LUG_GRAPHICS_API RenderPass {
     friend class Builder::RenderPass;

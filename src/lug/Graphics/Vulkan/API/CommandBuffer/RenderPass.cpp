@@ -8,7 +8,11 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-void CommandBuffer::beginRenderPass(const API::RenderPass& renderPass, const CommandBuffer::CmdBeginRenderPass& parameters, VkSubpassContents contents) const {
+void CommandBuffer::beginRenderPass(
+    const API::RenderPass& renderPass,
+    const CommandBuffer::CmdBeginRenderPass& parameters,
+    VkSubpassContents contents
+) const {
     const VkRenderPassBeginInfo beginInfo{
         /* beginInfo.sType */ VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
         /* beginInfo.pNext */ nullptr,

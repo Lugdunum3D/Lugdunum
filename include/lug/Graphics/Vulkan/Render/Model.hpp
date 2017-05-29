@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <set>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Model.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
@@ -14,7 +15,7 @@ namespace Vulkan {
 
 namespace API {
 class Device;
-}
+} // API
 
 namespace Render {
 

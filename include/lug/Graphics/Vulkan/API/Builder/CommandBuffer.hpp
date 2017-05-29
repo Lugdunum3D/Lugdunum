@@ -10,8 +10,8 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-class Device;
 class CommandPool;
+class Device;
 
 namespace Builder {
 
@@ -39,6 +39,7 @@ public:
 
 private:
     const API::Device& _device;
+
     const API::CommandPool& _commandPool;
     VkCommandBufferLevel _level{VK_COMMAND_BUFFER_LEVEL_PRIMARY};
 };
