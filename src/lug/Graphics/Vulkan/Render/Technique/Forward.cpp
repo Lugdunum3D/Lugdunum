@@ -351,10 +351,10 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
             const VkPipelineColorBlendAttachmentState colorBlendAttachment{
                 /* colorBlendAttachment.blendEnable */ VK_TRUE,
                 /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_ONE,
-                /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_ONE,
+                /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
                 /* colorBlendAttachment.colorBlendOp */ VK_BLEND_OP_ADD,
                 /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
-                /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
+                /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
                 /* colorBlendAttachment.alphaBlendOp */ VK_BLEND_OP_ADD,
                 /* colorBlendAttachment.colorWriteMask */ VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
             };
