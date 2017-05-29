@@ -34,15 +34,34 @@ public:
     }
 
     /**
-     * @brief      Update the descriptor set
+     * @brief      Update the descriptor set buffers
      *
-     * @param[in]  descriptorType  The descriptor type
      * @param[in]  dstBinding      The destination binding
-     * @param[in]  buffer          The buffer to bind to the descriptor set
-     * @param[in]  offset          The offset in the buffer
-     * @param[in]  range           The range of the set
+     * @param[in]  dstArrayElement The starting element in the descriptor set binding array
+     * @param[in]  descriptorType  The descriptor type
+     * @param[in]  bufferInfos     The buffers to bind to the descriptor set
      */
-    void update(VkDescriptorType descriptorType, uint32_t dstBinding, const Buffer* buffer, VkDeviceSize offset, VkDeviceSize range) const;
+    void updateBuffers(
+        uint32_t dstBinding,
+        uint32_t dstArrayElement,
+        VkDescriptorType descriptorType,
+        const std::vector<VkDescriptorBufferInfo>& bufferInfos
+    ) const;
+
+    /**
+     * @brief      Update the descriptor set images
+     *
+     * @param[in]  dstBinding      The destination binding
+     * @param[in]  dstArrayElement The starting element in the descriptor set binding array
+     * @param[in]  descriptorType  The descriptor type
+     * @param[in]  imageInfos     The images to bind to the descriptor set
+     */
+    void updateImages(
+        uint32_t dstBinding,
+        uint32_t dstArrayElement,
+        VkDescriptorType descriptorType,
+        const std::vector<VkDescriptorImageInfo>& imageInfos
+    ) const;
 
     void destroy();
 

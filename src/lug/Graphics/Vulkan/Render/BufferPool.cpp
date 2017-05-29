@@ -88,7 +88,12 @@ BufferPool::SubBuffer* BufferPool::allocate() {
             return nullptr;
         }
 
-        chunk.descriptorSet.update(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 0, &chunk.buffer, 0, _subBufferSize);
+        const VkDescriptorBufferInfo bufferInfo{
+            /* bufferInfo.buffer */ static_cast<VkBuffer>(chunk.buffer),
+            /* bufferInfo.offset */ 0,
+            /* bufferInfo.range */ _subBufferSize,
+        };
+        chunk.descriptorSet.updateBuffers(0, 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, {bufferInfo});
 
         _chunks.push_back(std::move(chunk));
     }
