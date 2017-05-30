@@ -5,6 +5,9 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Graphics.cpp
 
+    ${SRCROOT}/Builder/Material.cpp
+    ${SRCROOT}/Builder/Mesh.cpp
+
     ${SRCROOT}/Light/Directional.cpp
     ${SRCROOT}/Light/Light.cpp
     ${SRCROOT}/Light/Point.cpp
@@ -12,8 +15,12 @@ set(SRC
 
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/Node.cpp
+    ${SRCROOT}/GltfLoader.cpp
+    ${SRCROOT}/Resource.cpp
+    ${SRCROOT}/ResourceManager.cpp
 
     ${SRCROOT}/Render/Camera.cpp
+    ${SRCROOT}/Render/Material.cpp
     ${SRCROOT}/Render/Mesh.cpp
     ${SRCROOT}/Render/Queue.cpp
     ${SRCROOT}/Render/View.cpp
@@ -49,9 +56,15 @@ set(SRC
     ${SRCROOT}/Vulkan/API/ShaderModule.cpp
     ${SRCROOT}/Vulkan/API/Swapchain.cpp
 
+    ${SRCROOT}/Vulkan/Builder/Material.cpp
+    ${SRCROOT}/Vulkan/Builder/Mesh.cpp
+
     ${SRCROOT}/Vulkan/Render/BufferPool.cpp
     ${SRCROOT}/Vulkan/Render/Camera.cpp
+    ${SRCROOT}/Vulkan/Render/Material.cpp
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
+    ${SRCROOT}/Vulkan/Render/Pipeline.cpp
+    ${SRCROOT}/Vulkan/Render/Pipeline/ShaderBuilder.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Forward.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Technique.cpp
     ${SRCROOT}/Vulkan/Render/View.cpp
@@ -71,6 +84,17 @@ set(INC
     ${INCROOT}/Export.hpp
     ${INCROOT}/Graphics.hpp
     ${INCROOT}/Graphics.inl
+    ${INCROOT}/Loader.hpp
+    ${INCROOT}/GltfLoader.hpp
+    ${INCROOT}/Resource.hpp
+    ${INCROOT}/Resource.inl
+    ${INCROOT}/ResourceManager.hpp
+    ${INCROOT}/ResourceManager.inl
+
+    ${INCROOT}/Builder/Material.hpp
+    ${INCROOT}/Builder/Material.inl
+    ${INCROOT}/Builder/Mesh.hpp
+    ${INCROOT}/Builder/Mesh.inl
 
     ${INCROOT}/Light/Directional.hpp
     ${INCROOT}/Light/Light.hpp
@@ -85,6 +109,8 @@ set(INC
 
     ${INCROOT}/Render/Camera.hpp
     ${INCROOT}/Render/Camera.inl
+    ${INCROOT}/Render/Material.hpp
+    ${INCROOT}/Render/Material.inl
     ${INCROOT}/Render/Mesh.hpp
     ${INCROOT}/Render/Mesh.inl
     ${INCROOT}/Render/Queue.hpp
@@ -137,10 +163,16 @@ set(INC
     ${INCROOT}/Vulkan/API/Swapchain.hpp
     ${INCROOT}/Vulkan/API/Swapchain.inl
 
+    ${INCROOT}/Vulkan/Builder/Material.hpp
+    ${INCROOT}/Vulkan/Builder/Mesh.hpp
+
     ${INCROOT}/Vulkan/Render/BufferPool.hpp
     ${INCROOT}/Vulkan/Render/Camera.hpp
+    ${INCROOT}/Vulkan/Render/Material.hpp
     ${INCROOT}/Vulkan/Render/Mesh.hpp
     ${INCROOT}/Vulkan/Render/Mesh.inl
+    ${INCROOT}/Vulkan/Render/Pipeline.hpp
+    ${INCROOT}/Vulkan/Render/Pipeline.inl
     ${INCROOT}/Vulkan/Render/Technique/Forward.hpp
     ${INCROOT}/Vulkan/Render/Technique/Technique.hpp
     ${INCROOT}/Vulkan/Render/View.hpp
@@ -154,49 +186,31 @@ set(INC
 )
 source_group("inc" FILES ${INC})
 
-find_package(Vulkan)
-if (NOT VULKAN_INCLUDE_DIR)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/vulkan")
-        message(FATAL_ERROR "Can't find vulkan, call `git submodule update --recursive`")
-    endif()
-
-    set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/vulkan/include)
-endif()
-
-include_directories(${VULKAN_INCLUDE_DIR})
-
 if(LUG_OS_ANDROID)
     list(APPEND EXT_LIBRARIES android)
 endif()
 
 # Find glTF2-loader
-find_package(GLTF2Loader)
+find_package(GLTF2-Loader)
 
-if (NOT GLTF2_LOADER_FOUND)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader")
-        message(FATAL_ERROR "Can't find glTF2-loader, call `git submodule update --recursive`")
+if (NOT GLTF2-LOADER_FOUND)
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/glTF2-loader")
+        message(FATAL_ERROR "Can't find glTF2-loader in the thirdparty directory")
     endif()
 
-    set(GLTF2_LOADER_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/include")
+    set(GLTF2-LOADER_ROOT "${LUG_THIRDPARTY_DIR}/glTF2-loader")
 
-    if (LUG_OS_WINDOWS)
-        set(GLTF2_LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/windows/${ARCH_DIR}")
-    elseif (LUG_OS_LINUX)
-        set(GLTF2_LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/linux")
-    elseif (LUG_OS_ANDROID)
-        set(GLTF2_LOADER_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/glTF2-loader/lib/android")
-    endif()
-    find_package(GLTF2Loader REQUIRED)
+    find_package(GLTF2-Loader REQUIRED)
 
-    message(STATUS "Found GLTF2Loader library: ${GLTF2_LOADER_LIBRARY}")
-    message(STATUS "Found GLTF2Loader includes: ${GLTF2_LOADER_INCLUDE_DIR}")
+    message(STATUS "Found glTF2-loader library: ${GLTF2-LOADER_LIBRARY}")
+    message(STATUS "Found glTF2-loader includes: ${GLTF2-LOADER_INCLUDE_DIR}")
 endif()
 
-include_directories(${GLTF2_LOADER_INCLUDE_DIR})
+include_directories(${GLTF2-LOADER_INCLUDE_DIR})
 
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2_LOADER_LIBRARY}
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY}
 )

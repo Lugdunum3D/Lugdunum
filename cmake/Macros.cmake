@@ -112,7 +112,7 @@ macro(lug_add_test name)
     set(target run${name}UnitTests)
 
     # parse the arguments
-    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;EXTERNAL_LIBS" ${ARGN})
+    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;EXTERNAL_LIBS;SHADERS" ${ARGN})
 
     add_executable(${target} ${THIS_SOURCES} ${PROJECT_SOURCE_DIR}/main.cpp)
 
@@ -127,6 +127,27 @@ macro(lug_add_test name)
     # link the target to its external dependencies
     if(THIS_EXTERNAL_LIBS)
         target_link_libraries(${target} ${THIS_EXTERNAL_LIBS})
+    endif()
+
+    if(THIS_SHADERS)
+        foreach(shader ${THIS_SHADERS})
+            set(new_path ${CMAKE_CURRENT_BINARY_DIR}/shaders/${shader})
+            set(old_path ${CMAKE_SOURCE_DIR}/resources/shaders/${shader})
+
+            add_custom_command(
+                OUTPUT ${new_path}
+                DEPENDS ${old_path}
+                COMMAND ${CMAKE_COMMAND} -E make_directory shaders/
+                COMMAND ${CMAKE_COMMAND} -E copy ${old_path} ${new_path}
+
+                COMMENT "Copying ${old_path} to ${new_path}"
+            )
+
+            list(APPEND SHADERS_DEPENDS ${new_path})
+        endforeach(shader)
+
+        add_custom_target(${target}Shaders DEPENDS ${SHADERS_DEPENDS})
+        add_dependencies(${target} ${target}Shaders)
     endif()
 
     target_link_libraries(${target} ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})

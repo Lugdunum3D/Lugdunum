@@ -19,7 +19,6 @@ namespace Graphics {
  *             This class is the root class of the 3D engine. It handles modules, will create
  *             the Graphics::Renderer based on the @p rendererType given in the Graphics::InitInfo
  *             structure. @n
- *             It also handles Scene, Camera and Mesh creation.
  */
 class LUG_GRAPHICS_API Graphics {
 public:

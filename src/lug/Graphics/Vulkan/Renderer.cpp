@@ -51,7 +51,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
     return VK_FALSE;
 }
 
-Renderer::Renderer(Graphics& graphics) : ::lug::Graphics::Renderer(graphics) {}
+Renderer::Renderer(Graphics& graphics) : ::lug::Graphics::Renderer(graphics, Renderer::Type::Vulkan) {}
 
 Renderer::~Renderer() {
     destroy();
@@ -129,6 +129,8 @@ bool Renderer::finishInit() {
     LUG_LOG.info("RendererVulkan: Use device {}", _physicalDeviceInfo->properties.deviceName);
 #endif
 
+    _resourceManager = std::make_unique<::lug::Graphics::ResourceManager>(*this);
+    
     return true;
 }
 

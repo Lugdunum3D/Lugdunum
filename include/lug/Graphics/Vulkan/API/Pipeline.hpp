@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Resource.hpp>
 #include <lug/Graphics/Vulkan/API/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/RenderPass.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
@@ -14,7 +15,7 @@ namespace API {
 class CommandBuffer;
 class Device;
 
-class LUG_GRAPHICS_API Pipeline {
+class LUG_GRAPHICS_API Pipeline final {
 public:
     explicit Pipeline(VkPipeline pipeline = VK_NULL_HANDLE, const Device* device = nullptr,
         std::unique_ptr<PipelineLayout> layout = nullptr, std::unique_ptr<RenderPass> renderPass = nullptr);

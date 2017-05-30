@@ -1,4 +1,4 @@
-﻿# include macros
+# include macros
 include(${PROJECT_SOURCE_DIR}/cmake/Macros.cmake)
 
 # add the sources path

@@ -11,7 +11,6 @@ Application::Application() : lug::Core::Application::Application{{"hello", {0, 1
     getRenderWindowInfo().windowInitInfo.title = "Hello Model";
 
     getRenderWindowInfo().renderViewsInitInfo.push_back({
-        lug::Graphics::Render::Technique::Type::Forward,    // renderTechniqueType
         {                                                   // viewport
             {                                               // offset
                 0.0f,                                       // x
@@ -40,7 +39,6 @@ Application::Application() : lug::Core::Application::Application{{"hello", {0, 1
     });
 
     getRenderWindowInfo().renderViewsInitInfo.push_back({
-        lug::Graphics::Render::Technique::Type::Forward,    // renderTechniqueType
         {                                                   // viewport
             {                                               // offset
                 0.5f,                                       // x

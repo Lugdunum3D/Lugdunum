@@ -1,4 +1,4 @@
-﻿set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Math)
+set(INCROOT ${PROJECT_SOURCE_DIR}/include/lug/Math)
 set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Math)
 
 # all source files

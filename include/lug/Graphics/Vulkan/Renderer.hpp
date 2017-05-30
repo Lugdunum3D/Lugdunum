@@ -15,6 +15,7 @@
 #include <lug/Graphics/Vulkan/API/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Render/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
@@ -96,6 +97,12 @@ public:
     Preferences& getPreferences();
     const Preferences& getPreferences() const;
 
+    void addPipeline(Resource::SharedPtr<Render::Pipeline> pipeline);
+    bool containsPipeline(Render::Pipeline::Id id) const;
+    Resource::SharedPtr<Render::Pipeline> getPipeline(Render::Pipeline::Id id) const;
+
+    Render::Window* getRenderWindow() const;
+
     void destroy();
 
     bool beginFrame() override final;
@@ -154,6 +161,8 @@ private:
             }
         }
     };
+
+    std::unordered_map<Render::Pipeline::Id, Resource::WeakPtr<Render::Pipeline>> _pipelines;
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;

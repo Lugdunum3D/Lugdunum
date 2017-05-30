@@ -1,4 +1,0 @@
-[submodule "thirdparty"]
-	path = thirdparty
-	url = https://github.com/Lugdunum3D/Lugdunum-ThirdParty.git
-	branch = master

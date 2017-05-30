@@ -6,16 +6,15 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Mesh::Mesh(
-    const std::string& name,
-    const std::vector<uint32_t>& queueFamilyIndices,
-    const API::Device* device) : ::lug::Graphics::Render::Mesh(name), _queueFamilyIndices(queueFamilyIndices), _device(device) {}
+Mesh::Mesh(const std::string& name) : ::lug::Graphics::Render::Mesh(name) {
+
+}
 
 Mesh::~Mesh() {
     destroy();
 }
 
-bool Mesh::load() {
+/*bool Mesh::load() {
     if (_loaded) {
         LUG_LOG.warn("RendererVulkan: Attempt to load a mesh that is already loaded");
         return true;
@@ -63,14 +62,21 @@ bool Mesh::load() {
 
     return true;
 }
-
+*/
 void Mesh::destroy() {
-    if (_vertexBuffer) {
-        _vertexBuffer->destroy();
+    for (auto& primitiveSet : _primitiveSets) {
+        if (!primitiveSet._data) {
+            continue;
+        }
+        PrimitiveSetData* primitiveSetData = static_cast<PrimitiveSetData*>(primitiveSet._data);
+        for (auto& buffer : primitiveSetData->buffers) {
+            buffer->destroy();
+        }
+        delete primitiveSetData;
     }
 
-    if (_indexBuffer) {
-        _indexBuffer->destroy();
+    if (_deviceMemory != nullptr) {
+        _deviceMemory->destroy();
     }
 }
 
