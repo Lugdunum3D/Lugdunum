@@ -1,21 +1,27 @@
 #pragma once
 
 #include <memory>
+#include <set>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+namespace API {
+class Device;
+} // API
+
 namespace Render {
 
 class LUG_GRAPHICS_API Mesh : public ::lug::Graphics::Render::Mesh {
 public:
-    explicit Mesh(const std::string& name, const std::vector<uint32_t>& queueFamilyIndices, const API::Device* device);
+    explicit Mesh(const std::string& name, const std::set<uint32_t>& queueFamilyIndices, const API::Device& device);
 
     Mesh(const Mesh&) = delete;
     Mesh(Mesh&& mesh) = delete;
@@ -34,16 +40,15 @@ public:
     const API::Buffer* getIndexBuffer() const;
 
 private:
-    std::unique_ptr<API::Buffer> _vertexBuffer;
-    std::unique_ptr<API::Buffer> _indexBuffer;
-
-    std::unique_ptr<API::DeviceMemory> _vertexDeviceMemory{nullptr};
-    std::unique_ptr<API::DeviceMemory> _indexDeviceMemory{nullptr};
+    API::Buffer _vertexBuffer;
+    API::Buffer _indexBuffer;
 
     // Queue family indices used by the vertex and index buffers
-    std::vector<uint32_t> _queueFamilyIndices;
+    std::set<uint32_t> _queueFamilyIndices;
 
-    const API::Device* _device{nullptr};
+    API::DeviceMemory _deviceMemory;
+
+    const API::Device& _device;
 };
 
 #include <lug/Graphics/Vulkan/Render/Mesh.inl>

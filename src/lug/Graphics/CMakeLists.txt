@@ -29,7 +29,33 @@ set(SRC
     ${SRCROOT}/Scene/Node.cpp
     ${SRCROOT}/Scene/Scene.cpp
 
+    ${SRCROOT}/Vulkan/API/Builder/Buffer.cpp
+    ${SRCROOT}/Vulkan/API/Builder/CommandBuffer.cpp
+    ${SRCROOT}/Vulkan/API/Builder/CommandPool.cpp
+    ${SRCROOT}/Vulkan/API/Builder/DescriptorPool.cpp
+    ${SRCROOT}/Vulkan/API/Builder/DescriptorSet.cpp
+    ${SRCROOT}/Vulkan/API/Builder/DescriptorSetLayout.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Device.cpp
+    ${SRCROOT}/Vulkan/API/Builder/DeviceMemory.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Fence.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Framebuffer.cpp
+    ${SRCROOT}/Vulkan/API/Builder/GraphicsPipeline.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Image.cpp
+    ${SRCROOT}/Vulkan/API/Builder/ImageView.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Instance.cpp
+    ${SRCROOT}/Vulkan/API/Builder/PipelineLayout.cpp
+    ${SRCROOT}/Vulkan/API/Builder/RenderPass.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Sampler.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Semaphore.cpp
+    ${SRCROOT}/Vulkan/API/Builder/ShaderModule.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Surface.cpp
+    ${SRCROOT}/Vulkan/API/Builder/Swapchain.cpp
+
     ${SRCROOT}/Vulkan/API/Buffer.cpp
+    ${SRCROOT}/Vulkan/API/CommandBuffer/Buffer.cpp
+    ${SRCROOT}/Vulkan/API/CommandBuffer/DescriptorSet.cpp
+    ${SRCROOT}/Vulkan/API/CommandBuffer/Pipeline.cpp
+    ${SRCROOT}/Vulkan/API/CommandBuffer/RenderPass.cpp
     ${SRCROOT}/Vulkan/API/CommandBuffer.cpp
     ${SRCROOT}/Vulkan/API/CommandPool.cpp
     ${SRCROOT}/Vulkan/API/DescriptorPool.cpp
@@ -39,17 +65,20 @@ set(SRC
     ${SRCROOT}/Vulkan/API/DeviceMemory.cpp
     ${SRCROOT}/Vulkan/API/Fence.cpp
     ${SRCROOT}/Vulkan/API/Framebuffer.cpp
+    ${SRCROOT}/Vulkan/API/GraphicsPipeline.cpp
     ${SRCROOT}/Vulkan/API/Image.cpp
     ${SRCROOT}/Vulkan/API/ImageView.cpp
     ${SRCROOT}/Vulkan/API/Instance.cpp
     ${SRCROOT}/Vulkan/API/Loader.cpp
-    ${SRCROOT}/Vulkan/API/Pipeline.cpp
     ${SRCROOT}/Vulkan/API/PipelineLayout.cpp
     ${SRCROOT}/Vulkan/API/Queue.cpp
+    ${SRCROOT}/Vulkan/API/QueueFamily.cpp
     ${SRCROOT}/Vulkan/API/RTTI/Enum.cpp
     ${SRCROOT}/Vulkan/API/RenderPass.cpp
+    ${SRCROOT}/Vulkan/API/Sampler.cpp
     ${SRCROOT}/Vulkan/API/Semaphore.cpp
     ${SRCROOT}/Vulkan/API/ShaderModule.cpp
+    ${SRCROOT}/Vulkan/API/Surface.cpp
     ${SRCROOT}/Vulkan/API/Swapchain.cpp
 
     ${SRCROOT}/Vulkan/Render/BufferPool.cpp
@@ -117,31 +146,84 @@ set(INC
     ${INCROOT}/Scene/Scene.hpp
     ${INCROOT}/Scene/Scene.inl
 
+    ${INCROOT}/Vulkan/API/Builder/Buffer.hpp
+    ${INCROOT}/Vulkan/API/Builder/Buffer.inl
+    ${INCROOT}/Vulkan/API/Builder/CommandBuffer.hpp
+    ${INCROOT}/Vulkan/API/Builder/CommandBuffer.inl
+    ${INCROOT}/Vulkan/API/Builder/CommandPool.hpp
+    ${INCROOT}/Vulkan/API/Builder/CommandPool.inl
+    ${INCROOT}/Vulkan/API/Builder/DescriptorPool.hpp
+    ${INCROOT}/Vulkan/API/Builder/DescriptorPool.inl
+    ${INCROOT}/Vulkan/API/Builder/DescriptorSet.hpp
+    ${INCROOT}/Vulkan/API/Builder/DescriptorSet.inl
+    ${INCROOT}/Vulkan/API/Builder/DescriptorSetLayout.hpp
+    ${INCROOT}/Vulkan/API/Builder/DescriptorSetLayout.inl
+    ${INCROOT}/Vulkan/API/Builder/Device.hpp
+    ${INCROOT}/Vulkan/API/Builder/Device.inl
+    ${INCROOT}/Vulkan/API/Builder/DeviceMemory.hpp
+    ${INCROOT}/Vulkan/API/Builder/DeviceMemory.inl
+    ${INCROOT}/Vulkan/API/Builder/Fence.hpp
+    ${INCROOT}/Vulkan/API/Builder/Fence.inl
+    ${INCROOT}/Vulkan/API/Builder/Framebuffer.hpp
+    ${INCROOT}/Vulkan/API/Builder/Framebuffer.inl
+    ${INCROOT}/Vulkan/API/Builder/GraphicsPipeline.hpp
+    ${INCROOT}/Vulkan/API/Builder/GraphicsPipeline.inl
+    ${INCROOT}/Vulkan/API/Builder/Image.hpp
+    ${INCROOT}/Vulkan/API/Builder/Image.inl
+    ${INCROOT}/Vulkan/API/Builder/ImageView.hpp
+    ${INCROOT}/Vulkan/API/Builder/ImageView.inl
+    ${INCROOT}/Vulkan/API/Builder/Instance.hpp
+    ${INCROOT}/Vulkan/API/Builder/Instance.inl
+    ${INCROOT}/Vulkan/API/Builder/PipelineLayout.hpp
+    ${INCROOT}/Vulkan/API/Builder/PipelineLayout.inl
+    ${INCROOT}/Vulkan/API/Builder/RenderPass.hpp
+    ${INCROOT}/Vulkan/API/Builder/Sampler.hpp
+    ${INCROOT}/Vulkan/API/Builder/Sampler.inl
+    ${INCROOT}/Vulkan/API/Builder/Semaphore.hpp
+    ${INCROOT}/Vulkan/API/Builder/ShaderModule.hpp
+    ${INCROOT}/Vulkan/API/Builder/Surface.hpp
+    ${INCROOT}/Vulkan/API/Builder/Surface.inl
+    ${INCROOT}/Vulkan/API/Builder/Swapchain.hpp
+    ${INCROOT}/Vulkan/API/Builder/Swapchain.inl
+
     ${INCROOT}/Vulkan/API/Buffer.hpp
+    ${INCROOT}/Vulkan/API/Buffer.inl
+    ${INCROOT}/Vulkan/API/CommandBuffer/Buffer.inl
+    ${INCROOT}/Vulkan/API/CommandBuffer/DescriptorSet.inl
+    ${INCROOT}/Vulkan/API/CommandBuffer/Pipeline.inl
+    ${INCROOT}/Vulkan/API/CommandBuffer/RenderPass.inl
     ${INCROOT}/Vulkan/API/CommandBuffer.hpp
     ${INCROOT}/Vulkan/API/CommandPool.hpp
     ${INCROOT}/Vulkan/API/CommandPool.inl
     ${INCROOT}/Vulkan/API/DescriptorPool.hpp
     ${INCROOT}/Vulkan/API/DescriptorSet.hpp
     ${INCROOT}/Vulkan/API/DescriptorSetLayout.hpp
+    ${INCROOT}/Vulkan/API/DescriptorSetLayout.inl
     ${INCROOT}/Vulkan/API/Device.hpp
     ${INCROOT}/Vulkan/API/Device.inl
     ${INCROOT}/Vulkan/API/DeviceMemory.hpp
+    ${INCROOT}/Vulkan/API/DeviceMemory.inl
     ${INCROOT}/Vulkan/API/Fence.hpp
+    ${INCROOT}/Vulkan/API/Fence.inl
     ${INCROOT}/Vulkan/API/Framebuffer.hpp
+    ${INCROOT}/Vulkan/API/GraphicsPipeline.hpp
     ${INCROOT}/Vulkan/API/Image.hpp
     ${INCROOT}/Vulkan/API/ImageView.hpp
+    ${INCROOT}/Vulkan/API/ImageView.inl
     ${INCROOT}/Vulkan/API/Instance.hpp
     ${INCROOT}/Vulkan/API/Instance.inl
     ${INCROOT}/Vulkan/API/Loader.hpp
-    ${INCROOT}/Vulkan/API/Pipeline.hpp
     ${INCROOT}/Vulkan/API/PipelineLayout.hpp
+    ${INCROOT}/Vulkan/API/PipelineLayout.inl
     ${INCROOT}/Vulkan/API/Queue.hpp
-    ${INCROOT}/Vulkan/API/Queue.inl
+    ${INCROOT}/Vulkan/API/QueueFamily.hpp
+    ${INCROOT}/Vulkan/API/QueueFamily.inl
     ${INCROOT}/Vulkan/API/RTTI/Enum.hpp
     ${INCROOT}/Vulkan/API/RenderPass.hpp
+    ${INCROOT}/Vulkan/API/Sampler.hpp
     ${INCROOT}/Vulkan/API/Semaphore.hpp
     ${INCROOT}/Vulkan/API/ShaderModule.hpp
+    ${INCROOT}/Vulkan/API/Surface.hpp
     ${INCROOT}/Vulkan/API/Swapchain.hpp
     ${INCROOT}/Vulkan/API/Swapchain.inl
 

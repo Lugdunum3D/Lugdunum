@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/API/QueueFamily.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -8,9 +9,15 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
+namespace Builder {
+class Device;
+} // Builder
+
 class LUG_GRAPHICS_API Device {
+    friend class Builder::Device;
+
 public:
-    explicit Device(VkDevice device = VK_NULL_HANDLE, PhysicalDeviceInfo* physicalDeviceInfo = {});
+    Device() = default;
 
     Device(const Device&) = delete;
     Device(Device&& device);
@@ -27,13 +34,27 @@ public:
     template <typename Function>
     Function getProcAddr(const char* name) const;
 
+    const PhysicalDeviceInfo* getPhysicalDeviceInfo() const;
+
+    const std::vector<QueueFamily>& getQueueFamilies() const;
+    std::vector<QueueFamily>& getQueueFamilies();
+
+    const API::QueueFamily* getQueueFamily(VkQueueFlags flags, bool supportPresentation = false) const;
+    API::QueueFamily* getQueueFamily(VkQueueFlags flags, bool supportPresentation = false);
+
+    bool waitIdle() const;
+
     void destroy();
 
-    const PhysicalDeviceInfo* getPhysicalDeviceInfo() const;
+
+private:
+    explicit Device(VkDevice device, const PhysicalDeviceInfo* physicalDeviceInfo);
 
 private:
     VkDevice _device{VK_NULL_HANDLE};
-    PhysicalDeviceInfo* _physicalDeviceInfo{nullptr};
+
+    const PhysicalDeviceInfo* _physicalDeviceInfo{nullptr};
+    std::vector<QueueFamily> _queueFamilies;
 };
 
 #include <lug/Graphics/Vulkan/API/Device.inl>

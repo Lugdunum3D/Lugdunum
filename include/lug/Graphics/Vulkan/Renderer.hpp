@@ -1,19 +1,15 @@
 #pragma once
 
-#include <memory>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
+#include <memory>
 #include <unordered_map>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Renderer.hpp>
-#include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/API/Instance.hpp>
 #include <lug/Graphics/Vulkan/API/Loader.hpp>
-#include <lug/Graphics/Vulkan/API/Pipeline.hpp>
-#include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
@@ -35,9 +31,6 @@ public:
 
         const VkPhysicalDeviceFeatures mandatoryFeatures;
         const VkPhysicalDeviceFeatures optionalFeatures;
-
-        const std::vector<VkQueueFlags> mandatoryQueueFlags;
-        const std::vector<VkQueueFlags> optionalQueueFlags;
 
         // TODO: PhysicalDeviceLimits / PhysicalDeviceSparseProperties
         // TODO: Memory properties
@@ -65,7 +58,7 @@ public:
 
     ~Renderer();
 
-    bool beginInit(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) override final;
+    bool beginInit(const std::string& appName, const Core::Version& appVersion, const Renderer::InitInfo& initInfo) override final;
     bool finishInit() override final;
 
     bool isInstanceLayerLoaded(const char* name) const;
@@ -76,13 +69,8 @@ public:
     ::lug::Graphics::Render::Window* getWindow() override final;
 
     const API::Instance& getInstance() const;
+    API::Device& getDevice();
     const API::Device& getDevice() const;
-    std::vector<API::Queue>& getQueues();
-    const std::vector<API::Queue>& getQueues() const;
-    API::Queue* getQueue(VkQueueFlags flags, bool supportPresentation);
-    const API::Queue* getQueue(VkQueueFlags flags, bool supportPresentation) const;
-
-    bool isSameQueue(VkQueueFlags flagsA, bool supportPresentationA, VkQueueFlags flagsB, bool supportPresentationB) const;
 
     InstanceInfo& getInstanceInfo();
     const InstanceInfo& getInstanceInfo() const;
@@ -102,7 +90,7 @@ public:
     bool endFrame() override final;
 
 private:
-    bool initInstance(const char* appName, uint32_t appVersion);
+    bool initInstance(const std::string& appName, const Core::Version& appVersion);
     bool initDevice();
 
     bool checkRequirementsInstance(const std::set<Module::Type> &modulesToCheck);
@@ -119,7 +107,6 @@ private:
 
     API::Instance _instance{};
     API::Device _device{};
-    std::vector<API::Queue> _queues{};
 
     InstanceInfo _instanceInfo{};
     PhysicalDeviceInfo* _physicalDeviceInfo{nullptr};
@@ -133,7 +120,6 @@ private:
     std::vector<const char*> _loadedInstanceExtensions{};
     std::vector<const char*> _loadedDeviceExtensions{};
     VkPhysicalDeviceFeatures _loadedDeviceFeatures{};
-    std::set<int8_t> _loadedQueueFamiliesIdx{};
     std::vector<Render::Mesh*> _attachedMeshes{};
 
     Preferences _preferences{

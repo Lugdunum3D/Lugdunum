@@ -1,5 +1,8 @@
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
+
+#include <lug/Graphics/Vulkan/API/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
+#include <lug/Graphics/Vulkan/API/Image.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -7,22 +10,26 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-DeviceMemory::DeviceMemory(VkDeviceMemory buffer, const Device* device) : _deviceMemory(buffer), _device(device) {}
+DeviceMemory::DeviceMemory(VkDeviceMemory deviceMemory, const Device* device, VkDeviceSize size) : _deviceMemory(deviceMemory), _device(device), _size(size) {}
 
-DeviceMemory::DeviceMemory(DeviceMemory&& buffer) {
-    _deviceMemory = buffer._deviceMemory;
-    _device = buffer._device;
-    buffer._deviceMemory = VK_NULL_HANDLE;
-    buffer._device = nullptr;
+DeviceMemory::DeviceMemory(DeviceMemory&& deviceMemory) {
+    _deviceMemory = deviceMemory._deviceMemory;
+    _device = deviceMemory._device;
+    _size = deviceMemory._size;
+    deviceMemory._deviceMemory = VK_NULL_HANDLE;
+    deviceMemory._device = nullptr;
+    deviceMemory._size = 0;
 }
 
-DeviceMemory& DeviceMemory::operator=(DeviceMemory&& buffer) {
+DeviceMemory& DeviceMemory::operator=(DeviceMemory&& deviceMemory) {
     destroy();
 
-    _deviceMemory = buffer._deviceMemory;
-    _device = buffer._device;
-    buffer._deviceMemory = VK_NULL_HANDLE;
-    buffer._device = nullptr;
+    _deviceMemory = deviceMemory._deviceMemory;
+    _device = deviceMemory._device;
+    _size = deviceMemory._size;
+    deviceMemory._deviceMemory = VK_NULL_HANDLE;
+    deviceMemory._device = nullptr;
+    deviceMemory._size = 0;
 
     return *this;
 }
@@ -38,39 +45,46 @@ void DeviceMemory::destroy() {
     }
 }
 
-std::unique_ptr<DeviceMemory> DeviceMemory::allocate(const Device* device, VkDeviceSize size, uint32_t memoryTypeIndex) {
-    VkMemoryAllocateInfo allocateInfo{
-        allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
-        allocateInfo.pNext = nullptr,
-        allocateInfo.allocationSize = size,
-        allocateInfo.memoryTypeIndex = memoryTypeIndex
-    };
+void* DeviceMemory::map(VkDeviceSize size, VkDeviceSize offset) const {
+    void* data = nullptr;
 
-    VkDeviceMemory memory = VK_NULL_HANDLE;
-    VkResult result = vkAllocateMemory(static_cast<VkDevice>(*device), &allocateInfo, nullptr, &memory);
+    VkResult result = vkMapMemory(static_cast<VkDevice>(*_device), _deviceMemory, offset, size, 0, &data);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't allocate device memory: {}", result);
+        LUG_LOG.error("DeviceMemory: Can't map memory: {}", result);
         return nullptr;
     }
 
-    return std::unique_ptr<DeviceMemory>(new DeviceMemory(memory, device));
+    return data;
 }
 
-uint32_t DeviceMemory::findMemoryType(const Device* device, const VkMemoryRequirements& memoryRequirements, VkMemoryPropertyFlags requiredFlags) {
-    const PhysicalDeviceInfo* physicalDeviceInfo = device->getPhysicalDeviceInfo();
-
-    for (uint32_t i = 0; i < physicalDeviceInfo->memoryProperties.memoryTypeCount; i++) {
-        if (memoryRequirements.memoryTypeBits & (1 << i)) {
-            const VkMemoryType& type = physicalDeviceInfo->memoryProperties.memoryTypes[i];
-
-            if (type.propertyFlags & requiredFlags) {
-                return i;
-            }
-        }
+void* DeviceMemory::mapBuffer(const API::Buffer& buffer, VkDeviceSize size, VkDeviceSize offset) const {
+    if (buffer.getDeviceMemory() != this) {
+        LUG_LOG.error("DeviceMemory: Can't map memory of a buffer: The buffer use a different device memory");
+        return nullptr;
     }
 
-    return 0;
+    void* data = nullptr;
+
+    VkResult result = vkMapMemory(
+        static_cast<VkDevice>(*_device),
+        _deviceMemory,
+        offset + buffer.getDeviceMemoryOffset(),
+        size == VK_WHOLE_SIZE ? buffer.getRequirements().size - offset : size,
+        0,
+        &data
+    );
+
+    if (result != VK_SUCCESS) {
+        LUG_LOG.error("DeviceMemory: Can't map memory of a buffer: {}", result);
+        return nullptr;
+    }
+
+    return data;
+}
+
+void DeviceMemory::unmap() const {
+    vkUnmapMemory(static_cast<VkDevice>(*_device), _deviceMemory);
 }
 
 } // API

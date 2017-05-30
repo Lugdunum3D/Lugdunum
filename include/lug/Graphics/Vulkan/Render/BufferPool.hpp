@@ -1,21 +1,28 @@
 #pragma once
 
 #include <cstdint>
+#include <list>
 #include <memory>
+#include <set>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorSet.hpp>
-#include <lug/Graphics/Vulkan/API/DescriptorSetLayout.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+namespace API {
+class DescriptorPool;
+class DescriptorSetLayout;
+} // API
+
 namespace Render {
 
 class LUG_GRAPHICS_API BufferPool {
-struct Chunk;
+    struct Chunk;
 
 public:
     class SubBuffer{
@@ -23,7 +30,7 @@ public:
 
     public:
         SubBuffer() = default;
-        SubBuffer(API::DescriptorSet* descriptorSet, API::Buffer* buffer, uint32_t offset, uint32_t size, Chunk* chunk);
+        SubBuffer(const API::DescriptorSet* descriptorSet, const API::Buffer* buffer, uint32_t offset, uint32_t size, Chunk* chunk);
 
         SubBuffer(const SubBuffer&) = default;
         SubBuffer(SubBuffer&& subBuffer) = default;
@@ -34,8 +41,8 @@ public:
         void free();
 
     public:
-        API::DescriptorSet* descriptorSet;
-        API::Buffer* buffer;
+        const API::DescriptorSet* descriptorSet;
+        const API::Buffer* buffer;
         uint32_t offset;
         uint32_t size;
 
@@ -45,10 +52,10 @@ public:
 
 private:
     struct Chunk {
-        std::unique_ptr<API::DeviceMemory> bufferMemory;
+        API::DeviceMemory bufferMemory;
         API::DescriptorSet descriptorSet;
-        std::unique_ptr<API::Buffer> buffer;
-        uint32_t size;
+        API::Buffer buffer;
+
         // Warning: Do not resize chunk.subBuffers
         std::vector<SubBuffer> subBuffers;
         std::vector<SubBuffer*> subBuffersFree;
@@ -66,9 +73,9 @@ private:
 public:
     BufferPool(uint32_t countPerChunk,
                 uint32_t subBufferSize,
-                const API::Device* device,
-                const std::vector<uint32_t>& queueFamilyIndices,
-                API::DescriptorPool* descriptorPool,
+                const API::Device& device,
+                const std::set<uint32_t>& queueFamilyIndices,
+                const API::DescriptorPool& descriptorPool,
                 const API::DescriptorSetLayout* descriptorSetLayout);
 
     BufferPool(const BufferPool&) = delete;
@@ -85,11 +92,13 @@ public:
 private:
     uint32_t _countPerChunk;
     uint32_t _subBufferSize;
-    std::vector<std::unique_ptr<Chunk>> _chunks;
 
-    const API::Device* _device;
-    std::vector<uint32_t> _queueFamilyIndices;
-    API::DescriptorPool* _descriptorPool;
+    // Use a list to avoid the change of adress of a chunk if we add another chunk to the list
+    std::list<Chunk> _chunks;
+
+    const API::Device& _device;
+    std::set<uint32_t> _queueFamilyIndices;
+    const API::DescriptorPool& _descriptorPool;
     const API::DescriptorSetLayout* _descriptorSetLayout;
 };
 

@@ -1,9 +1,6 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/API/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -11,9 +8,18 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
+namespace Builder {
+class DescriptorSet;
+} // Builder
+
+class Buffer;
+class Device;
+
 class LUG_GRAPHICS_API DescriptorSet {
+    friend class Builder::DescriptorSet;
+
 public:
-    explicit DescriptorSet(VkDescriptorSet descriptorSet = VK_NULL_HANDLE, const Device* device = nullptr);
+    DescriptorSet() = default;
 
     DescriptorSet(const DescriptorSet&) = delete;
     DescriptorSet(DescriptorSet&& DescriptorSet);
@@ -28,30 +34,39 @@ public:
     }
 
     /**
-     * @brief      Bind the descriptor set
+     * @brief      Update the descriptor set buffers
      *
-     * @param[in]  pipelineLayout  The pipeline layout to bind the descriptor set to
-     * @param[in]  commandBuffer   The command buffer to submit the command to
-     * @param[in]  setNb           The number of the set
+     * @param[in]  dstBinding      The destination binding
+     * @param[in]  dstArrayElement The starting element in the descriptor set binding array
+     * @param[in]  descriptorType  The descriptor type
+     * @param[in]  bufferInfos     The buffers to bind to the descriptor set
      */
-    void bind(const PipelineLayout* pipelineLayout,
-                const CommandBuffer* commandBuffer,
-                uint32_t setNb,
-                uint32_t dynamicOffsetsCount = 0,
-                const uint32_t* dynamicOffsets = nullptr);
+    void updateBuffers(
+        uint32_t dstBinding,
+        uint32_t dstArrayElement,
+        VkDescriptorType descriptorType,
+        const std::vector<VkDescriptorBufferInfo>& bufferInfos
+    ) const;
 
     /**
-     * @brief      Update the descriptor set
+     * @brief      Update the descriptor set images
      *
-     * @param[in]  descriptorType  The descriptor type
      * @param[in]  dstBinding      The destination binding
-     * @param[in]  buffer          The buffer to bind to the descriptor set
-     * @param[in]  offset          The offset in the buffer
-     * @param[in]  range           The range of the set
+     * @param[in]  dstArrayElement The starting element in the descriptor set binding array
+     * @param[in]  descriptorType  The descriptor type
+     * @param[in]  imageInfos     The images to bind to the descriptor set
      */
-    void update(VkDescriptorType descriptorType, uint32_t dstBinding, const Buffer* buffer, uint32_t offset, uint32_t range);
+    void updateImages(
+        uint32_t dstBinding,
+        uint32_t dstArrayElement,
+        VkDescriptorType descriptorType,
+        const std::vector<VkDescriptorImageInfo>& imageInfos
+    ) const;
 
     void destroy();
+
+private:
+    explicit DescriptorSet(VkDescriptorSet descriptorSet, const Device* device);
 
 private:
     VkDescriptorSet _descriptorSet{VK_NULL_HANDLE};

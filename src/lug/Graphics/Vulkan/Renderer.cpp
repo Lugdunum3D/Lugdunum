@@ -1,6 +1,7 @@
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Graphics.hpp>
-#include <lug/Graphics/Vulkan/API/Loader.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Device.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Instance.hpp>
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Core.hpp>
 #include <lug/Graphics/Vulkan/Requirements/Requirements.hpp>
@@ -58,18 +59,8 @@ Renderer::~Renderer() {
 }
 
 void Renderer::destroy() {
-    for (auto& queue : _queues) {
-        queue.waitIdle();
-    }
-
     // Destroy the window
     _window.reset();
-
-    for (auto& queue : _queues) {
-        queue.destroy();
-    }
-
-    _queues.clear();
 
     _device.destroy();
 
@@ -88,7 +79,7 @@ void Renderer::destroy() {
     _loader.unload();
 }
 
-bool Renderer::beginInit(const char* appName, uint32_t appVersion, const Renderer::InitInfo& initInfo) {
+bool Renderer::beginInit(const std::string& appName, const Core::Version& appVersion, const Renderer::InitInfo& initInfo) {
     _initInfo = initInfo;
 
     if (!initInstance(appName, appVersion)) {
@@ -102,20 +93,12 @@ bool Renderer::beginInit(const char* appName, uint32_t appVersion, const Rendere
 bool Renderer::finishInit() {
     // Is it a second time finishInit?
     if (static_cast<VkDevice>(_device)) {
-        for (auto& queue : _queues) {
-            queue.waitIdle();
-        }
+        _device.waitIdle();
 
         // Destroy the render part of the window
         if (_window) {
             _window->destroyRender();
         }
-
-        for (auto& queue : _queues) {
-            queue.destroy();
-        }
-
-        _queues.clear();
 
         _device.destroy();
     }
@@ -132,8 +115,8 @@ bool Renderer::finishInit() {
     return true;
 }
 
-bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
-    VkResult result;
+bool Renderer::initInstance(const std::string& appName, const Core::Version& appVersion) {
+    VkResult result{VK_SUCCESS};
 
     // Load vulkan core functions
     {
@@ -193,37 +176,20 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
 
         checkRequirementsInstance(_graphics.getLoadedOptionalModules());
 
-        // Create the application information for vkCreateInstance
-        VkApplicationInfo applicationInfo{
-            applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-            applicationInfo.pNext = nullptr,
-            applicationInfo.pApplicationName = appName,
-            applicationInfo.applicationVersion = appVersion,
-            applicationInfo.pEngineName = "Lugdunum3D",
-            applicationInfo.engineVersion = VK_MAKE_VERSION(LUG_VERSION_MAJOR, LUG_VERSION_MINOR, LUG_VERSION_PATCH),
-            applicationInfo.apiVersion = 0
-        };
+        // Build the instance
+        API::Builder::Instance instanceBuilder;
 
-        // Create the instance creation information for vkCreateInstance
-        VkInstanceCreateInfo createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0,
-            createInfo.pApplicationInfo = &applicationInfo,
-            createInfo.enabledLayerCount = static_cast<uint32_t>(_loadedInstanceLayers.size()),
-            createInfo.ppEnabledLayerNames = _loadedInstanceLayers.data(),
-            createInfo.enabledExtensionCount = static_cast<uint32_t>(_loadedInstanceExtensions.size()),
-            createInfo.ppEnabledExtensionNames = _loadedInstanceExtensions.data()
-        };
+        instanceBuilder.setApplicationInfo(appName, appVersion);
+        instanceBuilder.setEngineInfo(LUG_NAME, {LUG_VERSION_MAJOR, LUG_VERSION_MINOR, LUG_VERSION_PATCH});
 
-        VkInstance instance{VK_NULL_HANDLE};
-        result = vkCreateInstance(&createInfo, nullptr, &instance);
-        if (result != VK_SUCCESS) {
+        instanceBuilder.setLayers(_loadedInstanceLayers);
+        instanceBuilder.setExtensions(_loadedInstanceExtensions);
+
+        if (!instanceBuilder.build(_instance, &result)) {
             LUG_LOG.error("RendererVulkan: Can't create the instance: {}", result);
             return false;
         }
 
-        _instance = API::Instance(instance);
     }
 
     // Create report callback if necessary
@@ -325,7 +291,7 @@ bool Renderer::initInstance(const char* appName, uint32_t appVersion) {
 }
 
 bool Renderer::initDevice() {
-    VkResult result;
+    VkResult result{VK_SUCCESS};
 
     if (_preferences.device) {
         _physicalDeviceInfo = _preferences.device;
@@ -382,44 +348,21 @@ bool Renderer::initDevice() {
 
     // Create device
     {
-        float queuePriority = 1.0f;
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfo(_loadedQueueFamiliesIdx.size());
+        // Build the device
+        API::Builder::Device deviceBuilder(*_physicalDeviceInfo);
 
-        {
-            uint8_t i = 0;
+        deviceBuilder.setExtensions(_loadedDeviceExtensions);
+        deviceBuilder.setFeatures(_loadedDeviceFeatures);
 
-            for (auto idx : _loadedQueueFamiliesIdx) {
-                queueCreateInfo[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-                queueCreateInfo[i].queueFamilyIndex = idx;
-                queueCreateInfo[i].queueCount = 1;
-                queueCreateInfo[i].pQueuePriorities = &queuePriority;
-
-                ++i;
-            }
-        }
-
-        VkDeviceCreateInfo createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0,
-            createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfo.size()),
-            createInfo.pQueueCreateInfos = queueCreateInfo.data(),
-            createInfo.enabledLayerCount = 0, // Deprecated
-            createInfo.ppEnabledLayerNames = nullptr, // Deprecated
-            createInfo.enabledExtensionCount = static_cast<uint32_t>(_loadedDeviceExtensions.size()),
-            createInfo.ppEnabledExtensionNames = _loadedDeviceExtensions.data(),
-            createInfo.pEnabledFeatures = &_loadedDeviceFeatures
-        };
-
-        VkDevice device{VK_NULL_HANDLE};
-        result = vkCreateDevice(_physicalDeviceInfo->handle, &createInfo, nullptr, &device);
-
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererVulkan: Can't create the device: {}", result);
+        if (!deviceBuilder.addQueues(VK_QUEUE_GRAPHICS_BIT, {"queue_graphics"}) ||
+            !deviceBuilder.addQueues(VK_QUEUE_TRANSFER_BIT, {"queue_transfer"})) {
             return false;
         }
 
-        _device = API::Device(device, _physicalDeviceInfo);
+        if (!deviceBuilder.build(_device, &result)) {
+            LUG_LOG.error("RendererVulkan: Can't create the device: {}", result);
+            return false;
+        }
     }
 
     // Load vulkan device functions
@@ -430,42 +373,6 @@ bool Renderer::initDevice() {
         }
     }
 
-    // Create queues
-    {
-        _queues.resize(_loadedQueueFamiliesIdx.size());
-
-        uint8_t i = 0;
-
-        for (auto idx : _loadedQueueFamiliesIdx) {
-            VkQueue queue;
-            vkGetDeviceQueue(static_cast<VkDevice>(_device), idx, 0, &queue);
-
-            _queues[i] = API::Queue(idx, queue, _physicalDeviceInfo->queueFamilies[idx].queueFlags);
-
-            ++i;
-        }
-    }
-
-    // Create command pools
-    {
-        for (auto& queue : _queues) {
-            VkCommandPoolCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT, // TODO: Maybe change that
-                createInfo.queueFamilyIndex = queue.getFamilyIdx()
-            };
-
-            VkCommandPool commandPool{VK_NULL_HANDLE};
-            result = vkCreateCommandPool(static_cast<VkDevice>(_device), &createInfo, nullptr, &commandPool);
-            if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create a command pool: {}", result);
-                return false;
-            }
-
-            queue.setCommandPool(API::CommandPool(commandPool, &_device, &queue));
-        }
-    }
     return true;
 }
 
@@ -594,30 +501,6 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
         LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_CHECK_VULKAN_PHYSICAL_DEVICE_OPTIONNAL_FEATURES);
 #undef LUG_CHECK_VULKAN_PHYSICAL_DEVICE_MANDATORY_FEATURES
 
-        for (const auto& queueFlags : requirements.mandatoryQueueFlags) {
-            int8_t idx = 0;
-
-            if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
-                queueFamiliesIdx.insert(idx);
-            } else {
-                if (!quiet) {
-                    LUG_LOG.warn("Device {}: Can't find mandatory queue type for module '{}'", physicalDeviceInfo.properties.deviceName, moduleType);
-                }
-
-                moduleRequirementsCheck = false;
-            }
-        }
-
-        for (const auto& queueFlags : requirements.optionalQueueFlags) {
-            int8_t idx = 0;
-
-            if (physicalDeviceInfo.containsQueueFlags(queueFlags, idx)) {
-                queueFamiliesIdx.insert(idx);
-            } else if (!quiet) {
-                LUG_LOG.warn("Device {}: Can't find optional queue type for module '{}'", physicalDeviceInfo.properties.deviceName, moduleType);
-            }
-        }
-
         if (finalization) {
             if (moduleRequirementsCheck) {
                 _loadedDeviceExtensions.insert(_loadedDeviceExtensions.end(), extensions.begin(), extensions.end());
@@ -625,8 +508,6 @@ bool Renderer::checkRequirementsDevice(const PhysicalDeviceInfo& physicalDeviceI
 #define LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES(featureName) _loadedDeviceFeatures.featureName = _loadedDeviceFeatures.featureName || features.featureName;
                 LUG_VULKAN_PHYSICAL_DEVICE_FEATURES(LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES);
 #undef LUG_FILL_VULKAN_PHYSICAL_DEVICE_FEATURES
-
-                _loadedQueueFamiliesIdx.insert(queueFamiliesIdx.begin(), queueFamiliesIdx.end());
             } else {
                 _graphics.unsupportedModule(moduleType);
             }

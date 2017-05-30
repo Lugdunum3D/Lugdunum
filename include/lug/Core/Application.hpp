@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
+
 #include <lug/Core/Export.hpp>
+#include <lug/Core/Version.hpp>
 #include <lug/Graphics/Graphics.hpp>
 #include <lug/Graphics/Render/Window.hpp>
 #include <lug/System/Time.hpp>
@@ -17,23 +19,8 @@ namespace Core {
  */
 class LUG_CORE_API Application {
 public:
-    /**
-     * @brief      Stores the version of the Application
-     */
-    struct Version {
-        uint32_t major; /** 10 bits */
-        uint32_t minor; /** 10 bits */
-        uint32_t patch; /** 12 bits */
-
-        uint32_t createVersion() const;
-
-        operator uint32_t() const {
-            return createVersion();
-        }
-    };
-
     struct Info {
-        const char* name;
+        std::string name;
         Version version;
     };
 

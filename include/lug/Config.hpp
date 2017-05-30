@@ -1,5 +1,8 @@
 #pragma once
-// Version
+
+// Info about Lugdunum
+#define LUG_NAME "Lugdunum3D"
+
 #define LUG_VERSION_MAJOR 0
 #define LUG_VERSION_MINOR 1
 #define LUG_VERSION_PATCH 0

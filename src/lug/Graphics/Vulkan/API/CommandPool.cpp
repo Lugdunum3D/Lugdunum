@@ -1,6 +1,6 @@
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
+
 #include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -8,7 +8,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-CommandPool::CommandPool(VkCommandPool commandPool, Device* device, Queue* queue) : _commandPool(commandPool), _device(device), _queue(queue) {}
+CommandPool::CommandPool(VkCommandPool commandPool, const Device* device, const Queue* queue) : _commandPool(commandPool), _device(device), _queue(queue) {}
 
 CommandPool::CommandPool(CommandPool&& commandPool) {
     _commandPool = commandPool._commandPool;
@@ -38,33 +38,7 @@ CommandPool::~CommandPool() {
     destroy();
 }
 
-std::vector<CommandBuffer> CommandPool::createCommandBuffers(VkCommandBufferLevel level, uint32_t count) {
-    VkCommandBufferAllocateInfo allocateInfo{
-        allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
-        allocateInfo.pNext = nullptr,
-        allocateInfo.commandPool = _commandPool,
-        allocateInfo.level = level,
-        allocateInfo.commandBufferCount = count
-    };
-
-    std::vector<VkCommandBuffer> commandBuffers(count);
-    VkResult result = vkAllocateCommandBuffers(static_cast<VkDevice>(*_device), &allocateInfo, commandBuffers.data());
-
-    if (result != VK_SUCCESS) {
-        LUG_LOG.error("CommandPool: Can't allocate command buffers: {}", result);
-        return {};
-    }
-
-    std::vector<CommandBuffer> commandBuffersReturn(count);
-
-    for (uint32_t i = 0; i < count; ++i) {
-        commandBuffersReturn[i] = CommandBuffer(commandBuffers[i], this);
-    }
-
-    return commandBuffersReturn;
-}
-
-bool CommandPool::reset(bool releaseRessources) {
+bool CommandPool::reset(bool releaseRessources) const {
     VkResult result = vkResetCommandPool(static_cast<VkDevice>(*_device), _commandPool, releaseRessources ? VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT : 0);
 
     if (result != VK_SUCCESS) {
