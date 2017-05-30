@@ -60,19 +60,19 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string
         // Material Part
         {
             options.AddMacroDefinition("TEXTURE_COLOR", materialPart.baseColorInfo != 0b11 ? "1" : "0");
-            options.AddMacroDefinition("TEXTURE_COLOR_UV", "in_uv_" + std::to_string(materialPart.baseColorInfo));
+            options.AddMacroDefinition("TEXTURE_COLOR_UV", "inUV" + std::to_string(materialPart.baseColorInfo));
 
             options.AddMacroDefinition("TEXTURE_METALLIC_ROUGHNESS", materialPart.metallicRoughnessInfo != 0b11 ? "1" : "0");
-            options.AddMacroDefinition("TEXTURE_METALLIC_ROUGHNESS_UV", "in_uv_" + std::to_string(materialPart.metallicRoughnessInfo));
+            options.AddMacroDefinition("TEXTURE_METALLIC_ROUGHNESS_UV", "inUV" + std::to_string(materialPart.metallicRoughnessInfo));
 
             options.AddMacroDefinition("TEXTURE_NORMAL", materialPart.normalInfo != 0b11 ? "1" : "0");
-            options.AddMacroDefinition("TEXTURE_NORMAL_UV", "in_uv_" + std::to_string(materialPart.normalInfo));
+            options.AddMacroDefinition("TEXTURE_NORMAL_UV", "inUV" + std::to_string(materialPart.normalInfo));
 
             options.AddMacroDefinition("TEXTURE_OCCLUSION", materialPart.occlusionInfo != 0b11 ? "1" : "0");
-            options.AddMacroDefinition("TEXTURE_OCCLUSION_UV", "in_uv_" + std::to_string(materialPart.occlusionInfo));
+            options.AddMacroDefinition("TEXTURE_OCCLUSION_UV", "inUV" + std::to_string(materialPart.occlusionInfo));
 
             options.AddMacroDefinition("TEXTURE_EMISSIVE", materialPart.emissiveInfo != 0b11 ? "1" : "0");
-            options.AddMacroDefinition("TEXTURE_EMISSIVE_UV", "in_uv_" + std::to_string(materialPart.emissiveInfo));
+            options.AddMacroDefinition("TEXTURE_EMISSIVE_UV", "inUV" + std::to_string(materialPart.emissiveInfo));
         }
 
         // Set location
