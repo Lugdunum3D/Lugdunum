@@ -14,7 +14,11 @@ struct Version {
     operator uint32_t() const {
         return (major << 22) | (minor << 12) | patch;
     }
+
+    static Version fromInt(uint32_t version);
 };
+
+#include <lug/Core/Version.inl>
 
 } // Core
 } // lug
