@@ -1,10 +1,11 @@
 #pragma once
 
-#include <vector>
+#include <list>
 #include <string>
+#include <vector>
 
-#include <lug/Graphics/Resource.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
+#include <lug/Graphics/Resource.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -76,7 +77,7 @@ protected:
     Renderer& _renderer;
 
     std::string _name;
-    std::vector<PrimitiveSet> _primitiveSets;
+    std::list<PrimitiveSet> _primitiveSets;
 };
 
 #include <lug/Graphics/Builder/Mesh.inl>
