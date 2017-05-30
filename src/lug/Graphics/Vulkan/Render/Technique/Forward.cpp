@@ -592,6 +592,8 @@ void Forward::destroy() {
 
     _cameraPool.reset();
     _lightsPool.reset();
+
+    _commandPool.destroy();
 }
 
 bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {

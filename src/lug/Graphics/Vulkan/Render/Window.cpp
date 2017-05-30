@@ -602,6 +602,8 @@ void Window::destroyRender() {
     _descriptorPool.destroy();
 
     _acquireImageDatas.clear();
+
+    _commandPool.destroy();
 }
 
 } // Render
