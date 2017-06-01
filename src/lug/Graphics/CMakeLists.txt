@@ -90,12 +90,12 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/View.cpp
     ${SRCROOT}/Vulkan/Render/Window.cpp
 
-    ${SRCROOT}/Vulkan/Renderer.cpp
-
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
 
-    ${SRCROOT}/Vulkan/Vulkan.cpp
+    ${SRCROOT}/Vulkan/Renderer.cpp
+    ${SRCROOT}/Vulkan/Vulkan.cpp    
+    ${SRCROOT}/Vulkan/Gui.cpp
 )
 source_group("src" FILES ${SRC})
 
@@ -243,6 +243,7 @@ set(INC
     ${INCROOT}/Vulkan/Renderer.hpp
     ${INCROOT}/Vulkan/Renderer.inl
     ${INCROOT}/Vulkan/Vulkan.hpp
+    ${INCROOT}/Vulkan/Gui.hpp
 )
 source_group("inc" FILES ${INC})
 
@@ -298,9 +299,23 @@ if(LUG_OS_ANDROID)
     list(APPEND EXT_LIBRARIES z android ${ASSIMP_LIBRARY_ANDROID})
 endif()
 
+# find imgui
+if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/imgui")
+    message(FATAL_ERROR "Can't find fmt, call `git submodule update --recursive`")
+endif()
+
+set(IMGUI_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/imgui/include)
+message(STATUS "Found Imgui: ${IMGUI_INCLUDE_DIR}")
+
+set(IMGUI_SOURCE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/imgui/src)
+message(STATUS "Found Imgui: ${IMGUI_SOURCE_DIR}")
+
+include_directories(${IMGUI_INCLUDE_DIR})
+
+
 # define the target
 lug_add_library(lug-graphics
-                SOURCES ${SRC} ${INC}
+                SOURCES ${SRC} ${INC} ${IMGUI_SOURCE_DIR}
                 DEPENDS lug-window lug-system lug-math
                 EXTERNAL_LIBS ${EXT_LIBRARIES} ${ASSIMP_LIBRARY}
 )
