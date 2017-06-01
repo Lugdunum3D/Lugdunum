@@ -2,8 +2,13 @@
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/Render/View.hpp>
-#include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
-#include <lug/System/Debug.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DescriptorPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Surface.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
+#include <lug/Graphics/Vulkan/API/Instance.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
@@ -140,7 +145,7 @@ bool Window::endFrame() {
 lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::InitInfo& initInfo) {
     std::unique_ptr<View> renderView = std::make_unique<View>(_renderer, this);
 
-    if (!renderView->init(initInfo, &_renderer.getDevice(), _presentQueue, _descriptorPool.get(), _swapchain.getImagesViews())) {
+    if (!renderView->init(initInfo, _presentQueue, &_descriptorPool, _swapchain.getImagesViews())) {
         return nullptr;
     }
 
@@ -174,38 +179,34 @@ Window::create(Renderer& renderer, Window::InitInfo& initInfo) {
     return window;
 }
 
+/**
+ * @brief      Create the descriptor pool
+ *             This is in Window because we need to know the number of RenderTechnique (Actually the number of render views)
+ *             Each RenderTechnique has 50 descriptors for the lights and 1 for the camera
+ *
+ * @return     True if the creation was successful, false otherwise
+ */
 bool Window::initDescriptorPool() {
-    // Create descriptor pool
-    // This is in Window because we need to know the number of RenderTechnique (Actually the number of render views)
-    // Each RenderTechnique has got 50 descriptors for the lights and 1 for the camera
+    API::Builder::DescriptorPool descriptorPoolBuilder(_renderer.getDevice());
 
-    VkDescriptorPoolSize poolSize[] = {
+    // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
+    descriptorPoolBuilder.setFlags(0);
+
+    // Only ForwardRenderTechnique has 1 descriptor sets (for lights) and 1 (for the camera)
+    descriptorPoolBuilder.setMaxSets((uint32_t)_initInfo.renderViewsInitInfo.size() * (1 + 1) * 3);
+
+    VkDescriptorPoolSize poolSize{
         // Dynamic uniform buffers descriptors (1 for camera and 1 for lights in ForwardRenderTechnique)
-        {
-            poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-            poolSize[0].descriptorCount = (uint32_t)_initInfo.renderViewsInitInfo.size() * 3 * 2
-        }
+        poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+        poolSize.descriptorCount = (uint32_t)_initInfo.renderViewsInitInfo.size() * (1 + 1) * 3
     };
+    descriptorPoolBuilder.setPoolSizes({poolSize});
 
-    VkDescriptorPoolCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0, // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
-        createInfo.maxSets = (uint32_t)_initInfo.renderViewsInitInfo.size() * (1 + 1) * 3, // Only ForwardRenderTechnique has 1 descriptor sets (for lights) and 1 (for the camera)
-        createInfo.poolSizeCount = 1,
-        createInfo.pPoolSizes = poolSize
-    };
-
-    VkDescriptorPool descriptorPool{VK_NULL_HANDLE};
-
-    VkResult result = vkCreateDescriptorPool(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &descriptorPool);
-
-    if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create the descriptor pool: {}", result);
+    VkResult result{VK_SUCCESS};
+    if (!descriptorPoolBuilder.build(_descriptorPool, &result)) {
+        LUG_LOG.error("Window::initDescriptorPool: Can't create the descriptor pool: {}", result);
         return false;
     }
-
-    _descriptorPool = std::make_unique<API::DescriptorPool>(descriptorPool, &_renderer.getDevice());
 
     return true;
 }
@@ -215,40 +216,18 @@ bool Window::initDescriptorPool() {
  * @return Success
  */
 bool Window::initSurface() {
+    VkResult result{VK_SUCCESS};
+    API::Builder::Surface surfaceBuilder(_renderer.getInstance());
+
 #if defined(LUG_SYSTEM_WINDOWS) // Win32 surface
-    VkWin32SurfaceCreateInfoKHR createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.hinstance = _impl->getHinstance(),
-        createInfo.hwnd = _impl->getHandle()
-    };
-
-    VkResult result = vkCreateWin32SurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), &createInfo, nullptr, &_surface);
+    surfaceBuilder.setWindowInformations(_impl->getHinstance(), _impl->getHandle());
 #elif defined(LUG_SYSTEM_LINUX) // Linux surface
-    VkXlibSurfaceCreateInfoKHR createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.dpy = _impl->getDisplay(),
-        createInfo.window = _impl->getWindow()
-    };
-
-    VkResult result = vkCreateXlibSurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), &createInfo, nullptr, &_surface);
+    surfaceBuilder.setWindowInformations(_impl->getDisplay(), _impl->getWindow());
 #elif defined(LUG_SYSTEM_ANDROID) // Android Surface
-    VkAndroidSurfaceCreateInfoKHR createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.window = _impl->getWindow()
-    };
-
-    VkResult result = vkCreateAndroidSurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), &createInfo, nullptr, &_surface);
-#else
-    #error "Window::initSurface Unknow platform"
+    surfaceBuilder.setWindowInformations(_impl->getWindow());
 #endif
 
-    if (result != VK_SUCCESS) {
+    if (!surfaceBuilder.build(_surface, &result)) {
         LUG_LOG.error("RendererWindow: Can't initialize surface: {}", result);
         return false;
     }
@@ -257,14 +236,14 @@ bool Window::initSurface() {
 }
 
 bool Window::initSwapchainCapabilities() {
-    VkResult result;
+    VkResult result{VK_SUCCESS};
     PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
 
     LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
 
     // Get swapchain capabilities
     {
-        result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(info->handle, _surface, &info->swapchain.capabilities);
+        result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(info->handle, static_cast<VkSurfaceKHR>(_surface), &info->swapchain.capabilities);
 
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't get surface capabilities: {}", result);
@@ -272,7 +251,7 @@ bool Window::initSwapchainCapabilities() {
         }
 
         uint32_t formatsCount = 0;
-        result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, _surface, &formatsCount, nullptr);
+        result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, static_cast<VkSurfaceKHR>(_surface), &formatsCount, nullptr);
 
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve formats count: {}", result);
@@ -280,7 +259,7 @@ bool Window::initSwapchainCapabilities() {
         }
 
         info->swapchain.formats.resize(formatsCount);
-        result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, _surface, &formatsCount, info->swapchain.formats.data());
+        result = vkGetPhysicalDeviceSurfaceFormatsKHR(info->handle, static_cast<VkSurfaceKHR>(_surface), &formatsCount, info->swapchain.formats.data());
 
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve formats: {}", result);
@@ -288,7 +267,7 @@ bool Window::initSwapchainCapabilities() {
         }
 
         uint32_t presentModesCount = 0;
-        result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, _surface, &presentModesCount, nullptr);
+        result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, static_cast<VkSurfaceKHR>(_surface), &presentModesCount, nullptr);
 
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve present modes count: {}", result);
@@ -296,7 +275,7 @@ bool Window::initSwapchainCapabilities() {
         }
 
         info->swapchain.presentModes.resize(presentModesCount);
-        result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, _surface, &presentModesCount, info->swapchain.presentModes.data());
+        result = vkGetPhysicalDeviceSurfacePresentModesKHR(info->handle, static_cast<VkSurfaceKHR>(_surface), &presentModesCount, info->swapchain.presentModes.data());
 
         if (result != VK_SUCCESS) {
             LUG_LOG.error("RendererWindow: Can't retrieve present modes: {}", result);
@@ -308,23 +287,47 @@ bool Window::initSwapchainCapabilities() {
 }
 
 bool Window::initPresentQueue() {
-    VkResult result;
     PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
 
     LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
 
-    // Get present queues
+    // Get present queue families
     {
-        for (auto& queue : _renderer.getQueues()) {
+        VkResult result{VK_SUCCESS};
+        for (auto& queueFamily : _renderer.getDevice().getQueueFamilies()) {
             VkBool32 supported = 0;
-            result = vkGetPhysicalDeviceSurfaceSupportKHR(info->handle, queue.getFamilyIdx(), _surface, &supported);
+            result = vkGetPhysicalDeviceSurfaceSupportKHR(info->handle, queueFamily.getIdx(), static_cast<VkSurfaceKHR>(_surface), &supported);
 
             if (result != VK_SUCCESS) {
                 LUG_LOG.error("RendererWindow: Can't check if queue supports presentation: {}", result);
                 return false;
             }
 
-            queue.supportsPresentation(!!supported);
+            queueFamily.supportsPresentation(!!supported);
+        }
+    }
+
+    // Get present queue family and retrieve the first queue
+    {
+        _presentQueueFamily = _renderer.getDevice().getQueueFamily(0, true);
+        if (!_presentQueueFamily) {
+            LUG_LOG.error("Window::initPresentQueue: Can't find presentation queue family");
+            return false;
+        }
+        _presentQueue = &_presentQueueFamily->getQueues().front();
+        if (!_presentQueue) {
+            LUG_LOG.error("Window::initPresentQueue: Can't find presentation queue");
+            return false;
+        }
+    }
+
+    // Create command pool of present queue
+    {
+        VkResult result{VK_SUCCESS};
+        API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *_presentQueueFamily);
+        if (!commandPoolBuilder.build(_commandPool, &result)) {
+            LUG_LOG.error("Window::initPresentQueue: Can't create a command pool: {}", result);
+            return false;
         }
     }
 
@@ -332,164 +335,55 @@ bool Window::initPresentQueue() {
 }
 
 bool Window::initSwapchain() {
-    VkResult result;
     PhysicalDeviceInfo* info = _renderer.getPhysicalDeviceInfo();
 
-    LUG_ASSERT(info != nullptr, "PhysicalDeviceInfo cannot be null");
+    API::Builder::Swapchain swapchainBuilder(_renderer.getDevice());
+    swapchainBuilder.setPreferences(_renderer.getPreferences().swapchain);
+    swapchainBuilder.setImageColorSpace(VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
+    swapchainBuilder.setMinImageCount(3);
 
-    // TODO: Find a way to put Preferences elsewhere
-    Renderer::Preferences::Swapchain& swapchainPreferences = _renderer.getPreferences().swapchain;
-
-    VkPresentModeKHR swapchainPresentMode = VK_PRESENT_MODE_MAX_ENUM_KHR;
-    VkSurfaceFormatKHR swapchainFormat{
-        swapchainFormat.format = VK_FORMAT_MAX_ENUM,
-        swapchainFormat.colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
-    };
-    VkCompositeAlphaFlagBitsKHR compositeAlpha = static_cast<VkCompositeAlphaFlagBitsKHR>(0);
-    uint32_t minImageCount = 3;
-    VkExtent2D extent{};
-    VkSurfaceTransformFlagsKHR transform{};
-
-    // Check requirements for swapchain
-    {
-        // Check the present mode
-        {
-            for (auto presentMode : swapchainPreferences.presentModes) {
-                if (std::find(info->swapchain.presentModes.begin(), info->swapchain.presentModes.end(), presentMode) != info->swapchain.presentModes.end()) {
-                    LUG_LOG.info("RendererWindow: Use present mode {}", API::RTTI::toStr(presentMode));
-
-                    swapchainPresentMode = presentMode;
-                    break;
-                }
-            }
-
-            if (swapchainPresentMode == VK_PRESENT_MODE_MAX_ENUM_KHR) {
-                LUG_LOG.error("RendererWindow: Missing present mode supported by Lugdunum");
-                return false;
-            }
-        }
-
-        // Check the formats
-        {
-            for (auto format : swapchainPreferences.formats) {
-                if (std::find_if(info->swapchain.formats.begin(), info->swapchain.formats.end(), [&swapchainFormat, &format](const VkSurfaceFormatKHR& lhs) {
-                    return lhs.colorSpace == swapchainFormat.colorSpace && format == lhs.format;
-                }) != info->swapchain.formats.end()) {
-                    LUG_LOG.info("RendererWindow: Use format {}", API::RTTI::toStr(format));
-
-                    swapchainFormat.format = format;
-                    break;
-                }
-            }
-
-            if (swapchainFormat.format == VK_FORMAT_MAX_ENUM) {
-                LUG_LOG.error("RendererWindow: Missing swapchain format supported by Lugdunum");
-                return false;
-            }
-        }
-
-        // Check composite alpha
-        {
-            for (auto compositeAlphaPreferency : swapchainPreferences.compositeAlphas) {
-                if (info->swapchain.capabilities.supportedCompositeAlpha & compositeAlphaPreferency) {
-                    LUG_LOG.info("RendererWindow: Use composite alpha {}", API::RTTI::toStr(compositeAlphaPreferency));
-
-                    compositeAlpha = compositeAlphaPreferency;
-                    break;
-                }
-            }
-
-            if (!compositeAlpha) {
-                LUG_LOG.error("RendererWindow: Missing composite alpha supported by Lugdunum");
-                return false;
-            }
-        }
-
-        // Check image counts
-        if (info->swapchain.capabilities.maxImageCount > 0 && info->swapchain.capabilities.maxImageCount < minImageCount) {
-            LUG_LOG.error("RendererWindow: Not enough images ({} required), found {}", minImageCount, info->swapchain.capabilities.maxImageCount);
-            return false;
-        }
-
-        // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
-        if (info->swapchain.capabilities.currentExtent.height == 0xFFFFFFFF
-            && info->swapchain.capabilities.currentExtent.width == 0xFFFFFFFF) {
-            extent.height = _mode.height;
-            extent.width = _mode.width;
-        } else {
-            extent.height = info->swapchain.capabilities.currentExtent.height;
-            extent.width = info->swapchain.capabilities.currentExtent.width;
-        }
-
-        // Find the transformation of the surface
-        if (info->swapchain.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
-            // We prefer a non-rotated transform
-            transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-        } else {
-            transform = info->swapchain.capabilities.currentTransform;
-        }
+    // If width (and height) equals the special value 0xFFFFFFFF, the size of the surface will be set by the swapchain
+    if (info->swapchain.capabilities.currentExtent.height == 0xFFFFFFFF
+        && info->swapchain.capabilities.currentExtent.width == 0xFFFFFFFF) {
+        swapchainBuilder.setImageExtent(
+            {
+                _mode.width,
+                _mode.height
+            });
+    } else {
+        swapchainBuilder.setImageExtent(
+            {
+                info->swapchain.capabilities.currentExtent.width,
+                info->swapchain.capabilities.currentExtent.height
+            });
     }
+
+    // Find the transformation of the surface
+    if (info->swapchain.capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
+        // We prefer a non-rotated transform
+        swapchainBuilder.setPreTransform(VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR);
+    } else {
+        swapchainBuilder.setPreTransform(info->swapchain.capabilities.currentTransform);
+    }
+
+    swapchainBuilder.setSurface(static_cast<VkSurfaceKHR>(_surface));
+    swapchainBuilder.setOldSwapchain(static_cast<VkSwapchainKHR>(_swapchain));
 
     // Create the swapchain
     {
-        VkSwapchainCreateInfoKHR createInfo{
-            createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-            createInfo.pNext = nullptr,
-            createInfo.flags = 0,
-            createInfo.surface = _surface,
-            createInfo.minImageCount = minImageCount,
-            createInfo.imageFormat = swapchainFormat.format,
-            createInfo.imageColorSpace = swapchainFormat.colorSpace,
-            {}, // createInfo.imageExtent
-            createInfo.imageArrayLayers = 1,
-            createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-            createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
-            createInfo.queueFamilyIndexCount = 0,
-            createInfo.pQueueFamilyIndices = nullptr,
-            createInfo.preTransform = static_cast<VkSurfaceTransformFlagBitsKHR>(transform),
-            createInfo.compositeAlpha = compositeAlpha,
-            createInfo.presentMode = swapchainPresentMode,
-            createInfo.clipped = VK_TRUE,
-            createInfo.oldSwapchain = static_cast<VkSwapchainKHR>(_swapchain)
-        };
-
-        // Thank you clang
-        createInfo.imageExtent.width = extent.width;
-        createInfo.imageExtent.height = extent.height;
-
-        std::vector<uint32_t> queueFamilyIndices(1);
-
-        _presentQueue = _renderer.getQueue(0, true);
-
-        if (!_presentQueue) {
-            LUG_LOG.error("RendererWindow: Can't find presentation queue");
-            return false;
-        }
-
-        queueFamilyIndices[0] = _presentQueue->getFamilyIdx();
-
         // Check if the presentation and graphics queue are the same
-        if (!_renderer.isSameQueue(0, true, VK_QUEUE_GRAPHICS_BIT, false)) {
-            const API::Queue* graphicsQueue = _renderer.getQueue(VK_QUEUE_GRAPHICS_BIT, false);
+        const API::QueueFamily* graphicsQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
+        if (graphicsQueueFamily != _presentQueueFamily) {
 
-            if (!graphicsQueue) {
+            if (!graphicsQueueFamily) {
                 LUG_LOG.error("RendererWindow: Can't find graphics queue");
                 return false;
             }
 
-            queueFamilyIndices.push_back(graphicsQueue->getFamilyIdx());
-            createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+            swapchainBuilder.setQueueFamilyIndices({_presentQueueFamily->getIdx(), graphicsQueueFamily->getIdx()});
         }
-
-        createInfo.queueFamilyIndexCount = static_cast<uint32_t>(queueFamilyIndices.size());
-        createInfo.pQueueFamilyIndices = queueFamilyIndices.data();
-
-        VkSwapchainKHR swapchainKHR;
-        result = vkCreateSwapchainKHR(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &swapchainKHR);
-
-        if (result != VK_SUCCESS) {
-            LUG_LOG.error("RendererWindow: Can't initialize swapchain: {}", result);
-            return false;
+        else {
+            swapchainBuilder.setQueueFamilyIndices({_presentQueueFamily->getIdx()});
         }
 
         // Reset command buffers because they use the swapchain images
@@ -504,9 +398,13 @@ bool Window::initSwapchain() {
             }
         }
 
-        _swapchain = API::Swapchain(swapchainKHR, &_renderer.getDevice(), swapchainFormat, extent);
+        VkResult result{VK_SUCCESS};
+        if (!swapchainBuilder.build(_swapchain, &result)) {
+            LUG_LOG.error("Window::initPresentQueue: Can't create swapchain: {}", result);
+            return false;
+        }
 
-        return _swapchain.init();
+        return true;
     }
 }
 
@@ -520,68 +418,54 @@ bool Window::initFramesData() {
     _framesData.resize(frameDataSize);
     _acquireImageDatas.resize(frameDataSize + 1);
 
+    API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _commandPool);
+    commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
+    API::Builder::Semaphore semaphoreBuilder(_renderer.getDevice());
+
     for (uint32_t i = 0; i < frameDataSize; ++i) {
         // All draws finished semaphore
         {
-            VkSemaphore semaphore;
-            VkSemaphoreCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = 0
-            };
-            VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
-
-            if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+            VkResult result{VK_SUCCESS};
+            if (!semaphoreBuilder.build(_framesData[i].allDrawsFinishedSemaphore, &result)) {
+                LUG_LOG.error("Window::initFramesData: Can't create semaphore: {}", result);
                 return false;
             }
-
-            _framesData[i].allDrawsFinishedSemaphore = API::Semaphore(semaphore, &_renderer.getDevice());
         }
 
         // Image ready semaphores
         {
-            VkSemaphoreCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = 0
-            };
             _framesData[i].imageReadySemaphores.resize(_initInfo.renderViewsInitInfo.size());
 
             for (uint32_t j = 0; j < _initInfo.renderViewsInitInfo.size(); ++j) {
-                VkSemaphore semaphore;
-                VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
-
-                if (result != VK_SUCCESS) {
-                    LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+                VkResult result{VK_SUCCESS};
+                if (!semaphoreBuilder.build(_framesData[i].imageReadySemaphores[j], &result)) {
+                    LUG_LOG.error("Window::initFramesData: Can't create semaphore: {}", result);
                     return false;
                 }
-
-                _framesData[i].imageReadySemaphores[j] = API::Semaphore(semaphore, &_renderer.getDevice());
             }
         }
 
         // Command buffers
-        _framesData[i].cmdBuffers = _renderer.getQueue(0, true)->getCommandPool().createCommandBuffers(VK_COMMAND_BUFFER_LEVEL_PRIMARY, 2);
+        {
+            VkResult result{VK_SUCCESS};
+            _framesData[i].cmdBuffers.resize(2); // The builder will build according to the array size.
+            if (!commandBufferBuilder.build(_framesData[i].cmdBuffers, &result)) {
+                LUG_LOG.error("Window::initFramesData: Can't create the command buffer: {}", result);
+                return false;
+            }
+        }
     }
 
     for (uint32_t i = 0; i < frameDataSize + 1; ++i) {
         // Acquire image semaphore
         {
-            VkSemaphore semaphore;
-            VkSemaphoreCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = 0
-            };
-            VkResult result = vkCreateSemaphore(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &semaphore);
-
-            if (result != VK_SUCCESS) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain semaphore: {}", result);
+            VkResult result{VK_SUCCESS};
+            if (!semaphoreBuilder.build(_acquireImageDatas[i].completeSemaphore, &result)) {
+                LUG_LOG.error("Window::initFramesData: Can't create semaphore: {}", result);
                 return false;
             }
 
-            _acquireImageDatas[i].completeSemaphore = API::Semaphore(semaphore, &_renderer.getDevice());
             _acquireImageDatas[i].imageIdx = -1;
         }
     }
@@ -597,16 +481,19 @@ bool Window::buildCommandBuffers() {
         {
             API::CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[0];
 
-            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT )) {
+            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)) {
                 return false;
             }
 
-            _swapchain.getImages()[i].changeLayout(
-                cmdBuffer,
-                0,
-                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                VK_IMAGE_LAYOUT_UNDEFINED,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
 
             if (!cmdBuffer.end()) {
                 return false;
@@ -617,16 +504,19 @@ bool Window::buildCommandBuffers() {
         {
             API::CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[1];
 
-            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT )) {
+            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)) {
                 return false;
             }
 
-            _swapchain.getImages()[i].changeLayout(
-                cmdBuffer,
-                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-                VK_ACCESS_MEMORY_READ_BIT,
-                VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
 
             if (!cmdBuffer.end()) {
                 return false;
@@ -704,17 +594,15 @@ void Window::destroyRender() {
     _renderViews.clear();
 
     _swapchain.destroy();
-
-    if (_surface != VK_NULL_HANDLE) {
-        vkDestroySurfaceKHR(static_cast<VkInstance>(_renderer.getInstance()), _surface, nullptr);
-        _surface = VK_NULL_HANDLE;
-    }
+    _surface.destroy();
 
     _framesData.clear();
 
-    _descriptorPool->destroy();
+    _descriptorPool.destroy();
 
     _acquireImageDatas.clear();
+
+    _commandPool.destroy();
 }
 
 } // Render

@@ -1,7 +1,8 @@
 #include <lug/Graphics/Vulkan/Builder/Mesh.hpp>
 
 #include <lug/Graphics/Renderer.hpp>
-#include <lug/Graphics/Vulkan/API/Buffer.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Graphics.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
@@ -13,60 +14,12 @@ namespace Builder {
 
 Mesh::Mesh(lug::Graphics::Renderer& renderer) : lug::Graphics::Builder::Mesh(renderer) {}
 
-static std::unique_ptr<API::Buffer> createAttributeBuffer(
-    Vulkan::Renderer* renderer,
-    int& meshMemoryTypeIndex,
-    VkDeviceSize& meshMemorySize,
-    Render::Mesh::PrimitiveSet::Attribute& attribute) {
-
-    auto& device = renderer->getDevice();
-
-    VkBufferUsageFlags usage;
-    if (attribute.type == lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice) {
-        usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-    } else {
-        usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    }
-
-    std::vector<uint32_t> queueFamilyIndices = { (uint32_t)renderer->getQueue(VK_QUEUE_GRAPHICS_BIT, false)->getFamilyIdx() };
-    std::unique_ptr<API::Buffer> buffer = API::Buffer::create(&device,
-        (uint32_t)queueFamilyIndices.size(),
-        queueFamilyIndices.data(),
-        attribute.buffer.size, usage);
-
-    // Check the memory type of the buffer
-    // All the buffers should have the same memory type
-    // Because we create one device memory for all the buffers (So, with one type)
-    auto& requirements = buffer->getRequirements();
-    int attributeMemoryTypeIndex = API::DeviceMemory::findMemoryType(&device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-    if (attributeMemoryTypeIndex != meshMemoryTypeIndex &&
-        meshMemoryTypeIndex != -1) {
-        LUG_LOG.error("Vulkan::Mesh::build: Buffers don't have the same memory type");
-        return nullptr;
-    } else if (attributeMemoryTypeIndex == -1) {
-        LUG_LOG.error("Vulkan::Mesh::build: Memory type not supported");
-        return nullptr;
-    }
-
-    if (meshMemorySize % requirements.alignment) {
-        meshMemorySize += requirements.alignment - meshMemorySize % requirements.alignment;
-    }
-
-    meshMemoryTypeIndex = attributeMemoryTypeIndex;
-    meshMemorySize += requirements.size;
-
-    return buffer;
-}
-
 Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
     // Constructor of Mesh is private, we can't use std::make_unique
     std::unique_ptr<Resource> resource{new Vulkan::Render::Mesh(_name)};
     Vulkan::Render::Mesh* mesh = static_cast<Vulkan::Render::Mesh*>(resource.get());
-    VkDeviceSize meshMemorySize = 0;
-    int meshMemoryTypeIndex = -1;
 
-    Vulkan::Renderer* renderer = static_cast<Vulkan::Renderer*>(&_renderer);
-    auto& device = renderer->getDevice();
+    const Vulkan::Renderer& renderer = static_cast<Vulkan::Renderer&>(_renderer);
 
     for (auto& builderPrimitiveSet : _primitiveSets) {
         Render::Mesh::PrimitiveSetData* primitiveSetData = new Render::Mesh::PrimitiveSetData();
@@ -107,17 +60,33 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
                     break;
             }
 
-            std::unique_ptr<API::Buffer> buffer = createAttributeBuffer(
-                renderer,
-                meshMemoryTypeIndex,
-                meshMemorySize,
-                targetPrimitiveSet.attributes[i]);
+            {
+                API::Buffer buffer;
+                API::Builder::Buffer bufferBuilder(renderer.getDevice());
 
-            if (!buffer) {
-                return nullptr;
+                const API::QueueFamily* graphicsQueueFamily = renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
+                if (!graphicsQueueFamily) {
+                    LUG_LOG.error("Vulkan::Mesh::build: Can't find graphics queue");
+                    return nullptr;
+                }
+
+                bufferBuilder.setQueueFamilyIndices({graphicsQueueFamily->getIdx()});
+                bufferBuilder.setSize(targetPrimitiveSet.attributes[i].buffer.size);
+
+                if (targetPrimitiveSet.attributes[i].type == lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice) {
+                    bufferBuilder.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+                } else {
+                    bufferBuilder.setUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+                }
+
+                VkResult result{VK_SUCCESS};
+                if (!bufferBuilder.build(buffer, &result)) {
+                    LUG_LOG.error("Vulkan::Mesh::build: Can't create buffer: {}", result);
+                    return nullptr;
+                }
+
+                primitiveSetData->buffers.push_back(std::move(buffer));
             }
-
-            primitiveSetData->buffers.push_back(std::move(buffer));
         }
 
         primitiveSetData->pipelineIdPrimitivePart.positionVertexData = targetPrimitiveSet.position != nullptr;
@@ -130,23 +99,26 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
         mesh->_primitiveSets.push_back(targetPrimitiveSet);
     }
 
-    mesh->_deviceMemory = API::DeviceMemory::allocate(&device, meshMemorySize, meshMemoryTypeIndex);
-
     // Bind attributes buffers to mesh device memory
     {
-        VkDeviceSize deviceMemoryOffset = 0;
+        API::Builder::DeviceMemory deviceMemoryBuilder(renderer.getDevice());
+        deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
         for (auto& primitiveSet : mesh->_primitiveSets) {
             Render::Mesh::PrimitiveSetData* primitiveSetData = static_cast<Render::Mesh::PrimitiveSetData*>(primitiveSet._data);
+
             for (auto& buffer : primitiveSetData->buffers) {
-                auto& requirements = buffer->getRequirements();
-
-                if (deviceMemoryOffset % requirements.alignment) {
-                    deviceMemoryOffset += requirements.alignment - deviceMemoryOffset % requirements.alignment;
+                if (!deviceMemoryBuilder.addBuffer(buffer)) {
+                    LUG_LOG.error("Vulkan::Mesh::build: Can't add buffer to device memory");
+                    return nullptr;
                 }
-
-                buffer->bindMemory(mesh->_deviceMemory.get(), deviceMemoryOffset);
-                deviceMemoryOffset += requirements.size;
             }
+        }
+
+        VkResult result{VK_SUCCESS};
+        if (!deviceMemoryBuilder.build(mesh->_deviceMemory, &result)) {
+            LUG_LOG.error("Vulkan::Mesh::build: Can't create device memory: {}", result);
+            return nullptr;
         }
     }
 

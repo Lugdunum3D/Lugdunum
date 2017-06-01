@@ -47,6 +47,10 @@ bool WindowImpl::pollEvent(lug::Window::Event& event) {
     return false;
 }
 
+void WindowImpl::setKeyRepeat(bool) {
+    //
+}
+
 } // namespace priv
 } // namespace Window
 } // namespace lug

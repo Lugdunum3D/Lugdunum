@@ -1,4 +1,6 @@
 #include <lug/Graphics/Vulkan/API/DescriptorSet.hpp>
+
+#include <lug/Graphics/Vulkan/API/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
@@ -34,41 +36,45 @@ DescriptorSet::~DescriptorSet() {
     destroy();
 }
 
-void DescriptorSet::bind(
-    const PipelineLayout* pipelineLayout,
-    const CommandBuffer* commandBuffer,
-    uint32_t setNb,
-    uint32_t dynamicOffsetsCount,
-    const uint32_t* dynamicOffsets) {
-    vkCmdBindDescriptorSets(
-        static_cast<VkCommandBuffer>(*commandBuffer),
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        static_cast<VkPipelineLayout>(*pipelineLayout),
-        setNb,
-        1,
-        &_descriptorSet,
-        dynamicOffsetsCount,
-        dynamicOffsets);
-}
-
-void DescriptorSet::update(VkDescriptorType descriptorType, uint32_t dstBinding, const Buffer* buffer, uint32_t offset, uint32_t range) {
-    VkDescriptorBufferInfo bufferInfo{
-        bufferInfo.buffer = static_cast<VkBuffer>(*buffer),
-        bufferInfo.offset = offset,
-        bufferInfo.range = range,
+void DescriptorSet::updateBuffers(
+    uint32_t dstBinding,
+    uint32_t dstArrayElement,
+    VkDescriptorType descriptorType,
+    const std::vector<VkDescriptorBufferInfo>& bufferInfos
+) const {
+    VkWriteDescriptorSet write{
+        /* write.sType */ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        /* write.pNext */ nullptr,
+        /* write.dstSet */ _descriptorSet,
+        /* write.dstBinding */ dstBinding,
+        /* write.dstArrayElement */ dstArrayElement,
+        /* write.descriptorCount */ static_cast<uint32_t>(bufferInfos.size()),
+        /* write.descriptorType */ descriptorType,
+        /* write.pImageInfo */ nullptr,
+        /* write.pBufferInfo */ bufferInfos.data(),
+        /* write.pTexelBufferView */ nullptr
     };
 
+    vkUpdateDescriptorSets(static_cast<VkDevice>(*_device), 1, &write, 0, nullptr);
+}
+
+void DescriptorSet::updateImages(
+    uint32_t dstBinding,
+    uint32_t dstArrayElement,
+    VkDescriptorType descriptorType,
+    const std::vector<VkDescriptorImageInfo>& imageInfos
+) const {
     VkWriteDescriptorSet write{
-        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-        write.pNext = nullptr,
-        write.dstSet = _descriptorSet,
-        write.dstBinding = dstBinding,
-        write.dstArrayElement = 0,
-        write.descriptorCount = 1,
-        write.descriptorType = descriptorType,
-        write.pImageInfo = nullptr,
-        write.pBufferInfo = &bufferInfo,
-        write.pTexelBufferView = nullptr
+        /* write.sType */ VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        /* write.pNext */ nullptr,
+        /* write.dstSet */ _descriptorSet,
+        /* write.dstBinding */ dstBinding,
+        /* write.dstArrayElement */ dstArrayElement,
+        /* write.descriptorCount */ static_cast<uint32_t>(imageInfos.size()),
+        /* write.descriptorType */ descriptorType,
+        /* write.pImageInfo */ imageInfos.data(),
+        /* write.pBufferInfo */ nullptr,
+        /* write.pTexelBufferView */ nullptr
     };
 
     vkUpdateDescriptorSets(static_cast<VkDevice>(*_device), 1, &write, 0, nullptr);

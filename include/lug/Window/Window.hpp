@@ -120,6 +120,24 @@ public:
      */
     bool isKeyPressed(Keyboard::Key key) const;
 
+    /**
+    * @brief      Determines if a mouse button pressed.
+    *
+    * @param[in]  button   The button to check.
+    *
+    * @return     True if the button is pressed, False otherwise.
+    */
+    bool isMousePressed(Mouse::Button button) const;
+
+    /**
+    * @brief      Used to retrieve the mouses position
+    *
+    * @param[in]  x   The parameter that will be set to the mouse's position on the x axis.
+    * @param[in]  y   The parameter that will be set to the mouse's position on the x axis.
+    *
+    */
+    void getMousePos(uint32_t &x, uint32_t &y) const;
+
 protected:
     Window();
     bool init(const InitInfo& initInfo);
@@ -128,6 +146,11 @@ protected:
      * @brief      Inits every key in @p _keyState to false
      */
     void initKeyState();
+
+    /**
+    * @brief      Inits every button in @p _mouseState to false
+    */
+    void initMouseState();
 
     /**
      * Internal representation of the platform specific implementation.
@@ -144,6 +167,18 @@ protected:
      */
     std::unordered_map<Keyboard::Key, bool> _keyState;
 
+    /**
+    * Map to store the current state of the mouse buttons, used by #isMousePressed.
+    */
+    std::unordered_map<Mouse::Button, bool> _mouseState;
+
+    /**
+    * Used to store the mouse's position, used by #getMousePos.
+    */
+    struct {
+        uint32_t x;
+        uint32_t y;
+    } _mouseCoord;
     friend lug::Window::priv::WindowImpl;
 };
 

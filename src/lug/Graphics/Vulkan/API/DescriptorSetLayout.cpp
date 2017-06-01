@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/API/DescriptorSetLayout.hpp>
+
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
@@ -36,26 +37,7 @@ void DescriptorSetLayout::destroy() {
         vkDestroyDescriptorSetLayout(static_cast<VkDevice>(*_device), _descriptorSetLayout, nullptr);
         _descriptorSetLayout = VK_NULL_HANDLE;
     }
-}
-
-std::unique_ptr<DescriptorSetLayout> DescriptorSetLayout::create(const Device* device, VkDescriptorSetLayoutBinding layoutBindings[], uint32_t bindingCount) {
-    VkDescriptorSetLayoutCreateInfo createInfo{
-        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
-        createInfo.pNext = nullptr,
-        createInfo.flags = 0,
-        createInfo.bindingCount = bindingCount,
-        createInfo.pBindings = layoutBindings
-    };
-
-    VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
-    VkResult result = vkCreateDescriptorSetLayout(static_cast<VkDevice>(*device), &createInfo, nullptr, &descriptorSetLayout);
-
-    if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't create descriptor set layout: {}", result);
-        return nullptr;
-    }
-
-    return std::unique_ptr<DescriptorSetLayout>(new DescriptorSetLayout(descriptorSetLayout, device));
+    _device = nullptr;
 }
 
 } // API

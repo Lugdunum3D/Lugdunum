@@ -8,7 +8,7 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Technique/Type.hpp>
 #include <lug/Graphics/Resource.hpp>
-#include <lug/Graphics/Vulkan/API/Pipeline.hpp>
+#include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -173,7 +173,7 @@ private:
     Renderer& _renderer;
     Id _id;
 
-    API::Pipeline _pipeline;
+    API::GraphicsPipeline _pipeline;
 };
 
 #include <lug/Graphics/Vulkan/Render/Pipeline.inl>

@@ -2,6 +2,9 @@
 
 #include <lug/System/Export.hpp>
 
+#ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+#endif
 #define FMT_HEADER_ONLY
 #if defined(False)
     #undef False

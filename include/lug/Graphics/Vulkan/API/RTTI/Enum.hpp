@@ -217,6 +217,7 @@
     macro(VK_QUEUE_TRANSFER_BIT)      \
     macro(VK_QUEUE_SPARSE_BINDING_BIT)
 
+#if VK_HEADER_VERSION >= 39
 #define LUG_VULKAN_FORMAT_FEATURE_BIT(macro)                    \
     macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT)                  \
     macro(VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT)                  \
@@ -234,6 +235,23 @@
     macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_IMG) \
     macro(VK_FORMAT_FEATURE_TRANSFER_SRC_BIT_KHR)               \
     macro(VK_FORMAT_FEATURE_TRANSFER_DST_BIT_KHR)
+#else
+#define LUG_VULKAN_FORMAT_FEATURE_BIT(macro)                    \
+    macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT)                  \
+    macro(VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT)                  \
+    macro(VK_FORMAT_FEATURE_STORAGE_IMAGE_ATOMIC_BIT)           \
+    macro(VK_FORMAT_FEATURE_UNIFORM_TEXEL_BUFFER_BIT)           \
+    macro(VK_FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_BIT)           \
+    macro(VK_FORMAT_FEATURE_STORAGE_TEXEL_BUFFER_ATOMIC_BIT)    \
+    macro(VK_FORMAT_FEATURE_VERTEX_BUFFER_BIT)                  \
+    macro(VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT)               \
+    macro(VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT)         \
+    macro(VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)       \
+    macro(VK_FORMAT_FEATURE_BLIT_SRC_BIT)                       \
+    macro(VK_FORMAT_FEATURE_BLIT_DST_BIT)                       \
+    macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)    \
+    macro(VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_CUBIC_BIT_IMG)
+#endif
 
 #define LUG_VULKAN_MEMORY_HEAP_BIT(macro) \
     macro(VK_MEMORY_HEAP_DEVICE_LOCAL_BIT)
@@ -288,26 +306,26 @@ LUG_GRAPHICS_API const char* toStr(VkPresentModeKHR enumVal);
 LUG_GRAPHICS_API const char* toStr(VkSurfaceTransformFlagBitsKHR enumVal);
 LUG_GRAPHICS_API const char* toStr(VkCompositeAlphaFlagBitsKHR enumVal);
 
-LUG_GRAPHICS_API std::vector<const char*> VkMemoryPropertyFlagsToStr(VkMemoryPropertyFlags flag);
-LUG_GRAPHICS_API std::vector<const char*> VkQueueFlagsToStr(VkQueueFlags flag);
-LUG_GRAPHICS_API std::vector<const char*> VkFormatFeatureFlagsToStr(VkFormatFeatureFlags flag);
-LUG_GRAPHICS_API std::vector<const char*> VkMemoryHeapFlagsToStr(VkMemoryHeapFlags flag);
-LUG_GRAPHICS_API std::vector<const char*> VkImageUsageFlagsToStr(VkImageUsageFlags flag);
-LUG_GRAPHICS_API std::vector<const char*> VkSampleCountFlagsToStr(VkSampleCountFlags flag);
-LUG_GRAPHICS_API std::vector<const char*> VkSurfaceTransformFlagsKHRToStr(VkSurfaceTransformFlagsKHR flag);
-LUG_GRAPHICS_API std::vector<const char*> VkCompositeAlphaFlagsKHRToStr(VkCompositeAlphaFlagsKHR flag);
+LUG_GRAPHICS_API std::vector<const char*> VkMemoryPropertyFlagsToStrVec(VkMemoryPropertyFlags flag);
+LUG_GRAPHICS_API std::vector<const char*> VkQueueFlagsToStrVec(VkQueueFlags flag);
+LUG_GRAPHICS_API std::vector<const char*> VkFormatFeatureFlagsToStrVec(VkFormatFeatureFlags flag);
+LUG_GRAPHICS_API std::vector<const char*> VkMemoryHeapFlagsToStrVec(VkMemoryHeapFlags flag);
+LUG_GRAPHICS_API std::vector<const char*> VkImageUsageFlagsToStrVec(VkImageUsageFlags flag);
+LUG_GRAPHICS_API std::vector<const char*> VkSampleCountFlagsToStrVec(VkSampleCountFlags flag);
+LUG_GRAPHICS_API std::vector<const char*> VkSurfaceTransformFlagsKHRToStrVec(VkSurfaceTransformFlagsKHR flag);
+LUG_GRAPHICS_API std::vector<const char*> VkCompositeAlphaFlagsKHRToStrVec(VkCompositeAlphaFlagsKHR flag);
+
+LUG_GRAPHICS_API std::string VkMemoryPropertyFlagsToStr(VkMemoryPropertyFlags flag);
+LUG_GRAPHICS_API std::string VkQueueFlagsToStr(VkQueueFlags flag);
+LUG_GRAPHICS_API std::string VkFormatFeatureFlagsToStr(VkFormatFeatureFlags flag);
+LUG_GRAPHICS_API std::string VkMemoryHeapFlagsToStr(VkMemoryHeapFlags flag);
+LUG_GRAPHICS_API std::string VkImageUsageFlagsToStr(VkImageUsageFlags flag);
+LUG_GRAPHICS_API std::string VkSampleCountFlagsToStr(VkSampleCountFlags flag);
+LUG_GRAPHICS_API std::string VkSurfaceTransformFlagsKHRToStr(VkSurfaceTransformFlagsKHR flag);
+LUG_GRAPHICS_API std::string VkCompositeAlphaFlagsKHRToStr(VkCompositeAlphaFlagsKHR flag);
 
 } // RTTI
 } // API
 } // Vulkan
 } // Graphics
 } // lug
-
-/**
- * PSA: This is outside of the namespace because VkResult is in the root namespace
- */
-std::ostream& operator<<(std::ostream& ss, const VkResult& result);
-inline std::ostream& operator<<(std::ostream& ss, const VkResult& result) {
-    ss << ::lug::Graphics::Vulkan::API::RTTI::toStr(result);
-    return ss;
-}
