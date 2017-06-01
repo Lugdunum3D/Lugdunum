@@ -1,8 +1,6 @@
 #pragma once
 
-#include <vector>
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Vulkan/API/DescriptorSet.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
@@ -10,11 +8,17 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
+namespace Builder {
+class DescriptorPool;
+} // Builder
+
 class Device;
 
 class LUG_GRAPHICS_API DescriptorPool {
+    friend class Builder::DescriptorPool;
+
 public:
-    explicit DescriptorPool(VkDescriptorPool descriptorPool = VK_NULL_HANDLE, const Device *device = nullptr);
+    DescriptorPool() = default;
 
     DescriptorPool(const DescriptorPool&) = delete;
     // Warning: Don't move DescriptorPool after creating a DescriptorSet
@@ -30,9 +34,10 @@ public:
         return _descriptorPool;
     }
 
-    std::vector<DescriptorSet> createDescriptorSets(const std::vector<VkDescriptorSetLayout>& descriptorSetLayouts);
-
     void destroy();
+
+private:
+    explicit DescriptorPool(VkDescriptorPool descriptorPool, const Device *device);
 
 private:
     VkDescriptorPool _descriptorPool{VK_NULL_HANDLE};

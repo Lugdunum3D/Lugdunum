@@ -8,9 +8,15 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
+namespace Builder {
+class Instance;
+} // Builder
+
 class LUG_GRAPHICS_API Instance {
+    friend class Builder::Instance;
+
 public:
-    explicit Instance(VkInstance instance = VK_NULL_HANDLE);
+    Instance() = default;
 
     Instance(const Instance&) = delete;
     Instance(Instance&& instance);
@@ -28,6 +34,9 @@ public:
     Function getProcAddr(const char* name) const;
 
     void destroy();
+
+private:
+    explicit Instance(VkInstance instance);
 
 private:
     VkInstance _instance{VK_NULL_HANDLE};

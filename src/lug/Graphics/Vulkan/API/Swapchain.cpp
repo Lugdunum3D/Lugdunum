@@ -1,7 +1,8 @@
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
+
+#include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Queue.hpp>
-#include <lug/Graphics/Vulkan/API/RenderPass.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -58,10 +59,9 @@ void Swapchain::destroy() {
 }
 
 bool Swapchain::init() {
-    VkResult result;
-
     // Get swapchain images
     {
+        VkResult result{VK_SUCCESS};
         uint32_t imagesCount = 0;
         std::vector<VkImage> images;
 
@@ -84,7 +84,7 @@ bool Swapchain::init() {
         _images.resize(imagesCount);
 
         for (uint8_t i = 0; i < images.size(); ++i) {
-            _images[i] = Image(images[i], _device, {_extent.width, _extent.height}, true);
+            _images[i] = Image(images[i], _device, {_extent.width, _extent.height}, _format.format, true);
         }
     }
 
@@ -93,14 +93,15 @@ bool Swapchain::init() {
         _imagesViews.resize(_images.size());
 
         for (uint8_t i = 0; i < _images.size(); ++i) {
-            std::unique_ptr<ImageView> imageView = ImageView::create(_device, &_images[i], _format.format);
+            VkResult result{VK_SUCCESS};
+            API::Builder::ImageView imageViewBuilder(*_device, _images[i]);
 
-            if (!imageView) {
-                LUG_LOG.error("RendererVulkan: Can't create swapchain image view");
+            imageViewBuilder.setFormat(_format.format);
+
+            if (!imageViewBuilder.build(_imagesViews[i], &result)) {
+                LUG_LOG.error("Forward::initDepthBuffers: Can't create swapchain image view: {}", result);
                 return false;
             }
-
-            _imagesViews[i] = std::move(imageView);
         }
     }
 
@@ -123,17 +124,17 @@ bool Swapchain::getNextImage(uint32_t* imageIndex, VkSemaphore semaphore) {
     return true;
 }
 
-bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore) {
+bool Swapchain::present(const Queue* presentQueue, uint32_t imageIndex, VkSemaphore semaphore) const {
     // Present image
-    VkPresentInfoKHR presentInfo{
-        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
-        presentInfo.pNext = nullptr,
-        presentInfo.waitSemaphoreCount = semaphore != VK_NULL_HANDLE ? 1 : 0,
-        presentInfo.pWaitSemaphores = semaphore != VK_NULL_HANDLE ? &semaphore : nullptr,
-        presentInfo.swapchainCount = 1,
-        presentInfo.pSwapchains = &_swapchain,
-        presentInfo.pImageIndices = &imageIndex,
-        presentInfo.pResults = nullptr
+    const VkPresentInfoKHR presentInfo{
+        /* presentInfo.sType */ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,
+        /* presentInfo.pNext */ nullptr,
+        /* presentInfo.waitSemaphoreCount */ static_cast<uint32_t>(semaphore != VK_NULL_HANDLE ? 1 : 0),
+        /* presentInfo.pWaitSemaphores */ semaphore != VK_NULL_HANDLE ? &semaphore : nullptr,
+        /* presentInfo.swapchainCount */ 1,
+        /* presentInfo.pSwapchains */ &_swapchain,
+        /* presentInfo.pImageIndices */ &imageIndex,
+        /* presentInfo.pResults */ nullptr
     };
 
     VkResult result = vkQueuePresentKHR(static_cast<VkQueue>(*presentQueue), &presentInfo);

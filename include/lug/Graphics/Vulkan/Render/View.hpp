@@ -2,15 +2,17 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/View.hpp>
-#include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
-#include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Technique.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+namespace API {
+class DescriptorPool;
+class Queue;
+} // API
 
 class Renderer;
 
@@ -30,10 +32,9 @@ public:
     ~View() = default;
 
     bool init(View::InitInfo& initInfo,
-                const API::Device* device,
-                API::Queue* presentQueue,
+                const API::Queue* presentQueue,
                 API::DescriptorPool* descriptorPool,
-                const std::vector<std::unique_ptr<API::ImageView>>& imageViews);
+                const std::vector<API::ImageView>& imageViews);
 
     bool render(const API::Semaphore& imageReadySemaphore, uint32_t currentImageIndex);
     void destroy() override final;
@@ -52,7 +53,7 @@ private:
     std::unique_ptr<Technique::Technique> _renderTechnique{nullptr};
 
     std::vector<API::Semaphore> _drawCompleteSemaphores;
-    API::Queue* _presentQueue;
+    const API::Queue* _presentQueue;
 };
 
 #include <lug/Graphics/Vulkan/Render/View.inl>

@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
+
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/System/Logger/Logger.hpp>
@@ -8,7 +9,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-CommandBuffer::CommandBuffer(VkCommandBuffer commandBuffer, CommandPool* commandPool) : _commandBuffer(commandBuffer), _commandPool(commandPool) {}
+CommandBuffer::CommandBuffer(VkCommandBuffer commandBuffer, const CommandPool* commandPool) : _commandBuffer(commandBuffer), _commandPool(commandPool) {}
 
 CommandBuffer::CommandBuffer(CommandBuffer&& commandBuffer) {
     _commandBuffer = commandBuffer._commandBuffer;
@@ -34,7 +35,7 @@ CommandBuffer::~CommandBuffer() {
     destroy();
 }
 
-bool CommandBuffer::begin(VkCommandBufferUsageFlags flags) {
+bool CommandBuffer::begin(VkCommandBufferUsageFlags flags) const {
     VkCommandBufferBeginInfo beginInfo{
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
         beginInfo.pNext = nullptr,
@@ -52,7 +53,7 @@ bool CommandBuffer::begin(VkCommandBufferUsageFlags flags) {
     return true;
 }
 
-bool CommandBuffer::end() {
+bool CommandBuffer::end() const {
     VkResult result = vkEndCommandBuffer(_commandBuffer);
 
     if (result != VK_SUCCESS) {
@@ -63,7 +64,7 @@ bool CommandBuffer::end() {
     return true;
 }
 
-bool CommandBuffer::reset(bool releaseRessources) {
+bool CommandBuffer::reset(bool releaseRessources) const {
     VkResult result = vkResetCommandBuffer(_commandBuffer, releaseRessources ? VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT : 0);
 
     if (result != VK_SUCCESS) {

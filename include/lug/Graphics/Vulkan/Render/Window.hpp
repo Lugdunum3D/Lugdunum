@@ -1,17 +1,23 @@
 #pragma once
 
 #include <memory>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Window.hpp>
+#include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorPool.hpp>
-#include <lug/Graphics/Vulkan/API/Fence.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
+#include <lug/Graphics/Vulkan/API/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
+
+namespace API {
+class QueueFamily;
+} // API
 
 class Renderer;
 
@@ -76,17 +82,20 @@ private:
     InitInfo _initInfo;
 
     Renderer& _renderer;
-    VkSurfaceKHR _surface{VK_NULL_HANDLE};
+    API::Surface _surface{};
     API::Swapchain _swapchain{};
 
-    std::unique_ptr<API::DescriptorPool> _descriptorPool{nullptr};
+    API::DescriptorPool _descriptorPool{};
 
-    API::Queue* _presentQueue{nullptr};
+    const API::Queue* _presentQueue{nullptr};
+    const API::QueueFamily* _presentQueueFamily{nullptr};
     uint32_t _currentImageIndex{0};
 
     std::vector<FrameData> _framesData;
 
     std::vector<AcquireImageData> _acquireImageDatas;
+
+    API::CommandPool _commandPool{};
 };
 
 #include <lug/Graphics/Vulkan/Render/Window.inl>

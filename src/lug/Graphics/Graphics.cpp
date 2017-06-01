@@ -1,6 +1,9 @@
+#include <lug/Graphics/Graphics.hpp>
+
 #include <iterator>
 #include <sstream>
-#include <lug/Graphics/Graphics.hpp>
+#include <map>
+
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
@@ -10,7 +13,7 @@
 namespace lug {
 namespace Graphics {
 
-Graphics::Graphics(const char* appName, uint32_t appVersion) : _appName{appName}, _appVersion{appVersion} {}
+Graphics::Graphics(const std::string& appName, const Core::Version& appVersion) : _appName{appName}, _appVersion{appVersion} {}
 
 bool Graphics::init(const InitInfo& initInfo) {
     return beginInit(initInfo) && finishInit();

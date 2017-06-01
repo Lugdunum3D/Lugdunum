@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/API/Loader.hpp>
+
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/Instance.hpp>
 

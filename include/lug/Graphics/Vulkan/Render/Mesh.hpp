@@ -1,10 +1,11 @@
 #pragma once
 
 #include <memory>
+#include <set>
+
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/Device.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Render/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
@@ -25,7 +26,7 @@ class LUG_GRAPHICS_API Mesh : public ::lug::Graphics::Render::Mesh {
 public:
     struct PrimitiveSetData {
         Pipeline::Id::PrimitivePart pipelineIdPrimitivePart;
-        std::vector<std::unique_ptr<API::Buffer>> buffers;
+        std::vector<API::Buffer> buffers;
     };
 
 public:
@@ -43,7 +44,7 @@ private:
     explicit Mesh(const std::string& name);
 
 private:
-    std::unique_ptr<API::DeviceMemory> _deviceMemory{nullptr};
+    API::DeviceMemory _deviceMemory;
 };
 
 #include <lug/Graphics/Vulkan/Render/Mesh.inl>

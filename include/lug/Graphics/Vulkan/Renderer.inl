@@ -26,56 +26,12 @@ inline const API::Instance& Renderer::getInstance() const {
     return _instance;
 }
 
-inline const API::Device& Renderer::getDevice() const {
+inline API::Device& Renderer::getDevice() {
     return _device;
 }
 
-inline std::vector<API::Queue> &Renderer::getQueues() {
-    return _queues;
-}
-
-inline const std::vector<API::Queue>& Renderer::getQueues() const {
-    return _queues;
-}
-
-inline API::Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentation) {
-    API::Queue* returnQueue = nullptr;
-
-    for (auto& queue : _queues) {
-        if ((queue.getFlags() & flags) == flags && (!supportPresentation || queue.supportsPresentation())) {
-            if (returnQueue == nullptr || queue.getFlags() == flags || (supportPresentation && flags == 0 && queue.getFlags() & VK_QUEUE_GRAPHICS_BIT)) {
-                returnQueue = &queue;
-            }
-        }
-    }
-
-    if (!returnQueue && flags & VK_QUEUE_TRANSFER_BIT) {
-        return getQueue((flags & ~VK_QUEUE_TRANSFER_BIT) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
-    }
-
-    return returnQueue;
-}
-
-inline const API::Queue* Renderer::getQueue(VkQueueFlags flags, bool supportPresentation) const {
-    const API::Queue* returnQueue = nullptr;
-
-    for (const auto& queue : _queues) {
-        if ((queue.getFlags() & flags) == flags && (!supportPresentation || queue.supportsPresentation())) {
-            if (returnQueue == nullptr || queue.getFlags() == flags || (supportPresentation && flags == 0 && queue.getFlags() & VK_QUEUE_GRAPHICS_BIT)) {
-                returnQueue = &queue;
-            }
-        }
-    }
-
-    if (!returnQueue && flags & VK_QUEUE_TRANSFER_BIT) {
-        return getQueue((flags & ~VK_QUEUE_TRANSFER_BIT) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
-    }
-
-    return returnQueue;
-}
-
-inline bool Renderer::isSameQueue(VkQueueFlags flagsA, bool supportPresentationA, VkQueueFlags flagsB, bool supportPresentationB) const {
-    return getQueue(flagsA, supportPresentationA) == getQueue(flagsB, supportPresentationB);
+inline const API::Device& Renderer::getDevice() const {
+    return _device;
 }
 
 inline InstanceInfo& Renderer::getInstanceInfo() {

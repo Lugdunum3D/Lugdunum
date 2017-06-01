@@ -1,46 +1,28 @@
 #include <lug/Graphics/Vulkan/API/Queue.hpp>
-#include <lug/System/Logger/Logger.hpp>
+
+#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/System/Debug.hpp>
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-Queue::Queue(int8_t idx, VkQueue queue, VkQueueFlags flags, bool presentation) : _idx(idx), _queue(queue), _flags(flags), _presentation(presentation) {}
+Queue::Queue(VkQueue queue) : _queue(queue) {}
 
 Queue::Queue(Queue&& queue) {
     _queue = queue._queue;
-    _idx = queue._idx;
-    _flags = queue._flags;
-    _presentation = queue._presentation;
-    _commandPool = std::move(queue._commandPool);
 
     queue._queue = VK_NULL_HANDLE;
-    queue._idx = -1;
-    queue._flags = 0;
-    queue._presentation = false;
 }
 
 Queue& Queue::operator=(Queue&& queue) {
-    destroy();
-
     _queue = queue._queue;
-    _idx = queue._idx;
-    _flags = queue._flags;
-    _presentation = queue._presentation;
-    _commandPool = std::move(queue._commandPool);
 
     queue._queue = VK_NULL_HANDLE;
-    queue._idx = -1;
-    queue._flags = 0;
-    queue._presentation = false;
 
     return *this;
-}
-
-Queue::~Queue() {
-    destroy();
 }
 
 bool Queue::submit(
@@ -54,22 +36,22 @@ bool Queue::submit(
 
     VkCommandBuffer vkCommandBuffer = static_cast<VkCommandBuffer>(commandBuffer);
 
-    VkSubmitInfo submitInfo{
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
-        submitInfo.pNext = nullptr,
-        submitInfo.waitSemaphoreCount = waitSemaphores.size() > 0 ? (uint32_t)waitSemaphores.size() : 0,
-        submitInfo.pWaitSemaphores = waitSemaphores.size() > 0 ? waitSemaphores.data() : nullptr,
-        submitInfo.pWaitDstStageMask = waitDstStageMasks.size() > 0 ? waitDstStageMasks.data() : nullptr,
-        submitInfo.commandBufferCount = 1,
-        submitInfo.pCommandBuffers = &vkCommandBuffer,
-        submitInfo.signalSemaphoreCount = signalSemaphores.size() > 0 ? (uint32_t)signalSemaphores.size() : 0,
-        submitInfo.pSignalSemaphores = signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr
+    const VkSubmitInfo submitInfo{
+        /* submitInfo.sType */ VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        /* submitInfo.pNext */ nullptr,
+        /* submitInfo.waitSemaphoreCount */ waitSemaphores.size() > 0 ? (uint32_t)waitSemaphores.size() : 0,
+        /* submitInfo.pWaitSemaphores */ waitSemaphores.size() > 0 ? waitSemaphores.data() : nullptr,
+        /* submitInfo.pWaitDstStageMask */ waitDstStageMasks.size() > 0 ? waitDstStageMasks.data() : nullptr,
+        /* submitInfo.commandBufferCount */ 1,
+        /* submitInfo.pCommandBuffers */ &vkCommandBuffer,
+        /* submitInfo.signalSemaphoreCount */ signalSemaphores.size() > 0 ? (uint32_t)signalSemaphores.size() : 0,
+        /* submitInfo.pSignalSemaphores */ signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr
     };
 
     VkResult result = vkQueueSubmit(_queue, 1, &submitInfo, fence);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
+        LUG_LOG.error("Queue::submit: Can't submit command buffer {}", result);
         return false;
     }
 
@@ -80,24 +62,11 @@ bool Queue::waitIdle() const {
     VkResult result = vkQueueWaitIdle(_queue);
 
     if (result != VK_SUCCESS) {
-        LUG_LOG.error("RendererVulkan: Can't enumerate instance layers: {}", result);
+        LUG_LOG.error("Queue::waitIdle: Can't wait for queue work {}", result);
         return false;
     }
 
     return true;
-}
-
-void Queue::destroy() {
-    _commandPool.destroy();
-
-    if (_queue != VK_NULL_HANDLE) {
-        waitIdle();
-        _queue = VK_NULL_HANDLE;
-    }
-
-    _idx = -1;
-    _flags = 0;
-    _presentation = false;
 }
 
 } // API

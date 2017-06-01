@@ -1,4 +1,5 @@
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
+
 #include <lug/Graphics/Vulkan/API/Device.hpp>
 
 namespace lug {

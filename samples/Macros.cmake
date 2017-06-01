@@ -49,8 +49,10 @@ macro(add_shaders target)
         endforeach(shader)
     endif()
 
-    add_custom_target(shaders DEPENDS ${SHADERS_DEPENDS})
-    add_dependencies(${target} shaders)
+    set(target_shaders "shaders-${target}")
+
+    add_custom_target(${target_shaders} DEPENDS ${SHADERS_DEPENDS})
+    add_dependencies(${target} ${target_shaders})
 endmacro()
 
 # resources
@@ -98,11 +100,11 @@ macro(lug_add_sample target)
     find_package(Vulkan)
 
     if (NOT VULKAN_INCLUDE_DIR)
-        if (NOT EXISTS "${CMAKE_SOURCE_DIR}/../../thirdparty/vulkan")
+        if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/vulkan")
             message(FATAL_ERROR "Can't find vulkan, call `git submodule update --recursive`")
         endif()
 
-        set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../../thirdparty/vulkan/include)
+        set(VULKAN_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/vulkan/include)
         message(STATUS "Found Vulkan: ${VULKAN_INCLUDE_DIR}")
     endif()
 
@@ -112,11 +114,11 @@ macro(lug_add_sample target)
     find_package(Fmt)
 
     if (NOT FMT_INCLUDE_DIR)
-        if (NOT EXISTS "${CMAKE_SOURCE_DIR}/../../thirdparty/fmt")
+        if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/fmt")
             message(FATAL_ERROR "Can't find fmt, call `git submodule update --recursive`")
         endif()
 
-        set(FMT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../../thirdparty/fmt/include)
+        set(FMT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/fmt/include)
         message(STATUS "Found Fmt: ${FMT_INCLUDE_DIR}")
     endif()
 
@@ -149,11 +151,11 @@ macro(lug_add_sample target)
 
     # copy lugdunum resources
     if(THIS_LUG_RESOURCES)
-        add_resources(${target} lug_resources ${LUG_RESOURCES_DIR} ${THIS_LUG_RESOURCES})
+        add_resources(${target} "lug-resources-${target}" ${LUG_RESOURCES_DIR} ${THIS_LUG_RESOURCES})
     endif()
 
     # copy resources
     if(THIS_OTHER_RESOURCES)
-        add_resources(${target} sample_resources "${CMAKE_SOURCE_DIR}/resources" ${THIS_OTHER_RESOURCES})
+        add_resources(${target} "sample-resources-${target}" "${CMAKE_SOURCE_DIR}/resources" ${THIS_OTHER_RESOURCES})
     endif()
 endmacro()

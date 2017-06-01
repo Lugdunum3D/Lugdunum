@@ -17,6 +17,8 @@ public:
     bool init(const Window::InitInfo& initInfo);
     void close();
     bool pollEvent(lug::Window::Event& event);
+    void setKeyRepeat(bool state);
+
     ANativeWindow* getWindow();
 
     LUG_WINDOW_API static std::queue<lug::Window::Event> events;

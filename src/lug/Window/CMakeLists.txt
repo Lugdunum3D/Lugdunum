@@ -12,6 +12,7 @@ set(INC
     ${INCROOT}/Event.hpp
     ${INCROOT}/Export.hpp
     ${INCROOT}/Keyboard.hpp
+    ${INCROOT}/Mouse.hpp
     ${INCROOT}/Window.hpp
     ${INCROOT}/WindowHandle.hpp
 )
