@@ -7,21 +7,17 @@
 #include <lug/Graphics/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/Builder/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Render/Pipeline.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
-
-namespace Builder {
-class Mesh;
-} // Builder
-
 namespace Render {
 
 class LUG_GRAPHICS_API Mesh : public ::lug::Graphics::Render::Mesh {
-    friend class ::lug::Graphics::Vulkan::Builder::Mesh;
+    friend Resource::SharedPtr<lug::Graphics::Render::Mesh> Builder::Mesh::build(const ::lug::Graphics::Builder::Mesh&);
 
 public:
     struct PrimitiveSetData {

@@ -6,6 +6,7 @@
 
 #include <lug/Graphics/Render/Mesh.hpp>
 #include <lug/Graphics/Resource.hpp>
+#include <lug/Graphics/Vulkan/Builder/Mesh.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -15,6 +16,8 @@ class Renderer;
 namespace Builder {
 
 class LUG_GRAPHICS_API Mesh {
+    friend Resource::SharedPtr<lug::Graphics::Render::Mesh> lug::Graphics::Vulkan::Builder::Mesh::build(const ::lug::Graphics::Builder::Mesh&);
+
 public:
     class PrimitiveSet {
     public:
@@ -58,7 +61,7 @@ public:
     Mesh& operator=(const Mesh&) = delete;
     Mesh& operator=(Mesh&&) = delete;
 
-    virtual ~Mesh() = default;
+    ~Mesh() = default;
 
     /**
      * @brief      Sets the name.
@@ -71,7 +74,7 @@ public:
      */
     PrimitiveSet* addPrimitiveSet();
 
-    virtual Resource::SharedPtr<Render::Mesh> build() = 0;
+    Resource::SharedPtr<Render::Mesh> build();
 
 protected:
     Renderer& _renderer;
