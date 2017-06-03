@@ -5,7 +5,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
-#include <lug/Graphics/Graphics.hpp>
+#include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 
 namespace lug {
 namespace Graphics {

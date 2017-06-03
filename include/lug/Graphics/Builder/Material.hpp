@@ -5,6 +5,7 @@
 
 #include <lug/Graphics/Resource.hpp>
 #include <lug/Graphics/Render/Material.hpp>
+#include <lug/Graphics/Vulkan/Builder/Material.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -14,6 +15,8 @@ class Renderer;
 namespace Builder {
 
 class LUG_GRAPHICS_API Material {
+    friend Resource::SharedPtr<lug::Graphics::Render::Material> lug::Graphics::Vulkan::Builder::Material::build(const ::lug::Graphics::Builder::Material&);
+
 public:
     explicit Material(Renderer& renderer);
 
@@ -23,7 +26,7 @@ public:
     Material& operator=(const Material&) = delete;
     Material& operator=(Material&&) = delete;
 
-    virtual ~Material() = default;
+    ~Material() = default;
 
     /**
      * @brief      Sets the name.
@@ -43,7 +46,7 @@ public:
     void setOcclusionTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0, float strength = 1.0f);
     void setEmissiveTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0);
 
-    virtual Resource::SharedPtr<Render::Material> build() = 0;
+    Resource::SharedPtr<Render::Material> build();
 
 protected:
     Renderer& _renderer;
