@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <string>
 
 #include <lug/Graphics/Export.hpp>
 
@@ -149,7 +150,7 @@ public:
     };
 
 public:
-    Resource(Type type);
+    Resource(Type type, const std::string& name);
 
     Resource(const Resource&) = delete;
     Resource(Resource&&) = delete;
@@ -172,6 +173,23 @@ public:
      * @return     The handle.
      */
     Handle getHandle() const;
+
+    /**
+     * @brief      Gets the name of the Resource.
+     *
+     * @return     The name.
+     */
+    const std::string& getName() const;
+
+    /**
+     * @brief      Sets the name of the Resource.
+     *
+     * @param[in]  name  The name
+     */
+    void setName(const std::string &name);
+
+protected:
+    std::string _name;
 
 private:
     Handle _handle;

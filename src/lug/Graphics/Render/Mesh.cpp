@@ -4,7 +4,7 @@ namespace lug {
 namespace Graphics {
 namespace Render {
 
-Mesh::Mesh(const std::string& name) : Resource(Resource::Type::Mesh), _name(name) {}
+Mesh::Mesh(const std::string& name) : Resource(Resource::Type::Mesh, name) {}
 
 Mesh::~Mesh() {
     for (auto& primitiveSet : _primitiveSets) {

@@ -6,7 +6,7 @@ namespace lug {
 namespace Graphics {
 namespace Scene {
 
-Scene::Scene() : _root{std::make_unique<Node>(*this, "root")} {}
+Scene::Scene(const std::string& name) : Resource(Resource::Type::Scene, name), _root{std::make_unique<Node>(*this, "root")} {}
 
 std::unique_ptr<Node> Scene::createSceneNode(const std::string& name, std::unique_ptr<MovableObject> object) {
     std::unique_ptr<Node> node = std::make_unique<Node>(*this, name);

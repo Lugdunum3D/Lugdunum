@@ -1,7 +1,10 @@
 #pragma once
 
+#include <string>
+
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Render/Light.hpp>
+#include <lug/Graphics/Light/Light.hpp>
+#include <lug/Graphics/Resource.hpp>
 #include <lug/Graphics/Scene/MeshInstance.hpp>
 #include <lug/Graphics/Scene/MovableCamera.hpp>
 #include <lug/Graphics/Scene/Node.hpp>
@@ -17,9 +20,9 @@ class View;
 
 namespace Scene {
 
-class LUG_GRAPHICS_API Scene {
+class LUG_GRAPHICS_API Scene : public Resource {
 public:
-    Scene();
+    Scene(const std::string& name);
 
     Scene(const Scene&) = delete;
     Scene(Scene&&) = delete;
@@ -32,6 +35,7 @@ public:
     std::unique_ptr<Node> createSceneNode(const std::string& name, std::unique_ptr<MovableObject> object = nullptr);
     std::unique_ptr<MeshInstance> createMeshInstance(const std::string& name, Render::Mesh* mesh = nullptr);
     std::unique_ptr<MovableCamera> createMovableCamera(const std::string& name, Render::Camera* camera = nullptr);
+    std::unique_ptr<Light::Light> createLight(const std::string& name, Light::Light::Type type);
 
     Node* getRoot();
     const Node* getRoot() const;

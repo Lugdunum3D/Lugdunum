@@ -16,7 +16,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Pipeline::Pipeline(Renderer& renderer, Id id) : Resource(Resource::Type::Pipeline), _renderer(renderer), _id(id) {}
+Pipeline::Pipeline(Renderer& renderer, Id id) : Resource(Resource::Type::Pipeline, "Pipeline"), _renderer(renderer), _id(id) {}
 
 bool Pipeline::init() {
     Pipeline::Id::PrimitivePart primitivePart = _id.getPrimitivePart();

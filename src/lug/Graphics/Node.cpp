@@ -4,7 +4,7 @@
 namespace lug {
 namespace Graphics {
 
-Node::Node(const std::string& name) : _name(name) {}
+Node::Node(const std::string& name) : Resource(Resource::Type::SceneNode, name) {}
 
 Node* Node::getNode(const std::string& name) {
     if (name == _name) {

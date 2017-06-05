@@ -133,3 +133,11 @@ inline Resource::Type Resource::getType() const {
 inline Resource::Handle Resource::getHandle() const {
     return _handle;
 }
+
+inline const std::string& Resource::getName() const {
+    return _name;
+}
+
+inline void Resource::setName(const std::string &name) {
+    _name = name;
+}

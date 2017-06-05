@@ -4,7 +4,7 @@ namespace lug {
 namespace Graphics {
 namespace Render {
 
-Material::Material(const std::string& name): Resource(Resource::Type::Material), _name(name) {
+Material::Material(const std::string& name): Resource(Resource::Type::Material, name) {
     (void)_baseColorTexture;
     (void)_metallicRoughnessTexture;
     (void)_normalTexture;

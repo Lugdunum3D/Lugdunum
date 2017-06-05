@@ -52,8 +52,25 @@ public:
 
     void setPosition(const Math::Vec3f& position, TransformSpace space = TransformSpace::Local);
     void setRotation(const Math::Quatf& rotation, TransformSpace space = TransformSpace::Local);
+
+    /**
+     * @brief      Rotates the node according to the direction given in parameter
+     *
+     * @param[in]  spaceTargetDirection  The direction we want the local direction point to (will be normalized), in local space
+     * @param[in]  localDirectionVector  The local direction vector
+     * @param[in]  localUpVector         The local up vector
+     * @param[in]  space                 The space, defaults to local
+     */
     void setDirection(const Math::Vec3f& spaceTargetDirection, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space = TransformSpace::Local);
 
+    /**
+     * @brief      Rotates the node in order to look at the target position
+     *
+     * @param[in]  targetPosition        The target position
+     * @param[in]  localDirectionVector  The local direction vector
+     * @param[in]  localUpVector         The local up vector
+     * @param[in]  space                 The space, defaults to local
+     */
     void lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space = TransformSpace::Local);
 
     virtual void needUpdate();
