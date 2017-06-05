@@ -312,10 +312,15 @@ message(STATUS "Found Imgui: ${IMGUI_SOURCE_DIR}")
 
 include_directories(${IMGUI_INCLUDE_DIR})
 
+set(IMGUI_SOURCE_FILES
+    ${IMGUI_SOURCE_DIR}/imgui.cpp
+    ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
+    ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+)
 
 # define the target
 lug_add_library(lug-graphics
-                SOURCES ${SRC} ${INC} ${IMGUI_SOURCE_DIR}
+                SOURCES ${SRC} ${INC} ${IMGUI_SOURCE_FILES}
                 DEPENDS lug-window lug-system lug-math
                 EXTERNAL_LIBS ${EXT_LIBRARIES} ${ASSIMP_LIBRARY}
 )
