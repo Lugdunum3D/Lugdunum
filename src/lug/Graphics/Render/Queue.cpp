@@ -1,6 +1,6 @@
 #include <lug/Graphics/Render/Queue.hpp>
 #include <cstring>
-#include <lug/Graphics/Light/Light.hpp>
+#include <lug/Graphics/Render/Light.hpp>
 #include <lug/Graphics/Scene/MeshInstance.hpp>
 #include <lug/Graphics/Scene/MovableObject.hpp>
 #include <lug/System/Logger/Logger.hpp>
@@ -14,11 +14,11 @@ void Queue::addMovableObject(Scene::MovableObject* object) {
         return;
     }
 
-    if (object->getType() == Scene::MovableObject::Type::Light) {
-        _lights[_lightsNb] = static_cast<Light::Light*>(object);
+    /*if (object->getType() == Scene::MovableObject::Type::Light) {
+        _lights[_lightsNb] = static_cast<Render::Light*>(object);
         ++_lightsNb;
         return;
-    } else if (object->getType() == Scene::MovableObject::Type::Mesh) {
+    }*/ if (object->getType() == Scene::MovableObject::Type::Mesh) {
         _meshs[_meshsNb] = static_cast<Scene::MeshInstance*>(object);
         ++_meshsNb;
         return;
@@ -38,10 +38,6 @@ void Queue::clear() {
 void Queue::removeDirtyProperty() {
     for (std::size_t i = 0; i < _meshsNb; ++i) {
         _meshs[i]->isDirty(false);
-    }
-
-    for (std::size_t i = 0; i < _lightsNb; ++i) {
-        _lights[i]->isDirty(false);
     }
 }
 

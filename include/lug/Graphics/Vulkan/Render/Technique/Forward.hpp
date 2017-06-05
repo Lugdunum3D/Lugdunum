@@ -3,7 +3,6 @@
 #include <unordered_map>
 
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Light/Light.hpp>
 #include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/DescriptorSet.hpp>
@@ -69,7 +68,7 @@ private:
 
     API::DeviceMemory _depthBufferMemory;
 
-    std::unordered_map<Light::Light::Type, API::GraphicsPipeline> _pipelines;
+    API::GraphicsPipeline _pipeline;
 
     std::vector<FrameData> _framesData;
 

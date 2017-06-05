@@ -5,13 +5,9 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Graphics.cpp
 
+    ${SRCROOT}/Builder/Light.cpp
     ${SRCROOT}/Builder/Material.cpp
     ${SRCROOT}/Builder/Mesh.cpp
-
-    ${SRCROOT}/Light/Directional.cpp
-    ${SRCROOT}/Light/Light.cpp
-    ${SRCROOT}/Light/Point.cpp
-    ${SRCROOT}/Light/Spot.cpp
 
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/Node.cpp
@@ -20,6 +16,7 @@ set(SRC
     ${SRCROOT}/ResourceManager.cpp
 
     ${SRCROOT}/Render/Camera.cpp
+    ${SRCROOT}/Render/Light.cpp
     ${SRCROOT}/Render/Material.cpp
     ${SRCROOT}/Render/Mesh.cpp
     ${SRCROOT}/Render/Queue.cpp
@@ -120,16 +117,12 @@ set(INC
     ${INCROOT}/ResourceManager.hpp
     ${INCROOT}/ResourceManager.inl
 
+    ${INCROOT}/Builder/Light.hpp
+    ${INCROOT}/Builder/Light.inl
     ${INCROOT}/Builder/Material.hpp
     ${INCROOT}/Builder/Material.inl
     ${INCROOT}/Builder/Mesh.hpp
     ${INCROOT}/Builder/Mesh.inl
-
-    ${INCROOT}/Light/Directional.hpp
-    ${INCROOT}/Light/Light.hpp
-    ${INCROOT}/Light/Light.inl
-    ${INCROOT}/Light/Point.hpp
-    ${INCROOT}/Light/Spot.hpp
 
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl
@@ -138,6 +131,8 @@ set(INC
 
     ${INCROOT}/Render/Camera.hpp
     ${INCROOT}/Render/Camera.inl
+    ${INCROOT}/Render/Light.hpp
+    ${INCROOT}/Render/Light.inl
     ${INCROOT}/Render/Material.hpp
     ${INCROOT}/Render/Material.inl
     ${INCROOT}/Render/Mesh.hpp

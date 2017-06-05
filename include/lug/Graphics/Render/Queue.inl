@@ -7,7 +7,7 @@ inline std::size_t Queue::getMeshsNb() const {
     return _meshsNb;
 }
 
-inline const std::vector<Light::Light*>& Queue::getLights() const {
+inline const std::vector<Render::Light*>& Queue::getLights() const {
     return _lights;
 
 }
