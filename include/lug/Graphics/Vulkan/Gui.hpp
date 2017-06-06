@@ -39,6 +39,8 @@ private:
 
     const API::Queue* _presentQueue{ nullptr };
     const API::QueueFamily* _presentQueueFamily{ nullptr };
+    const API::Queue* _transferQueue{ nullptr };
+    const API::QueueFamily* _transferQueueFamily{ nullptr };
 
     API::CommandPool _commandPool{};
     std::vector<Vulkan::API::CommandBuffer> _commandBuffers;
@@ -51,6 +53,11 @@ private:
 
     std::vector<int> _vertexCounts;
     std::vector<int> _indexCounts;
+
+    std::unique_ptr<API::Image> _image;
+    std::unique_ptr<API::ImageView> _imageView;
+
+    API::Buffer _stagingBuffer;
 
 };
 
