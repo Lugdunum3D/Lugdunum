@@ -29,8 +29,8 @@ public:
     bool init(const std::vector<std::unique_ptr<API::ImageView>>& imageViews);
     void initKeyMapping();
     bool initFontsTexture();
-    bool initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews);
     bool initPipeline();
+    bool initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews);
 
 
 private:
@@ -58,7 +58,14 @@ private:
     std::unique_ptr<API::ImageView> _imageView;
 
     API::Buffer _stagingBuffer;
+    API::DeviceMemory _deviceMemory;
 
+    API::Fence _fence; // This one shouldn't be here
+
+    VkSampler _sampler;
+
+    std::vector<Vulkan::API::Semaphore> _guiSemaphores;
+    std::vector<Vulkan::API::Fence> _guiFences;
 };
 
 } // Vulkan

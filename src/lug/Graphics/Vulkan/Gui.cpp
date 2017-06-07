@@ -7,6 +7,8 @@
 #include <lug\Graphics\Vulkan\API\Builder\ImageView.hpp>
 #include <lug\Graphics\Vulkan\API\Builder\Image.hpp>
 #include <lug\Graphics\Vulkan\API\Builder\Buffer.hpp>
+#include <lug\Graphics\Vulkan\API\Builder\Fence.hpp>
+#include <lug\Graphics\Vulkan\API\Builder\Semaphore.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -189,21 +191,21 @@ bool Gui::initFontsTexture() {
             }
         }
 
-        // # # # OLD
-        auto& requirements = _stagingBuffer.getRequirements();
-        uint32_t memoryTypeIndex = API::DeviceMemory::findMemoryType(device, requirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-        auto fontsTextureDeviceMemory = API::DeviceMemory::allocate(device, requirements.size, memoryTypeIndex);
-        if (!fontsTextureDeviceMemory) {
-            LUG_LOG.error("GUI: Can't allocate device memory");
+        API::Builder::DeviceMemory deviceMemoryBuilder(device);
+        deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+        deviceMemoryBuilder.addBuffer(_stagingBuffer);
+
+        VkResult result{ VK_SUCCESS };
+        if (!deviceMemoryBuilder.build(_deviceMemory, &result)) {
+            LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer device memory: {}", result);
             return false;
         }
 
-        _stagingBuffer.bindMemory(fontsTextureDeviceMemory.get());
         _stagingBuffer.updateData(fontData, (uint32_t)uploadSize);
 
         // Copy buffer data to font image
         {
-            auto commandBuffer = transfertQueue->getCommandPool().createCommandBuffers();
+            auto& commandBuffer = _commandBuffers[0];
 
             VkFence fence;
             VkFenceCreateInfo createInfo{
@@ -213,16 +215,31 @@ bool Gui::initFontsTexture() {
             };
             VkResult result = vkCreateFence(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &fence);
             if (result != VK_SUCCESS) {
-                LUG_LOG.error("GUI: Can't create swapchain fence: {}", result);
+                LUG_LOG.error("Gui::initFontsTexture: Can't create swapchain fence: {}", result);
                 return false;
             }
-            auto _fence = Vulkan::API::Fence(fence, &_renderer.getDevice());
+            API::Builder::Fence fenceBuilder(device);
+            fenceBuilder.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
 
-            commandBuffer[0].begin();
+            if (!fenceBuilder.build(_fence, &result)) {
+                LUG_LOG.error("Gui::initFontsTexture: Can't create swapchain fence: {}", result);
+                return false;
+            }
+
+            _commandBuffers[0].begin();
+
             // Prepare for transfer
-            _image->changeLayout(commandBuffer[0], 0, VK_ACCESS_TRANSFER_WRITE_BIT,
-                VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                VK_PIPELINE_STAGE_HOST_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
+            {
+                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
+                pipelineBarrier.imageMemoryBarriers.resize(1);
+                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
+                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].image = _image.get();
+
+                _commandBuffers[0].pipelineBarrier(pipelineBarrier);
+            }
 
             // Copy
             VkBufferImageCopy bufferCopyRegion = {};
@@ -233,8 +250,8 @@ bool Gui::initFontsTexture() {
             bufferCopyRegion.imageExtent.depth = 1;
 
             vkCmdCopyBufferToImage(
-                static_cast<VkCommandBuffer>(commandBuffer[0]),
-                static_cast<VkBuffer>(*stagingBuffer),
+                static_cast<VkCommandBuffer>(_commandBuffers[0]),
+                static_cast<VkBuffer>(_stagingBuffer),
                 static_cast<VkImage>(*_image),
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 1,
@@ -242,36 +259,89 @@ bool Gui::initFontsTexture() {
             );
 
             // Prepare for shader read
-            _image->changeLayout(commandBuffer[0], VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT,
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
+            {
+                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
+                pipelineBarrier.imageMemoryBarriers.resize(1);
+                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].image = _image.get();
 
-            commandBuffer[0].end();
-            if (transfertQueue->submit(commandBuffer[0], {}, {}, {}, fence) == false) {
-                LUG_LOG.error("GUI: Can't submit commandBuffer");
+                _commandBuffers[0].pipelineBarrier(pipelineBarrier);
+            }
+
+            _commandBuffers[0].end();
+            if (_transferQueue->submit(_commandBuffers[0], {}, {}, {}, fence) == false) {
+                LUG_LOG.error("Gui::initFontsTexture: Can't submit commandBuffer");
                 return false;
             }
 
             // TODO : set a define for the fence timeout
             if (!_fence.wait()) {
-                LUG_LOG.error("Gui: Can't vkWaitForFences");
+                LUG_LOG.error("Gui::initFontsTexture: Can't vkWaitForFences");
                 return false;
             }
 
             _fence.destroy();
-            commandBuffer[0].destroy();
-            stagingBuffer->destroy();
+            _commandBuffers[0].destroy();
+            _stagingBuffer.destroy();
+            _deviceMemory.destroy();
+        }
+    }
+
+    // Font texture Sampler
+    {
+    VkSamplerCreateInfo samplerInfo = {};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.pNext = nullptr;
+    samplerInfo.flags = 0;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+    samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+
+    vkCreateSampler(static_cast<VkDevice>(_renderer.getDevice()), &samplerInfo, nullptr, &_sampler);
+    }
+
+    _guiSemaphores.resize(3);
+    _guiFences.resize(3);
+    for (int i = 0; i < 3; i++) {
+        {
+            API::Builder::Semaphore semaphoreBuilder(device);
+
+            VkResult result;
+            if (!semaphoreBuilder.build(_guiSemaphores[i], &result)) {
+                LUG_LOG.error("Gui::initFontsTexture: Can't create semaphore: {}", result);
+                return false;
+            }
+        }
+
+        {
+            API::Builder::Fence fenceBuilder(device);
+            fenceBuilder.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
+
+            VkResult result;
+            if (!fenceBuilder.build(_guiFences[i], &result)) {
+                LUG_LOG.error("Gui::initFontsTexture: Can't create fence: {}", result);
+                return false;
+            }
         }
     }
 
     return true;
 }
 
-bool Gui::initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>>& /*imageViews*/) {
+bool Gui::initPipeline() {
+    API::Device &device = _renderer.getDevice();
+
     return false;
 }
 
-bool Gui::initPipeline() {
+bool Gui::initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>>& /*imageViews*/) {
     return false;
 }
 
