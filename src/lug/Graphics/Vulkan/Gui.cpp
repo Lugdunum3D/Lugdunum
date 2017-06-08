@@ -1,14 +1,23 @@
+#include <lug/Graphics/Vulkan/Gui.hpp>
+
 #include <imgui.h>
 
-#include <lug\Graphics\Vulkan\Gui.hpp>
-#include <lug\Graphics\Vulkan\API\Builder\CommandBuffer.hpp>
-#include <lug\Graphics\Vulkan\API\Builder\CommandPool.hpp>
-#include <lug\Graphics\Vulkan\API\Builder\DeviceMemory.hpp>
-#include <lug\Graphics\Vulkan\API\Builder\ImageView.hpp>
-#include <lug\Graphics\Vulkan\API\Builder\Image.hpp>
-#include <lug\Graphics\Vulkan\API\Builder\Buffer.hpp>
-#include <lug\Graphics\Vulkan\API\Builder\Fence.hpp>
-#include <lug\Graphics\Vulkan\API\Builder\Semaphore.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DescriptorPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DescriptorSet.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DescriptorSetLayout.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Fence.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Framebuffer.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/GraphicsPipeline.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Image.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Sampler.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -17,11 +26,9 @@ namespace Vulkan {
 Gui::Gui(Renderer & renderer, Render::Window & window) : _renderer(renderer), _window(window) {
 }
 
-Gui::~Gui() {
-    //vkDestroySampler(static_cast<VkDevice>(_renderer.getDevice()), _sampler, nullptr);
-}
+Gui::~Gui() {}
 
-bool Gui::init(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
+bool Gui::init(const std::vector<API::ImageView>& imageViews) {
     ImGuiIO& io = ImGui::GetIO();
 
     initKeyMapping();
@@ -53,9 +60,13 @@ bool Gui::init(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
         }
     }
     API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _commandPool);
+    commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
     // Command buffers
     {
+        // Create command buffers
+        _commandBuffers.resize(imageViews.size()); // The builder will build according to the array size.
+
         VkResult result{ VK_SUCCESS };
         if (!commandBufferBuilder.build(_commandBuffers, &result)) {
             LUG_LOG.error("Gui::init: Can't create the command buffer: {}", result);
@@ -67,7 +78,7 @@ bool Gui::init(const std::vector<std::unique_ptr<API::ImageView>>& imageViews) {
     _vertexBuffers.resize(imageViews.size());
     _vertexDeviceMemories.resize(imageViews.size());
     _indexDeviceMemories.resize(imageViews.size());
-    _vertexCounts.resize(imageViews.size()); // NOTE: These might be unecessary as we might be able to retrieve their size 
+    _vertexCounts.resize(imageViews.size()); // NOTE: These might be unecessary as we might be able to retrieve their size
     _indexCounts.resize(imageViews.size()); // NOTE: "  "
 
     return initFontsTexture() && initPipeline() && initFramebuffers(imageViews);
@@ -111,12 +122,7 @@ bool Gui::initFontsTexture() {
 
     // Get transfer queue family and retrieve the first queue
     {
-        _transferQueueFamily = device.getQueueFamily(VK_QUEUE_TRANSFER_BIT);
-        if (!_transferQueueFamily) {
-            LUG_LOG.error("Gui::initFontsTexture: Can't find VK_QUEUE_TRANSFER_BIT queue family");
-            return false;
-        }
-        _transferQueue = &_transferQueueFamily->getQueues().front();
+        _transferQueue = device.getQueue("queue_transfer");
         if (!_transferQueue) {
             LUG_LOG.error("Gui::initFontsTexture: Can't find transfer queue");
             return false;
@@ -145,13 +151,19 @@ bool Gui::initFontsTexture() {
 
         {
             VkResult result{ VK_SUCCESS };
-            if (!imageBuilder.build(*_image, &result)) {
+            if (!imageBuilder.build(_fontImage, &result)) {
                 LUG_LOG.error("Gui::initFontsTexture: Can't create depth buffer image: {}", result);
                 return false;
             }
-
-            if (!deviceMemoryBuilder.addImage(*_image)) {
+            result = VK_SUCCESS;
+            if (!deviceMemoryBuilder.addImage(_fontImage)) {
                 LUG_LOG.error("Gui::initFontsTexture: Can't add image to device memory");
+                return false;
+            }
+
+            result = VK_SUCCESS;
+            if (!deviceMemoryBuilder.build(_fontDeviceMemory, &result)) {
+                LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer device memory: {}", result);
                 return false;
             }
         }
@@ -159,13 +171,13 @@ bool Gui::initFontsTexture() {
 
     // Create FontsTexture image view
     {
-        API::Builder::ImageView imageViewBuilder(device, *_image);
+        API::Builder::ImageView imageViewBuilder(device, _fontImage);
 
-        imageViewBuilder.setFormat(_image->getFormat());
+        imageViewBuilder.setFormat(_fontImage.getFormat());
         imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
 
         VkResult result{ VK_SUCCESS };
-        if (!imageViewBuilder.build(*_imageView, &result)) {
+        if (!imageViewBuilder.build(_fontImageView, &result)) {
             LUG_LOG.error("Gui::initFontsTexture: Can't create image view: {}", result);
             return false;
         }
@@ -173,9 +185,10 @@ bool Gui::initFontsTexture() {
 
     // Create staging buffers for font data upload
     {
-        // # # # NEW
-        std::set<uint32_t> queueFamilyIndices = { (uint32_t)_transferQueueFamily->getIdx() };
-        
+        API::Buffer stagingBuffer;
+        API::DeviceMemory stagingBufferMemory;
+        std::set<uint32_t> queueFamilyIndices = { _transferQueue->getQueueFamily()->getIdx() };
+
         // Create staging buffer
         {
             API::Builder::Buffer bufferBuilder(device);
@@ -185,7 +198,7 @@ bool Gui::initFontsTexture() {
             bufferBuilder.setExclusive(VK_SHARING_MODE_EXCLUSIVE);
 
             VkResult result{ VK_SUCCESS };
-            if (!bufferBuilder.build(_stagingBuffer, &result)) {
+            if (!bufferBuilder.build(stagingBuffer, &result)) {
                 LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer: {}", result);
                 return false;
             }
@@ -193,37 +206,27 @@ bool Gui::initFontsTexture() {
 
         API::Builder::DeviceMemory deviceMemoryBuilder(device);
         deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-        deviceMemoryBuilder.addBuffer(_stagingBuffer);
+        deviceMemoryBuilder.addBuffer(stagingBuffer);
 
         VkResult result{ VK_SUCCESS };
-        if (!deviceMemoryBuilder.build(_deviceMemory, &result)) {
+        if (!deviceMemoryBuilder.build(stagingBufferMemory, &result)) {
             LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer device memory: {}", result);
             return false;
         }
 
-        _stagingBuffer.updateData(fontData, (uint32_t)uploadSize);
+        stagingBuffer.updateData(fontData, (uint32_t)uploadSize);
 
         // Copy buffer data to font image
         {
-            auto& commandBuffer = _commandBuffers[0];
+            // Create fence
+            API::Fence fence;
+            {
+                API::Builder::Fence fenceBuilder(device);
 
-            VkFence fence;
-            VkFenceCreateInfo createInfo{
-                createInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-                createInfo.pNext = nullptr,
-                createInfo.flags = 0
-            };
-            VkResult result = vkCreateFence(static_cast<VkDevice>(_renderer.getDevice()), &createInfo, nullptr, &fence);
-            if (result != VK_SUCCESS) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't create swapchain fence: {}", result);
-                return false;
-            }
-            API::Builder::Fence fenceBuilder(device);
-            fenceBuilder.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
-
-            if (!fenceBuilder.build(_fence, &result)) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't create swapchain fence: {}", result);
-                return false;
+                if (!fenceBuilder.build(fence, &result)) {
+                    LUG_LOG.error("Gui::initFontsTexture: Can't create swapchain fence: {}", result);
+                    return false;
+                }
             }
 
             _commandBuffers[0].begin();
@@ -236,7 +239,7 @@ bool Gui::initFontsTexture() {
                 pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
                 pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = _image.get();
+                pipelineBarrier.imageMemoryBarriers[0].image = &_fontImage;
 
                 _commandBuffers[0].pipelineBarrier(pipelineBarrier);
             }
@@ -251,8 +254,8 @@ bool Gui::initFontsTexture() {
 
             vkCmdCopyBufferToImage(
                 static_cast<VkCommandBuffer>(_commandBuffers[0]),
-                static_cast<VkBuffer>(_stagingBuffer),
-                static_cast<VkImage>(*_image),
+                static_cast<VkBuffer>(stagingBuffer),
+                static_cast<VkImage>(_fontImage),
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 1,
                 &bufferCopyRegion
@@ -266,45 +269,43 @@ bool Gui::initFontsTexture() {
                 pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = _image.get();
+                pipelineBarrier.imageMemoryBarriers[0].image = &_fontImage;
 
                 _commandBuffers[0].pipelineBarrier(pipelineBarrier);
             }
 
             _commandBuffers[0].end();
-            if (_transferQueue->submit(_commandBuffers[0], {}, {}, {}, fence) == false) {
+            if (_transferQueue->submit(_commandBuffers[0], {}, {}, {}, static_cast<VkFence>(fence)) == false) {
                 LUG_LOG.error("Gui::initFontsTexture: Can't submit commandBuffer");
                 return false;
             }
 
             // TODO : set a define for the fence timeout
-            if (!_fence.wait()) {
+            if (!fence.wait()) {
                 LUG_LOG.error("Gui::initFontsTexture: Can't vkWaitForFences");
                 return false;
             }
 
-            _fence.destroy();
-            _commandBuffers[0].destroy();
-            _stagingBuffer.destroy();
-            _deviceMemory.destroy();
+            fence.destroy();
+            stagingBuffer.destroy();
+            stagingBufferMemory.destroy();
         }
     }
 
     // Font texture Sampler
     {
-    VkSamplerCreateInfo samplerInfo = {};
-    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-    samplerInfo.pNext = nullptr;
-    samplerInfo.flags = 0;
-    samplerInfo.magFilter = VK_FILTER_LINEAR;
-    samplerInfo.minFilter = VK_FILTER_LINEAR;
-    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+        API::Builder::Sampler samplerBuilder(device);
 
-    vkCreateSampler(static_cast<VkDevice>(_renderer.getDevice()), &samplerInfo, nullptr, &_sampler);
+        samplerBuilder.setAddressModeU(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+        samplerBuilder.setAddressModeV(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+        samplerBuilder.setAddressModeW(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+        samplerBuilder.setBorderColor(VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
+
+        VkResult result{ VK_SUCCESS };
+        if (!samplerBuilder.build(_fontSampler, &result)) {
+            LUG_LOG.error("Gui::initFontsTexture: Can't create image view: {}", result);
+            return false;
+        }
     }
 
     _guiSemaphores.resize(3);
@@ -338,12 +339,514 @@ bool Gui::initFontsTexture() {
 bool Gui::initPipeline() {
     API::Device &device = _renderer.getDevice();
 
-    return false;
+    API::Builder::GraphicsPipeline graphicsPipelineBuilder(_renderer.getDevice());
+
+    // Set shaders state
+    if (!graphicsPipelineBuilder.setShaderFromFile(VK_SHADER_STAGE_VERTEX_BIT, "main", _renderer.getInfo().shadersRoot + "gui.vert.spv")
+        || !graphicsPipelineBuilder.setShaderFromFile(VK_SHADER_STAGE_FRAGMENT_BIT, "main", _renderer.getInfo().shadersRoot + "gui.frag.spv")) {
+        LUG_LOG.error("ForwardRenderer: Can't create pipeline's shaders.");
+        return false;
+    }
+
+    // Set vertex input state
+    auto vertexBinding = graphicsPipelineBuilder.addInputBinding(sizeof(ImDrawVert), VK_VERTEX_INPUT_RATE_VERTEX);
+
+    vertexBinding.addAttributes(VK_FORMAT_R32G32B32_SFLOAT, offsetof(ImDrawVert, pos)); // Position
+    vertexBinding.addAttributes(VK_FORMAT_R32G32_SFLOAT, offsetof(ImDrawVert, uv)); // UV
+    vertexBinding.addAttributes(VK_FORMAT_R8G8B8A8_UNORM, offsetof(ImDrawVert, col)); // Color
+
+    // Set viewport state
+    const VkViewport viewport{
+        /* viewport.x */ 0.0f,
+        /* viewport.y */ 0.0f,
+        /* viewport.width */ 0.0f,
+        /* viewport.height */ 0.0f,
+        /* viewport.minDepth */ 0.0f,
+        /* viewport.maxDepth */ 1.0f,
+    };
+
+    const VkRect2D scissor{
+        /* scissor.offset */{ 0, 0 },
+        /* scissor.extent */{ 0, 0 }
+    };
+
+    auto viewportState = graphicsPipelineBuilder.getViewportState();
+    viewportState.addViewport(viewport);
+    viewportState.addScissor(scissor);
+
+    // Set rasterization state
+    auto rasterizationState = graphicsPipelineBuilder.getRasterizationState();
+    rasterizationState.setCullMode(VK_CULL_MODE_NONE);
+
+    // Set depth stencil state
+    auto depthStencilState = graphicsPipelineBuilder.getDepthStencilState();
+
+    // Set color blend state
+    const VkPipelineColorBlendAttachmentState colorBlendAttachment{
+        /* colorBlendAttachment.blendEnable */ VK_TRUE,
+        /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_SRC_ALPHA,
+        /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+        /* colorBlendAttachment.colorBlendOp */ VK_BLEND_OP_ADD,
+        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+        /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
+        /* colorBlendAttachment.alphaBlendOp */ VK_BLEND_OP_ADD,
+        /* colorBlendAttachment.colorWriteMask */ VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
+    };
+
+    auto colorBlendState = graphicsPipelineBuilder.getColorBlendState();
+    colorBlendState.addAttachment(colorBlendAttachment);
+
+    // Set dynamic states
+    graphicsPipelineBuilder.setDynamicStates({
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
+    });
+
+    std::vector<Vulkan::API::DescriptorSetLayout> descriptorSetLayouts;
+    {
+        // creating descriptor pool
+        {
+            API::Builder::DescriptorPool descriptorPoolBuilder(device);
+
+            // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
+            descriptorPoolBuilder.setFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
+
+            // Only ForwardRenderTechnique has 1 descriptor sets (for lights) and 1 (for the camera)
+            descriptorPoolBuilder.setMaxSets(1);
+
+            VkDescriptorPoolSize poolSize{
+                // Dynamic uniform buffers descriptors (1 for camera and 1 for lights in ForwardRenderTechnique)
+                poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                poolSize.descriptorCount = 1
+            };
+            descriptorPoolBuilder.setPoolSizes({ poolSize });
+
+            VkResult result{ VK_SUCCESS };
+            if (!descriptorPoolBuilder.build(_descriptorPool, &result)) {
+                LUG_LOG.error("Gui::initPipeline: Can't create the descriptor pool: {}", result);
+                return false;
+            }
+        }
+
+        // descriptorSetLayout
+        {
+            API::Builder::DescriptorSetLayout descriptorSetLayoutBuilder(device);
+
+            // Camera uniform buffer
+            const VkDescriptorSetLayoutBinding binding{
+                /* binding.binding */ 0,
+                /* binding.descriptorType */ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                /* binding.descriptorCount */ 1,
+                /* binding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
+                /* binding.pImmutableSamplers */ nullptr
+            };
+
+            descriptorSetLayoutBuilder.setBindings({ binding });
+
+            // create descriptor set
+            VkResult result{ VK_SUCCESS };
+            descriptorSetLayouts.resize(1);
+            if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[0], &result)) {
+                LUG_LOG.error("Gui::initPipeline: Can't create pipeline descriptor: {}", result);
+                return false;
+            }
+        }
+
+        // Create and update descriptor set
+        {
+            API::Builder::DescriptorSet descriptorSetBuilder(device, _descriptorPool);
+            descriptorSetBuilder.setDescriptorSetLayouts({ static_cast<VkDescriptorSetLayout>(descriptorSetLayouts[0]) });
+
+            VkResult result{ VK_SUCCESS };
+            if (!descriptorSetBuilder.build(_descriptorSet, &result)) {
+                LUG_LOG.error("Gui::initPipeline: Can't create descriptor set: {}", result);
+                return nullptr;
+            }
+        }
+
+        // Update descriptor set
+        VkDescriptorImageInfo descriptorImageInfo;
+        descriptorImageInfo.sampler = static_cast<VkSampler>(_fontSampler);
+        descriptorImageInfo.imageView = static_cast<VkImageView>(_fontImageView);
+        descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+        _descriptorSet.updateImages(0, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, {descriptorImageInfo});
+
+        VkPushConstantRange pushConstant = {
+            pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+            pushConstant.offset = 0,
+            pushConstant.size = sizeof(PushConstBlock)
+        };
+
+        API::Builder::PipelineLayout pipelineLayoutBuilder(device);
+
+        pipelineLayoutBuilder.setPushConstants({ pushConstant });
+        pipelineLayoutBuilder.setDescriptorSetLayouts(std::move(descriptorSetLayouts));
+
+        VkResult result{ VK_SUCCESS };
+        _pipelineLayout.resize(1);
+        if (!pipelineLayoutBuilder.build(_pipelineLayout[0], &result)) {
+            LUG_LOG.error("Gui::initPipeline: Can't create pipeline layout: {}", result);
+            return false;
+        }
+        graphicsPipelineBuilder.setPipelineLayout(std::move(_pipelineLayout[0]));
+    }
+
+    // Set render pass
+    {
+        API::Builder::RenderPass renderPassBuilder(_renderer.getDevice());
+
+        auto colorFormat = _window.getSwapchain().getFormat().format;
+
+        const VkAttachmentDescription colorAttachment{
+            /* colorAttachment.flags */ 0,
+            /* colorAttachment.format */ colorFormat,
+            /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_LOAD,
+            /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
+            /* colorAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            /* colorAttachment.stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            /* colorAttachment.initialLayout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            /* colorAttachment.finalLayout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+        };
+
+        auto colorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
+
+        const API::Builder::RenderPass::SubpassDescription subpassDescription{
+            /* subpassDescription.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+            /* subpassDescription.inputAttachments */{},
+            /* subpassDescription.colorAttachments */{ { colorAttachmentIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL } },
+            /* subpassDescription.resolveAttachments */{},
+            /* subpassDescription.depthStencilAttachment */{},
+            /* subpassDescription.preserveAttachments */{},
+        };
+
+        renderPassBuilder.addSubpass(subpassDescription);
+
+        VkResult result{ VK_SUCCESS };
+        API::RenderPass renderPass;
+        if (!renderPassBuilder.build(renderPass, &result)) {
+            LUG_LOG.error("Gui::initPipeline: Can't create render pass: {}", result);
+            return false;
+        }
+
+        graphicsPipelineBuilder.setRenderPass(std::move(renderPass), 0);
+    }
+
+    VkResult result{ VK_SUCCESS };
+    if (!graphicsPipelineBuilder.build(_pipeline, &result)) {
+        LUG_LOG.error("Gui::initPipeline: Can't create pipeline: {}", result);
+        return false;
+    }
+
+    return true;
 }
 
-bool Gui::initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>>& /*imageViews*/) {
-    return false;
+bool Gui::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
+    // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
+    const API::RenderPass* renderPass = _pipeline.getRenderPass();
+
+    _framebuffers.resize(imageViews.size());
+    for (size_t i = 0; i < imageViews.size(); i++) {
+        // Create depth buffer image view
+        API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
+
+        framebufferBuilder.setRenderPass(renderPass);
+        framebufferBuilder.addAttachment(&imageViews[i]);
+        framebufferBuilder.setWidth(imageViews[i].getImage()->getExtent().width);
+        framebufferBuilder.setHeight(imageViews[i].getImage()->getExtent().height);
+
+        VkResult result{ VK_SUCCESS };
+        if (!framebufferBuilder.build(_framebuffers[i], &result)) {
+            LUG_LOG.error("Forward::initFramebuffers: Can't create framebuffer: {}", result);
+            return false;
+        }
+    }
+
+    return true;
 }
+
+bool Gui::beginFrame(const lug::System::Time & elapsedTime)
+{
+    ImGuiIO& io = ImGui::GetIO();
+
+    io.DeltaTime = elapsedTime.getSeconds();
+
+    io.DisplaySize = ImVec2(_window.getWidth(), _window.getHeight());
+
+    uint32_t x;
+    uint32_t y;
+    _window.getMousePos(x, y);
+    io.MousePos = ImVec2(static_cast<float>(x), static_cast<float>(y));
+
+    io.MouseDown[0] = _window.isMousePressed(lug::Window::Mouse::Button::Left);
+    io.MouseDown[1] = _window.isMousePressed(lug::Window::Mouse::Button::Right);
+    io.MouseDown[2] = _window.isMousePressed(lug::Window::Mouse::Button::Middle);
+
+    ImGui::NewFrame();
+
+    ImGui::ShowTestWindow();
+
+    return true;
+}
+
+bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t currentImageIndex)
+{
+    ImGui::Render();
+    if (!_guiFences[currentImageIndex].wait()) {
+        return false;
+    }
+    _guiFences[currentImageIndex].reset();
+    updateBuffers(currentImageIndex);
+
+    API::Device &device = _renderer.getDevice();
+
+    API::QueueFamily* graphicsQueueFamily;
+    const API::Queue* graphicsQueue;
+    // Get transfer queue family and retrieve the first queue
+    {
+        graphicsQueueFamily = device.getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
+        if (!graphicsQueueFamily) {
+            LUG_LOG.error("Gui::initFontsTexture: Can't find VK_QUEUE_GRAPHICS_BIT queue family");
+            return false;
+        }
+        graphicsQueue = &graphicsQueueFamily->getQueues().front();
+        if (!graphicsQueue) {
+            LUG_LOG.error("Gui::initFontsTexture: Can't find graphics queue");
+            return false;
+        }
+    }
+
+    _commandBuffers[currentImageIndex].reset();
+    _commandBuffers[currentImageIndex].begin();
+
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Init viewport
+    {
+        const VkViewport vkViewport{
+            /* vkViewport.x */ 0,
+            /* vkViewport.y */ 0,
+            /* vkViewport.width */ io.DisplaySize.x,
+            /* vkViewport.height */ io.DisplaySize.y,
+            /* vkViewport.minDepth */ 0.0f,
+            /* vkViewport.maxDepth */ 1.0f,
+        };
+
+        _commandBuffers[currentImageIndex].setViewport({vkViewport});
+    }
+
+    const API::RenderPass* renderPass = _pipeline.getRenderPass();
+
+    API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
+        /* beginRenderPass.framebuffer */ _framebuffers[currentImageIndex],
+        /* beginRenderPass.renderArea */{},
+        /* beginRenderPass.clearValues */{}
+    };
+
+    beginRenderPass.renderArea.offset = { 0, 0 };
+    beginRenderPass.renderArea.extent = { _window.getWidth(), _window.getHeight() };
+
+    _commandBuffers[currentImageIndex].beginRenderPass(*renderPass, beginRenderPass);
+
+    const API::CommandBuffer::CmdBindDescriptors cmdDescriptorSet{
+        /* cameraBind.pipelineLayout */ *_pipeline.getLayout(),
+        /* lightBind.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+        /* lightBind.firstSet */ 0,
+        /* lightBind.descriptorSets */{ &_descriptorSet },
+        /* lightBind.dynamicOffsets */{ },
+    };
+
+    _commandBuffers[currentImageIndex].bindDescriptorSets(cmdDescriptorSet);
+    _commandBuffers[currentImageIndex].bindPipeline(_pipeline);
+
+    _commandBuffers[currentImageIndex].bindVertexBuffers({&_vertexBuffers[currentImageIndex]}, {0});
+    _commandBuffers[currentImageIndex].bindIndexBuffer(_indexBuffers[currentImageIndex], VK_INDEX_TYPE_UINT16);
+
+    // UI scale and translate via push constants
+    PushConstBlock pushConstants{
+        /* pushConstants.scale */ {2.0f / io.DisplaySize.x, 2.0f / io.DisplaySize.y},
+        /* pushConstants.translate */ {-1.0f, -1.0f}
+    };
+    const API::CommandBuffer::CmdPushConstants cmdPushConstants{
+        /* cmdPushConstants.layout */ static_cast<VkPipelineLayout>(*_pipeline.getLayout()),
+        /* cmdPushConstants.stageFlags */ VK_SHADER_STAGE_VERTEX_BIT,
+        /* cmdPushConstants.offset */ 0,
+        /* cmdPushConstants.size */ sizeof(pushConstants),
+        /* cmdPushConstants.values */ &pushConstants
+    };
+    _commandBuffers[currentImageIndex].pushConstants(cmdPushConstants);
+
+    // Render commands
+    ImDrawData* imDrawData = ImGui::GetDrawData();
+
+    uint32_t vertexCount = 0;
+    uint32_t indexCount = 0;
+
+    for (int32_t i = 0; i < imDrawData->CmdListsCount; i++) {
+        const ImDrawList* cmd_list = imDrawData->CmdLists[i];
+        for (int32_t j = 0; j < cmd_list->CmdBuffer.Size; j++) {
+            const ImDrawCmd* pcmd = &cmd_list->CmdBuffer[j];
+
+            const VkRect2D scissor{
+                /* scissor.offset */ {
+                    std::max(static_cast<int32_t>(pcmd->ClipRect.x), 0),
+                    std::max(static_cast<int32_t>(pcmd->ClipRect.y), 0)},
+                /* scissor.extent */ {
+                    static_cast<uint32_t>(pcmd->ClipRect.z - pcmd->ClipRect.x),
+                    static_cast<uint32_t>(pcmd->ClipRect.w - pcmd->ClipRect.y)
+                }
+            };
+            _commandBuffers[currentImageIndex].setScissor({scissor});
+
+            const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
+                /* cmdDrawIndexed.indexCount */ pcmd->ElemCount,
+                /* cmdDrawIndexed.instanceCount */ 1,
+                /* cmdDrawIndexed.firstIndex */ indexCount,
+                /* cmdDrawIndexed.vertexOffset */ vertexCount,
+                /* cmdDrawIndexed.firstInstance */ 0
+            };
+            _commandBuffers[currentImageIndex].drawIndexed(cmdDrawIndexed);
+
+            indexCount += pcmd->ElemCount;
+        }
+        vertexCount += cmd_list->VtxBuffer.Size;
+    }
+
+    _commandBuffers[currentImageIndex].endRenderPass();
+    _commandBuffers[currentImageIndex].end();
+
+    std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+    if (graphicsQueue->submit(_commandBuffers[currentImageIndex], { static_cast<VkSemaphore>(_guiSemaphores[currentImageIndex]) }, waitSemaphores, waitDstStageMasks, static_cast<VkFence>(_guiFences[currentImageIndex])) == false) {
+        LUG_LOG.error("GUI: Can't submit commandBuffer");
+        return false;
+    }
+
+    return true;
+}
+
+void Gui::processEvents(lug::Window::Event event) {
+    ImGuiIO& io = ImGui::GetIO();
+    switch (event.type) {
+    case (lug::Window::Event::Type::KeyPressed):
+    case (lug::Window::Event::Type::KeyReleased):
+        io.KeysDown[static_cast<int>(event.key.code)] = (event.type == lug::Window::Event::Type::KeyPressed) ? true : false;
+
+        io.KeyCtrl = static_cast<int>(event.key.ctrl);
+        io.KeyShift = static_cast<int>(event.key.shift);
+        io.KeyAlt = static_cast<int>(event.key.alt);
+        io.KeySuper = static_cast<int>(event.key.system);
+        break;
+    case (lug::Window::Event::Type::CharEntered):
+        if (event.character.val > 0 && event.character.val < 0x10000) {
+            io.AddInputCharacter(static_cast<unsigned short>(event.character.val));
+        }
+        break;
+    }
+}
+
+const Vulkan::API::Semaphore & Gui::getGuiSemaphore(uint32_t currentImageIndex) const
+{
+    return _guiSemaphores[currentImageIndex];
+}
+
+void Gui::updateBuffers(uint32_t currentImageIndex)
+{
+    ImDrawData* imDrawData = ImGui::GetDrawData();
+    if (!imDrawData) {
+        return;
+    }
+    API::Device &device = _renderer.getDevice();
+
+    // Note: Alignment is done inside buffer creation
+    VkDeviceSize vertexBufferSize = imDrawData->TotalVtxCount * sizeof(ImDrawVert);
+    VkDeviceSize indexBufferSize = imDrawData->TotalIdxCount * sizeof(ImDrawIdx);
+
+    // Update buffers only if vertex or index count has been changed compared to current buffer size
+    {
+        // Vertex buffer
+        if ((static_cast<VkBuffer>(_vertexBuffers[currentImageIndex]) == VK_NULL_HANDLE) || (_vertexCounts[currentImageIndex] != imDrawData->TotalVtxCount)) {
+            {
+                // Create Vertex buffer
+                {
+                    API::Builder::Buffer bufferBuilder(device);
+                    bufferBuilder.setQueueFamilyIndices({ _transferQueue->getQueueFamily()->getIdx() });
+                    bufferBuilder.setSize(vertexBufferSize);
+                    bufferBuilder.setUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+
+                    VkResult result{ VK_SUCCESS };
+                    if (!bufferBuilder.build(_vertexBuffers[currentImageIndex], &result)) {
+                        LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer: {}", result);
+                        return ;
+                    }
+                }
+
+                API::Builder::DeviceMemory deviceMemoryBuilder(device);
+                deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+                deviceMemoryBuilder.addBuffer(_vertexBuffers[currentImageIndex]);
+
+                VkResult result{ VK_SUCCESS };
+                if (!deviceMemoryBuilder.build(_vertexDeviceMemories[currentImageIndex], &result)) {
+                    LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer device memory: {}", result);
+                    return ;
+                }
+            }
+
+            _vertexCounts[currentImageIndex] = imDrawData->TotalVtxCount;
+        }
+
+        // IndexBuffer
+        if ((static_cast<VkBuffer>(_indexBuffers[currentImageIndex]) == VK_NULL_HANDLE) || (_indexCounts[currentImageIndex] < imDrawData->TotalIdxCount)) {
+            {
+                // Create Index buffer
+                {
+                    API::Builder::Buffer bufferBuilder(device);
+                    bufferBuilder.setQueueFamilyIndices({ _transferQueue->getQueueFamily()->getIdx() });
+                    bufferBuilder.setSize(indexBufferSize);
+                    bufferBuilder.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+
+                    VkResult result{ VK_SUCCESS };
+                    if (!bufferBuilder.build(_indexBuffers[currentImageIndex], &result)) {
+                        LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer: {}", result);
+                        return;
+                    }
+                }
+
+                API::Builder::DeviceMemory deviceMemoryBuilder(device);
+                deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+                deviceMemoryBuilder.addBuffer(_indexBuffers[currentImageIndex]);
+
+                VkResult result{ VK_SUCCESS };
+                if (!deviceMemoryBuilder.build(_indexDeviceMemories[currentImageIndex], &result)) {
+                    LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer device memory: {}", result);
+                    return;
+                }
+            }
+
+            _indexCounts[currentImageIndex] = imDrawData->TotalVtxCount;
+        }
+    }
+
+
+
+
+    // Upload data
+    {
+        ImDrawIdx* idxDst = (ImDrawIdx*)_indexDeviceMemories[currentImageIndex].mapBuffer(_indexBuffers[currentImageIndex]);
+        ImDrawVert* vtxDst = (ImDrawVert*)_vertexDeviceMemories[currentImageIndex].mapBuffer(_vertexBuffers[currentImageIndex]);
+
+        for (int n = 0; n < imDrawData->CmdListsCount; n++) {
+            const ImDrawList* cmd_list = imDrawData->CmdLists[n];
+            memcpy(vtxDst, cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
+            memcpy(idxDst, cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
+            vtxDst += cmd_list->VtxBuffer.Size;
+            idxDst += cmd_list->IdxBuffer.Size;
+        }
+
+        _vertexDeviceMemories[currentImageIndex].unmap();
+        _indexDeviceMemories[currentImageIndex].unmap();
+    }
+    }
 
 } // Vulkan
 } // Graphics

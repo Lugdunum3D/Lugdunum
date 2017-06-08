@@ -1,5 +1,6 @@
 #pragma once
 
+#define NOMINMAX
 #include <algorithm>
 #include <memory>
 #include <set>

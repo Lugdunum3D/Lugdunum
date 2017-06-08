@@ -9,10 +9,11 @@ namespace Vulkan {
 namespace API {
 
 class CommandBuffer;
+class QueueFamily;
 
 class LUG_GRAPHICS_API Queue {
 public:
-    explicit Queue(VkQueue queue = VK_NULL_HANDLE);
+    explicit Queue(VkQueue queue = VK_NULL_HANDLE, const QueueFamily* queueFamily = nullptr);
 
     Queue(const Queue&) = delete;
     Queue(Queue&& queue);
@@ -35,8 +36,12 @@ public:
 
     bool waitIdle() const;
 
+    const QueueFamily* getQueueFamily() const;
+
 private:
     VkQueue _queue{VK_NULL_HANDLE};
+
+    const QueueFamily* _queueFamily{nullptr};
 };
 
 } // API

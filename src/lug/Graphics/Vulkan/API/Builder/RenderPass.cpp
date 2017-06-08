@@ -20,6 +20,10 @@ RenderPass::AttachmentIndex RenderPass::addAttachment(const VkAttachmentDescript
 
 RenderPass::SubpassIndex RenderPass::addSubpass(const RenderPass::SubpassDescription& subpassDescription) {
     const auto findIndexAttachment = [this](RenderPass::AttachmentIndex idx) {
+        if (idx == nullptr) {
+            return VK_ATTACHMENT_UNUSED;
+        }
+
         uint32_t i = 0;
 
         for (const auto& attachment : _attachments) {

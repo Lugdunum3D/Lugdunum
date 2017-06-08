@@ -20,6 +20,7 @@ class QueueFamily;
 } // API
 
 class Renderer;
+class Gui;
 
 namespace Render {
 
@@ -51,7 +52,7 @@ public:
 
     bool pollEvent(lug::Window::Event&) override;
 
-    bool beginFrame() override final;
+    bool beginFrame(const lug::System::Time &elapsedTime) override final;
     bool endFrame() override final;
 
     const API::Swapchain& getSwapchain() const;
@@ -73,6 +74,7 @@ private:
     bool initDescriptorPool();
     bool initSurface();
     bool initSwapchainCapabilities();
+    bool initGui();
     bool initPresentQueue();
     bool initSwapchain();
     bool initFramesData();
@@ -96,6 +98,8 @@ private:
     std::vector<AcquireImageData> _acquireImageDatas;
 
     API::CommandPool _commandPool{};
+
+    std::unique_ptr<lug::Graphics::Vulkan::Gui>   _guiInstance;
 };
 
 #include <lug/Graphics/Vulkan/Render/Window.inl>

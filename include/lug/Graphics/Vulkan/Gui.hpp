@@ -2,6 +2,11 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
+#include <lug/System/Time.hpp>
+#include <lug/Graphics/Vulkan/API/Fence.hpp>
+#include <lug/Graphics/Vulkan/API/DescriptorSet.hpp>
+#include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
+#include <lug/Graphics/Vulkan/API/Sampler.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -13,7 +18,8 @@ public:
     struct PushConstBlock {
         lug::Math::Vec2f scale;
         lug::Math::Vec2f translate;
-    } pushConstBlock;
+    };
+
 public:
     Gui() = delete;
 
@@ -26,12 +32,21 @@ public:
 
     ~Gui();
 
-    bool init(const std::vector<std::unique_ptr<API::ImageView>>& imageViews);
+    bool init(const std::vector<API::ImageView>& imageViews);
     void initKeyMapping();
     bool initFontsTexture();
     bool initPipeline();
-    bool initFramebuffers(const std::vector<std::unique_ptr<API::ImageView>>& imageViews);
+    bool initFramebuffers(const std::vector<API::ImageView>&);
 
+    bool beginFrame(const lug::System::Time &elapsedTime);
+    bool endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t currentImageIndex);
+
+    void processEvents(lug::Window::Event event);
+
+    const Vulkan::API::Semaphore& getGuiSemaphore(uint32_t currentImageIndex) const;
+
+private:
+    void updateBuffers(uint32_t currentImageIndex);
 
 private:
     Renderer& _renderer;
@@ -40,32 +55,34 @@ private:
     const API::Queue* _presentQueue{ nullptr };
     const API::QueueFamily* _presentQueueFamily{ nullptr };
     const API::Queue* _transferQueue{ nullptr };
-    const API::QueueFamily* _transferQueueFamily{ nullptr };
 
     API::CommandPool _commandPool{};
     std::vector<Vulkan::API::CommandBuffer> _commandBuffers;
 
-    std::vector<std::unique_ptr<Vulkan::API::DeviceMemory>> _vertexDeviceMemories;
-    std::vector<std::unique_ptr<Vulkan::API::DeviceMemory>> _indexDeviceMemories;
+    std::vector<Vulkan::API::DeviceMemory> _vertexDeviceMemories;
+    std::vector<Vulkan::API::DeviceMemory> _indexDeviceMemories;
 
-    std::vector<std::unique_ptr<Vulkan::API::Buffer>> _indexBuffers;
-    std::vector<std::unique_ptr<Vulkan::API::Buffer>> _vertexBuffers;
+    std::vector<Vulkan::API::Buffer> _indexBuffers;
+    std::vector<Vulkan::API::Buffer> _vertexBuffers;
 
     std::vector<int> _vertexCounts;
     std::vector<int> _indexCounts;
 
-    std::unique_ptr<API::Image> _image;
-    std::unique_ptr<API::ImageView> _imageView;
-
-    API::Buffer _stagingBuffer;
-    API::DeviceMemory _deviceMemory;
-
-    API::Fence _fence; // This one shouldn't be here
-
-    VkSampler _sampler;
+    API::Image _fontImage;
+    API::ImageView _fontImageView;
+    API::DeviceMemory _fontDeviceMemory;
+    API::Sampler _fontSampler;
 
     std::vector<Vulkan::API::Semaphore> _guiSemaphores;
     std::vector<Vulkan::API::Fence> _guiFences;
+
+    API::DescriptorPool _descriptorPool;
+    API::DescriptorSet _descriptorSet;
+
+    std::vector<API::PipelineLayout> _pipelineLayout;
+    API::GraphicsPipeline _pipeline;
+
+    std::vector<Vulkan::API::Framebuffer> _framebuffers;
 };
 
 } // Vulkan

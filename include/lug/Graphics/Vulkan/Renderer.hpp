@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <cstring>
 #include <memory>
 #include <unordered_map>
@@ -86,7 +85,7 @@ public:
 
     void destroy();
 
-    bool beginFrame() override final;
+    bool beginFrame(const lug::System::Time &elapsedTime) override final;
     bool endFrame() override final;
 
 private:

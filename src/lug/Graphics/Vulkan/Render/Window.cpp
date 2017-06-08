@@ -10,6 +10,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/API/Instance.hpp>
 #include <lug/System/Logger/Logger.hpp>
+#include <lug/Graphics/Vulkan/Gui.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
     #include <lug/Window/Win32/WindowImplWin32.hpp>
@@ -41,13 +42,16 @@ bool Window::pollEvent(lug::Window::Event& event) {
             }
         }
 
+        _guiInstance->processEvents(event);
+
         return true;
     }
 
     return false;
 }
 
-bool Window::beginFrame() {
+bool Window::beginFrame(const lug::System::Time &elapsedTime) {
+    _guiInstance->beginFrame(elapsedTime);
     AcquireImageData* acquireImageData = nullptr;
     // Retrieve free AcquireImageData
     {
@@ -64,7 +68,7 @@ bool Window::beginFrame() {
             if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
                 return false;
             }
-
+            _guiInstance->initFramebuffers(_swapchain.getImagesViews());
             for (auto& renderView: _renderViews) {
                 View* renderView_ = static_cast<View*>(renderView.get());
 
@@ -135,11 +139,13 @@ bool Window::endFrame() {
     }
     std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
-    return _presentQueue->submit(
+    return _guiInstance->endFrame(waitSemaphores, _currentImageIndex)
+        && _presentQueue->submit(
         cmdBuffer,
         {static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore)},
-        waitSemaphores, waitDstStageMasks
-    ) && _swapchain.present(_presentQueue, _currentImageIndex, static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore));
+        { static_cast<VkSemaphore>(_guiInstance->getGuiSemaphore(_currentImageIndex)) },
+        { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT })
+        && _swapchain.present(_presentQueue, _currentImageIndex, static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore));
 }
 
 lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::InitInfo& initInfo) {
@@ -283,6 +289,17 @@ bool Window::initSwapchainCapabilities() {
         }
     }
 
+    return true;
+}
+
+bool Window::initGui()
+{
+    _guiInstance = std::make_unique<Gui>(_renderer, *this);
+    if (!_guiInstance->init(_swapchain.getImagesViews()))
+    {
+        LUG_LOG.error("RendererWindow: Can't create font texture for Gui");
+        return false;
+    }
     return true;
 }
 
@@ -578,6 +595,12 @@ bool Window::initRender() {
         if (!createView(renderViewInitInfo)) {
             return false;
         }
+    }
+
+    if (!initGui())
+    {
+        LUG_LOG.error("Window::initGui failed");
+        return false;
     }
 
     return true;

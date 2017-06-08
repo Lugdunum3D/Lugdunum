@@ -5,6 +5,7 @@
 #include <lug/Graphics/Render/Target.hpp>
 #include <lug/Graphics/Render/View.hpp>
 #include <lug/Window/Window.hpp>
+#include <lug/System/Time.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -28,7 +29,7 @@ public:
 
     virtual ~Window() = default;
 
-    virtual bool beginFrame() = 0;
+    virtual bool beginFrame(const lug::System::Time &elapsedTime) = 0;
     virtual bool endFrame() = 0;
 };
 

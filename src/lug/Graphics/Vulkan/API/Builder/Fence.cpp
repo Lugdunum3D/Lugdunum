@@ -15,7 +15,7 @@ bool Fence::build(API::Fence& fence, VkResult* returnResult) {
     const VkFenceCreateInfo createInfo{
         /* createInfo.sType */ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
         /* createInfo.pNext */ nullptr,
-        /* createInfo.flags */ VK_FENCE_CREATE_SIGNALED_BIT
+        /* createInfo.flags */ _flags
     };
 
     // Create the fence

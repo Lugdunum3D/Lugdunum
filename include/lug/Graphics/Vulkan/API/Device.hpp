@@ -41,6 +41,7 @@ public:
 
     const API::QueueFamily* getQueueFamily(VkQueueFlags flags, bool supportPresentation = false) const;
     API::QueueFamily* getQueueFamily(VkQueueFlags flags, bool supportPresentation = false);
+    const API::Queue* getQueue(const std::string& queueName) const;
 
     bool waitIdle() const;
 
