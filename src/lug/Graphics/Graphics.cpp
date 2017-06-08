@@ -91,10 +91,6 @@ void Graphics::unsupportedModule(Module::Type type) {
     }
 }
 
-std::unique_ptr<Scene::Scene> Graphics::createScene(const std::string& name) {
-    return std::make_unique<Scene::Scene>(name);
-}
-
 std::unique_ptr<Render::Camera> Graphics::createCamera(const std::string& name) {
     if (!_renderer) {
         LUG_LOG.error("Graphics: Can't create a camera, the renderer is not initialized");

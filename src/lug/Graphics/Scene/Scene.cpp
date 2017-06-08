@@ -6,20 +6,14 @@ namespace lug {
 namespace Graphics {
 namespace Scene {
 
-Scene::Scene(const std::string& name) : Resource(Resource::Type::Scene, name), _root{std::make_unique<Node>(*this, "root")} {}
+Scene::Scene(const std::string& name) : Resource(Resource::Type::Scene, name), _root{*this, "root"} {}
 
-std::unique_ptr<Node> Scene::createSceneNode(const std::string& name, std::unique_ptr<MovableObject> object) {
-    std::unique_ptr<Node> node = std::make_unique<Node>(*this, name);
+Node* Scene::createSceneNode(const std::string& name) {
+    _nodes.emplace_back(*this, name);
 
-    if (object) {
-        node->attachMovableObject(std::move(object));
-    }
+    Node* node = &_nodes.back();
 
     return node;
-}
-
-std::unique_ptr<MeshInstance> Scene::createMeshInstance(const std::string& name, Render::Mesh* mesh) {
-    return std::make_unique<MeshInstance>(name, mesh);
 }
 
 std::unique_ptr<MovableCamera> Scene::createMovableCamera(const std::string& name, Render::Camera* camera) {
@@ -27,15 +21,15 @@ std::unique_ptr<MovableCamera> Scene::createMovableCamera(const std::string& nam
 }
 
 Node* Scene::getSceneNode(const std::string& name) {
-    return _root->getNode(name);
+    return _root.getNode(name);
 }
 
 const Node* Scene::getSceneNode(const std::string& name) const {
-    return _root->getNode(name);
+    return _root.getNode(name);
 }
 
 void Scene::fetchVisibleObjects(const Render::View* renderView, const Render::Camera* camera, Render::Queue& renderQueue) const {
-    _root->fetchVisibleObjects(renderView, camera, renderQueue);
+    _root.fetchVisibleObjects(renderView, camera, renderQueue);
 }
 
 } // Scene

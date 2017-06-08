@@ -100,13 +100,6 @@ public:
     Renderer* getRenderer() const;
 
     /**
-     * @brief      Creates a scene.
-     *
-     * @return     A pointer to the scene instance. The ownership is given to the caller.
-     */
-    std::unique_ptr<Scene::Scene> createScene();
-
-    /**
      * @brief      Creates a camera.
      *
      * @param[in]  name  The name of the camera.

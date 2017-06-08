@@ -67,8 +67,6 @@ public:
     void setFalloffExponent(float falloffExponent);
 
     void getData(Light::Data& lightData);
-    // TODO: Move in Resource
-    const std::string& getName() const;
 
 private:
     /**
@@ -90,11 +88,6 @@ protected:
     float _quadraticAttenuation{1.0f};
     float _falloffAngle{Math::halfPi<float>()};
     float _falloffExponent{0.0f};
-
-    Light::Data _data;
-
-    // TODO: Move in Resource
-    std::string _name;
 };
 
 #include <lug/Graphics/Render/Light.inl>

@@ -4,7 +4,7 @@ namespace lug {
 namespace Graphics {
 namespace Render {
 
-Light::Light(const std::string& name, Type type) : Resource(Resource::Type::Light), _type(type), _name(name) {}
+Light::Light(const std::string& name, Type type) : Resource(Resource::Type::Light, name), _type(type) {}
 
 void Light::getData(Light::Data& lightData) {
     lightData.color = _color;

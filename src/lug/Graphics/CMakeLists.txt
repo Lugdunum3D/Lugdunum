@@ -24,7 +24,6 @@ set(SRC
 
     ${SRCROOT}/Renderer.cpp
 
-    ${SRCROOT}/Scene/MeshInstance.cpp
     ${SRCROOT}/Scene/MovableCamera.cpp
     ${SRCROOT}/Scene/MovableObject.cpp
     ${SRCROOT}/Scene/Node.cpp
@@ -149,8 +148,6 @@ set(INC
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/Renderer.inl
 
-    ${INCROOT}/Scene/MeshInstance.hpp
-    ${INCROOT}/Scene/MeshInstance.inl
     ${INCROOT}/Scene/MovableCamera.hpp
     ${INCROOT}/Scene/MovableObject.hpp
     ${INCROOT}/Scene/MovableObject.inl

@@ -8,35 +8,48 @@ namespace Scene {
 
 Node::Node(Scene& scene, const std::string& name) : ::lug::Graphics::Node(name), _scene(scene) {}
 
-Node* Node::createSceneNode(const std::string& name, std::unique_ptr<MovableObject> object) {
-    std::unique_ptr<Node> node = _scene.createSceneNode(name, std::move(object));
+Node* Node::createSceneNode(const std::string& name) {
+    Node* node = _scene.createSceneNode(name);
 
-    Node* ptrNode = node.get();
-    attachChild(std::move(node));
-    return ptrNode;
+    attachChild(*node);
+    return node;
 }
 
-void Node::attachMovableObject(std::unique_ptr<MovableObject> movableObject) {
-    movableObject->setParent(this);
-    _movableObjects.push_back(std::move(movableObject));
+void Node::attachLight(Resource::SharedPtr<Render::Light> light) {
+    _light = light;
+}
+
+void Node::attachMeshInstance(Resource::SharedPtr<Render::Mesh> mesh, Resource::SharedPtr<Render::Material> material) {
+    _meshInstance.mesh = mesh;
+
+    const auto& primitiveSets = mesh->getPrimitiveSets();
+    if (material) {
+        _meshInstance.materials.resize(primitiveSets.size(), material);
+    }
+    else {
+        _meshInstance.materials.resize(primitiveSets.size());
+        for (uint32_t i = 0; i < primitiveSets.size(); ++i) {
+            _meshInstance.materials[i] = primitiveSets[i].material;
+        }
+    }
+
 }
 
 void Node::fetchVisibleObjects(const Render::View* renderView, const Render::Camera* camera, Render::Queue& renderQueue) const {
     for (const auto& child : _children) {
-        static_cast<const Node*>(child.get())->fetchVisibleObjects(renderView, camera, renderQueue);
+        static_cast<const Node*>(child)->fetchVisibleObjects(renderView, camera, renderQueue);
     }
 
-    for (const auto& object : _movableObjects) {
-        renderQueue.addMovableObject(object.get());
-    }
+    renderQueue.addMeshInstance(*const_cast<Node*>(this), _meshInstance);
+    renderQueue.addLight(*const_cast<Node*>(this), _light);
 }
 
 void Node::needUpdate() {
     ::lug::Graphics::Node::needUpdate();
 
-    for (auto& object : _movableObjects) {
-        object->needUpdate();
-    }
+    //for (auto& object : _movableObjects) {
+        // object->needUpdate();
+    //}
 }
 
 } // Scene

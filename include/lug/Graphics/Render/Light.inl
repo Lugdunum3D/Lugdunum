@@ -37,7 +37,3 @@ inline void Light::setFalloffAngle(float falloffAngle) {
 inline void Light::setFalloffExponent(float falloffExponent) {
     _falloffExponent = falloffExponent;
 }
-
-inline const std::string& Light::getName() const {
-    return _name;
-}

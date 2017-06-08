@@ -5,7 +5,6 @@
 #include <lug/Config.hpp>
 #include <lug/Graphics/Render/Light.hpp>
 #include <lug/Graphics/Render/Queue.hpp>
-#include <lug/Graphics/Scene/MeshInstance.hpp>
 #include <lug/Graphics/Scene/Node.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
@@ -33,7 +32,7 @@ namespace Vulkan {
 namespace Render {
 namespace Technique {
 
-using MeshInstance = ::lug::Graphics::Scene::MeshInstance;
+using MeshInstance = ::lug::Graphics::Scene::Node::MeshInstance;
 
 Forward::Forward(const Renderer& renderer, const Render::View& renderView) :
     Technique(renderer, renderView) {}
@@ -117,7 +116,7 @@ bool Forward::render(
     // Update lights buffers data
     {
         for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
-            auto& light = renderQueue.getLights()[i];
+            auto& light = renderQueue.getLights()[i].second;
 
             BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
 
@@ -189,7 +188,7 @@ bool Forward::render(
                 }
             }
 
-            auto& light = renderQueue.getLights()[i];
+            auto& light = renderQueue.getLights()[i].second;
 
             cmdBuffer.bindPipeline(_pipeline);
 

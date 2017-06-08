@@ -43,7 +43,7 @@ public:
 
     const Math::Mat4x4f& getTransform();
 
-    void attachChild(std::unique_ptr<Node> child);
+    void attachChild(Node& child);
 
     void translate(const Math::Vec3f& direction, TransformSpace space = TransformSpace::Local);
     void rotate(float angle, const Math::Vec3f& axis, TransformSpace space = TransformSpace::Local);
@@ -85,7 +85,7 @@ protected:
     Node* _parent{nullptr};
 
     std::string _name;
-    std::vector<std::unique_ptr<Node>> _children;
+    std::vector<Node*> _children;
 
     // Flag to know if the node is dirty since the last frame
     bool _dirty{true};

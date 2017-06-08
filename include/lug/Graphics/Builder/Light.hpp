@@ -26,7 +26,7 @@ public:
     Light& operator=(const Light&) = delete;
     Light& operator=(Light&&) = delete;
 
-    virtual ~Light() = default;
+    ~Light() = default;
 
     /**
      * @brief      Sets the name.

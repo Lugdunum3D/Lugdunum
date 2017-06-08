@@ -1,14 +1,12 @@
 #pragma once
 
+#include <utility>
 #include <vector>
+
+#include <lug/Graphics/Scene/Node.hpp>
 
 namespace lug {
 namespace Graphics {
-
-namespace Scene {
-class MeshInstance;
-class MovableObject;
-} // Scene
 
 namespace Render {
 
@@ -26,21 +24,24 @@ public:
 
     ~Queue() = default;
 
-    void addMovableObject(Scene::MovableObject* object);
+    void addMeshInstance(Scene::Node& node, const Scene::Node::MeshInstance& meshInstance);
+    void addLight(Scene::Node& node, Resource::SharedPtr<Render::Light> light);
     void clear();
     void removeDirtyProperty();
 
-    const std::vector<Scene::MeshInstance*>& getMeshs() const;
+    const std::vector<std::pair<Scene::Node*, Scene::Node::MeshInstance>>& getMeshs() const;
     std::size_t getMeshsNb() const;
 
-    const std::vector<Render::Light*>& getLights() const;
+    const std::vector<std::pair<Scene::Node*, Resource::SharedPtr<Render::Light>>>& getLights() const;
     std::size_t getLightsNb() const;
 
 private:
     std::size_t _meshsNb{0};
-    std::vector<Scene::MeshInstance*> _meshs{4000}; // TODO: Change that
+    // TODO(nokitoo): store pointers to MeshInstance ?
+    // (Need to change Node MeshsInstance vector to list)
+    std::vector<std::pair<Scene::Node*, Scene::Node::MeshInstance>> _meshs{4000}; // TODO: Change that
 
-    std::vector<Render::Light*> _lights{50}; // TODO: Change that
+    std::vector<std::pair<Scene::Node*, Resource::SharedPtr<Render::Light>>> _lights{50}; // TODO: Change that
     std::size_t _lightsNb{0};
 };
 
