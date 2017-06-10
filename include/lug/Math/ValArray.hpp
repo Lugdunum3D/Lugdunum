@@ -1,5 +1,6 @@
 #pragma once
 
+#define NOMINMAX
 #include <algorithm>
 #include <array>
 #include <cstring>
