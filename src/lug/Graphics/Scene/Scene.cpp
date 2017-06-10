@@ -16,10 +16,6 @@ Node* Scene::createSceneNode(const std::string& name) {
     return node;
 }
 
-std::unique_ptr<MovableCamera> Scene::createMovableCamera(const std::string& name, Render::Camera* camera) {
-    return std::make_unique<MovableCamera>(name, camera);
-}
-
 Node* Scene::getSceneNode(const std::string& name) {
     return _root.getNode(name);
 }
@@ -28,7 +24,7 @@ const Node* Scene::getSceneNode(const std::string& name) const {
     return _root.getNode(name);
 }
 
-void Scene::fetchVisibleObjects(const Render::View* renderView, const Render::Camera* camera, Render::Queue& renderQueue) const {
+void Scene::fetchVisibleObjects(const Render::View& renderView, const Render::Camera::Camera& camera, Render::Queue& renderQueue) const {
     _root.fetchVisibleObjects(renderView, camera, renderQueue);
 }
 

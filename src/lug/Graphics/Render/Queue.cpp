@@ -7,13 +7,13 @@ namespace lug {
 namespace Graphics {
 namespace Render {
 
-void Queue::addMeshInstance(Scene::Node& node, const Scene::Node::MeshInstance& meshInstance) {
-    _meshs[_meshsNb] = std::make_pair(&node, meshInstance);
+void Queue::addMeshInstance(Scene::Node& node) {
+    _meshs[_meshsNb] = &node;
     ++_meshsNb;
 }
 
-void Queue::addLight(Scene::Node& node, Resource::SharedPtr<Render::Light> light) {
-    _lights[_lightsNb] = std::make_pair(&node, light);
+void Queue::addLight(Scene::Node& node) {
+    _lights[_lightsNb] = &node;
     ++_lightsNb;
 }
 

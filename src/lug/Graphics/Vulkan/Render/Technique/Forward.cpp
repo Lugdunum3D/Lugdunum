@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <lug/Config.hpp>
+#include <lug/Graphics/Render/Camera/Camera.hpp>
 #include <lug/Graphics/Render/Light.hpp>
 #include <lug/Graphics/Render/Queue.hpp>
 #include <lug/Graphics/Scene/Node.hpp>
@@ -17,7 +18,6 @@
 #include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
-#include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Render/View.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
@@ -88,7 +88,7 @@ bool Forward::render(
     // Update camera buffer data
     BufferPool::SubBuffer* cameraBuffer = _subBuffers[_renderView.getCamera()->getName()];
     {
-        Camera* camera = static_cast<Camera*>(_renderView.getCamera());
+        /*Camera* camera = static_cast<Camera*>(_renderView.getCamera());
 
         if (camera->isDirty() && cameraBuffer) {
             frameData.freeSubBuffers.push_back(cameraBuffer);
@@ -110,13 +110,13 @@ bool Forward::render(
 
             cmdBuffer.updateBuffer(*cameraBuffer->buffer, cameraData, sizeof(cameraData), cameraBuffer->offset);
             camera->isDirty(false);
-        }
+        }*/
     }
 
     // Update lights buffers data
     {
         for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
-            auto& light = renderQueue.getLights()[i].second;
+            const auto& light = renderQueue.getLights()[i]->getLight();
 
             BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
 
@@ -188,7 +188,7 @@ bool Forward::render(
                 }
             }
 
-            auto& light = renderQueue.getLights()[i].second;
+            const auto& light = renderQueue.getLights()[i]->getLight();
 
             cmdBuffer.bindPipeline(_pipeline);
 
@@ -292,7 +292,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
     // auto colorFormat = _renderView.getFormat().format;
 
     // {
-    //     auto initLightPipeline = [this, &colorFormat](::lug::Graphics::Render::Light::::lug::Graphics::Render::Light::Type lightType, const char* vertexShader, const char* fragmentShader) {
+    //     auto initLightPipeline = [this, &colorFormat](::lug::Graphics::Render::Light::Type lightType, const char* vertexShader, const char* fragmentShader) {
     //         API::Builder::GraphicsPipeline graphicsPipelineBuilder(_renderer.getDevice());
 
     //         // Set shaders state
@@ -492,9 +492,9 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
     //         return true;
     //     };
 
-    //     if (!initLightPipeline(::lug::Graphics::Render::Light::::lug::Graphics::Render::Light::Type::Directional, "shader.vert.spv", "shader-directional.frag.spv")
-    //         || !initLightPipeline(::lug::Graphics::Render::Light::::lug::Graphics::Render::Light::Type::Point, "shader.vert.spv", "shader-point.frag.spv")
-    //         || !initLightPipeline(::lug::Graphics::Render::Light::::lug::Graphics::Render::Light::Type::Spot, "shader.vert.spv", "shader-spot.frag.spv")) {
+    //     if (!initLightPipeline(::lug::Graphics::Render::Light::Type::Directional, "shader.vert.spv", "shader-directional.frag.spv")
+    //         || !initLightPipeline(::lug::Graphics::Render::Light::Type::Point, "shader.vert.spv", "shader-point.frag.spv")
+    //         || !initLightPipeline(::lug::Graphics::Render::Light::Type::Spot, "shader.vert.spv", "shader-spot.frag.spv")) {
     //         return false;
     //     }
     // }

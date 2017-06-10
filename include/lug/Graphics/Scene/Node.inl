@@ -13,3 +13,15 @@ inline Scene& Node::getScene() {
 inline const Scene& Node::getScene() const {
     return _scene;
 }
+
+inline const Resource::SharedPtr<Render::Light>& Node::getLight() const {
+    return _light;
+}
+
+inline const Node::MeshInstance& Node::getMeshInstance() const {
+    return _meshInstance;
+}
+
+inline const Resource::SharedPtr<Render::Camera::Camera>& Node::getCamera() const {
+    return _camera;
+}

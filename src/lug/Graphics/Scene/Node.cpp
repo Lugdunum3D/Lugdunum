@@ -25,31 +25,34 @@ void Node::attachMeshInstance(Resource::SharedPtr<Render::Mesh> mesh, Resource::
     const auto& primitiveSets = mesh->getPrimitiveSets();
     if (material) {
         _meshInstance.materials.resize(primitiveSets.size(), material);
-    }
-    else {
+    } else {
         _meshInstance.materials.resize(primitiveSets.size());
         for (uint32_t i = 0; i < primitiveSets.size(); ++i) {
             _meshInstance.materials[i] = primitiveSets[i].material;
         }
     }
-
 }
 
-void Node::fetchVisibleObjects(const Render::View* renderView, const Render::Camera* camera, Render::Queue& renderQueue) const {
+void Node::attachCamera(Resource::SharedPtr<Render::Camera::Camera> camera) {
+    camera->setParent(this);
+    _camera = std::move(camera);
+}
+
+void Node::fetchVisibleObjects(const Render::View& renderView, const Render::Camera::Camera& camera, Render::Queue& renderQueue) const {
     for (const auto& child : _children) {
         static_cast<const Node*>(child)->fetchVisibleObjects(renderView, camera, renderQueue);
     }
 
-    renderQueue.addMeshInstance(*const_cast<Node*>(this), _meshInstance);
-    renderQueue.addLight(*const_cast<Node*>(this), _light);
+    renderQueue.addMeshInstance(*const_cast<Node*>(this));
+    renderQueue.addLight(*const_cast<Node*>(this));
 }
 
 void Node::needUpdate() {
     ::lug::Graphics::Node::needUpdate();
 
-    //for (auto& object : _movableObjects) {
-        // object->needUpdate();
-    //}
+    if (_camera) {
+        _camera->needUpdateView();
+    }
 }
 
 } // Scene

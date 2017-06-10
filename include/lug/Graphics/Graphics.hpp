@@ -7,7 +7,6 @@
 #include <lug/Core/Version.hpp>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Module.hpp>
-#include <lug/Graphics/Render/Camera.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
@@ -98,16 +97,6 @@ public:
      * @return     A raw pointer to the renderer instance.
      */
     Renderer* getRenderer() const;
-
-    /**
-     * @brief      Creates a camera.
-     *
-     * @param[in]  name  The name of the camera.
-     *
-     * @return     A pointer to the camera instance. The ownership is given to the caller. @n
-     *             Returns @p nullptr if the camera creation fails.
-     */
-    std::unique_ptr<Render::Camera> createCamera(const std::string& name);
 
 private:
     std::string _appName;
