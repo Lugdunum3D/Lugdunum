@@ -301,7 +301,7 @@ endif()
 
 # find imgui
 if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/imgui")
-    message(FATAL_ERROR "Can't find fmt, call `git submodule update --recursive`")
+    message(FATAL_ERROR "Can't find imgui, call `git submodule update --recursive`")
 endif()
 
 set(IMGUI_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/imgui/include)

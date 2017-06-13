@@ -567,7 +567,6 @@ bool Gui::initPipeline() {
 }
 
 bool Gui::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
-    // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
     const API::RenderPass* renderPass = _pipeline.getRenderPass();
 
     for (size_t i = 0; i < imageViews.size(); ++i) {
@@ -606,8 +605,6 @@ bool Gui::beginFrame(const lug::System::Time& elapsedTime) {
     io.MouseDown[2] = _window.isMousePressed(lug::Window::Mouse::Button::Middle);
 
     ImGui::NewFrame();
-
-    ImGui::ShowTestWindow();
 
     return true;
 }

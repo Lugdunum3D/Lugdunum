@@ -124,18 +124,37 @@ macro(lug_add_sample target)
 
     include_directories(${FMT_INCLUDE_DIR})
 
+    # find imgui
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/../../thirdparty/imgui")
+    message(FATAL_ERROR "Can't find imgui, call `git submodule update --recursive`")
+    endif()
+
+    set(IMGUI_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/../../thirdparty/imgui/include)
+    message(STATUS "Found Imgui: ${IMGUI_INCLUDE_DIR}")
+    
+    set(IMGUI_SOURCE_DIR ${CMAKE_SOURCE_DIR}/../../thirdparty/imgui/src)
+    message(STATUS "Found Imgui: ${IMGUI_SOURCE_DIR}")
+    
+    include_directories(${IMGUI_INCLUDE_DIR})
+    
+    set(IMGUI_SOURCE_FILES
+        ${IMGUI_SOURCE_DIR}/imgui.cpp
+        ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
+        ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+    )
+
     # find Lugdunum
     find_package(LUG REQUIRED ${THIS_DEPENDS})
 
     # create target
     if(LUG_OS_ANDROID)
-        add_library(${target} SHARED ${THIS_SOURCES})
+        add_library(${target} SHARED ${THIS_SOURCES} ${IMGUI_SOURCE_FILES})
 
         set(ANDROID_PROJECT_PATH ${PROJECT_SOURCE_DIR}/../compiler/android/${target}App)
         set(ANDROID_PROJECT_ASSETS ${ANDROID_PROJECT_PATH}/src/main/assets)
         set(ANDROID_PROJECT_SHADERS ${ANDROID_PROJECT_PATH}/src/main/shaders)
     else()
-        add_executable(${target} ${THIS_SOURCES})
+        add_executable(${target} ${THIS_SOURCES} ${IMGUI_SOURCE_FILES})
     endif()
 
     lug_add_compile_options(${target})
