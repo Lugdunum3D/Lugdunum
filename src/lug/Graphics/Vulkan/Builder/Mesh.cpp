@@ -1,27 +1,26 @@
 #include <lug/Graphics/Vulkan/Builder/Mesh.hpp>
 
+#include <lug/Graphics/Builder/Mesh.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
-#include <lug/Graphics/Graphics.hpp>
-#include <lug/Graphics/Render/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 namespace Builder {
+namespace Mesh {
 
-Mesh::Mesh(lug::Graphics::Renderer& renderer) : lug::Graphics::Builder::Mesh(renderer) {}
-
-Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
+Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::Builder::Mesh& builder) {
     // Constructor of Mesh is private, we can't use std::make_unique
-    std::unique_ptr<Resource> resource{new Vulkan::Render::Mesh(_name)};
+    std::unique_ptr<Resource> resource{new Vulkan::Render::Mesh(builder._name)};
     Vulkan::Render::Mesh* mesh = static_cast<Vulkan::Render::Mesh*>(resource.get());
 
-    const Vulkan::Renderer& renderer = static_cast<Vulkan::Renderer&>(_renderer);
+    const Vulkan::Renderer& renderer = static_cast<Vulkan::Renderer&>(builder._renderer);
 
-    for (auto& builderPrimitiveSet : _primitiveSets) {
+    for (auto& builderPrimitiveSet : builder._primitiveSets) {
         Render::Mesh::PrimitiveSetData* primitiveSetData = new Render::Mesh::PrimitiveSetData();
         lug::Graphics::Render::Mesh::PrimitiveSet targetPrimitiveSet;
 
@@ -122,9 +121,10 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> Mesh::build() {
         }
     }
 
-    return _renderer.getResourceManager()->add<::lug::Graphics::Render::Mesh>(std::move(resource));
+    return builder._renderer.getResourceManager()->add<::lug::Graphics::Render::Mesh>(std::move(resource));
 }
 
+} // Mesh
 } // Builder
 } // Vulkan
 } // Graphics

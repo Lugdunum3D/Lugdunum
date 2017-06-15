@@ -3,11 +3,9 @@
 #include <algorithm>
 
 #include <lug/Config.hpp>
-#include <lug/Graphics/Light/Directional.hpp>
-#include <lug/Graphics/Light/Point.hpp>
-#include <lug/Graphics/Light/Spot.hpp>
+#include <lug/Graphics/Render/Camera/Camera.hpp>
+#include <lug/Graphics/Render/Light.hpp>
 #include <lug/Graphics/Render/Queue.hpp>
-#include <lug/Graphics/Scene/MeshInstance.hpp>
 #include <lug/Graphics/Scene/Node.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
@@ -20,7 +18,6 @@
 #include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
-#include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Render/View.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
@@ -35,7 +32,7 @@ namespace Vulkan {
 namespace Render {
 namespace Technique {
 
-using MeshInstance = ::lug::Graphics::Scene::MeshInstance;
+using MeshInstance = ::lug::Graphics::Scene::Node::MeshInstance;
 
 Forward::Forward(const Renderer& renderer, const Render::View& renderView) :
     Technique(renderer, renderView) {}
@@ -91,7 +88,7 @@ bool Forward::render(
     // Update camera buffer data
     BufferPool::SubBuffer* cameraBuffer = _subBuffers[_renderView.getCamera()->getName()];
     {
-        Camera* camera = static_cast<Camera*>(_renderView.getCamera());
+        /*Camera* camera = static_cast<Camera*>(_renderView.getCamera());
 
         if (camera->isDirty() && cameraBuffer) {
             frameData.freeSubBuffers.push_back(cameraBuffer);
@@ -113,17 +110,17 @@ bool Forward::render(
 
             cmdBuffer.updateBuffer(*cameraBuffer->buffer, cameraData, sizeof(cameraData), cameraBuffer->offset);
             camera->isDirty(false);
-        }
+        }*/
     }
 
     // Update lights buffers data
     {
         for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
-            auto& light = renderQueue.getLights()[i];
+            const auto& light = renderQueue.getLights()[i]->getLight();
 
             BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
 
-            if (light->isDirty() && lightBuffer) {
+            if (lightBuffer) {
                 frameData.freeSubBuffers.push_back(lightBuffer);
                 lightBuffer = nullptr;
             }
@@ -136,11 +133,9 @@ bool Forward::render(
 
                 _subBuffers[light->getName()] = lightBuffer;
 
-                uint32_t lightSize = 0;
-                void* lightData;
-
-                lightData = light->getData(lightSize);
-                cmdBuffer.updateBuffer(*lightBuffer->buffer, lightData, lightSize, lightBuffer->offset);
+                ::lug::Graphics::Render::Light::Data lightData;
+                light->getData(lightData);
+                cmdBuffer.updateBuffer(*lightBuffer->buffer, &lightData, sizeof(lightData), lightBuffer->offset);
             }
         }
     }
@@ -148,7 +143,7 @@ bool Forward::render(
     // Render objects
     {
         // All the lights pipelines have the same renderPass
-        const API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional].getRenderPass();
+        const API::RenderPass* renderPass = _pipeline.getRenderPass();
 
         API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
             /* beginRenderPass.framebuffer */ frameData.framebuffer,
@@ -166,7 +161,7 @@ bool Forward::render(
         cmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
 
         const API::CommandBuffer::CmdBindDescriptors cameraBind {
-            /* cameraBind.pipelineLayout */ *_pipelines[Light::Light::Type::Directional].getLayout(),
+            /* cameraBind.pipelineLayout */ *_pipeline.getLayout(),
             /* cameraBind.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
             /* cameraBind.firstSet */ 0,
             /* cameraBind.descriptorSets */ {cameraBuffer->descriptorSet},
@@ -193,16 +188,14 @@ bool Forward::render(
                 }
             }
 
-            auto& light = renderQueue.getLights()[i];
-            auto lightType = light->getLightType();
-            auto& lightPipeline = _pipelines[lightType];
+            const auto& light = renderQueue.getLights()[i]->getLight();
 
-            cmdBuffer.bindPipeline(lightPipeline);
+            cmdBuffer.bindPipeline(_pipeline);
 
             BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
 
             const API::CommandBuffer::CmdBindDescriptors lightBind {
-                /* cameraBind.pipelineLayout */ *_pipelines[Light::Light::Type::Directional].getLayout(),
+                /* cameraBind.pipelineLayout */ *_pipeline.getLayout(),
                 /* lightBind.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
                 /* lightBind.firstSet */ 1,
                 /* lightBind.descriptorSets */ {lightBuffer->descriptorSet},
@@ -227,7 +220,7 @@ bool Forward::render(
             //         };
 
             //         const API::CommandBuffer::CmdPushConstants cmdPushConstants{
-            //             /* cmdPushConstants.layout */ static_cast<VkPipelineLayout>(*lightPipeline.getLayout()),
+            //             /* cmdPushConstants.layout */ static_cast<VkPipelineLayout>(*_pipeline.getLayout()),
             //             /* cmdPushConstants.stageFlags */ VK_SHADER_STAGE_VERTEX_BIT,
             //             /* cmdPushConstants.offset */ 0,
             //             /* cmdPushConstants.size */ sizeof(pushConstants),
@@ -258,7 +251,7 @@ bool Forward::render(
             //         };
 
             //         const API::CommandBuffer::CmdPushConstants cmdPushConstants{
-            //             /* cmdPushConstants.layout */ static_cast<VkPipelineLayout>(*lightPipeline.getLayout()),
+            //             /* cmdPushConstants.layout */ static_cast<VkPipelineLayout>(*_pipeline.getLayout()),
             //             /* cmdPushConstants.stageFlags */ VK_SHADER_STAGE_VERTEX_BIT,
             //             /* cmdPushConstants.offset */ 0,
             //             /* cmdPushConstants.size */ sizeof(pushConstants),
@@ -299,7 +292,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
     // auto colorFormat = _renderView.getFormat().format;
 
     // {
-    //     auto initLightPipeline = [this, &colorFormat](Light::Light::Type lightType, const char* vertexShader, const char* fragmentShader) {
+    //     auto initLightPipeline = [this, &colorFormat](::lug::Graphics::Render::Light::Type lightType, const char* vertexShader, const char* fragmentShader) {
     //         API::Builder::GraphicsPipeline graphicsPipelineBuilder(_renderer.getDevice());
 
     //         // Set shaders state
@@ -491,7 +484,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
     //         }
 
     //         VkResult result{VK_SUCCESS};
-    //         if (!graphicsPipelineBuilder.build(_pipelines[lightType], &result)) {
+    //         if (!graphicsPipelineBuilder.build(_pipeline, &result)) {
     //             LUG_LOG.error("ForwardRenderer: Can't create pipeline: {}", result);
     //             return false;
     //         }
@@ -499,9 +492,9 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
     //         return true;
     //     };
 
-    //     if (!initLightPipeline(Light::Light::Type::Directional, "shader.vert.spv", "shader-directional.frag.spv")
-    //         || !initLightPipeline(Light::Light::Type::Point, "shader.vert.spv", "shader-point.frag.spv")
-    //         || !initLightPipeline(Light::Light::Type::Spot, "shader.vert.spv", "shader-spot.frag.spv")) {
+    //     if (!initLightPipeline(::lug::Graphics::Render::Light::Type::Directional, "shader.vert.spv", "shader-directional.frag.spv")
+    //         || !initLightPipeline(::lug::Graphics::Render::Light::Type::Point, "shader.vert.spv", "shader-point.frag.spv")
+    //         || !initLightPipeline(::lug::Graphics::Render::Light::Type::Spot, "shader.vert.spv", "shader-spot.frag.spv")) {
     //         return false;
     //     }
     // }
@@ -555,23 +548,16 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
         _renderer.getDevice(),
         queueFamilyIndices,
         *descriptorPool,
-        &_pipelines[Light::Light::Type::Directional].getLayout()->getDescriptorSetLayouts()[0]
+        &_pipeline.getLayout()->getDescriptorSetLayouts()[0]
     );
 
-    uint32_t largestLightSize = 0;
-    // Calculate largest light structure
-    {
-        largestLightSize = (uint32_t)(std::max)(sizeof(Light::Directional::LightData), sizeof(Light::Point::LightData));
-        largestLightSize = (std::max)(largestLightSize, (uint32_t)sizeof(Light::Spot::LightData));
-    }
-
     _lightsPool = std::make_unique<BufferPool>(
-        (uint32_t)_framesData.size() * 50,
-        largestLightSize,
+        static_cast<uint32_t>(_framesData.size() * 50),
+        static_cast<uint32_t>(sizeof(::lug::Graphics::Render::Light::Data)),
         _renderer.getDevice(),
         queueFamilyIndices,
         *descriptorPool,
-        &_pipelines[Light::Light::Type::Directional].getLayout()->getDescriptorSetLayouts()[1]
+        &_pipeline.getLayout()->getDescriptorSetLayouts()[1]
     );
 
     return initDepthBuffers(imageViews) && initFramebuffers(imageViews);
@@ -580,9 +566,7 @@ bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::I
 void Forward::destroy() {
     _graphicsQueue->waitIdle();
 
-    for (auto& pipeline: _pipelines) {
-        pipeline.second.destroy();
-    }
+    _pipeline.destroy();
 
     _framesData.clear();
 
@@ -661,7 +645,7 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
 
 bool Forward::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
     // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
-    const API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional].getRenderPass();
+    const API::RenderPass* renderPass = _pipeline.getRenderPass();
 
     _framesData.resize(imageViews.size());
 

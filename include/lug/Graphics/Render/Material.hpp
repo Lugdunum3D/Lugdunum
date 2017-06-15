@@ -54,11 +54,7 @@ public:
 
     virtual ~Material() = default;
 
-    const std::string& getName() const;
-    void setName(const std::string &name);
-
 protected:
-    std::string _name;
 
     Constants _constants;
     TextureInfo _baseColorTexture;

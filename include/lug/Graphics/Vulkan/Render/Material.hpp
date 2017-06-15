@@ -6,23 +6,19 @@
 #include <lug/Graphics/Render/Material.hpp>
 #include <lug/Graphics/Vulkan/API/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/Builder/Material.hpp>
 #include <lug/Graphics/Vulkan/Render/Pipeline.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
-
-namespace Builder {
-class Material;
-} // Builder
-
 namespace Render {
 
 /**
  * @brief     Class for Material
  */
 class LUG_GRAPHICS_API Material final : public ::lug::Graphics::Render::Material {
-    friend class ::lug::Graphics::Vulkan::Builder::Material;
+    friend Resource::SharedPtr<lug::Graphics::Render::Material> Builder::Material::build(const ::lug::Graphics::Builder::Material&);
 
 public:
     Pipeline::Id::MaterialPart _pipelineIdMaterialPart;

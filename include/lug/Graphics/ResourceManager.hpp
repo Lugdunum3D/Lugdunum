@@ -44,7 +44,7 @@ public:
      */
     template <typename T = Resource>
     Resource::SharedPtr<T> get(Resource::Handle handle);
-    
+
     /**
      * @brief      Add a resource to the ResourceManager.
      * @param[in]  resource The resource to add resource.

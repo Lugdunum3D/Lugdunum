@@ -5,7 +5,6 @@
 #include <map>
 
 #include <lug/Graphics/Module.hpp>
-#include <lug/Graphics/Vulkan/Render/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/System/Logger/Logger.hpp>
@@ -89,27 +88,6 @@ void Graphics::unsupportedModule(Module::Type type) {
             _loadedOptionalModules.erase(it);
         }
     }
-}
-
-std::unique_ptr<Scene::Scene> Graphics::createScene() {
-    return std::make_unique<Scene::Scene>();
-}
-
-std::unique_ptr<Render::Camera> Graphics::createCamera(const std::string& name) {
-    if (!_renderer) {
-        LUG_LOG.error("Graphics: Can't create a camera, the renderer is not initialized");
-        return nullptr;
-    }
-
-    std::unique_ptr<Render::Camera> camera = nullptr;
-
-    if (_initInfo.rendererType == Renderer::Type::Vulkan) {
-        camera = std::make_unique<Vulkan::Render::Camera>(name);
-    } else {
-        LUG_LOG.error("Graphics: Unknown render type");
-    }
-
-    return camera;
 }
 
 } // Graphics

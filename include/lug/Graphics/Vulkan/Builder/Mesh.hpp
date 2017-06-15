@@ -1,29 +1,22 @@
 #pragma once
 
-#include <lug/Graphics/Builder/Mesh.hpp>
-#include <lug/Graphics/Vulkan/Render/Mesh.hpp>
-#include <lug/Graphics/Vulkan/Renderer.hpp>
+#include <lug/Graphics/Render/Mesh.hpp>
+#include <lug/Graphics/Resource.hpp>
 
 namespace lug {
 namespace Graphics {
+
+namespace Builder {
+class Mesh;
+} // Builder
+
 namespace Vulkan {
 namespace Builder {
+namespace Mesh {
 
-class LUG_GRAPHICS_API Mesh final : public lug::Graphics::Builder::Mesh {
-public:
-    explicit Mesh(lug::Graphics::Renderer& renderer);
+Resource::SharedPtr<lug::Graphics::Render::Mesh> LUG_GRAPHICS_API build(const ::lug::Graphics::Builder::Mesh& builder);
 
-    Mesh(const Mesh&) = default;
-    Mesh(Mesh&&) = default;
-
-    Mesh& operator=(const Mesh&) = default;
-    Mesh& operator=(Mesh&&) = default;
-
-    ~Mesh() = default;
-
-    Resource::SharedPtr<lug::Graphics::Render::Mesh> build() override final;
-};
-
+} // Mesh
 } // Builder
 } // Vulkan
 } // Graphics

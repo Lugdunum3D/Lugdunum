@@ -11,7 +11,7 @@ Node* Node::getNode(const std::string& name) {
         return this;
     }
 
-    for (const auto& child : _children) {
+    for (auto& child : _children) {
         Node* tmp = child->getNode(name);
 
         if (tmp) {
@@ -28,7 +28,7 @@ const Node* Node::getNode(const std::string& name) const {
     }
 
     for (const auto& child : _children) {
-        Node* tmp = child->getNode(name);
+        const Node* tmp = child->getNode(name);
 
         if (tmp) {
             return tmp;
@@ -38,9 +38,9 @@ const Node* Node::getNode(const std::string& name) const {
     return nullptr;
 }
 
-void Node::attachChild(std::unique_ptr<Node> child) {
-    child->_parent = this;
-    _children.push_back(std::move(child));
+void Node::attachChild(Node& child) {
+    child._parent = this;
+    _children.push_back(&child);
 }
 
 void Node::translate(const Math::Vec3f& direction, TransformSpace space) {
@@ -165,7 +165,7 @@ void Node::needUpdate() {
     _needUpdate = true;
     _dirty = true;
 
-    for (const auto& child : _children) {
+    for (auto& child : _children) {
         child->needUpdate();
     }
 }

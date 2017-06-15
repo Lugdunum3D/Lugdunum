@@ -5,13 +5,10 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Graphics.cpp
 
+    ${SRCROOT}/Builder/Camera.cpp
+    ${SRCROOT}/Builder/Light.cpp
     ${SRCROOT}/Builder/Material.cpp
     ${SRCROOT}/Builder/Mesh.cpp
-
-    ${SRCROOT}/Light/Directional.cpp
-    ${SRCROOT}/Light/Light.cpp
-    ${SRCROOT}/Light/Point.cpp
-    ${SRCROOT}/Light/Spot.cpp
 
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/Node.cpp
@@ -19,7 +16,11 @@ set(SRC
     ${SRCROOT}/Resource.cpp
     ${SRCROOT}/ResourceManager.cpp
 
-    ${SRCROOT}/Render/Camera.cpp
+    ${SRCROOT}/Render/Camera/Camera.cpp
+    ${SRCROOT}/Render/Camera/Orthographic.cpp
+    ${SRCROOT}/Render/Camera/Perspective.cpp
+
+    ${SRCROOT}/Render/Light.cpp
     ${SRCROOT}/Render/Material.cpp
     ${SRCROOT}/Render/Mesh.cpp
     ${SRCROOT}/Render/Queue.cpp
@@ -27,9 +28,6 @@ set(SRC
 
     ${SRCROOT}/Renderer.cpp
 
-    ${SRCROOT}/Scene/MeshInstance.cpp
-    ${SRCROOT}/Scene/MovableCamera.cpp
-    ${SRCROOT}/Scene/MovableObject.cpp
     ${SRCROOT}/Scene/Node.cpp
     ${SRCROOT}/Scene/Scene.cpp
 
@@ -89,7 +87,6 @@ set(SRC
     ${SRCROOT}/Vulkan/Builder/Mesh.cpp
 
     ${SRCROOT}/Vulkan/Render/BufferPool.cpp
-    ${SRCROOT}/Vulkan/Render/Camera.cpp
     ${SRCROOT}/Vulkan/Render/Material.cpp
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
     ${SRCROOT}/Vulkan/Render/Pipeline.cpp
@@ -120,24 +117,29 @@ set(INC
     ${INCROOT}/ResourceManager.hpp
     ${INCROOT}/ResourceManager.inl
 
+    ${INCROOT}/Builder/Camera.hpp
+    ${INCROOT}/Builder/Camera.inl
+    ${INCROOT}/Builder/Light.hpp
+    ${INCROOT}/Builder/Light.inl
     ${INCROOT}/Builder/Material.hpp
     ${INCROOT}/Builder/Material.inl
     ${INCROOT}/Builder/Mesh.hpp
     ${INCROOT}/Builder/Mesh.inl
-
-    ${INCROOT}/Light/Directional.hpp
-    ${INCROOT}/Light/Light.hpp
-    ${INCROOT}/Light/Light.inl
-    ${INCROOT}/Light/Point.hpp
-    ${INCROOT}/Light/Spot.hpp
 
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl
     ${INCROOT}/Node.hpp
     ${INCROOT}/Node.inl
 
-    ${INCROOT}/Render/Camera.hpp
-    ${INCROOT}/Render/Camera.inl
+    ${INCROOT}/Render/Camera/Camera.hpp
+    ${INCROOT}/Render/Camera/Camera.inl
+    ${INCROOT}/Render/Camera/Orthographic.hpp
+    ${INCROOT}/Render/Camera/Orthographic.inl
+    ${INCROOT}/Render/Camera/Perspective.hpp
+    ${INCROOT}/Render/Camera/Perspective.inl
+
+    ${INCROOT}/Render/Light.hpp
+    ${INCROOT}/Render/Light.inl
     ${INCROOT}/Render/Material.hpp
     ${INCROOT}/Render/Material.inl
     ${INCROOT}/Render/Mesh.hpp
@@ -154,11 +156,6 @@ set(INC
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/Renderer.inl
 
-    ${INCROOT}/Scene/MeshInstance.hpp
-    ${INCROOT}/Scene/MeshInstance.inl
-    ${INCROOT}/Scene/MovableCamera.hpp
-    ${INCROOT}/Scene/MovableObject.hpp
-    ${INCROOT}/Scene/MovableObject.inl
     ${INCROOT}/Scene/Node.hpp
     ${INCROOT}/Scene/Node.inl
     ${INCROOT}/Scene/Scene.hpp
@@ -249,7 +246,6 @@ set(INC
     ${INCROOT}/Vulkan/Builder/Mesh.hpp
 
     ${INCROOT}/Vulkan/Render/BufferPool.hpp
-    ${INCROOT}/Vulkan/Render/Camera.hpp
     ${INCROOT}/Vulkan/Render/Material.hpp
     ${INCROOT}/Vulkan/Render/Mesh.hpp
     ${INCROOT}/Vulkan/Render/Mesh.inl

@@ -56,7 +56,7 @@ bool View::render(const API::Semaphore& imageReadySemaphore, uint32_t currentIma
         return true; // Not fatal, return success anyway
     }
 
-    _camera->update(this);
+    _camera->update(*this);
     return _renderTechnique->render(_camera->getRenderQueue(), imageReadySemaphore, _drawCompleteSemaphores[currentImageIndex], currentImageIndex);
 }
 

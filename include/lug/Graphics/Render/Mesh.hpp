@@ -86,6 +86,8 @@ public:
     const std::string& getName() const;
     void setName(const std::string &name);
 
+    const std::vector<Mesh::PrimitiveSet>& getPrimitiveSets() const;
+
 protected:
     explicit Mesh(const std::string& name);
 
