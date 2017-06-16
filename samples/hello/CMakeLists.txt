@@ -42,6 +42,7 @@ set(SHADERS
 set(LUG_RESOURCES
     models/LowPoly/Low\ poly.obj
     models/LowPoly/Low_poly.mtl
+    models/TriangleWithoutIndices.gltf
 )
 
 include_directories(include)

@@ -1,0 +1,66 @@
+{
+  "scenes": [
+    {
+      "name": "scene0",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "node0",
+      "mesh": 0
+    }
+  ],
+  "meshes": [
+    {
+      "name": "mesh0",
+      "primitives": [
+        {
+          "attributes":
+            {
+              "POSITION": 0
+            }
+        }
+      ]
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "triangleWithoutIndices.bin",
+      "byteLength": 36
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteOffset": 0,
+      "byteLength": 36,
+      "target": 34962
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "byteOffset": 0,
+      "componentType": 5126,
+      "count": 3,
+      "type": "VEC3",
+      "max": [
+        1.0,
+        1.0,
+        0.0
+      ],
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "asset": {
+    "version": "2.0",
+    "generator": "Manually converted to 2.0"
+  }
+}
