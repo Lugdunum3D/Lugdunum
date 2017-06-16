@@ -97,16 +97,22 @@ bool Pipeline::init() {
     switch(static_cast<Render::Mesh::PrimitiveSet::Mode>(primitivePart.primitiveMode)) {
         case Render::Mesh::PrimitiveSet::Mode::Points:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_POINT_LIST, false);
+            break;
         case Render::Mesh::PrimitiveSet::Mode::Lines:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_LINE_LIST, false);
+            break;
         case Render::Mesh::PrimitiveSet::Mode::LineStrip:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, false);
+            break;
         case Render::Mesh::PrimitiveSet::Mode::Triangles:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, false);
+            break;
         case Render::Mesh::PrimitiveSet::Mode::TriangleStrip:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP, false);
+            break;
         case Render::Mesh::PrimitiveSet::Mode::TriangleFan:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN, false);
+            break;
     }
 
     // Set viewport state

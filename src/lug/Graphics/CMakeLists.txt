@@ -5,10 +5,12 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Graphics.cpp
 
+    ${SRCROOT}/Loader.cpp
     ${SRCROOT}/Builder/Camera.cpp
     ${SRCROOT}/Builder/Light.cpp
     ${SRCROOT}/Builder/Material.cpp
     ${SRCROOT}/Builder/Mesh.cpp
+    ${SRCROOT}/Builder/Scene.cpp
 
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/Node.cpp
@@ -125,6 +127,8 @@ set(INC
     ${INCROOT}/Builder/Material.inl
     ${INCROOT}/Builder/Mesh.hpp
     ${INCROOT}/Builder/Mesh.inl
+    ${INCROOT}/Builder/Scene.inl
+    ${INCROOT}/Builder/Scene.inl
 
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl

@@ -11,7 +11,7 @@ namespace Graphics {
  */
 class LUG_GRAPHICS_API GltfLoader final : public Loader {
 public:
-    GltfLoader() = default;
+    GltfLoader(Renderer& renderer);
 
     GltfLoader(const GltfLoader&) = delete;
     GltfLoader(GltfLoader&&) = delete;
