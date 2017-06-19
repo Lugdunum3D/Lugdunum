@@ -786,7 +786,7 @@ void Gui::updateBuffers(uint32_t currentImageIndex) {
     // Update buffers only if vertex or index count has been changed compared to current buffer size
     {
         // Vertex buffer
-        if ((static_cast<VkBuffer>(frameData.vertexBuffer) == VK_NULL_HANDLE) || (frameData.vertexBuffer.getRequirements().size != imDrawData->TotalVtxCount)) {
+        if ((static_cast<VkBuffer>(frameData.vertexBuffer) == VK_NULL_HANDLE) || (static_cast<int>(frameData.vertexBuffer.getRequirements().size) != imDrawData->TotalVtxCount)) {
             {
                 // Create Vertex buffer
                 {
@@ -821,7 +821,7 @@ void Gui::updateBuffers(uint32_t currentImageIndex) {
         }
 
         // IndexBuffer
-        if ((static_cast<VkBuffer>(frameData.indexBuffer) == VK_NULL_HANDLE) || (frameData.indexBuffer.getRequirements().size < imDrawData->TotalIdxCount)) {
+        if ((static_cast<VkBuffer>(frameData.indexBuffer) == VK_NULL_HANDLE) || (static_cast<int>(frameData.indexBuffer.getRequirements().size) < imDrawData->TotalIdxCount)) {
             {
                 // Create Index buffer
                 {

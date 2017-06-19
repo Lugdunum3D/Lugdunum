@@ -94,7 +94,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
 
     ${SRCROOT}/Vulkan/Renderer.cpp
-    ${SRCROOT}/Vulkan/Vulkan.cpp    
+    ${SRCROOT}/Vulkan/Vulkan.cpp
     ${SRCROOT}/Vulkan/Gui.cpp
 )
 source_group("src" FILES ${SRC})
@@ -317,6 +317,10 @@ set(IMGUI_SOURCE_FILES
     ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
     ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
 )
+
+if(LUG_COMPILER_GCC)
+    set_source_files_properties(${IMGUI_SOURCE_FILES} PROPERTIES COMPILE_FLAGS -Wno-error=maybe-uninitialized)
+endif()
 
 # define the target
 lug_add_library(lug-graphics
