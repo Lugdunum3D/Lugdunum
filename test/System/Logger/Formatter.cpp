@@ -39,7 +39,6 @@ TEST(Formatter, FormatsWithLevel) {
     testOneLevel(Level::Error,   "ERROR  ");
     testOneLevel(Level::Fatal,   "FATAL  ");
     testOneLevel(Level::Assert,  "ASSERT ");
-    testOneLevel(Level::Off,     "OFF    ");
     testOneLevel(static_cast<Level>(42), "UNKNOWN");
 }
 

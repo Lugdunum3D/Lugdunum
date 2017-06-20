@@ -85,7 +85,6 @@ TEST(Logger, LevelsExplicit) {
         logger.log(level, helloWorld);
     };
 
-    testOneLevel(Level::Off);
     testOneLevel(Level::Debug);
     testOneLevel(Level::Info);
     testOneLevel(Level::Warning);
@@ -314,4 +313,3 @@ TEST(Logger, LogsExceptionWhenParseFails) {
 }
 }
 }
-
