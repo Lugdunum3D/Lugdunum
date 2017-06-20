@@ -147,7 +147,6 @@ TEST(Logger, LevelsFilter) {
     testOneLevel(Level::Warning, Level::Error);
     testOneLevel(Level::Error, Level::Fatal);
     testOneLevel(Level::Fatal, Level::Assert);
-    testOneLevel(Level::Assert, Level::Off);
 
     LoggingFacility::clear();
 }
