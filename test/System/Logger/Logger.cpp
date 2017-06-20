@@ -133,11 +133,11 @@ TEST(Logger, LevelsFilter) {
     logger->addHandler(handler);
 
     auto testOneLevel = [&](Level level, Level levelPlusOne) {
-        handler->setLevel(levelPlusOne);
+        handler->setLevels(levelPlusOne);
         EXPECT_CALL(*handler, handle(_)).Times(0);
         logger->log(level, helloWorld);
 
-        handler->setLevel(level);
+        handler->setLevels(level);
         EXPECT_CALL(*handler, handle(_)).Times(1);
         logger->log(level, helloWorld);
     };
