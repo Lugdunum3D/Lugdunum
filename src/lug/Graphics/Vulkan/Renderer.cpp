@@ -35,7 +35,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
     void* /*userData*/) {
 
     // Convert VkDebugReportFlagsEXT to System::Logger::Level
-    System::Logger::Level level = System::Logger::Level::Off;
+    System::Logger::Level level = System::Logger::Level::Info;
 
     if (flags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
         level = System::Logger::Level::Error;
