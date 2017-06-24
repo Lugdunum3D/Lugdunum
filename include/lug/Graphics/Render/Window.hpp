@@ -29,7 +29,7 @@ public:
 
     virtual ~Window() = default;
 
-    virtual bool beginFrame(const lug::System::Time &elapsedTime) = 0;
+    virtual bool beginFrame(const lug::System::Time& elapsedTime) = 0;
     virtual bool endFrame() = 0;
 };
 

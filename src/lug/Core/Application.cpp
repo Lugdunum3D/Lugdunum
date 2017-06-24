@@ -77,7 +77,7 @@ void Application::close() {
     _closed = true;
 }
 
-bool Application::beginFrame(const lug::System::Time &elapsedTime) {
+bool Application::beginFrame(const lug::System::Time& elapsedTime) {
     return _graphics.getRenderer()->beginFrame(elapsedTime);
 }
 

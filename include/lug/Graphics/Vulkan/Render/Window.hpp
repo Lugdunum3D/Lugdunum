@@ -10,6 +10,7 @@
 #include <lug/Graphics/Vulkan/API/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
+#include <lug/Graphics/Vulkan/Gui.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -20,7 +21,6 @@ class QueueFamily;
 } // API
 
 class Renderer;
-class Gui;
 
 namespace Render {
 
@@ -40,7 +40,7 @@ private:
 public:
     Window() = delete;
 
-    Window(Renderer& renderer);
+    Window(lug::Graphics::Vulkan::Renderer& renderer);
 
     Window(const Window&) = delete;
     Window(Window&&) = delete;
@@ -52,7 +52,7 @@ public:
 
     bool pollEvent(lug::Window::Event&) override;
 
-    bool beginFrame(const lug::System::Time &elapsedTime) override final;
+    bool beginFrame(const lug::System::Time& elapsedTime) override final;
     bool endFrame() override final;
 
     const API::Swapchain& getSwapchain() const;
@@ -64,7 +64,7 @@ public:
     uint16_t getWidth() const override final;
     uint16_t getHeight() const override final;
 
-    static std::unique_ptr<Window> create(Renderer& renderer, Window::InitInfo& initInfo);
+    static std::unique_ptr<Window> create(lug::Graphics::Vulkan::Renderer& renderer, Window::InitInfo& initInfo);
 
     bool initRender();
     void destroyRender();
@@ -83,7 +83,7 @@ private:
 private:
     InitInfo _initInfo;
 
-    Renderer& _renderer;
+    lug::Graphics::Vulkan::Renderer& _renderer;
     API::Surface _surface{};
     API::Swapchain _swapchain{};
 
@@ -99,7 +99,7 @@ private:
 
     API::CommandPool _commandPool{};
 
-    std::unique_ptr<lug::Graphics::Vulkan::Gui>   _guiInstance;
+    lug::Graphics::Vulkan::Gui  _guiInstance;
 };
 
 #include <lug/Graphics/Vulkan/Render/Window.inl>

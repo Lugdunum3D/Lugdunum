@@ -4,5 +4,4 @@ inline Version Version::fromInt(uint32_t version) {
         (version >> 12) & 0x3FF, // minor
         version & 0xFFF // patch
     };
-
 }

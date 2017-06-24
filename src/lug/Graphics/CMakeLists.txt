@@ -81,6 +81,8 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Surface.cpp
     ${SRCROOT}/Vulkan/API/Swapchain.cpp
 
+    ${SRCROOT}/Vulkan/Gui.cpp
+
     ${SRCROOT}/Vulkan/Render/BufferPool.cpp
     ${SRCROOT}/Vulkan/Render/Camera.cpp
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
@@ -90,12 +92,17 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/View.cpp
     ${SRCROOT}/Vulkan/Render/Window.cpp
 
+    ${SRCROOT}/Vulkan/Renderer.cpp
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
 
+<<<<<<< HEAD
     ${SRCROOT}/Vulkan/Renderer.cpp
     ${SRCROOT}/Vulkan/Vulkan.cpp
     ${SRCROOT}/Vulkan/Gui.cpp
+=======
+    ${SRCROOT}/Vulkan/Vulkan.cpp    
+>>>>>>> Corrected all changes that were requested by Quentin01 except one
 )
 source_group("src" FILES ${SRC})
 
@@ -227,6 +234,8 @@ set(INC
     ${INCROOT}/Vulkan/API/Swapchain.hpp
     ${INCROOT}/Vulkan/API/Swapchain.inl
 
+    ${INCROOT}/Vulkan/Gui.hpp
+
     ${INCROOT}/Vulkan/Render/BufferPool.hpp
     ${INCROOT}/Vulkan/Render/Camera.hpp
     ${INCROOT}/Vulkan/Render/Mesh.hpp
@@ -243,7 +252,6 @@ set(INC
     ${INCROOT}/Vulkan/Renderer.hpp
     ${INCROOT}/Vulkan/Renderer.inl
     ${INCROOT}/Vulkan/Vulkan.hpp
-    ${INCROOT}/Vulkan/Gui.hpp
 )
 source_group("inc" FILES ${INC})
 

@@ -126,7 +126,7 @@ macro(lug_add_sample target)
 
     # find imgui
     if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/imgui")
-    message(FATAL_ERROR "Can't find imgui, call `git submodule update --recursive`")
+        message(FATAL_ERROR "Can't find imgui, call `git submodule update --recursive`")
     endif()
 
     set(IMGUI_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/imgui/include)

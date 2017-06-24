@@ -158,7 +158,7 @@ public:
     virtual void onFrame(const System::Time& elapsedTime) = 0;
 
 private:
-    bool beginFrame(const lug::System::Time &elapsedTime);
+    bool beginFrame(const lug::System::Time& elapsedTime);
     bool endFrame();
 
 private:

@@ -1,13 +1,13 @@
 #include "Application.hpp"
 
+#include <imgui.h>
+
 #include <lug/Graphics/Light/Directional.hpp>
 #include <lug/Graphics/Scene/ModelInstance.hpp>
 
 // TODO: Remove this when the ResourceManager is done
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
-
-#include <imgui.h>
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
     getRenderWindowInfo().windowInitInfo.title = "Hello Model";
@@ -171,6 +171,4 @@ void Application::onFrame(const lug::System::Time& elapsedTime) {
         renderViews[i]->getCamera()->setPosition({x, 10.0f, y}, lug::Graphics::Node::TransformSpace::World);
         renderViews[i]->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
     }
-
-    ImGui::ShowTestWindow();
 }

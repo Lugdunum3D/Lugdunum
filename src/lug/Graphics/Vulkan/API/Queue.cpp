@@ -73,8 +73,7 @@ bool Queue::waitIdle() const {
     return true;
 }
 
-const QueueFamily * Queue::getQueueFamily() const
-{
+const QueueFamily * Queue::getQueueFamily() const {
     return _queueFamily;
 }
 

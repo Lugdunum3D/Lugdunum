@@ -70,8 +70,9 @@ API::QueueFamily* Device::getQueueFamily(VkQueueFlags flags, bool supportPresent
 const API::Queue* Device::getQueue(const std::string & queueName) const {
     for (const API::QueueFamily& queueFamily : _queueFamilies) {
         const API::Queue* queue = queueFamily.getQueue(queueName);
-        if (queue) return queue;
+        if (queue) { return queue; }
     }
+
     return nullptr;
 }
 

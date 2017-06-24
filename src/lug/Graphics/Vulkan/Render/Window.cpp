@@ -10,7 +10,6 @@
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/API/Instance.hpp>
 #include <lug/System/Logger/Logger.hpp>
-#include <lug/Graphics/Vulkan/Gui.hpp>
 
 #if defined(LUG_SYSTEM_WINDOWS)
     #include <lug/Window/Win32/WindowImplWin32.hpp>
@@ -25,7 +24,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Window::Window(Renderer& renderer) : _renderer(renderer) {}
+Window::Window(lug::Graphics::Vulkan::Renderer& renderer) : _renderer(renderer), _guiInstance(_renderer, *this) {}
 
 Window::~Window() {
     destroyRender();
@@ -42,7 +41,7 @@ bool Window::pollEvent(lug::Window::Event& event) {
             }
         }
 
-        _guiInstance->processEvents(event);
+        _guiInstance.processEvent(event);
 
         return true;
     }
@@ -51,7 +50,6 @@ bool Window::pollEvent(lug::Window::Event& event) {
 }
 
 bool Window::beginFrame(const lug::System::Time &elapsedTime) {
-    _guiInstance->beginFrame(elapsedTime);
     AcquireImageData* acquireImageData = nullptr;
     // Retrieve free AcquireImageData
     {
@@ -63,12 +61,19 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
         }
     }
 
+    _guiInstance.beginFrame(elapsedTime);
+
     while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, static_cast<VkSemaphore>(acquireImageData->completeSemaphore))) {
         if (_swapchain.isOutOfDate()) {
             if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
                 return false;
             }
-            _guiInstance->initFramebuffers(_swapchain.getImagesViews());
+
+            if (!_guiInstance.initFramebuffers(_swapchain.getImagesViews())) {
+                LUG_LOG.error("Window::beginFrame: Failed to initialise Gui framebuffers");
+                return false;
+            }
+
             for (auto& renderView: _renderViews) {
                 View* renderView_ = static_cast<View*>(renderView.get());
 
@@ -139,11 +144,11 @@ bool Window::endFrame() {
     }
     std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
-    return _guiInstance->endFrame(waitSemaphores, _currentImageIndex)
+    return _guiInstance.endFrame(waitSemaphores, _currentImageIndex)
         && _presentQueue->submit(
         cmdBuffer,
         {static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore)},
-        { static_cast<VkSemaphore>(_guiInstance->getGuiSemaphore(_currentImageIndex)) },
+        { static_cast<VkSemaphore>(_guiInstance.getSemaphore(_currentImageIndex)) },
         { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT })
         && _swapchain.present(_presentQueue, _currentImageIndex, static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore));
 }
@@ -175,7 +180,7 @@ bool Window::render() {
 
 std::unique_ptr<Window>
 
-Window::create(Renderer& renderer, Window::InitInfo& initInfo) {
+Window::create(lug::Graphics::Vulkan::Renderer& renderer, Window::InitInfo& initInfo) {
     std::unique_ptr<Window> window(new Window(renderer));
 
     if (!window->init(initInfo)) {
@@ -292,14 +297,12 @@ bool Window::initSwapchainCapabilities() {
     return true;
 }
 
-bool Window::initGui()
-{
-    _guiInstance = std::make_unique<Gui>(_renderer, *this);
-    if (!_guiInstance->init(_swapchain.getImagesViews()))
-    {
-        LUG_LOG.error("RendererWindow: Can't create font texture for Gui");
+bool Window::initGui() {
+    if (!_guiInstance.init(_swapchain.getImagesViews())) {
+        LUG_LOG.error("RendererWindow: Failed to initialise Gui");
         return false;
     }
+
     return true;
 }
 
@@ -587,7 +590,7 @@ bool Window::init(Window::InitInfo& initInfo) {
 }
 
 bool Window::initRender() {
-    if (!(initDescriptorPool() && initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData())) {
+    if (!(initDescriptorPool() && initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData() && initGui())) {
         return false;
     }
 
@@ -595,12 +598,6 @@ bool Window::initRender() {
         if (!createView(renderViewInitInfo)) {
             return false;
         }
-    }
-
-    if (!initGui())
-    {
-        LUG_LOG.error("Window::initGui failed");
-        return false;
     }
 
     return true;

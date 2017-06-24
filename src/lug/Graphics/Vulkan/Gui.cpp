@@ -2,28 +2,22 @@
 
 #include <imgui.h>
 
-#include <lug/Graphics/Vulkan/API/Builder/Buffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/DescriptorPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSet.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSetLayout.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Fence.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Framebuffer.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/GraphicsPipeline.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/Image.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Sampler.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
+#include <lug/Graphics/Vulkan/Render/Window.hpp>
+#include <lug/Graphics/Vulkan/Renderer.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-Gui::Gui(Renderer & renderer, Render::Window & window) : _renderer(renderer), _window(window) {
+Gui::Gui(lug::Graphics::Vulkan::Renderer& renderer, lug::Graphics::Vulkan::Render::Window& window) : _renderer(renderer), _window(window) {
 }
 
 Gui::~Gui() {
@@ -46,32 +40,30 @@ bool Gui::init(const std::vector<API::ImageView>& imageViews) {
     io.DisplaySize = ImVec2(_window.getWidth(), _window.getHeight());
     io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
-    // Get present queue family and retrieve the first queue
+    API::Device& device = _renderer.getDevice();
+
+    // Get graphic queue family and retrieve the first queue
     {
-        _presentQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
-        if (!_presentQueueFamily) {
-            LUG_LOG.error("Gui::init: Can't find VK_QUEUE_GRAPHICS_BIT queue family");
+        _graphicQueue = device.getQueue("queue_graphics");
+        if (!_graphicQueue) {
+            LUG_LOG.error("Gui::init: Can't find graphic queue");
             return false;
         }
-        _presentQueue = &_presentQueueFamily->getQueues().front();
-        if (!_presentQueue) {
-            LUG_LOG.error("Gui::init: Can't find presentation queue");
-            return false;
-        }
+
     }
 
-    // Create command pool of present queue
+    // Create command pool of graphic queue
     {
         VkResult result{VK_SUCCESS};
-        API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *_presentQueueFamily);
-        if (!commandPoolBuilder.build(_commandPool, &result)) {
+        API::Builder::CommandPool commandPoolBuilder(device, *_graphicQueue->getQueueFamily());
+        if (!commandPoolBuilder.build(_graphicQueueCommandPool, &result)) {
             LUG_LOG.error("Gui::init: Can't create a command pool: {}", result);
             return false;
         }
     }
-    API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _commandPool);
-    commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
+    API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _graphicQueueCommandPool);
+    commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
     // Create command buffers (as a temporary vector first)
     std::vector<Vulkan::API::CommandBuffer> commandBuffers(imageViews.size());
@@ -90,7 +82,7 @@ bool Gui::init(const std::vector<API::ImageView>& imageViews) {
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
         _framesData[i].commandBuffer = std::move(commandBuffers[i]);
     }
-    commandBuffers.resize(0); // clear the array
+    commandBuffers.clear(); // clear the array
 
     return initFontsTexture() && initPipeline() && initFramebuffers(imageViews);
 }
@@ -124,10 +116,19 @@ bool Gui::initFontsTexture() {
     ImGuiIO& io = ImGui::GetIO();
 
     // Create font texture
-    unsigned char* fontData;
-    int texWidth, texHeight;
-    io.Fonts->GetTexDataAsRGBA32(&fontData, &texWidth, &texHeight);
-    size_t uploadSize = texWidth * texHeight * 4 * sizeof(char);
+    unsigned char* fontData = nullptr;
+    uint32_t texWidth = 0;
+    uint32_t texHeight = 0;
+
+    {
+        int tempWidth;
+        int tempHeight;
+        io.Fonts->GetTexDataAsRGBA32(&fontData, &tempWidth, &tempHeight);
+        texWidth = static_cast<uint32_t>(tempWidth);
+        texHeight = static_cast<uint32_t>(tempHeight);
+    }
+
+    const size_t uploadSize = texWidth * texHeight * 4 * sizeof(char);
 
     API::Device &device = _renderer.getDevice();
 
@@ -140,6 +141,16 @@ bool Gui::initFontsTexture() {
         }
     }
 
+    // Create command pool of transfer queue
+    {
+        VkResult result{ VK_SUCCESS };
+        API::Builder::CommandPool commandPoolBuilder(device, *_transferQueue->getQueueFamily());
+        if (!commandPoolBuilder.build(_transferQueueCommandPool, &result)) {
+            LUG_LOG.error("Gui::init: Can't create a command pool: {}", result);
+            return false;
+        }
+    }
+
     // Create FontsTexture image
     {
         API::Builder::Image imageBuilder(device);
@@ -147,15 +158,16 @@ bool Gui::initFontsTexture() {
         imageBuilder.setUsage(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
         imageBuilder.setPreferedFormats({ VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT });
         imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
+        imageBuilder.setQueueFamilyIndices({ _transferQueue->getQueueFamily()->getIdx() });
         imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
 
         API::Builder::DeviceMemory deviceMemoryBuilder(device);
         deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
         VkExtent3D extent{
-            extent.width = texWidth,
-            extent.height = texHeight,
-            extent.depth = 1
+            /* extent.width */ texWidth,
+            /* extent.height */ texHeight,
+            /* extent.depth */ 1
         };
 
         imageBuilder.setExtent(extent);
@@ -174,7 +186,7 @@ bool Gui::initFontsTexture() {
 
             result = VK_SUCCESS;
             if (!deviceMemoryBuilder.build(_fontDeviceMemory, &result)) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer device memory: {}", result);
+                LUG_LOG.error("Gui::initFontsTexture: Can't create font buffer device memory: {}", result);
                 return false;
             }
         }
@@ -228,7 +240,6 @@ bool Gui::initFontsTexture() {
             }
         }
 
-
         stagingBuffer.updateData(fontData, (uint32_t)uploadSize);
 
         // Copy buffer data to font image
@@ -236,7 +247,7 @@ bool Gui::initFontsTexture() {
             VkResult result{VK_SUCCESS};
             API::CommandBuffer commandBuffer;
 
-            API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _commandPool);
+            API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _transferQueueCommandPool);
             commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
             if (!commandBufferBuilder.build(commandBuffer, &result)) {
@@ -271,12 +282,30 @@ bool Gui::initFontsTexture() {
             }
 
             // Copy
-            VkBufferImageCopy bufferCopyRegion = {};
-            bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            bufferCopyRegion.imageSubresource.layerCount = 1;
-            bufferCopyRegion.imageExtent.width = texWidth;
-            bufferCopyRegion.imageExtent.height = texHeight;
-            bufferCopyRegion.imageExtent.depth = 1;
+            VkBufferImageCopy bufferCopyRegion{
+                /* bufferCopyRegion.bufferOffset */ 0,
+                /* bufferCopyRegion.bufferRowLength */ 0,
+                /* bufferCopyRegion.bufferImageHeight */ 0,
+                {
+                    /* bufferCopyRegion.imageSubresource.aspectMask */ VK_IMAGE_ASPECT_COLOR_BIT,
+                    /* bufferCopyRegion.imageSubresource.mipLevel */ 0,
+                    /* bufferCopyRegion.imageSubresource.baseArrayLayer */ 0,
+                    /* bufferCopyRegion.imageSubresource.layerCount */ 1
+                },
+                {
+                    /* bufferCopyRegion.imageOffset.x */ 0,
+                    /* bufferCopyRegion.imageOffset.y */ 0,
+                    /* bufferCopyRegion.imageOffset.z */ 0,
+                },
+                {
+                    /* bufferCopyRegion.imageExtent.width */ texWidth,
+                    /* bufferCopyRegion.imageExtent.height */ texHeight,
+                    /* bufferCopyRegion.imageExtent.depth */ 1
+                }
+            };
+
+//            // TODO write this function
+//            commandBuffer.copyBufferToImage();
 
             vkCmdCopyBufferToImage(
                 static_cast<VkCommandBuffer>(commandBuffer),
@@ -300,7 +329,11 @@ bool Gui::initFontsTexture() {
                 commandBuffer.pipelineBarrier(pipelineBarrier);
             }
 
-            commandBuffer.end();
+            if (commandBuffer.end() == false) {
+                LUG_LOG.error("Gui::initFontsTexture: Failed to end commandBuffer");
+                return false;
+            }
+
             if (_transferQueue->submit(commandBuffer, {}, {}, {}, static_cast<VkFence>(fence)) == false) {
                 LUG_LOG.error("Gui::initFontsTexture: Can't submit commandBuffer");
                 return false;
@@ -336,30 +369,11 @@ bool Gui::initFontsTexture() {
         }
     }
 
-    for (auto& frameData: _framesData) {
-        // Build semaphore
-        {
-            API::Builder::Semaphore semaphoreBuilder(device);
-
-            VkResult result;
-            if (!semaphoreBuilder.build(frameData.semaphore, &result)) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't create semaphore: {}", result);
-                return false;
-            }
-        }
-
-        // Build fence
-        {
-            API::Builder::Fence fenceBuilder(device);
-            fenceBuilder.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
-
-            VkResult result;
-            if (!fenceBuilder.build(frameData.fence, &result)) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't create fence: {}", result);
-                return false;
-            }
-        }
+    if (initFrameData() == false) {
+        LUG_LOG.error("Gui::initFontsTexture: Failed to init frame data");
+        return false;
     }
+
 
     return true;
 }
@@ -497,10 +511,10 @@ bool Gui::initPipeline() {
 
         _descriptorSet.updateImages(0, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, {descriptorImageInfo});
 
-        VkPushConstantRange pushConstant = {
-            pushConstant.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
-            pushConstant.offset = 0,
-            pushConstant.size = sizeof(PushConstBlock)
+        VkPushConstantRange pushConstant{
+            /*pushConstant.stageFlags*/ VK_SHADER_STAGE_VERTEX_BIT,
+            /*pushConstant.offset*/ 0,
+            /*pushConstant.size*/ sizeof(PushConstBlock)
         };
 
         API::Builder::PipelineLayout pipelineLayoutBuilder(device);
@@ -580,7 +594,7 @@ bool Gui::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
 
         VkResult result{VK_SUCCESS};
         if (!framebufferBuilder.build(_framesData[i].framebuffer, &result)) {
-            LUG_LOG.error("Forward::initFramebuffers: Can't create framebuffer: {}", result);
+            LUG_LOG.error("Gui::initFramebuffers: Can't create framebuffer: {}", result);
             return false;
         }
     }
@@ -588,15 +602,15 @@ bool Gui::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
     return true;
 }
 
-bool Gui::beginFrame(const lug::System::Time& elapsedTime) {
+void Gui::beginFrame(const lug::System::Time& elapsedTime) {
     ImGuiIO& io = ImGui::GetIO();
 
     io.DeltaTime = elapsedTime.getSeconds();
 
     io.DisplaySize = ImVec2(_window.getWidth(), _window.getHeight());
 
-    uint32_t x;
-    uint32_t y;
+    uint32_t x = 0;
+    uint32_t y = 0;
     _window.getMousePos(x, y);
     io.MousePos = ImVec2(static_cast<float>(x), static_cast<float>(y));
 
@@ -605,8 +619,6 @@ bool Gui::beginFrame(const lug::System::Time& elapsedTime) {
     io.MouseDown[2] = _window.isMousePressed(lug::Window::Mouse::Button::Middle);
 
     ImGui::NewFrame();
-
-    return true;
 }
 
 bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t currentImageIndex) {
@@ -617,24 +629,9 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
         return false;
     }
     frameData.fence.reset();
-    updateBuffers(currentImageIndex);
-
-    API::Device &device = _renderer.getDevice();
-
-    API::QueueFamily* graphicsQueueFamily;
-    const API::Queue* graphicsQueue;
-    // Get transfer queue family and retrieve the first queue
-    {
-        graphicsQueueFamily = device.getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
-        if (!graphicsQueueFamily) {
-            LUG_LOG.error("Gui::initFontsTexture: Can't find VK_QUEUE_GRAPHICS_BIT queue family");
-            return false;
-        }
-        graphicsQueue = &graphicsQueueFamily->getQueues().front();
-        if (!graphicsQueue) {
-            LUG_LOG.error("Gui::initFontsTexture: Can't find graphics queue");
-            return false;
-        }
+    if (updateBuffers(currentImageIndex) == false) {
+        LUG_LOG.error("Gui::endFrame: Failed to update buffers");
+        return false;
     }
 
     frameData.commandBuffer.reset();
@@ -684,7 +681,7 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
     frameData.commandBuffer.bindIndexBuffer(frameData.indexBuffer, VK_INDEX_TYPE_UINT16);
 
     // UI scale and translate via push constants
-    PushConstBlock pushConstants{
+    const PushConstBlock pushConstants{
         /* pushConstants.scale */ {2.0f / io.DisplaySize.x, 2.0f / io.DisplaySize.y},
         /* pushConstants.translate */ {-1.0f, -1.0f}
     };
@@ -737,7 +734,7 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
     frameData.commandBuffer.end();
 
     std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-    if (graphicsQueue->submit(frameData.commandBuffer, { static_cast<VkSemaphore>(frameData.semaphore) }, waitSemaphores, waitDstStageMasks, static_cast<VkFence>(frameData.fence)) == false) {
+    if (_graphicQueue->submit(frameData.commandBuffer, { static_cast<VkSemaphore>(frameData.semaphore) }, waitSemaphores, waitDstStageMasks, static_cast<VkFence>(frameData.fence)) == false) {
         LUG_LOG.error("GUI: Can't submit commandBuffer");
         return false;
     }
@@ -745,49 +742,51 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
     return true;
 }
 
-void Gui::processEvents(lug::Window::Event event) {
+void Gui::processEvent(const lug::Window::Event event) {
     ImGuiIO& io = ImGui::GetIO();
     switch (event.type) {
-    case (lug::Window::Event::Type::KeyPressed):
-    case (lug::Window::Event::Type::KeyReleased):
-        io.KeysDown[static_cast<int>(event.key.code)] = (event.type == lug::Window::Event::Type::KeyPressed) ? true : false;
+        case lug::Window::Event::Type::KeyPressed:
+        case lug::Window::Event::Type::KeyReleased:
+            io.KeysDown[static_cast<int>(event.key.code)] = (event.type == lug::Window::Event::Type::KeyPressed) ? true : false;
 
-        io.KeyCtrl = static_cast<int>(event.key.ctrl);
-        io.KeyShift = static_cast<int>(event.key.shift);
-        io.KeyAlt = static_cast<int>(event.key.alt);
-        io.KeySuper = static_cast<int>(event.key.system);
-        break;
-    case (lug::Window::Event::Type::CharEntered):
-        if (event.character.val > 0 && event.character.val < 0x10000) {
-            io.AddInputCharacter(static_cast<unsigned short>(event.character.val));
-        }
-        break;
-    default:
-        break;
+            io.KeyCtrl = static_cast<int>(event.key.ctrl);
+            io.KeyShift = static_cast<int>(event.key.shift);
+            io.KeyAlt = static_cast<int>(event.key.alt);
+            io.KeySuper = static_cast<int>(event.key.system);
+            break;
+        case lug::Window::Event::Type::CharEntered:
+            if (isprint(event.character.val)) {
+                io.AddInputCharacter(static_cast<unsigned short>(event.character.val));
+            }
+            break;
+        default:
+            break;
     }
 }
 
-const Vulkan::API::Semaphore& Gui::getGuiSemaphore(uint32_t currentImageIndex) const {
+const Vulkan::API::Semaphore& Gui::getSemaphore(uint32_t currentImageIndex) const {
     return _framesData[currentImageIndex].semaphore;
 }
 
-void Gui::updateBuffers(uint32_t currentImageIndex) {
+bool Gui::updateBuffers(uint32_t currentImageIndex) {
     ImDrawData* imDrawData = ImGui::GetDrawData();
     if (!imDrawData) {
-        return;
+        LUG_LOG.error("Gui::updateBuffers: Failed to retrieve draw data from imgui");
+        return false;
     }
     API::Device &device = _renderer.getDevice();
     FrameData& frameData = _framesData[currentImageIndex];
 
     // Note: Alignment is done inside buffer creation
-    VkDeviceSize vertexBufferSize = imDrawData->TotalVtxCount * sizeof(ImDrawVert);
-    VkDeviceSize indexBufferSize = imDrawData->TotalIdxCount * sizeof(ImDrawIdx);
+    const VkDeviceSize vertexBufferSize = imDrawData->TotalVtxCount * sizeof(ImDrawVert);
+    const VkDeviceSize indexBufferSize = imDrawData->TotalIdxCount * sizeof(ImDrawIdx);
 
     // Update buffers only if vertex or index count has been changed compared to current buffer size
     {
         // Vertex buffer
-        if ((static_cast<VkBuffer>(frameData.vertexBuffer) == VK_NULL_HANDLE) || (static_cast<int>(frameData.vertexBuffer.getRequirements().size) != imDrawData->TotalVtxCount)) {
+        if ((static_cast<VkBuffer>(frameData.vertexBuffer) == VK_NULL_HANDLE) || (frameData.previousVertexCount != imDrawData->TotalVtxCount)) {
             {
+                frameData.previousVertexCount = imDrawData->TotalVtxCount;
                 // Create Vertex buffer
                 {
                     API::Builder::Buffer bufferBuilder(device);
@@ -797,8 +796,8 @@ void Gui::updateBuffers(uint32_t currentImageIndex) {
 
                     VkResult result{VK_SUCCESS};
                     if (!bufferBuilder.build(frameData.vertexBuffer, &result)) {
-                        LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer: {}", result);
-                        return ;
+                        LUG_LOG.error("Gui::updateBuffers: Can't create staging buffer: {}", result);
+                        return false;
                     }
                 }
 
@@ -812,8 +811,8 @@ void Gui::updateBuffers(uint32_t currentImageIndex) {
 
                 VkResult result{VK_SUCCESS};
                 if (!deviceMemoryBuilder.build(frameData.vertexMemory, &result)) {
-                    LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer device memory: {}", result);
-                    return ;
+                    LUG_LOG.error("Gui::updateBuffers: Can't create staging buffer device memory: {}", result);
+                    return false;
                 }
 
                 frameData.vertexMemoryPtr = frameData.vertexMemory.mapBuffer(frameData.vertexBuffer);
@@ -821,8 +820,10 @@ void Gui::updateBuffers(uint32_t currentImageIndex) {
         }
 
         // IndexBuffer
-        if ((static_cast<VkBuffer>(frameData.indexBuffer) == VK_NULL_HANDLE) || (static_cast<int>(frameData.indexBuffer.getRequirements().size) < imDrawData->TotalIdxCount)) {
+        if ((static_cast<VkBuffer>(frameData.indexBuffer) == VK_NULL_HANDLE) || (frameData.previousIndexCount < imDrawData->TotalIdxCount)) {
             {
+                frameData.previousIndexCount = imDrawData->TotalIdxCount;
+
                 // Create Index buffer
                 {
                     API::Builder::Buffer bufferBuilder(device);
@@ -832,8 +833,8 @@ void Gui::updateBuffers(uint32_t currentImageIndex) {
 
                     VkResult result{VK_SUCCESS};
                     if (!bufferBuilder.build(frameData.indexBuffer, &result)) {
-                        LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer: {}", result);
-                        return;
+                        LUG_LOG.error("Gui::updateBuffers: Can't create staging buffer: {}", result);
+                        return false;
                     }
                 }
 
@@ -847,8 +848,8 @@ void Gui::updateBuffers(uint32_t currentImageIndex) {
 
                 VkResult result{VK_SUCCESS};
                 if (!deviceMemoryBuilder.build(frameData.indexMemory, &result)) {
-                    LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer device memory: {}", result);
-                    return;
+                    LUG_LOG.error("Gui::updateBuffers: Can't create staging buffer device memory: {}", result);
+                    return false;
                 }
 
                 frameData.indexMemoryPtr = frameData.indexMemory.mapBuffer(frameData.indexBuffer);
@@ -863,12 +864,47 @@ void Gui::updateBuffers(uint32_t currentImageIndex) {
 
         for (int n = 0; n < imDrawData->CmdListsCount; n++) {
             const ImDrawList* cmd_list = imDrawData->CmdLists[n];
-            memcpy(vertexMemoryPtr, cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
-            memcpy(indexMemoryPtr, cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
+            memcpy(vertexMemoryPtr, cmd_list->VtxBuffer.Data, vertexBufferSize);
+            memcpy(indexMemoryPtr, cmd_list->IdxBuffer.Data, indexBufferSize);
             vertexMemoryPtr += cmd_list->VtxBuffer.Size;
             indexMemoryPtr += cmd_list->IdxBuffer.Size;
         }
     }
+    return true;
+}
+
+bool Gui::initFrameData()
+{
+    API::Device& device = _renderer.getDevice();
+
+    for (auto& frameData : _framesData) {
+        // Build semaphore
+        {
+            API::Builder::Semaphore semaphoreBuilder(device);
+
+            VkResult result{ VK_SUCCESS };
+            if (!semaphoreBuilder.build(frameData.semaphore, &result)) {
+                LUG_LOG.error("Gui::initFontsTexture: Can't create semaphore: {}", result);
+                return false;
+            }
+        }
+
+        // Build fence
+        {
+            API::Builder::Fence fenceBuilder(device);
+            fenceBuilder.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
+
+            VkResult result{ VK_SUCCESS };
+            if (!fenceBuilder.build(frameData.fence, &result)) {
+                LUG_LOG.error("Gui::initFontsTexture: Can't create fence: {}", result);
+                return false;
+            }
+        }
+        frameData.previousVertexCount = 0;
+        frameData.previousIndexCount = 0;
+    }
+
+    return true;
 }
 
 } // Vulkan

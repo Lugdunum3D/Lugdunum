@@ -85,7 +85,7 @@ public:
 
     void destroy();
 
-    bool beginFrame(const lug::System::Time &elapsedTime) override final;
+    bool beginFrame(const lug::System::Time& elapsedTime) override final;
     bool endFrame() override final;
 
 private:
