@@ -18,10 +18,10 @@ class PipelineLayout {
 public:
     PipelineLayout(const API::Device& device);
 
-    PipelineLayout(const PipelineLayout&&) = delete;
+    PipelineLayout(const PipelineLayout&) = delete;
     PipelineLayout(PipelineLayout&&) = delete;
 
-    PipelineLayout& operator=(const PipelineLayout&&) = delete;
+    PipelineLayout& operator=(const PipelineLayout&) = delete;
     PipelineLayout& operator=(PipelineLayout&&) = delete;
 
     ~PipelineLayout() = default;

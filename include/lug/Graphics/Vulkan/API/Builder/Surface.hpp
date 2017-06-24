@@ -16,10 +16,10 @@ class Surface {
 public:
     Surface(const API::Instance& instance);
 
-    Surface(const Surface&&) = delete;
+    Surface(const Surface&) = delete;
     Surface(Surface&&) = delete;
 
-    Surface& operator=(const Surface&&) = delete;
+    Surface& operator=(const Surface&) = delete;
     Surface& operator=(Surface&&) = delete;
 
     ~Surface() = default;

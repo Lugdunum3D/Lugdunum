@@ -19,10 +19,10 @@ class Swapchain {
 public:
     Swapchain(const API::Device& device);
 
-    Swapchain(const Swapchain&&) = delete;
+    Swapchain(const Swapchain&) = delete;
     Swapchain(Swapchain&&) = delete;
 
-    Swapchain& operator=(const Swapchain&&) = delete;
+    Swapchain& operator=(const Swapchain&) = delete;
     Swapchain& operator=(Swapchain&&) = delete;
 
     ~Swapchain() = default;

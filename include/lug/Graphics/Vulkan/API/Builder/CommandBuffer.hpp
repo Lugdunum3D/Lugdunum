@@ -19,10 +19,10 @@ class CommandBuffer {
 public:
     CommandBuffer(const API::Device& device, const API::CommandPool& commandPool);
 
-    CommandBuffer(const CommandBuffer&&) = delete;
+    CommandBuffer(const CommandBuffer&) = delete;
     CommandBuffer(CommandBuffer&&) = delete;
 
-    CommandBuffer& operator=(const CommandBuffer&&) = delete;
+    CommandBuffer& operator=(const CommandBuffer&) = delete;
     CommandBuffer& operator=(CommandBuffer&&) = delete;
 
     ~CommandBuffer() = default;

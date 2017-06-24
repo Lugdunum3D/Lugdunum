@@ -19,10 +19,10 @@ class DescriptorSet {
 public:
     DescriptorSet(const API::Device& device, const API::DescriptorPool& descriptorPool);
 
-    DescriptorSet(const DescriptorSet&&) = delete;
+    DescriptorSet(const DescriptorSet&) = delete;
     DescriptorSet(DescriptorSet&&) = delete;
 
-    DescriptorSet& operator=(const DescriptorSet&&) = delete;
+    DescriptorSet& operator=(const DescriptorSet&) = delete;
     DescriptorSet& operator=(DescriptorSet&&) = delete;
 
     ~DescriptorSet() = default;

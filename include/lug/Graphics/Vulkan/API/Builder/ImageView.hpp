@@ -18,10 +18,10 @@ class ImageView {
 public:
     ImageView(const API::Device& device, const API::Image& image);
 
-    ImageView(const ImageView&&) = delete;
+    ImageView(const ImageView&) = delete;
     ImageView(ImageView&&) = delete;
 
-    ImageView& operator=(const ImageView&&) = delete;
+    ImageView& operator=(const ImageView&) = delete;
     ImageView& operator=(ImageView&&) = delete;
 
     ~ImageView() = default;

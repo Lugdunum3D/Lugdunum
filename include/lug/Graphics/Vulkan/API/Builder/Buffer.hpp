@@ -18,10 +18,10 @@ class Buffer {
 public:
     Buffer(const API::Device& device);
 
-    Buffer(const Buffer&&) = delete;
+    Buffer(const Buffer&) = delete;
     Buffer(Buffer&&) = delete;
 
-    Buffer& operator=(const Buffer&&) = delete;
+    Buffer& operator=(const Buffer&) = delete;
     Buffer& operator=(Buffer&&) = delete;
 
     ~Buffer() = default;

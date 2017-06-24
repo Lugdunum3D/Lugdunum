@@ -18,10 +18,10 @@ class DescriptorSetLayout {
 public:
     DescriptorSetLayout(const API::Device& device);
 
-    DescriptorSetLayout(const DescriptorSetLayout&&) = delete;
+    DescriptorSetLayout(const DescriptorSetLayout&) = delete;
     DescriptorSetLayout(DescriptorSetLayout&&) = delete;
 
-    DescriptorSetLayout& operator=(const DescriptorSetLayout&&) = delete;
+    DescriptorSetLayout& operator=(const DescriptorSetLayout&) = delete;
     DescriptorSetLayout& operator=(DescriptorSetLayout&&) = delete;
 
     ~DescriptorSetLayout() = default;
