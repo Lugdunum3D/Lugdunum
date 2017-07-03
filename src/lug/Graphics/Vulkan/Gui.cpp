@@ -677,8 +677,13 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
     frameData.commandBuffer.bindDescriptorSets(cmdDescriptorSet);
     frameData.commandBuffer.bindPipeline(_pipeline);
 
-    frameData.commandBuffer.bindVertexBuffers({&frameData.vertexBuffer}, {0});
-    frameData.commandBuffer.bindIndexBuffer(frameData.indexBuffer, VK_INDEX_TYPE_UINT16);
+    if (static_cast<VkBuffer>(frameData.vertexBuffer) != VK_NULL_HANDLE) {
+        frameData.commandBuffer.bindVertexBuffers({&frameData.vertexBuffer}, {0});
+    }
+
+    if (static_cast<VkBuffer>(frameData.indexBuffer) != VK_NULL_HANDLE) {
+        frameData.commandBuffer.bindIndexBuffer(frameData.indexBuffer, VK_INDEX_TYPE_UINT16);
+    }
 
     // UI scale and translate via push constants
     const PushConstBlock pushConstants{
@@ -774,6 +779,11 @@ bool Gui::updateBuffers(uint32_t currentImageIndex) {
         LUG_LOG.error("Gui::updateBuffers: Failed to retrieve draw data from imgui");
         return false;
     }
+
+    if (imDrawData->TotalVtxCount == 0 || imDrawData->TotalIdxCount == 0) {
+        return true;
+    }
+
     API::Device &device = _renderer.getDevice();
     FrameData& frameData = _framesData[currentImageIndex];
 
@@ -784,9 +794,8 @@ bool Gui::updateBuffers(uint32_t currentImageIndex) {
     // Update buffers only if vertex or index count has been changed compared to current buffer size
     {
         // Vertex buffer
-        if ((static_cast<VkBuffer>(frameData.vertexBuffer) == VK_NULL_HANDLE) || (frameData.previousVertexCount != imDrawData->TotalVtxCount)) {
+        if ((static_cast<VkBuffer>(frameData.vertexBuffer) == VK_NULL_HANDLE) || (vertexBufferSize > frameData.vertexBuffer.getRequirements().size)) {
             {
-                frameData.previousVertexCount = imDrawData->TotalVtxCount;
                 // Create Vertex buffer
                 {
                     API::Builder::Buffer bufferBuilder(device);
@@ -820,10 +829,8 @@ bool Gui::updateBuffers(uint32_t currentImageIndex) {
         }
 
         // IndexBuffer
-        if ((static_cast<VkBuffer>(frameData.indexBuffer) == VK_NULL_HANDLE) || (frameData.previousIndexCount < imDrawData->TotalIdxCount)) {
+        if ((static_cast<VkBuffer>(frameData.indexBuffer) == VK_NULL_HANDLE) || (indexBufferSize > frameData.indexBuffer.getRequirements().size)) {
             {
-                frameData.previousIndexCount = imDrawData->TotalIdxCount;
-
                 // Create Index buffer
                 {
                     API::Builder::Buffer bufferBuilder(device);
@@ -870,6 +877,7 @@ bool Gui::updateBuffers(uint32_t currentImageIndex) {
             indexMemoryPtr += cmd_list->IdxBuffer.Size;
         }
     }
+
     return true;
 }
 
@@ -900,8 +908,6 @@ bool Gui::initFrameData()
                 return false;
             }
         }
-        frameData.previousVertexCount = 0;
-        frameData.previousIndexCount = 0;
     }
 
     return true;

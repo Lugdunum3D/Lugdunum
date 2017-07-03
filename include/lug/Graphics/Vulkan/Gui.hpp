@@ -52,9 +52,6 @@ private:
         Vulkan::API::Buffer vertexBuffer;
         Vulkan::API::Buffer indexBuffer;
 
-        int previousVertexCount;
-        int previousIndexCount;
-
         void* vertexMemoryPtr{nullptr};
         void* indexMemoryPtr{nullptr};
     };

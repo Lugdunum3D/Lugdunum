@@ -95,14 +95,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Renderer.cpp
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
-
-<<<<<<< HEAD
-    ${SRCROOT}/Vulkan/Renderer.cpp
     ${SRCROOT}/Vulkan/Vulkan.cpp
-    ${SRCROOT}/Vulkan/Gui.cpp
-=======
-    ${SRCROOT}/Vulkan/Vulkan.cpp    
->>>>>>> Corrected all changes that were requested by Quentin01 except one
 )
 source_group("src" FILES ${SRC})
 
