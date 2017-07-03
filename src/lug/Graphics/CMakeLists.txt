@@ -81,6 +81,8 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Surface.cpp
     ${SRCROOT}/Vulkan/API/Swapchain.cpp
 
+    ${SRCROOT}/Vulkan/Gui.cpp
+
     ${SRCROOT}/Vulkan/Render/BufferPool.cpp
     ${SRCROOT}/Vulkan/Render/Camera.cpp
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
@@ -91,10 +93,8 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/Window.cpp
 
     ${SRCROOT}/Vulkan/Renderer.cpp
-
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
-
     ${SRCROOT}/Vulkan/Vulkan.cpp
 )
 source_group("src" FILES ${SRC})
@@ -227,6 +227,8 @@ set(INC
     ${INCROOT}/Vulkan/API/Swapchain.hpp
     ${INCROOT}/Vulkan/API/Swapchain.inl
 
+    ${INCROOT}/Vulkan/Gui.hpp
+
     ${INCROOT}/Vulkan/Render/BufferPool.hpp
     ${INCROOT}/Vulkan/Render/Camera.hpp
     ${INCROOT}/Vulkan/Render/Mesh.hpp
@@ -298,9 +300,32 @@ if(LUG_OS_ANDROID)
     list(APPEND EXT_LIBRARIES z android ${ASSIMP_LIBRARY_ANDROID})
 endif()
 
+# find imgui
+if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/imgui")
+    message(FATAL_ERROR "Can't find imgui, call `git submodule update --recursive`")
+endif()
+
+set(IMGUI_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/imgui/include)
+message(STATUS "Found Imgui: ${IMGUI_INCLUDE_DIR}")
+
+set(IMGUI_SOURCE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/imgui/src)
+message(STATUS "Found Imgui: ${IMGUI_SOURCE_DIR}")
+
+include_directories(${IMGUI_INCLUDE_DIR})
+
+set(IMGUI_SOURCE_FILES
+    ${IMGUI_SOURCE_DIR}/imgui.cpp
+    ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
+    ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+)
+
+if(LUG_COMPILER_GCC)
+    set_source_files_properties(${IMGUI_SOURCE_FILES} PROPERTIES COMPILE_FLAGS -Wno-error=maybe-uninitialized)
+endif()
+
 # define the target
 lug_add_library(lug-graphics
-                SOURCES ${SRC} ${INC}
+                SOURCES ${SRC} ${INC} ${IMGUI_SOURCE_FILES}
                 DEPENDS lug-window lug-system lug-math
                 EXTERNAL_LIBS ${EXT_LIBRARIES} ${ASSIMP_LIBRARY}
 )

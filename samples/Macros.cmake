@@ -124,6 +124,16 @@ macro(lug_add_sample target)
 
     include_directories(${FMT_INCLUDE_DIR})
 
+    # find imgui
+    if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/imgui")
+        message(FATAL_ERROR "Can't find imgui, call `git submodule update --recursive`")
+    endif()
+
+    set(IMGUI_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/imgui/include)
+    message(STATUS "Found Imgui: ${IMGUI_INCLUDE_DIR}")
+    
+    include_directories(${IMGUI_INCLUDE_DIR})
+
     # find Lugdunum
     find_package(LUG REQUIRED ${THIS_DEPENDS})
 

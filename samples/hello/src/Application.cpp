@@ -1,5 +1,7 @@
 #include "Application.hpp"
 
+#include <imgui.h>
+
 #include <lug/Graphics/Light/Directional.hpp>
 #include <lug/Graphics/Scene/ModelInstance.hpp>
 

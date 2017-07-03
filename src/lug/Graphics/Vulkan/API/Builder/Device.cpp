@@ -115,7 +115,7 @@ bool Device::build(API::Device& device, VkResult* returnResult) {
                 VkQueue queue{VK_NULL_HANDLE};
                 getDeviceQueue(static_cast<VkDevice>(device), i, j, &queue);
 
-                device._queueFamilies[i]._queues.push_back(API::Queue(queue));
+                device._queueFamilies[i]._queues.push_back(API::Queue(queue, &device._queueFamilies[i]));
 
                 for (const std::string& name: _queueFamiliesInfos[i].queues[j].names) {
                     device._queueFamilies[i]._queuesIndices[name] = static_cast<uint32_t>(device._queueFamilies[i]._queues.size() - 1);

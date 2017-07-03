@@ -24,7 +24,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Window::Window(Renderer& renderer) : _renderer(renderer) {}
+Window::Window(lug::Graphics::Vulkan::Renderer& renderer) : _renderer(renderer), _guiInstance(_renderer, *this) {}
 
 Window::~Window() {
     destroyRender();
@@ -41,13 +41,15 @@ bool Window::pollEvent(lug::Window::Event& event) {
             }
         }
 
+        _guiInstance.processEvent(event);
+
         return true;
     }
 
     return false;
 }
 
-bool Window::beginFrame() {
+bool Window::beginFrame(const lug::System::Time &elapsedTime) {
     AcquireImageData* acquireImageData = nullptr;
     // Retrieve free AcquireImageData
     {
@@ -59,9 +61,16 @@ bool Window::beginFrame() {
         }
     }
 
+    _guiInstance.beginFrame(elapsedTime);
+
     while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, static_cast<VkSemaphore>(acquireImageData->completeSemaphore))) {
         if (_swapchain.isOutOfDate()) {
             if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
+                return false;
+            }
+
+            if (!_guiInstance.initFramebuffers(_swapchain.getImagesViews())) {
+                LUG_LOG.error("Window::beginFrame: Failed to initialise Gui framebuffers");
                 return false;
             }
 
@@ -135,11 +144,13 @@ bool Window::endFrame() {
     }
     std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
-    return _presentQueue->submit(
+    return _guiInstance.endFrame(waitSemaphores, _currentImageIndex)
+        && _presentQueue->submit(
         cmdBuffer,
         {static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore)},
-        waitSemaphores, waitDstStageMasks
-    ) && _swapchain.present(_presentQueue, _currentImageIndex, static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore));
+        { static_cast<VkSemaphore>(_guiInstance.getSemaphore(_currentImageIndex)) },
+        { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT })
+        && _swapchain.present(_presentQueue, _currentImageIndex, static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore));
 }
 
 lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::InitInfo& initInfo) {
@@ -169,7 +180,7 @@ bool Window::render() {
 
 std::unique_ptr<Window>
 
-Window::create(Renderer& renderer, Window::InitInfo& initInfo) {
+Window::create(lug::Graphics::Vulkan::Renderer& renderer, Window::InitInfo& initInfo) {
     std::unique_ptr<Window> window(new Window(renderer));
 
     if (!window->init(initInfo)) {
@@ -281,6 +292,15 @@ bool Window::initSwapchainCapabilities() {
             LUG_LOG.error("RendererWindow: Can't retrieve present modes: {}", result);
             return false;
         }
+    }
+
+    return true;
+}
+
+bool Window::initGui() {
+    if (!_guiInstance.init(_swapchain.getImagesViews())) {
+        LUG_LOG.error("RendererWindow: Failed to initialise Gui");
+        return false;
     }
 
     return true;
@@ -570,7 +590,7 @@ bool Window::init(Window::InitInfo& initInfo) {
 }
 
 bool Window::initRender() {
-    if (!(initDescriptorPool() && initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData())) {
+    if (!(initDescriptorPool() && initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData() && initGui())) {
         return false;
     }
 

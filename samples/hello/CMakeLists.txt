@@ -37,6 +37,8 @@ set(SHADERS
     shader-directional.frag
     shader-point.frag # not used but must be present
     shader-spot.frag # not used but must be present
+    gui.frag
+    gui.vert
 )
 
 set(LUG_RESOURCES

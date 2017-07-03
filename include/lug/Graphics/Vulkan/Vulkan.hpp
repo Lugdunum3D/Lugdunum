@@ -18,6 +18,7 @@
 #ifndef WIN32_LEAN_AND_MEAN
     #define WIN32_LEAN_AND_MEAN
 #endif
+#define NOMINMAX
 #include <vulkan/vulkan.h>
 
 #if defined(LUG_SYSTEM_LINUX)
