@@ -8,6 +8,19 @@ namespace Builder {
 
 Mesh::Mesh(Renderer& renderer) : _renderer(renderer) {}
 
+void Mesh::PrimitiveSet::addAttributeBuffer(void* data, uint32_t elementSize, uint32_t elementsCount, Render::Mesh::PrimitiveSet::Attribute::Type type) {
+    Render::Mesh::PrimitiveSet::Attribute attribute;
+
+    attribute.type = type;
+    attribute.buffer.size = elementSize * elementsCount;
+    attribute.buffer.data = new char[attribute.buffer.size];
+    attribute.buffer.elementsCount = elementsCount;
+
+    std::memcpy(attribute.buffer.data, static_cast<char*>(data), attribute.buffer.size);
+
+    _attributes.push_back(std::move(attribute));
+}
+
 Resource::SharedPtr<Render::Mesh> Mesh::build() {
     switch (_renderer.getType()) {
         case Renderer::Type::Vulkan:

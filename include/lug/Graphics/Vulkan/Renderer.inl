@@ -74,12 +74,12 @@ inline bool Renderer::containsPipeline(Render::Pipeline::Id id) const {
     return _pipelines.find(id) != _pipelines.end() && _pipelines.at(id).lock();
 }
 
-inline Resource::SharedPtr<Render::Pipeline> Renderer::getPipeline(Render::Pipeline::Id id) const {
+inline Resource::SharedPtr<Render::Pipeline> Renderer::getPipeline(Render::Pipeline::Id id) {
     if (containsPipeline(id)) {
         return _pipelines.at(id).lock();
     }
 
-    return nullptr;
+    return Render::Pipeline::create(*this, id);
 }
 
 inline Render::Window* Renderer::getRenderWindow() const {

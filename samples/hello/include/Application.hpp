@@ -20,5 +20,6 @@ public:
     void onFrame(const lug::System::Time& elapsedTime) override final;
 
 private:
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Scene::Scene> _scene;
     float _rotation{0.0f};
 };

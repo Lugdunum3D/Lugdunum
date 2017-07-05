@@ -2,6 +2,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Node.hpp>
+#include <lug/Graphics/Render/DirtyObject.hpp>
 #include <lug/Graphics/Render/Queue.hpp>
 #include <lug/Graphics/Resource.hpp>
 #include <lug/Math/Matrix.hpp>
@@ -26,7 +27,7 @@ namespace Camera {
  *             This class represents a Camera in the 3D engine.
  *             A Camera can be attached to only one Render::View and one Scene::Node.
  */
-class LUG_GRAPHICS_API Camera : public Resource {
+class LUG_GRAPHICS_API Camera : public Resource, public DirtyObject {
 public:
     Camera(const Camera&) = delete;
     Camera(Camera&&) = delete;
@@ -35,14 +36,6 @@ public:
     Camera& operator=(Camera&&) = delete;
 
     virtual ~Camera() = default;
-
-    /**
-     * @brief      Gets the render queue of the Camera.
-     *
-     * @return     A reference to the Render::Queue.
-     */
-    Queue& getRenderQueue();
-    const Queue& getRenderQueue() const;
 
     /**
      * @brief      Sets the znear (distance of near plane).
@@ -93,10 +86,13 @@ public:
      *             the visible objects of the attached scene.
      *
      * @param[in]  renderView  The render view
+     * @param[in]  renderQueue The render queue
      */
-    void update(const View& renderView);
+    void update(const View& renderView, Queue& renderQueue);
 
     void setRenderView(View* renderView);
+
+    Scene::Node* getParent() const;
     void setParent(Scene::Node* parent);
 
     void needUpdateProj();
@@ -113,7 +109,6 @@ protected:
 protected:
     Scene::Node* _parent{nullptr};
 
-    Queue _renderQueue;
     View* _renderView{nullptr};
 
     float _znear{0.1f};

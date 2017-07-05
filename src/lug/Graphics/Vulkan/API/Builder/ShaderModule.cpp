@@ -71,7 +71,7 @@ bool ShaderModule::build(API::ShaderModule& shaderModule, VkResult* returnResult
         /* createInfo.sType */ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         /* createInfo.pNext */ nullptr,
         /* createInfo.flags */ 0,
-        /* createInfo.codeSize */ static_cast<uint32_t>(_data.size()),
+        /* createInfo.codeSize */ static_cast<uint32_t>(_data.size()) * sizeof(uint32_t),
         /* createInfo.pCode */ _data.data()
     };
 

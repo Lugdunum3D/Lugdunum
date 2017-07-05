@@ -2,6 +2,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
+#include <lug/Graphics/Vulkan/Render/Queue.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -27,7 +28,7 @@ namespace Technique {
 
 class LUG_GRAPHICS_API Technique {
 public:
-    Technique(const Renderer& renderer, const View& renderView);
+    Technique(Renderer& renderer, const View& renderView);
 
     Technique(const Technique&) = delete;
     Technique(Technique&&) = delete;
@@ -37,15 +38,21 @@ public:
 
     virtual ~Technique() = default;
 
-    virtual bool render(const ::lug::Graphics::Render::Queue& renderQueue, const API::Semaphore& imageReadySemaphore, const API::Semaphore& drawCompleteSemaphore, uint32_t currentImageIndex) = 0;
-    virtual bool init(API::DescriptorPool* descriptorPool, const std::vector<API::ImageView>& imageViews) = 0;
+    virtual bool render(
+        const Render::Queue& renderQueue,
+        const API::Semaphore& imageReadySemaphore,
+        const API::Semaphore& drawCompleteSemaphore,
+        uint32_t currentImageIndex
+    ) = 0;
+
+    virtual bool init(const std::vector<API::ImageView>& imageViews) = 0;
     virtual void destroy() = 0;
 
     virtual bool initDepthBuffers(const std::vector<API::ImageView>& imageViews) = 0;
     virtual bool initFramebuffers(const std::vector<API::ImageView>& imageViews) = 0;
 
 protected:
-    const Renderer& _renderer;
+    Renderer& _renderer;
     const View& _renderView;
 };
 

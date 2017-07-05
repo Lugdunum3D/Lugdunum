@@ -1,6 +1,6 @@
 shaderc:
     repository:
-        tag: dcb30368cdbb91930aee6d86a0fc210f98304bcd
+        tag: aede4fe9571a1be4e8962c3149772bb9fcc604f1
 
 vulkan:
     repository:
@@ -16,4 +16,4 @@ googlemock:
 
 gltf2-loader:
     repository:
-        tag: af5c74f82d2a563d4f659aebd91c27c8143edf9d
+        tag: db730a1b66ef98f1f0e4e008aa909a88f05897a4

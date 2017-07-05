@@ -3,6 +3,7 @@
 #include <string>
 
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Render/DirtyObject.hpp>
 #include <lug/Graphics/Resource.hpp>
 #include <lug/Math/Vector.hpp>
 
@@ -19,7 +20,7 @@ namespace Render {
 /**
  * @brief     Class for Material. Is a Resource.
  */
-class LUG_GRAPHICS_API Material : public Resource {
+class LUG_GRAPHICS_API Material : public Resource, public DirtyObject {
     friend class ::lug::Graphics::Builder::Material;
 
 public:
@@ -29,12 +30,12 @@ public:
     };
 
     struct Constants {
-        Math::Vec4f baseColor{1.0f};            ///< Overall color of the material.
-        Math::Vec3f emissive{0.0f};             ///< Color of the emissive factor.
-        float metallic{0.0f};                   ///< How metal-like the material is. 0 is non-metal (e.g. wood, plastic), 1 is metallic.
-        float roughness{0.0f};                  ///< How rough the material is. 0 is smooth and 1 is rough (matte).
-        float normalTextureScale{1.0f};         ///< Scale of the normal texture
-        float occlusionTextureStrength{1.0f};   ///< Strength of the occlusion texture
+        Math::Vec4f baseColor{1.0f, 1.0f, 1.0f, 1.0f};  ///< Overall color of the material.
+        Math::Vec3f emissive{0.0f, 0.0f, 0.0f};         ///< Color of the emissive factor.
+        float metallic{1.0f};                           ///< How metal-like the material is. 0 is non-metal (e.g. wood, plastic), 1 is metallic.
+        float roughness{1.0f};                          ///< How rough the material is. 0 is smooth and 1 is rough (matte).
+        float normalTextureScale{1.0f};                 ///< Scale of the normal texture
+        float occlusionTextureStrength{1.0f};           ///< Strength of the occlusion texture
     };
 
 public:
@@ -54,8 +55,11 @@ public:
 
     virtual ~Material() = default;
 
-protected:
+    // TODO: Setters which call ::lug::Graphics::Render::DirtyObject::setDirty()
 
+    const Constants& getConstants() const;
+
+protected:
     Constants _constants;
     TextureInfo _baseColorTexture;
     TextureInfo _metallicRoughnessTexture;

@@ -6,6 +6,8 @@
 namespace lug {
 namespace Graphics {
 
+class Renderer;
+
 /**
  * @brief      Class for loading glTF files
  */

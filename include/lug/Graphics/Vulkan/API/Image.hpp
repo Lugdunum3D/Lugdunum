@@ -54,6 +54,7 @@ public:
 
     const VkMemoryRequirements& getRequirements() const;
     const DeviceMemory* getDeviceMemory() const;
+    VkDeviceSize getDeviceMemoryOffset() const;
     VkFormat getFormat() const;
 
     // Return first format supported by given features and tiling
@@ -78,6 +79,8 @@ private:
 
     VkMemoryRequirements _requirements{};
 };
+
+#include <lug/Graphics/Vulkan/API/Image.inl>
 
 } // API
 } // Vulkan

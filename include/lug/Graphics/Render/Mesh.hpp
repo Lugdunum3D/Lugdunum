@@ -44,9 +44,12 @@ public:
              * @brief      Access to the data of the attribute.
              */
             struct Buffer {
-                char* data{nullptr};    ///< The data of the buffer.
-                uint32_t size{0};       ///< The size of the above data buffer, in bytes.
+                char* data{nullptr};        ///< The data of the buffer.
+                uint32_t size{0};           ///< The size of the above data buffer, in bytes.
+                uint32_t elementsCount{0};  ///< The number of elements (indices, vertices, normals)
             } buffer;
+
+            void* _data{nullptr}; // Specific to each Renderer
         };
 
         /**
@@ -83,17 +86,12 @@ public:
 
     virtual ~Mesh();
 
-    const std::string& getName() const;
-    void setName(const std::string &name);
-
     const std::vector<Mesh::PrimitiveSet>& getPrimitiveSets() const;
 
 protected:
     explicit Mesh(const std::string& name);
 
 protected:
-    std::string _name;
-
     std::vector<PrimitiveSet> _primitiveSets;
 };
 

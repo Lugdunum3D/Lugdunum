@@ -5,6 +5,7 @@
 
 #include <lug/System/Logger/Logger.hpp>
 #include <lug/Graphics/Builder/Scene.hpp>
+#include <lug/Graphics/Builder/Material.hpp>
 #include <lug/Graphics/Builder/Mesh.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
 
@@ -17,17 +18,13 @@ static void* getBufferViewData(const gltf2::Asset& asset, const gltf2::Accessor&
     const gltf2::BufferView& bufferView = asset.bufferViews[accessor.bufferView];
     const gltf2::Buffer& buffer = asset.buffers[bufferView.buffer];
 
-    if (buffer.uri.size()) {
-        LUG_LOG.error("GltfLoader::createMesh Buffer uri not supported yet {}", buffer.uri);
-        return nullptr;
-    }
-    else if (!buffer.data) {
+    if (!buffer.data) {
         LUG_LOG.error("GltfLoader::createMesh Buffer data can't be null");
         return nullptr;
     }
 
     // TODO(nokitoo): handle uri
-    return buffer.data + bufferView.byteOffset;
+    return buffer.data + bufferView.byteOffset + accessor.byteOffset;
 }
 
 static uint32_t getAttributeSize(const gltf2::Accessor& accessor) {
@@ -74,6 +71,32 @@ static uint32_t getAttributeSize(const gltf2::Accessor& accessor) {
     return componentSize;
 }
 
+static Resource::SharedPtr<Render::Material> createMaterial(Renderer& renderer, const gltf2::Asset& asset/*, const gltf2::Material& gltfMaterial*/) {
+    Builder::Material materialBuilder(renderer);
+    // TODO(nokitoo): set material name
+    (void)asset;
+
+    return materialBuilder.build();
+}
+
+static void* generateNormals(float* positions, uint32_t accessorCount) {
+    Math::Vec3f* data = new Math::Vec3f[accessorCount];
+
+    uint32_t trianglesCount = accessorCount / 3;
+    uint32_t positionsIdx = 0;
+    for (uint32_t i = 0; i < trianglesCount; ++i) {
+        Math::Vec3f a{positions[positionsIdx], positions[positionsIdx + 1], positions[positionsIdx + 2]};
+        Math::Vec3f b{positions[positionsIdx + 3], positions[positionsIdx + 4], positions[positionsIdx + 5]};
+        Math::Vec3f c{positions[positionsIdx + 6], positions[positionsIdx + 7], positions[positionsIdx + 8]};
+        Math::Vec3f edge1 = b - a;
+        Math::Vec3f edge2 = c - a;
+
+        data[i++] = cross(edge1, edge2);
+    }
+
+    return data;
+}
+
 static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gltf2::Asset& asset, const gltf2::Mesh& gltfMesh) {
     Builder::Mesh meshBuilder(renderer);
     meshBuilder.setName(gltfMesh.name);
@@ -106,9 +129,6 @@ static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gl
                 break;
         }
 
-        // Material
-        // TODO(nokitoo)
-
         // Indices
         if (gltfPrimitive.indices != -1) {
             const gltf2::Accessor& accessor = asset.accessors[gltfPrimitive.indices]; // Get the accessor from its index (directly from indices)
@@ -118,25 +138,33 @@ static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gl
             if (!data) {
                 return nullptr;
             }
-            primitiveSet->addAttributeBuffer(data, componentSize * accessor.count, Render::Mesh::PrimitiveSet::Attribute::Type::Indice);
+            primitiveSet->addAttributeBuffer(
+                data,
+                componentSize,
+                accessor.count,
+                Render::Mesh::PrimitiveSet::Attribute::Type::Indice
+            );
         }
 
         // Attributes
+        struct {
+            void* data{nullptr};
+            uint32_t accessorCount{0};
+        } positions; // Store positions for normals generation
+        bool hasNormals = false;
+
         for (auto& attribute : gltfPrimitive.attributes) {
             Render::Mesh::PrimitiveSet::Attribute::Type type;
             if (attribute.first == "POSITION") {
                 type = Render::Mesh::PrimitiveSet::Attribute::Type::Position;
-            }
-            else if (attribute.first == "NORMAL") {
+            } else if (attribute.first == "NORMAL") {
                 type = Render::Mesh::PrimitiveSet::Attribute::Type::Normal;
-            }
-            else if (attribute.first == "TANGENT") {
+                hasNormals = true;
+            } else if (attribute.first == "TANGENT") {
                 type = Render::Mesh::PrimitiveSet::Attribute::Type::Tangent;
-            }
-            else if (attribute.first.find("TEXCOORD_") != std::string::npos) {
+            } else if (attribute.first.find("TEXCOORD_") != std::string::npos) {
                 type = Render::Mesh::PrimitiveSet::Attribute::Type::TexCoord;
-            }
-            else {
+            } else {
                 LUG_LOG.warn("GltfLoader::createMesh Unsupported attribute {}", attribute.first);
                 continue;
             }
@@ -149,9 +177,35 @@ static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gl
             if (!data) {
                 return nullptr;
             }
-            primitiveSet->addAttributeBuffer(data, componentSize * accessor.count, type);
+            if (type == Render::Mesh::PrimitiveSet::Attribute::Type::Position) { // Store positions in case we need to generate the normals later
+                positions.data = data;
+                positions.accessorCount = accessor.count;
+            }
+            primitiveSet->addAttributeBuffer(data, componentSize, accessor.count, type);
         }
 
+        // Generate flat normals if there is not any
+        if (!hasNormals) {
+            void* data = generateNormals((float*)positions.data, positions.accessorCount);
+            if (!data) {
+                return nullptr;
+            }
+            primitiveSet->addAttributeBuffer(
+                data, sizeof(Math::Vec3f), positions.accessorCount,
+                Render::Mesh::PrimitiveSet::Attribute::Type::Normal
+            );
+        }
+
+        // Material
+        Resource::SharedPtr<Render::Material> material = createMaterial(renderer, asset);
+        if (!material) {
+            LUG_LOG.error("GltfLoader::createMesh Can't create the material resource");
+            return nullptr;
+        }
+
+        primitiveSet->setMaterial(material);
+
+        // TODO(nokitoo): set node transformations
     }
 
     return meshBuilder.build();
@@ -159,6 +213,7 @@ static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gl
 
 static bool createNode(Renderer& renderer, const gltf2::Asset& asset, const gltf2::Node& gltfNode, Scene::Node& parent) {
     Scene::Node* node = parent.createSceneNode(gltfNode.name);
+    parent.attachChild(*node);
 
     if (gltfNode.mesh != -1) {
         Resource::SharedPtr<Render::Mesh> mesh = createMesh(renderer, asset, asset.meshes[gltfNode.mesh]);
@@ -169,14 +224,11 @@ static bool createNode(Renderer& renderer, const gltf2::Asset& asset, const gltf
         node->attachMeshInstance(mesh);
     }
 
-    // TODO(nokitoo): Create material
-
     for (uint32_t nodeIdx : gltfNode.children) {
         const gltf2::Node& childrenGltfNode = asset.nodes[nodeIdx];
         if (!createNode(renderer, asset, childrenGltfNode, *node)) {
             return false;
         }
-        // TODO(nokitoo): set node transformations
     }
 
     return true;
@@ -186,6 +238,8 @@ Resource::SharedPtr<Resource> GltfLoader::loadFile(const std::string& filename) 
     gltf2::Asset asset;
     try {
         asset = gltf2::load(filename);
+        // TODO(nokitoo): Format the asset if not already done
+        // Should we store the version of format in asset.extensions or asset.copyright/asset.version ?
     } catch (gltf2::MisformattedException& e) {
         LUG_LOG.error("GltfLoader::loadFile Can't load the file \"{}\": {}", filename, e.what());
         return nullptr;

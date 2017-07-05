@@ -32,24 +32,26 @@ set(INC
 )
 source_group("inc" FILES ${INC})
 
-set(SHADERS
-    shader.vert
-    shader-directional.frag
-    shader-point.frag # not used but must be present
-    shader-spot.frag # not used but must be present
-)
-
 set(LUG_RESOURCES
-    models/LowPoly/Low\ poly.obj
-    models/LowPoly/Low_poly.mtl
+    models/triangleWithoutIndices.bin
     models/TriangleWithoutIndices.gltf
+    models/simpleTriangle.bin
+    models/Triangle.gltf
+    models/Box0.bin
+    models/Box.gltf
+    shaders/forward/shader.frag
+    shaders/forward/shader.vert
 )
 
 include_directories(include)
+
+find_package(Threads)
 
 lug_add_sample(hello
                SOURCES ${SRC} ${INC}
                DEPENDS core graphics system window math
                SHADERS ${SHADERS}
                LUG_RESOURCES ${LUG_RESOURCES}
+               EXTERNAL_LIBS ${CMAKE_THREAD_LIBS_INIT}
 )
+

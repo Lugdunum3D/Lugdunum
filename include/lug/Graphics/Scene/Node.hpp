@@ -5,6 +5,7 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Node.hpp>
 #include <lug/Graphics/Render/Camera/Camera.hpp>
+#include <lug/Graphics/Render/DirtyObject.hpp>
 #include <lug/Graphics/Render/Light.hpp>
 #include <lug/Graphics/Render/Material.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
@@ -23,12 +24,12 @@ namespace Scene {
 
 class Scene;
 
-class LUG_GRAPHICS_API Node : public ::lug::Graphics::Node {
+class LUG_GRAPHICS_API Node : public ::lug::Graphics::Node, public Render::DirtyObject {
     friend class Scene;
 
 public:
     struct MeshInstance {
-        Resource::SharedPtr<Render::Mesh> mesh;
+        Resource::SharedPtr<Render::Mesh> mesh{nullptr};
         std::vector<Resource::SharedPtr<Render::Material>> materials;
     };
 
@@ -54,9 +55,13 @@ public:
     void attachMeshInstance(Resource::SharedPtr<Render::Mesh> mesh, Resource::SharedPtr<Render::Material> material = nullptr);
     void attachCamera(Resource::SharedPtr<Render::Camera::Camera> camera);
 
-    const Resource::SharedPtr<Render::Light>& getLight() const;
-    const MeshInstance& getMeshInstance() const;
-    const Resource::SharedPtr<Render::Camera::Camera>& getCamera() const;
+    Render::Light* getLight();
+    const Render::Light* getLight() const;
+
+    const MeshInstance* getMeshInstance() const;
+
+    Render::Camera::Camera* getCamera();
+    const Render::Camera::Camera* getCamera() const;
 
     void fetchVisibleObjects(const Render::View& renderView, const Render::Camera::Camera& camera, Render::Queue& renderQueue) const;
 

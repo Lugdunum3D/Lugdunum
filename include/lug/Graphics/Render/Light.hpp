@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Render/DirtyObject.hpp>
 #include <lug/Graphics/Resource.hpp>
 #include <lug/Math/Constant.hpp>
 #include <lug/Math/Vector.hpp>
@@ -13,12 +14,16 @@ namespace Builder {
 class Light;
 } // Builder
 
+namespace Scene {
+class Node;
+} // Scene
+
 namespace Render {
 
 /**
  * @brief     Class for Light
  */
-class LUG_GRAPHICS_API Light : public Resource {
+class LUG_GRAPHICS_API Light : public Resource, public DirtyObject {
     friend class ::lug::Graphics::Builder::Light;
 
 public:
@@ -29,16 +34,20 @@ public:
         Spot = 3
     };
 
+    // No default values other than 0.0f, required fields will be filled by the function getData
     struct Data {
-        Math::Vec4f color{0.0f, 0.0f, 0.0f, 1.0f};
+        Math::Vec3f position{0.0f, 0.0f, 0.0f};
+        float distance{0.0f};
+        Math::Vec4f color{0.0f, 0.0f, 0.0f, 0.0f};
         Math::Vec3f direction{0.0f, 0.0f, 0.0f};
         float constantAttenuation{0.0f};
-        float distance{0.0f};
-        float linearAttenuation{1.0f};
-        float quadraticAttenuation{1.0f};
-        float falloffAngle{Math::halfPi<float>()};
+        float linearAttenuation{0.0f};
+        float quadraticAttenuation{0.0f};
+        float falloffAngle{0.0f};
         float falloffExponent{0.0f};
     };
+
+    static constexpr uint32_t strideShader = 64;
 
 public:
     Light(const Light&) = delete;
@@ -66,7 +75,9 @@ public:
     void setFalloffAngle(float falloffAngle);
     void setFalloffExponent(float falloffExponent);
 
-    void getData(Light::Data& lightData);
+    float getDistance() const;
+
+    void getData(Light::Data& lightData, Scene::Node& node);
 
 private:
     /**

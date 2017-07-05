@@ -5,27 +5,49 @@
 #version 450
 
 //////////////////////////////////////////////////////////////////////////////
+// CONSTANTS
+//////////////////////////////////////////////////////////////////////////////
+
+const float PI = 3.14159265359;
+
+//////////////////////////////////////////////////////////////////////////////
 // BLOCK OF STATIC INPUTS
 //////////////////////////////////////////////////////////////////////////////
 
-layout(set = 0, binding = 0) uniform cameraBlock {
+layout(std140, set = 0, binding = 0) uniform cameraBlock {
     mat4 view;
     mat4 proj;
 } camera;
 
-layout(set = 1, binding = 0) uniform lightBlock {
-  // TODO: Fill this structure
-  float tmp;
-} light;
+struct Light {
+    vec3 position;
+    float distance;
+    vec4 color;
+    vec3 direction;
+    float constantAttenuation;
+    float linearAttenuation;
+    float quadraticAttenuation;
+    float falloffAngle;
+    float falloffExponent;
+};
 
-layout(set = 2, binding = 0) uniform materialBlock {
+struct Material {
     vec4 color;
     vec3 emissive;
     float metallic;
     float roughness;
     float normalTextureScale;
     float occlusionTextureStrength;
-} material;
+};
+
+layout(std140, set = 1, binding = 0) uniform lightDataBlock {
+    Light lights[50];
+    uint lightsNb;
+};
+
+layout(std140, set = 2, binding = 0) uniform materialBlock {
+    Material material;
+};
 
 layout (location = 0) in vec3 inPositionWorldSpace;
 layout (location = 1) in vec3 inNormalWorldSpace;
@@ -81,6 +103,44 @@ layout (set = 2, binding = TEXTURE_EMISSIVE_BINDING) uniform sampler2D textureEm
 layout (location = 0) out vec4 outColor;
 
 //////////////////////////////////////////////////////////////////////////////
+// BRDF FUNCTIONS
+//////////////////////////////////////////////////////////////////////////////
+
+vec3 fresnelSchlick(float cosTheta, vec3 F0) {
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+float DistributionGGX(vec3 N, vec3 H, float roughness) {
+    const float a = roughness * roughness;
+    const float a2 = a * a;
+    const float NdotH = max(dot(N, H), 0.0);
+    const float NdotH2 = NdotH * NdotH;
+
+    float denom = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom = PI * denom * denom;
+
+    return a2 / denom;
+}
+
+float GeometrySchlickGGX(float NdotV, float roughness) {
+    const float r = (roughness + 1.0);
+    const float k = (r * r) / 8.0;
+
+    const float denom = NdotV * (1.0 - k) + k;
+
+    return NdotV / denom;
+}
+
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
+    const float NdotV = max(dot(N, V), 0.0);
+    const float NdotL = max(dot(N, L), 0.0);
+    const float ggx2 = GeometrySchlickGGX(NdotV, roughness);
+    const float ggx1 = GeometrySchlickGGX(NdotL, roughness);
+
+    return ggx1 * ggx2;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // MAIN BLOCK
 //////////////////////////////////////////////////////////////////////////////
 
@@ -89,43 +149,41 @@ void main() {
     // CALCULATE THE FINAL COLOR
     //////////////////////////////////////////////////////////////////////
 
-    vec4 color = material.color;
+    vec4 albedo = material.color;
 
     #if TEXTURE_COLOR
-    color = color * texture(textureColor, TEXTURE_COLOR_UV).rgba;
+    albedo = albedo * texture(textureColor, TEXTURE_COLOR_UV).rgba;
     #endif
 
     #if IN_COLOR >= 1
-    color = color * inColor0;
+    albedo = albedo * inColor0;
     #endif
 
     #if IN_COLOR >= 2
-    color = color * inColor1;
+    albedo = albedo * inColor1;
     #endif
 
     #if IN_COLOR >= 3
-    color = color * inColor2;
+    albedo = albedo * inColor2;
     #endif
 
     //////////////////////////////////////////////////////////////////////
     // CALCULATE THE FINAL METALLIC & ROUGHNESS
     //////////////////////////////////////////////////////////////////////
 
-    float metallic = material.metallic;
-    float roughness = material.roughness;
-
     #if TEXTURE_METALLIC_ROUGHNESS
-    vec3 textureValue = texture(textureMetallicRoughness, TEXTURE_METALLIC_ROUGHNESS_UV).rgb;
+    const vec3 textureValue = texture(textureMetallicRoughness, TEXTURE_METALLIC_ROUGHNESS_UV).rgb;
 
-    metallic = metallic * textureValue.b;
-    roughness = roughness * textureValue.g;
+    const float metallic = material.metallic * textureValue.b;
+    const float roughness = material.roughness * textureValue.g;
+    # else
+    const float metallic = material.metallic;
+    const float roughness = material.roughness;
     #endif
 
     //////////////////////////////////////////////////////////////////////
     // CALCULATE THE FINAL NORMAL WITH THE NORMAL MAP
     //////////////////////////////////////////////////////////////////////
-
-    vec3 normalWorldSpace = inNormalWorldSpace;
 
     #if TEXTURE_NORMAL
     // Get the normal from the texture in tangent space and scale it
@@ -134,50 +192,128 @@ void main() {
 
     // Compute the matrix to transform the normal from tangent space to world space
     # if IN_TANGENT
-    vec3 tangent = normalize(inTangent.xyz);
-    vec3 bitangent = normalize(cross(inNormalWorldSpace, tangent) * inTangent.w);
+    const vec3 tangent = normalize(inTangent.xyz);
+    const vec3 bitangent = normalize(cross(inNormalWorldSpace, tangent) * inTangent.w);
     # else
-    vec3 deltaPosX = dFdx(inPositionWorldSpace);
-    vec3 deltaPosY = dFdy(inPositionWorldSpace);
-    vec2 deltaUvX = dFdx(TEXTURE_NORMAL_UV);
-    vec2 deltaUvY = dFdy(TEXTURE_NORMAL_UV);
+    const vec3 deltaPosX = dFdx(inPositionWorldSpace);
+    const vec3 deltaPosY = dFdy(inPositionWorldSpace);
+    const vec2 deltaUvX = dFdx(TEXTURE_NORMAL_UV);
+    const vec2 deltaUvY = dFdy(TEXTURE_NORMAL_UV);
 
     vec3 tangent = (deltaUvY.t * deltaPosX - deltaUvX.t * deltaPosY) / (deltaUvX.s * deltaUvY.t - deltaUvY.s * deltaUvX.t);
     tangent = normalize(tangent - inNormalWorldSpace * dot(inNormalWorldSpace, tangent));
-    vec3 bitangent = normalize(cross(inNormalWorldSpace, tangent));
+    const vec3 bitangent = normalize(cross(inNormalWorldSpace, tangent));
     # endif
 
-    mat3 tbn = mat3(tangent, bitangent, inNormalWorldSpace);
+    const mat3 tbn = mat3(tangent, bitangent, inNormalWorldSpace);
 
     // Transform the normal from tangent space to world space
-    normalWorldSpace = normalize(tbn * normalTangentSpace);
+    const vec3 normalWorldSpace = normalize(tbn * normalTangentSpace);
+    #else
+    const vec3 normalWorldSpace = inNormalWorldSpace;
     #endif
 
     //////////////////////////////////////////////////////////////////////
     // CALCULATE THE FINAL OCCLUSION
     //////////////////////////////////////////////////////////////////////
 
-    float occlusion = 1.0f;
-
     #if TEXTURE_OCCLUSION
-    occlusion = occlusion * texture(textureOcclusion, TEXTURE_OCCLUSION_UV).r;
+    const float occlusion = texture(textureOcclusion, TEXTURE_OCCLUSION_UV).r;
+    #else
+    const float occlusion = 1.0;
     #endif
 
     //////////////////////////////////////////////////////////////////////
     // CALCULATE THE FINAL EMISSIVE
     //////////////////////////////////////////////////////////////////////
 
-    vec3 emissive = material.emissive;
-
     #if TEXTURE_EMISSIVE
-    emissive = emissive * texture(textureEmissive, TEXTURE_EMISSIVE_UV).rgb;
+    const vec3 emissive = material.emissive * texture(textureEmissive, TEXTURE_EMISSIVE_UV).rgb;
+    #else
+    const vec3 emissive = material.emissive;
     #endif
+
+    //////////////////////////////////////////////////////////////////////
+    // BASIC CALCULATION REQUIRED
+    //////////////////////////////////////////////////////////////////////
+
+    const vec3 cameraPositionWorldSpace = (inverse(camera.view) * vec4(vec3(0.0), 1.0)).xyz;
+    const vec3 viewDirection = normalize(cameraPositionWorldSpace - inPositionWorldSpace);
+
+    const vec3 F0 = mix(vec3(0.04), albedo.xyz, metallic);
 
     //////////////////////////////////////////////////////////////////////
     // CALCULATE THE LIGHTING OF THE FRAGMENT
     //////////////////////////////////////////////////////////////////////
 
-    // TODO: Do the calculation
-    outColor = color;
-    // TODO: Change to lerp between color and color * textureOcclusion with occlusionTextureStrength
+    vec3 Lo = vec3(0.0);
+    vec3 ambient = vec3(0.0);
+
+    for (int i = 0; i < lightsNb; ++i) {
+        // Ambient Light : No position
+        // Direction : Position + Direction + No falloffAngle
+        // Point : Position + No direction
+        // Spotlight : Position + Direction + fallOffAngle
+
+        if (lights[i].position == vec3(0.0)) { // Ambient Light
+            ambient += (lights[i].color * albedo).xyz;
+            continue;
+        }
+
+        // Discard light if it is too far away
+        const float lightDistance = distance(lights[i].position, inPositionWorldSpace);
+        if (lights[i].distance != 0.0 && lightDistance > lights[i].distance) {
+            continue;
+        }
+
+        // lightDirection is the direction from the fragment to the light
+        vec3 lightDirection = vec3(0.0);
+        if (lights[i].direction == vec3(0.0) || lights[i].falloffAngle > 0.0) { // Point / Spot Light
+            // We just use the direction of the spot light to calculate the falloff
+            lightDirection = normalize(lights[i].position - inPositionWorldSpace);
+        } else { // Direction Light
+            lightDirection = normalize(-lights[i].direction);
+        }
+
+        const vec3 halfViewLightDirection = normalize(viewDirection + lightDirection);
+
+        // Calculate light radiance
+        const float attenuation = lights[i].constantAttenuation + lights[i].linearAttenuation * lightDistance + lights[i].quadraticAttenuation * (lightDistance * lightDistance);
+        vec3 radiance = lights[i].color.xyz / attenuation;
+
+        // cook-torrance brdf
+        const float NDF = DistributionGGX(normalWorldSpace, halfViewLightDirection, roughness);
+        const float G = GeometrySmith(normalWorldSpace, viewDirection, lightDirection, roughness);
+        const vec3 F = fresnelSchlick(max(dot(halfViewLightDirection, viewDirection), 0.0), F0);
+
+        const vec3 kS = F;
+        const vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);
+
+        const float denominator = 4 * max(dot(normalWorldSpace, viewDirection), 0.0) * max(dot(normalWorldSpace, lightDirection), 0.0) + 0.001;
+        const vec3 specular = NDF * G * F / denominator;
+
+        // add to outgoing radiance Lo
+        const float NdotL = max(dot(normalWorldSpace, lightDirection), 0.0);
+        const vec3 lightFinalColor = (kD * albedo.xyz / PI + specular) * radiance * NdotL;
+
+        if (lights[i].falloffAngle > 0.0) { // Spot Light
+            const float theta = dot(-lightDirection, normalize(lights[i].direction));
+
+            if (theta > cos(lights[i].falloffAngle)) {
+                const float intensity = max(0.0, pow(theta, lights[i].falloffExponent));
+                Lo += lightFinalColor * intensity;
+            }
+        } else { // Direction / Point Light
+            Lo += lightFinalColor;
+        }
+    }
+
+    vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo;
+
+    // Tone mapping and gamma correction
+    color = color / (color + vec3(1.0));
+    color = pow(color, vec3(1.0 / 2.2));
+
+    // Final output
+    outColor = vec4(color, 1.0);
 }

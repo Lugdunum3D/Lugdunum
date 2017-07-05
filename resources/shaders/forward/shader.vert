@@ -12,7 +12,7 @@ layout (push_constant) uniform modelBlock {
     mat4 transform;
 } model;
 
-layout(set = 0, binding = 0) uniform cameraBlock {
+layout(std140, set = 0, binding = 0) uniform cameraBlock {
     mat4 view;
     mat4 proj;
 } camera;

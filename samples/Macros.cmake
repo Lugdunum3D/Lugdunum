@@ -94,7 +94,7 @@ endmacro()
 # macro to add a sample
 macro(lug_add_sample target)
     # parse the arguments
-    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;SHADERS;LUG_RESOURCES;OTHER_RESOURCES" ${ARGN})
+    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;SHADERS;EXTERNAL_LIBS;LUG_RESOURCES;OTHER_RESOURCES" ${ARGN})
 
     # find vulkan
     find_package(Vulkan)
@@ -139,6 +139,11 @@ macro(lug_add_sample target)
     endif()
 
     lug_add_compile_options(${target})
+
+    # link the target to its external dependencies
+    if(THIS_EXTERNAL_LIBS)
+        target_link_libraries(${target} ${THIS_EXTERNAL_LIBS})
+    endif()
 
     # use lugdunum
     include_directories(${LUG_INCLUDE_DIR})

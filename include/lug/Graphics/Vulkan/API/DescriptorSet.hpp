@@ -54,7 +54,7 @@ public:
      * @param[in]  dstBinding      The destination binding
      * @param[in]  dstArrayElement The starting element in the descriptor set binding array
      * @param[in]  descriptorType  The descriptor type
-     * @param[in]  imageInfos     The images to bind to the descriptor set
+     * @param[in]  imageInfos      The images to bind to the descriptor set
      */
     void updateImages(
         uint32_t dstBinding,

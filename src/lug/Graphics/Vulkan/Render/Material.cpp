@@ -15,7 +15,11 @@ Material::~Material() {
 }
 
 void Material::destroy() {
-    // TODO(Nokitoo): free device memory and buffer
+
+}
+
+Pipeline::Id::MaterialPart Material::getPipelineId() {
+    return _pipelineIdMaterialPart;
 }
 
 } // Render

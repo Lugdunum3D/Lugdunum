@@ -1,11 +1,3 @@
-inline Render::Queue& Camera::getRenderQueue() {
-    return _renderQueue;
-}
-
-inline const Render::Queue& Camera::getRenderQueue() const {
-    return _renderQueue;
-}
-
 inline float Camera::getZFar() const {
     return _zfar;
 }
@@ -27,6 +19,10 @@ inline void Camera::setZNear(float znear) {
 inline void Camera::setRenderView(View* renderView) {
     _renderView = renderView;
     needUpdateProj();
+}
+
+inline Scene::Node* Camera::getParent() const {
+    return _parent;
 }
 
 inline void Camera::setParent(Scene::Node* parent) {
@@ -51,9 +47,11 @@ inline const Math::Mat4x4f& Camera::getViewMatrix() {
 }
 
 inline void Camera::needUpdateProj() {
+    ::lug::Graphics::Render::DirtyObject::setDirty();
     _needUpdateProj = true;
 }
 
 inline void Camera::needUpdateView() {
+    ::lug::Graphics::Render::DirtyObject::setDirty();
     _needUpdateView = true;
 }

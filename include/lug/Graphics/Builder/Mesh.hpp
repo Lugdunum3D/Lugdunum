@@ -37,7 +37,7 @@ public:
         // TODO: Non raw mode
 
         // Raw mode
-        void addAttributeBuffer(void* data, uint32_t size, Render::Mesh::PrimitiveSet::Attribute::Type type);
+        void addAttributeBuffer(void* data, uint32_t elementSize, uint32_t elementsCount, Render::Mesh::PrimitiveSet::Attribute::Type type);
 
         Render::Mesh::PrimitiveSet::Mode getMode() const;
         Resource::SharedPtr<Render::Material> getMaterial() const;

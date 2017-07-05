@@ -187,16 +187,18 @@ bool Pipeline::init() {
 
         // Bindings set 1 : Light uniform buffer (F)
         {
-            // Light uniform buffer
-            const VkDescriptorSetLayoutBinding binding{
-                /* binding.binding */ 0,
-                /* binding.descriptorType */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-                /* binding.descriptorCount */ 1,
-                /* binding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
-                /* binding.pImmutableSamplers */ nullptr
+            const std::vector<VkDescriptorSetLayoutBinding> bindings{
+                // Light array uniform buffer
+                {
+                    /* binding.binding */ 0,
+                    /* binding.descriptorType */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+                    /* binding.descriptorCount */ 1,
+                    /* binding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
+                    /* binding.pImmutableSamplers */ nullptr
+                }
             };
 
-            descriptorSetLayoutBuilder.setBindings({binding});
+            descriptorSetLayoutBuilder.setBindings(bindings);
             if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[1], &result)) {
                 LUG_LOG.error("Vulkan::Render::Pipeline: Can't create pipeline descriptor sets layout 1: {}", result);
                 return false;
