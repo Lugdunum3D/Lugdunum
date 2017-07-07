@@ -815,7 +815,7 @@ bool Gui::updateBuffers(uint32_t currentImageIndex) {
                 }
 
                 API::Builder::DeviceMemory deviceMemoryBuilder(device);
-                deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+                deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
                 deviceMemoryBuilder.addBuffer(frameData.vertexBuffer);
 
                 VkResult result{VK_SUCCESS};
@@ -836,7 +836,7 @@ bool Gui::updateBuffers(uint32_t currentImageIndex) {
                     API::Builder::Buffer bufferBuilder(device);
                     bufferBuilder.setQueueFamilyIndices({ _transferQueue->getQueueFamily()->getIdx() });
                     bufferBuilder.setSize(indexBufferSize);
-                    bufferBuilder.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
+                    bufferBuilder.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
                     VkResult result{VK_SUCCESS};
                     if (!bufferBuilder.build(frameData.indexBuffer, &result)) {
@@ -871,8 +871,8 @@ bool Gui::updateBuffers(uint32_t currentImageIndex) {
 
         for (int n = 0; n < imDrawData->CmdListsCount; n++) {
             const ImDrawList* cmd_list = imDrawData->CmdLists[n];
-            memcpy(vertexMemoryPtr, cmd_list->VtxBuffer.Data, vertexBufferSize);
-            memcpy(indexMemoryPtr, cmd_list->IdxBuffer.Data, indexBufferSize);
+            memcpy(vertexMemoryPtr, cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
+            memcpy(indexMemoryPtr, cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
             vertexMemoryPtr += cmd_list->VtxBuffer.Size;
             indexMemoryPtr += cmd_list->IdxBuffer.Size;
         }
