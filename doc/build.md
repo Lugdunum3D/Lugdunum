@@ -1,3 +1,11 @@
+---
+title: Building Lugdunum
+menu:
+- title: Documentation
+  href: /doc
+  class: documentation button button-green align-right
+---
+
 # Dependencies for Lugdunum
 
 ## Introduction

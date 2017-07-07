@@ -1,5 +1,9 @@
 ---
 title: C++ Code Guidelines
+menu:
+- title: Documentation
+  href: /doc
+  class: documentation button button-green align-right
 ---
 
 # Header files

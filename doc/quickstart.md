@@ -1,3 +1,11 @@
+---
+title: Quick Start
+menu:
+- title: Documentation
+  href: /doc
+  class: documentation button button-green align-right
+---
+
 # Quickstart
 
 Welcome to Lugdunum's quickstart tutorial! Here we will show you through a number of examples how to use our 3D engine for your own projects.

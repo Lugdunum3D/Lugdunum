@@ -1,3 +1,11 @@
+---
+title: Architecture of Lugdunum
+menu:
+- title: Documentation
+  href: /doc
+  class: documentation button button-green align-right
+---
+
 # Architecture of Lugdunum
 
 The purpose of this section is to introduce you to the internal operation of our 3D engine. We will first talk about the architecture of the renderer. Then we will describe the sequencing of the engine graphic's loop, how each component of the [`Renderer::Target`](#lug::Graphics::Renderer::Target) is interacting with the [`Render::Window`](#lug::Graphics::Render::Window) composed of different [`Renderer::View`](#lug::Graphics::Renderer::View). Then, we will discuss the GPU & CPU's side operation. We will explain how each buffer is loaded and used by our engine.
