@@ -28,7 +28,7 @@ WindowImpl::~WindowImpl() {
 
         // Unregister window class if we were the last window
         if (windowCount == 0) {
-            UnregisterClassW(className, GetModuleHandleW(NULL));
+            UnregisterClassW(className, GetModuleHandleW(nullptr));
         }
     } else {
         // The window is external: remove the hook on its message callback
@@ -363,6 +363,15 @@ void WindowImpl::setKeyRepeat(bool state) {
     _keyRepeat = state;
 }
 
+void WindowImpl::setMouseCursorVisible(bool visible) {
+    _cursor = visible ? LoadCursor(nullptr, IDC_ARROW) : nullptr;
+    SetCursor(_cursor);
+}
+
+void WindowImpl::setMousePos(const Math::Vec2i& mousePosition) {
+    SetCursorPos(mousePosition.x(), mousePosition.y());
+}
+
 HWND WindowImpl::getHandle() const {
     return _handle;
 }
@@ -403,6 +412,12 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_DESTROY:
             e.type = Event::Type::Destroy;
+            break;
+
+        case WM_SETCURSOR:
+            // The mouse has moved, if the cursor is in our window we must refresh the cursor
+            if (LOWORD(lParam) == HTCLIENT)
+                SetCursor(_cursor);
             break;
 
         case WM_KEYDOWN:
@@ -477,14 +492,14 @@ void WindowImpl::registerWindow() const {
     windowClass.cbClsExtra = 0;
     windowClass.cbWndExtra = 0;
     windowClass.hInstance = _hinstance;
-    windowClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
-    windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+    windowClass.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
+    windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
     windowClass.hbrBackground = 0;
     windowClass.lpszMenuName = nullptr;
     windowClass.lpszClassName = className;
 
     if (!RegisterClassW(&windowClass)) {
-        MessageBox(NULL, "Failed To Register The Window Class.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, "Failed To Register The Window Class.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
     }
 }
 
@@ -500,12 +515,12 @@ bool WindowImpl::activateFullscreen() {
     // Apply full-screen mode
     if (ChangeDisplaySettingsW(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL) {
         // If The Mode Fails, Offer Two Options.  Quit Or Use Windowed Mode.
-        if (MessageBox(NULL, "Full-screen mode has failed to be initialized. Use Windowed Mode Instead?", "Warning", MB_YESNO | MB_ICONEXCLAMATION) == IDYES) {
+        if (MessageBox(nullptr, "Full-screen mode has failed to be initialized. Use Windowed Mode Instead?", "Warning", MB_YESNO | MB_ICONEXCLAMATION) == IDYES) {
             _fullscreen = false;
             return false;
         } else {
             // Pop Up A Message Box Letting User Know The Program Is Closing.
-            MessageBox(NULL, "Program Will Now Close.", "ERROR", MB_OK | MB_ICONSTOP);
+            MessageBox(nullptr, "Program Will Now Close.", "ERROR", MB_OK | MB_ICONSTOP);
             return false;
         }
     }

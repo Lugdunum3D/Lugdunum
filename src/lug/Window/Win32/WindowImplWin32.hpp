@@ -4,7 +4,9 @@
     #define WIN32_LEAN_AND_MEAN
 #endif
 #include <Windows.h>
+#include <lug/Math/Vector.hpp>
 #include <lug/Window/Window.hpp>
+
 
 namespace lug {
 namespace Window {
@@ -25,6 +27,8 @@ public:
 
     bool pollEvent(lug::Window::Event&);
     void setKeyRepeat(bool state);
+    void setMouseCursorVisible(bool visible);
+    void setMousePos(const Math::Vec2i& mousePosition);
 
     HWND getHandle() const;
     HINSTANCE getHinstance() const;

@@ -258,5 +258,16 @@ const Math::Vec2i& Window::getMousePos() const {
     return _mousePosition;
 }
 
+void Window::setMousePos(const Math::Vec2i& mousePosition) {
+    if (_impl != nullptr) {
+        _impl->setMousePos(mousePosition);
+    }
+    _mousePosition = mousePosition;
+}
+
+Math::Vec2i Window::getWindowSize() const {
+    return {_mode.width, _mode.height};
+}
+
 } // Window
 } // lug

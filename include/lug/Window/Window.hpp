@@ -137,6 +137,27 @@ public:
     */
     const Math::Vec2i& getMousePos() const;
 
+    /**
+     * @brief      Sets the mouse position.
+     *
+     * @param[in]  mousePosition  The position of the cursor (relative to the window)
+     */
+    void setMousePos(const Math::Vec2i& mousePosition);
+
+    /**
+     * @brief      Gets the window size.
+     *
+     * @return     The window size.
+     */
+    Math::Vec2i getWindowSize() const;
+
+    /**
+     * @brief      Sets the visibility of the mouse cursor (hide/show)
+     *
+     * @param[in]  visible  The state
+     */
+    void setMouseCursorVisible(bool visible);
+
 protected:
     Window();
     bool init(const InitInfo& initInfo);
