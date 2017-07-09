@@ -101,9 +101,11 @@ make
 
 Target | Toolchain
 ------------ | -------------
-Windows 10 | Visual Studio 2015
 Windows 10 | [Visual Studio 2017](https://www.visualstudio.com/downloads/)
- 
+
+:::info
+Visual Studio 2015 is **NOT** supported anymore, Visual Studio 2017 is the only supported toolchain.
+::: 
 
 ### Building
 
