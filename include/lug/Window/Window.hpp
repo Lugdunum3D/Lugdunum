@@ -4,6 +4,7 @@
 #include <queue>
 #include <string>
 #include <unordered_map>
+#include <lug/Math/Vector.hpp>
 #include <lug/Window/Event.hpp>
 #include <lug/Window/Export.hpp>
 #include <lug/Window/Keyboard.hpp>
@@ -130,13 +131,11 @@ public:
     bool isMousePressed(Mouse::Button button) const;
 
     /**
-    * @brief      Used to retrieve the mouses position
+    * @brief      Retrieves the mouses position
     *
-    * @param[in]  x   The parameter that will be set to the mouse's position on the x axis.
-    * @param[in]  y   The parameter that will be set to the mouse's position on the x axis.
-    *
+    * @return     Position of the cursor (relative to the window).
     */
-    void getMousePos(uint32_t &x, uint32_t &y) const;
+    const Math::Vec2i& getMousePos() const;
 
 protected:
     Window();
@@ -175,10 +174,7 @@ protected:
     /**
     * Used to store the mouse's position, used by #getMousePos.
     */
-    struct {
-        uint32_t x;
-        uint32_t y;
-    } _mouseCoord;
+    Math::Vec2i _mousePosition{0, 0};
     friend lug::Window::priv::WindowImpl;
 };
 

@@ -217,8 +217,8 @@ bool Window::pollEvent(Event& event) {
         }
 
         if (event.type == Event::Type::MouseMoved) {
-            _mouseCoord.x = event.mouse.coord.x;
-            _mouseCoord.y = event.mouse.coord.y;
+            _mousePosition.x() = event.mouse.coord.x;
+            _mousePosition.y() = event.mouse.coord.y;
         }
 
         return value;
@@ -229,6 +229,12 @@ bool Window::pollEvent(Event& event) {
 void Window::setKeyRepeat(bool enable) {
     if (_impl != nullptr) {
         _impl->setKeyRepeat(enable);
+    }
+}
+
+void Window::setMouseCursorVisible(bool visible) {
+    if (_impl != nullptr) {
+        _impl->setMouseCursorVisible(visible);
     }
 }
 
@@ -248,10 +254,9 @@ bool Window::isMousePressed(Mouse::Button button) const {
     return (_mouseState.at(button));
 }
 
-void Window::getMousePos(uint32_t & x, uint32_t & y) const {
-    x = _mouseCoord.x;
-    y = _mouseCoord.y;
+const Math::Vec2i& Window::getMousePos() const {
+    return _mousePosition;
 }
 
-} // namespace Window
-} // namespace lug
+} // Window
+} // lug

@@ -38,6 +38,6 @@ endif()
 # define the target
 lug_add_library(lug-window
                 SOURCES ${SRC} ${INC}
-                DEPENDS lug-system
+                DEPENDS lug-system lug-math
                 EXTERNAL_LIBS ${EXT_LIBRARIES}
 )
