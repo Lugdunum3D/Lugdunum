@@ -12,6 +12,9 @@ if(ANDROID)
     populate_android_infos()
 endif()
 
+# set the path of thirdparty
+lug_set_option(LUG_THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty" STRING "Choose the path for the thirdparty directory")
+
 # project name
 project(hello)
 

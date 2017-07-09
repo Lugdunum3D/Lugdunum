@@ -193,16 +193,16 @@ bool Application::initSphereMesh() {
             {
                 for (int x = 0; x <= X_SEGMENTS; ++x)
                 {
-                    indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
-                    indices.push_back(y       * (X_SEGMENTS + 1) + x);
+                    indices.push_back(static_cast<uint16_t>((y + 1) * (X_SEGMENTS + 1) + x));
+                    indices.push_back(static_cast<uint16_t>(y       * (X_SEGMENTS + 1) + x));
                 }
             }
             else
             {
                 for (int x = X_SEGMENTS; x >= 0; --x)
                 {
-                    indices.push_back(y       * (X_SEGMENTS + 1) + x);
-                    indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+                    indices.push_back(static_cast<uint16_t>(y       * (X_SEGMENTS + 1) + x));
+                    indices.push_back(static_cast<uint16_t>((y + 1) * (X_SEGMENTS + 1) + x));
                 }
             }
             oddRow = !oddRow;
@@ -221,21 +221,21 @@ bool Application::initSphereMesh() {
         primitiveSet->addAttributeBuffer(
             indices.data(),
             sizeof(uint16_t),
-            indices.size(),
+            static_cast<uint32_t>(indices.size()),
             lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice
         );
 
         primitiveSet->addAttributeBuffer(
             positions.data(),
             sizeof(lug::Math::Vec3f),
-            positions.size(),
+            static_cast<uint32_t>(positions.size()),
             lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Position
         );
 
         primitiveSet->addAttributeBuffer(
             normals.data(),
             sizeof(lug::Math::Vec3f),
-            normals.size(),
+            static_cast<uint32_t>(normals.size()),
             lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Normal
         );
 

@@ -19,7 +19,7 @@ class LUG_GRAPHICS_API Mesh {
     friend Resource::SharedPtr<lug::Graphics::Render::Mesh> lug::Graphics::Vulkan::Builder::Mesh::build(const ::lug::Graphics::Builder::Mesh&);
 
 public:
-    class PrimitiveSet {
+    class LUG_GRAPHICS_API PrimitiveSet {
     public:
         PrimitiveSet() = default;
 

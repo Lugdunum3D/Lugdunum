@@ -252,22 +252,22 @@ build_script:
     cd ..
 
 # Build samples
-# - ps: |
-#     cd samples
+- ps: |
+    cd samples
 
-#     md build -Force | Out-Null
-#     cd build
+    md build -Force | Out-Null
+    cd build
 
-#     & cmake -G "$generator" -DLUG_ROOT="$pwd/../../install" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DBUILD_SHADERS=false ..
-#     if ($LastExitCode -ne 0) {
-#         throw "Exec: $ErrorMessage"
-#     }
-#     & cmake --build . --config $env:CONFIGURATION
-#     if ($LastExitCode -ne 0) {
-#         throw "Exec: $ErrorMessage"
-#     }
+    & cmake -G "$generator" -DLUG_ROOT="$pwd/../../install" -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -DBUILD_SHADERS=false ..
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
+    & cmake --build . --config $env:CONFIGURATION
+    if ($LastExitCode -ne 0) {
+        throw "Exec: $ErrorMessage"
+    }
 
-#     cd ../..
+    cd ../..
 
 # scripts to run after build
 after_build:

@@ -250,28 +250,28 @@ bool Application::initCubeMesh() {
         primitiveSet->addAttributeBuffer(
             indices.data(),
             sizeof(uint16_t),
-            indices.size(),
+            static_cast<uint32_t>(indices.size()),
             lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice
         );
 
         primitiveSet->addAttributeBuffer(
             positions.data(),
             sizeof(lug::Math::Vec3f),
-            positions.size(),
+            static_cast<uint32_t>(positions.size()),
             lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Position
         );
 
         primitiveSet->addAttributeBuffer(
             normals.data(),
             sizeof(lug::Math::Vec3f),
-            normals.size(),
+            static_cast<uint32_t>(normals.size()),
             lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Normal
         );
 
         primitiveSet->addAttributeBuffer(
             colors.data(),
             sizeof(lug::Math::Vec4f),
-            colors.size(),
+            static_cast<uint32_t>(colors.size()),
             lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Color
         );
 
