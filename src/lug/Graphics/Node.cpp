@@ -180,6 +180,8 @@ void Node::update() {
         _absoluteScale = _scale;
     }
 
+    _absoluteRotation.normalize();
+
     _transform = Math::Geometry::translate(_absolutePosition) * _absoluteRotation.transform() * Math::Geometry::scale(_absoluteScale);
 
     _needUpdate = false;
