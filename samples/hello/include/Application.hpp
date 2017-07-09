@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lug/Core/Application.hpp>
+#include <lug/Core/FreeMovement.hpp>
 
 class Application : public ::lug::Core::Application {
 public:
@@ -21,5 +22,5 @@ public:
 
 private:
     lug::Graphics::Resource::SharedPtr<lug::Graphics::Scene::Scene> _scene;
-    float _rotation{0.0f};
+    lug::Core::FreeMovement _cameraMover;
 };

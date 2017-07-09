@@ -73,6 +73,16 @@ bool Application::init(int argc, char* argv[]) {
 
         node->attachCamera(camera);
 
+        // Set initial position of the camera
+        node->setPosition({2.0f, 0.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+        // Look at once
+        node->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+
+        // Attach the camera node to the mover
+        _cameraMover.setTargetNode(*node);
+        _cameraMover.setEventSource(*_graphics.getRenderer()->getWindow());
+
+
         // Attach camera to RenderView
         {
             auto& renderViews = _graphics.getRenderer()->getWindow()->getRenderViews();
@@ -128,20 +138,5 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
-    _rotation += (0.05f * elapsedTime.getMilliseconds<float>());
-
-    if (_rotation > 360.0f) {
-        _rotation -= 360.0f;
-    }
-
-    auto& renderViews = _graphics.getRenderer()->getWindow()->getRenderViews();
-
-    for (int i = 0; i < 1; ++i) {
-        float x = 2.0f * cos(lug::Math::Geometry::radians((i % 2) ? _rotation : -_rotation));
-        float y = 2.0f * sin(lug::Math::Geometry::radians((i % 2) ? _rotation : -_rotation));
-
-        //_scene->getSceneNode("camera")->setPosition({x, 10.0f, y}, lug::Graphics::Node::TransformSpace::World);
-        _scene->getSceneNode("camera")->setPosition({x, 1.0f, y}, lug::Graphics::Node::TransformSpace::World);
-        renderViews[i]->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
-    }
+    _cameraMover.onFrame(elapsedTime);
 }
