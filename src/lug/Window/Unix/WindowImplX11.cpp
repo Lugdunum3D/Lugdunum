@@ -449,6 +449,7 @@ bool WindowImpl::pollEvent(Event& event) {
             } else {
                 return false;
             }
+            break;
 
         case ButtonPress:
             switch (xEvent.xbutton.button) {
