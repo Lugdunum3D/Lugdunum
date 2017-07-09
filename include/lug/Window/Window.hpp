@@ -95,7 +95,7 @@ public:
      *
      * @return     True if an event was polled, false otherwise.
      */
-    virtual bool pollEvent(lug::Window::Event&);
+    virtual bool pollEvent(lug::Window::Event& event);
 
     /**
      * @brief      Close the window gracefully.
@@ -105,7 +105,7 @@ public:
     /**
      * @brief      Enables or disables key repeat.
      *
-     * The key repeat is set to false by default (i.e. the default, untouched, behaviour)
+     * The key repeat is set to false by default (i.e. the default, unpressed, behavior)
      *
      * @param[in]  state  Desired state
      */
@@ -143,12 +143,12 @@ protected:
     bool init(const InitInfo& initInfo);
 
     /**
-     * @brief      Inits every key in @p _keyState to false
+     * @brief       Inits every key in @p _keyState to false
      */
     void initKeyState();
 
     /**
-    * @brief      Inits every button in @p _mouseState to false
+    * @brief        Inits every button in @p _mouseState to false
     */
     void initMouseState();
 
@@ -158,7 +158,7 @@ protected:
     priv::WindowImpl* _impl{nullptr};
 
     /**
-     * Default videomode.
+     * Default video mode.
      */
     VideoMode _mode{800, 600, 8, 8, 8, 60};
 

@@ -7,7 +7,7 @@
 #elif defined(LUG_SYSTEM_ANDROID)
     #include <lug/Window/Android/WindowImplAndroid.hpp>
 #else
-    // Theorically this should never happen since the Config.cmake will
+    // Theoretically this should never happen since the Config.cmake will
     // warn the user before, but #error anyway
     #error "Unsupported operating system or environment"
 #endif
@@ -36,7 +36,7 @@ std::unique_ptr<Window> Window::create(const InitInfo& initInfo) {
 bool Window::init(const InitInfo& initInfo) {
     if (_impl != nullptr) {
 
-        // Specifiy the width and height of our window, for now it's the only thing we can specify along with the title and style that is
+        // Specify the width and height of our window, for now it's the only thing we can specify along with the title and style that is
         _mode.width = initInfo.width;
         _mode.height = initInfo.height;
 

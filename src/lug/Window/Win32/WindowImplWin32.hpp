@@ -54,7 +54,7 @@ private:
     LONG_PTR _callback{0};         ///< Stores the original event callback function of the control
     HCURSOR _cursor{nullptr};      ///< The system cursor to display into the window
     HICON _icon{nullptr};          ///< Custom icon assigned to the window
-    bool _fullscreen{false};       ///< Is the window fullscreen?
+    bool _fullscreen{false};       ///< Is the window full-screen?
 
     static uint8_t windowCount;
     static lug::Window::priv::WindowImpl*  fullscreenWindow;
