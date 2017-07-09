@@ -316,9 +316,11 @@ endif()
 
 include_directories(${GLTF2-LOADER_INCLUDE_DIR})
 
+find_package(Threads)
+
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY}
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY} ${CMAKE_THREAD_LIBS_INIT}
 )

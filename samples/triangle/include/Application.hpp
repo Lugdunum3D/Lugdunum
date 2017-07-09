@@ -1,8 +1,7 @@
 #pragma once
 
 #include <lug/Core/Application.hpp>
-#include <lug/Graphics/Render/Camera.hpp>
-#include <lug/Graphics/Scene/Scene.hpp>
+#include <lug/Graphics/Render/Mesh.hpp>
 
 class Application : public ::lug::Core::Application {
 public:
@@ -14,16 +13,14 @@ public:
     Application& operator=(const Application&) = delete;
     Application& operator=(Application&&) = delete;
 
-    ~Application() override final;
+    ~Application() override final = default;
 
     bool init(int argc, char* argv[]);
+    bool initTriangleMesh();
 
     void onEvent(const lug::Window::Event& event) override final;
     void onFrame(const lug::System::Time& elapsedTime) override final;
 
 private:
-    std::unique_ptr<lug::Graphics::Scene::Scene> _scene;
-
-    // Temporary store mesh because we don't have resource manager yet
-    std::unique_ptr<lug::Graphics::Render::Mesh> _triangle;
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> _triangleMesh;
 };

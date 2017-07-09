@@ -39,13 +39,10 @@ set(LUG_RESOURCES
 
 include_directories(include)
 
-find_package(Threads)
-
 lug_add_sample(spheres_pbr
                SOURCES ${SRC} ${INC}
                DEPENDS core graphics system window math
                SHADERS ${SHADERS}
                LUG_RESOURCES ${LUG_RESOURCES}
-               EXTERNAL_LIBS ${CMAKE_THREAD_LIBS_INIT}
 )
 

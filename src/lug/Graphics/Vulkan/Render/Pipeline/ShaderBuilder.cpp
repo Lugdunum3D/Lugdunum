@@ -55,6 +55,7 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string
             options.AddMacroDefinition("IN_NORMAL", std::to_string(primitivePart.normalVertexData));
             options.AddMacroDefinition("IN_TANGENT", std::to_string(primitivePart.tangentVertexData));
             options.AddMacroDefinition("IN_UV", std::to_string(primitivePart.countTexCoord));
+            options.AddMacroDefinition("IN_COLOR", std::to_string(primitivePart.countColor));
         }
 
         // Material Part
@@ -85,6 +86,10 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string
 
             for (uint8_t i = 0; i < primitivePart.countTexCoord; ++i) {
                 options.AddMacroDefinition("IN_UV_" + std::to_string(i) + "_LOCATION", std::to_string(location++));
+            }
+
+            for (uint8_t i = 0; i < primitivePart.countColor; ++i) {
+                options.AddMacroDefinition("IN_COLOR_" + std::to_string(i) + "_LOCATION", std::to_string(location++));
             }
         }
 

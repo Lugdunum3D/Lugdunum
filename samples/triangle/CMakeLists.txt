@@ -32,11 +32,9 @@ set(INC
 )
 source_group("inc" FILES ${INC})
 
-set(SHADERS
-    shader.vert
-    shader-directional.frag
-    shader-point.frag # not used but must be present
-    shader-spot.frag # not used but must be present
+set(LUG_RESOURCES
+    shaders/forward/shader.frag
+    shaders/forward/shader.vert
 )
 
 include_directories(include)
@@ -45,4 +43,5 @@ lug_add_sample(triangle
                SOURCES ${SRC} ${INC}
                DEPENDS core graphics system window math
                SHADERS ${SHADERS}
+               LUG_RESOURCES ${LUG_RESOURCES}
 )

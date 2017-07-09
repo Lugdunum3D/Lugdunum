@@ -1,6 +1,5 @@
 #include "Application.hpp"
 
-// TODO: Remove this when the ResourceManager is done
 #include <lug/Graphics/Builder/Camera.hpp>
 #include <lug/Graphics/Builder/Light.hpp>
 #include <lug/Graphics/Builder/Material.hpp>
@@ -47,7 +46,6 @@ bool Application::init(int argc, char* argv[]) {
         return false;
     }
 
-    // Load scene
     lug::Graphics::Renderer* renderer = _graphics.getRenderer();
 
     // Build the scene
@@ -57,7 +55,7 @@ bool Application::init(int argc, char* argv[]) {
 
         _scene = sceneBuilder.build();
         if (!_scene) {
-            LUG_LOG.error("Application: Can't create the scene resource");
+            LUG_LOG.error("Application: Can't create the scene");
             return false;
         }
     }
@@ -75,8 +73,6 @@ bool Application::init(int argc, char* argv[]) {
 
         lug::Graphics::Builder::Material materialBuilder(*renderer);
         materialBuilder.setBaseColorFactor({1.0f, 0.0f, 0.0f, 1.0f});
-
-        lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Material> material;
 
         // Attach the spheres
         for (int row = 0; row < nbRows; ++row)
@@ -261,9 +257,5 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
-    _rotation += (0.05f * elapsedTime.getMilliseconds<float>());
-
-    if (_rotation > 360.0f) {
-        _rotation -= 360.0f;
-    }
+    (void)(elapsedTime);
 }

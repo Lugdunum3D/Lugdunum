@@ -8,6 +8,7 @@ inline Pipeline::Id Pipeline::getBaseId() {
     primitivePart.normalVertexData = 1;
     primitivePart.tangentVertexData = 0;
     primitivePart.countTexCoord = 0;
+    primitivePart.countColor = 0;
     primitivePart.primitiveMode = 4; // Triangles
 
     Pipeline::Id::MaterialPart materialPart;

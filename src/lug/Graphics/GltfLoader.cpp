@@ -164,6 +164,8 @@ static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gl
                 type = Render::Mesh::PrimitiveSet::Attribute::Type::Tangent;
             } else if (attribute.first.find("TEXCOORD_") != std::string::npos) {
                 type = Render::Mesh::PrimitiveSet::Attribute::Type::TexCoord;
+            } else if (attribute.first.find("COLOR_") != std::string::npos) {
+                type = Render::Mesh::PrimitiveSet::Attribute::Type::Color;
             } else {
                 LUG_LOG.warn("GltfLoader::createMesh Unsupported attribute {}", attribute.first);
                 continue;

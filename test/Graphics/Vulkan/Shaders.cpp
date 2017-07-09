@@ -26,36 +26,40 @@ static std::vector<Vulkan::Render::Pipeline::Id> generatePipelineIds() {
             for (uint8_t tangentVertexData = 0; tangentVertexData <= 1; ++tangentVertexData) {
                 primitivePart.tangentVertexData = tangentVertexData;
 
-                for (uint8_t countTexCoord = 0; countTexCoord <= 3; ++countTexCoord) {
-                    primitivePart.countTexCoord = countTexCoord;
+                for (uint8_t countColor = 0; countColor <= 3; ++countColor) {
+                    primitivePart.countColor = countColor;
 
-                    if (countTexCoord == 0) {
-                        materialPart.baseColorInfo = 0b11;
-                        materialPart.metallicRoughnessInfo = 0b11;
-                        materialPart.normalInfo = 0b11;
-                        materialPart.occlusionInfo = 0b11;
-                        materialPart.emissiveInfo = 0b11;
+                    for (uint8_t countTexCoord = 0; countTexCoord <= 3; ++countTexCoord) {
+                        primitivePart.countTexCoord = countTexCoord;
 
-                        pipelineIds.push_back(Vulkan::Render::Pipeline::Id::create(primitivePart, materialPart));
-                        continue;
-                    }
+                        if (countTexCoord == 0) {
+                            materialPart.baseColorInfo = 0b11;
+                            materialPart.metallicRoughnessInfo = 0b11;
+                            materialPart.normalInfo = 0b11;
+                            materialPart.occlusionInfo = 0b11;
+                            materialPart.emissiveInfo = 0b11;
 
-                    for (uint8_t baseColorInfo = 0; baseColorInfo <= countTexCoord; ++baseColorInfo) {
-                        materialPart.baseColorInfo = baseColorInfo != countTexCoord ? baseColorInfo : 0b11;
+                            pipelineIds.push_back(Vulkan::Render::Pipeline::Id::create(primitivePart, materialPart));
+                            continue;
+                        }
 
-                        for (uint8_t metallicRoughnessInfo = 0; metallicRoughnessInfo <= countTexCoord; ++metallicRoughnessInfo) {
-                            materialPart.metallicRoughnessInfo = metallicRoughnessInfo != countTexCoord ? metallicRoughnessInfo : 0b11;
+                        for (uint8_t baseColorInfo = 0; baseColorInfo <= countTexCoord; ++baseColorInfo) {
+                            materialPart.baseColorInfo = baseColorInfo != countTexCoord ? baseColorInfo : 0b11;
 
-                            for (uint8_t normalInfo = 0; normalInfo <= countTexCoord; ++normalInfo) {
-                                materialPart.normalInfo = normalInfo != countTexCoord ? normalInfo : 0b11;
+                            for (uint8_t metallicRoughnessInfo = 0; metallicRoughnessInfo <= countTexCoord; ++metallicRoughnessInfo) {
+                                materialPart.metallicRoughnessInfo = metallicRoughnessInfo != countTexCoord ? metallicRoughnessInfo : 0b11;
 
-                                for (uint8_t occlusionInfo = 0; occlusionInfo <= countTexCoord; ++occlusionInfo) {
-                                    materialPart.occlusionInfo = occlusionInfo != countTexCoord ? occlusionInfo : 0b11;
+                                for (uint8_t normalInfo = 0; normalInfo <= countTexCoord; ++normalInfo) {
+                                    materialPart.normalInfo = normalInfo != countTexCoord ? normalInfo : 0b11;
 
-                                    for (uint8_t emissiveInfo = 0; emissiveInfo <= countTexCoord; ++emissiveInfo) {
-                                        materialPart.emissiveInfo = emissiveInfo != countTexCoord ? emissiveInfo : 0b11;
+                                    for (uint8_t occlusionInfo = 0; occlusionInfo <= countTexCoord; ++occlusionInfo) {
+                                        materialPart.occlusionInfo = occlusionInfo != countTexCoord ? occlusionInfo : 0b11;
 
-                                        pipelineIds.push_back(Vulkan::Render::Pipeline::Id::create(primitivePart, materialPart));
+                                        for (uint8_t emissiveInfo = 0; emissiveInfo <= countTexCoord; ++emissiveInfo) {
+                                            materialPart.emissiveInfo = emissiveInfo != countTexCoord ? emissiveInfo : 0b11;
+
+                                            pipelineIds.push_back(Vulkan::Render::Pipeline::Id::create(primitivePart, materialPart));
+                                        }
                                     }
                                 }
                             }

@@ -37,7 +37,8 @@ public:
                 Position,   ///< Position (VEC3<FLOAT>)
                 Normal,     ///< Normal (VEC3<FLOAT>)
                 TexCoord,   ///< UV (VEC2<FLOAT>)
-                Tangent     ///< Tangent (VEC4<FLOAT> w component is a sign value (-1 or +1) indicating handedness of the tangent basis)
+                Tangent,    ///< Tangent (VEC4<FLOAT> w component is a sign value (-1 or +1) indicating handedness of the tangent basis)
+                Color,      ///< Color (VEC4<FLOAT>)
             } type;
 
             /**
@@ -70,6 +71,7 @@ public:
         Attribute* position{nullptr};
         Attribute* normal{nullptr};
         std::vector<Attribute*> texCoords{};
+        std::vector<Attribute*> colors{};
         Attribute* tangent{nullptr};
 
         Resource::SharedPtr<Material> material{nullptr};

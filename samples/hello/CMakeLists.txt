@@ -33,10 +33,6 @@ set(INC
 source_group("inc" FILES ${INC})
 
 set(LUG_RESOURCES
-    models/triangleWithoutIndices.bin
-    models/TriangleWithoutIndices.gltf
-    models/simpleTriangle.bin
-    models/Triangle.gltf
     models/Box0.bin
     models/Box.gltf
     shaders/forward/shader.frag
@@ -45,13 +41,10 @@ set(LUG_RESOURCES
 
 include_directories(include)
 
-find_package(Threads)
-
 lug_add_sample(hello
                SOURCES ${SRC} ${INC}
                DEPENDS core graphics system window math
                SHADERS ${SHADERS}
                LUG_RESOURCES ${LUG_RESOURCES}
-               EXTERNAL_LIBS ${CMAKE_THREAD_LIBS_INIT}
 )
 

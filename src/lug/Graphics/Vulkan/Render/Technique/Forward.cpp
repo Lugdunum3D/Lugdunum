@@ -249,6 +249,10 @@ bool Forward::render(
                         vertexBuffers.push_back(static_cast<API::Buffer*>(texCoord->_data));
                     }
 
+                    for (const auto& color: primitiveSet.colors) {
+                        vertexBuffers.push_back(static_cast<API::Buffer*>(color->_data));
+                    }
+
                     const std::vector<VkDeviceSize> offsets(vertexBuffers.size());
                     frameData.renderCmdBuffer.bindVertexBuffers(vertexBuffers, offsets);
 

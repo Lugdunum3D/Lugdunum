@@ -57,6 +57,9 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
                 case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::TexCoord:
                     targetPrimitiveSet.texCoords.push_back(&targetPrimitiveSet.attributes[i]);
                     break;
+                case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Color:
+                    targetPrimitiveSet.colors.push_back(&targetPrimitiveSet.attributes[i]);
+                    break;
                 case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Tangent:
                     targetPrimitiveSet.tangent = &targetPrimitiveSet.attributes[i];
                     break;
@@ -95,6 +98,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
         primitiveSetData->pipelineIdPrimitivePart.normalVertexData = targetPrimitiveSet.normal != nullptr;
         primitiveSetData->pipelineIdPrimitivePart.tangentVertexData = targetPrimitiveSet.tangent != nullptr;
         primitiveSetData->pipelineIdPrimitivePart.countTexCoord = targetPrimitiveSet.texCoords.size();
+        primitiveSetData->pipelineIdPrimitivePart.countColor = targetPrimitiveSet.colors.size();
         primitiveSetData->pipelineIdPrimitivePart.primitiveMode = static_cast<uint32_t>(targetPrimitiveSet.mode);
 
         targetPrimitiveSet._data = static_cast<void*>(primitiveSetData);

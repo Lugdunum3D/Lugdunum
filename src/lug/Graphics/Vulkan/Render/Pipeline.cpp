@@ -91,6 +91,11 @@ bool Pipeline::init() {
             auto uvBinding = graphicsPipelineBuilder.addInputBinding(sizeof(Math::Vec2f), VK_VERTEX_INPUT_RATE_VERTEX);
             uvBinding.addAttributes(VK_FORMAT_R32G32_SFLOAT, 0);
         }
+
+        for (uint8_t i = 0; i < primitivePart.countColor; ++i) {
+            auto uvBinding = graphicsPipelineBuilder.addInputBinding(sizeof(Math::Vec4f), VK_VERTEX_INPUT_RATE_VERTEX);
+            uvBinding.addAttributes(VK_FORMAT_R32G32B32A32_SFLOAT, 0);
+        }
     }
 
     // Set input assembly state
