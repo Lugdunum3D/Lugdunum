@@ -1,7 +1,16 @@
 #include <lug/Graphics/Vulkan/Builder/Texture.hpp>
 
+#if defined(LUG_SYSTEM_WINDOWS)
+    #pragma warning(push)
+    #pragma warning(disable : 4244)
+    #pragma warning(disable : 4456)
+
+#endif
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#if defined(LUG_SYSTEM_WINDOWS)
+    #pragma warning(pop)
+#endif
 
 #include <lug/Graphics/Builder/Texture.hpp>
 #include <lug/Graphics/Renderer.hpp>
