@@ -323,7 +323,7 @@ find_package(Threads)
 
 # find imgui
 if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/imgui")
-    message(FATAL_ERROR "Can't find imgui, call `git submodule update --recursive`")
+    message(FATAL_ERROR "Can't find imgui in the thirdparty directory")
 endif()
 
 set(IMGUI_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/imgui/include)
