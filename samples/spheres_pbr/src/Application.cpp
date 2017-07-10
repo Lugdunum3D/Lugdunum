@@ -116,6 +116,9 @@ bool Application::init(int argc, char* argv[]) {
         lug::Graphics::Scene::Node* node = _scene->createSceneNode("camera");
         _scene->getRoot().attachChild(*node);
 
+        _mover.setTargetNode(*node);
+        _mover.setEventSource(*_graphics.getRenderer()->getWindow());
+
         node->attachCamera(camera);
 
         node->setPosition({0.0f, 0.0f, 25.0f}, lug::Graphics::Node::TransformSpace::World);
@@ -250,5 +253,5 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
-    (void)(elapsedTime);
+    _mover.onFrame(elapsedTime);
 }

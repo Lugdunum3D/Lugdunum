@@ -16,7 +16,7 @@ endif()
 lug_set_option(LUG_THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty" STRING "Choose the path for the thirdparty directory")
 
 # project name
-project(hello)
+project(spheres_pbr)
 
 # use config
 include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/Config.cmake)

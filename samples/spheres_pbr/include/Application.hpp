@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lug/Core/Application.hpp>
+#include <lug/Core/FreeMovement.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
 
@@ -25,4 +26,5 @@ public:
 private:
     lug::Graphics::Resource::SharedPtr<lug::Graphics::Scene::Scene> _scene;
     lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> _sphereMesh;
+    lug::Core::FreeMovement _mover;
 };

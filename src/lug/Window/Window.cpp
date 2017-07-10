@@ -212,8 +212,12 @@ bool Window::pollEvent(Event& event) {
 
         if (event.type == Event::Type::ButtonPressed) {
             _mouseState[event.mouse.code] = true;
+            _mousePosition.x() = event.mouse.coord.x;
+            _mousePosition.y() = event.mouse.coord.y;
         } else if (event.type == Event::Type::ButtonReleased) {
             _mouseState[event.mouse.code] = false;
+            _mousePosition.x() = event.mouse.coord.x;
+            _mousePosition.y() = event.mouse.coord.y;
         }
 
         if (event.type == Event::Type::MouseMoved) {
