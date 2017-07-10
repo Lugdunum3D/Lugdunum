@@ -39,12 +39,12 @@ void FreeMovement::onFrame(const System::Time& elapsedTime) {
 
 
     // Capture / Release the mouse cursor
-    if (_eventSource->isMousePressed(lug::Window::Mouse::Button::Left)) {
+    if (_eventSource->isMousePressed(lug::Window::Mouse::Button::Left) && !_hasFocus) {
         _lastMousePos = _eventSource->getMousePos();
         _hasFocus = true;
         _eventSource->setMouseCursorVisible(false);
     }
-    if (_eventSource->isKeyPressed(lug::Window::Keyboard::Key::LAlt)) {
+    if (_eventSource->isKeyPressed(lug::Window::Keyboard::Key::LAlt) && _hasFocus) {
         _hasFocus = false;
         _eventSource->setMouseCursorVisible(true);
     }
@@ -58,14 +58,14 @@ void FreeMovement::onFrame(const System::Time& elapsedTime) {
             _lastMousePos = mousePos;
 
             // Rotate in world space to freeze the rotation on the X axis
-            _target->rotate(elapsedTime.getSeconds<float>() * 5 * -delta.x(), {0, 1, 0}, lug::Graphics::Node::TransformSpace::World);
-            _target->rotate(elapsedTime.getSeconds<float>() * 5 * -delta.y(), {1, 0, 0});
+            _target->rotate(_speed * 0.4f * -delta.x(), {0, 1, 0}, lug::Graphics::Node::TransformSpace::World);
+            _target->rotate(_speed * 0.4f * -delta.y(), {1, 0, 0});
 
             Math::Vec2i windowSize = _eventSource->getWindowSize();
 
-            // If the mouse escapes a 5% zone on the edges of the screen, we reset-it on the middle
-            if (mousePos.x() < windowSize.width() * 0.05 || mousePos.x() > windowSize.width() * 0.95
-                || mousePos.y() < windowSize.height() * 0.05 || mousePos.y() > windowSize.height() * 0.95) {
+            // If the mouse escapes a 30% zone on the edges of the screen, we reset-it on the middle
+            if (mousePos.x() < windowSize.width() * 0.30 || mousePos.x() > windowSize.width() * 0.70
+                || mousePos.y() < windowSize.height() * 0.30 || mousePos.y() > windowSize.height() * 0.70) {
                 Math::Vec2i middle{windowSize.width() / 2, windowSize.height() / 2};
                 _eventSource->setMousePos(middle);
                 _lastMousePos = middle;
