@@ -65,8 +65,7 @@ void FreeMovement::onFrame(const System::Time& elapsedTime) {
 
             // If the mouse escapes a 5% zone on the edges of the screen, we reset-it on the middle
             if (mousePos.x() < windowSize.width() * 0.05 || mousePos.x() > windowSize.width() * 0.95
-                || mousePos.y() < windowSize.height() * 0.05 || mousePos.y() > windowSize.height() * 0.95)
-            {
+                || mousePos.y() < windowSize.height() * 0.05 || mousePos.y() > windowSize.height() * 0.95) {
                 Math::Vec2i middle{windowSize.width() / 2, windowSize.height() / 2};
                 _eventSource->setMousePos(middle);
                 _lastMousePos = middle;

@@ -75,8 +75,7 @@ bool Application::init(int argc, char* argv[]) {
         materialBuilder.setBaseColorFactor({1.0f, 0.0f, 0.0f, 1.0f});
 
         // Attach the spheres
-        for (int row = 0; row < nbRows; ++row)
-        {
+        for (int row = 0; row < nbRows; ++row) {
             materialBuilder.setMetallicFactor((float)row / (float)nbRows);
 
             for (int col = 0; col < nbColumns; ++col) {
@@ -171,10 +170,8 @@ bool Application::initSphereMesh() {
     {
         const int X_SEGMENTS = 64;
         const int Y_SEGMENTS = 64;
-        for (int y = 0; y <= Y_SEGMENTS; ++y)
-        {
-            for (int x = 0; x <= X_SEGMENTS; ++x)
-            {
+        for (int y = 0; y <= Y_SEGMENTS; ++y) {
+            for (int x = 0; x <= X_SEGMENTS; ++x) {
                 float xSegment = (float)x / (float)X_SEGMENTS;
                 float ySegment = (float)y / (float)Y_SEGMENTS;
                 float xPos = std::cos(xSegment * 2.0f * lug::Math::pi<float>()) * std::sin(ySegment * lug::Math::pi<float>());
@@ -187,24 +184,20 @@ bool Application::initSphereMesh() {
         }
 
         bool oddRow = false;
-        for (int y = 0; y < Y_SEGMENTS; ++y)
-        {
-            if (!oddRow) // even rows: y == 0, y == 2; and so on
-            {
-                for (int x = 0; x <= X_SEGMENTS; ++x)
-                {
+        for (int y = 0; y < Y_SEGMENTS; ++y) {
+            if (!oddRow) { // even rows: y == 0, y == 2; and so on
+                for (int x = 0; x <= X_SEGMENTS; ++x) {
                     indices.push_back(static_cast<uint16_t>((y + 1) * (X_SEGMENTS + 1) + x));
                     indices.push_back(static_cast<uint16_t>(y       * (X_SEGMENTS + 1) + x));
                 }
-            }
-            else
-            {
+            } else {
                 for (int x = X_SEGMENTS; x >= 0; --x)
                 {
                     indices.push_back(static_cast<uint16_t>(y       * (X_SEGMENTS + 1) + x));
                     indices.push_back(static_cast<uint16_t>((y + 1) * (X_SEGMENTS + 1) + x));
                 }
             }
+
             oddRow = !oddRow;
         }
     }

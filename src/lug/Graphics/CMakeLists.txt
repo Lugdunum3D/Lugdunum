@@ -22,7 +22,6 @@ set(SRC
     ${SRCROOT}/Render/Camera/Orthographic.cpp
     ${SRCROOT}/Render/Camera/Perspective.cpp
 
-    ${SRCROOT}/Render/DirtyObject.cpp
     ${SRCROOT}/Render/Light.cpp
     ${SRCROOT}/Render/Material.cpp
     ${SRCROOT}/Render/Mesh.cpp
