@@ -41,8 +41,8 @@ set(SHADERS
 )
 
 set(LUG_RESOURCES
-    models/Box0.bin
-    models/Box.gltf
+    models/DamagedHelmet/DamagedHelmet.bin
+    models/DamagedHelmet/DamagedHelmet.gltf
     shaders/forward/shader.frag
     shaders/forward/shader.vert
 )

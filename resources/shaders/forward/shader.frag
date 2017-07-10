@@ -308,7 +308,7 @@ void main() {
         }
     }
 
-    vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo;
+    vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo + emissive;
 
     // Tone mapping and gamma correction
     color = color / (color + vec3(1.0));

@@ -47,7 +47,7 @@ bool Application::init(int argc, char* argv[]) {
 
     // Load scene
     lug::Graphics::Renderer* renderer = _graphics.getRenderer();
-    lug::Graphics::Resource::SharedPtr<lug::Graphics::Resource> sceneResource = renderer->getResourceManager()->loadFile("models/Box.gltf");
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Resource> sceneResource = renderer->getResourceManager()->loadFile("models/DamagedHelmet/DamagedHelmet.gltf");
     if (!sceneResource) {
         return false;
     }
@@ -74,7 +74,7 @@ bool Application::init(int argc, char* argv[]) {
         node->attachCamera(camera);
 
         // Set initial position of the camera
-        node->setPosition({2.0f, 0.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+        node->setPosition({10.0f, 0.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
         // Look at once
         node->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
 

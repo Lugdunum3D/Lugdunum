@@ -71,11 +71,42 @@ static uint32_t getAttributeSize(const gltf2::Accessor& accessor) {
     return componentSize;
 }
 
-static Resource::SharedPtr<Render::Material> createMaterial(Renderer& renderer, const gltf2::Asset& asset/*, const gltf2::Material& gltfMaterial*/) {
+static Resource::SharedPtr<Render::Material> createMaterial(Renderer& renderer, const gltf2::Asset& asset, const gltf2::Material& gltfMaterial) {
+    // TODO: Check if the material is already created
     Builder::Material materialBuilder(renderer);
-    // TODO(nokitoo): set material name
-    (void)asset;
 
+    materialBuilder.setName(gltfMaterial.name);
+
+    materialBuilder.setBaseColorFactor({
+        gltfMaterial.pbr.baseColorFactor[0],
+        gltfMaterial.pbr.baseColorFactor[1],
+        gltfMaterial.pbr.baseColorFactor[2],
+        gltfMaterial.pbr.baseColorFactor[3]
+    });
+
+    // TODO: Set baseColorTexture
+    (void)(asset);
+
+    materialBuilder.setMetallicFactor(gltfMaterial.pbr.metallicFactor);
+    materialBuilder.setRoughnessFactor(gltfMaterial.pbr.roughnessFactor);
+
+    // TODO: Set metallicRoughnessTexture
+    // TODO: Set normalTexture
+    // TODO: Set occlusionTexture
+    // TODO: Set emissiveTexture
+
+    materialBuilder.setEmissiveFactor({
+        gltfMaterial.emissiveFactor[0],
+        gltfMaterial.emissiveFactor[1],
+        gltfMaterial.emissiveFactor[2]
+    });
+
+    return materialBuilder.build();
+}
+
+static Resource::SharedPtr<Render::Material> createDefaultMaterial(Renderer& renderer) {
+    // TODO: Check if the material is already created
+    Builder::Material materialBuilder(renderer);
     return materialBuilder.build();
 }
 
@@ -98,6 +129,7 @@ static void* generateNormals(float* positions, uint32_t accessorCount) {
 }
 
 static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gltf2::Asset& asset, const gltf2::Mesh& gltfMesh) {
+    // TODO: Check if the mesh is already created
     Builder::Mesh meshBuilder(renderer);
     meshBuilder.setName(gltfMesh.name);
 
@@ -199,7 +231,7 @@ static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gl
         }
 
         // Material
-        Resource::SharedPtr<Render::Material> material = createMaterial(renderer, asset);
+        Resource::SharedPtr<Render::Material> material = gltfPrimitive.material != -1 ? createMaterial(renderer, asset, asset.materials[gltfPrimitive.material]) : createDefaultMaterial(renderer);
         if (!material) {
             LUG_LOG.error("GltfLoader::createMesh Can't create the material resource");
             return nullptr;
