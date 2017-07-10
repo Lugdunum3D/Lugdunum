@@ -40,6 +40,7 @@ std::unique_ptr<BufferPool::Material> Forward::_materialBufferPool = nullptr;
 std::unique_ptr<DescriptorSetPool::Camera> Forward::_cameraDescriptorSetPool = nullptr;
 std::unique_ptr<DescriptorSetPool::Light> Forward::_lightDescriptorSetPool = nullptr;
 std::unique_ptr<DescriptorSetPool::Material> Forward::_materialDescriptorSetPool = nullptr;
+std::unique_ptr<DescriptorSetPool::MaterialTextures> Forward::_materialTexturesDescriptorSetPool = nullptr;
 
 Forward::Forward(Renderer& renderer, const Render::View& renderView) : Technique(renderer, renderView) {}
 
@@ -146,6 +147,7 @@ bool Forward::render(
     // they will replace frameData.lightDescriptorSets and frameData.materialDescriptorSets atfer the rendering
     std::vector<const DescriptorSetPool::DescriptorSet*> lightDescriptorSets;
     std::vector<const DescriptorSetPool::DescriptorSet*> materialDescriptorSets;
+    std::vector<const DescriptorSetPool::DescriptorSet*> materialTexturesDescriptorSets;
 
     // Render objects
     {
@@ -197,13 +199,14 @@ bool Forward::render(
                 for (const auto primitiveSetInstance : it.second) {
                     auto& node = *primitiveSetInstance.node;
                     const auto& primitiveSet = *primitiveSetInstance.primitiveSet;
+                    auto& material = *primitiveSetInstance.material;
 
                     const Math::Mat4x4f pushConstants[] = {
                         node.getTransform()
                     };
 
                     const API::CommandBuffer::CmdPushConstants cmdPushConstants{
-                        /* cmdPushConstants.layout      */ static_cast<VkPipelineLayout>(*_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout()),
+                        /* cmdPushConstants.layout      */ static_cast<VkPipelineLayout>(*pipeline->getPipelineAPI().getLayout()),
                         /* cmdPushConstants.stageFlags  */ VK_SHADER_STAGE_VERTEX_BIT,
                         /* cmdPushConstants.offset      */ 0,
                         /* cmdPushConstants.size        */ sizeof(pushConstants),
@@ -212,19 +215,57 @@ bool Forward::render(
                     frameData.renderCmdBuffer.pushConstants(cmdPushConstants);
 
                     // Get the new (or old) material buffer
-                    const BufferPool::SubBuffer* materialBuffer = _materialBufferPool->allocate(frameData.transferCmdBuffer, *primitiveSetInstance.material);
+                    const BufferPool::SubBuffer* materialBuffer = _materialBufferPool->allocate(frameData.transferCmdBuffer, material);
                     materialBuffers.push_back(materialBuffer);
 
                     // Get the new (or old) material descriptor set
                     const DescriptorSetPool::DescriptorSet* materialDescriptorSet = _materialDescriptorSetPool->allocate(*materialBuffer);
+                    materialDescriptorSets.push_back(materialDescriptorSet);
+
+                    std::vector<const API::DescriptorSet*> materialDescriptorSetsBind{&materialDescriptorSet->getDescriptorSet()};
+
+                    if (pipeline->getPipelineAPI().getLayout()->getDescriptorSetLayouts().size() > 3) {
+                        // Get the new (or old) material descriptor set
+                        const DescriptorSetPool::DescriptorSet* materialTexturesDescriptorSet = _materialTexturesDescriptorSetPool->allocate(
+                            pipeline->getPipelineAPI(),
+                            [&material]() {
+                                std::vector<const ::lug::Graphics::Vulkan::Render::Texture*> textures;
+
+                                if (material.getBaseColorTexture().texture) {
+                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getBaseColorTexture().texture.get()));
+                                }
+
+                                if (material.getMetallicRoughnessTexture().texture) {
+                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getMetallicRoughnessTexture().texture.get()));
+                                }
+
+                                if (material.getNormalTexture().texture) {
+                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getNormalTexture().texture.get()));
+                                }
+
+                                if (material.getOcclusionTexture().texture) {
+                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getOcclusionTexture().texture.get()));
+                                }
+
+                                if (material.getEmissiveTexture().texture) {
+                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getEmissiveTexture().texture.get()));
+                                }
+
+
+                                return textures;
+                            }()
+                        );
+                        materialTexturesDescriptorSets.push_back(materialTexturesDescriptorSet);
+                        materialDescriptorSetsBind.push_back(&materialTexturesDescriptorSet->getDescriptorSet());
+                    }
 
                     // Bind descriptor set of the material
                     {
                         const API::CommandBuffer::CmdBindDescriptors materialBind{
-                            /* materialBind.pipelineLayout     */ *_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout(),
+                            /* materialBind.pipelineLayout     */ *pipeline->getPipelineAPI().getLayout(),
                             /* materialBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
                             /* materialBind.firstSet           */ 2,
-                            /* materialBind.descriptorSets     */ {&materialDescriptorSet->getDescriptorSet()},
+                            /* materialBind.descriptorSets     */ materialDescriptorSetsBind,
                             /* materialBind.dynamicOffsets     */ {materialBuffer->getOffset()},
                         };
 
@@ -308,10 +349,19 @@ bool Forward::render(
     // Free and replace previous materialDescriptorSets
     {
         for (const auto& descriptorSet : frameData.materialDescriptorSets) {
-            _lightDescriptorSetPool->free(descriptorSet);
+            _materialDescriptorSetPool->free(descriptorSet);
         }
 
         frameData.materialDescriptorSets = materialDescriptorSets;
+    }
+
+    // Free and replace previous materialTexturesDescriptorSets
+    {
+        for (const auto& descriptorSet : frameData.materialTexturesDescriptorSets) {
+            _materialTexturesDescriptorSetPool->free(descriptorSet);
+        }
+
+        frameData.materialTexturesDescriptorSets = materialTexturesDescriptorSets;
     }
 
     // End of the render pass
@@ -457,6 +507,13 @@ bool Forward::init(const std::vector<API::ImageView>& imageViews) {
         }
     }
 
+    if (!_materialTexturesDescriptorSetPool) {
+        _materialTexturesDescriptorSetPool = std::make_unique<DescriptorSetPool::MaterialTextures>(_renderer);
+        if (!_materialTexturesDescriptorSetPool->init()) {
+            return false;
+        }
+    }
+
     return initDepthBuffers(imageViews) && initFramebuffers(imageViews);
 }
 
@@ -475,6 +532,7 @@ void Forward::destroy() {
     _cameraDescriptorSetPool.reset();
     _lightDescriptorSetPool.reset();
     _materialDescriptorSetPool.reset();
+    _materialTexturesDescriptorSetPool.reset();
 
     _graphicsCommandPool.destroy();
     _transferCommandPool.destroy();

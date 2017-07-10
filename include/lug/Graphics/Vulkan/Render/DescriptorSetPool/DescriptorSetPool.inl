@@ -20,6 +20,10 @@ inline bool DescriptorSetPool<maxSets>::init() {
             {
                 /* poolSize.type            */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
                 /* poolSize.descriptorCount */ 42
+            },
+            {
+                /* poolSize.type            */ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                /* poolSize.descriptorCount */ 42
             }
         };
         descriptorPoolBuilder.setPoolSizes(poolSizes);

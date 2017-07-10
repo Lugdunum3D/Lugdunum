@@ -95,7 +95,7 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string
 
         // Set binding
         {
-            uint8_t binding = 1;
+            uint8_t binding = 0;
 
             if (materialPart.baseColorInfo != 0b11) {
                 options.AddMacroDefinition("TEXTURE_COLOR_BINDING", std::to_string(binding++));

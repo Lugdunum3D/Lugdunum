@@ -30,8 +30,6 @@ Resource::SharedPtr<::lug::Graphics::Render::Material> build(const ::lug::Graphi
     material->_pipelineIdMaterialPart.occlusionInfo = material->_occlusionTexture.texture ? material->_occlusionTexture.texCoord : 0b11;
     material->_pipelineIdMaterialPart.emissiveInfo = material->_emissiveTexture.texture ? material->_emissiveTexture.texCoord : 0b11;
 
-    // TODO(Nokitoo): load vulkan textures
-
     return builder._renderer.getResourceManager()->add<::lug::Graphics::Render::Material>(std::move(resource));
 }
 

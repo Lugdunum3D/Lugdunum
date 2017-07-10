@@ -4,8 +4,6 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Material.hpp>
-#include <lug/Graphics/Vulkan/API/Buffer.hpp>
-#include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/Builder/Material.hpp>
 #include <lug/Graphics/Vulkan/Render/Pipeline.hpp>
 

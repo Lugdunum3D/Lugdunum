@@ -4,6 +4,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/DirtyObject.hpp>
+#include <lug/Graphics/Render/Texture.hpp>
 #include <lug/Graphics/Resource.hpp>
 #include <lug/Math/Vector.hpp>
 
@@ -25,7 +26,7 @@ class LUG_GRAPHICS_API Material : public Resource, public DirtyObject {
 
 public:
     struct TextureInfo {
-        Resource::SharedPtr<Resource> texture; // TODO: Change the template type to Texture
+        Resource::SharedPtr<Texture> texture;
         uint32_t texCoord{0};
     };
 
@@ -58,6 +59,12 @@ public:
     // TODO: Setters which call ::lug::Graphics::Render::DirtyObject::setDirty()
 
     const Constants& getConstants() const;
+
+    const TextureInfo& getBaseColorTexture() const;
+    const TextureInfo& getMetallicRoughnessTexture() const;
+    const TextureInfo& getNormalTexture() const;
+    const TextureInfo& getOcclusionTexture() const;
+    const TextureInfo& getEmissiveTexture() const;
 
 protected:
     Constants _constants;

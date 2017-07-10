@@ -39,12 +39,11 @@ public:
     void setMetallicFactor(float factor);
     void setRoughnessFactor(float factor);
 
-    // TODO: Replace Resource::SharedPtr<Resource> texture by Resource::SharedPtr<Texture>
-    void setBaseColorTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0);
-    void setMetallicRoughnessTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0);
-    void setNormalTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0, float scale = 1.0f);
-    void setOcclusionTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0, float strength = 1.0f);
-    void setEmissiveTexture(Resource::SharedPtr<Resource> texture, uint32_t texCoord = 0);
+    void setBaseColorTexture(Resource::SharedPtr<Render::Texture> texture, uint32_t texCoord = 0);
+    void setMetallicRoughnessTexture(Resource::SharedPtr<Render::Texture> texture, uint32_t texCoord = 0);
+    void setNormalTexture(Resource::SharedPtr<Render::Texture> texture, uint32_t texCoord = 0, float scale = 1.0f);
+    void setOcclusionTexture(Resource::SharedPtr<Render::Texture> texture, uint32_t texCoord = 0, float strength = 1.0f);
+    void setEmissiveTexture(Resource::SharedPtr<Render::Texture> texture, uint32_t texCoord = 0);
 
     Resource::SharedPtr<Render::Material> build();
 
