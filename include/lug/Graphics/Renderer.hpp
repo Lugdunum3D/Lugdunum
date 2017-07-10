@@ -40,7 +40,7 @@ public:
     virtual bool beginInit(const std::string& appName, const Core::Version& appVersion, const InitInfo& initInfo) = 0;
     virtual bool finishInit() = 0;
 
-    virtual bool beginFrame() = 0;
+    virtual bool beginFrame(const lug::System::Time& elapsedTime) = 0;
     virtual bool endFrame() = 0;
 
     virtual Render::Window* createWindow(Render::Window::InitInfo& initInfo) = 0;

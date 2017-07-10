@@ -96,6 +96,9 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Light.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Material.cpp
     ${SRCROOT}/Vulkan/Render/Material.cpp
+
+    ${SRCROOT}/Vulkan/Gui.cpp
+
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
     ${SRCROOT}/Vulkan/Render/Pipeline.cpp
     ${SRCROOT}/Vulkan/Render/Pipeline/ShaderBuilder.cpp
@@ -106,10 +109,8 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/Window.cpp
 
     ${SRCROOT}/Vulkan/Renderer.cpp
-
     ${SRCROOT}/Vulkan/Requirements/Core.hpp
     ${SRCROOT}/Vulkan/Requirements/Requirements.hpp
-
     ${SRCROOT}/Vulkan/Vulkan.cpp
 )
 source_group("src" FILES ${SRC})
@@ -275,6 +276,9 @@ set(INC
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/Light.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/Material.hpp
     ${INCROOT}/Vulkan/Render/Material.hpp
+
+    ${INCROOT}/Vulkan/Gui.hpp
+
     ${INCROOT}/Vulkan/Render/Mesh.hpp
     ${INCROOT}/Vulkan/Render/Mesh.inl
     ${INCROOT}/Vulkan/Render/Pipeline.hpp
@@ -317,9 +321,32 @@ include_directories(${GLTF2-LOADER_INCLUDE_DIR})
 
 find_package(Threads)
 
+# find imgui
+if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/imgui")
+    message(FATAL_ERROR "Can't find imgui, call `git submodule update --recursive`")
+endif()
+
+set(IMGUI_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/imgui/include)
+message(STATUS "Found Imgui: ${IMGUI_INCLUDE_DIR}")
+
+set(IMGUI_SOURCE_DIR ${LUG_THIRDPARTY_DIR}/imgui/src)
+message(STATUS "Found Imgui: ${IMGUI_SOURCE_DIR}")
+
+include_directories(${IMGUI_INCLUDE_DIR})
+
+set(IMGUI_SOURCE_FILES
+    ${IMGUI_SOURCE_DIR}/imgui.cpp
+    ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
+    ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+)
+
+if(LUG_COMPILER_GCC)
+    set_source_files_properties(${IMGUI_SOURCE_FILES} PROPERTIES COMPILE_FLAGS -Wno-error=maybe-uninitialized)
+endif()
+
 # define the target
 lug_add_library(lug-graphics
-                SOURCES ${SRC} ${INC}
+                SOURCES ${SRC} ${INC} ${IMGUI_SOURCE_FILES}
                 DEPENDS lug-window lug-system lug-math
                 EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY} ${CMAKE_THREAD_LIBS_INIT}
 )

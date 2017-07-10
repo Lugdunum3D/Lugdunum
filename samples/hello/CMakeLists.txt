@@ -35,6 +35,11 @@ set(INC
 )
 source_group("inc" FILES ${INC})
 
+set(SHADERS
+    gui.frag
+    gui.vert
+)
+
 set(LUG_RESOURCES
     models/Box0.bin
     models/Box.gltf

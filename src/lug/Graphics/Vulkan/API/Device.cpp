@@ -79,7 +79,6 @@ const API::Queue* Device::getQueue(const std::string& queueName) const {
     return nullptr;
 }
 
-
 bool Device::waitIdle() const {
     VkResult result = vkDeviceWaitIdle(_device);
 

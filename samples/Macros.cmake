@@ -123,6 +123,16 @@ macro(lug_add_sample target)
 
     include_directories(${FMT_INCLUDE_DIR})
 
+    # find imgui
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/imgui")
+        message(FATAL_ERROR "Can't find imgui in the thirdparty directory")
+    endif()
+
+    set(IMGUI_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/imgui/include)
+    message(STATUS "Found Imgui: ${IMGUI_INCLUDE_DIR}")
+
+    include_directories(${IMGUI_INCLUDE_DIR})
+
     # find Lugdunum
     find_package(LUG REQUIRED ${THIS_DEPENDS})
 

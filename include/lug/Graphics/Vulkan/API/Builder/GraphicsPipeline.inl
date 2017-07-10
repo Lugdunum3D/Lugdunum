@@ -213,9 +213,12 @@ inline void GraphicsPipeline::setShader(VkShaderStageFlagBits stage, const char*
 inline bool GraphicsPipeline::setShaderFromFile(VkShaderStageFlagBits stage, const char* entry, const std::string& filename) {
     API::Builder::ShaderModule shaderModuleBuilder(_device);
 
-    shaderModuleBuilder.loadFromFile(filename);
+    if (!shaderModuleBuilder.loadFromFile(filename)) {
+        LUG_LOG.error("Builder::GraphicsPipeline: Create load from file {}", filename);
+        return false;
+    }
 
-    VkResult result{VK_SUCCESS};
+    VkResult result{ VK_SUCCESS };
     API::ShaderModule shaderModule;
     if (!shaderModuleBuilder.build(shaderModule, &result)) {
         LUG_LOG.error("Builder::GraphicsPipeline: Create create shader from file {}: {}", filename, result);

@@ -9,18 +9,22 @@ namespace Graphics {
 namespace Vulkan {
 namespace API {
 
-Queue::Queue(VkQueue queue) : _queue(queue) {}
+Queue::Queue(VkQueue queue, const QueueFamily* queueFamily) : _queue(queue), _queueFamily(queueFamily) {}
 
 Queue::Queue(Queue&& queue) {
     _queue = queue._queue;
+    _queueFamily = queue._queueFamily;
 
     queue._queue = VK_NULL_HANDLE;
+    queue._queueFamily = nullptr;
 }
 
 Queue& Queue::operator=(Queue&& queue) {
     _queue = queue._queue;
+    _queueFamily = queue._queueFamily;
 
     queue._queue = VK_NULL_HANDLE;
+    queue._queueFamily = nullptr;
 
     return *this;
 }
@@ -67,6 +71,10 @@ bool Queue::waitIdle() const {
     }
 
     return true;
+}
+
+const QueueFamily * Queue::getQueueFamily() const {
+    return _queueFamily;
 }
 
 } // API

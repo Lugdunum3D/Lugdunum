@@ -56,7 +56,7 @@ private:
     VkSamplerAddressMode _addressModeW{VK_SAMPLER_ADDRESS_MODE_REPEAT};
     float _mipLodBias{0.0f};
     VkBool32 _anisotropyEnable{VK_FALSE};
-    float _maxAnisotropy{0.0f};
+    float _maxAnisotropy{1.0f};
     VkBool32 _compareEnable{VK_FALSE};
     VkCompareOp _compareOp{VK_COMPARE_OP_NEVER};
     float _minLod{0.0f};

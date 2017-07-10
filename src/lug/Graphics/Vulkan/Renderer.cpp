@@ -569,8 +569,8 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
     return _window.get();
 }
 
-bool Renderer::beginFrame() {
-    return _window->beginFrame();
+bool Renderer::beginFrame(const lug::System::Time& elapsedTime) {
+    return _window->beginFrame(elapsedTime);
 }
 
 bool Renderer::endFrame() {

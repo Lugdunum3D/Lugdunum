@@ -32,6 +32,11 @@ set(INC
 )
 source_group("inc" FILES ${INC})
 
+set(SHADERS
+    gui.frag
+    gui.vert
+)
+
 set(LUG_RESOURCES
     shaders/forward/shader.frag
     shaders/forward/shader.vert
