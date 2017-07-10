@@ -4,7 +4,6 @@
 #include <lug/Graphics/Vulkan/Render/View.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/DescriptorPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
@@ -145,7 +144,7 @@ bool Window::endFrame() {
 lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::InitInfo& initInfo) {
     std::unique_ptr<View> renderView = std::make_unique<View>(_renderer, this);
 
-    if (!renderView->init(initInfo, _presentQueue, &_descriptorPool, _swapchain.getImagesViews())) {
+    if (!renderView->init(initInfo, _presentQueue, _swapchain.getImagesViews())) {
         return nullptr;
     }
 
@@ -177,38 +176,6 @@ Window::create(Renderer& renderer, Window::InitInfo& initInfo) {
     }
 
     return window;
-}
-
-/**
- * @brief      Create the descriptor pool
- *             This is in Window because we need to know the number of RenderTechnique (Actually the number of render views)
- *             Each RenderTechnique has 50 descriptors for the lights and 1 for the camera
- *
- * @return     True if the creation was successful, false otherwise
- */
-bool Window::initDescriptorPool() {
-    API::Builder::DescriptorPool descriptorPoolBuilder(_renderer.getDevice());
-
-    // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
-    descriptorPoolBuilder.setFlags(0);
-
-    // Only ForwardRenderTechnique has 1 descriptor sets (for lights) and 1 (for the camera)
-    descriptorPoolBuilder.setMaxSets((uint32_t)_initInfo.renderViewsInitInfo.size() * (1 + 1) * 3);
-
-    VkDescriptorPoolSize poolSize{
-        // Dynamic uniform buffers descriptors (1 for camera and 1 for lights in ForwardRenderTechnique)
-        poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        poolSize.descriptorCount = (uint32_t)_initInfo.renderViewsInitInfo.size() * (1 + 1) * 3
-    };
-    descriptorPoolBuilder.setPoolSizes({poolSize});
-
-    VkResult result{VK_SUCCESS};
-    if (!descriptorPoolBuilder.build(_descriptorPool, &result)) {
-        LUG_LOG.error("Window::initDescriptorPool: Can't create the descriptor pool: {}", result);
-        return false;
-    }
-
-    return true;
 }
 
 /**
@@ -485,7 +452,7 @@ bool Window::buildCommandBuffers() {
                 return false;
             }
 
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
             pipelineBarrier.imageMemoryBarriers.resize(1);
             pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
             pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
@@ -508,7 +475,7 @@ bool Window::buildCommandBuffers() {
                 return false;
             }
 
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
             pipelineBarrier.imageMemoryBarriers.resize(1);
             pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
             pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
@@ -565,11 +532,11 @@ bool Window::init(Window::InitInfo& initInfo) {
         });
     }
 
-    return initRender();
+    return true;
 }
 
 bool Window::initRender() {
-    if (!(initDescriptorPool() && initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData())) {
+    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData())) {
         return false;
     }
 
@@ -597,8 +564,6 @@ void Window::destroyRender() {
     _surface.destroy();
 
     _framesData.clear();
-
-    _descriptorPool.destroy();
 
     _acquireImageDatas.clear();
 

@@ -3,6 +3,7 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/View.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
+#include <lug/Graphics/Vulkan/Render/Queue.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Technique.hpp>
 
 namespace lug {
@@ -21,7 +22,7 @@ namespace Render {
 class LUG_GRAPHICS_API View final : public ::lug::Graphics::Render::View {
 public:
     // TODO: Take the number of images and the list of images
-    View(const Renderer& renderer, const ::lug::Graphics::Render::Target* renderTarget);
+    View(Renderer& renderer, const ::lug::Graphics::Render::Target* renderTarget);
 
     View(const View&) = delete;
     View(View&&) = delete;
@@ -33,7 +34,6 @@ public:
 
     bool init(View::InitInfo& initInfo,
                 const API::Queue* presentQueue,
-                API::DescriptorPool* descriptorPool,
                 const std::vector<API::ImageView>& imageViews);
 
     bool render(const API::Semaphore& imageReadySemaphore, uint32_t currentImageIndex);
@@ -49,11 +49,13 @@ public:
     // TODO: Add the semaphores for the images ready in that class too
 
 private:
-    const Renderer& _renderer;
+    Renderer& _renderer;
     std::unique_ptr<Technique::Technique> _renderTechnique{nullptr};
 
     std::vector<API::Semaphore> _drawCompleteSemaphores;
     const API::Queue* _presentQueue;
+
+    Render::Queue _renderQueue;
 };
 
 #include <lug/Graphics/Vulkan/Render/View.inl>

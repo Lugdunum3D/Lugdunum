@@ -1,9 +1,10 @@
 #include "Application.hpp"
 
-#include <lug/Graphics/Light/Directional.hpp>
-#include <lug/Graphics/Scene/MeshInstance.hpp>
-
-// TODO: Remove this when the ResourceManager is done
+#include <lug/Graphics/Builder/Camera.hpp>
+#include <lug/Graphics/Builder/Light.hpp>
+#include <lug/Graphics/Builder/Material.hpp>
+#include <lug/Graphics/Builder/Mesh.hpp>
+#include <lug/Graphics/Builder/Scene.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 
@@ -11,138 +12,275 @@ Application::Application() : lug::Core::Application::Application{{"cube", {0, 1,
     getRenderWindowInfo().windowInitInfo.title = "Hello Cube";
 }
 
-Application::~Application() {
-    // TODO: Remove this when the ResourceManager is done
-    lug::Graphics::Renderer* renderer = _graphics.getRenderer();
-    lug::Graphics::Vulkan::Renderer* vkRender = static_cast<lug::Graphics::Vulkan::Renderer*>(renderer);
-
-    vkRender->getDevice().waitIdle();
-}
-
 bool Application::init(int argc, char* argv[]) {
     if (!lug::Core::Application::init(argc, argv)) {
         return false;
     }
 
-    // Create the mesh of the cube
+    lug::Graphics::Renderer* renderer = _graphics.getRenderer();
+
+    // Build the scene
     {
-        _cube = _graphics.createMesh("Cube");
+        lug::Graphics::Builder::Scene sceneBuilder(*renderer);
+        sceneBuilder.setName("scene");
 
-        // 1. pos
-        // 2. color
-        // 3. normal
-        // 4. texture uv
-        _cube->vertices = {
-            // Back
-            {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f}},
-            {{1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f}},
-            {{-1.0f, 1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f}},
-            {{1.0f, 1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f}},
-
-            // Front
-            {{-1.0f, -1.0f, 1.0f}, {1.0f, 0.0f, 1.0}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-            {{1.0f, -1.0f, 1.0f}, {1.0f, 0.0f, 1.0}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-            {{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 1.0}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-            {{1.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 1.0}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-
-            // Left
-            {{-1.0f, -1.0f, -1.0f}, {1.0f, 0.0f, 0.0}, {-1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-            {{-1.0f, -1.0f, 1.0f}, {1.0f, 0.0f, 0.0}, {-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-            {{-1.0f, 1.0f, -1.0f}, {1.0f, 0.0f, 0.0}, {-1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-            {{-1.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 0.0}, {-1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
-
-            // Right
-            {{1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-            {{1.0f, -1.0f, 1.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-            {{1.0f, 1.0f, -1.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
-            {{1.0f, 1.0f, 1.0f}, {1.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 1.0f}},
-
-            // Bottom
-            {{-1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 1.0f}},
-            {{-1.0f, -1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, {0.0f, 0.0f}},
-            {{1.0f, -1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, {1.0f, 1.0f}},
-            {{1.0f, -1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, -1.0f, 0.0f}, {1.0f, 0.0f}},
-
-            // Top
-            {{-1.0f, 1.0f, -1.0f}, {0.0f, 1.0f, 1.0}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-            {{-1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0}, {0.0f, 1.0f, 0.0f}, {0.0f, 1.0f}},
-            {{1.0f, 1.0f, -1.0f}, {0.0f, 1.0f, 1.0}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-            {{1.0f, 1.0f, 1.0f}, {0.0f, 1.0f, 1.0}, {0.0f, 1.0f, 0.0f}, {1.0f, 1.0f}}
-        };
-
-        _cube->indices = {
-            // Back
-            0, 1, 2,
-            1, 3, 2,
-
-            // Front
-            6, 5, 4,
-            7, 5, 6,
-
-            // Left
-            10, 9, 8,
-            11, 9, 10,
-
-            // Right
-            14, 12, 13,
-            15, 14, 13,
-
-            // Bottom
-            17, 19, 16,
-            19, 18, 16,
-
-            // Top
-            23, 21, 20,
-            22, 23, 20
-        };
-
-        if (!_cube->load()) {
+        _scene = sceneBuilder.build();
+        if (!_scene) {
+            LUG_LOG.error("Application: Can't create the scene");
             return false;
         }
     }
 
-    // Create the scene
-    _scene = _graphics.createScene();
-
-    // Add cube to scene
-    {
-        std::unique_ptr<lug::Graphics::Scene::MeshInstance> cubeInstance = _scene->createMeshInstance("cube instance", _cube.get());
-        _scene->getRoot()->createSceneNode("cube instance node", std::move(cubeInstance));
+    // Build the triangle
+    if (!initCubeMesh()) {
+        return false;
     }
 
-    // Add directional light to scene
+    // Attach the triangle
     {
-        std::unique_ptr<lug::Graphics::Light::Light> light = _scene->createLight("light", lug::Graphics::Light::Light::Type::Directional);
+        lug::Graphics::Builder::Material materialBuilder(*renderer);
 
-        // Set the diffuse to white color and the direction to the viewing direction of the camera
-        light->setDiffuse({1.0f, 1.0f, 1.0f});
-        static_cast<lug::Graphics::Light::Directional*>(light.get())->setDirection({-10.0f, -10.0f, -10.0f});
+        lug::Graphics::Scene::Node* node = _scene->createSceneNode("cube");
+        _scene->getRoot().attachChild(*node);
 
-        _scene->getRoot()->createSceneNode("light node", std::move(light));
+        node->attachMeshInstance(_cubeMesh, materialBuilder.build());
     }
 
-    // Create a camera
-    std::unique_ptr<lug::Graphics::Render::Camera> camera = _graphics.createCamera("camera");
-    camera->setScene(_scene.get());
-
-    // Add camera to scene
+    // Attach camera
     {
-        std::unique_ptr<lug::Graphics::Scene::MovableCamera> movableCamera = _scene->createMovableCamera("movable camera", camera.get());
-        _scene->getRoot()->createSceneNode("movable camera node", std::move(movableCamera));
+        lug::Graphics::Builder::Camera cameraBuilder(*renderer);
+
+        cameraBuilder.setFovY(45.0f);
+        cameraBuilder.setZNear(0.1f);
+        cameraBuilder.setZFar(100.0f);
+
+        lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Camera::Camera> camera = cameraBuilder.build();
+        if (!camera) {
+            LUG_LOG.error("Application: Can't create the camera");
+            return false;
+        }
+
+        lug::Graphics::Scene::Node* node = _scene->createSceneNode("camera");
+        _scene->getRoot().attachChild(*node);
+
+        node->attachCamera(camera);
+
+        node->setPosition({5.0f, 5.0f, 5.0f}, lug::Graphics::Node::TransformSpace::World);
+        camera->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+
+        // Attach camera to RenderView
+        {
+            auto& renderViews = _graphics.getRenderer()->getWindow()->getRenderViews();
+
+            LUG_ASSERT(renderViews.size() > 0, "There should be at least 1 render view");
+
+            renderViews[0]->attachCamera(camera);
+        }
     }
 
-    // Attach camera to RenderView
+    // Attach an ambient light
     {
-        auto& renderViews = _graphics.getRenderer()->getWindow()->getRenderViews();
-        renderViews[0]->attachCamera(std::move(camera));
+        lug::Graphics::Builder::Light lightBuilder(*renderer);
+
+        lightBuilder.setType(lug::Graphics::Render::Light::Type::Ambient);
+        lightBuilder.setColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+        lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Light> light = lightBuilder.build();
+        if (!light) {
+            LUG_LOG.error("Application: Can't create the light");
+            return false;
+        }
+
+        _scene->getRoot().attachLight(light);
     }
 
-    // Set the position and rotation of the camera
-    {
-        auto& renderViews = _graphics.getRenderer()->getWindow()->getRenderViews();
+    return true;
+}
 
-        renderViews[0]->getCamera()->setPosition({5.0f, 5.0f, 5.0f}, lug::Graphics::Node::TransformSpace::World);
-        renderViews[0]->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+bool Application::initCubeMesh() {
+    const std::vector<lug::Math::Vec3f> positions = {
+        // Back
+        {-1.0f, -1.0f, -1.0f},
+        {1.0f, -1.0f, -1.0f},
+        {-1.0f, 1.0f, -1.0f},
+        {1.0f, 1.0f, -1.0f},
+
+        // Front
+        {-1.0f, -1.0f, 1.0f},
+        {1.0f, -1.0f, 1.0f},
+        {-1.0f, 1.0f, 1.0f},
+        {1.0f, 1.0f, 1.0f},
+
+        // Left
+        {-1.0f, -1.0f, -1.0f},
+        {-1.0f, -1.0f, 1.0f},
+        {-1.0f, 1.0f, -1.0f},
+        {-1.0f, 1.0f, 1.0f},
+
+        // Right
+        {1.0f, -1.0f, -1.0f},
+        {1.0f, -1.0f, 1.0f},
+        {1.0f, 1.0f, -1.0f},
+        {1.0f, 1.0f, 1.0f},
+
+        // Bottom
+        {-1.0f, -1.0f, -1.0f},
+        {-1.0f, -1.0f, 1.0f},
+        {1.0f, -1.0f, -1.0f},
+        {1.0f, -1.0f, 1.0f},
+
+        // Top
+        {-1.0f, 1.0f, -1.0f},
+        {-1.0f, 1.0f, 1.0f},
+        {1.0f, 1.0f, -1.0f},
+        {1.0f, 1.0f, 1.0}
+    };
+
+    const std::vector<lug::Math::Vec3f> normals = {
+        // Back
+        {0.0f, 0.0f, -1.0f},
+        {0.0f, 0.0f, -1.0f},
+        {0.0f, 0.0f, -1.0f},
+        {0.0f, 0.0f, -1.0f},
+
+        // Front
+        {0.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f},
+
+        // Left
+        {-1.0f, 0.0f, 0.0f},
+        {-1.0f, 0.0f, 0.0f},
+        {-1.0f, 0.0f, 0.0f},
+        {-1.0f, 0.0f, 0.0f},
+
+        // Right
+        {1.0f, 0.0f, 0.0f},
+        {1.0f, 0.0f, 0.0f},
+        {1.0f, 0.0f, 0.0f},
+        {1.0f, 0.0f, 0.0f},
+
+        // Bottom
+        {0.0f, -1.0f, 0.0f},
+        {0.0f, -1.0f, 0.0f},
+        {0.0f, -1.0f, 0.0f},
+        {0.0f, -1.0f, 0.0f},
+
+        // Top
+        {0.0f, 1.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f}
+    };
+
+    const std::vector<lug::Math::Vec4f> colors = {
+        // Back
+        {0.0f, 0.0f, 1.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f, 1.0f},
+
+        // Front
+        {1.0f, 0.0f, 1.0, 1.0f},
+        {1.0f, 0.0f, 1.0, 1.0f},
+        {1.0f, 0.0f, 1.0, 1.0f},
+        {1.0f, 0.0f, 1.0, 1.0f},
+
+        // Left
+        {1.0f, 0.0f, 0.0, 1.0f},
+        {1.0f, 0.0f, 0.0, 1.0f},
+        {1.0f, 0.0f, 0.0, 1.0f},
+        {1.0f, 0.0f, 0.0, 1.0f},
+
+        // Right
+        {1.0f, 1.0f, 0.0f, 1.0f},
+        {1.0f, 1.0f, 0.0f, 1.0f},
+        {1.0f, 1.0f, 0.0f, 1.0f},
+        {1.0f, 1.0f, 0.0f, 1.0f},
+
+        // Bottom
+        {0.0f, 1.0f, 0.0f, 1.0f},
+        {0.0f, 1.0f, 0.0f, 1.0f},
+        {0.0f, 1.0f, 0.0f, 1.0f},
+        {0.0f, 1.0f, 0.0f, 1.0f},
+
+        // Top
+        {0.0f, 1.0f, 1.0f, 1.0f},
+        {0.0f, 1.0f, 1.0f, 1.0f},
+        {0.0f, 1.0f, 1.0f, 1.0f},
+        {0.0f, 1.0f, 1.0f, 1.0f}
+    };
+
+    const std::vector<uint16_t> indices = {
+        // Back
+        0, 2, 1,
+        1, 2, 3,
+
+        // Front
+        6, 4, 5,
+        7, 6, 5,
+
+        // Left
+        10, 8, 9,
+        11, 10, 9,
+
+        // Right
+        14, 13, 12,
+        15, 13, 14,
+
+        // Bottom
+        17, 16, 19,
+        19, 16, 18,
+
+        // Top
+        23, 20, 21,
+        22, 20, 23
+    };
+
+    // Build the mesh
+    {
+        lug::Graphics::Builder::Mesh meshBuilder(*_graphics.getRenderer());
+        meshBuilder.setName("cube");
+
+        lug::Graphics::Builder::Mesh::PrimitiveSet* primitiveSet = meshBuilder.addPrimitiveSet();
+
+        primitiveSet->setMode(lug::Graphics::Render::Mesh::PrimitiveSet::Mode::Triangles);
+
+        primitiveSet->addAttributeBuffer(
+            indices.data(),
+            sizeof(uint16_t),
+            static_cast<uint32_t>(indices.size()),
+            lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice
+        );
+
+        primitiveSet->addAttributeBuffer(
+            positions.data(),
+            sizeof(lug::Math::Vec3f),
+            static_cast<uint32_t>(positions.size()),
+            lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Position
+        );
+
+        primitiveSet->addAttributeBuffer(
+            normals.data(),
+            sizeof(lug::Math::Vec3f),
+            static_cast<uint32_t>(normals.size()),
+            lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Normal
+        );
+
+        primitiveSet->addAttributeBuffer(
+            colors.data(),
+            sizeof(lug::Math::Vec4f),
+            static_cast<uint32_t>(colors.size()),
+            lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Color
+        );
+
+        _cubeMesh = meshBuilder.build();
+
+        if (!_cubeMesh) {
+            LUG_LOG.error("Application: Can't create the triangle mesh");
+            return false;
+        }
     }
 
     return true;
@@ -161,7 +299,7 @@ void Application::onFrame(const lug::System::Time& elapsedTime) {
         _rotation -= 360.0f;
     }
 
-    auto cubeNode = _scene->getSceneNode("cube instance node");
+    auto cubeNode = _scene->getSceneNode("cube");
 
     cubeNode->setRotation(lug::Math::Quatf(_rotation, {0.0f, 1.0f, 0.0f}));
     cubeNode->rotate(lug::Math::Quatf(_rotation, {0.0f, 0.0f, 1.0f}));

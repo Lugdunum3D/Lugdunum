@@ -60,7 +60,7 @@ void* DeviceMemory::map(VkDeviceSize size, VkDeviceSize offset) const {
 
 void* DeviceMemory::mapBuffer(const API::Buffer& buffer, VkDeviceSize size, VkDeviceSize offset) const {
     if (buffer.getDeviceMemory() != this) {
-        LUG_LOG.error("DeviceMemory: Can't map memory of a buffer: The buffer use a different device memory");
+        LUG_LOG.error("DeviceMemory: Can't map memory of a buffer: The buffer uses a different device memory");
         return nullptr;
     }
 
@@ -77,6 +77,31 @@ void* DeviceMemory::mapBuffer(const API::Buffer& buffer, VkDeviceSize size, VkDe
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("DeviceMemory: Can't map memory of a buffer: {}", result);
+        return nullptr;
+    }
+
+    return data;
+}
+
+void* DeviceMemory::mapImage(const API::Image& image, VkDeviceSize size, VkDeviceSize offset) const {
+    if (image.getDeviceMemory() != this) {
+        LUG_LOG.error("DeviceMemory: Can't map memory of a image: The image uses a different device memory");
+        return nullptr;
+    }
+
+    void* data = nullptr;
+
+    VkResult result = vkMapMemory(
+        static_cast<VkDevice>(*_device),
+        _deviceMemory,
+        offset + image.getDeviceMemoryOffset(),
+        size == VK_WHOLE_SIZE ? image.getRequirements().size - offset : size,
+        0,
+        &data
+    );
+
+    if (result != VK_SUCCESS) {
+        LUG_LOG.error("DeviceMemory: Can't map memory of an image: {}", result);
         return nullptr;
     }
 

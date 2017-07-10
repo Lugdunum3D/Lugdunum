@@ -5,10 +5,12 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Graphics.cpp
 
+    ${SRCROOT}/Loader.cpp
     ${SRCROOT}/Builder/Camera.cpp
     ${SRCROOT}/Builder/Light.cpp
     ${SRCROOT}/Builder/Material.cpp
     ${SRCROOT}/Builder/Mesh.cpp
+    ${SRCROOT}/Builder/Scene.cpp
 
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/Node.cpp
@@ -86,11 +88,18 @@ set(SRC
     ${SRCROOT}/Vulkan/Builder/Material.cpp
     ${SRCROOT}/Vulkan/Builder/Mesh.cpp
 
-    ${SRCROOT}/Vulkan/Render/BufferPool.cpp
+    ${SRCROOT}/Vulkan/Render/BufferPool/Camera.cpp
+    ${SRCROOT}/Vulkan/Render/BufferPool/Light.cpp
+    ${SRCROOT}/Vulkan/Render/BufferPool/Material.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Camera.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSetPool.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Light.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Material.cpp
     ${SRCROOT}/Vulkan/Render/Material.cpp
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
     ${SRCROOT}/Vulkan/Render/Pipeline.cpp
     ${SRCROOT}/Vulkan/Render/Pipeline/ShaderBuilder.cpp
+    ${SRCROOT}/Vulkan/Render/Queue.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Forward.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Technique.cpp
     ${SRCROOT}/Vulkan/Render/View.cpp
@@ -125,6 +134,8 @@ set(INC
     ${INCROOT}/Builder/Material.inl
     ${INCROOT}/Builder/Mesh.hpp
     ${INCROOT}/Builder/Mesh.inl
+    ${INCROOT}/Builder/Scene.inl
+    ${INCROOT}/Builder/Scene.inl
 
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl
@@ -138,6 +149,8 @@ set(INC
     ${INCROOT}/Render/Camera/Perspective.hpp
     ${INCROOT}/Render/Camera/Perspective.inl
 
+    ${INCROOT}/Render/DirtyObject.hpp
+    ${INCROOT}/Render/DirtyObject.inl
     ${INCROOT}/Render/Light.hpp
     ${INCROOT}/Render/Light.inl
     ${INCROOT}/Render/Material.hpp
@@ -145,7 +158,6 @@ set(INC
     ${INCROOT}/Render/Mesh.hpp
     ${INCROOT}/Render/Mesh.inl
     ${INCROOT}/Render/Queue.hpp
-    ${INCROOT}/Render/Queue.inl
     ${INCROOT}/Render/Target.hpp
     ${INCROOT}/Render/Target.inl
     ${INCROOT}/Render/Technique/Type.hpp
@@ -223,6 +235,7 @@ set(INC
     ${INCROOT}/Vulkan/API/Framebuffer.hpp
     ${INCROOT}/Vulkan/API/GraphicsPipeline.hpp
     ${INCROOT}/Vulkan/API/Image.hpp
+    ${INCROOT}/Vulkan/API/Image.inl
     ${INCROOT}/Vulkan/API/ImageView.hpp
     ${INCROOT}/Vulkan/API/ImageView.inl
     ${INCROOT}/Vulkan/API/Instance.hpp
@@ -245,12 +258,28 @@ set(INC
     ${INCROOT}/Vulkan/Builder/Material.hpp
     ${INCROOT}/Vulkan/Builder/Mesh.hpp
 
-    ${INCROOT}/Vulkan/Render/BufferPool.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/BufferPool.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/BufferPool.inl
+    ${INCROOT}/Vulkan/Render/BufferPool/Camera.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/Chunk.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/Chunk.inl
+    ${INCROOT}/Vulkan/Render/BufferPool/Light.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/Material.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/SubBuffer.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/SubBuffer.inl
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/Camera.hpp
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSet.hpp
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSet.inl
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSetPool.hpp
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSetPool.inl
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/Light.hpp
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/Material.hpp
     ${INCROOT}/Vulkan/Render/Material.hpp
     ${INCROOT}/Vulkan/Render/Mesh.hpp
     ${INCROOT}/Vulkan/Render/Mesh.inl
     ${INCROOT}/Vulkan/Render/Pipeline.hpp
     ${INCROOT}/Vulkan/Render/Pipeline.inl
+    ${INCROOT}/Vulkan/Render/Queue.hpp
     ${INCROOT}/Vulkan/Render/Technique/Forward.hpp
     ${INCROOT}/Vulkan/Render/Technique/Technique.hpp
     ${INCROOT}/Vulkan/Render/View.hpp
@@ -286,9 +315,11 @@ endif()
 
 include_directories(${GLTF2-LOADER_INCLUDE_DIR})
 
+find_package(Threads)
+
 # define the target
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY}
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY} ${CMAKE_THREAD_LIBS_INIT}
 )

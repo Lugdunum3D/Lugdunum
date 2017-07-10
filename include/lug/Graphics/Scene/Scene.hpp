@@ -11,6 +11,10 @@
 namespace lug {
 namespace Graphics {
 
+namespace Builder {
+class Scene;
+} // Builder
+
 namespace Render {
 namespace Camera {
 class Camera;
@@ -23,6 +27,8 @@ class View;
 namespace Scene {
 
 class LUG_GRAPHICS_API Scene : public Resource {
+    friend class Builder::Scene;
+
 public:
     Scene() = default;
 

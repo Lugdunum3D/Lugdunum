@@ -2,14 +2,18 @@
 
 #include <lug/Window/Export.hpp>
 #if defined(LUG_SYSTEM_WINDOWS)
-#ifndef WIN32_LEAN_AND_MEAN
-    #define WIN32_LEAN_AND_MEAN
-#endif
-#include <Windows.h>
+    #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+    #endif
+    #include <Windows.h>
 #elif defined(LUG_SYSTEM_LINUX)
-#include <X11/keysym.h>
+    #include <X11/keysym.h>
+#elif defined(LUG_SYSTEM_ANDROID)
+    // TODO
 #else
-// Insert error message here
+    // Theoretically this should never happen since the Config.cmake will
+    // warn the user before, but #error anyway
+    #error "Unsupported operating system or environment"
 #endif
 
 namespace lug {

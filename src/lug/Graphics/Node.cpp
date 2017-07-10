@@ -163,7 +163,6 @@ void Node::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDir
 
 void Node::needUpdate() {
     _needUpdate = true;
-    _dirty = true;
 
     for (auto& child : _children) {
         child->needUpdate();

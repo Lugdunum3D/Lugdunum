@@ -4,7 +4,9 @@
     #define WIN32_LEAN_AND_MEAN
 #endif
 #include <Windows.h>
+#include <lug/Math/Vector.hpp>
 #include <lug/Window/Window.hpp>
+
 
 namespace lug {
 namespace Window {
@@ -25,6 +27,8 @@ public:
 
     bool pollEvent(lug::Window::Event&);
     void setKeyRepeat(bool state);
+    void setMouseCursorVisible(bool visible);
+    void setMousePos(const Math::Vec2i& mousePosition);
 
     HWND getHandle() const;
     HINSTANCE getHinstance() const;
@@ -54,7 +58,7 @@ private:
     LONG_PTR _callback{0};         ///< Stores the original event callback function of the control
     HCURSOR _cursor{nullptr};      ///< The system cursor to display into the window
     HICON _icon{nullptr};          ///< Custom icon assigned to the window
-    bool _fullscreen{false};       ///< Is the window fullscreen?
+    bool _fullscreen{false};       ///< Is the window full-screen?
 
     static uint8_t windowCount;
     static lug::Window::priv::WindowImpl*  fullscreenWindow;

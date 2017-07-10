@@ -1,5 +1,6 @@
 #pragma once
 
+#include <lug/Math/Vector.hpp>
 #include <lug/Window/Window.hpp>
 #include <android/input.h>
 #include <android/native_window.h>
@@ -18,6 +19,8 @@ public:
     void close();
     bool pollEvent(lug::Window::Event& event);
     void setKeyRepeat(bool state);
+    void setMouseCursorVisible(bool visible);
+    void setMousePos(const Math::Vec2i& mousePosition);
 
     ANativeWindow* getWindow();
 

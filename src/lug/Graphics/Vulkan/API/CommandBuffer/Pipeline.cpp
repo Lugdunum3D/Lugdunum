@@ -34,8 +34,7 @@ static VkAccessFlags getImageSrcAccessMask(VkImageLayout oldLayout) {
 }
 
 static VkAccessFlags getImageDstAccessMask(VkImageLayout newLayout) {
-    switch (newLayout)
-    {
+    switch (newLayout) {
         case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:
             return VK_ACCESS_TRANSFER_WRITE_BIT;
         case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:
@@ -57,7 +56,7 @@ static void setupMemoryBarriers(
     const std::vector<CommandBuffer::CmdPipelineBarrier::MemoryBarrier>& memoryBarriers
 ) {
     vkMemoryBarriers.resize(memoryBarriers.size());
-    for (uint8_t i = 0; i < memoryBarriers.size(); ++i){
+    for (uint8_t i = 0; i < memoryBarriers.size(); ++i) {
         vkMemoryBarriers[i].sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
         vkMemoryBarriers[i].pNext = nullptr;
         vkMemoryBarriers[i].srcAccessMask = memoryBarriers[i].srcAccessMask;
@@ -112,8 +111,7 @@ static void setupImageBarriers(
         }
 
         if (vkImageMemoryBarriers[i].srcAccessMask == 0 &&
-            vkImageMemoryBarriers[i].newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-        {
+            vkImageMemoryBarriers[i].newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
             vkImageMemoryBarriers[i].srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
         }
     }
@@ -135,7 +133,7 @@ void CommandBuffer::pipelineBarrier(
     setupImageBarriers(vkImageMemoryBarriers, parameters.imageMemoryBarriers);
 
     vkCmdPipelineBarrier(
-        static_cast<VkCommandBuffer>(_commandBuffer),
+        _commandBuffer,
         srcStageMask,
         dstStageMask,
         dependencyFlags,
@@ -150,7 +148,7 @@ void CommandBuffer::pipelineBarrier(
 
 void CommandBuffer::bindPipeline(const API::GraphicsPipeline& pipeline, VkPipelineBindPoint pipelineBindPoint) const {
     vkCmdBindPipeline(
-        static_cast<VkCommandBuffer>(_commandBuffer),
+        _commandBuffer,
         pipelineBindPoint,
         static_cast<VkPipeline>(pipeline)
     );
@@ -170,7 +168,7 @@ void CommandBuffer::bindVertexBuffers(
     );
 
     vkCmdBindVertexBuffers(
-        static_cast<VkCommandBuffer>(_commandBuffer),
+        _commandBuffer,
         firstBinding,
         static_cast<uint32_t>(vkBuffers.size()),
         vkBuffers.data(),
@@ -180,7 +178,7 @@ void CommandBuffer::bindVertexBuffers(
 
 void CommandBuffer::bindIndexBuffer(const API::Buffer& buffer, VkIndexType indexType, VkDeviceSize offset) const {
     vkCmdBindIndexBuffer(
-        static_cast<VkCommandBuffer>(_commandBuffer),
+        _commandBuffer,
         static_cast<VkBuffer>(buffer),
         offset,
         indexType
@@ -189,7 +187,7 @@ void CommandBuffer::bindIndexBuffer(const API::Buffer& buffer, VkIndexType index
 
 void CommandBuffer::setViewport(const std::vector<VkViewport>& viewports, uint32_t firstViewport) const {
     vkCmdSetViewport(
-        static_cast<VkCommandBuffer>(_commandBuffer),
+        _commandBuffer,
         firstViewport,
         static_cast<uint32_t>(viewports.size()),
         viewports.data()
@@ -198,20 +196,20 @@ void CommandBuffer::setViewport(const std::vector<VkViewport>& viewports, uint32
 
 void CommandBuffer::setScissor(const std::vector<VkRect2D>& scissors, uint32_t firstScissor) const {
     vkCmdSetScissor(
-        static_cast<VkCommandBuffer>(_commandBuffer),
+        _commandBuffer,
         firstScissor,
         static_cast<uint32_t>(scissors.size()),
-        scissors.data(
-        ));
+        scissors.data()
+    );
 }
 
 void CommandBuffer::setBlendConstants(const float blendConstants[4]) const {
-    vkCmdSetBlendConstants(static_cast<VkCommandBuffer>(_commandBuffer), blendConstants);
+    vkCmdSetBlendConstants(_commandBuffer, blendConstants);
 }
 
 void CommandBuffer::pushConstants(const CmdPushConstants& parameters) const {
     vkCmdPushConstants(
-        static_cast<VkCommandBuffer>(_commandBuffer),
+        _commandBuffer,
         parameters.layout,
         parameters.stageFlags,
         parameters.offset,

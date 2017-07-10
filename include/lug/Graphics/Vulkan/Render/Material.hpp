@@ -21,9 +21,6 @@ class LUG_GRAPHICS_API Material final : public ::lug::Graphics::Render::Material
     friend Resource::SharedPtr<lug::Graphics::Render::Material> Builder::Material::build(const ::lug::Graphics::Builder::Material&);
 
 public:
-    Pipeline::Id::MaterialPart _pipelineIdMaterialPart;
-
-public:
     Material(const Material&) = delete;
     Material(Material&&) = delete;
 
@@ -33,6 +30,8 @@ public:
     ~Material();
 
     void destroy();
+
+    Pipeline::Id::MaterialPart getPipelineId();
 
 private:
     /**
@@ -44,8 +43,7 @@ private:
     Material(const std::string& name);
 
 private:
-    API::DeviceMemory _deviceMemory;
-    API::Buffer _buffer;
+    Pipeline::Id::MaterialPart _pipelineIdMaterialPart;
 };
 
 } // Render

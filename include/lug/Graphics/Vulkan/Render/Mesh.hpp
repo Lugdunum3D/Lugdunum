@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <set>
+#include <vector>
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>

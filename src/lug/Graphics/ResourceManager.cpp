@@ -9,8 +9,8 @@ namespace Graphics {
 
 ResourceManager::ResourceManager(Renderer& renderer) : _renderer(renderer) {
     if (_renderer.getType() == Renderer::Type::Vulkan) {
-        _loaders["gltf"] = std::make_unique<GltfLoader>();
-        _loaders["glb"] = std::make_unique<GltfLoader>();
+        _loaders["gltf"] = std::make_unique<GltfLoader>(_renderer);
+        _loaders["glb"] = std::make_unique<GltfLoader>(_renderer);
     }
 }
 

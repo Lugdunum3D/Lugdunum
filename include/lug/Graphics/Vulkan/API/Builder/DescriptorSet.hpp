@@ -34,7 +34,7 @@ public:
     bool build(API::DescriptorSet& instance, VkResult* returnResult = nullptr);
     std::unique_ptr<API::DescriptorSet> build(VkResult* returnResult = nullptr);
 
-    bool build(std::vector<API::DescriptorSet>& commandBuffers, VkResult* returnResult = nullptr);
+    bool build(std::vector<API::DescriptorSet>& descriptorSets, VkResult* returnResult = nullptr);
     std::vector<std::unique_ptr<API::DescriptorSet>> build(uint32_t count, VkResult* returnResult = nullptr);
 
 private:
@@ -42,7 +42,6 @@ private:
 
     const API::DescriptorPool& _descriptorPool;
     std::vector<VkDescriptorSetLayout> _descriptorSetLayouts{};
-    std::vector<VkDescriptorSet> _poolSizes{};
 };
 
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSet.inl>

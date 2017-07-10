@@ -91,22 +91,33 @@ bool Pipeline::init() {
             auto uvBinding = graphicsPipelineBuilder.addInputBinding(sizeof(Math::Vec2f), VK_VERTEX_INPUT_RATE_VERTEX);
             uvBinding.addAttributes(VK_FORMAT_R32G32_SFLOAT, 0);
         }
+
+        for (uint8_t i = 0; i < primitivePart.countColor; ++i) {
+            auto uvBinding = graphicsPipelineBuilder.addInputBinding(sizeof(Math::Vec4f), VK_VERTEX_INPUT_RATE_VERTEX);
+            uvBinding.addAttributes(VK_FORMAT_R32G32B32A32_SFLOAT, 0);
+        }
     }
 
     // Set input assembly state
     switch(static_cast<Render::Mesh::PrimitiveSet::Mode>(primitivePart.primitiveMode)) {
         case Render::Mesh::PrimitiveSet::Mode::Points:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_POINT_LIST, false);
+            break;
         case Render::Mesh::PrimitiveSet::Mode::Lines:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_LINE_LIST, false);
+            break;
         case Render::Mesh::PrimitiveSet::Mode::LineStrip:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_LINE_STRIP, false);
+            break;
         case Render::Mesh::PrimitiveSet::Mode::Triangles:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, false);
+            break;
         case Render::Mesh::PrimitiveSet::Mode::TriangleStrip:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP, false);
+            break;
         case Render::Mesh::PrimitiveSet::Mode::TriangleFan:
             graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN, false);
+            break;
     }
 
     // Set viewport state
@@ -181,16 +192,18 @@ bool Pipeline::init() {
 
         // Bindings set 1 : Light uniform buffer (F)
         {
-            // Light uniform buffer
-            const VkDescriptorSetLayoutBinding binding{
-                /* binding.binding */ 0,
-                /* binding.descriptorType */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-                /* binding.descriptorCount */ 1,
-                /* binding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
-                /* binding.pImmutableSamplers */ nullptr
+            const std::vector<VkDescriptorSetLayoutBinding> bindings{
+                // Light array uniform buffer
+                {
+                    /* binding.binding */ 0,
+                    /* binding.descriptorType */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+                    /* binding.descriptorCount */ 1,
+                    /* binding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
+                    /* binding.pImmutableSamplers */ nullptr
+                }
             };
 
-            descriptorSetLayoutBuilder.setBindings({binding});
+            descriptorSetLayoutBuilder.setBindings(bindings);
             if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[1], &result)) {
                 LUG_LOG.error("Vulkan::Render::Pipeline: Can't create pipeline descriptor sets layout 1: {}", result);
                 return false;

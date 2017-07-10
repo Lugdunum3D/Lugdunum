@@ -79,18 +79,6 @@ void Image::bindMemory(const DeviceMemory& deviceMemory, VkDeviceSize memoryOffs
     vkBindImageMemory(static_cast<VkDevice>(*_device), _image, static_cast<VkDeviceMemory>(deviceMemory), memoryOffset);
 }
 
-const VkMemoryRequirements& Image::getRequirements() const {
-    return _requirements;
-}
-
-const DeviceMemory* Image::getDeviceMemory() const {
-    return _deviceMemory;
-}
-
-VkFormat Image::getFormat() const {
-    return _format;
-}
-
 VkFormat Image::findSupportedFormat(const Device& device, const std::set<VkFormat>& formats, VkImageTiling tiling, VkFormatFeatureFlags features) {
     for (auto format: formats) {
         if (isFormatSupported(device, format, tiling, features)) {

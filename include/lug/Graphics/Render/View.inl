@@ -20,6 +20,7 @@ inline void View::attachCamera(Resource::SharedPtr<Camera::Camera> camera) {
     }
 
     _camera = std::move(camera);
+    _camera->setRenderView(this);
 }
 
 inline Resource::SharedPtr<Camera::Camera> View::getCamera() const {

@@ -58,6 +58,7 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
 
 void WindowImpl::close() {
     if (_display != nullptr) {
+        setMouseCursorVisible(true); // In case it was hidden before
         XDestroyWindow(_display, _window);
         XCloseDisplay(_display);
         _display = nullptr;
@@ -529,6 +530,39 @@ Display* WindowImpl::getDisplay() const {
 
 void WindowImpl::setKeyRepeat(bool state) {
     _keyRepeat = state;
+}
+
+static Cursor createHiddenCursor(::Display* display, ::Window window) {
+    // Create the cursor's pixmap (1x1 pixels)
+    Pixmap cursorPixmap = XCreatePixmap(display, window, 1, 1, 1);
+    GC graphicsContext = XCreateGC(display, cursorPixmap, 0, NULL);
+    XDrawPoint(display, cursorPixmap, graphicsContext, 0, 0);
+    XFreeGC(display, graphicsContext);
+
+    // Create the cursor, using the pixmap as both the shape and the mask of the cursor
+    XColor color;
+    color.flags = DoRed | DoGreen | DoBlue;
+    color.red = color.blue = color.green = 0;
+    Cursor cursor = XCreatePixmapCursor(display, cursorPixmap, cursorPixmap, &color, &color, 0, 0);
+
+    // We don't need the pixmap any longer, free it
+    XFreePixmap(display, cursorPixmap);
+
+    // Return the cursor
+    return cursor;
+}
+
+void WindowImpl::setMouseCursorVisible(bool visible) {
+    if (!visible && !_hiddenCursor) {
+        _hiddenCursor = createHiddenCursor(_display, _window);
+    }
+    XDefineCursor(_display, _window, visible ? None : _hiddenCursor);
+    XFlush(_display);
+}
+
+void WindowImpl::setMousePos(const Math::Vec2i& mousePosition) {
+    XWarpPointer(_display, None, _window, 0, 0, 0, 0, mousePosition.x(), mousePosition.y());
+    XFlush(_display);
 }
 
 void WindowImpl::setWindowDecorations(Style style) {

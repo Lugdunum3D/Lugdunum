@@ -6,18 +6,6 @@ inline void Mesh::PrimitiveSet::setMode(Render::Mesh::PrimitiveSet::Mode mode) {
     _mode = mode;
 }
 
-inline void Mesh::PrimitiveSet::addAttributeBuffer(void* data, uint32_t size, Render::Mesh::PrimitiveSet::Attribute::Type type) {
-    Render::Mesh::PrimitiveSet::Attribute attribute;
-
-    attribute.type = type;
-    attribute.buffer.size = size;
-    attribute.buffer.data = new char[size];
-
-    std::memcpy(attribute.buffer.data, static_cast<char*>(data), size);
-
-    _attributes.push_back(std::move(attribute));
-}
-
 inline Render::Mesh::PrimitiveSet::Mode Mesh::PrimitiveSet::getMode() const {
     return _mode;
 }

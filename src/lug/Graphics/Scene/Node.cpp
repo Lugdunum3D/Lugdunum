@@ -9,10 +9,7 @@ namespace Scene {
 Node::Node(Scene& scene, const std::string& name) : ::lug::Graphics::Node(name), _scene(scene) {}
 
 Node* Node::createSceneNode(const std::string& name) {
-    Node* node = _scene.createSceneNode(name);
-
-    attachChild(*node);
-    return node;
+    return _scene.createSceneNode(name);
 }
 
 void Node::attachLight(Resource::SharedPtr<Render::Light> light) {
@@ -43,12 +40,19 @@ void Node::fetchVisibleObjects(const Render::View& renderView, const Render::Cam
         static_cast<const Node*>(child)->fetchVisibleObjects(renderView, camera, renderQueue);
     }
 
-    renderQueue.addMeshInstance(*const_cast<Node*>(this));
-    renderQueue.addLight(*const_cast<Node*>(this));
+    if (_meshInstance.mesh) {
+        renderQueue.addMeshInstance(*const_cast<Node*>(this));
+    }
+
+    // Check the distance with the light
+    if (_light && (_light->getDistance() == 0.0f || _light->getDistance() >= fabs((Math::Vec3f(const_cast<Node*>(this)->getAbsolutePosition() - camera.getParent()->getAbsolutePosition())).length()))) {
+        renderQueue.addLight(*const_cast<Node*>(this));
+    }
 }
 
 void Node::needUpdate() {
     ::lug::Graphics::Node::needUpdate();
+    ::lug::Graphics::Render::DirtyObject::setDirty();
 
     if (_camera) {
         _camera->needUpdateView();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <lug/Math/Vector.hpp>
 #include <lug/Window/Window.hpp> // I include Window.hpp before Xlib because Xlib is dumb
 #include <X11/Xlib.h>
 
@@ -22,6 +23,8 @@ public:
 
     bool pollEvent(lug::Window::Event& event);
     void setKeyRepeat(bool state);
+    void setMouseCursorVisible(bool visible);
+    void setMousePos(const Math::Vec2i& mousePosition);
 
     Display* getDisplay() const;
     ::Window getWindow() const;
@@ -39,6 +42,8 @@ private:
     Atom _wmProtocols;
     Atom _wmDeleteWindow;
     Atom _wmHints;
+
+    Cursor _hiddenCursor{0};    ///< Invisible cursor used to hide the pointer
 
     bool _keyRepeat{true};
 };

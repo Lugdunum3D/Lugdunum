@@ -37,13 +37,13 @@ GraphicsPipeline::~GraphicsPipeline() {
 }
 
 void GraphicsPipeline::destroy() {
+    _pipelineLayout.destroy();
+    _renderPass.destroy();
+
     if (_pipeline != VK_NULL_HANDLE) {
         vkDestroyPipeline(static_cast<VkDevice>(*_device), _pipeline, nullptr);
         _pipeline = VK_NULL_HANDLE;
     }
-
-    _pipelineLayout.destroy();
-    _renderPass.destroy();
 }
 
 const RenderPass* GraphicsPipeline::getRenderPass() const {

@@ -8,12 +8,14 @@
 namespace lug {
 namespace Graphics {
 
+class Renderer;
+
 /**
  * @brief      Class for loading a type of file
  */
 class LUG_GRAPHICS_API Loader {
 public:
-    Loader() = default;
+    Loader(Renderer& renderer);
 
     Loader(const Loader&) = delete;
     Loader(Loader&&) = delete;
@@ -29,6 +31,9 @@ public:
      * @return     The resource.
      */
     virtual Resource::SharedPtr<Resource> loadFile(const std::string& filename) = 0;
+
+protected:
+    Renderer& _renderer;
 };
 
 } // Graphics

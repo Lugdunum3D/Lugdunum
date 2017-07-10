@@ -12,6 +12,7 @@
 
 namespace lug {
 namespace Graphics {
+
 namespace Vulkan {
 
 class Renderer;
@@ -39,6 +40,7 @@ public:
                     uint32_t normalVertexData : 1;      ///< 0 if no attribute normal.
                     uint32_t tangentVertexData : 1;     ///< 0 if no attribute tangeant.
                     uint32_t countTexCoord : 2;         ///< The number of texcoord (maximum 3).
+                    uint32_t countColor : 2;            ///< The number of colors (maximum 3).
                     uint32_t primitiveMode : 3;         ///< The primitive mode. @see Mesh::PrimitiveSet::Mode.
                 };
 
@@ -75,19 +77,33 @@ public:
 
         union {
             struct {
-                uint32_t primitivePart : 8;
+                uint32_t primitivePart : 10;
                 uint32_t materialPart : 10;
             };
 
             uint32_t value;
         };
 
+        Id(uint32_t id = 0): value(id) {}
+
         explicit operator uint32_t() {
             return value;
         }
 
+        explicit operator bool() const {
+            return value != 0;
+        }
+
         bool operator==(const Id& other) const {
             return value == other.value;
+        }
+
+        bool operator!=(const Id& other) const {
+            return value != other.value;
+        }
+
+        bool operator<(const Id& other) const {
+            return value < other.value;
         }
 
         PrimitivePart getPrimitivePart() {
@@ -162,12 +178,14 @@ public:
      * @return     The id.
      */
     Id getId() const;
+    static inline Id getBaseId();
+
+    const API::GraphicsPipeline& getPipelineAPI();
+
+    static Resource::SharedPtr<Pipeline> create(Renderer& renderer, Id id);
 
 private:
     bool init();
-
-private:
-    static Resource::SharedPtr<Pipeline> create(Renderer& renderer, Id id);
 
 private:
     Renderer& _renderer;

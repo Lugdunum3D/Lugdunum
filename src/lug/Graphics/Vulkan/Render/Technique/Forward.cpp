@@ -3,14 +3,12 @@
 #include <algorithm>
 
 #include <lug/Config.hpp>
-#include <lug/Graphics/Render/Camera/Camera.hpp>
 #include <lug/Graphics/Render/Light.hpp>
-#include <lug/Graphics/Render/Queue.hpp>
 #include <lug/Graphics/Scene/Node.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
-#include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSetLayout.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Fence.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/GraphicsPipeline.hpp>
@@ -18,12 +16,15 @@
 #include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
+#include <lug/Graphics/Vulkan/Render/Material.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Render/Queue.hpp>
 #include <lug/Graphics/Vulkan/Render/View.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
+#include <lug/Math/Geometry/Transform.hpp>
 #include <lug/Math/Matrix.hpp>
 #include <lug/Math/Vector.hpp>
-#include <lug/Math/Geometry/Transform.hpp>
 #include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
@@ -32,125 +33,57 @@ namespace Vulkan {
 namespace Render {
 namespace Technique {
 
-using MeshInstance = ::lug::Graphics::Scene::Node::MeshInstance;
+std::unique_ptr<BufferPool::Camera> Forward::_cameraBufferPool = nullptr;
+std::unique_ptr<BufferPool::Light> Forward::_lightBufferPool = nullptr;
+std::unique_ptr<BufferPool::Material> Forward::_materialBufferPool = nullptr;
 
-Forward::Forward(const Renderer& renderer, const Render::View& renderView) :
-    Technique(renderer, renderView) {}
+std::unique_ptr<DescriptorSetPool::Camera> Forward::_cameraDescriptorSetPool = nullptr;
+std::unique_ptr<DescriptorSetPool::Light> Forward::_lightDescriptorSetPool = nullptr;
+std::unique_ptr<DescriptorSetPool::Material> Forward::_materialDescriptorSetPool = nullptr;
+
+Forward::Forward(Renderer& renderer, const Render::View& renderView) : Technique(renderer, renderView) {}
 
 bool Forward::render(
-    const ::lug::Graphics::Render::Queue& renderQueue,
+    const Render::Queue& renderQueue,
     const API::Semaphore& imageReadySemaphore,
     const API::Semaphore& drawCompleteSemaphore,
-    uint32_t currentImageIndex) {
+    uint32_t currentImageIndex
+) {
     FrameData& frameData = _framesData[currentImageIndex];
 
-    auto& viewport = _renderView.getViewport();
+    frameData.transferFence.wait();
+    frameData.transferFence.reset();
 
-    frameData.fence.wait();
-    frameData.fence.reset();
-    auto& cmdBuffer = frameData.cmdBuffers[0];
-
-    for (auto subBuffer: frameData.freeSubBuffers) {
-        subBuffer->free();
-    }
-
-    frameData.freeSubBuffers.clear();
-
-    if (!cmdBuffer.reset() || !cmdBuffer.begin()) {
+    if (!frameData.transferCmdBuffer.reset() || !frameData.transferCmdBuffer.begin()) {
         return false;
     }
 
-    // Init render pass
+    // Get the new (or old) camera buffer
     {
-        const VkViewport vkViewport{
-            /* vkViewport.x */ viewport.offset.x,
-            /* vkViewport.y */ viewport.offset.y,
-            /* vkViewport.width */ viewport.extent.width,
-            /* vkViewport.height */ viewport.extent.height,
-            /* vkViewport.minDepth */ viewport.minDepth,
-            /* vkViewport.maxDepth */ viewport.maxDepth,
-        };
-
-        const VkRect2D scissor{
-            /* scissor.offset */ {
-                (int32_t)_renderView.getScissor().offset.x,
-                (int32_t)_renderView.getScissor().offset.y},
-            /* scissor.extent */ {
-                (uint32_t)_renderView.getScissor().extent.width,
-                (uint32_t)_renderView.getScissor().extent.height
-            }
-        };
-
-        cmdBuffer.setViewport({vkViewport});
-        cmdBuffer.setScissor({scissor});
+        const BufferPool::SubBuffer* cameraBuffer = _cameraBufferPool->allocate(frameData.transferCmdBuffer, *_renderView.getCamera());
+        _cameraBufferPool->free(frameData.cameraBuffer);
+        frameData.cameraBuffer = cameraBuffer;
     }
 
-    // Update camera buffer data
-    BufferPool::SubBuffer* cameraBuffer = _subBuffers[_renderView.getCamera()->getName()];
-    {
-        /*Camera* camera = static_cast<Camera*>(_renderView.getCamera());
+    frameData.renderFence.wait();
+    frameData.renderFence.reset();
 
-        if (camera->isDirty() && cameraBuffer) {
-            frameData.freeSubBuffers.push_back(cameraBuffer);
-            cameraBuffer = nullptr;
-        }
-
-        if (!cameraBuffer) {
-            cameraBuffer = _cameraPool->allocate();
-            if (!cameraBuffer) {
-                return false;
-            }
-
-            _subBuffers[camera->getName()] = cameraBuffer;
-
-            const Math::Mat4x4f cameraData[] = {
-                camera->getViewMatrix(),
-                camera->getProjectionMatrix()
-            };
-
-            cmdBuffer.updateBuffer(*cameraBuffer->buffer, cameraData, sizeof(cameraData), cameraBuffer->offset);
-            camera->isDirty(false);
-        }*/
+    if (!frameData.renderCmdBuffer.reset() || !frameData.renderCmdBuffer.begin()) {
+        return false;
     }
 
-    // Update lights buffers data
+    // Begin of the render pass
     {
-        for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
-            const auto& light = renderQueue.getLights()[i]->getLight();
-
-            BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
-
-            if (lightBuffer) {
-                frameData.freeSubBuffers.push_back(lightBuffer);
-                lightBuffer = nullptr;
-            }
-
-            if (!lightBuffer) {
-                lightBuffer = _lightsPool->allocate();
-                if (!lightBuffer) {
-                    return false;
-                }
-
-                _subBuffers[light->getName()] = lightBuffer;
-
-                ::lug::Graphics::Render::Light::Data lightData;
-                light->getData(lightData);
-                cmdBuffer.updateBuffer(*lightBuffer->buffer, &lightData, sizeof(lightData), lightBuffer->offset);
-            }
-        }
-    }
-
-    // Render objects
-    {
-        // All the lights pipelines have the same renderPass
-        const API::RenderPass* renderPass = _pipeline.getRenderPass();
+        // All the pipelines have the same renderPass
+        const API::RenderPass* renderPass = _renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getRenderPass();
 
         API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
-            /* beginRenderPass.framebuffer */ frameData.framebuffer,
-            /* beginRenderPass.renderArea */ {},
-            /* beginRenderPass.clearValues */ {}
+            /* beginRenderPass.framebuffer  */ frameData.framebuffer,
+            /* beginRenderPass.renderArea   */ {},
+            /* beginRenderPass.clearValues  */ {}
         };
 
+        const auto& viewport = _renderView.getViewport();
         beginRenderPass.renderArea.offset = {static_cast<int32_t>(viewport.offset.x), static_cast<int32_t>(viewport.offset.y)};
         beginRenderPass.renderArea.extent = {static_cast<uint32_t>(viewport.extent.width), static_cast<uint32_t>(viewport.extent.height)};
 
@@ -158,424 +91,393 @@ bool Forward::render(
         beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
         beginRenderPass.clearValues[1].depthStencil = {1.0f, 0};
 
-        cmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
+        frameData.renderCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
 
-        const API::CommandBuffer::CmdBindDescriptors cameraBind {
-            /* cameraBind.pipelineLayout */ *_pipeline.getLayout(),
-            /* cameraBind.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
-            /* cameraBind.firstSet */ 0,
-            /* cameraBind.descriptorSets */ {cameraBuffer->descriptorSet},
-            /* cameraBind.dynamicOffsets */ {cameraBuffer->offset},
+        const VkViewport vkViewport{
+            /* vkViewport.x         */ viewport.offset.x,
+            /* vkViewport.y         */ viewport.offset.y,
+            /* vkViewport.width     */ viewport.extent.width,
+            /* vkViewport.height    */ viewport.extent.height,
+            /* vkViewport.minDepth  */ viewport.minDepth,
+            /* vkViewport.maxDepth  */ viewport.maxDepth,
         };
 
-        cmdBuffer.bindDescriptorSets(cameraBind);
+        const VkRect2D scissor{
+            /* scissor.offset */ {
+               static_cast<int32_t>(_renderView.getScissor().offset.x),
+               static_cast<int32_t>(_renderView.getScissor().offset.y)
+            },
+            /* scissor.extent */ {
+               static_cast<uint32_t>(_renderView.getScissor().extent.width),
+               static_cast<uint32_t>(_renderView.getScissor().extent.height)
+            }
+        };
 
+        frameData.renderCmdBuffer.setViewport({vkViewport});
+        frameData.renderCmdBuffer.setScissor({scissor});
+    }
+
+    // Get the new (or old) camera descriptor set
+    {
+        const DescriptorSetPool::DescriptorSet* cameraDescriptorSet = _cameraDescriptorSetPool->allocate(*frameData.cameraBuffer);
+        _cameraDescriptorSetPool->free(frameData.cameraDescriptorSet);
+        frameData.cameraDescriptorSet = cameraDescriptorSet;
+    }
+
+    // Bind descriptor set of the camera
+    {
+        const API::CommandBuffer::CmdBindDescriptors cameraBind{
+            /* cameraBind.pipelineLayout    */ *_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout(),
+            /* cameraBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+            /* cameraBind.firstSet           */ 0,
+            /* cameraBind.descriptorSets     */ {&frameData.cameraDescriptorSet->getDescriptorSet()},
+            /* cameraBind.dynamicOffsets     */ {frameData.cameraBuffer->getOffset()},
+        };
+
+        frameData.renderCmdBuffer.bindDescriptorSets(cameraBind);
+    }
+
+    // Temporary array of light and material buffers use to render this frame
+    // they will replace frameData.lightBuffers and frameData.materialBuffers atfer the rendering
+    std::vector<const BufferPool::SubBuffer*> lightBuffers;
+    std::vector<const BufferPool::SubBuffer*> materialBuffers;
+
+    // Temporary array of light and material descriptor sets use to render this frame
+    // they will replace frameData.lightDescriptorSets and frameData.materialDescriptorSets atfer the rendering
+    std::vector<const DescriptorSetPool::DescriptorSet*> lightDescriptorSets;
+    std::vector<const DescriptorSetPool::DescriptorSet*> materialDescriptorSets;
+
+    // Render objects
+    {
         // Blend constants are used as dst blend factor
         // We set them to 0 so that there is no blending
         {
             const float blendConstants[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-            cmdBuffer.setBlendConstants(blendConstants);
+            frameData.renderCmdBuffer.setBlendConstants(blendConstants);
         }
 
-        for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
+        auto& lights = renderQueue.getLights();
+        for (uint32_t i = 0; i < renderQueue.getLightsCount(); i += 50) {
+            // Get the new (or old) light buffer
+            const BufferPool::SubBuffer* lightBuffer = _lightBufferPool->allocate(
+                currentImageIndex,
+                frameData.transferCmdBuffer,
+                {lights.begin() + i, i + 50 > renderQueue.getLightsCount() ? lights.begin() + renderQueue.getLightsCount() : lights.begin() + i + 50}
+            );
+            lightBuffers.push_back(lightBuffer);
 
+            // Get the new (or old) light descriptor set
+            const DescriptorSetPool::DescriptorSet* lightDescriptorSet = _lightDescriptorSetPool->allocate(*lightBuffer);
+
+            // Bind descriptor set of the light
             {
-                if (i == 1) {
-                    // Blend constants are used as dst blend factor
-                    // Now the depth buffer is filled, we can set the blend constants to 1 to enable blending
-                    const float blendConstants[4] = {1.0f, 1.0f, 1.0f, 1.0f};
-                    cmdBuffer.setBlendConstants(blendConstants);
-                }
+                const API::CommandBuffer::CmdBindDescriptors lightBind{
+                    /* lightBind.pipelineLayout     */ *_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout(),
+                    /* lightBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    /* lightBind.firstSet           */ 1,
+                    /* lightBind.descriptorSets     */ {&lightDescriptorSet->getDescriptorSet()},
+                    /* lightBind.dynamicOffsets     */ {lightBuffer->getOffset()},
+                };
+
+                frameData.renderCmdBuffer.bindDescriptorSets(lightBind);
             }
 
-            const auto& light = renderQueue.getLights()[i]->getLight();
+            // After the first batch of lights we need to re-enable the blend
+            if (i == 50) {
+                const float blendConstants[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+                frameData.renderCmdBuffer.setBlendConstants(blendConstants);
+            }
 
-            cmdBuffer.bindPipeline(_pipeline);
+            for (const auto it : renderQueue.getPrimitiveSets()) {
+                // Bind pipeline
+                Resource::SharedPtr<Render::Pipeline> pipeline = _renderer.getPipeline(it.first);
+                frameData.renderCmdBuffer.bindPipeline(pipeline->getPipelineAPI());
 
-            BufferPool::SubBuffer* lightBuffer = _subBuffers[light->getName()];
+                // Display primitive set by primitive set
+                for (const auto primitiveSetInstance : it.second) {
+                    auto& node = *primitiveSetInstance.node;
+                    const auto& primitiveSet = *primitiveSetInstance.primitiveSet;
 
-            const API::CommandBuffer::CmdBindDescriptors lightBind {
-                /* cameraBind.pipelineLayout */ *_pipeline.getLayout(),
-                /* lightBind.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
-                /* lightBind.firstSet */ 1,
-                /* lightBind.descriptorSets */ {lightBuffer->descriptorSet},
-                /* lightBind.dynamicOffsets */ {lightBuffer->offset},
-            };
+                    const Math::Mat4x4f pushConstants[] = {
+                        node.getTransform()
+                    };
 
-            cmdBuffer.bindDescriptorSets(lightBind);
+                    const API::CommandBuffer::CmdPushConstants cmdPushConstants{
+                        /* cmdPushConstants.layout      */ static_cast<VkPipelineLayout>(*_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout()),
+                        /* cmdPushConstants.stageFlags  */ VK_SHADER_STAGE_VERTEX_BIT,
+                        /* cmdPushConstants.offset      */ 0,
+                        /* cmdPushConstants.size        */ sizeof(pushConstants),
+                        /* cmdPushConstants.values      */ pushConstants
+                    };
+                    frameData.renderCmdBuffer.pushConstants(cmdPushConstants);
 
-            // for (std::size_t j = 0; j < renderQueue.getMeshsNb(); ++j) {
-            //     MeshInstance* meshInstance = renderQueue.getMeshs()[j];
-            //     lug::Graphics::Render::Mesh* mesh = static_cast<lug::Graphics::Render::Mesh*>(meshInstance->getMesh());
+                    // Get the new (or old) material buffer
+                    const BufferPool::SubBuffer* materialBuffer = _materialBufferPool->allocate(frameData.transferCmdBuffer, *primitiveSetInstance.material);
+                    materialBuffers.push_back(materialBuffer);
 
-            //     if (!mesh->isModelMesh()) {
-            //         Mesh* vkMesh = static_cast<Mesh*>(mesh);
-            //         VkDeviceSize vertexBufferOffset = 0;
-            //         VkDeviceSize indexBufferOffset = 0;
+                    // Get the new (or old) material descriptor set
+                    const DescriptorSetPool::DescriptorSet* materialDescriptorSet = _materialDescriptorSetPool->allocate(*materialBuffer);
 
-            //         LUG_ASSERT(meshInstance->getParent() != nullptr, "A MeshInstance should have a parent");
+                    // Bind descriptor set of the material
+                    {
+                        const API::CommandBuffer::CmdBindDescriptors materialBind{
+                            /* materialBind.pipelineLayout     */ *_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout(),
+                            /* materialBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            /* materialBind.firstSet           */ 2,
+                            /* materialBind.descriptorSets     */ {&materialDescriptorSet->getDescriptorSet()},
+                            /* materialBind.dynamicOffsets     */ {materialBuffer->getOffset()},
+                        };
 
-            //         const Math::Mat4x4f pushConstants[] = {
-            //             meshInstance->getParent()->getTransform()
-            //         };
+                        frameData.renderCmdBuffer.bindDescriptorSets(materialBind);
+                    }
 
-            //         const API::CommandBuffer::CmdPushConstants cmdPushConstants{
-            //             /* cmdPushConstants.layout */ static_cast<VkPipelineLayout>(*_pipeline.getLayout()),
-            //             /* cmdPushConstants.stageFlags */ VK_SHADER_STAGE_VERTEX_BIT,
-            //             /* cmdPushConstants.offset */ 0,
-            //             /* cmdPushConstants.size */ sizeof(pushConstants),
-            //             /* cmdPushConstants.values */ pushConstants
-            //         };
-            //         cmdBuffer.pushConstants(cmdPushConstants);
+                    if (!primitiveSet.position || !primitiveSet.normal) {
+                        LUG_LOG.warn("Forward::render: Mesh should have positions and normals data");
+                        continue;
+                    }
 
-            //         cmdBuffer.bindVertexBuffers({vkMesh->getVertexBuffer()}, {vertexBufferOffset});
-            //         cmdBuffer.bindIndexBuffer(*vkMesh->getIndexBuffer(), VK_INDEX_TYPE_UINT32, indexBufferOffset);
+                    std::vector<const API::Buffer*> vertexBuffers{
+                        static_cast<API::Buffer*>(primitiveSet.position->_data),
+                        static_cast<API::Buffer*>(primitiveSet.normal->_data)
+                    };
 
-            //         const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
-            //             /* cmdDrawIndexed.indexCount */ static_cast<uint32_t>(vkMesh->indices.size()),
-            //             /* cmdDrawIndexed.instanceCount */ 1,
-            //         };
+                    if (primitiveSet.tangent) {
+                        vertexBuffers.push_back(static_cast<API::Buffer*>(primitiveSet.tangent->_data));
+                    }
 
-            //         cmdBuffer.drawIndexed(cmdDrawIndexed);
-            //     } else {
-            //         Model::Mesh* modelMesh = static_cast<Model::Mesh*>(mesh);
-            //         Scene::ModelInstance* modelInstance = meshInstance->getModelInstance();
-            //         Model* model = static_cast<Model*>(modelInstance->getModel());
-            //         VkDeviceSize vertexBufferOffset = modelMesh->verticesOffset * sizeof(lug::Graphics::Render::Mesh::Vertex);
-            //         VkDeviceSize indexBufferOffset = modelMesh->indicesOffset * sizeof(uint32_t);
+                    for (const auto& texCoord: primitiveSet.texCoords) {
+                        vertexBuffers.push_back(static_cast<API::Buffer*>(texCoord->_data));
+                    }
 
-            //         LUG_ASSERT(modelInstance->getParent() != nullptr, "A ModelInstance should have a parent");
+                    for (const auto& color: primitiveSet.colors) {
+                        vertexBuffers.push_back(static_cast<API::Buffer*>(color->_data));
+                    }
 
-            //         const Math::Mat4x4f pushConstants[] = {
-            //             modelInstance->getParent()->getTransform()
-            //         };
+                    const std::vector<VkDeviceSize> offsets(vertexBuffers.size());
+                    frameData.renderCmdBuffer.bindVertexBuffers(vertexBuffers, offsets);
 
-            //         const API::CommandBuffer::CmdPushConstants cmdPushConstants{
-            //             /* cmdPushConstants.layout */ static_cast<VkPipelineLayout>(*_pipeline.getLayout()),
-            //             /* cmdPushConstants.stageFlags */ VK_SHADER_STAGE_VERTEX_BIT,
-            //             /* cmdPushConstants.offset */ 0,
-            //             /* cmdPushConstants.size */ sizeof(pushConstants),
-            //             /* cmdPushConstants.values */ pushConstants
-            //         };
-            //         cmdBuffer.pushConstants(cmdPushConstants);
+                    if (primitiveSet.indices) {
+                        API::Buffer* indicesBuffer = static_cast<API::Buffer*>(primitiveSet.indices->_data);
+                        frameData.renderCmdBuffer.bindIndexBuffer(*indicesBuffer, VK_INDEX_TYPE_UINT16);
+                        const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
+                            /* cmdDrawIndexed.indexCount    */ primitiveSet.indices->buffer.elementsCount,
+                            /* cmdDrawIndexed.instanceCount */ 1,
+                        };
 
-            //         cmdBuffer.bindVertexBuffers({model->getVertexBuffer()}, {vertexBufferOffset});
-            //         cmdBuffer.bindIndexBuffer(*model->getIndexBuffer(), VK_INDEX_TYPE_UINT32, indexBufferOffset);
+                        frameData.renderCmdBuffer.drawIndexed(cmdDrawIndexed);
+                    } else {
+                        const API::CommandBuffer::CmdDraw cmdDraw {
+                            /* cmdDrawIndexed.vertexCount   */ primitiveSet.position->buffer.elementsCount,
+                            /* cmdDrawIndexed.instanceCount */ 1,
+                        };
 
-            //         const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
-            //             /* cmdDrawIndexed.indexCount */ static_cast<uint32_t>(modelMesh->indices.size()),
-            //             /* cmdDrawIndexed.instanceCount */ 1,
-            //         };
-
-            //         cmdBuffer.drawIndexed(cmdDrawIndexed);
-            //     }
-            // }
+                        frameData.renderCmdBuffer.draw(cmdDraw);
+                    }
+                }
+            }
         }
-
-        cmdBuffer.endRenderPass();
     }
 
-    if (!cmdBuffer.end()) {
+    // Free and replace previous lightBuffers
+    {
+        for (const auto& subBuffer : frameData.lightBuffers) {
+            _lightBufferPool->free(subBuffer);
+        }
+
+        frameData.lightBuffers = lightBuffers;
+    }
+
+    // Free and replace previous materialBuffers
+    {
+        for (const auto& subBuffer : frameData.materialBuffers) {
+            _lightBufferPool->free(subBuffer);
+        }
+
+        frameData.materialBuffers = materialBuffers;
+    }
+
+    // Free and replace previous lightDescriptorSets
+    {
+        for (const auto& descriptorSet : frameData.lightDescriptorSets) {
+            _lightDescriptorSetPool->free(descriptorSet);
+        }
+
+        frameData.lightDescriptorSets = lightDescriptorSets;
+    }
+
+    // Free and replace previous materialDescriptorSets
+    {
+        for (const auto& descriptorSet : frameData.materialDescriptorSets) {
+            _lightDescriptorSetPool->free(descriptorSet);
+        }
+
+        frameData.materialDescriptorSets = materialDescriptorSets;
+    }
+
+    // End of the render pass
+    frameData.renderCmdBuffer.endRenderPass();
+
+    if (!frameData.renderCmdBuffer.end() || !frameData.transferCmdBuffer.end()) {
         return false;
     }
 
-    return _graphicsQueue->submit(
-        cmdBuffer,
+    return _transferQueue->submit(
+        frameData.transferCmdBuffer,
+        {static_cast<VkSemaphore>(frameData.transferSemaphore)},
+        {},
+        {},
+        static_cast<VkFence>(frameData.transferFence)
+    ) && _graphicsQueue->submit(
+        frameData.renderCmdBuffer,
         {static_cast<VkSemaphore>(drawCompleteSemaphore)},
-        {static_cast<VkSemaphore>(imageReadySemaphore)},
-        {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
-        static_cast<VkFence>(frameData.fence)
+        {static_cast<VkSemaphore>(frameData.transferSemaphore), static_cast<VkSemaphore>(imageReadySemaphore)},
+        {VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
+        static_cast<VkFence>(frameData.renderFence)
     );
 }
 
-bool Forward::init(API::DescriptorPool* descriptorPool, const std::vector<API::ImageView>& imageViews) {
-    // auto colorFormat = _renderView.getFormat().format;
-
-    // {
-    //     auto initLightPipeline = [this, &colorFormat](::lug::Graphics::Render::Light::Type lightType, const char* vertexShader, const char* fragmentShader) {
-    //         API::Builder::GraphicsPipeline graphicsPipelineBuilder(_renderer.getDevice());
-
-    //         // Set shaders state
-    //         if (!graphicsPipelineBuilder.setShaderFromFile(VK_SHADER_STAGE_VERTEX_BIT, "main", _renderer.getInfo().shadersRoot + vertexShader)
-    //             || !graphicsPipelineBuilder.setShaderFromFile(VK_SHADER_STAGE_FRAGMENT_BIT, "main", _renderer.getInfo().shadersRoot + fragmentShader)) {
-    //             LUG_LOG.error("ForwardRenderer: Can't create pipeline's shaders.");
-    //             return false;
-    //         }
-
-    //         // Set vertex input state
-    //         auto vertexBinding = graphicsPipelineBuilder.addInputBinding(sizeof(Render::Mesh::Vertex), VK_VERTEX_INPUT_RATE_VERTEX);
-
-    //         vertexBinding.addAttributes(VK_FORMAT_R32G32B32_SFLOAT, 0); // Position
-    //         vertexBinding.addAttributes(VK_FORMAT_R32G32B32_SFLOAT, offsetof(Render::Mesh::Vertex, color)); // Color
-    //         vertexBinding.addAttributes(VK_FORMAT_R32G32B32_SFLOAT, offsetof(Render::Mesh::Vertex, normal)); // Normal
-    //         vertexBinding.addAttributes(VK_FORMAT_R32G32_SFLOAT, offsetof(Render::Mesh::Vertex, uv)); // UV
-
-    //         // Set viewport state
-    //         const VkViewport viewport{
-    //             /* viewport.x */ 0.0f,
-    //             /* viewport.y */ 0.0f,
-    //             /* viewport.width */ 0.0f,
-    //             /* viewport.height */ 0.0f,
-    //             /* viewport.minDepth */ 0.0f,
-    //             /* viewport.maxDepth */ 1.0f,
-    //         };
-
-    //         const VkRect2D scissor{
-    //             /* scissor.offset */ {0, 0},
-    //             /* scissor.extent */ {0, 0}
-    //         };
-
-    //         auto viewportState = graphicsPipelineBuilder.getViewportState();
-    //         viewportState.addViewport(viewport);
-    //         viewportState.addScissor(scissor);
-
-    //         // Set rasterization state
-    //         auto rasterizationState = graphicsPipelineBuilder.getRasterizationState();
-    //         rasterizationState.setFrontFace(VK_FRONT_FACE_CLOCKWISE);
-
-    //         // Set depth stencil state
-    //         auto depthStencilState = graphicsPipelineBuilder.getDepthStencilState();
-    //         depthStencilState.enableDepthTest(VK_COMPARE_OP_LESS_OR_EQUAL);
-    //         depthStencilState.enableDepthWrite();
-
-    //         // Set color blend state
-    //         const VkPipelineColorBlendAttachmentState colorBlendAttachment{
-    //             /* colorBlendAttachment.blendEnable */ VK_TRUE,
-    //             /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_ONE,
-    //             /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
-    //             /* colorBlendAttachment.colorBlendOp */ VK_BLEND_OP_ADD,
-    //             /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
-    //             /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
-    //             /* colorBlendAttachment.alphaBlendOp */ VK_BLEND_OP_ADD,
-    //             /* colorBlendAttachment.colorWriteMask */ VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
-    //         };
-
-    //         auto colorBlendState = graphicsPipelineBuilder.getColorBlendState();
-    //         colorBlendState.addAttachment(colorBlendAttachment);
-
-    //         // Set dynamic states
-    //         graphicsPipelineBuilder.setDynamicStates({
-    //             VK_DYNAMIC_STATE_VIEWPORT,
-    //             VK_DYNAMIC_STATE_SCISSOR,
-    //             VK_DYNAMIC_STATE_BLEND_CONSTANTS
-    //         });
-
-    //         // Set pipeline layout
-    //         {
-    //             VkResult result{VK_SUCCESS};
-    //             std::vector<API::DescriptorSetLayout> descriptorSetLayouts(2);
-    //             API::Builder::DescriptorSetLayout descriptorSetLayoutBuilder(_renderer.getDevice());
-
-    //             // Bindings set 0
-    //             {
-    //                 // Camera uniform buffer
-    //                 const VkDescriptorSetLayoutBinding binding{
-    //                     /* binding.binding */ 0,
-    //                     /* binding.descriptorType */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-    //                     /* binding.descriptorCount */ 1,
-    //                     /* binding.stageFlags */ VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-    //                     /* binding.pImmutableSamplers */ nullptr
-    //                 };
-
-    //                 descriptorSetLayoutBuilder.setBindings({binding});
-    //                 if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[0], &result)) {
-    //                     LUG_LOG.error("ForwardRenderer: Can't create pipeline descriptor sets layout 0: {}", result);
-    //                     return false;
-    //                 }
-    //             }
-
-    //             // Bindings set 1
-    //             {
-    //                 // Light uniform buffer
-    //                 const VkDescriptorSetLayoutBinding binding{
-    //                     /* binding.binding */ 0,
-    //                     /* binding.descriptorType */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-    //                     /* binding.descriptorCount */ 1,
-    //                     /* binding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
-    //                     /* binding.pImmutableSamplers */ nullptr
-    //                 };
-
-    //                 descriptorSetLayoutBuilder.setBindings({binding});
-    //                 if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[1], &result)) {
-    //                     LUG_LOG.error("ForwardRenderer: Can't create pipeline descriptor sets layout 1: {}", result);
-    //                     return false;
-    //                 }
-    //             }
-
-    //             // Model transformation
-    //             const VkPushConstantRange pushConstant{
-    //                 /* pushConstant.stageFlags */ VK_SHADER_STAGE_VERTEX_BIT,
-    //                 /* pushConstant.offset */ 0,
-    //                 /* pushConstant.size */ sizeof(Math::Mat4x4f)
-    //             };
-
-    //             API::Builder::PipelineLayout pipelineLayoutBuilder(_renderer.getDevice());
-
-    //             pipelineLayoutBuilder.setPushConstants({pushConstant});
-    //             pipelineLayoutBuilder.setDescriptorSetLayouts(std::move(descriptorSetLayouts));
-
-    //             API::PipelineLayout pipelineLayout;
-    //             if (!pipelineLayoutBuilder.build(pipelineLayout, &result)) {
-    //                 LUG_LOG.error("ForwardRenderer: Can't create pipeline layout: {}", result);
-    //                 return false;
-    //             }
-
-    //             graphicsPipelineBuilder.setPipelineLayout(std::move(pipelineLayout));
-    //         }
-
-    //         // Set render pass
-    //         {
-    //             API::Builder::RenderPass renderPassBuilder(_renderer.getDevice());
-
-    //             const VkAttachmentDescription colorAttachment{
-    //                 /* colorAttachment.flags */ 0,
-    //                 /* colorAttachment.format */ colorFormat,
-    //                 /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
-    //                 /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
-    //                 /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
-    //                 /* colorAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-    //                 /* colorAttachment.stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
-    //                 /* colorAttachment.initialLayout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-    //                 /* colorAttachment.finalLayout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-    //             };
-
-    //             auto colorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
-
-    //             const VkFormat depthFormat = API::Image::findSupportedFormat(
-    //                 _renderer.getDevice(),
-    //                 {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-    //                 VK_IMAGE_TILING_OPTIMAL,
-    //                 VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-    //             );
-
-    //             const VkAttachmentDescription depthAttachment{
-    //                 /* depthAttachment.flags */ 0,
-    //                 /* depthAttachment.format */ depthFormat,
-    //                 /* depthAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
-    //                 /* depthAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
-    //                 /* depthAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
-    //                 /* depthAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-    //                 /* depthAttachment.stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
-    //                 /* depthAttachment.initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
-    //                 /* depthAttachment.finalLayout */ VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-    //             };
-
-    //             auto depthAttachmentIndex = renderPassBuilder.addAttachment(depthAttachment);
-
-    //             const API::Builder::RenderPass::SubpassDescription subpassDescription{
-    //                 /* subpassDescription.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
-    //                 /* subpassDescription.inputAttachments */ {},
-    //                 /* subpassDescription.colorAttachments */ {{colorAttachmentIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}},
-    //                 /* subpassDescription.resolveAttachments */ {},
-    //                 /* subpassDescription.depthStencilAttachment */ {depthAttachmentIndex, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL},
-    //                 /* subpassDescription.preserveAttachments */ {},
-    //             };
-
-    //             renderPassBuilder.addSubpass(subpassDescription);
-
-    //             VkResult result{VK_SUCCESS};
-    //             API::RenderPass renderPass;
-    //             if (!renderPassBuilder.build(renderPass, &result)) {
-    //                 LUG_LOG.error("ForwardRenderer: Can't create render pass: {}", result);
-    //                 return false;
-    //             }
-
-    //             graphicsPipelineBuilder.setRenderPass(std::move(renderPass), 0);
-    //         }
-
-    //         VkResult result{VK_SUCCESS};
-    //         if (!graphicsPipelineBuilder.build(_pipeline, &result)) {
-    //             LUG_LOG.error("ForwardRenderer: Can't create pipeline: {}", result);
-    //             return false;
-    //         }
-
-    //         return true;
-    //     };
-
-    //     if (!initLightPipeline(::lug::Graphics::Render::Light::Type::Directional, "shader.vert.spv", "shader-directional.frag.spv")
-    //         || !initLightPipeline(::lug::Graphics::Render::Light::Type::Point, "shader.vert.spv", "shader-point.frag.spv")
-    //         || !initLightPipeline(::lug::Graphics::Render::Light::Type::Spot, "shader.vert.spv", "shader-spot.frag.spv")) {
-    //         return false;
-    //     }
-    // }
-
-    _framesData.resize(imageViews.size());
-
-    const API::QueueFamily* graphicsQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
-    if (!graphicsQueueFamily) {
-        LUG_LOG.error("Forward::init: Can't find VK_QUEUE_GRAPHICS_BIT queue family");
-        return false;
-    }
-    _graphicsQueue = graphicsQueueFamily->getQueue("queue_graphics");
-    if (!_graphicsQueue) {
-        LUG_LOG.error("Forward::init: Can't find queue with name queue_graphics");
-        return false;
-    }
-
-    API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *graphicsQueueFamily);
+bool Forward::init(const std::vector<API::ImageView>& imageViews) {
     VkResult result{VK_SUCCESS};
-    if (!commandPoolBuilder.build(_commandPool, &result)) {
-        LUG_LOG.error("Forward::init: Can't create a command pool: {}", result);
-        return false;
+
+    // Init graphics queue
+    {
+        const API::QueueFamily* graphicsQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
+        if (!graphicsQueueFamily) {
+            LUG_LOG.error("Forward::init: Can't find VK_QUEUE_GRAPHICS_BIT queue family");
+            return false;
+        }
+
+        _graphicsQueue = graphicsQueueFamily->getQueue("queue_graphics");
+        if (!_graphicsQueue) {
+            LUG_LOG.error("Forward::init: Can't find queue with name queue_graphics");
+            return false;
+        }
+
+        API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *graphicsQueueFamily);
+        if (!commandPoolBuilder.build(_graphicsCommandPool, &result)) {
+            LUG_LOG.error("Forward::init: Can't create the graphics command pool: {}", result);
+            return false;
+        }
+    }
+
+    // Init transfer queue
+    {
+        const API::QueueFamily* transferQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_TRANSFER_BIT);
+        if (!transferQueueFamily) {
+            LUG_LOG.error("Forward::init: Can't find VK_QUEUE_TRANSFER_BIT queue family");
+            return false;
+        }
+
+        _transferQueue = transferQueueFamily->getQueue("queue_transfer");
+        if (!_transferQueue) {
+            LUG_LOG.error("Forward::init: Can't find queue with name queue_transfer");
+            return false;
+        }
+
+        API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *transferQueueFamily);
+        if (!commandPoolBuilder.build(_transferCommandPool, &result)) {
+            LUG_LOG.error("Forward::init: Can't create the transfer command pool: {}", result);
+            return false;
+        }
     }
 
     API::Builder::Fence fenceBuilder(_renderer.getDevice());
     fenceBuilder.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
 
-    API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _commandPool);
-    commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+    API::Builder::CommandBuffer graphicsCommandBufferBuilder(_renderer.getDevice(), _graphicsCommandPool);
+    graphicsCommandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
+    API::Builder::CommandBuffer transferCommandBufferBuilder(_renderer.getDevice(), _transferCommandPool);
+    transferCommandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
+    API::Builder::Semaphore semaphoreBuilder(_renderer.getDevice());
+
+    _framesData.resize(imageViews.size());
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
-        // Create the Fence
-        if (!fenceBuilder.build(_framesData[i].fence, &result)) {
-            LUG_LOG.error("Forward::init: Can't create swapchain fence: {}", result);
+        // Create the render fence
+        if (!fenceBuilder.build(_framesData[i].renderFence, &result)) {
+            LUG_LOG.error("Forward::init: Can't create render fence: {}", result);
             return false;
         }
 
-        // Create command buffers
-        _framesData[i].cmdBuffers.resize(1); // The builder will build according to the array size.
+        // Create the transfer fence
+        if (!fenceBuilder.build(_framesData[i].transferFence, &result)) {
+            LUG_LOG.error("Forward::init: Can't create transfer fence: {}", result);
+            return false;
+        }
 
-        if (!commandBufferBuilder.build(_framesData[i].cmdBuffers, &result)) {
-            LUG_LOG.error("Forward::init: Can't create the command buffer: {}", result);
+        // Create the render command buffer
+        if (!graphicsCommandBufferBuilder.build(_framesData[i].renderCmdBuffer, &result)) {
+            LUG_LOG.error("Forward::init: Can't create the render command buffer: {}", result);
+            return false;
+        }
+
+        // Create the transfer command buffer
+        if (!transferCommandBufferBuilder.build(_framesData[i].transferCmdBuffer, &result)) {
+            LUG_LOG.error("Forward::init: Can't create the transfer command buffer: {}", result);
+            return false;
+        }
+
+        if (!semaphoreBuilder.build(_framesData[i].transferSemaphore, &result)) {
+            LUG_LOG.error("Forward::init: Can't create the transfer semaphore: {}", result);
             return false;
         }
     }
 
-    std::set<uint32_t> queueFamilyIndices = {graphicsQueueFamily->getIdx()};
-    _cameraPool = std::make_unique<BufferPool>(
-        (uint32_t)_framesData.size(),
-        (uint32_t)sizeof(Math::Mat4x4f) * 2,
-        _renderer.getDevice(),
-        queueFamilyIndices,
-        *descriptorPool,
-        &_pipeline.getLayout()->getDescriptorSetLayouts()[0]
-    );
+    if (!_cameraBufferPool) {
+        _cameraBufferPool = std::make_unique<BufferPool::Camera>(_renderer);
+    }
 
-    _lightsPool = std::make_unique<BufferPool>(
-        static_cast<uint32_t>(_framesData.size() * 50),
-        static_cast<uint32_t>(sizeof(::lug::Graphics::Render::Light::Data)),
-        _renderer.getDevice(),
-        queueFamilyIndices,
-        *descriptorPool,
-        &_pipeline.getLayout()->getDescriptorSetLayouts()[1]
-    );
+    if (!_lightBufferPool) {
+        _lightBufferPool = std::make_unique<BufferPool::Light>(_renderer);
+    }
+
+    if (!_materialBufferPool) {
+        _materialBufferPool = std::make_unique<BufferPool::Material>(_renderer);
+    }
+
+    if (!_cameraDescriptorSetPool) {
+        _cameraDescriptorSetPool = std::make_unique<DescriptorSetPool::Camera>(_renderer);
+        if (!_cameraDescriptorSetPool->init()) {
+            return false;
+        }
+    }
+
+    if (!_lightDescriptorSetPool) {
+        _lightDescriptorSetPool = std::make_unique<DescriptorSetPool::Light>(_renderer);
+        if (!_lightDescriptorSetPool->init()) {
+            return false;
+        }
+    }
+
+    if (!_materialDescriptorSetPool) {
+        _materialDescriptorSetPool = std::make_unique<DescriptorSetPool::Material>(_renderer);
+        if (!_materialDescriptorSetPool->init()) {
+            return false;
+        }
+    }
 
     return initDepthBuffers(imageViews) && initFramebuffers(imageViews);
 }
 
 void Forward::destroy() {
     _graphicsQueue->waitIdle();
-
-    _pipeline.destroy();
+    _transferQueue->waitIdle();
 
     _framesData.clear();
 
     _depthBufferMemory.destroy();
 
-    _cameraPool.reset();
-    _lightsPool.reset();
+    _cameraBufferPool.reset();
+    _lightBufferPool.reset();
+    _materialBufferPool.reset();
 
-    _commandPool.destroy();
+    _cameraDescriptorSetPool.reset();
+    _lightDescriptorSetPool.reset();
+    _materialDescriptorSetPool.reset();
+
+    _graphicsCommandPool.destroy();
+    _transferCommandPool.destroy();
 }
 
 bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
@@ -593,9 +495,9 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
     // Create images and add them to API::Builder::DeviceMemory
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
         const VkExtent3D extent{
-            /* extent.width */ imageViews[i].getImage()->getExtent().width,
-            /* extent.height */ imageViews[i].getImage()->getExtent().height,
-            /* extent.depth */ 1
+            /* extent.width     */ imageViews[i].getImage()->getExtent().width,
+            /* extent.height    */ imageViews[i].getImage()->getExtent().height,
+            /* extent.depth     */ 1
         };
 
         imageBuilder.setExtent(extent);
@@ -645,11 +547,11 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
 
 bool Forward::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
     // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
-    const API::RenderPass* renderPass = _pipeline.getRenderPass();
+    const API::RenderPass* renderPass = _renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getRenderPass();
 
     _framesData.resize(imageViews.size());
 
-    for (size_t i = 0; i < imageViews.size(); i++) {
+    for (uint32_t i = 0; i < imageViews.size(); i++) {
         // Create depth buffer image view
         API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
 

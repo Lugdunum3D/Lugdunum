@@ -30,6 +30,16 @@ void CommandBuffer::endRenderPass() const {
     vkCmdEndRenderPass(static_cast<VkCommandBuffer>(_commandBuffer));
 }
 
+void CommandBuffer::draw(const CmdDraw& params) const {
+    vkCmdDraw(
+        static_cast<VkCommandBuffer>(_commandBuffer),
+        params.vertexCount,
+        params.instanceCount,
+        params.firstVertex,
+        params.firstInstance
+    );
+}
+
 void CommandBuffer::drawIndexed(const CmdDrawIndexed& params) const {
     vkCmdDrawIndexed(
         static_cast<VkCommandBuffer>(_commandBuffer),

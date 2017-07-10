@@ -74,10 +74,6 @@ public:
     void lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space = TransformSpace::Local);
 
     virtual void needUpdate();
-
-    bool isDirty() const;
-    void isDirty(bool dirty);
-
 private:
     void update();
 
@@ -86,9 +82,6 @@ protected:
 
     std::string _name;
     std::vector<Node*> _children;
-
-    // Flag to know if the node is dirty since the last frame
-    bool _dirty{true};
 
 private:
     Math::Vec3f _position{Math::Vec3f(0.0f)};

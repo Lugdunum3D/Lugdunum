@@ -19,7 +19,7 @@ class LUG_GRAPHICS_API Mesh {
     friend Resource::SharedPtr<lug::Graphics::Render::Mesh> lug::Graphics::Vulkan::Builder::Mesh::build(const ::lug::Graphics::Builder::Mesh&);
 
 public:
-    class PrimitiveSet {
+    class LUG_GRAPHICS_API PrimitiveSet {
     public:
         PrimitiveSet() = default;
 
@@ -37,7 +37,7 @@ public:
         // TODO: Non raw mode
 
         // Raw mode
-        void addAttributeBuffer(void* data, uint32_t size, Render::Mesh::PrimitiveSet::Attribute::Type type);
+        void addAttributeBuffer(const void* data, uint32_t elementSize, uint32_t elementsCount, Render::Mesh::PrimitiveSet::Attribute::Type type);
 
         Render::Mesh::PrimitiveSet::Mode getMode() const;
         Resource::SharedPtr<Render::Material> getMaterial() const;

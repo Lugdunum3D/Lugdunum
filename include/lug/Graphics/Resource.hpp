@@ -85,7 +85,7 @@ public:
         T& operator*() const;
         T* operator->() const;
 
-        explicit operator bool() {
+        explicit operator bool() const {
             return _resource != nullptr;
         }
 

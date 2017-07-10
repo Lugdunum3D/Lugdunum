@@ -37,16 +37,20 @@ public:
                 Position,   ///< Position (VEC3<FLOAT>)
                 Normal,     ///< Normal (VEC3<FLOAT>)
                 TexCoord,   ///< UV (VEC2<FLOAT>)
-                Tangent     ///< Tangent (VEC4<FLOAT> w component is a sign value (-1 or +1) indicating handedness of the tangent basis)
+                Tangent,    ///< Tangent (VEC4<FLOAT> w component is a sign value (-1 or +1) indicating handedness of the tangent basis)
+                Color,      ///< Color (VEC4<FLOAT>)
             } type;
 
             /**
              * @brief      Access to the data of the attribute.
              */
             struct Buffer {
-                char* data{nullptr};    ///< The data of the buffer.
-                uint32_t size{0};       ///< The size of the above data buffer, in bytes.
+                char* data{nullptr};        ///< The data of the buffer.
+                uint32_t size{0};           ///< The size of the above data buffer, in bytes.
+                uint32_t elementsCount{0};  ///< The number of elements (indices, vertices, normals)
             } buffer;
+
+            void* _data{nullptr}; // Specific to each Renderer
         };
 
         /**
@@ -67,6 +71,7 @@ public:
         Attribute* position{nullptr};
         Attribute* normal{nullptr};
         std::vector<Attribute*> texCoords{};
+        std::vector<Attribute*> colors{};
         Attribute* tangent{nullptr};
 
         Resource::SharedPtr<Material> material{nullptr};
@@ -83,17 +88,12 @@ public:
 
     virtual ~Mesh();
 
-    const std::string& getName() const;
-    void setName(const std::string &name);
-
     const std::vector<Mesh::PrimitiveSet>& getPrimitiveSets() const;
 
 protected:
     explicit Mesh(const std::string& name);
 
 protected:
-    std::string _name;
-
     std::vector<PrimitiveSet> _primitiveSets;
 };
 

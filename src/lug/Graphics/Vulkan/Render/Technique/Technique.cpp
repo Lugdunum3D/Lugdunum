@@ -6,7 +6,7 @@ namespace Vulkan {
 namespace Render {
 namespace Technique {
 
-Technique::Technique(const Renderer& renderer, const Render::View& renderView) :
+Technique::Technique(Renderer& renderer, const Render::View& renderView) :
     _renderer(renderer), _renderView{renderView} {}
 
 } // Technique

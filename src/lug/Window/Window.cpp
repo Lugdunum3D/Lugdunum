@@ -7,7 +7,7 @@
 #elif defined(LUG_SYSTEM_ANDROID)
     #include <lug/Window/Android/WindowImplAndroid.hpp>
 #else
-    // Theorically this should never happen since the Config.cmake will
+    // Theoretically this should never happen since the Config.cmake will
     // warn the user before, but #error anyway
     #error "Unsupported operating system or environment"
 #endif
@@ -36,7 +36,7 @@ std::unique_ptr<Window> Window::create(const InitInfo& initInfo) {
 bool Window::init(const InitInfo& initInfo) {
     if (_impl != nullptr) {
 
-        // Specifiy the width and height of our window, for now it's the only thing we can specify along with the title and style that is
+        // Specify the width and height of our window, for now it's the only thing we can specify along with the title and style that is
         _mode.width = initInfo.width;
         _mode.height = initInfo.height;
 
@@ -217,8 +217,8 @@ bool Window::pollEvent(Event& event) {
         }
 
         if (event.type == Event::Type::MouseMoved) {
-            _mouseCoord.x = event.mouse.coord.x;
-            _mouseCoord.y = event.mouse.coord.y;
+            _mousePosition.x() = event.mouse.coord.x;
+            _mousePosition.y() = event.mouse.coord.y;
         }
 
         return value;
@@ -229,6 +229,12 @@ bool Window::pollEvent(Event& event) {
 void Window::setKeyRepeat(bool enable) {
     if (_impl != nullptr) {
         _impl->setKeyRepeat(enable);
+    }
+}
+
+void Window::setMouseCursorVisible(bool visible) {
+    if (_impl != nullptr) {
+        _impl->setMouseCursorVisible(visible);
     }
 }
 
@@ -248,10 +254,20 @@ bool Window::isMousePressed(Mouse::Button button) const {
     return (_mouseState.at(button));
 }
 
-void Window::getMousePos(uint32_t & x, uint32_t & y) const {
-    x = _mouseCoord.x;
-    y = _mouseCoord.y;
+const Math::Vec2i& Window::getMousePos() const {
+    return _mousePosition;
 }
 
-} // namespace Window
-} // namespace lug
+void Window::setMousePos(const Math::Vec2i& mousePosition) {
+    if (_impl != nullptr) {
+        _impl->setMousePos(mousePosition);
+    }
+    _mousePosition = mousePosition;
+}
+
+Math::Vec2i Window::getWindowSize() const {
+    return {_mode.width, _mode.height};
+}
+
+} // Window
+} // lug

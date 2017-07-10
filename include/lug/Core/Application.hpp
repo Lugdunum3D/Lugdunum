@@ -38,7 +38,7 @@ public:
     /**
      * @brief      Gets the application's information.
      *
-     * @return     The applicaton's information.
+     * @return     The application's information.
      */
     const Application::Info& getInfo() const;
 
@@ -76,7 +76,7 @@ public:
     /**
      * @brief      Sets the graphics information.
      *
-     * @param[in]  initInfo  A refenrence to the RenderWindow initialize information.
+     * @param[in]  initInfo  A reference to the RenderWindow initialize information.
      */
     void setGraphicsInfo(const lug::Graphics::Graphics::InitInfo& initInfo);
 
@@ -98,12 +98,12 @@ public:
      * @param[in]  argc  The argc argument as received from the main function.
      * @param[in]  argv  The argv argument as received from the main function.
      *
-     * @return     Wether the application was successfully initialized.
+     * @return     Whether the application was successfully initialized.
      */
     bool init(int argc, char* argv[]);
 
     /**
-     * @brief      Begin the initialisation of the application with the informations filled in the
+     * @brief      Begin the initialization of the application with the informations filled in the
      *             lug::Graphics::Graphics::InitInfo structure.
      *
      *             The lug::Graphics::Graphics::InitInfo structure can be modified by calling #getGraphicsInfo or #setGraphicsInfo. @n
@@ -111,17 +111,17 @@ public:
      * @param[in]  argc  The argc argument as received from the main function.
      * @param[in]  argv  The argv argument as received from the main function.
      *
-     * @return     Wether the application was successfully initialized.
+     * @return     Whether the application was successfully initialized.
      */
     bool beginInit(int argc, char* argv[]);
 
     /**
-     * @brief      Finish the initialisation of the application with the informations filled in the
+     * @brief      Finish the initialization of the application with the informations filled in the
      *             lug::Graphics::RenderWindow::InitInfo structure.
      *
      *             The lug::Graphics::RenderWindow::InitInfo structure can be modified by calling #getRenderWindowInfo or #setRenderWindowInfo.
      *
-     * @return     Wether the application was successfully initialized.
+     * @return     Whether the application was successfully initialized.
      */
     bool finishInit();
 
@@ -130,7 +130,7 @@ public:
      *
      *             Launches an infinite loop (i.e. it does not exit immediately) and runs the application in the foreground.
      *
-     * @return     Wether the application exited successfully.
+     * @return     Whether the application exited successfully.
      */
     bool run();
 
@@ -142,7 +142,7 @@ public:
     void close();
 
     /**
-     * @brief      Overide this function to hanle an event.
+     * @brief      Override this function to handle an event.
      *
      *             This function will be called by the engine for each polled event.
      *
@@ -151,7 +151,7 @@ public:
     virtual void onEvent(const lug::Window::Event& event) = 0;
 
     /**
-     * @brief      Overide this function to handle a frame.
+     * @brief      Override this function to handle a frame.
      *
      *             This function will be called by the engine at each frame.
      */

@@ -94,17 +94,16 @@ endmacro()
 # macro to add a sample
 macro(lug_add_sample target)
     # parse the arguments
-    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;SHADERS;LUG_RESOURCES;OTHER_RESOURCES" ${ARGN})
+    cmake_parse_arguments(THIS "" "" "SOURCES;DEPENDS;SHADERS;EXTERNAL_LIBS;LUG_RESOURCES;OTHER_RESOURCES" ${ARGN})
 
-    # find vulkan
+    # find Vulkan
     find_package(Vulkan)
-
     if (NOT VULKAN_INCLUDE_DIR)
-        if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/vulkan")
-            message(FATAL_ERROR "Can't find vulkan, call `git submodule update --recursive`")
+        if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/vulkan")
+            message(FATAL_ERROR "Can't find vulkan in the thirdparty directory")
         endif()
 
-        set(VULKAN_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/vulkan/include)
+        set(VULKAN_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/vulkan/include)
         message(STATUS "Found Vulkan: ${VULKAN_INCLUDE_DIR}")
     endif()
 
@@ -114,11 +113,11 @@ macro(lug_add_sample target)
     find_package(Fmt)
 
     if (NOT FMT_INCLUDE_DIR)
-        if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/fmt")
-            message(FATAL_ERROR "Can't find fmt, call `git submodule update --recursive`")
+        if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/fmt")
+            message(FATAL_ERROR "Can't find fmt in the thirdparty directory")
         endif()
 
-        set(FMT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/fmt/include)
+        set(FMT_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/fmt/include)
         message(STATUS "Found Fmt: ${FMT_INCLUDE_DIR}")
     endif()
 
@@ -139,6 +138,11 @@ macro(lug_add_sample target)
     endif()
 
     lug_add_compile_options(${target})
+
+    # link the target to its external dependencies
+    if(THIS_EXTERNAL_LIBS)
+        target_link_libraries(${target} ${THIS_EXTERNAL_LIBS})
+    endif()
 
     # use lugdunum
     include_directories(${LUG_INCLUDE_DIR})

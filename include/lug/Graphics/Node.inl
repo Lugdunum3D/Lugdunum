@@ -41,11 +41,3 @@ inline const Math::Mat4x4f& Node::getTransform() {
     }
     return _transform;
 }
-
-inline bool Node::isDirty() const {
-    return _dirty;
-}
-
-inline void Node::isDirty(bool dirty) {
-    _dirty = dirty;
-}
