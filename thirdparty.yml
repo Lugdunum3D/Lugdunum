@@ -1,0 +1,23 @@
+shaderc:
+    repository:
+        tag: aede4fe9571a1be4e8962c3149772bb9fcc604f1
+
+vulkan:
+    repository:
+        tag: 685295031d092db5417a5254e4f8b3e8024214cf
+
+fmt:
+    repository:
+        tag: 07ed4215212324145bee94b94e34656923a4e9b4
+
+googlemock:
+    repository:
+        tag: 294f72bc773c92410aa3c5ecdd6cd4a757c3fbf4
+
+gltf2-loader:
+    repository:
+        tag: db730a1b66ef98f1f0e4e008aa909a88f05897a4
+
+imgui:
+    repository:
+        tag: 1094afc6bef39080b60cbc7f44bb3eb52cd597d8

@@ -3,14 +3,16 @@
 #include <cstdint>
 #include <memory>
 #include <lug/Graphics/Export.hpp>
-#include <lug/Graphics/Render/Camera.hpp>
-#include <lug/Graphics/Render/Technique/Type.hpp>
+#include <lug/Graphics/Render/Camera/Camera.hpp>
 
 namespace lug {
 namespace Graphics {
 namespace Render {
 
+namespace Camera {
 class Camera;
+} // Camera
+
 class Target;
 
 class LUG_GRAPHICS_API View {
@@ -48,10 +50,9 @@ public:
     };
 
     struct InitInfo {
-        Technique::Type renderTechniqueType;
         Viewport viewport;
         Scissor scissor;
-        std::unique_ptr<Camera> camera;
+        Resource::SharedPtr<Camera::Camera> camera;
         // TODO: Clear color
     };
 
@@ -74,9 +75,8 @@ public:
     const Viewport& getViewport() const;
     const Scissor& getScissor() const;
 
-    std::unique_ptr<Camera> attachCamera(std::unique_ptr<Camera> camera);
-    std::unique_ptr<Camera> detachCamera();
-    Camera* getCamera() const;
+    void attachCamera(Resource::SharedPtr<Camera::Camera> camera);
+    Resource::SharedPtr<Camera::Camera> getCamera() const;
 
     void update();
 
@@ -89,7 +89,7 @@ protected:
 
     Viewport _viewport{};
     Scissor _scissor{};
-    std::unique_ptr<Camera> _camera{nullptr};
+    Resource::SharedPtr<Camera::Camera> _camera{nullptr};
 };
 
 #include <lug/Graphics/Render/View.inl>

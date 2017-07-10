@@ -41,8 +41,9 @@
     #define LUG_API_EXPORT __declspec(dllexport)
     #define LUG_API_IMPORT __declspec(dllimport)
 
-    // Disable C4251 and C4275 warnings for Visual C++ compilers
+    // Disable C4201, C4251 and C4275 warnings for Visual C++ compilers
     #if defined(LUG_COMPILER_MSVC)
+        #pragma warning(disable:4201) // Anonymous struct/union
         #pragma warning(disable:4251)
         #pragma warning(disable:4275)
     #endif

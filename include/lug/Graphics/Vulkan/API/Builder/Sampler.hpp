@@ -17,10 +17,10 @@ class Sampler {
 public:
     Sampler(const API::Device& device);
 
-    Sampler(const Sampler&&) = delete;
+    Sampler(const Sampler&) = delete;
     Sampler(Sampler&&) = delete;
 
-    Sampler& operator=(const Sampler&&) = delete;
+    Sampler& operator=(const Sampler&) = delete;
     Sampler& operator=(Sampler&&) = delete;
 
     ~Sampler() = default;

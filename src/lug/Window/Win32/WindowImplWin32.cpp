@@ -28,7 +28,7 @@ WindowImpl::~WindowImpl() {
 
         // Unregister window class if we were the last window
         if (windowCount == 0) {
-            UnregisterClassW(className, GetModuleHandleW(NULL));
+            UnregisterClassW(className, GetModuleHandleW(nullptr));
         }
     } else {
         // The window is external: remove the hook on its message callback
@@ -96,10 +96,10 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
         GetModuleHandleW(nullptr),
         this);
 
-    // Switch to fullscreen if requested
+    // Switch to full-screen if requested
     if (_fullscreen) {
-        if (activateFullscreen()) {
-            // TODO: Log failure
+        if (!activateFullscreen()) {
+            LUG_LOG.error("WindowImpl::Win32::Init Can't activate full-screen");
         }
     }
 
@@ -109,7 +109,7 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
 }
 
 void WindowImpl::close() {
-    // Restore the previous video mode (in case we were running in fullscreen)
+    // Restore the previous video mode (in case we were running in full-screen)
     if (fullscreenWindow == this) {
         ChangeDisplaySettingsW(nullptr, 0);
         fullscreenWindow = nullptr;
@@ -363,6 +363,15 @@ void WindowImpl::setKeyRepeat(bool state) {
     _keyRepeat = state;
 }
 
+void WindowImpl::setMouseCursorVisible(bool visible) {
+    _cursor = visible ? LoadCursor(nullptr, IDC_ARROW) : nullptr;
+    SetCursor(_cursor);
+}
+
+void WindowImpl::setMousePos(const Math::Vec2i& mousePosition) {
+    SetCursorPos(mousePosition.x(), mousePosition.y());
+}
+
 HWND WindowImpl::getHandle() const {
     return _handle;
 }
@@ -378,7 +387,7 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
         case WM_SIZE:
             e.type = Event::Type::Resize;
 
-            // The handle is not set on first call
+            // The handle is not set on first call (window not yet created)
             if (!_handle) {
                 break;
             }
@@ -403,6 +412,12 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_DESTROY:
             e.type = Event::Type::Destroy;
+            break;
+
+        case WM_SETCURSOR:
+            // The mouse has moved, if the cursor is in our window we must refresh the cursor
+            if (LOWORD(lParam) == HTCLIENT)
+                SetCursor(_cursor);
             break;
 
         case WM_KEYDOWN:
@@ -477,40 +492,40 @@ void WindowImpl::registerWindow() const {
     windowClass.cbClsExtra = 0;
     windowClass.cbWndExtra = 0;
     windowClass.hInstance = _hinstance;
-    windowClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
-    windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+    windowClass.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
+    windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
     windowClass.hbrBackground = 0;
     windowClass.lpszMenuName = nullptr;
     windowClass.lpszClassName = className;
 
     if (!RegisterClassW(&windowClass)) {
-        MessageBox(NULL, "Failed To Register The Window Class.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+        MessageBox(nullptr, "Failed To Register The Window Class.", "ERROR", MB_OK | MB_ICONEXCLAMATION);
     }
 }
 
 bool WindowImpl::activateFullscreen() {
     DEVMODEW devMode{};
 
-    devMode.dmSize = sizeof(devMode);               // Size Of The Devmode Structure
+    devMode.dmSize = sizeof(devMode);
     devMode.dmPelsWidth = _parent->_mode.width;     // Selected Screen Width
     devMode.dmPelsHeight = _parent->_mode.height;   // Selected Screen Height
     devMode.dmBitsPerPel = 32;                      // Selected Bits Per Pixel
     devMode.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
-    // Apply fullscreen mode
+    // Apply full-screen mode
     if (ChangeDisplaySettingsW(&devMode, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL) {
         // If The Mode Fails, Offer Two Options.  Quit Or Use Windowed Mode.
-        if (MessageBox(NULL, "Fullscreen mode has failed to be initialized. Use Windowed Mode Instead?", "Warning", MB_YESNO | MB_ICONEXCLAMATION) == IDYES) {
+        if (MessageBox(nullptr, "Full-screen mode has failed to be initialized. Use Windowed Mode Instead?", "Warning", MB_YESNO | MB_ICONEXCLAMATION) == IDYES) {
             _fullscreen = false;
             return false;
         } else {
             // Pop Up A Message Box Letting User Know The Program Is Closing.
-            MessageBox(NULL, "Program Will Now Close.", "ERROR", MB_OK | MB_ICONSTOP);
+            MessageBox(nullptr, "Program Will Now Close.", "ERROR", MB_OK | MB_ICONSTOP);
             return false;
         }
     }
 
-    // Make the window flags compatible with fullscreen mode
+    // Make the window flags compatible with full-screen mode
     SetWindowLongW(_handle, GWL_STYLE, WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
     SetWindowLongW(_handle, GWL_EXSTYLE, WS_EX_APPWINDOW);
 
@@ -518,13 +533,14 @@ bool WindowImpl::activateFullscreen() {
     SetWindowPos(_handle, HWND_TOP, 0, 0, _parent->_mode.width, _parent->_mode.height, SWP_FRAMECHANGED);
     ShowWindow(_handle, SW_SHOW);
 
-    // Set "this" as the current fullscreen window
+    // Set "this" as the current full-screen window
     fullscreenWindow = this;
     return true;
 }
 
 Keyboard::Key WindowImpl::getKeyCode(WPARAM wParam, LPARAM lParam) {
     WPARAM new_vk = wParam;
+    // @see https://msdn.microsoft.com/en-us/library/ms646267%28v=vs.85%29.aspx#_win32_Keystroke_Message_Flags
     UINT scancode = (lParam & 0x00ff0000) >> 16;
     int extended = (lParam & 0x01000000) != 0;
 

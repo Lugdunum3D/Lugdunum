@@ -4,6 +4,7 @@
 #include <queue>
 #include <string>
 #include <unordered_map>
+#include <lug/Math/Vector.hpp>
 #include <lug/Window/Event.hpp>
 #include <lug/Window/Export.hpp>
 #include <lug/Window/Keyboard.hpp>
@@ -95,7 +96,7 @@ public:
      *
      * @return     True if an event was polled, false otherwise.
      */
-    virtual bool pollEvent(lug::Window::Event&);
+    virtual bool pollEvent(lug::Window::Event& event);
 
     /**
      * @brief      Close the window gracefully.
@@ -105,7 +106,7 @@ public:
     /**
      * @brief      Enables or disables key repeat.
      *
-     * The key repeat is set to false by default (i.e. the default, untouched, behaviour)
+     * The key repeat is set to false by default (i.e. the default, unpressed, behavior)
      *
      * @param[in]  state  Desired state
      */
@@ -130,25 +131,44 @@ public:
     bool isMousePressed(Mouse::Button button) const;
 
     /**
-    * @brief      Used to retrieve the mouses position
+    * @brief      Retrieves the mouses position
     *
-    * @param[in]  x   The parameter that will be set to the mouse's position on the x axis.
-    * @param[in]  y   The parameter that will be set to the mouse's position on the x axis.
-    *
+    * @return     Position of the cursor (relative to the window).
     */
-    void getMousePos(uint32_t &x, uint32_t &y) const;
+    const Math::Vec2i& getMousePos() const;
+
+    /**
+     * @brief      Sets the mouse position.
+     *
+     * @param[in]  mousePosition  The position of the cursor (relative to the window)
+     */
+    void setMousePos(const Math::Vec2i& mousePosition);
+
+    /**
+     * @brief      Gets the window size.
+     *
+     * @return     The window size.
+     */
+    Math::Vec2i getWindowSize() const;
+
+    /**
+     * @brief      Sets the visibility of the mouse cursor (hide/show)
+     *
+     * @param[in]  visible  The state
+     */
+    void setMouseCursorVisible(bool visible);
 
 protected:
     Window();
     bool init(const InitInfo& initInfo);
 
     /**
-     * @brief      Inits every key in @p _keyState to false
+     * @brief       Inits every key in @p _keyState to false
      */
     void initKeyState();
 
     /**
-    * @brief      Inits every button in @p _mouseState to false
+    * @brief        Inits every button in @p _mouseState to false
     */
     void initMouseState();
 
@@ -158,7 +178,7 @@ protected:
     priv::WindowImpl* _impl{nullptr};
 
     /**
-     * Default videomode.
+     * Default video mode.
      */
     VideoMode _mode{800, 600, 8, 8, 8, 60};
 
@@ -175,10 +195,7 @@ protected:
     /**
     * Used to store the mouse's position, used by #getMousePos.
     */
-    struct {
-        uint32_t x;
-        uint32_t y;
-    } _mouseCoord;
+    Math::Vec2i _mousePosition{0, 0};
     friend lug::Window::priv::WindowImpl;
 };
 

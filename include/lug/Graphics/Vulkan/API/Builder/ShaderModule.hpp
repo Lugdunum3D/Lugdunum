@@ -18,10 +18,10 @@ class ShaderModule {
 public:
     ShaderModule(const API::Device& device);
 
-    ShaderModule(const ShaderModule&&) = delete;
+    ShaderModule(const ShaderModule&) = delete;
     ShaderModule(ShaderModule&&) = delete;
 
-    ShaderModule& operator=(const ShaderModule&&) = delete;
+    ShaderModule& operator=(const ShaderModule&) = delete;
     ShaderModule& operator=(ShaderModule&&) = delete;
 
     ~ShaderModule() = default;
@@ -36,6 +36,7 @@ public:
 private:
     const API::Device& _device;
 
+    size_t _codeSize{0};
     std::vector<uint32_t> _data;
 };
 

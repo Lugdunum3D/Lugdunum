@@ -45,10 +45,10 @@ public:
 public:
     RenderPass(const API::Device& device);
 
-    RenderPass(const RenderPass&&) = delete;
+    RenderPass(const RenderPass&) = delete;
     RenderPass(RenderPass&&) = delete;
 
-    RenderPass& operator=(const RenderPass&&) = delete;
+    RenderPass& operator=(const RenderPass&) = delete;
     RenderPass& operator=(RenderPass&&) = delete;
 
     ~RenderPass() = default;

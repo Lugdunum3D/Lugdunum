@@ -7,6 +7,8 @@
 #include <lug/Core/Version.hpp>
 #include <lug/Graphics/Module.hpp>
 #include <lug/Graphics/Render/Window.hpp>
+#include <lug/Graphics/Render/Technique/Type.hpp>
+#include <lug/Graphics/ResourceManager.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -21,10 +23,11 @@ public:
 
     struct InitInfo {
         std::string shadersRoot;
+        Render::Technique::Type renderTechnique;
     };
 
 public:
-    Renderer(Graphics& graphics);
+    Renderer(Graphics& graphics, Type type);
 
     Renderer(const Renderer&) = delete;
     Renderer(Renderer&&) = delete;
@@ -44,10 +47,15 @@ public:
     virtual Render::Window* getWindow() = 0;
 
     const InitInfo& getInfo() const;
+    Type getType() const;
+
+    ResourceManager* getResourceManager() const;
 
 protected:
     Graphics& _graphics;
+    Type _type;
     InitInfo _initInfo;
+    std::unique_ptr<ResourceManager> _resourceManager{nullptr};
 };
 
 #include <lug/Graphics/Renderer.inl>

@@ -1,8 +1,3 @@
-checkout:
-  post:
-    - git submodule sync
-    - git submodule update --init # use submodules
-
 dependencies:
   override:
     - /bin/true
@@ -12,6 +7,7 @@ dependencies:
 
   pre:
     - ./test/ci/scripts/circle_dependencies.sh
+    - ./test/ci/scripts/circle_thirdparty.sh
 
 test:
   override:

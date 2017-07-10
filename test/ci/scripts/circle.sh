@@ -4,15 +4,17 @@ function build_lugdunum() {
     cd ~/Lugdunum
 
     mkdir build && cd build
-    (cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS) || return 1
+    (cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DLUG_THIRDPARTY_DIR=$HOME/.local/thirdparty) || return 1
     (make all test && sudo make install) || return 1
+
+    return 0
 }
 
 function build_samples() {
     cd ~/Lugdunum/samples
 
     mkdir build && cd build
-    (cmake .. -DBUILD_SHADERS=false) || return 1
+    (cmake .. -DBUILD_SHADERS=false -DLUG_THIRDPARTY_DIR=$HOME/.local/thirdparty) || return 1
     (make all) || return 1
 
     return 0

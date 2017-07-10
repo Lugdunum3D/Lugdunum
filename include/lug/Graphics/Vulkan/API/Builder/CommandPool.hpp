@@ -18,10 +18,10 @@ class CommandPool {
 public:
     CommandPool(const API::Device& device, const API::QueueFamily& queueFamily);
 
-    CommandPool(const CommandPool&&) = delete;
+    CommandPool(const CommandPool&) = delete;
     CommandPool(CommandPool&&) = delete;
 
-    CommandPool& operator=(const CommandPool&&) = delete;
+    CommandPool& operator=(const CommandPool&) = delete;
     CommandPool& operator=(CommandPool&&) = delete;
 
     ~CommandPool() = default;

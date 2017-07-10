@@ -37,7 +37,6 @@ if [[ ! -d "$cache_dir" || "$invalidate" = true ]]; then
     packages=(
         clang-3.8 cmake gcc-6 g++-6     # compilation
         doxygen graphviz                # doxigen
-        libassimp-dev                   # assimp
     )
 
     for package in ${packages[*]}; do

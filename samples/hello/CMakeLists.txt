@@ -12,6 +12,9 @@ if(ANDROID)
     populate_android_infos()
 endif()
 
+# set the path of thirdparty
+lug_set_option(LUG_THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty" STRING "Choose the path for the thirdparty directory")
+
 # project name
 project(hello)
 
@@ -33,17 +36,15 @@ set(INC
 source_group("inc" FILES ${INC})
 
 set(SHADERS
-    shader.vert
-    shader-directional.frag
-    shader-point.frag # not used but must be present
-    shader-spot.frag # not used but must be present
     gui.frag
     gui.vert
 )
 
 set(LUG_RESOURCES
-    models/LowPoly/Low\ poly.obj
-    models/LowPoly/Low_poly.mtl
+    models/Box0.bin
+    models/Box.gltf
+    shaders/forward/shader.frag
+    shaders/forward/shader.vert
 )
 
 include_directories(include)
@@ -54,3 +55,4 @@ lug_add_sample(hello
                SHADERS ${SHADERS}
                LUG_RESOURCES ${LUG_RESOURCES}
 )
+

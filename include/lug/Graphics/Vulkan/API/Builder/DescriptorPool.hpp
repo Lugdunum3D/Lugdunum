@@ -18,10 +18,10 @@ class DescriptorPool {
 public:
     DescriptorPool(const API::Device& device);
 
-    DescriptorPool(const DescriptorPool&&) = delete;
+    DescriptorPool(const DescriptorPool&) = delete;
     DescriptorPool(DescriptorPool&&) = delete;
 
-    DescriptorPool& operator=(const DescriptorPool&&) = delete;
+    DescriptorPool& operator=(const DescriptorPool&) = delete;
     DescriptorPool& operator=(DescriptorPool&&) = delete;
 
     ~DescriptorPool() = default;

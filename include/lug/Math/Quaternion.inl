@@ -189,12 +189,12 @@ inline Quaternion<T> inverse(const Quaternion<T>& lhs) {
 
     result.conjugate();
 
-    const T length = result.length();
+    const T length = result.squaredLength();
 
     result[0] /= length * length;
-    result[1] /= -length * length;
-    result[2] /= -length * length;
-    result[3] /= -length * length;
+    result[1] /= length * length;
+    result[2] /= length * length;
+    result[3] /= length * length;
 
     result.normalize();
 

@@ -30,16 +30,16 @@ bool ShaderModule::loadFromFile(const std::string& filename) {
         return false;
     }
 
-    size_t shaderCodeSize = AAsset_getLength(asset);
+    _codeSize = AAsset_getLength(asset);
 
-    if (shaderCodeSize <= 0) {
+    if (_codeSize <= 0) {
         LUG_LOG.error("Builder::ShaderModule: Android asset \"{}\" is empty", filename);
         return false;
     }
 
-    _data.resize(shaderCodeSize % 4 ? (shaderCodeSize + 4 - shaderCodeSize % 4) : (shaderCodeSize));
+    _data.resize(_codeSize % 4 ? (_codeSize + 4 - _codeSize % 4) : (_codeSize));
 
-    AAsset_read(asset, reinterpret_cast<char*>(_data.data()), shaderCodeSize);
+    AAsset_read(asset, reinterpret_cast<char*>(_data.data()), _codeSize);
     AAsset_close(asset);
 #else
     std::ifstream shaderFile(filename, std::ios::binary);
@@ -50,12 +50,12 @@ bool ShaderModule::loadFromFile(const std::string& filename) {
     }
 
     shaderFile.seekg(0, shaderFile.end);
-    size_t shaderCodeSize = shaderFile.tellg();
+    _codeSize = shaderFile.tellg();
     shaderFile.seekg(0, shaderFile.beg);
 
-    _data.resize(shaderCodeSize % 4 ? (shaderCodeSize + 4 - shaderCodeSize % 4) : (shaderCodeSize));
+    _data.resize(_codeSize % 4 ? (_codeSize + 4 - _codeSize % 4) : (_codeSize));
 
-    shaderFile.read(reinterpret_cast<char*>(_data.data()), shaderCodeSize);
+    shaderFile.read(reinterpret_cast<char*>(_data.data()), _codeSize);
     shaderFile.close();
 #endif
 
@@ -63,6 +63,7 @@ bool ShaderModule::loadFromFile(const std::string& filename) {
 }
 
 void ShaderModule::loadFromData(const std::vector<uint32_t>& data) {
+    _codeSize = data.size() * sizeof(uint32_t);
     _data = data;
 }
 
@@ -71,7 +72,7 @@ bool ShaderModule::build(API::ShaderModule& shaderModule, VkResult* returnResult
         /* createInfo.sType */ VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
         /* createInfo.pNext */ nullptr,
         /* createInfo.flags */ 0,
-        /* createInfo.codeSize */ static_cast<uint32_t>(_data.size()),
+        /* createInfo.codeSize */ _codeSize,
         /* createInfo.pCode */ _data.data()
     };
 

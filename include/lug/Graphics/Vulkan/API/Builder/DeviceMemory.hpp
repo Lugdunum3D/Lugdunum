@@ -20,10 +20,10 @@ class DeviceMemory {
 public:
     DeviceMemory(const API::Device& deviceMemory);
 
-    DeviceMemory(const DeviceMemory&&) = delete;
+    DeviceMemory(const DeviceMemory&) = delete;
     DeviceMemory(DeviceMemory&&) = delete;
 
-    DeviceMemory& operator=(const DeviceMemory&&) = delete;
+    DeviceMemory& operator=(const DeviceMemory&) = delete;
     DeviceMemory& operator=(DeviceMemory&&) = delete;
 
     ~DeviceMemory() = default;

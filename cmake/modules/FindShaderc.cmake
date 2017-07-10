@@ -1,0 +1,50 @@
+# Find shaderc
+#
+# Below are the output variables:
+#  - SHADERC_INCLUDE_DIR
+#  - SHADERC_LIBRARY
+#  - SHADERC_FOUND
+
+
+find_path(SHADERC_INCLUDE_DIR
+    NAMES shaderc/shaderc.hpp
+    PATHS $ENV{SHADERC_ROOT} ${SHADERC_ROOT}
+    PATH_SUFFIXES include
+    CMAKE_FIND_ROOT_PATH_BOTH
+)
+
+find_library(SHADERC_LIBRARY_DEBUG
+    NAMES shaderc_combined-d
+    PATHS $ENV{SHADERC_ROOT} ${SHADERC_ROOT}
+    PATH_SUFFIXES lib lib64 lib/${ANDROID_ABI}
+    CMAKE_FIND_ROOT_PATH_BOTH
+)
+
+find_library(SHADERC_LIBRARY_RELEASE
+    NAMES shaderc_combined
+    PATHS $ENV{SHADERC_ROOT} ${SHADERC_ROOT}
+    PATH_SUFFIXES lib lib64 lib/${ANDROID_ABI}
+    CMAKE_FIND_ROOT_PATH_BOTH
+)
+
+# if both are found, set GLTF2-LOADER_LIBRARY to contain both
+if (SHADERC_LIBRARY_DEBUG AND SHADERC_LIBRARY_RELEASE)
+    set(SHADERC_LIBRARY debug ${SHADERC_LIBRARY_DEBUG}
+                        optimized ${SHADERC_LIBRARY_RELEASE})
+endif()
+
+# if only one debug/release variant is found, set the other to be equal to the found one
+if (SHADERC_LIBRARY_DEBUG AND NOT SHADERC_LIBRARY_RELEASE)
+    set(SHADERC_LIBRARY ${SHADERC_LIBRARY_DEBUG})
+    set(SHADERC_LIBRARY_RELEASE ${SHADERC_LIBRARY_DEBUG})
+endif()
+
+if (NOT SHADERC_LIBRARY_DEBUG AND SHADERC_LIBRARY_RELEASE)
+    set(SHADERC_LIBRARY ${SHADERC_LIBRARY_RELEASE})
+    set(SHADERC_LIBRARY_DEBUG ${SHADERC_LIBRARY_RELEASE})
+endif()
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Shaderc FOUND_VAR SHADERC_FOUND REQUIRED_VARS SHADERC_LIBRARY SHADERC_INCLUDE_DIR)
+
+mark_as_advanced(SHADERC_INCLUDE_DIR SHADERC_LIBRARY)

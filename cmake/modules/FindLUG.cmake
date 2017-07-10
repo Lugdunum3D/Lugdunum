@@ -177,7 +177,7 @@ foreach(FIND_LUG_COMPONENT ${LUG_FIND_COMPONENTS})
 endforeach()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LUG DEFAULT_MSG LUG_INCLUDE_DIR LUG_LIBRARIES LUG_RESOURCES_DIR)
+find_package_handle_standard_args(LUG DEFAULT_MSG LUG_LIBRARIES LUG_INCLUDE_DIR LUG_RESOURCES_DIR)
 
 if (LUG_FOUND)
     message(STATUS "Found Lugdunum headers in ${LUG_INCLUDE_DIR}")

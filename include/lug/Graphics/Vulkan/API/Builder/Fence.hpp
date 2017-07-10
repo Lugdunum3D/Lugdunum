@@ -17,10 +17,10 @@ class Fence {
 public:
     Fence(const API::Device& device);
 
-    Fence(const Fence&&) = delete;
+    Fence(const Fence&) = delete;
     Fence(Fence&&) = delete;
 
-    Fence& operator=(const Fence&&) = delete;
+    Fence& operator=(const Fence&) = delete;
     Fence& operator=(Fence&&) = delete;
 
     ~Fence() = default;

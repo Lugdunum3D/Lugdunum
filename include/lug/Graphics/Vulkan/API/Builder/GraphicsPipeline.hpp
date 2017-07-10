@@ -201,10 +201,10 @@ public:
 public:
     GraphicsPipeline(const API::Device& device);
 
-    GraphicsPipeline(const GraphicsPipeline&&) = delete;
+    GraphicsPipeline(const GraphicsPipeline&) = delete;
     GraphicsPipeline(GraphicsPipeline&&) = delete;
 
-    GraphicsPipeline& operator=(const GraphicsPipeline&&) = delete;
+    GraphicsPipeline& operator=(const GraphicsPipeline&) = delete;
     GraphicsPipeline& operator=(GraphicsPipeline&&) = delete;
 
     ~GraphicsPipeline() = default;

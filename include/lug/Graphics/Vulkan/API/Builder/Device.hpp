@@ -28,10 +28,10 @@ private:
 public:
     Device(const PhysicalDeviceInfo& physicalDeviceInfo);
 
-    Device(const Device&&) = delete;
+    Device(const Device&) = delete;
     Device(Device&&) = delete;
 
-    Device& operator=(const Device&&) = delete;
+    Device& operator=(const Device&) = delete;
     Device& operator=(Device&&) = delete;
 
     ~Device() = default;

@@ -8,9 +8,7 @@
 #include <lug/Core/Version.hpp>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Module.hpp>
-#include <lug/Graphics/Render/Camera.hpp>
 #include <lug/Graphics/Render/Mesh.hpp>
-#include <lug/Graphics/Render/Model.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
 
@@ -23,7 +21,6 @@ namespace Graphics {
  *             This class is the root class of the 3D engine. It handles modules, will create
  *             the Graphics::Renderer based on the @p rendererType given in the Graphics::InitInfo
  *             structure. @n
- *             It also handles Scene, Camera and Mesh creation.
  */
 class LUG_GRAPHICS_API Graphics {
 public:
@@ -101,43 +98,6 @@ public:
      * @return     A raw pointer to the renderer instance.
      */
     Renderer* getRenderer() const;
-
-    /**
-     * @brief      Creates a scene.
-     *
-     * @return     A pointer to the scene instance. The ownership is given to the caller.
-     */
-    std::unique_ptr<Scene::Scene> createScene();
-
-    /**
-     * @brief      Creates a mesh.
-     *
-     * @param[in]  name  The name of the mesh.
-     *
-     * @return     A pointer to the scene instance. The ownership is given to the caller. @n
-     *             Returns @p nullptr if the mesh creation fails.
-     */
-    std::unique_ptr<Render::Mesh> createMesh(const std::string& name);
-
-    /**
-     * @brief      Creates a model.
-     *
-     * @param[in]  name  The name of the model.
-     *
-     * @return     A pointer to the scene instance. The ownership is given to the caller. @n
-     *             Returns @p nullptr if the model creation fails.
-     */
-    std::unique_ptr<Render::Model> createModel(const std::string& name, const std::string& fileName = "");
-
-    /**
-     * @brief      Creates a camera.
-     *
-     * @param[in]  name  The name of the camera.
-     *
-     * @return     A pointer to the camera instance. The ownership is given to the caller. @n
-     *             Returns @p nullptr if the camera creation fails.
-     */
-    std::unique_ptr<Render::Camera> createCamera(const std::string& name);
 
 private:
     std::string _appName;

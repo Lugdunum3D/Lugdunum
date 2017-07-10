@@ -4,6 +4,7 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Core)
 # all source files
 set(SRC
      ${SRCROOT}/Application.cpp
+     ${SRCROOT}/FreeMovement.cpp
 )
 source_group("src" FILES ${SRC})
 
@@ -11,6 +12,7 @@ source_group("src" FILES ${SRC})
 set(INC
     ${INCROOT}/Application.hpp
     ${INCROOT}/Application.inl
+    ${INCROOT}/FreeMovement.hpp
     ${INCROOT}/Version.hpp
     ${INCROOT}/Version.inl
     ${INCROOT}/Export.hpp

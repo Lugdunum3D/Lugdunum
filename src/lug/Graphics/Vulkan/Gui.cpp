@@ -609,10 +609,8 @@ void Gui::beginFrame(const lug::System::Time& elapsedTime) {
 
     io.DisplaySize = ImVec2(_window.getWidth(), _window.getHeight());
 
-    uint32_t x = 0;
-    uint32_t y = 0;
-    _window.getMousePos(x, y);
-    io.MousePos = ImVec2(static_cast<float>(x), static_cast<float>(y));
+    const auto mousePos = _window.getMousePos();
+    io.MousePos = ImVec2(static_cast<float>(mousePos.x()), static_cast<float>(mousePos.y()));
 
     io.MouseDown[0] = _window.isMousePressed(lug::Window::Mouse::Button::Left);
     io.MouseDown[1] = _window.isMousePressed(lug::Window::Mouse::Button::Right);

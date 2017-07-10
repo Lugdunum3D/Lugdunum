@@ -52,7 +52,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugReportCallback(
     return VK_FALSE;
 }
 
-Renderer::Renderer(Graphics& graphics) : ::lug::Graphics::Renderer(graphics) {}
+Renderer::Renderer(Graphics& graphics) : ::lug::Graphics::Renderer(graphics, Renderer::Type::Vulkan) {}
 
 Renderer::~Renderer() {
     destroy();
@@ -61,6 +61,8 @@ Renderer::~Renderer() {
 void Renderer::destroy() {
     // Destroy the window
     _window.reset();
+
+    _resourceManager.reset();
 
     _device.destroy();
 
@@ -111,6 +113,8 @@ bool Renderer::finishInit() {
 #if defined(LUG_DEBUG)
     LUG_LOG.info("RendererVulkan: Use device {}", _physicalDeviceInfo->properties.deviceName);
 #endif
+
+    _resourceManager = std::make_unique<::lug::Graphics::ResourceManager>(*this);
 
     return true;
 }
@@ -550,12 +554,12 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
 }
 
 ::lug::Graphics::Render::Window* Renderer::createWindow(Render::Window::InitInfo& initInfo) {
-    if (_window) {
-        if (!_window->initRender()) {
-            _window.reset();
-        }
-    } else {
+    if (!_window) {
         _window = Render::Window::create(*this, initInfo);
+    }
+
+    if (!_window->initRender()) {
+        _window.reset();
     }
 
     return _window.get();

@@ -17,10 +17,10 @@ class Image {
 public:
     Image(const API::Device& device);
 
-    Image(const Image&&) = delete;
+    Image(const Image&) = delete;
     Image(Image&&) = delete;
 
-    Image& operator=(const Image&&) = delete;
+    Image& operator=(const Image&) = delete;
     Image& operator=(Image&&) = delete;
 
     ~Image() = default;

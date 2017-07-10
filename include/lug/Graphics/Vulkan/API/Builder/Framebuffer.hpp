@@ -20,10 +20,10 @@ class Framebuffer {
 public:
     Framebuffer(const API::Device& device);
 
-    Framebuffer(const Framebuffer&&) = delete;
+    Framebuffer(const Framebuffer&) = delete;
     Framebuffer(Framebuffer&&) = delete;
 
-    Framebuffer& operator=(const Framebuffer&&) = delete;
+    Framebuffer& operator=(const Framebuffer&) = delete;
     Framebuffer& operator=(Framebuffer&&) = delete;
 
     ~Framebuffer() = default;

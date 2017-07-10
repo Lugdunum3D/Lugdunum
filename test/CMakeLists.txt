@@ -8,43 +8,39 @@ set(EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}")
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR})
 
+if (BUILD_LONG_TESTS)
+    add_definitions(-DENABLE_LONG_TESTS)
+endif()
+
 # Find gmock
 find_package(GMock)
 if (NOT GMOCK_FOUND)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/googlemock")
-        message(FATAL_ERROR "Can't find googlemock, call `git submodule update --recursive`")
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/googlemock")
+        message(FATAL_ERROR "Can't find googlemock in the thirdparty directory")
     endif()
+
+    set(GMOCK_ROOT "${LUG_THIRDPARTY_DIR}/googlemock")
 
     if (LUG_OS_WINDOWS)
-        set(GMOCK_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/googlemock/lib/windows/${ARCH_DIR}")
         set(GMOCK_MSVC_SEARCH "MT")
-    elseif (LUG_OS_LINUX)
-        set(GMOCK_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/googlemock/lib/linux")
-    else ()
-        set(GMOCK_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/googlemock/lib/android")
     endif()
 
-    set(GMOCK_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/googlemock/include")
     find_package(GMock REQUIRED)
 endif()
 
 # Find gtest
 find_package(GTest)
 if (NOT GTEST_FOUND)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/googletest")
-        message(FATAL_ERROR "Can't find googletest, call `git submodule update --recursive`")
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/googlemock")
+        message(FATAL_ERROR "Can't find googlemock in the thirdparty directory")
     endif()
+
+    set(GTEST_ROOT "${LUG_THIRDPARTY_DIR}/googlemock")
 
     if (LUG_OS_WINDOWS)
-        set(GTEST_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/googletest/lib/windows/${ARCH_DIR}")
         set(GTEST_MSVC_SEARCH "MT")
-    elseif (LUG_OS_LINUX)
-        set(GTEST_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/googletest/lib/linux")
-    else ()
-        set(GTEST_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/googletest/lib/android")
     endif()
 
-    set(GTEST_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/googletest/include")
     find_package(GTest REQUIRED)
 endif()
 
@@ -59,3 +55,4 @@ endif()
 
 add_subdirectory(System)
 add_subdirectory(Math)
+add_subdirectory(Graphics)

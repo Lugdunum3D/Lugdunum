@@ -47,8 +47,19 @@ bool WindowImpl::pollEvent(lug::Window::Event& event) {
     return false;
 }
 
-void WindowImpl::setKeyRepeat(bool) {
-    //
+void WindowImpl::setKeyRepeat(bool state) {
+    (void)state;
+    // TODO
+}
+
+void WindowImpl::setMouseCursorVisible(bool visible) {
+    (void)visible;
+    // TODO
+}
+
+void WindowImpl::setMousePos(const Math::Vec2i& mousePosition) {
+    (void)mousePosition;
+    // TODO
 }
 
 } // namespace priv

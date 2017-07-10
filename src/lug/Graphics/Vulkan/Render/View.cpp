@@ -14,20 +14,19 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-View::View(const Renderer& renderer, const ::lug::Graphics::Render::Target* renderTarget) : ::lug::Graphics::Render::View(renderTarget), _renderer(renderer) {}
+View::View(Renderer& renderer, const ::lug::Graphics::Render::Target* renderTarget) : ::lug::Graphics::Render::View(renderTarget), _renderer(renderer) {}
 
 bool View::init(
     View::InitInfo& initInfo,
     const API::Queue* presentQueue,
-    API::DescriptorPool* descriptorPool,
     const std::vector<API::ImageView>& imageViews) {
     ::lug::Graphics::Render::View::init(initInfo);
 
-    if (_info.renderTechniqueType == lug::Graphics::Render::Technique::Type::Forward) {
+    if (_renderer.getInfo().renderTechnique == lug::Graphics::Render::Technique::Type::Forward) {
         _renderTechnique = std::make_unique<Render::Technique::Forward>(_renderer, *this);
     }
 
-    if (_renderTechnique && !_renderTechnique->init(descriptorPool, imageViews)) {
+    if (_renderTechnique && !_renderTechnique->init(imageViews)) {
         LUG_LOG.warn("View::init: Failed to init render technique");
         return false;
     }
@@ -56,8 +55,8 @@ bool View::render(const API::Semaphore& imageReadySemaphore, uint32_t currentIma
         return true; // Not fatal, return success anyway
     }
 
-    _camera->update(this);
-    return _renderTechnique->render(_camera->getRenderQueue(), imageReadySemaphore, _drawCompleteSemaphores[currentImageIndex], currentImageIndex);
+    _camera->update(*this, _renderQueue);
+    return _renderTechnique->render(_renderQueue, imageReadySemaphore, _drawCompleteSemaphores[currentImageIndex], currentImageIndex);
 }
 
 void View::destroy() {
@@ -65,10 +64,7 @@ void View::destroy() {
 }
 
 bool View::endFrame() {
-    if (_camera) {
-        // Call isDirty(false) for each objects in the RenderQueue
-        _camera->getRenderQueue().removeDirtyProperty();
-    }
+    _renderQueue.clear();
 
     return true;
 }

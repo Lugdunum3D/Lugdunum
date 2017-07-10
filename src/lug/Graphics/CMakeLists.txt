@@ -5,27 +5,31 @@ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/lug/Graphics)
 set(SRC
     ${SRCROOT}/Graphics.cpp
 
-    ${SRCROOT}/Light/Directional.cpp
-    ${SRCROOT}/Light/Light.cpp
-    ${SRCROOT}/Light/Point.cpp
-    ${SRCROOT}/Light/Spot.cpp
+    ${SRCROOT}/Loader.cpp
+    ${SRCROOT}/Builder/Camera.cpp
+    ${SRCROOT}/Builder/Light.cpp
+    ${SRCROOT}/Builder/Material.cpp
+    ${SRCROOT}/Builder/Mesh.cpp
+    ${SRCROOT}/Builder/Scene.cpp
 
     ${SRCROOT}/Module.cpp
     ${SRCROOT}/Node.cpp
+    ${SRCROOT}/GltfLoader.cpp
+    ${SRCROOT}/Resource.cpp
+    ${SRCROOT}/ResourceManager.cpp
 
-    ${SRCROOT}/Render/Camera.cpp
+    ${SRCROOT}/Render/Camera/Camera.cpp
+    ${SRCROOT}/Render/Camera/Orthographic.cpp
+    ${SRCROOT}/Render/Camera/Perspective.cpp
+
+    ${SRCROOT}/Render/Light.cpp
+    ${SRCROOT}/Render/Material.cpp
     ${SRCROOT}/Render/Mesh.cpp
-    ${SRCROOT}/Render/Model.cpp
     ${SRCROOT}/Render/Queue.cpp
     ${SRCROOT}/Render/View.cpp
 
     ${SRCROOT}/Renderer.cpp
 
-    ${SRCROOT}/Scene/MeshInstance.cpp
-    ${SRCROOT}/Scene/ModelInstance.cpp
-    ${SRCROOT}/Scene/ModelLoader.cpp
-    ${SRCROOT}/Scene/MovableCamera.cpp
-    ${SRCROOT}/Scene/MovableObject.cpp
     ${SRCROOT}/Scene/Node.cpp
     ${SRCROOT}/Scene/Scene.cpp
 
@@ -81,12 +85,24 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Surface.cpp
     ${SRCROOT}/Vulkan/API/Swapchain.cpp
 
+    ${SRCROOT}/Vulkan/Builder/Material.cpp
+    ${SRCROOT}/Vulkan/Builder/Mesh.cpp
+
+    ${SRCROOT}/Vulkan/Render/BufferPool/Camera.cpp
+    ${SRCROOT}/Vulkan/Render/BufferPool/Light.cpp
+    ${SRCROOT}/Vulkan/Render/BufferPool/Material.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Camera.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSetPool.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Light.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Material.cpp
+    ${SRCROOT}/Vulkan/Render/Material.cpp
+
     ${SRCROOT}/Vulkan/Gui.cpp
 
-    ${SRCROOT}/Vulkan/Render/BufferPool.cpp
-    ${SRCROOT}/Vulkan/Render/Camera.cpp
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
-    ${SRCROOT}/Vulkan/Render/Model.cpp
+    ${SRCROOT}/Vulkan/Render/Pipeline.cpp
+    ${SRCROOT}/Vulkan/Render/Pipeline/ShaderBuilder.cpp
+    ${SRCROOT}/Vulkan/Render/Queue.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Forward.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Technique.cpp
     ${SRCROOT}/Vulkan/Render/View.cpp
@@ -104,25 +120,45 @@ set(INC
     ${INCROOT}/Export.hpp
     ${INCROOT}/Graphics.hpp
     ${INCROOT}/Graphics.inl
+    ${INCROOT}/Loader.hpp
+    ${INCROOT}/GltfLoader.hpp
+    ${INCROOT}/Resource.hpp
+    ${INCROOT}/Resource.inl
+    ${INCROOT}/ResourceManager.hpp
+    ${INCROOT}/ResourceManager.inl
 
-    ${INCROOT}/Light/Directional.hpp
-    ${INCROOT}/Light/Light.hpp
-    ${INCROOT}/Light/Light.inl
-    ${INCROOT}/Light/Point.hpp
-    ${INCROOT}/Light/Spot.hpp
+    ${INCROOT}/Builder/Camera.hpp
+    ${INCROOT}/Builder/Camera.inl
+    ${INCROOT}/Builder/Light.hpp
+    ${INCROOT}/Builder/Light.inl
+    ${INCROOT}/Builder/Material.hpp
+    ${INCROOT}/Builder/Material.inl
+    ${INCROOT}/Builder/Mesh.hpp
+    ${INCROOT}/Builder/Mesh.inl
+    ${INCROOT}/Builder/Scene.inl
+    ${INCROOT}/Builder/Scene.inl
 
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl
     ${INCROOT}/Node.hpp
     ${INCROOT}/Node.inl
 
-    ${INCROOT}/Render/Camera.hpp
-    ${INCROOT}/Render/Camera.inl
+    ${INCROOT}/Render/Camera/Camera.hpp
+    ${INCROOT}/Render/Camera/Camera.inl
+    ${INCROOT}/Render/Camera/Orthographic.hpp
+    ${INCROOT}/Render/Camera/Orthographic.inl
+    ${INCROOT}/Render/Camera/Perspective.hpp
+    ${INCROOT}/Render/Camera/Perspective.inl
+
+    ${INCROOT}/Render/DirtyObject.hpp
+    ${INCROOT}/Render/DirtyObject.inl
+    ${INCROOT}/Render/Light.hpp
+    ${INCROOT}/Render/Light.inl
+    ${INCROOT}/Render/Material.hpp
+    ${INCROOT}/Render/Material.inl
     ${INCROOT}/Render/Mesh.hpp
     ${INCROOT}/Render/Mesh.inl
-    ${INCROOT}/Render/Model.hpp
     ${INCROOT}/Render/Queue.hpp
-    ${INCROOT}/Render/Queue.inl
     ${INCROOT}/Render/Target.hpp
     ${INCROOT}/Render/Target.inl
     ${INCROOT}/Render/Technique/Type.hpp
@@ -133,14 +169,6 @@ set(INC
     ${INCROOT}/Renderer.hpp
     ${INCROOT}/Renderer.inl
 
-    ${INCROOT}/Scene/MeshInstance.hpp
-    ${INCROOT}/Scene/MeshInstance.inl
-    ${INCROOT}/Scene/ModelInstance.hpp
-    ${INCROOT}/Scene/ModelInstance.inl
-    ${INCROOT}/Scene/ModelLoader.hpp
-    ${INCROOT}/Scene/MovableCamera.hpp
-    ${INCROOT}/Scene/MovableObject.hpp
-    ${INCROOT}/Scene/MovableObject.inl
     ${INCROOT}/Scene/Node.hpp
     ${INCROOT}/Scene/Node.inl
     ${INCROOT}/Scene/Scene.hpp
@@ -208,6 +236,7 @@ set(INC
     ${INCROOT}/Vulkan/API/Framebuffer.hpp
     ${INCROOT}/Vulkan/API/GraphicsPipeline.hpp
     ${INCROOT}/Vulkan/API/Image.hpp
+    ${INCROOT}/Vulkan/API/Image.inl
     ${INCROOT}/Vulkan/API/ImageView.hpp
     ${INCROOT}/Vulkan/API/ImageView.inl
     ${INCROOT}/Vulkan/API/Instance.hpp
@@ -227,14 +256,34 @@ set(INC
     ${INCROOT}/Vulkan/API/Swapchain.hpp
     ${INCROOT}/Vulkan/API/Swapchain.inl
 
+    ${INCROOT}/Vulkan/Builder/Material.hpp
+    ${INCROOT}/Vulkan/Builder/Mesh.hpp
+
+    ${INCROOT}/Vulkan/Render/BufferPool/BufferPool.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/BufferPool.inl
+    ${INCROOT}/Vulkan/Render/BufferPool/Camera.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/Chunk.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/Chunk.inl
+    ${INCROOT}/Vulkan/Render/BufferPool/Light.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/Material.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/SubBuffer.hpp
+    ${INCROOT}/Vulkan/Render/BufferPool/SubBuffer.inl
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/Camera.hpp
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSet.hpp
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSet.inl
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSetPool.hpp
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSetPool.inl
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/Light.hpp
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/Material.hpp
+    ${INCROOT}/Vulkan/Render/Material.hpp
+
     ${INCROOT}/Vulkan/Gui.hpp
 
-    ${INCROOT}/Vulkan/Render/BufferPool.hpp
-    ${INCROOT}/Vulkan/Render/Camera.hpp
     ${INCROOT}/Vulkan/Render/Mesh.hpp
     ${INCROOT}/Vulkan/Render/Mesh.inl
-    ${INCROOT}/Vulkan/Render/Model.hpp
-    ${INCROOT}/Vulkan/Render/Model.inl
+    ${INCROOT}/Vulkan/Render/Pipeline.hpp
+    ${INCROOT}/Vulkan/Render/Pipeline.inl
+    ${INCROOT}/Vulkan/Render/Queue.hpp
     ${INCROOT}/Vulkan/Render/Technique/Forward.hpp
     ${INCROOT}/Vulkan/Render/Technique/Technique.hpp
     ${INCROOT}/Vulkan/Render/View.hpp
@@ -248,67 +297,39 @@ set(INC
 )
 source_group("inc" FILES ${INC})
 
-find_package(Vulkan)
-if (NOT VULKAN_INCLUDE_DIR)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/vulkan")
-        message(FATAL_ERROR "Can't find vulkan, call `git submodule update --recursive`")
-    endif()
-
-    set(VULKAN_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/vulkan/include)
-endif()
-
-message(STATUS "Found Vulkan header: ${VULKAN_INCLUDE_DIR}")
-include_directories(${VULKAN_INCLUDE_DIR})
-
-# Find assimp
-if(NOT LUG_OS_ANDROID)
-    find_package(Assimp)
-endif()
-
-if (NOT ASSIMP_FOUND)
-    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/assimp")
-        message(FATAL_ERROR "Can't find assimp, call `git submodule update --recursive`")
-    endif()
-
-    set(ASSIMP_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/thirdparty/assimp/include")
-
-    if (LUG_OS_WINDOWS)
-        set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/windows/${ARCH_DIR}")
-        find_package(Assimp REQUIRED)
-    elseif (LUG_OS_LINUX)
-        set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/linux")
-        find_package(Assimp REQUIRED)
-    elseif (LUG_OS_ANDROID)
-        set(ASSIMP_ROOT "${CMAKE_SOURCE_DIR}/thirdparty/assimp/lib/android")
-        set(ASSIMP_LIBRARY "${ASSIMP_ROOT}/libassimp.so")
-
-        # Install the libassimp.so alongside lug-graphics.so
-        install(FILES ${ASSIMP_LIBRARY}
-            DESTINATION lib${LIB_SUFFIX}
-        )
-
-        set(ASSIMP_LIBRARY_ANDROID "${ASSIMP_ROOT}/libandroid_jniiosystem.a")
-    endif()
-
-    message(STATUS "Found Assimp library: ${ASSIMP_LIBRARY}")
-    message(STATUS "Found Assimp includes: ${ASSIMP_INCLUDE_DIR}")
-endif()
-
-include_directories(${ASSIMP_INCLUDE_DIR})
-
 if(LUG_OS_ANDROID)
-    list(APPEND EXT_LIBRARIES z android ${ASSIMP_LIBRARY_ANDROID})
+    list(APPEND EXT_LIBRARIES android)
 endif()
+
+# Find glTF2-loader
+find_package(GLTF2-Loader)
+
+if (NOT GLTF2-LOADER_FOUND)
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/glTF2-loader")
+        message(FATAL_ERROR "Can't find glTF2-loader in the thirdparty directory")
+    endif()
+
+    set(GLTF2-LOADER_ROOT "${LUG_THIRDPARTY_DIR}/glTF2-loader")
+
+    find_package(GLTF2-Loader REQUIRED)
+
+    message(STATUS "Found glTF2-loader library: ${GLTF2-LOADER_LIBRARY}")
+    message(STATUS "Found glTF2-loader includes: ${GLTF2-LOADER_INCLUDE_DIR}")
+endif()
+
+include_directories(${GLTF2-LOADER_INCLUDE_DIR})
+
+find_package(Threads)
 
 # find imgui
-if (NOT EXISTS "${CMAKE_SOURCE_DIR}/thirdparty/imgui")
-    message(FATAL_ERROR "Can't find imgui, call `git submodule update --recursive`")
+if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/imgui")
+    message(FATAL_ERROR "Can't find imgui in the thirdparty directory")
 endif()
 
-set(IMGUI_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/imgui/include)
+set(IMGUI_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/imgui/include)
 message(STATUS "Found Imgui: ${IMGUI_INCLUDE_DIR}")
 
-set(IMGUI_SOURCE_DIR ${CMAKE_SOURCE_DIR}/thirdparty/imgui/src)
+set(IMGUI_SOURCE_DIR ${LUG_THIRDPARTY_DIR}/imgui/src)
 message(STATUS "Found Imgui: ${IMGUI_SOURCE_DIR}")
 
 include_directories(${IMGUI_INCLUDE_DIR})
@@ -327,5 +348,5 @@ endif()
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC} ${IMGUI_SOURCE_FILES}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${EXT_LIBRARIES} ${ASSIMP_LIBRARY}
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY} ${CMAKE_THREAD_LIBS_INIT}
 )

@@ -51,9 +51,11 @@ public:
 
     DEFINE_ACCESS(x, 1)
     DEFINE_ACCESS(r, 1)
+    DEFINE_ACCESS(width, 1)
 
     DEFINE_ACCESS(y, 2)
     DEFINE_ACCESS(g, 2)
+    DEFINE_ACCESS(height, 2)
 
     DEFINE_ACCESS(z, 3)
     DEFINE_ACCESS(b, 3)
