@@ -55,4 +55,3 @@ lug_add_sample(hello
                SHADERS ${SHADERS}
                LUG_RESOURCES ${LUG_RESOURCES}
 )
-
