@@ -113,6 +113,10 @@ void Node::setRotation(const Math::Quatf& rotation, TransformSpace space) {
     needUpdate();
 }
 
+void Node::setRotation(float angle, const Math::Vec3f& axis, TransformSpace space) {
+    setRotation(Math::Quatf(angle, axis), space);
+}
+
 void Node::setDirection(const Math::Vec3f& spaceTargetDirection, const Math::Vec3f& localDirectionVector, const Math::Vec3f& localUpVector, TransformSpace space) {
     if (spaceTargetDirection.length() == 0.0f) {
         return;

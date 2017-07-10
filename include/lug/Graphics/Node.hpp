@@ -51,6 +51,7 @@ public:
     void scale(const Math::Vec3f& scale);
 
     void setPosition(const Math::Vec3f& position, TransformSpace space = TransformSpace::Local);
+    void setRotation(float angle, const Math::Vec3f& axis, TransformSpace space = TransformSpace::Local);
     void setRotation(const Math::Quatf& rotation, TransformSpace space = TransformSpace::Local);
 
     /**
