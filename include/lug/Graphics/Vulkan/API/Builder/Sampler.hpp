@@ -33,8 +33,8 @@ public:
     void setAddressModeV(VkSamplerAddressMode addressModeV);
     void setAddressModeW(VkSamplerAddressMode addressModeW);
     void setMipLodBias(float mipLodBias);
-    void setAnisotropyEnable(VkBool32 anisotropyEnable);
-    void setMaxAnisotropy(float maxAnisotropy);
+    void enableAnisotropy(float maxAnisotropy);
+    void disableAnisotropy();
     void setCompareOp(VkCompareOp compareOp);
     void setMinLod(float minLod);
     void setMaxLod(float maxLod);

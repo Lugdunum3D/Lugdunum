@@ -26,12 +26,14 @@ inline void Sampler::setMipLodBias(float mipLodBias) {
     _mipLodBias = mipLodBias;
 }
 
-inline void Sampler::setAnisotropyEnable(VkBool32 anisotropyEnable) {
-    _anisotropyEnable = anisotropyEnable;
+inline void Sampler::enableAnisotropy(float maxAnisotropy) {
+    _anisotropyEnable = VK_TRUE;
+    _maxAnisotropy = maxAnisotropy;
 }
 
-inline void Sampler::setMaxAnisotropy(float maxAnisotropy) {
-    _maxAnisotropy = maxAnisotropy;
+inline void Sampler::disableAnisotropy() {
+    _anisotropyEnable = VK_FALSE;
+    _maxAnisotropy = 1.0f;
 }
 
 inline void Sampler::setCompareOp(VkCompareOp compareOp) {
