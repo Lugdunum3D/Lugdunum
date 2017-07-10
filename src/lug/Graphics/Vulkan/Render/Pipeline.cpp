@@ -210,7 +210,7 @@ bool Pipeline::init() {
             }
         }
 
-        // Bindings set 2 : Material uniform buffer (F) + Material Samplers (F)
+        // Bindings set 2 : Material uniform buffer (F)
         {
             const VkDescriptorSetLayoutBinding materialBinding{
                 /* materialBinding.binding */ 0,
@@ -220,10 +220,19 @@ bool Pipeline::init() {
                 /* materialBinding.pImmutableSamplers */ nullptr
             };
 
-            std::vector<VkDescriptorSetLayoutBinding> bindings = {materialBinding};
+            descriptorSetLayoutBuilder.setBindings({materialBinding});
+            if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[2], &result)) {
+                LUG_LOG.error("Vulkan::Render::Pipeline: Can't create pipeline descriptor sets layout 2: {}", result);
+                return false;
+            }
+        }
+
+        // Binding set 3 : Material Samplers (F)
+        {
+            std::vector<VkDescriptorSetLayoutBinding> bindings = {};
 
             // Set binding for samples of the material
-            uint8_t binding = 1;
+            uint8_t binding = 0;
 
             if (materialPart.baseColorInfo != 0b11) {
                 const VkDescriptorSetLayoutBinding textureBinding = {
@@ -285,10 +294,14 @@ bool Pipeline::init() {
                 bindings.push_back(std::move(textureBinding));
             }
 
-            descriptorSetLayoutBuilder.setBindings(bindings);
-            if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[2], &result)) {
-                LUG_LOG.error("Vulkan::Render::Pipeline: Can't create pipeline descriptor sets layout 2: {}", result);
-                return false;
+            if (bindings.size() > 0) {
+                descriptorSetLayouts.resize(4);
+
+                descriptorSetLayoutBuilder.setBindings(bindings);
+                if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[3], &result)) {
+                    LUG_LOG.error("Vulkan::Render::Pipeline: Can't create pipeline descriptor sets layout 3: {}", result);
+                    return false;
+                }
             }
         }
 

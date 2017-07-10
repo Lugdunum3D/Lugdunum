@@ -15,6 +15,7 @@
 #include <lug/Graphics/Vulkan/Render/DescriptorSetPool/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/DescriptorSetPool/Light.hpp>
 #include <lug/Graphics/Vulkan/Render/DescriptorSetPool/Material.hpp>
+#include <lug/Graphics/Vulkan/Render/DescriptorSetPool/MaterialTextures.hpp>
 #include <lug/Graphics/Vulkan/Render/Technique/Technique.hpp>
 
 namespace lug {
@@ -53,6 +54,7 @@ private:
         const DescriptorSetPool::DescriptorSet* cameraDescriptorSet{nullptr};
         std::vector<const DescriptorSetPool::DescriptorSet*> lightDescriptorSets;
         std::vector<const DescriptorSetPool::DescriptorSet*> materialDescriptorSets;
+        std::vector<const DescriptorSetPool::DescriptorSet*> materialTexturesDescriptorSets;
     };
 
 public:
@@ -99,6 +101,7 @@ private:
     static std::unique_ptr<DescriptorSetPool::Camera> _cameraDescriptorSetPool;
     static std::unique_ptr<DescriptorSetPool::Light> _lightDescriptorSetPool;
     static std::unique_ptr<DescriptorSetPool::Material> _materialDescriptorSetPool;
+    static std::unique_ptr<DescriptorSetPool::MaterialTextures> _materialTexturesDescriptorSetPool;
 };
 
 } // Technique

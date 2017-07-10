@@ -81,19 +81,19 @@ layout (location = IN_COLOR_2_LOCATION) in vec4 inColor2;
 #endif
 
 #if TEXTURE_COLOR
-layout (set = 2, binding = TEXTURE_COLOR_BINDING) uniform sampler2D textureColor;
+layout (set = 3, binding = TEXTURE_COLOR_BINDING) uniform sampler2D textureColor;
 #endif
 #if TEXTURE_METALLIC_ROUGHNESS
-layout (set = 2, binding = TEXTURE_METALLIC_ROUGHNESS_BINDING) uniform sampler2D textureMetallicRoughness;
+layout (set = 3, binding = TEXTURE_METALLIC_ROUGHNESS_BINDING) uniform sampler2D textureMetallicRoughness;
 #endif
 #if TEXTURE_NORMAL
-layout (set = 2, binding = TEXTURE_NORMAL_BINDING) uniform sampler2D textureNormal;
+layout (set = 3, binding = TEXTURE_NORMAL_BINDING) uniform sampler2D textureNormal;
 #endif
 #if TEXTURE_OCCLUSION
-layout (set = 2, binding = TEXTURE_OCCLUSION_BINDING) uniform sampler2D textureOcclusion;
+layout (set = 3, binding = TEXTURE_OCCLUSION_BINDING) uniform sampler2D textureOcclusion;
 #endif
 #if TEXTURE_EMISSIVE
-layout (set = 2, binding = TEXTURE_EMISSIVE_BINDING) uniform sampler2D textureEmissive;
+layout (set = 3, binding = TEXTURE_EMISSIVE_BINDING) uniform sampler2D textureEmissive;
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -152,7 +152,7 @@ void main() {
     vec4 albedo = material.color;
 
     #if TEXTURE_COLOR
-    albedo = albedo * texture(textureColor, TEXTURE_COLOR_UV).rgba;
+    albedo = albedo * pow(texture(textureColor, TEXTURE_COLOR_UV).rgba, vec4(2.2));
     #endif
 
     #if IN_COLOR >= 1

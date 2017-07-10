@@ -92,6 +92,8 @@ endif()
 
 include_directories(${SHADERC_INCLUDE_DIR})
 
+include_directories(ext/)
+
 # add the subdirectories
 add_subdirectory(src/lug/)
 
