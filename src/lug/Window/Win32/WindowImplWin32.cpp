@@ -6,8 +6,8 @@ namespace lug {
 namespace Window {
 namespace priv {
 
-uint8_t WindowImpl::windowCount = 0;
-WindowImpl* WindowImpl::fullscreenWindow = nullptr;
+uint8_t WindowImpl::_windowCount = 0;
+WindowImpl* WindowImpl::_fullscreenWindow = nullptr;
 
 WindowImpl::WindowImpl(Window* win) : _parent{win} {}
 
@@ -24,10 +24,10 @@ WindowImpl::~WindowImpl() {
         }
 
         // Decrement the window count
-        windowCount--;
+       _windowCount--;
 
         // Unregister window class if we were the last window
-        if (windowCount == 0) {
+        if (_windowCount == 0) {
             UnregisterClassW(className, GetModuleHandleW(nullptr));
         }
     } else {
@@ -39,7 +39,7 @@ WindowImpl::~WindowImpl() {
 bool WindowImpl::init(const Window::InitInfo& initInfo) {
 
     // Register the window class at first call
-    if (windowCount == 0) {
+    if (_windowCount == 0) {
         _hinstance = GetModuleHandleW(nullptr);
         registerWindow();
     }
@@ -106,15 +106,15 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
     setMouseCursorVisible(true);
 
     // Increment window count
-    windowCount++;
+    _windowCount++;
     return true;
 }
 
 void WindowImpl::close() {
-    // Restore the previous video mode (in case we were running in full-screen)
-    if (fullscreenWindow == this) {
+    // Restore the previous video mode (in case we were running in fullscreen)
+    if (_fullscreenWindow == this) {
         ChangeDisplaySettingsW(nullptr, 0);
-        fullscreenWindow = nullptr;
+        _fullscreenWindow = nullptr;
     }
 
     // No longer capture the cursor
@@ -471,6 +471,22 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
             e.type = Event::Type::MouseMoved;
             e.mouse.code = Mouse::Button::Unknown;
             configMouseEvent(e.mouse, wParam, lParam);
+            // NOTE: As long as we don't receive WM_MOUSELEAVE then the following code will never be called
+            if (_mouseIsIn == false) {
+                _mouseIsIn = true;
+                e.type = Event::Type::MouseEnter;
+                _parent->_mouseState[Mouse::Button::Left] = GetKeyState(VK_LBUTTON) & (1 << 15);
+                _parent->_mouseState[Mouse::Button::Middle] = GetKeyState(VK_MBUTTON) & (1 << 15);
+                _parent->_mouseState[Mouse::Button::Right] = GetKeyState(VK_RBUTTON) & (1 << 15);
+            }
+            break;
+
+        // TODO: We need to use TrackMouseEvent to receive this event
+        case WM_MOUSELEAVE:
+            e.type = Event::Type::MouseLeave;
+            e.mouse.code = Mouse::Button::Unknown;
+            configMouseEvent(e.mouse, wParam, lParam);
+            _mouseIsIn = false;
             break;
 
         case WM_MOUSEWHEEL:
@@ -537,8 +553,8 @@ bool WindowImpl::activateFullscreen() {
     SetWindowPos(_handle, HWND_TOP, 0, 0, _parent->_mode.width, _parent->_mode.height, SWP_FRAMECHANGED);
     ShowWindow(_handle, SW_SHOW);
 
-    // Set "this" as the current full-screen window
-    fullscreenWindow = this;
+    // Set "this" as the current fullscreen window
+    _fullscreenWindow = this;
     return true;
 }
 

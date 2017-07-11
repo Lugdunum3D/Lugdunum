@@ -61,9 +61,11 @@ private:
     HICON _icon{nullptr};          ///< Custom icon assigned to the window
     bool _fullscreen{false};       ///< Is the window full-screen?
 
-    static uint8_t windowCount;
-    static lug::Window::priv::WindowImpl*  fullscreenWindow;
+    static uint8_t _windowCount;
+    static lug::Window::priv::WindowImpl*  _fullscreenWindow;
     bool _keyRepeat{true};
+
+    bool _mouseIsIn{false}; ///< Boolean used to know if the mouse is in or out of the screen
 };
 
 } // namespace priv
