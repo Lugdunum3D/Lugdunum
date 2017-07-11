@@ -48,6 +48,8 @@ inline std::tuple<bool, const DescriptorSet*> DescriptorSetPool<maxSets>::alloca
         }
 
         descriptorSet->setHash(hash);
+        descriptorSet->_referenceCount += 1;
+
         _descriptorSetsInUse[hash] = descriptorSet;
 
         return std::make_tuple(true, descriptorSet);
@@ -81,14 +83,12 @@ inline DescriptorSet* DescriptorSetPool<maxSets>::allocateNewDescriptorSet(const
         DescriptorSet* tmp = _freeDescriptorSets[_freeDescriptorSetsCount];
 
         _freeDescriptorSets[_freeDescriptorSetsCount--] = nullptr;
-        tmp->_referenceCount += 1;
 
         return tmp;
     } else if (_descriptorSetsCount < maxSets) {
         API::Builder::DescriptorSet descriptorSetBuilder(_renderer.getDevice(), descriptorPool);
         descriptorSetBuilder.setDescriptorSetLayouts({static_cast<VkDescriptorSetLayout>(descriptorSetLayout)});
 
-        API::DescriptorSet descriptorSet;
         VkResult result{VK_SUCCESS};
         if (!descriptorSetBuilder.build(_descriptorSets[_descriptorSetsCount]._descriptorSet, &result)) {
             LUG_LOG.error("DescriptorSetPool: Can't create descriptor set: {}", result);
