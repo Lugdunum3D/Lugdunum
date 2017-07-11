@@ -9,7 +9,7 @@
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 
 Application::Application() : lug::Core::Application::Application{{"cube", {0, 1, 0}}} {
-    getRenderWindowInfo().windowInitInfo.title = "Hello Cube";
+    getRenderWindowInfo().windowInitInfo.title = "Cube";
 }
 
 bool Application::init(int argc, char* argv[]) {
@@ -87,7 +87,7 @@ bool Application::init(int argc, char* argv[]) {
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Light> light = lightBuilder.build();
         if (!light) {
-            LUG_LOG.error("Application: Can't create the light");
+            LUG_LOG.error("Application: Can't create the ambient light");
             return false;
         }
 
@@ -278,7 +278,7 @@ bool Application::initCubeMesh() {
         _cubeMesh = meshBuilder.build();
 
         if (!_cubeMesh) {
-            LUG_LOG.error("Application: Can't create the triangle mesh");
+            LUG_LOG.error("Application: Can't create the cube mesh");
             return false;
         }
     }

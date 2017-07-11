@@ -9,35 +9,7 @@
 #include <lug/Math/Geometry/Trigonometry.hpp>
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
-    getRenderWindowInfo().windowInitInfo.title = "Hello Model";
-
-    getRenderWindowInfo().renderViewsInitInfo.push_back({
-        {                                                   // viewport
-            {                                               // offset
-                0.0f,                                       // x
-                0.0f                                        // y
-            },
-
-            {                                               // extent
-                1.0f,                                       // width
-                1.0f                                        // height
-            },
-
-            0.0f,                                           // minDepth
-            1.0f                                            // maxDepth
-        },
-        {                                                   // scissor
-            {                                               // offset
-                0.0f,                                       // x
-                0.0f                                        // y
-            },
-            {                                               // extent
-                1.0f,                                       // width
-                1.0f                                        // height
-            }
-        },
-        nullptr                                             // camera
-    });
+    getRenderWindowInfo().windowInitInfo.title = "Hello";
 }
 
 bool Application::init(int argc, char* argv[]) {
@@ -70,7 +42,7 @@ bool Application::init(int argc, char* argv[]) {
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Camera::Camera> camera = cameraBuilder.build();
         if (!camera) {
-            LUG_LOG.error("Application::init Can't create camera");
+            LUG_LOG.error("Application: Can't create the camera");
             return false;
         }
 
@@ -107,7 +79,7 @@ bool Application::init(int argc, char* argv[]) {
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Light> light = lightBuilder.build();
         if (!light) {
-            LUG_LOG.error("Application::init Can't create ambient light");
+            LUG_LOG.error("Application: Can't create the ambient light");
             return false;
         }
 
@@ -124,7 +96,7 @@ bool Application::init(int argc, char* argv[]) {
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Light> light = lightBuilder.build();
         if (!light) {
-            LUG_LOG.error("Application::init Can't create light");
+            LUG_LOG.error("Application: Can't create the directional light");
             return false;
         }
 
