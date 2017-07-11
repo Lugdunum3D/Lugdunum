@@ -38,6 +38,8 @@ public:
     void setMagFilter(Render::Texture::Filter magFilter);
     void setMinFilter(Render::Texture::Filter minFilter);
     void setMipMapFilter(Render::Texture::Filter mipMapFilter);
+    void setWrapS(Render::Texture::WrappingMode wrapS);
+    void setWrapT(Render::Texture::WrappingMode wrapT);
 
     Resource::SharedPtr<Render::Texture> build();
 
@@ -50,6 +52,9 @@ protected:
     Render::Texture::Filter _magFilter{Render::Texture::Filter::Nearest};
     Render::Texture::Filter _minFilter{Render::Texture::Filter::Nearest};
     Render::Texture::Filter _mipMapFilter{Render::Texture::Filter::Nearest};
+
+    Render::Texture::WrappingMode _wrapS{Render::Texture::WrappingMode::ClampToEdge};
+    Render::Texture::WrappingMode _wrapT{Render::Texture::WrappingMode::ClampToEdge};
 
     // TODO: Add wrapS and wrapT
 };

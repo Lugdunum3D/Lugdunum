@@ -17,3 +17,11 @@ inline void Texture::setMinFilter(Render::Texture::Filter minFilter) {
 inline void Texture::setMipMapFilter(Render::Texture::Filter mipMapFilter) {
     _mipMapFilter = mipMapFilter;
 }
+
+inline void Texture::setWrapS(Render::Texture::WrappingMode wrapS) {
+    _wrapS = wrapS;
+}
+
+inline void Texture::setWrapT(Render::Texture::WrappingMode wrapT) {
+    _wrapT = wrapT;
+}
