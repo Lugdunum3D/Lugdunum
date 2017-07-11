@@ -2,8 +2,6 @@
 
 #include <lug/Graphics/Scene/Node.hpp>
 
-#include <lug/System/Logger/Logger.hpp>
-
 namespace lug {
 namespace Graphics {
 namespace Render {
@@ -11,6 +9,7 @@ namespace Render {
 Light::Light(const std::string& name, Type type) : Resource(Resource::Type::Light, name), _type(type) {}
 
 void Light::getData(Light::Data& lightData, Scene::Node& node) {
+    lightData.type = static_cast<uint32_t>(_type);
     lightData.color = _color;
 
     if (_type != Type::Ambient) {
