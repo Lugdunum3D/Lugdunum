@@ -16,7 +16,14 @@ Light::Light(Renderer& renderer) : BufferPool(renderer, {
 }) {}
 
 const SubBuffer* Light::allocate(uint32_t currentFrame, const API::CommandBuffer& cmdBuffer, const std::vector<::lug::Graphics::Scene::Node*> nodes) {
-    const auto& result = BufferPool::allocate(/* TODO: Generate hash */ 0, std::any_of(nodes.cbegin(), nodes.cend(), [&currentFrame](const ::lug::Graphics::Scene::Node* node) {
+    // Generate hash
+    size_t hash = nodes.size() * 2;
+    for (auto node : nodes) {
+        hash ^= reinterpret_cast<size_t>(node) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        hash ^= node->getLight()->getHandle().value + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    }
+
+    const auto& result = BufferPool::allocate(hash, std::any_of(nodes.cbegin(), nodes.cend(), [&currentFrame](const ::lug::Graphics::Scene::Node* node) {
         return node->getLight()->isDirty(currentFrame) || node->isDirty(currentFrame);
     }));
 
