@@ -54,6 +54,12 @@ bool Application::init(int argc, char* argv[]) {
 
     _scene = lug::Graphics::Resource::SharedPtr<lug::Graphics::Scene::Scene>::cast(sceneResource);
 
+    // Adjust the model
+    {
+        lug::Graphics::Scene::Node* node = _scene->getSceneNode("UnityGlTF_correctionMatrix");
+        node->rotate(lug::Math::Geometry::radians(270.0f), {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+    }
+
     // Attach camera
     {
         lug::Graphics::Builder::Camera cameraBuilder(*renderer);
@@ -74,14 +80,13 @@ bool Application::init(int argc, char* argv[]) {
         node->attachCamera(camera);
 
         // Set initial position of the camera
-        node->setPosition({10.0f, 0.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+        node->setPosition({5.0f, 0.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
         // Look at once
         node->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
 
         // Attach the camera node to the mover
         _cameraMover.setTargetNode(*node);
         _cameraMover.setEventSource(*_graphics.getRenderer()->getWindow());
-
 
         // Attach camera to RenderView
         {
@@ -109,15 +114,13 @@ bool Application::init(int argc, char* argv[]) {
         _scene->getRoot().attachLight(light);
     }
 
-    // Attach spot light to the camera
+    // Attach directional light
     {
         lug::Graphics::Builder::Light lightBuilder(*renderer);
 
-        lightBuilder.setType(lug::Graphics::Render::Light::Type::Spot);
-        lightBuilder.setColor({10.0f, 10.0f, 10.0f, 1.0f});
-        lightBuilder.setDirection({0.0f, 0.0f, -1.0f});
-        lightBuilder.setFalloffAngle(lug::Math::Geometry::radians(12.5f));
-        lightBuilder.setFalloffExponent(80.0);
+        lightBuilder.setType(lug::Graphics::Render::Light::Type::Directional);
+        lightBuilder.setColor({1.0f, 1.0f, 1.0f, 1.0f});
+        lightBuilder.setDirection({-5.0f, -5.0f, 0.0f});
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Light> light = lightBuilder.build();
         if (!light) {
@@ -125,7 +128,10 @@ bool Application::init(int argc, char* argv[]) {
             return false;
         }
 
-        _scene->getSceneNode("camera")->attachLight(light);
+        lug::Graphics::Scene::Node* node = _scene->createSceneNode("light");
+        _scene->getRoot().attachChild(*node);
+
+        node->attachLight(light);
     }
 
     return true;

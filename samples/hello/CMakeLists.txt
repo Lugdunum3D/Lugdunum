@@ -43,6 +43,11 @@ set(SHADERS
 set(LUG_RESOURCES
     models/DamagedHelmet/DamagedHelmet.bin
     models/DamagedHelmet/DamagedHelmet.gltf
+    models/DamagedHelmet/textures/Default_AO.jpg
+    models/DamagedHelmet/textures/Default_albedo.jpg
+    models/DamagedHelmet/textures/Default_metallic_roughness.jpg
+    models/DamagedHelmet/textures/Default_emissive.jpg
+    models/DamagedHelmet/textures/Default_normal.jpg
     shaders/forward/shader.frag
     shaders/forward/shader.vert
 )
