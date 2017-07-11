@@ -97,6 +97,8 @@ layout (set = 3, binding = TEXTURE_OCCLUSION_BINDING) uniform sampler2D textureO
 layout (set = 3, binding = TEXTURE_EMISSIVE_BINDING) uniform sampler2D textureEmissive;
 #endif
 
+layout (location = IN_FREE_LOCATION) in vec3 inCameraPositionWorldSpace;
+
 //////////////////////////////////////////////////////////////////////////////
 // BLOCK OF STATIC OUTPUTS
 //////////////////////////////////////////////////////////////////////////////
@@ -229,8 +231,7 @@ void main() {
     // BASIC CALCULATION REQUIRED
     //////////////////////////////////////////////////////////////////////
 
-    const vec3 cameraPositionWorldSpace = (inverse(camera.view) * vec4(vec3(0.0), 1.0)).xyz;
-    const vec3 viewDirection = normalize(cameraPositionWorldSpace - inPositionWorldSpace);
+    const vec3 viewDirection = normalize(inCameraPositionWorldSpace - inPositionWorldSpace);
 
     const vec3 F0 = mix(vec3(0.04), albedo.xyz, metallic);
 
