@@ -103,6 +103,8 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
         }
     }
 
+    setMouseCursorVisible(true);
+
     // Increment window count
     windowCount++;
     return true;
@@ -364,12 +366,14 @@ void WindowImpl::setKeyRepeat(bool state) {
 }
 
 void WindowImpl::setMouseCursorVisible(bool visible) {
-    _cursor = visible ? LoadCursor(nullptr, IDC_ARROW) : nullptr;
+    _cursor = visible ? LoadCursor(nullptr, IDC_ARROW) : NULL;
     SetCursor(_cursor);
 }
 
 void WindowImpl::setMousePos(const Math::Vec2i& mousePosition) {
-    SetCursorPos(mousePosition.x(), mousePosition.y());
+    POINT mouseScreenPosition{mousePosition.x(), mousePosition.y()};
+    ClientToScreen(_handle, &mouseScreenPosition);
+    SetCursorPos(mouseScreenPosition.x, mouseScreenPosition.y);
 }
 
 HWND WindowImpl::getHandle() const {
@@ -493,7 +497,7 @@ void WindowImpl::registerWindow() const {
     windowClass.cbWndExtra = 0;
     windowClass.hInstance = _hinstance;
     windowClass.hIcon = LoadIcon(nullptr, IDI_WINLOGO);
-    windowClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    windowClass.hCursor = NULL;
     windowClass.hbrBackground = 0;
     windowClass.lpszMenuName = nullptr;
     windowClass.lpszClassName = className;
