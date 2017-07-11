@@ -55,8 +55,6 @@ protected:
 
     Render::Texture::WrappingMode _wrapS{Render::Texture::WrappingMode::ClampToEdge};
     Render::Texture::WrappingMode _wrapT{Render::Texture::WrappingMode::ClampToEdge};
-
-    // TODO: Add wrapS and wrapT
 };
 
 #include <lug/Graphics/Builder/Texture.inl>

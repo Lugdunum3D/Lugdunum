@@ -284,7 +284,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
     {
         API::Builder::Sampler samplerBuilder(device);
 
-        samplerBuilder.setAddressModeU([](Render::Texture::WrappingMode wrappingMode){
+        const auto& wrappingModeToVulkan = [](Render::Texture::WrappingMode wrappingMode){
             switch(wrappingMode) {
                 case Render::Texture::WrappingMode::ClampToEdge:
                     return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
@@ -295,22 +295,12 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
             }
 
             return VkSamplerAddressMode{};
-        }(builder._wrapS));
+        };
 
-        samplerBuilder.setAddressModeV([](Render::Texture::WrappingMode wrappingMode){
-            switch(wrappingMode) {
-                case Render::Texture::WrappingMode::ClampToEdge:
-                    return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-                case Render::Texture::WrappingMode::MirroredRepeat:
-                    return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
-                case Render::Texture::WrappingMode::Repeat:
-                    return VK_SAMPLER_ADDRESS_MODE_REPEAT;
-            }
+        samplerBuilder.setAddressModeU(wrappingModeToVulkan(builder._wrapS));
+        samplerBuilder.setAddressModeV(wrappingModeToVulkan(builder._wrapT));
 
-            return VkSamplerAddressMode{};
-        }(builder._wrapT));
-
-        samplerBuilder.setMinFilter([](Render::Texture::Filter filter){
+        const auto& filterToVulkan = [](Render::Texture::Filter filter){
             switch(filter) {
                 case Render::Texture::Filter::Nearest:
                     return VK_FILTER_NEAREST;
@@ -319,18 +309,10 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
             }
 
             return VkFilter{};
-        }(builder._minFilter));
+        };
 
-        samplerBuilder.setMagFilter([](Render::Texture::Filter filter){
-            switch(filter) {
-                case Render::Texture::Filter::Nearest:
-                    return VK_FILTER_NEAREST;
-                case Render::Texture::Filter::Linear:
-                    return VK_FILTER_LINEAR;
-            }
-
-            return VkFilter{};
-        }(builder._magFilter));
+        samplerBuilder.setMinFilter(filterToVulkan(builder._minFilter));
+        samplerBuilder.setMagFilter(filterToVulkan(builder._magFilter));
 
         samplerBuilder.setMipmapMode([](Render::Texture::Filter filter){
             switch(filter) {
