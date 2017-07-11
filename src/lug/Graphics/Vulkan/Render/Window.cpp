@@ -100,17 +100,22 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
     FrameData& frameData = _framesData[_currentImageIndex];
     API::CommandBuffer& cmdBuffer = frameData.cmdBuffers[0];
 
-    std::vector<VkSemaphore> imageReadyVkSemaphores;
-    imageReadyVkSemaphores.reserve(frameData.imageReadySemaphores.size());
+    std::vector<VkSemaphore> imageReadyVkSemaphores(frameData.imageReadySemaphores.size());
 
-    std::transform(
-        frameData.imageReadySemaphores.begin(),
-        frameData.imageReadySemaphores.end(),
-        std::back_inserter(imageReadyVkSemaphores),
-        [] (const API::Semaphore& semaphore) {
-                        return static_cast<VkSemaphore>(semaphore);
-                    }
-        );
+    uint32_t i = 0;
+    uint32_t j = 0;
+    for (auto& renderView: _renderViews) {
+        View* renderView_ = static_cast<View*>(renderView.get());
+
+        // Render views with no camera don't signal the semaphore as they don't draw
+        if (renderView_->getCamera()) {
+            imageReadyVkSemaphores[i++] = static_cast<VkSemaphore>(frameData.imageReadySemaphores[j]);
+        }
+
+        ++j;
+    }
+
+    imageReadyVkSemaphores.resize(i);
 
     return _presentQueue->submit(
         cmdBuffer,
@@ -125,8 +130,8 @@ bool Window::endFrame() {
 
     API::CommandBuffer& cmdBuffer = frameData.cmdBuffers[1];
     std::vector<VkSemaphore> waitSemaphores(_renderViews.size());
-    uint32_t i = 0;
 
+    uint32_t i = 0;
     for (auto& renderView: _renderViews) {
         View* renderView_ = static_cast<View*>(renderView.get());
 
@@ -138,9 +143,8 @@ bool Window::endFrame() {
 
     // Update wait semaphores vector size,
     // it could be != from _renderViews.size(), if some render views has no camera
-    if (waitSemaphores.size() != i) {
-        waitSemaphores.resize(i);
-    }
+    waitSemaphores.resize(i);
+
     std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
     return _guiInstance.endFrame(waitSemaphores, _currentImageIndex)
