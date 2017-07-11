@@ -51,7 +51,6 @@ bool View::init(
 
 bool View::render(const API::Semaphore& imageReadySemaphore, uint32_t currentImageIndex) {
     if (!_camera) {
-        LUG_LOG.warn("View::render: Attempt to render with no camera attached");
         return true; // Not fatal, return success anyway
     }
 

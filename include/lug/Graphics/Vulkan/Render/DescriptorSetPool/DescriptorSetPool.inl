@@ -44,10 +44,12 @@ inline std::tuple<bool, const DescriptorSet*> DescriptorSetPool<maxSets>::alloca
         DescriptorSet* descriptorSet = allocateNewDescriptorSet(descriptorSetLayout);
 
         if (!descriptorSet) {
-            return std::make_tuple(true, nullptr);
+            return std::make_tuple(false, nullptr);
         }
 
         descriptorSet->setHash(hash);
+        descriptorSet->_referenceCount += 1;
+
         _descriptorSetsInUse[hash] = descriptorSet;
 
         return std::make_tuple(true, descriptorSet);
@@ -69,26 +71,26 @@ inline void DescriptorSetPool<maxSets>::free(const DescriptorSet* descriptorSet)
     if (descriptorSet->_referenceCount == 0) {
         if (it != _descriptorSetsInUse.end() && it->second == descriptorSet) {
             _descriptorSetsInUse.erase(descriptorSet->getHash());
-        } else {
-            _freeDescriptorSets[_freeDescriptorSetsCount++] = const_cast<DescriptorSet*>(descriptorSet);
         }
+
+        _freeDescriptorSets[_freeDescriptorSetsCount] = const_cast<DescriptorSet*>(descriptorSet);
+        ++_freeDescriptorSetsCount;
     }
 }
 
 template <size_t maxSets>
 inline DescriptorSet* DescriptorSetPool<maxSets>::allocateNewDescriptorSet(const API::DescriptorSetLayout& descriptorSetLayout) {
     if (_freeDescriptorSetsCount) {
-        DescriptorSet* tmp = _freeDescriptorSets[_freeDescriptorSetsCount];
+        --_freeDescriptorSetsCount;
 
-        _freeDescriptorSets[_freeDescriptorSetsCount--] = nullptr;
-        tmp->_referenceCount += 1;
+        DescriptorSet* tmp = _freeDescriptorSets[_freeDescriptorSetsCount];
+        _freeDescriptorSets[_freeDescriptorSetsCount] = nullptr;
 
         return tmp;
     } else if (_descriptorSetsCount < maxSets) {
         API::Builder::DescriptorSet descriptorSetBuilder(_renderer.getDevice(), descriptorPool);
         descriptorSetBuilder.setDescriptorSetLayouts({static_cast<VkDescriptorSetLayout>(descriptorSetLayout)});
 
-        API::DescriptorSet descriptorSet;
         VkResult result{VK_SUCCESS};
         if (!descriptorSetBuilder.build(_descriptorSets[_descriptorSetsCount]._descriptorSet, &result)) {
             LUG_LOG.error("DescriptorSetPool: Can't create descriptor set: {}", result);
@@ -96,6 +98,8 @@ inline DescriptorSet* DescriptorSetPool<maxSets>::allocateNewDescriptorSet(const
         }
 
         return &_descriptorSets[_descriptorSetsCount++];
+    } else {
+        LUG_LOG.error("DescriptorSetPool: Can't create descriptor set: Maximum number of sets reached");
     }
 
     return nullptr;

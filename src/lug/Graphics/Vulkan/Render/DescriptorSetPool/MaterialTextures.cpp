@@ -22,7 +22,7 @@ const DescriptorSet* MaterialTextures::allocate(const API::GraphicsPipeline& pip
         pipeline.getLayout()->getDescriptorSetLayouts()[3]
     );
 
-    if (std::get<0>(result)) {
+    if (std::get<0>(result) && std::get<1>(result)) {
         std::vector<VkDescriptorImageInfo> imageInfos(textures.size());
 
         for (uint32_t i = 0; i < textures.size(); ++i) {

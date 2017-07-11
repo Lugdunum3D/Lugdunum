@@ -18,7 +18,7 @@ const SubBuffer* Camera::allocate(const API::CommandBuffer& cmdBuffer, ::lug::Gr
     const auto& result = BufferPool::allocate(camera.getHandle().value, camera.isDirty());
     camera.clearDirty();
 
-    if (std::get<0>(result)) {
+    if (std::get<0>(result) && std::get<1>(result)) {
         // Update the buffer if the BufferPool told us that we need to
         const Math::Mat4x4f cameraData[] = {
             camera.getViewMatrix(),

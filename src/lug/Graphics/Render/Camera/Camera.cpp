@@ -22,8 +22,6 @@ void Camera::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& up, No
 void Camera::update(const ::lug::Graphics::Render::View& renderView, Queue& renderQueue) {
     if (_parent) {
         _parent->getScene().fetchVisibleObjects(renderView, *this, renderQueue);
-    } else {
-        LUG_LOG.warn("Camera: Attempt to update without being attached to a scene");
     }
 }
 

@@ -574,7 +574,9 @@ bool Renderer::beginFrame(const lug::System::Time& elapsedTime) {
 }
 
 bool Renderer::endFrame() {
-    _window->render();
+    if (!_window->render()) {
+        return false;
+    }
 
     for (auto& renderView: _window->getRenderViews()) {
         if (!renderView->endFrame()) {

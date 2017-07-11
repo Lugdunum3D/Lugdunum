@@ -32,7 +32,7 @@ const SubBuffer* Light::allocate(uint32_t currentFrame, const API::CommandBuffer
         node->clearDirty(currentFrame);
     }
 
-    if (std::get<0>(result)) {
+    if (std::get<0>(result) && std::get<1>(result)) {
         // Update the buffer if the BufferPool told us that we need to
         for (uint32_t i = 0; i < nodes.size(); ++i) {
             const auto& light = nodes[i]->getLight();

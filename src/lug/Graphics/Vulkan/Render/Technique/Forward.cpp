@@ -44,6 +44,10 @@ std::unique_ptr<DescriptorSetPool::MaterialTextures> Forward::_materialTexturesD
 
 Forward::Forward(Renderer& renderer, const Render::View& renderView) : Technique(renderer, renderView) {}
 
+Forward::~Forward() {
+    destroy();
+}
+
 bool Forward::render(
     const Render::Queue& renderQueue,
     const API::Semaphore& imageReadySemaphore,
@@ -62,6 +66,12 @@ bool Forward::render(
     // Get the new (or old) camera buffer
     {
         const BufferPool::SubBuffer* cameraBuffer = _cameraBufferPool->allocate(frameData.transferCmdBuffer, *_renderView.getCamera());
+
+        if (!cameraBuffer) {
+            LUG_LOG.error("Forward::render: Can't allocate camera buffer");
+            return false;
+        }
+
         _cameraBufferPool->free(frameData.cameraBuffer);
         frameData.cameraBuffer = cameraBuffer;
     }
@@ -121,6 +131,12 @@ bool Forward::render(
     // Get the new (or old) camera descriptor set
     {
         const DescriptorSetPool::DescriptorSet* cameraDescriptorSet = _cameraDescriptorSetPool->allocate(*frameData.cameraBuffer);
+
+        if (!cameraDescriptorSet) {
+            LUG_LOG.error("Forward::render: Can't allocate camera descriptor set");
+            return false;
+        }
+
         _cameraDescriptorSetPool->free(frameData.cameraDescriptorSet);
         frameData.cameraDescriptorSet = cameraDescriptorSet;
     }
@@ -168,9 +184,19 @@ bool Forward::render(
             );
             lightBuffers.push_back(lightBuffer);
 
+            if (!lightBuffer) {
+                LUG_LOG.error("Forward::render: Can't allocate light buffer");
+                return false;
+            }
+
             // Get the new (or old) light descriptor set
             const DescriptorSetPool::DescriptorSet* lightDescriptorSet = _lightDescriptorSetPool->allocate(*lightBuffer);
             lightDescriptorSets.push_back(lightDescriptorSet);
+
+            if (!lightDescriptorSet) {
+                LUG_LOG.error("Forward::render: Can't allocate light descriptor set");
+                return false;
+            }
 
             // Bind descriptor set of the light
             {
@@ -219,9 +245,19 @@ bool Forward::render(
                     const BufferPool::SubBuffer* materialBuffer = _materialBufferPool->allocate(frameData.transferCmdBuffer, material);
                     materialBuffers.push_back(materialBuffer);
 
+                    if (!materialBuffer) {
+                        LUG_LOG.error("Forward::render: Can't allocate material buffer");
+                        return false;
+                    }
+
                     // Get the new (or old) material descriptor set
                     const DescriptorSetPool::DescriptorSet* materialDescriptorSet = _materialDescriptorSetPool->allocate(*materialBuffer);
                     materialDescriptorSets.push_back(materialDescriptorSet);
+
+                    if (!materialDescriptorSet) {
+                        LUG_LOG.error("Forward::render: Can't allocate material descriptor set");
+                        return false;
+                    }
 
                     std::vector<const API::DescriptorSet*> materialDescriptorSetsBind{&materialDescriptorSet->getDescriptorSet()};
 
@@ -256,6 +292,12 @@ bool Forward::render(
                                 return textures;
                             }()
                         );
+
+                        if (!materialTexturesDescriptorSet) {
+                            LUG_LOG.error("Forward::render: Can't allocate material textures descriptor set");
+                            return false;
+                        }
+
                         materialTexturesDescriptorSets.push_back(materialTexturesDescriptorSet);
                         materialDescriptorSetsBind.push_back(&materialTexturesDescriptorSet->getDescriptorSet());
                     }
@@ -510,6 +552,32 @@ void Forward::destroy() {
     _graphicsQueue->waitIdle();
     _transferQueue->waitIdle();
 
+    for (auto& frameData : _framesData) {
+        _cameraBufferPool->free(frameData.cameraBuffer);
+
+        for (const auto& subBuffer : frameData.lightBuffers) {
+            _lightBufferPool->free(subBuffer);
+        }
+
+        for (const auto& subBuffer : frameData.materialBuffers) {
+            _lightBufferPool->free(subBuffer);
+        }
+
+        _cameraDescriptorSetPool->free(frameData.cameraDescriptorSet);
+
+        for (const auto& descriptorSet : frameData.lightDescriptorSets) {
+            _lightDescriptorSetPool->free(descriptorSet);
+        }
+
+        for (const auto& descriptorSet : frameData.materialDescriptorSets) {
+            _materialDescriptorSetPool->free(descriptorSet);
+        }
+
+        for (const auto& descriptorSet : frameData.materialTexturesDescriptorSets) {
+            _materialTexturesDescriptorSetPool->free(descriptorSet);
+        }
+    }
+
     _framesData.clear();
 
     _depthBufferMemory.destroy();
@@ -594,7 +662,13 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
 
 bool Forward::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
     // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
-    const API::RenderPass* renderPass = _renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getRenderPass();
+    const auto& basePipeline = _renderer.getPipeline(Pipeline::getBaseId());
+
+    if (!basePipeline) {
+        return false;
+    }
+
+    const API::RenderPass* renderPass = basePipeline->getPipelineAPI().getRenderPass();
 
     _framesData.resize(imageViews.size());
 

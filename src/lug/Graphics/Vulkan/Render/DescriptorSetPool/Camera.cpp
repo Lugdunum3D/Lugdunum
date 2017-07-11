@@ -17,7 +17,7 @@ const DescriptorSet* Camera::allocate(const BufferPool::SubBuffer& subBuffer) {
         _renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout()->getDescriptorSetLayouts()[0]
     );
 
-    if (std::get<0>(result)) {
+    if (std::get<0>(result) && std::get<1>(result)) {
         std::get<1>(result)->getDescriptorSet().updateBuffers(
             0,
             0,

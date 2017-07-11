@@ -18,7 +18,7 @@ const SubBuffer* Material::allocate(const API::CommandBuffer& cmdBuffer, ::lug::
     const auto& result = BufferPool::allocate(material.getHandle().value, material.isDirty());
     material.clearDirty();
 
-    if (std::get<0>(result)) {
+    if (std::get<0>(result) && std::get<1>(result)) {
         // Update the buffer if the BufferPool told us that we need to
         cmdBuffer.updateBuffer(
             *std::get<1>(result)->getBuffer(),
