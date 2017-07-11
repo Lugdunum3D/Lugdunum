@@ -222,7 +222,7 @@ void main() {
     //////////////////////////////////////////////////////////////////////
 
     #if TEXTURE_EMISSIVE
-    const vec3 emissive = material.emissive * texture(textureEmissive, TEXTURE_EMISSIVE_UV).rgb;
+    const vec3 emissive = material.emissive * pow(texture(textureEmissive, TEXTURE_EMISSIVE_UV).rgb, vec3(2.2));
     #else
     const vec3 emissive = material.emissive;
     #endif
@@ -302,11 +302,13 @@ void main() {
 
     vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo;
 
-    // Tone mapping and gamma correction
+    // Tone mapping
     color = color / (color + vec3(1.0));
-    color = pow(color, vec3(1.0 / 2.2));
 
     color += emissive;
+
+    // Gamma correction
+    color = pow(color, vec3(1.0 / 2.2));
 
     // Final output
     outColor = vec4(color, 1.0);
