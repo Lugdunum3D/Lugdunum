@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
@@ -30,6 +31,7 @@ public:
     void setFormat(VkFormat format);
     void setViewType(VkImageViewType viewType);
     void setAspectFlags(VkImageAspectFlags aspectFlags);
+    void setLayerCount(uint32_t layerCount);
 
     // Build methods
     bool build(API::ImageView& instance, VkResult* returnResult = nullptr);
@@ -42,6 +44,7 @@ private:
     VkFormat _format{VK_FORMAT_UNDEFINED};
     VkImageViewType _viewType{VK_IMAGE_VIEW_TYPE_2D};
     VkImageAspectFlags _aspectFlags{VK_IMAGE_ASPECT_COLOR_BIT};
+    uint32_t _layerCount{1};
 };
 
 #include <lug/Graphics/Vulkan/API/Builder/ImageView.inl>

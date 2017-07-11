@@ -1,7 +1,8 @@
 #include <cstring>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
-#include <lug/Graphics/Vulkan/Render/Window.hpp>
+#include <lug/Graphics/Vulkan/Render/SkyBox.hpp>
 #include <lug/Graphics/Vulkan/Render/View.hpp>
+#include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>

@@ -29,7 +29,8 @@ public:
         Light,      ///< A light
         Texture,    ///< A texture
         Pipeline,   ///< A graphical pipeline
-        Camera      ///< A camera
+        Camera,     ///< A camera
+        SkyBox      ///< A skyBox
     };
 
     /**

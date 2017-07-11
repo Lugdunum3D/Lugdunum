@@ -1,11 +1,13 @@
 #pragma once
 
+#include <array>
+#include <cstdint>
 #include <string>
-#include <vector>
 
+#include <lug/Graphics/Builder/Texture.hpp>
 #include <lug/Graphics/Resource.hpp>
-#include <lug/Graphics/Render/Texture.hpp>
-#include <lug/Graphics/Vulkan/Builder/Texture.hpp>
+#include <lug/Graphics/Render/SkyBox.hpp>
+#include <lug/Graphics/Vulkan/Builder/SkyBox.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -14,30 +16,29 @@ class Renderer;
 
 namespace Builder {
 
-class LUG_GRAPHICS_API Texture {
-    friend Resource::SharedPtr<lug::Graphics::Render::Texture> lug::Graphics::Vulkan::Builder::Texture::build(const ::lug::Graphics::Builder::Texture&);
+class LUG_GRAPHICS_API SkyBox {
+    friend Resource::SharedPtr<lug::Graphics::Render::SkyBox> lug::Graphics::Vulkan::Builder::SkyBox::build(const ::lug::Graphics::Builder::SkyBox&);
 
-    struct Layer {
-        // TODO(nokitoo): add other infos(layers count, aspect mask, mip level, etc...)
-        std::string filename;
+public:
+    enum class Face: uint8_t {
+        PositiveX = 0,
+        NegativeX = 1,
+        PositiveY = 2,
+        NegativeY = 3,
+        PositiveZ = 4,
+        NegativeZ = 5
     };
 
 public:
-    enum class Type {
-        Texture2D,
-        CubeMap
-    };
+    explicit SkyBox(Renderer& renderer);
 
-public:
-    explicit Texture(Renderer& renderer);
+    SkyBox(const SkyBox&) = delete;
+    SkyBox(SkyBox&&) = delete;
 
-    Texture(const Texture&) = delete;
-    Texture(Texture&&) = delete;
+    SkyBox& operator=(const SkyBox&) = delete;
+    SkyBox& operator=(SkyBox&&) = delete;
 
-    Texture& operator=(const Texture&) = delete;
-    Texture& operator=(Texture&&) = delete;
-
-    ~Texture() = default;
+    ~SkyBox() = default;
 
     /**
      * @brief      Sets the name.
@@ -45,24 +46,19 @@ public:
      */
     void setName(const std::string& name);
 
-    void setType(Type type);
-
     void setMagFilter(Render::Texture::Filter magFilter);
     void setMinFilter(Render::Texture::Filter minFilter);
     void setMipMapFilter(Render::Texture::Filter mipMapFilter);
     void setWrapS(Render::Texture::WrappingMode wrapS);
     void setWrapT(Render::Texture::WrappingMode wrapT);
+    void setFaceFilename(Face face, const std::string& filename);
 
-    void addLayer(const std::string& filename);
-
-    Resource::SharedPtr<Render::Texture> build();
+    Resource::SharedPtr<Render::SkyBox> build();
 
 protected:
     Renderer& _renderer;
 
     std::string _name;
-
-    Type _type{Type::Texture2D};
 
     Render::Texture::Filter _magFilter{Render::Texture::Filter::Nearest};
     Render::Texture::Filter _minFilter{Render::Texture::Filter::Nearest};
@@ -71,10 +67,11 @@ protected:
     Render::Texture::WrappingMode _wrapS{Render::Texture::WrappingMode::ClampToEdge};
     Render::Texture::WrappingMode _wrapT{Render::Texture::WrappingMode::ClampToEdge};
 
-    std::vector<Layer> _layers;
+    // Contains alls file names for faces
+    std::array<std::string, 6> _faces;
 };
 
-#include <lug/Graphics/Builder/Texture.inl>
+#include <lug/Graphics/Builder/SkyBox.inl>
 
 } // Builder
 } // Graphics

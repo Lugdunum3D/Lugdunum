@@ -45,6 +45,10 @@ void Queue::addLight(Scene::Node& node) {
     ++_lightsCount;
 }
 
+void Queue::addSkyBox(Resource::SharedPtr<::lug::Graphics::Render::SkyBox> skyBox) {
+    _skyBox = Resource::SharedPtr<Render::SkyBox>::cast(skyBox);
+}
+
 void Queue::clear() {
     _primitiveSets.clear();
     _lightsCount = 0;
@@ -60,6 +64,10 @@ const std::vector<Scene::Node*> Queue::getLights() const {
 
 std::size_t Queue::getLightsCount() const {
     return _lightsCount;
+}
+
+const Resource::SharedPtr<Render::SkyBox> Queue::getSkyBox() const {
+    return _skyBox;
 }
 
 } // Render

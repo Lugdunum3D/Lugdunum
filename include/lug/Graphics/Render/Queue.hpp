@@ -1,5 +1,8 @@
 #pragma once
 
+#include <lug/Graphics/Render/SkyBox.hpp>
+#include <lug/Graphics/Resource.hpp>
+
 namespace lug {
 namespace Graphics {
 namespace Scene {
@@ -22,6 +25,7 @@ public:
 
     virtual void addMeshInstance(Scene::Node& node) = 0;
     virtual void addLight(Scene::Node& node) = 0;
+    virtual void addSkyBox(Resource::SharedPtr<Render::SkyBox> skyBox) = 0;
     virtual void clear() = 0;
 };
 

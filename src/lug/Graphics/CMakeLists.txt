@@ -11,6 +11,7 @@ set(SRC
     ${SRCROOT}/Builder/Material.cpp
     ${SRCROOT}/Builder/Mesh.cpp
     ${SRCROOT}/Builder/Scene.cpp
+    ${SRCROOT}/Builder/SkyBox.cpp
     ${SRCROOT}/Builder/Texture.cpp
 
     ${SRCROOT}/Module.cpp
@@ -27,6 +28,7 @@ set(SRC
     ${SRCROOT}/Render/Material.cpp
     ${SRCROOT}/Render/Mesh.cpp
     ${SRCROOT}/Render/Queue.cpp
+    ${SRCROOT}/Render/SkyBox.cpp
     ${SRCROOT}/Render/Texture.cpp
     ${SRCROOT}/Render/View.cpp
 
@@ -90,6 +92,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Builder/Material.cpp
     ${SRCROOT}/Vulkan/Builder/Mesh.cpp
     ${SRCROOT}/Vulkan/Builder/Texture.cpp
+    ${SRCROOT}/Vulkan/Builder/SkyBox.cpp
 
     ${SRCROOT}/Vulkan/Render/BufferPool/Camera.cpp
     ${SRCROOT}/Vulkan/Render/BufferPool/Light.cpp
@@ -99,7 +102,9 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Light.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Material.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/MaterialTextures.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/SkyBox.cpp
     ${SRCROOT}/Vulkan/Render/Material.cpp
+    ${SRCROOT}/Vulkan/Render/SkyBox.cpp
 
     ${SRCROOT}/Vulkan/Gui.cpp
 
@@ -109,6 +114,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/Queue.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Forward.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Technique.cpp
+    ${SRCROOT}/Vulkan/Render/SkyBox.cpp
     ${SRCROOT}/Vulkan/Render/Texture.cpp
     ${SRCROOT}/Vulkan/Render/View.cpp
     ${SRCROOT}/Vulkan/Render/Window.cpp
@@ -144,6 +150,8 @@ set(INC
     ${INCROOT}/Builder/Scene.inl
     ${INCROOT}/Builder/Texture.hpp
     ${INCROOT}/Builder/Texture.inl
+    ${INCROOT}/Builder/SkyBox.hpp
+    ${INCROOT}/Builder/SkyBox.inl
 
     ${INCROOT}/Module.hpp
     ${INCROOT}/Module.inl
@@ -166,6 +174,8 @@ set(INC
     ${INCROOT}/Render/Mesh.hpp
     ${INCROOT}/Render/Mesh.inl
     ${INCROOT}/Render/Queue.hpp
+    ${INCROOT}/Render/SkyBox.hpp
+    ${INCROOT}/Render/SkyBox.inl
     ${INCROOT}/Render/Target.hpp
     ${INCROOT}/Render/Target.inl
     ${INCROOT}/Render/Technique/Type.hpp
@@ -266,6 +276,7 @@ set(INC
 
     ${INCROOT}/Vulkan/Builder/Material.hpp
     ${INCROOT}/Vulkan/Builder/Mesh.hpp
+    ${INCROOT}/Vulkan/Builder/SkyBox.hpp
     ${INCROOT}/Vulkan/Builder/Texture.hpp
 
     ${INCROOT}/Vulkan/Render/BufferPool/BufferPool.hpp
@@ -285,7 +296,10 @@ set(INC
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/Light.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/Material.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/MaterialTextures.hpp
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/SkyBox.hpp
     ${INCROOT}/Vulkan/Render/Material.hpp
+    ${INCROOT}/Vulkan/Render/SkyBox.hpp
+    ${INCROOT}/Vulkan/Render/SkyBox.inl
 
     ${INCROOT}/Vulkan/Gui.hpp
 

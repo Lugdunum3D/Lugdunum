@@ -3,6 +3,7 @@
 // TODO: Remove this when the ResourceManager is done
 #include <lug/Graphics/Builder/Camera.hpp>
 #include <lug/Graphics/Builder/Light.hpp>
+#include <lug/Graphics/Builder/SkyBox.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
@@ -104,6 +105,26 @@ bool Application::init(int argc, char* argv[]) {
         _scene->getRoot().attachChild(*node);
 
         node->attachLight(light);
+    }
+
+    // Attach skyBox
+    {
+        lug::Graphics::Builder::SkyBox skyBoxBuilder(*renderer);
+
+        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveX, "textures/skybox/right.jpg");
+        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeX, "textures/skybox/left.jpg");
+        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveY, "textures/skybox/top.jpg");
+        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeY, "textures/skybox/bottom.jpg");
+        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveZ, "textures/skybox/back.jpg");
+        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeZ, "textures/skybox/front.jpg");
+
+        lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> skyBox = skyBoxBuilder.build();
+        if (!skyBox) {
+            LUG_LOG.error("Application::init Can't create skyBox");
+            return false;
+        }
+
+        _scene->setSkyBox(skyBox);
     }
 
     return true;
