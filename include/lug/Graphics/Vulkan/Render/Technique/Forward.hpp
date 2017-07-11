@@ -66,7 +66,7 @@ public:
     Forward& operator=(const Forward&) = delete;
     Forward& operator=(Forward&&) = delete;
 
-    ~Forward() = default;
+    ~Forward();
 
     bool render(
         const Render::Queue& renderQueue,

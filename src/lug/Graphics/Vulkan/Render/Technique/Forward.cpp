@@ -44,6 +44,10 @@ std::unique_ptr<DescriptorSetPool::MaterialTextures> Forward::_materialTexturesD
 
 Forward::Forward(Renderer& renderer, const Render::View& renderView) : Technique(renderer, renderView) {}
 
+Forward::~Forward() {
+    destroy();
+}
+
 bool Forward::render(
     const Render::Queue& renderQueue,
     const API::Semaphore& imageReadySemaphore,
@@ -606,7 +610,13 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
 
 bool Forward::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
     // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
-    const API::RenderPass* renderPass = _renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getRenderPass();
+    const auto& basePipeline = _renderer.getPipeline(Pipeline::getBaseId());
+
+    if (!basePipeline) {
+        return false;
+    }
+
+    const API::RenderPass* renderPass = basePipeline->getPipelineAPI().getRenderPass();
 
     _framesData.resize(imageViews.size());
 
