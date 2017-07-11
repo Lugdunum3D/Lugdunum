@@ -284,12 +284,46 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
     {
         API::Builder::Sampler samplerBuilder(device);
 
-        // TODO: Use wrapS, wrapT
-        // TODO: Use minFilter, magFilter, mipMapFilter
-        samplerBuilder.setAddressModeU(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
-        samplerBuilder.setAddressModeV(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
-        samplerBuilder.setAddressModeW(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
-        samplerBuilder.setBorderColor(VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
+        const auto& wrappingModeToVulkan = [](Render::Texture::WrappingMode wrappingMode){
+            switch(wrappingMode) {
+                case Render::Texture::WrappingMode::ClampToEdge:
+                    return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+                case Render::Texture::WrappingMode::MirroredRepeat:
+                    return VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT;
+                case Render::Texture::WrappingMode::Repeat:
+                    return VK_SAMPLER_ADDRESS_MODE_REPEAT;
+            }
+
+            return VkSamplerAddressMode{};
+        };
+
+        samplerBuilder.setAddressModeU(wrappingModeToVulkan(builder._wrapS));
+        samplerBuilder.setAddressModeV(wrappingModeToVulkan(builder._wrapT));
+
+        const auto& filterToVulkan = [](Render::Texture::Filter filter){
+            switch(filter) {
+                case Render::Texture::Filter::Nearest:
+                    return VK_FILTER_NEAREST;
+                case Render::Texture::Filter::Linear:
+                    return VK_FILTER_LINEAR;
+            }
+
+            return VkFilter{};
+        };
+
+        samplerBuilder.setMinFilter(filterToVulkan(builder._minFilter));
+        samplerBuilder.setMagFilter(filterToVulkan(builder._magFilter));
+
+        samplerBuilder.setMipmapMode([](Render::Texture::Filter filter){
+            switch(filter) {
+                case Render::Texture::Filter::Nearest:
+                    return VK_SAMPLER_MIPMAP_MODE_NEAREST;
+                case Render::Texture::Filter::Linear:
+                    return VK_SAMPLER_MIPMAP_MODE_LINEAR;
+            }
+
+            return VkSamplerMipmapMode{};
+        }(builder._mipMapFilter));
 
         VkResult result{VK_SUCCESS};
         if (!samplerBuilder.build(texture->_sampler, &result)) {

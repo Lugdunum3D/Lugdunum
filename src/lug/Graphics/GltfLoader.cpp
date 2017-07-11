@@ -7,6 +7,7 @@
 #include <lug/Graphics/Builder/Scene.hpp>
 #include <lug/Graphics/Builder/Material.hpp>
 #include <lug/Graphics/Builder/Mesh.hpp>
+#include <lug/Graphics/Builder/Texture.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
 
 namespace lug {
@@ -71,11 +72,162 @@ static uint32_t getAttributeSize(const gltf2::Accessor& accessor) {
     return componentSize;
 }
 
-static Resource::SharedPtr<Render::Material> createMaterial(Renderer& renderer, const gltf2::Asset& asset/*, const gltf2::Material& gltfMaterial*/) {
-    Builder::Material materialBuilder(renderer);
-    // TODO(nokitoo): set material name
-    (void)asset;
+static Resource::SharedPtr<Render::Texture> createTexture(Renderer& renderer, const gltf2::Asset& asset, const gltf2::Texture& gltfTexture) {
+    // TODO: Check if the texture is already created
+    Builder::Texture textureBuilder(renderer);
 
+    if (gltfTexture.source != -1) {
+        // TODO: Handle correctly the load with bufferView / uri data
+        textureBuilder.setFilename(asset.images[gltfTexture.source].uri);
+    }
+
+    if (gltfTexture.sampler != -1) {
+        const gltf2::Sampler& sampler = asset.samplers[gltfTexture.sampler];
+
+        switch(sampler.magFilter) {
+            case gltf2::Sampler::MagFilter::None:
+                break;
+            case gltf2::Sampler::MagFilter::Nearest:
+                textureBuilder.setMagFilter(Render::Texture::Filter::Nearest);
+                break;
+            case gltf2::Sampler::MagFilter::Linear:
+                textureBuilder.setMagFilter(Render::Texture::Filter::Linear);
+                break;
+        }
+
+        switch(sampler.minFilter) {
+            case gltf2::Sampler::MinFilter::None:
+                break;
+            case gltf2::Sampler::MinFilter::Nearest:
+                textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
+                break;
+            case gltf2::Sampler::MinFilter::Linear:
+                textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
+                break;
+            case gltf2::Sampler::MinFilter::NearestMipMapNearest:
+                textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
+                textureBuilder.setMipMapFilter(Render::Texture::Filter::Nearest);
+                break;
+            case gltf2::Sampler::MinFilter::LinearMipMapNearest:
+                textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
+                textureBuilder.setMipMapFilter(Render::Texture::Filter::Nearest);
+                break;
+            case gltf2::Sampler::MinFilter::NearestMipMapLinear:
+                textureBuilder.setMinFilter(Render::Texture::Filter::Nearest);
+                textureBuilder.setMipMapFilter(Render::Texture::Filter::Linear);
+                break;
+            case gltf2::Sampler::MinFilter::LinearMipMapLinear:
+                textureBuilder.setMinFilter(Render::Texture::Filter::Linear);
+                textureBuilder.setMipMapFilter(Render::Texture::Filter::Linear);
+                break;
+        }
+
+        switch(sampler.wrapS) {
+            case gltf2::Sampler::WrappingMode::ClampToEdge:
+                textureBuilder.setWrapS(Render::Texture::WrappingMode::ClampToEdge);
+                break;
+            case gltf2::Sampler::WrappingMode::MirroredRepeat:
+                textureBuilder.setWrapS(Render::Texture::WrappingMode::MirroredRepeat);
+                break;
+            case gltf2::Sampler::WrappingMode::Repeat:
+                textureBuilder.setWrapS(Render::Texture::WrappingMode::Repeat);
+                break;
+        }
+
+        switch(sampler.wrapT) {
+            case gltf2::Sampler::WrappingMode::ClampToEdge:
+                textureBuilder.setWrapT(Render::Texture::WrappingMode::ClampToEdge);
+                break;
+            case gltf2::Sampler::WrappingMode::MirroredRepeat:
+                textureBuilder.setWrapT(Render::Texture::WrappingMode::MirroredRepeat);
+                break;
+            case gltf2::Sampler::WrappingMode::Repeat:
+                textureBuilder.setWrapT(Render::Texture::WrappingMode::Repeat);
+                break;
+        }
+    }
+
+    return textureBuilder.build();
+}
+
+static Resource::SharedPtr<Render::Material> createMaterial(Renderer& renderer, const gltf2::Asset& asset, const gltf2::Material& gltfMaterial) {
+    // TODO: Check if the material is already created
+    Builder::Material materialBuilder(renderer);
+
+    materialBuilder.setName(gltfMaterial.name);
+
+    materialBuilder.setBaseColorFactor({
+        gltfMaterial.pbr.baseColorFactor[0],
+        gltfMaterial.pbr.baseColorFactor[1],
+        gltfMaterial.pbr.baseColorFactor[2],
+        gltfMaterial.pbr.baseColorFactor[3]
+    });
+
+    if (gltfMaterial.pbr.baseColorTexture.index != -1) {
+        Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, asset.textures[gltfMaterial.pbr.baseColorTexture.index]);
+        if (!texture) {
+            LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
+            return nullptr;
+        }
+
+        materialBuilder.setBaseColorTexture(texture, gltfMaterial.pbr.baseColorTexture.texCoord);
+    }
+
+    materialBuilder.setMetallicFactor(gltfMaterial.pbr.metallicFactor);
+    materialBuilder.setRoughnessFactor(gltfMaterial.pbr.roughnessFactor);
+
+    if (gltfMaterial.pbr.metallicRoughnessTexture.index != -1) {
+        Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, asset.textures[gltfMaterial.pbr.metallicRoughnessTexture.index]);
+        if (!texture) {
+            LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
+            return nullptr;
+        }
+
+        materialBuilder.setMetallicRoughnessTexture(texture, gltfMaterial.pbr.metallicRoughnessTexture.texCoord);
+    }
+
+    if (gltfMaterial.normalTexture.index != -1) {
+        Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, asset.textures[gltfMaterial.normalTexture.index]);
+        if (!texture) {
+            LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
+            return nullptr;
+        }
+
+        materialBuilder.setNormalTexture(texture, gltfMaterial.normalTexture.texCoord);
+    }
+
+    if (gltfMaterial.occlusionTexture.index != -1) {
+        Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, asset.textures[gltfMaterial.occlusionTexture.index]);
+        if (!texture) {
+            LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
+            return nullptr;
+        }
+
+        materialBuilder.setOcclusionTexture(texture, gltfMaterial.occlusionTexture.texCoord);
+    }
+
+    if (gltfMaterial.emissiveTexture.index != -1) {
+        Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, asset.textures[gltfMaterial.emissiveTexture.index]);
+        if (!texture) {
+            LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
+            return nullptr;
+        }
+
+        materialBuilder.setEmissiveTexture(texture, gltfMaterial.emissiveTexture.texCoord);
+    }
+
+    materialBuilder.setEmissiveFactor({
+        gltfMaterial.emissiveFactor[0],
+        gltfMaterial.emissiveFactor[1],
+        gltfMaterial.emissiveFactor[2]
+    });
+
+    return materialBuilder.build();
+}
+
+static Resource::SharedPtr<Render::Material> createDefaultMaterial(Renderer& renderer) {
+    // TODO: Check if the material is already created
+    Builder::Material materialBuilder(renderer);
     return materialBuilder.build();
 }
 
@@ -98,6 +250,7 @@ static void* generateNormals(float* positions, uint32_t accessorCount) {
 }
 
 static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gltf2::Asset& asset, const gltf2::Mesh& gltfMesh) {
+    // TODO: Check if the mesh is already created
     Builder::Mesh meshBuilder(renderer);
     meshBuilder.setName(gltfMesh.name);
 
@@ -199,7 +352,7 @@ static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gl
         }
 
         // Material
-        Resource::SharedPtr<Render::Material> material = createMaterial(renderer, asset);
+        Resource::SharedPtr<Render::Material> material = gltfPrimitive.material != -1 ? createMaterial(renderer, asset, asset.materials[gltfPrimitive.material]) : createDefaultMaterial(renderer);
         if (!material) {
             LUG_LOG.error("GltfLoader::createMesh Can't create the material resource");
             return nullptr;

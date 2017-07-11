@@ -22,6 +22,12 @@ public:
         Linear
     };
 
+    enum class WrappingMode : uint8_t {
+        ClampToEdge,
+        MirroredRepeat,
+        Repeat
+    };
+
 public:
     Texture(const std::string& name);
 

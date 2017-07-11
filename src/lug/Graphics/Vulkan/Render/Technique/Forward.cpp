@@ -170,6 +170,7 @@ bool Forward::render(
 
             // Get the new (or old) light descriptor set
             const DescriptorSetPool::DescriptorSet* lightDescriptorSet = _lightDescriptorSetPool->allocate(*lightBuffer);
+            lightDescriptorSets.push_back(lightDescriptorSet);
 
             // Bind descriptor set of the light
             {

@@ -45,9 +45,10 @@ public:
         float quadraticAttenuation{0.0f};
         float falloffAngle{0.0f};
         float falloffExponent{0.0f};
+        uint32_t type;
     };
 
-    static constexpr uint32_t strideShader = 64;
+    static constexpr uint32_t strideShader = 80;
 
 public:
     Light(const Light&) = delete;

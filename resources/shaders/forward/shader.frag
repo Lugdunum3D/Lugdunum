@@ -29,6 +29,7 @@ struct Light {
     float quadraticAttenuation;
     float falloffAngle;
     float falloffExponent;
+    uint type;
 };
 
 struct Material {
@@ -250,12 +251,12 @@ void main() {
     vec3 ambient = vec3(0.0);
 
     for (int i = 0; i < lightsNb; ++i) {
-        // Ambient Light : No position
-        // Direction : Position + Direction + No falloffAngle
-        // Point : Position + No direction
-        // Spotlight : Position + Direction + fallOffAngle
+        // Ambient Light (0) : No position + No direction
+        // Direction (1) : Position + Direction + No falloffAngle
+        // Point (2) : Position + No direction
+        // Spotlight (3) : Position + Direction + fallOffAngle
 
-        if (lights[i].position == vec3(0.0)) { // Ambient Light
+        if (lights[i].type == 0) { // Ambient Light
             ambient += (lights[i].color * albedo).xyz;
             continue;
         }
@@ -267,18 +268,12 @@ void main() {
         }
 
         // lightDirection is the direction from the fragment to the light
-        vec3 lightDirection = vec3(0.0);
-        if (lights[i].direction == vec3(0.0) || lights[i].falloffAngle > 0.0) { // Point / Spot Light
-            // We just use the direction of the spot light to calculate the falloff
-            lightDirection = normalize(lights[i].position - inPositionWorldSpace);
-        } else { // Direction Light
-            lightDirection = normalize(-lights[i].direction);
-        }
+        const vec3 lightDirection = lights[i].type == 1 ? normalize(-lights[i].direction) : normalize(lights[i].position - inPositionWorldSpace);
 
         const vec3 halfViewLightDirection = normalize(viewDirection + lightDirection);
 
         // Calculate light radiance
-        const float attenuation = lights[i].constantAttenuation + lights[i].linearAttenuation * lightDistance + lights[i].quadraticAttenuation * (lightDistance * lightDistance);
+        const float attenuation = lights[i].type == 1 ? 1.0 : lights[i].constantAttenuation + lights[i].linearAttenuation * lightDistance + lights[i].quadraticAttenuation * (lightDistance * lightDistance);
         vec3 radiance = lights[i].color.xyz / attenuation;
 
         // cook-torrance brdf
@@ -296,7 +291,7 @@ void main() {
         const float NdotL = max(dot(normalWorldSpace, lightDirection), 0.0);
         const vec3 lightFinalColor = (kD * albedo.xyz / PI + specular) * radiance * NdotL;
 
-        if (lights[i].falloffAngle > 0.0) { // Spot Light
+        if (lights[i].type == 3) { // Spot Light
             const float theta = dot(-lightDirection, normalize(lights[i].direction));
 
             if (theta > cos(lights[i].falloffAngle)) {
@@ -308,7 +303,7 @@ void main() {
         }
     }
 
-    vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo;
+    vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo + emissive;
 
     // Tone mapping and gamma correction
     color = color / (color + vec3(1.0));
