@@ -71,18 +71,20 @@ inline void DescriptorSetPool<maxSets>::free(const DescriptorSet* descriptorSet)
     if (descriptorSet->_referenceCount == 0) {
         if (it != _descriptorSetsInUse.end() && it->second == descriptorSet) {
             _descriptorSetsInUse.erase(descriptorSet->getHash());
-        } else {
-            _freeDescriptorSets[_freeDescriptorSetsCount++] = const_cast<DescriptorSet*>(descriptorSet);
         }
+
+        _freeDescriptorSets[_freeDescriptorSetsCount] = const_cast<DescriptorSet*>(descriptorSet);
+        ++_freeDescriptorSetsCount;
     }
 }
 
 template <size_t maxSets>
 inline DescriptorSet* DescriptorSetPool<maxSets>::allocateNewDescriptorSet(const API::DescriptorSetLayout& descriptorSetLayout) {
     if (_freeDescriptorSetsCount) {
-        DescriptorSet* tmp = _freeDescriptorSets[_freeDescriptorSetsCount];
+        --_freeDescriptorSetsCount;
 
-        _freeDescriptorSets[_freeDescriptorSetsCount--] = nullptr;
+        DescriptorSet* tmp = _freeDescriptorSets[_freeDescriptorSetsCount];
+        _freeDescriptorSets[_freeDescriptorSetsCount] = nullptr;
 
         return tmp;
     } else if (_descriptorSetsCount < maxSets) {
