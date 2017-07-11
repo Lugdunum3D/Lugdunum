@@ -1,5 +1,6 @@
 #include <lug/Graphics/Vulkan/API/RTTI/Enum.hpp>
-#include <lug/System/Exception.hpp>
+
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -10,13 +11,14 @@ namespace RTTI {
 #define LUG_ENUM_TO_STR(enum) \
     case enum:                \
         return #enum;
-#define LUG_ENUM_TO_STR_FUNCTION(type, macro)                                                    \
-    const char* toStr(type enumVal) {                                                            \
-        switch (enumVal) {                                                                       \
-            macro(LUG_ENUM_TO_STR)                                                               \
-            default:                                                                             \
-                LUG_EXCEPT(RTTIException, "One value of the enum " #type " is not implemented"); \
-        }                                                                                        \
+#define LUG_ENUM_TO_STR_FUNCTION(type, macro)                                                       \
+    const char* toStr(type enumVal) {                                                               \
+        switch (enumVal) {                                                                          \
+            macro(LUG_ENUM_TO_STR)                                                                  \
+            default:                                                                                \
+                LUG_LOG.warn("One value of the enum " #type " is not implemented : {}", enumVal);   \
+                return nullptr;                                                                     \
+        }                                                                                           \
     }
 
 LUG_ENUM_TO_STR_FUNCTION(VkPhysicalDeviceType, LUG_VULKAN_PHYSICAL_DEVICE_TYPE)
@@ -34,21 +36,21 @@ LUG_ENUM_TO_STR_FUNCTION(VkSurfaceTransformFlagBitsKHR, LUG_VULKAN_SURFACE_TRANS
 LUG_ENUM_TO_STR_FUNCTION(VkCompositeAlphaFlagBitsKHR, LUG_VULKAN_COMPOSITE_ALPHA_KHR_BIT)
 
 
-#define LUG_FLAGS_TO_STR_VEC(enum)   \
-    if (flag & enum) {           \
-        retVal.push_back(#enum); \
-    }                            \
+#define LUG_FLAGS_TO_STR_VEC(enum)  \
+    if (flag & enum) {              \
+        retVal.push_back(#enum);    \
+    }                               \
     flag &= ~enum;
 
-#define LUG_FLAGS_TO_STR_VEC_FUNCTION(type, macro)                                           \
-    std::vector<const char*> type ## ToStrVec(type flag) {                                   \
-        std::vector<const char*> retVal;                                                     \
-                                                                                             \
-        macro(LUG_FLAGS_TO_STR_VEC)                                                         \
-        if (flag) {                                                                          \
-            LUG_EXCEPT(RTTIException, "One value of the flag " #type " is not implemented"); \
-        }                                                                                    \
-        return retVal;                                                                       \
+#define LUG_FLAGS_TO_STR_VEC_FUNCTION(type, macro)                                              \
+    std::vector<const char*> type ## ToStrVec(type flag) {                                      \
+        std::vector<const char*> retVal;                                                        \
+                                                                                                \
+        macro(LUG_FLAGS_TO_STR_VEC)                                                             \
+        if (flag) {                                                                             \
+            LUG_LOG.warn("One value of the flag " #type " is not implemented : {}", flag);      \
+        }                                                                                       \
+        return retVal;                                                                          \
     }
 
 LUG_FLAGS_TO_STR_VEC_FUNCTION(VkMemoryPropertyFlags, LUG_VULKAN_MEMORY_PROPERTY_BIT)
@@ -74,7 +76,7 @@ LUG_FLAGS_TO_STR_VEC_FUNCTION(VkCompositeAlphaFlagsKHR, LUG_VULKAN_COMPOSITE_ALP
                                                                                             \
         macro(LUG_FLAGS_TO_STR)                                                             \
         if (flag) {                                                                         \
-            LUG_EXCEPT(RTTIException, "One value of the flag " #type " is not implemented");\
+            LUG_LOG.warn("One value of the flag " #type " is not implemented: {}", flag);   \
         }                                                                                   \
         return val;                                                                         \
     }

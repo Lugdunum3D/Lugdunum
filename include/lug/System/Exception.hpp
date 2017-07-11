@@ -72,12 +72,6 @@ private:
     mutable std::string _fullDesc;
 };
 
-class LUG_SYSTEM_API RTTIException: public Exception {
-public:
-    RTTIException(const std::string &description, const char* file, const char* function, uint32_t line)
-    : Exception{"RTTIException", description, file, function, line} {}
-};
-
 class LUG_SYSTEM_API NotImplementedException: public Exception {
 public:
     NotImplementedException(const std::string &description, const char* file, const char* function, uint32_t line)
