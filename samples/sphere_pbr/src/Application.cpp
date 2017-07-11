@@ -47,7 +47,7 @@ bool Application::init(int argc, char* argv[]) {
 
         baseColorTexture = textureBuilder.build();
         if (!baseColorTexture) {
-            LUG_LOG.error("Application::init Can't create the base color texture");
+            LUG_LOG.error("Application: Can't create the base color texture");
             return false;
         }
     }
@@ -61,7 +61,7 @@ bool Application::init(int argc, char* argv[]) {
 
         metallicRoughnessTexture = textureBuilder.build();
         if (!metallicRoughnessTexture) {
-            LUG_LOG.error("Application::init Can't create the metallic roughness texture");
+            LUG_LOG.error("Application: Can't create the metallic roughness texture");
             return false;
         }
     }
@@ -75,7 +75,7 @@ bool Application::init(int argc, char* argv[]) {
 
         normalTexture = textureBuilder.build();
         if (!normalTexture) {
-            LUG_LOG.error("Application::init Can't create the normal texture");
+            LUG_LOG.error("Application: Can't create the normal texture");
             return false;
         }
     }
@@ -91,7 +91,7 @@ bool Application::init(int argc, char* argv[]) {
 
         material = materialBuilder.build();
         if (!material) {
-            LUG_LOG.error("Application::init Can't create the material");
+            LUG_LOG.error("Application: Can't create the material");
             return false;
         }
     }
@@ -114,7 +114,7 @@ bool Application::init(int argc, char* argv[]) {
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Camera::Camera> camera = cameraBuilder.build();
         if (!camera) {
-            LUG_LOG.error("Application::init Can't create camera");
+            LUG_LOG.error("Application: Can't create the camera");
             return false;
         }
 
@@ -152,7 +152,7 @@ bool Application::init(int argc, char* argv[]) {
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Light> light = lightBuilder.build();
         if (!light) {
-            LUG_LOG.error("Application::init Can't create light");
+            LUG_LOG.error("Application: Can't create the point light {}", i);
             return false;
         }
 

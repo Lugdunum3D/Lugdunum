@@ -81,7 +81,7 @@ bool Application::init(int argc, char* argv[]) {
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Camera::Camera> camera = cameraBuilder.build();
         if (!camera) {
-            LUG_LOG.error("Application::init Can't create camera");
+            LUG_LOG.error("Application: Can't create the camera");
             return false;
         }
 
@@ -122,7 +122,7 @@ bool Application::init(int argc, char* argv[]) {
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Light> light = lightBuilder.build();
         if (!light) {
-            LUG_LOG.error("Application::init Can't create light");
+            LUG_LOG.error("Application: Can't create the point light {}", i);
             return false;
         }
 

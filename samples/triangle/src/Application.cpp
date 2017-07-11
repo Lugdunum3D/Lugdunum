@@ -88,7 +88,7 @@ bool Application::init(int argc, char* argv[]) {
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Light> light = lightBuilder.build();
         if (!light) {
-            LUG_LOG.error("Application: Can't create the light");
+            LUG_LOG.error("Application: Can't create the ambient light");
             return false;
         }
 
