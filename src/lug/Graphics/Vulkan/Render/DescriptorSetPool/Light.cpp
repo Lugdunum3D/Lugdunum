@@ -17,7 +17,7 @@ const DescriptorSet* Light::allocate(const BufferPool::SubBuffer& subBuffer) {
         _renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout()->getDescriptorSetLayouts()[1]
     );
 
-    if (std::get<0>(result)) {
+    if (std::get<0>(result) && std::get<1>(result)) {
         std::get<1>(result)->getDescriptorSet().updateBuffers(
             0,
             0,

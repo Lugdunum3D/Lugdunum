@@ -44,7 +44,7 @@ inline std::tuple<bool, const DescriptorSet*> DescriptorSetPool<maxSets>::alloca
         DescriptorSet* descriptorSet = allocateNewDescriptorSet(descriptorSetLayout);
 
         if (!descriptorSet) {
-            return std::make_tuple(true, nullptr);
+            return std::make_tuple(false, nullptr);
         }
 
         descriptorSet->setHash(hash);
@@ -96,6 +96,8 @@ inline DescriptorSet* DescriptorSetPool<maxSets>::allocateNewDescriptorSet(const
         }
 
         return &_descriptorSets[_descriptorSetsCount++];
+    } else {
+        LUG_LOG.error("DescriptorSetPool: Can't create descriptor set: Maximum number of sets reached");
     }
 
     return nullptr;

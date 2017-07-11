@@ -10,7 +10,7 @@ inline std::tuple<bool, const SubBuffer*> BufferPool<subBufferPerChunk, subBuffe
         SubBuffer* subBuffer = allocateNewBuffer();
 
         if (!subBuffer) {
-            return std::make_tuple(true, nullptr);
+            return std::make_tuple(false, nullptr);
         }
 
         subBuffer->setHash(hash);
