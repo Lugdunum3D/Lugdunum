@@ -11,8 +11,14 @@ namespace DescriptorSetPool {
 MaterialTextures::MaterialTextures(Renderer& renderer) : DescriptorSetPool(renderer) {}
 
 const DescriptorSet* MaterialTextures::allocate(const API::GraphicsPipeline& pipeline, const std::vector<const ::lug::Graphics::Vulkan::Render::Texture*> textures) {
+    // Generate hash
+    size_t hash = textures.size();
+    for (uint32_t i = 0; i < textures.size(); ++i) {
+        hash ^= textures[i]->getHandle().value + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+    }
+
     const auto& result = DescriptorSetPool::allocate(
-        0 /* TODO: Calculate hash */,
+        hash,
         pipeline.getLayout()->getDescriptorSetLayouts()[3]
     );
 
