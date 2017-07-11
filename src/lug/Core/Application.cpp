@@ -56,9 +56,17 @@ bool Application::run() {
             }
         }
 
-        beginFrame(elapsedTime);
+        if (!beginFrame(elapsedTime)) {
+            LUG_LOG.error("Application::run: Can't begin frame");
+            return false;
+        }
+
         onFrame(elapsedTime);
-        endFrame();
+
+        if (!endFrame()) {
+            LUG_LOG.error("Application::run: Can't end frame");
+            return false;
+        }
 
         elapsed += elapsedTime.getSeconds<float>();
         frames++;
