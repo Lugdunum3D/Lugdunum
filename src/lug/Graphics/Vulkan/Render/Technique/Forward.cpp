@@ -392,19 +392,13 @@ bool Forward::init(const std::vector<API::ImageView>& imageViews) {
 
     // Init graphics queue
     {
-        const API::QueueFamily* graphicsQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
-        if (!graphicsQueueFamily) {
-            LUG_LOG.error("Forward::init: Can't find VK_QUEUE_GRAPHICS_BIT queue family");
-            return false;
-        }
-
-        _graphicsQueue = graphicsQueueFamily->getQueue("queue_graphics");
+        _graphicsQueue = _renderer.getDevice().getQueue("queue_graphics");
         if (!_graphicsQueue) {
             LUG_LOG.error("Forward::init: Can't find queue with name queue_graphics");
             return false;
         }
 
-        API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *graphicsQueueFamily);
+        API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *_graphicsQueue->getQueueFamily());
         if (!commandPoolBuilder.build(_graphicsCommandPool, &result)) {
             LUG_LOG.error("Forward::init: Can't create the graphics command pool: {}", result);
             return false;
@@ -413,19 +407,13 @@ bool Forward::init(const std::vector<API::ImageView>& imageViews) {
 
     // Init transfer queue
     {
-        const API::QueueFamily* transferQueueFamily = _renderer.getDevice().getQueueFamily(VK_QUEUE_TRANSFER_BIT);
-        if (!transferQueueFamily) {
-            LUG_LOG.error("Forward::init: Can't find VK_QUEUE_TRANSFER_BIT queue family");
-            return false;
-        }
-
-        _transferQueue = transferQueueFamily->getQueue("queue_transfer");
+        _transferQueue = _renderer.getDevice().getQueue("queue_transfer");
         if (!_transferQueue) {
             LUG_LOG.error("Forward::init: Can't find queue with name queue_transfer");
             return false;
         }
 
-        API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *transferQueueFamily);
+        API::Builder::CommandPool commandPoolBuilder(_renderer.getDevice(), *_transferQueue->getQueueFamily());
         if (!commandPoolBuilder.build(_transferCommandPool, &result)) {
             LUG_LOG.error("Forward::init: Can't create the transfer command pool: {}", result);
             return false;

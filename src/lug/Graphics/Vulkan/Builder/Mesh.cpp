@@ -69,13 +69,13 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
                 API::Buffer buffer;
                 API::Builder::Buffer bufferBuilder(renderer.getDevice());
 
-                const API::QueueFamily* graphicsQueueFamily = renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT);
-                if (!graphicsQueueFamily) {
+                const API::Queue* graphicsQueue = renderer.getDevice().getQueue("queue_graphics");
+                if (!graphicsQueue) {
                     LUG_LOG.error("Vulkan::Mesh::build: Can't find graphics queue");
                     return nullptr;
                 }
 
-                bufferBuilder.setQueueFamilyIndices({graphicsQueueFamily->getIdx()});
+                bufferBuilder.setQueueFamilyIndices({graphicsQueue->getQueueFamily()->getIdx()});
                 bufferBuilder.setSize(targetPrimitiveSet.attributes[i].buffer.size);
 
                 if (targetPrimitiveSet.attributes[i].type == lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice) {

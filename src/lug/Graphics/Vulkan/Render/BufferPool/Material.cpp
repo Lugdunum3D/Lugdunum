@@ -10,8 +10,8 @@ namespace Render {
 namespace BufferPool {
 
 Material::Material(Renderer& renderer) : BufferPool(renderer, {
-    renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT)->getIdx(),
-    renderer.getDevice().getQueueFamily(VK_QUEUE_TRANSFER_BIT)->getIdx()
+    renderer.getDevice().getQueue("queue_graphics")->getQueueFamily()->getIdx(),
+    renderer.getDevice().getQueue("queue_transfer")->getQueueFamily()->getIdx()
 }) {}
 
 const SubBuffer* Material::allocate(const API::CommandBuffer& cmdBuffer, ::lug::Graphics::Render::Material& material) {
