@@ -10,34 +10,6 @@
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
     getRenderWindowInfo().windowInitInfo.title = "Hello Model";
-
-    getRenderWindowInfo().renderViewsInitInfo.push_back({
-        {                                                   // viewport
-            {                                               // offset
-                0.0f,                                       // x
-                0.0f                                        // y
-            },
-
-            {                                               // extent
-                1.0f,                                       // width
-                1.0f                                        // height
-            },
-
-            0.0f,                                           // minDepth
-            1.0f                                            // maxDepth
-        },
-        {                                                   // scissor
-            {                                               // offset
-                0.0f,                                       // x
-                0.0f                                        // y
-            },
-            {                                               // extent
-                1.0f,                                       // width
-                1.0f                                        // height
-            }
-        },
-        nullptr                                             // camera
-    });
 }
 
 bool Application::init(int argc, char* argv[]) {
