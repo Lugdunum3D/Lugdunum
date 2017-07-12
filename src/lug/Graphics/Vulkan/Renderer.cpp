@@ -64,6 +64,7 @@ void Renderer::destroy() {
     _window.reset();
 
     _resourceManager.reset();
+    _pipelines.clear();
 
     _device.destroy();
 
@@ -102,6 +103,9 @@ bool Renderer::finishInit() {
         if (_window) {
             _window->destroyRender();
         }
+
+        _resourceManager.reset();
+        _pipelines.clear();
 
         _device.destroy();
     }

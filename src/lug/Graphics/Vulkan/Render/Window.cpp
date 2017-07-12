@@ -593,6 +593,8 @@ void Window::destroyRender() {
     _acquireImageDatas.clear();
 
     _commandPool.destroy();
+
+    _guiInstance.destroy();
 }
 
 } // Render

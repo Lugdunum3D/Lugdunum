@@ -21,6 +21,19 @@ Gui::Gui(lug::Graphics::Vulkan::Renderer& renderer, lug::Graphics::Vulkan::Rende
 }
 
 Gui::~Gui() {
+    destroy();
+}
+
+void Gui::destroy() {
+    _fontImage.destroy();
+    _fontImageView.destroy();
+    _fontDeviceMemory.destroy();
+    _fontSampler.destroy();
+
+    _descriptorPool.destroy();
+
+    _pipeline.destroy();
+
     for (const auto& frameData: _framesData) {
         if (frameData.vertexMemoryPtr) {
             frameData.vertexMemory.unmap();
@@ -30,6 +43,14 @@ Gui::~Gui() {
             frameData.indexMemory.unmap();
         }
     }
+
+    _framesData.clear();
+
+    _graphicQueueCommandPool.destroy();
+    _transferQueueCommandPool.destroy();
+
+    _graphicQueue = nullptr;
+    _transferQueue = nullptr;
 }
 
 bool Gui::init(const std::vector<API::ImageView>& imageViews) {
