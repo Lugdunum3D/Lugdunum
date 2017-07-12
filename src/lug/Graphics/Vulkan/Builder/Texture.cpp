@@ -12,6 +12,13 @@
     #pragma warning(pop)
 #endif
 
+#if defined(LUG_SYSTEM_ANDROID)
+    #include <android/asset_manager.h>
+
+    #include <lug/Window/Android/WindowImplAndroid.hpp>
+    #include <lug/Window/Window.hpp>
+#endif
+
 #include <lug/Graphics/Builder/Texture.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
@@ -71,7 +78,35 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
     int texChannels{0};
     std::vector<stbi_uc*> layersPixels;
     for (auto& layer: builder._layers) {
+#if defined(LUG_SYSTEM_ANDROID)
+        // Load shader from compressed asset
+        AAsset* asset = AAssetManager_open((lug::Window::priv::WindowImpl::activity)->assetManager, layer.filename.c_str(), AASSET_MODE_STREAMING);
+
+        if (!asset) {
+            LUG_LOG.error("Vulkan::Texture::build: Can't open Android asset \"{}\"", layer.filename);
+            freePixels(layersPixels);
+            return nullptr;
+        }
+
+        uint32_t size = AAsset_getLength(asset);
+
+        if (size <= 0) {
+            LUG_LOG.error("Vulkan::Texture::build: Android asset \"{}\" is empty", layer.filename);
+            freePixels(layersPixels);
+            return nullptr;
+        }
+
+        unsigned char* data = new unsigned char[size];
+
+        AAsset_read(asset, reinterpret_cast<char*>(data), size);
+        AAsset_close(asset);
+
+        stbi_uc* pixels = stbi_load_from_memory(data, size, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+
+        delete[] data;
+#else
         stbi_uc* pixels = stbi_load(layer.filename.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+#endif
 
         if (!pixels) {
             LUG_LOG.error("Vulkan::Texture::build: Failed to load the image \"{}\"", layer.filename);
