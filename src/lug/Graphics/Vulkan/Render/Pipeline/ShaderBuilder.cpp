@@ -91,6 +91,8 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string
             for (uint8_t i = 0; i < primitivePart.countColor; ++i) {
                 options.AddMacroDefinition("IN_COLOR_" + std::to_string(i) + "_LOCATION", std::to_string(location++));
             }
+
+            options.AddMacroDefinition("IN_FREE_LOCATION", std::to_string(location++));
         }
 
         // Set binding

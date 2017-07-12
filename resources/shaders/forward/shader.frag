@@ -97,6 +97,8 @@ layout (set = 3, binding = TEXTURE_OCCLUSION_BINDING) uniform sampler2D textureO
 layout (set = 3, binding = TEXTURE_EMISSIVE_BINDING) uniform sampler2D textureEmissive;
 #endif
 
+layout (location = IN_FREE_LOCATION) in vec3 inCameraPositionWorldSpace;
+
 //////////////////////////////////////////////////////////////////////////////
 // BLOCK OF STATIC OUTPUTS
 //////////////////////////////////////////////////////////////////////////////
@@ -111,10 +113,9 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-float DistributionGGX(vec3 N, vec3 H, float roughness) {
+float DistributionGGX(float NdotH, float roughness) {
     const float a = roughness * roughness;
     const float a2 = a * a;
-    const float NdotH = max(dot(N, H), 0.0);
     const float NdotH2 = NdotH * NdotH;
 
     float denom = (NdotH2 * (a2 - 1.0) + 1.0);
@@ -123,22 +124,14 @@ float DistributionGGX(vec3 N, vec3 H, float roughness) {
     return a2 / denom;
 }
 
-float GeometrySchlickGGX(float NdotV, float roughness) {
+float GeometrySchlickGGX(float NdotV, float NdotL, float roughness) {
     const float r = (roughness + 1.0);
     const float k = (r * r) / 8.0;
 
-    const float denom = NdotV * (1.0 - k) + k;
+    const float GL = NdotL / (NdotL * (1.0 - k) + k);
+    const float GV = NdotV / (NdotV * (1.0 - k) + k);
 
-    return NdotV / denom;
-}
-
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
-    const float NdotV = max(dot(N, V), 0.0);
-    const float NdotL = max(dot(N, L), 0.0);
-    const float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-    const float ggx1 = GeometrySchlickGGX(NdotL, roughness);
-
-    return ggx1 * ggx2;
+    return GL * GV;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -176,10 +169,10 @@ void main() {
     const vec3 textureValue = texture(textureMetallicRoughness, TEXTURE_METALLIC_ROUGHNESS_UV).rgb;
 
     const float metallic = material.metallic * textureValue.b;
-    const float roughness = material.roughness * textureValue.g;
+    const float roughness = max(material.roughness * textureValue.g, 0.05);
     # else
     const float metallic = material.metallic;
-    const float roughness = material.roughness;
+    const float roughness = max(material.roughness, 0.05);
     #endif
 
     //////////////////////////////////////////////////////////////////////
@@ -229,7 +222,7 @@ void main() {
     //////////////////////////////////////////////////////////////////////
 
     #if TEXTURE_EMISSIVE
-    const vec3 emissive = material.emissive * texture(textureEmissive, TEXTURE_EMISSIVE_UV).rgb;
+    const vec3 emissive = material.emissive * pow(texture(textureEmissive, TEXTURE_EMISSIVE_UV).rgb, vec3(2.2));
     #else
     const vec3 emissive = material.emissive;
     #endif
@@ -238,8 +231,7 @@ void main() {
     // BASIC CALCULATION REQUIRED
     //////////////////////////////////////////////////////////////////////
 
-    const vec3 cameraPositionWorldSpace = (inverse(camera.view) * vec4(vec3(0.0), 1.0)).xyz;
-    const vec3 viewDirection = normalize(cameraPositionWorldSpace - inPositionWorldSpace);
+    const vec3 viewDirection = normalize(inCameraPositionWorldSpace - inPositionWorldSpace);
 
     const vec3 F0 = mix(vec3(0.04), albedo.xyz, metallic);
 
@@ -269,44 +261,53 @@ void main() {
 
         // lightDirection is the direction from the fragment to the light
         const vec3 lightDirection = lights[i].type == 1 ? normalize(-lights[i].direction) : normalize(lights[i].position - inPositionWorldSpace);
+        const float NdotL = clamp(dot(normalWorldSpace, lightDirection), 0.0, 1.0);
 
-        const vec3 halfViewLightDirection = normalize(viewDirection + lightDirection);
+        if (dot(normalWorldSpace, lightDirection) > 0.0) {
+            const vec3 halfViewLightDirection = normalize(viewDirection + lightDirection);
 
-        // Calculate light radiance
-        const float attenuation = lights[i].type == 1 ? 1.0 : lights[i].constantAttenuation + lights[i].linearAttenuation * lightDistance + lights[i].quadraticAttenuation * (lightDistance * lightDistance);
-        vec3 radiance = lights[i].color.xyz / attenuation;
+            const float NdotV = clamp(dot(normalWorldSpace, viewDirection), 0.0, 1.0);
+            const float LdotH = clamp(dot(lightDirection, halfViewLightDirection), 0.0, 1.0);
+            const float NdotH = clamp(dot(normalWorldSpace, halfViewLightDirection), 0.0, 1.0);
 
-        // cook-torrance brdf
-        const float NDF = DistributionGGX(normalWorldSpace, halfViewLightDirection, roughness);
-        const float G = GeometrySmith(normalWorldSpace, viewDirection, lightDirection, roughness);
-        const vec3 F = fresnelSchlick(max(dot(halfViewLightDirection, viewDirection), 0.0), F0);
+            // Calculate light radiance
+            const float attenuation = lights[i].type == 1 ? 1.0 : lights[i].constantAttenuation + lights[i].linearAttenuation * lightDistance + lights[i].quadraticAttenuation * (lightDistance * lightDistance);
+            vec3 radiance = lights[i].color.xyz / attenuation;
 
-        const vec3 kS = F;
-        const vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);
+            // cook-torrance brdf
+            const float NDF = DistributionGGX(NdotH, roughness); // Normal distribution (Distribution of the microfacets)
+            const float G = GeometrySchlickGGX(NdotV, NdotL, roughness); // Geometric shadowing term (Microfacets shadowing)
+            const vec3 F = fresnelSchlick(NdotV, F0); // Fresnel factor (Reflectance depending on angle of incidence)
 
-        const float denominator = 4 * max(dot(normalWorldSpace, viewDirection), 0.0) * max(dot(normalWorldSpace, lightDirection), 0.0) + 0.001;
-        const vec3 specular = NDF * G * F / denominator;
+            const vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);
 
-        // add to outgoing radiance Lo
-        const float NdotL = max(dot(normalWorldSpace, lightDirection), 0.0);
-        const vec3 lightFinalColor = (kD * albedo.xyz / PI + specular) * radiance * NdotL;
+            const float denominator = 4 * NdotV * NdotL;
+            const vec3 specular = NDF * G * F / denominator;
 
-        if (lights[i].type == 3) { // Spot Light
-            const float theta = dot(-lightDirection, normalize(lights[i].direction));
+            const vec3 lightFinalColor = (kD * albedo.xyz / PI + specular) * radiance * NdotL;
 
-            if (theta > cos(lights[i].falloffAngle)) {
-                const float intensity = max(0.0, pow(theta, lights[i].falloffExponent));
-                Lo += lightFinalColor * intensity;
+            // add to outgoing color to Lo
+            if (lights[i].type == 3) { // Spot Light
+                const float theta = dot(-lightDirection, normalize(lights[i].direction));
+
+                if (theta > cos(lights[i].falloffAngle)) {
+                    const float intensity = max(0.0, pow(theta, lights[i].falloffExponent));
+                    Lo += lightFinalColor * intensity;
+                }
+            } else { // Direction / Point Light
+                Lo += lightFinalColor;
             }
-        } else { // Direction / Point Light
-            Lo += lightFinalColor;
         }
     }
 
-    vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo + emissive;
+    vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo;
 
-    // Tone mapping and gamma correction
+    // Tone mapping
     color = color / (color + vec3(1.0));
+
+    color += emissive;
+
+    // Gamma correction
     color = pow(color, vec3(1.0 / 2.2));
 
     // Final output

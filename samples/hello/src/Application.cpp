@@ -91,8 +91,8 @@ bool Application::init(int argc, char* argv[]) {
         lug::Graphics::Builder::Light lightBuilder(*renderer);
 
         lightBuilder.setType(lug::Graphics::Render::Light::Type::Directional);
-        lightBuilder.setColor({1.0f, 1.0f, 1.0f, 1.0f});
-        lightBuilder.setDirection({-5.0f, -5.0f, 0.0f});
+        lightBuilder.setColor({2.0f, 2.0f, 2.0f, 1.0f});
+        lightBuilder.setDirection({-5.0f, -5.0f, -5.0f});
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Light> light = lightBuilder.build();
         if (!light) {

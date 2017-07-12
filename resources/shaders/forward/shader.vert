@@ -83,6 +83,8 @@ layout (location = IN_COLOR_1_LOCATION) out vec4 outColor1;
 layout (location = IN_COLOR_2_LOCATION) out vec4 outColor2;
 #endif
 
+layout (location = IN_FREE_LOCATION) out vec3 outCameraPositionWorldSpace;
+
 //////////////////////////////////////////////////////////////////////////////
 // MAIN BLOCK
 //////////////////////////////////////////////////////////////////////////////
@@ -115,6 +117,8 @@ void main() {
     #if IN_COLOR >= 3
     outColor2 = inColor2;
     #endif
+
+    outCameraPositionWorldSpace = (inverse(camera.view) * vec4(vec3(0.0), 1.0)).xyz;
 
     //////////////////////////////////////////////////////////////////////
     // TRANSFER STATIC OUTPUT
