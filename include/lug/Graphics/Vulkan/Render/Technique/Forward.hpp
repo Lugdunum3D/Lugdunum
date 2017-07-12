@@ -105,6 +105,8 @@ private:
     static std::unique_ptr<DescriptorSetPool::Material> _materialDescriptorSetPool;
     static std::unique_ptr<DescriptorSetPool::MaterialTextures> _materialTexturesDescriptorSetPool;
     static std::unique_ptr<DescriptorSetPool::SkyBox> _skyBoxDescriptorSetPool;
+
+    static uint32_t _forwardCount;
 };
 
 } // Technique
