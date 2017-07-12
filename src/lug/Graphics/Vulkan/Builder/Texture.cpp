@@ -26,10 +26,21 @@ namespace Vulkan {
 namespace Builder {
 namespace Texture {
 
+static void freePixels(std::vector<stbi_uc*> layersPixels) {
+    for (auto& pixels: layersPixels) {
+        stbi_image_free(pixels);
+    }
+}
+
 Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphics::Builder::Texture& builder) {
     // Constructor of Texture is private, we can't use std::make_unique
     std::unique_ptr<Resource> resource{new Vulkan::Render::Texture(builder._name)};
     Vulkan::Render::Texture* texture = static_cast<Vulkan::Render::Texture*>(resource.get());
+
+    if (!builder._layers.size()) {
+        LUG_LOG.error("Vulkan::Texture::build: Not layers added");
+        return nullptr;
+    }
 
     Vulkan::Renderer& renderer = static_cast<Vulkan::Renderer&>(builder._renderer);
     API::Device &device = renderer.getDevice();
@@ -55,12 +66,20 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
         }
     }
 
-    int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(builder._filename.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    int texWidth{0};
+    int texHeight{0};
+    int texChannels{0};
+    std::vector<stbi_uc*> layersPixels;
+    for (auto& layer: builder._layers) {
+        stbi_uc* pixels = stbi_load(layer.filename.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
-    if (!pixels) {
-        LUG_LOG.error("Vulkan::Texture::build: Failed to load the image");
-        return nullptr;
+        if (!pixels) {
+            LUG_LOG.error("Vulkan::Texture::build: Failed to load the image \"{}\"", layer.filename);
+            freePixels(layersPixels);
+            return nullptr;
+        }
+
+        layersPixels.push_back(pixels);
     }
 
     // Create the API::Image
@@ -72,6 +91,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
         imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
         imageBuilder.setQueueFamilyIndices({ transferQueue->getQueueFamily()->getIdx() });
         imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
+        imageBuilder.setArrayLayers(static_cast<uint32_t>(layersPixels.size()));
 
         API::Builder::DeviceMemory deviceMemoryBuilder(device);
         deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -84,24 +104,28 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
 
         imageBuilder.setExtent(extent);
 
+        if (builder._type == ::lug::Graphics::Builder::Texture::Type::CubeMap) {
+            imageBuilder.setCreateFlags(VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT);
+        }
+
         {
             VkResult result{VK_SUCCESS};
             if (!imageBuilder.build(texture->_image, &result)) {
                 LUG_LOG.error("Vulkan::Texture::build: Can't create the image: {}", result);
-                stbi_image_free(pixels);
+                freePixels(layersPixels);
                 return nullptr;
             }
 
             if (!deviceMemoryBuilder.addImage(texture->_image)) {
                 LUG_LOG.error("Vulkan::Texture::build: Can't add image to device memory");
-                stbi_image_free(pixels);
+                freePixels(layersPixels);
                 return nullptr;
             }
 
             result = VK_SUCCESS;
             if (!deviceMemoryBuilder.build(texture->_deviceMemory, &result)) {
                 LUG_LOG.error("Vulkan::Texture::build: Can't create buffer device memory: {}", result);
-                stbi_image_free(pixels);
+                freePixels(layersPixels);
                 return nullptr;
             }
         }
@@ -113,18 +137,23 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
 
         imageViewBuilder.setFormat(texture->_image.getFormat());
         imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
+        imageViewBuilder.setLayerCount(static_cast<uint32_t>(layersPixels.size()));
+
+        if (builder._type == ::lug::Graphics::Builder::Texture::Type::CubeMap) {
+            imageViewBuilder.setViewType(VK_IMAGE_VIEW_TYPE_CUBE);
+        }
 
         VkResult result{VK_SUCCESS};
         if (!imageViewBuilder.build(texture->_imageView, &result)) {
             LUG_LOG.error("Vulkan::Texture::build: Can't create image view: {}", result);
-            stbi_image_free(pixels);
+            freePixels(layersPixels);
             return nullptr;
         }
     }
 
     // Create staging buffers for image upload
     {
-        VkDeviceSize imageSize = texWidth * texHeight * 4;
+        VkDeviceSize imageSize = texWidth * texHeight * 4 * layersPixels.size();
 
         API::Buffer stagingBuffer;
         API::DeviceMemory stagingBufferMemory;
@@ -141,7 +170,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
             VkResult result{VK_SUCCESS};
             if (!bufferBuilder.build(stagingBuffer, &result)) {
                 LUG_LOG.error("Vulkan::Texture::build: Can't create staging buffer: {}", result);
-                stbi_image_free(pixels);
+                freePixels(layersPixels);
                 return nullptr;
             }
         }
@@ -155,12 +184,21 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
             VkResult result{VK_SUCCESS};
             if (!deviceMemoryBuilder.build(stagingBufferMemory, &result)) {
                 LUG_LOG.error("Vulkan::Texture::build: Can't create staging buffer device memory: {}", result);
-                stbi_image_free(pixels);
+                freePixels(layersPixels);
                 return nullptr;
             }
         }
 
-        stagingBuffer.updateData(pixels, static_cast<uint32_t>(imageSize));
+        // Update buffer data
+        VkDeviceSize layerSize{imageSize / layersPixels.size()};
+        {
+            VkDeviceSize pixelsOffset{0};
+            for (stbi_uc* pixels: layersPixels) {
+                stagingBuffer.updateData(pixels, layerSize, pixelsOffset);
+                pixelsOffset += layerSize;
+            }
+        }
+
 
         // Copy buffer data to font image
         {
@@ -172,7 +210,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
 
             if (!commandBufferBuilder.build(commandBuffer, &result)) {
                 LUG_LOG.error("Gui::init: Can't create the command buffer: {}", result);
-                stbi_image_free(pixels);
+                freePixels(layersPixels);
                 return nullptr;
             }
 
@@ -183,7 +221,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
 
                 if (!fenceBuilder.build(fence, &result)) {
                     LUG_LOG.error("Vulkan::Texture::build: Can't create swapchain fence: {}", result);
-                    stbi_image_free(pixels);
+                    freePixels(layersPixels);
                     return nullptr;
                 }
             }
@@ -199,32 +237,41 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
                 pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 pipelineBarrier.imageMemoryBarriers[0].image = &texture->_image;
+                pipelineBarrier.imageMemoryBarriers[0].subresourceRange.layerCount = static_cast<uint32_t>(layersPixels.size());
 
                 commandBuffer.pipelineBarrier(pipelineBarrier);
             }
 
-            // Copy
-            VkBufferImageCopy bufferCopyRegion{
-                /* bufferCopyRegion.bufferOffset */ 0,
-                /* bufferCopyRegion.bufferRowLength */ 0,
-                /* bufferCopyRegion.bufferImageHeight */ 0,
-                {
-                    /* bufferCopyRegion.imageSubresource.aspectMask */ VK_IMAGE_ASPECT_COLOR_BIT,
-                    /* bufferCopyRegion.imageSubresource.mipLevel */ 0,
-                    /* bufferCopyRegion.imageSubresource.baseArrayLayer */ 0,
-                    /* bufferCopyRegion.imageSubresource.layerCount */ 1
-                },
-                {
-                    /* bufferCopyRegion.imageOffset.x */ 0,
-                    /* bufferCopyRegion.imageOffset.y */ 0,
-                    /* bufferCopyRegion.imageOffset.z */ 0,
-                },
-                {
-                    /* bufferCopyRegion.imageExtent.width */ static_cast<uint32_t>(texWidth),
-                    /* bufferCopyRegion.imageExtent.height */ static_cast<uint32_t>(texHeight),
-                    /* bufferCopyRegion.imageExtent.depth */ 1
-                }
-            };
+            std::vector<VkBufferImageCopy> bufferCopyRegions(layersPixels.size());
+            VkDeviceSize pixelsOffset{0};
+            for (uint32_t i = 0; i < layersPixels.size(); ++i) {
+                // Copy
+                VkBufferImageCopy bufferCopyRegion{
+                    /* bufferCopyRegion.bufferOffset */ pixelsOffset,
+                    /* bufferCopyRegion.bufferRowLength */ 0,
+                    /* bufferCopyRegion.bufferImageHeight */ 0,
+                    {
+                        /* bufferCopyRegion.imageSubresource.aspectMask */ VK_IMAGE_ASPECT_COLOR_BIT,
+                        /* bufferCopyRegion.imageSubresource.mipLevel */ 0,
+                        /* bufferCopyRegion.imageSubresource.baseArrayLayer */ i,
+                        /* bufferCopyRegion.imageSubresource.layerCount */ 1
+                    },
+                    {
+                        /* bufferCopyRegion.imageOffset.x */ 0,
+                        /* bufferCopyRegion.imageOffset.y */ 0,
+                        /* bufferCopyRegion.imageOffset.z */ 0,
+                    },
+                    {
+                        /* bufferCopyRegion.imageExtent.width */ static_cast<uint32_t>(texWidth),
+                        /* bufferCopyRegion.imageExtent.height */ static_cast<uint32_t>(texHeight),
+                        /* bufferCopyRegion.imageExtent.depth */ 1
+                    }
+                };
+
+                bufferCopyRegions[i] = bufferCopyRegion;
+                pixelsOffset += layerSize;
+            }
+
 
             // TODO write this function commandBuffer.copyBufferToImage();
 
@@ -233,8 +280,8 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
                 static_cast<VkBuffer>(stagingBuffer),
                 static_cast<VkImage>(texture->_image),
                 VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                1,
-                &bufferCopyRegion
+                static_cast<uint32_t>(bufferCopyRegions.size()),
+                bufferCopyRegions.data()
             );
 
             // Prepare for shader read
@@ -252,20 +299,20 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
 
             if (commandBuffer.end() == false) {
                 LUG_LOG.error("Vulkan::Texture::build: Failed to end commandBuffer");
-                stbi_image_free(pixels);
+                freePixels(layersPixels);
                 return nullptr;
             }
 
             if (transferQueue->submit(commandBuffer, {}, {}, {}, static_cast<VkFence>(fence)) == false) {
                 LUG_LOG.error("Vulkan::Texture::build: Can't submit commandBuffer");
-                stbi_image_free(pixels);
+                freePixels(layersPixels);
                 return nullptr;
             }
 
             // TODO(saveman71): set a define for the fence timeout
             if (!fence.wait()) {
                 LUG_LOG.error("Vulkan::Texture::build: Can't vkWaitForFences");
-                stbi_image_free(pixels);
+                freePixels(layersPixels);
                 return nullptr;
             }
 
@@ -276,7 +323,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
             commandBuffer.destroy();
 
             // Free the data
-            stbi_image_free(pixels);
+            freePixels(layersPixels);
         }
     }
 

@@ -5,6 +5,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Light.hpp>
+#include <lug/Graphics/Render/SkyBox.hpp>
 #include <lug/Graphics/Resource.hpp>
 #include <lug/Graphics/Scene/Node.hpp>
 
@@ -42,11 +43,14 @@ public:
 
     Node* createSceneNode(const std::string& name);
 
+    void setSkyBox(Resource::SharedPtr<Render::SkyBox> skyBox);
+
     Node& getRoot();
     const Node& getRoot() const;
 
     Node* getSceneNode(const std::string& name);
     const Node* getSceneNode(const std::string& name) const;
+    const Resource::SharedPtr<Render::SkyBox> getSkyBox() const;
 
     void fetchVisibleObjects(const Render::View& renderView, const Render::Camera::Camera& camera, Render::Queue& renderQueue) const;
 
@@ -55,6 +59,8 @@ private:
 
 private:
     Node _root;
+
+    Resource::SharedPtr<Render::SkyBox> _skyBox{nullptr};
 
     std::list<Node> _nodes;
 };

@@ -78,7 +78,7 @@ static Resource::SharedPtr<Render::Texture> createTexture(Renderer& renderer, co
 
     if (gltfTexture.source != -1) {
         // TODO: Handle correctly the load with bufferView / uri data
-        textureBuilder.setFilename(asset.images[gltfTexture.source].uri);
+        textureBuilder.addLayer(asset.images[gltfTexture.source].uri);
     }
 
     if (gltfTexture.sampler != -1) {

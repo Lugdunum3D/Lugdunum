@@ -26,7 +26,7 @@ bool ImageView::build(API::ImageView& imageView, VkResult* returnResult) {
             /* createInfo.subresourceRange.baseMipLevel */ 0,
             /* createInfo.subresourceRange.levelCount */ 1,
             /* createInfo.subresourceRange.baseArrayLayer */ 0,
-            /* createInfo.subresourceRange.layerCount */ 1
+            /* createInfo.subresourceRange.layerCount */ _layerCount
         }
     };
 

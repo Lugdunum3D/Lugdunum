@@ -25,6 +25,7 @@ const Node* Scene::getSceneNode(const std::string& name) const {
 }
 
 void Scene::fetchVisibleObjects(const Render::View& renderView, const Render::Camera::Camera& camera, Render::Queue& renderQueue) const {
+    renderQueue.addSkyBox(_skyBox);
     _root.fetchVisibleObjects(renderView, camera, renderQueue);
 }
 

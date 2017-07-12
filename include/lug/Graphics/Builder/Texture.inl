@@ -2,8 +2,8 @@ inline void Texture::Texture::setName(const std::string& name) {
     _name = name;
 }
 
-inline void Texture::setFilename(const std::string& filename) {
-    _filename = filename;
+inline void Texture::setType(Type type) {
+    _type = type;
 }
 
 inline void Texture::setMagFilter(Render::Texture::Filter magFilter) {
@@ -24,4 +24,8 @@ inline void Texture::setWrapS(Render::Texture::WrappingMode wrapS) {
 
 inline void Texture::setWrapT(Render::Texture::WrappingMode wrapT) {
     _wrapT = wrapT;
+}
+
+inline void Texture::addLayer(const std::string& filename) {
+    _layers.push_back({filename});
 }

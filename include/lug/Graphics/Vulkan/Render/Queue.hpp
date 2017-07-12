@@ -7,6 +7,7 @@
 #include <lug/Graphics/Render/Queue.hpp>
 #include <lug/Graphics/Vulkan/Render/Material.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
+#include <lug/Graphics/Vulkan/Render/SkyBox.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -34,12 +35,15 @@ public:
 
     void addMeshInstance(Scene::Node& node) override final;
     void addLight(Scene::Node& node) override final;
+    void addSkyBox(Resource::SharedPtr<::lug::Graphics::Render::SkyBox> skyBox) override final;
     void clear() override final;
 
     const std::map<Render::Pipeline::Id, std::vector<PrimitiveSetInstance>> getPrimitiveSets() const;
 
     const std::vector<Scene::Node*> getLights() const;
     std::size_t getLightsCount() const;
+
+    const Resource::SharedPtr<Render::SkyBox> getSkyBox() const;
 
 private:
     // TODO: Use a custom frame allocator for the content of the queue
@@ -48,6 +52,8 @@ private:
 
     std::vector<Scene::Node*> _lights{50};
     std::size_t _lightsCount{0};
+
+    Resource::SharedPtr<Render::SkyBox> _skyBox{nullptr};
 };
 
 } // Render

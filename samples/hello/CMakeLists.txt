@@ -38,6 +38,8 @@ source_group("inc" FILES ${INC})
 set(SHADERS
     gui.frag
     gui.vert
+    skybox.vert
+    skybox.frag
 )
 
 set(LUG_RESOURCES
@@ -48,6 +50,12 @@ set(LUG_RESOURCES
     models/DamagedHelmet/textures/Default_metallic_roughness.jpg
     models/DamagedHelmet/textures/Default_emissive.jpg
     models/DamagedHelmet/textures/Default_normal.jpg
+    textures/skybox/back.jpg
+    textures/skybox/bottom.jpg
+    textures/skybox/front.jpg
+    textures/skybox/left.jpg
+    textures/skybox/right.jpg
+    textures/skybox/top.jpg
     shaders/forward/shader.frag
     shaders/forward/shader.vert
 )
