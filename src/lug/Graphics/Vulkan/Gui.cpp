@@ -37,6 +37,10 @@ bool Gui::init(const std::vector<API::ImageView>& imageViews) {
 
     initKeyMapping();
 
+    // Modify the style of ImGui widgets
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+
     io.DisplaySize = ImVec2(_window.getWidth(), _window.getHeight());
     io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
@@ -611,7 +615,6 @@ void Gui::beginFrame(const lug::System::Time& elapsedTime) {
 
     const auto mousePos = _window.getMousePos();
     io.MousePos = ImVec2(static_cast<float>(mousePos.x()), static_cast<float>(mousePos.y()));
-
     io.MouseDown[0] = _window.isMousePressed(lug::Window::Mouse::Button::Left);
     io.MouseDown[1] = _window.isMousePressed(lug::Window::Mouse::Button::Right);
     io.MouseDown[2] = _window.isMousePressed(lug::Window::Mouse::Button::Middle);
@@ -636,6 +639,8 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
     frameData.commandBuffer.begin();
 
     ImGuiIO& io = ImGui::GetIO();
+
+    io.MouseWheel = 0.f;
 
     // Init viewport
     {
@@ -761,6 +766,9 @@ void Gui::processEvent(const lug::Window::Event event) {
             if (isprint(event.character.val)) {
                 io.AddInputCharacter(static_cast<unsigned short>(event.character.val));
             }
+            break;
+        case lug::Window::Event::Type::MouseWheel:
+            io.MouseWheel += static_cast<float>(event.mouse.scrollOffset.xOffset);
             break;
         default:
             break;
