@@ -1,5 +1,12 @@
 #include <lug/Graphics/GltfLoader.hpp>
 
+#if defined(LUG_SYSTEM_ANDROID)
+    #include <android/asset_manager.h>
+
+    #include <lug/Window/Android/WindowImplAndroid.hpp>
+    #include <lug/Window/Window.hpp>
+#endif
+
 #include <gltf2/glTF2.hpp>
 #include <gltf2/Exceptions.hpp>
 
@@ -411,7 +418,11 @@ static bool createNode(Renderer& renderer, const gltf2::Asset& asset, const gltf
 Resource::SharedPtr<Resource> GltfLoader::loadFile(const std::string& filename) {
     gltf2::Asset asset;
     try {
+#if defined(LUG_SYSTEM_ANDROID)
+        asset = gltf2::load(filename, (lug::Window::priv::WindowImpl::activity)->assetManager);
+#else
         asset = gltf2::load(filename);
+#endif
         // TODO(nokitoo): Format the asset if not already done
         // Should we store the version of format in asset.extensions or asset.copyright/asset.version ?
     } catch (gltf2::MisformattedException& e) {
