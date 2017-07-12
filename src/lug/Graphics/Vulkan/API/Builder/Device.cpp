@@ -103,22 +103,25 @@ bool Device::build(API::Device& device, VkResult* returnResult) {
 
     // Create queues
     {
-        device._queueFamilies.resize(_queueFamiliesInfos.size());
-
         for (uint32_t i = 0; i <  _queueFamiliesInfos.size(); ++i) {
-            VkQueueFlags queueFlags = _queueFamiliesInfos[i].flags;
+            if (_queueFamiliesInfos[i].queuesUsed == 0) {
+                continue;
+            }
 
-            device._queueFamilies[i] = API::QueueFamily(i, queueFlags);
+            VkQueueFlags queueFlags = _queueFamiliesInfos[i].flags;
+            device._queueFamilies.push_back(API::QueueFamily(i, queueFlags));
+
+            auto& queueFamily = device._queueFamilies.back();
 
             // Create queues for the queue family
             for (uint8_t j = 0; j < _queueFamiliesInfos[i].queuesUsed; ++j) {
                 VkQueue queue{VK_NULL_HANDLE};
                 getDeviceQueue(static_cast<VkDevice>(device), i, j, &queue);
 
-                device._queueFamilies[i]._queues.push_back(API::Queue(queue, &device._queueFamilies[i]));
+                queueFamily._queues.push_back(API::Queue(queue, &queueFamily));
 
                 for (const std::string& name: _queueFamiliesInfos[i].queues[j].names) {
-                    device._queueFamilies[i]._queuesIndices[name] = static_cast<uint32_t>(device._queueFamilies[i]._queues.size() - 1);
+                    queueFamily._queuesIndices[name] = static_cast<uint32_t>(queueFamily._queues.size() - 1);
                 }
             }
         }
