@@ -44,7 +44,11 @@ std::unique_ptr<DescriptorSetPool::Material> Forward::_materialDescriptorSetPool
 std::unique_ptr<DescriptorSetPool::MaterialTextures> Forward::_materialTexturesDescriptorSetPool = nullptr;
 std::unique_ptr<DescriptorSetPool::SkyBox> Forward::_skyBoxDescriptorSetPool = nullptr;
 
-Forward::Forward(Renderer& renderer, const Render::View& renderView) : Technique(renderer, renderView) {}
+uint32_t Forward::_forwardCount = 0;
+
+Forward::Forward(Renderer& renderer, const Render::View& renderView) : Technique(renderer, renderView) {
+    ++_forwardCount;
+}
 
 Forward::~Forward() {
     destroy();
@@ -609,6 +613,8 @@ bool Forward::init(const std::vector<API::ImageView>& imageViews) {
 }
 
 void Forward::destroy() {
+    --_forwardCount;
+
     _graphicsQueue->waitIdle();
     _transferQueue->waitIdle();
 
@@ -644,15 +650,17 @@ void Forward::destroy() {
 
     _depthBufferMemory.destroy();
 
-    _cameraBufferPool.reset();
-    _lightBufferPool.reset();
-    _materialBufferPool.reset();
+    if (_forwardCount == 0) {
+        _cameraBufferPool.reset();
+        _lightBufferPool.reset();
+        _materialBufferPool.reset();
 
-    _cameraDescriptorSetPool.reset();
-    _lightDescriptorSetPool.reset();
-    _materialDescriptorSetPool.reset();
-    _materialTexturesDescriptorSetPool.reset();
-    _skyBoxDescriptorSetPool.reset();
+        _cameraDescriptorSetPool.reset();
+        _lightDescriptorSetPool.reset();
+        _materialDescriptorSetPool.reset();
+        _materialTexturesDescriptorSetPool.reset();
+        _skyBoxDescriptorSetPool.reset();
+    }
 
     _graphicsCommandPool.destroy();
     _transferCommandPool.destroy();
