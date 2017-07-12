@@ -59,13 +59,6 @@ public:
 
     ~Light() = default;
 
-    /**
-     * @brief      Gets the light type.
-     *
-     * @return     The light type.
-     */
-    Type getType() const;
-
     void setType(Type type);
     void setColor(const Math::Vec4f& color);
     void setDirection(const Math::Vec3f& direction);
@@ -76,7 +69,21 @@ public:
     void setFalloffAngle(float falloffAngle);
     void setFalloffExponent(float falloffExponent);
 
+    /**
+     * @brief      Gets the light type.
+     *
+     * @return     The light type.
+     */
+    Type getType() const;
+
+    const Math::Vec4f& getColor() const;
+    const Math::Vec3f& getDirection() const;
+    float getConstantAttenuation() const;
     float getDistance() const;
+    float getLinearAttenuation() const;
+    float getQuadraticAttenuation() const;
+    float getFalloffAngle() const;
+    float getFalloffExponent() const;
 
     void getData(Light::Data& lightData, Scene::Node& node);
 

@@ -1,7 +1,3 @@
-inline Light::Type Light::getType() const {
-    return _type;
-}
-
 inline void Light::setType(Type type) {
     ::lug::Graphics::Render::DirtyObject::setDirty();
     _type = type;
@@ -47,6 +43,38 @@ inline void Light::setFalloffExponent(float falloffExponent) {
     _falloffExponent = falloffExponent;
 }
 
+inline Light::Type Light::getType() const {
+    return _type;
+}
+
+inline const Math::Vec4f& Light::getColor() const {
+    return _color;
+}
+
+inline const Math::Vec3f& Light::getDirection() const {
+    return _direction;
+}
+
+inline float Light::getConstantAttenuation() const {
+    return _constantAttenuation;
+}
+
 inline float Light::getDistance() const {
     return _distance;
+}
+
+inline float Light::getLinearAttenuation() const {
+    return _linearAttenuation;
+}
+
+inline float Light::getQuadraticAttenuation() const {
+    return _quadraticAttenuation;
+}
+
+inline float Light::getFalloffAngle() const {
+    return _falloffAngle;
+}
+
+inline float Light::getFalloffExponent() const {
+    return _falloffExponent;
 }

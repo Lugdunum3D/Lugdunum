@@ -277,7 +277,7 @@ void main() {
             // cook-torrance brdf
             const float NDF = DistributionGGX(NdotH, roughness); // Normal distribution (Distribution of the microfacets)
             const float G = GeometrySchlickGGX(NdotV, NdotL, roughness); // Geometric shadowing term (Microfacets shadowing)
-            const vec3 F = fresnelSchlick(NdotV, F0); // Fresnel factor (Reflectance depending on angle of incidence)
+            const vec3 F = fresnelSchlick(NdotH, F0); // Fresnel factor (Reflectance depending on angle of incidence)
 
             const vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);
 
