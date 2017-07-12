@@ -39,7 +39,7 @@ void FreeMovement::onFrame(const System::Time& elapsedTime) {
 
 
     // Capture / Release the mouse cursor
-    if (_eventSource->isMousePressed(lug::Window::Mouse::Button::Left) && !_hasFocus) {
+    if (_eventSource->isKeyPressed(lug::Window::Keyboard::Key::C) && !_hasFocus) {
         _lastMousePos = _eventSource->getMousePos();
         _hasFocus = true;
         _eventSource->setMouseCursorVisible(false);
