@@ -11,8 +11,8 @@ namespace Render {
 namespace BufferPool {
 
 Light::Light(Renderer& renderer) : BufferPool(renderer, {
-    renderer.getDevice().getQueueFamily(VK_QUEUE_GRAPHICS_BIT)->getIdx(),
-    renderer.getDevice().getQueueFamily(VK_QUEUE_TRANSFER_BIT)->getIdx()
+    renderer.getDevice().getQueue("queue_graphics")->getQueueFamily()->getIdx(),
+    renderer.getDevice().getQueue("queue_transfer")->getQueueFamily()->getIdx()
 }) {}
 
 const SubBuffer* Light::allocate(uint32_t currentFrame, const API::CommandBuffer& cmdBuffer, const std::vector<::lug::Graphics::Scene::Node*> nodes) {
