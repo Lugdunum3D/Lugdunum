@@ -67,6 +67,8 @@ public:
 
     ~Gui();
 
+    void destroy();
+
     bool init(const std::vector<API::ImageView>& imageViews);
     void initKeyMapping();
     bool initFontsTexture();

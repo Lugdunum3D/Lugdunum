@@ -91,6 +91,8 @@ bool Device::waitIdle() const {
 }
 
 void Device::destroy() {
+    _queueFamilies.clear();
+
     if (_device != VK_NULL_HANDLE) {
         vkDeviceWaitIdle(_device);
         vkDestroyDevice(_device, nullptr);
