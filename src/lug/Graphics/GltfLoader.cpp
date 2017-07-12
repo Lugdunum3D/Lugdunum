@@ -379,6 +379,25 @@ static bool createNode(Renderer& renderer, const gltf2::Asset& asset, const gltf
         node->attachMeshInstance(mesh);
     }
 
+    node->setPosition({
+        gltfNode.translation[0],
+        gltfNode.translation[1],
+        gltfNode.translation[2]
+    }, Node::TransformSpace::Parent);
+
+    node->setRotation(Math::Quatf{
+        gltfNode.rotation[3],
+        gltfNode.rotation[0],
+        gltfNode.rotation[1],
+        gltfNode.rotation[2]
+    }, Node::TransformSpace::Parent);
+
+    node->scale({
+        gltfNode.scale[0],
+        gltfNode.scale[1],
+        gltfNode.scale[2]
+    });
+
     for (uint32_t nodeIdx : gltfNode.children) {
         const gltf2::Node& childrenGltfNode = asset.nodes[nodeIdx];
         if (!createNode(renderer, asset, childrenGltfNode, *node)) {
