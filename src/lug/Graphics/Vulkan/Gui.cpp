@@ -58,10 +58,6 @@ bool Gui::init(const std::vector<API::ImageView>& imageViews) {
 
     initKeyMapping();
 
-    // Modify the style of ImGui widgets
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
-
     io.DisplaySize = ImVec2(_window.getWidth(), _window.getHeight());
     io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
