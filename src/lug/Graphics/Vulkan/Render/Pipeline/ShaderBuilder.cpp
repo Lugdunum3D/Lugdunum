@@ -1,6 +1,14 @@
 #include <lug/Graphics/Vulkan/Render/Pipeline.hpp>
 
 #include <fstream>
+
+#if defined(LUG_SYSTEM_ANDROID)
+    #include <android/asset_manager.h>
+
+    #include <lug/Window/Android/WindowImplAndroid.hpp>
+    #include <lug/Window/Window.hpp>
+#endif
+
 #include <shaderc/shaderc.hpp>
 
 #include <lug/System/Exception.hpp>
@@ -29,6 +37,28 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShader(
 }
 
 std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromFile(std::string filename, Pipeline::ShaderBuilder::Type type, Pipeline::Id id) {
+#if defined(LUG_SYSTEM_ANDROID)
+    // Load shader from compressed asset
+    AAsset* asset = AAssetManager_open((lug::Window::priv::WindowImpl::activity)->assetManager, filename.c_str(), AASSET_MODE_STREAMING);
+
+    if (!asset) {
+        LUG_EXCEPT(FileNotFoundException, "Can't open Android asset");
+        return {};
+    }
+
+    uint32_t size = AAsset_getLength(asset);
+
+    if (size <= 0) {
+        LUG_EXCEPT(FileNotFoundException, "Android asset is empty");
+        return {};
+    }
+
+    std::string content;
+    content.resize(size);
+
+    AAsset_read(asset, reinterpret_cast<char*>(&content[0]), size);
+    AAsset_close(asset);
+#else
     std::ifstream file(filename);
 
     if (!file.good()) {
@@ -36,6 +66,7 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromFile(std::string f
     }
 
     std::string content = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
+#endif
 
     return Pipeline::ShaderBuilder::buildShaderFromString(filename, content, type, id);
 }
