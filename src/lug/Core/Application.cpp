@@ -53,6 +53,9 @@ bool Application::run() {
 
             while (_window->pollEvent(event)) {
                 onEvent(event);
+                if (_closed) {
+                    return true;
+                }
             }
         }
 
