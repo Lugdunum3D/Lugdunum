@@ -366,6 +366,16 @@ set(IMGUI_SOURCE_FILES
     ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
 )
 
+# find IconFontCppHeaders
+if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/IconFontCppHeaders")
+    message(FATAL_ERROR "Can't find IconFontCppHeaders in the thirdparty directory")
+endif()
+
+set(ICON_FONT_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/IconFontCppHeaders)
+message(STATUS "Found IconFontCppHeaders: ${ICON_FONT_INCLUDE_DIR}")
+
+include_directories(${ICON_FONT_INCLUDE_DIR})
+
 if(LUG_COMPILER_GCC)
     set_source_files_properties(${IMGUI_SOURCE_FILES} PROPERTIES COMPILE_FLAGS -Wno-error=maybe-uninitialized)
 endif()
