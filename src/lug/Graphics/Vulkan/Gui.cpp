@@ -2,6 +2,8 @@
 
 #include <imgui.h>
 
+#include <lug/Graphics/IconsFontAwesome.h> // TODO Move this to be a thirdparty header
+
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSet.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSetLayout.hpp>
@@ -135,6 +137,13 @@ void Gui::initKeyMapping() {
 
 bool Gui::initFontsTexture() {
     ImGuiIO& io = ImGui::GetIO();
+    // merge in icons from Font Awesome
+    io.Fonts->AddFontDefault();
+    ImFontConfig config;
+    config.MergeMode = true;
+    static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+    ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+    io.Fonts->AddFontFromFileTTF("./fonts/fontawesome-webfont.ttf", 16.0f, &icons_config, icons_ranges);
 
     // Create font texture
     unsigned char* fontData = nullptr;
