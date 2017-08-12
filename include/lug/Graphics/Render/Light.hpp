@@ -48,7 +48,7 @@ public:
         uint32_t type;
     };
 
-    static constexpr uint32_t strideShader = 80;
+    static constexpr uint32_t strideShader{ 80 };
 
 public:
     Light(const Light&) = delete;
