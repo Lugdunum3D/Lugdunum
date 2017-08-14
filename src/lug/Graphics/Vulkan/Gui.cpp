@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-#include <lug/Graphics/IconsFontAwesome.h> // TODO Move this to be a thirdparty header
+#include <IconsFontAwesome.h>
 
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSet.hpp>
