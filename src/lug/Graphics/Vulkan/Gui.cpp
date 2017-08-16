@@ -139,10 +139,10 @@ bool Gui::initFontsTexture() {
     ImGuiIO& io = ImGui::GetIO();
     // merge in icons from Font Awesome
     io.Fonts->AddFontDefault();
-    ImFontConfig config;
-    config.MergeMode = true;
     static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+    ImFontConfig icons_config;
+    icons_config.MergeMode = true;
+    icons_config.PixelSnapH = true;
     io.Fonts->AddFontFromFileTTF("./fonts/fontawesome-webfont.ttf", 16.0f, &icons_config, icons_ranges);
 
     // Create font texture
