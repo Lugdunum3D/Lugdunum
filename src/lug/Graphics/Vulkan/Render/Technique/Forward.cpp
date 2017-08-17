@@ -150,7 +150,7 @@ bool Forward::render(
     // Bind descriptor set of the camera
     {
         const API::CommandBuffer::CmdBindDescriptors cameraBind{
-            /* cameraBind.pipelineLayout    */ *_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout(),
+            /* cameraBind.pipelineLayout     */ *_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout(),
             /* cameraBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
             /* cameraBind.firstSet           */ 0,
             /* cameraBind.descriptorSets     */ {&frameData.cameraDescriptorSet->getDescriptorSet()},
@@ -161,12 +161,12 @@ bool Forward::render(
     }
 
     // Temporary array of light and material buffers use to render this frame
-    // they will replace frameData.lightBuffers and frameData.materialBuffers atfer the rendering
+    // they will replace frameData.lightBuffers and frameData.materialBuffers after the rendering
     std::vector<const BufferPool::SubBuffer*> lightBuffers;
     std::vector<const BufferPool::SubBuffer*> materialBuffers;
 
     // Temporary array of light and material descriptor sets use to render this frame
-    // they will replace frameData.lightDescriptorSets and frameData.materialDescriptorSets atfer the rendering
+    // they will replace frameData.lightDescriptorSets and frameData.materialDescriptorSets after the rendering
     std::vector<const DescriptorSetPool::DescriptorSet*> lightDescriptorSets;
     std::vector<const DescriptorSetPool::DescriptorSet*> materialDescriptorSets;
     std::vector<const DescriptorSetPool::DescriptorSet*> materialTexturesDescriptorSets;
@@ -237,7 +237,7 @@ bool Forward::render(
             const BufferPool::SubBuffer* lightBuffer = _lightBufferPool->allocate(
                 currentImageIndex,
                 frameData.transferCmdBuffer,
-                {lights.begin() + i, i + 50 > renderQueue.getLightsCount() ? lights.begin() + renderQueue.getLightsCount() : lights.begin() + i + 50}
+                {lights.begin() + i, i + 50 > renderQueue.getLightsCount() ? lights.begin() + static_cast<uint32_t>(renderQueue.getLightsCount()) : lights.begin() + i + 50}
             );
             lightBuffers.push_back(lightBuffer);
 
@@ -274,13 +274,13 @@ bool Forward::render(
                 frameData.renderCmdBuffer.setBlendConstants(blendConstants);
             }
 
-            for (const auto it : renderQueue.getPrimitiveSets()) {
+            for (const auto& it : renderQueue.getPrimitiveSets()) {
                 // Bind pipeline
                 Resource::SharedPtr<Render::Pipeline> pipeline = _renderer.getPipeline(it.first);
                 frameData.renderCmdBuffer.bindPipeline(pipeline->getPipelineAPI());
 
                 // Display primitive set by primitive set
-                for (const auto primitiveSetInstance : it.second) {
+                for (const auto& primitiveSetInstance : it.second) {
                     auto& node = *primitiveSetInstance.node;
                     const auto& primitiveSet = *primitiveSetInstance.primitiveSet;
                     auto& material = *primitiveSetInstance.material;

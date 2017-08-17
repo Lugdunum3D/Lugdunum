@@ -37,7 +37,7 @@ public:
 protected:
     Renderer& _renderer;
 
-    std::string _name;
+    std::string _name{};
 };
 
 #include <lug/Graphics/Builder/Scene.inl>

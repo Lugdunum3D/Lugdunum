@@ -14,8 +14,8 @@ namespace Render {
 class LUG_GRAPHICS_API Window: public ::lug::Window::Window, public ::lug::Graphics::Render::Target {
 public:
     struct InitInfo {
-        lug::Window::Window::InitInfo windowInitInfo;
-        std::vector<View::InitInfo> renderViewsInitInfo;
+        lug::Window::Window::InitInfo windowInitInfo{};
+        std::vector<View::InitInfo> renderViewsInitInfo{};
     };
 
 public:

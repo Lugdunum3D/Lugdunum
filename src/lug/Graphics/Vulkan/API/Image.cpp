@@ -102,7 +102,8 @@ bool Image::isFormatSupported(const Device& device, VkFormat format, VkImageTili
 
     if (tiling == VK_IMAGE_TILING_LINEAR && (formatProperties.linearTilingFeatures & features) == features) {
         return true;
-    } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (formatProperties.optimalTilingFeatures & features) == features) {
+    }
+    if (tiling == VK_IMAGE_TILING_OPTIMAL && (formatProperties.optimalTilingFeatures & features) == features) {
         return true;
     }
 

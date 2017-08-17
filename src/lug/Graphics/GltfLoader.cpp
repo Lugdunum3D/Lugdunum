@@ -23,8 +23,12 @@ namespace Graphics {
 GltfLoader::GltfLoader(Renderer& renderer): Loader(renderer) {}
 
 static void* getBufferViewData(const gltf2::Asset& asset, const gltf2::Accessor& accessor) {
-    const gltf2::BufferView& bufferView = asset.bufferViews[accessor.bufferView];
-    const gltf2::Buffer& buffer = asset.buffers[bufferView.buffer];
+    if (accessor.bufferView == -1) {
+        LUG_LOG.error("GltfLoader::getBufferViewData Invalid bufferView index");
+        return nullptr;
+    }
+    const gltf2::BufferView& bufferView = asset.bufferViews[static_cast<size_t>(accessor.bufferView)];
+    const gltf2::Buffer& buffer = asset.buffers[static_cast<size_t>(bufferView.buffer)];
 
     if (!buffer.data) {
         LUG_LOG.error("GltfLoader::createMesh Buffer data can't be null");
@@ -85,11 +89,11 @@ static Resource::SharedPtr<Render::Texture> createTexture(Renderer& renderer, co
 
     if (gltfTexture.source != -1) {
         // TODO: Handle correctly the load with bufferView / uri data
-        textureBuilder.addLayer(asset.images[gltfTexture.source].uri);
+        textureBuilder.addLayer(asset.images[static_cast<size_t>(gltfTexture.source)].uri);
     }
 
     if (gltfTexture.sampler != -1) {
-        const gltf2::Sampler& sampler = asset.samplers[gltfTexture.sampler];
+        const gltf2::Sampler& sampler = asset.samplers[static_cast<size_t>(gltfTexture.sampler)];
 
         switch(sampler.magFilter) {
             case gltf2::Sampler::MagFilter::None:
@@ -171,7 +175,10 @@ static Resource::SharedPtr<Render::Material> createMaterial(Renderer& renderer, 
     });
 
     if (gltfMaterial.pbr.baseColorTexture.index != -1) {
-        Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, asset.textures[gltfMaterial.pbr.baseColorTexture.index]);
+        Resource::SharedPtr<Render::Texture> texture = createTexture(
+            renderer, asset,
+            asset.textures[static_cast<size_t>(gltfMaterial.pbr.baseColorTexture.index)]
+        );
         if (!texture) {
             LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
             return nullptr;
@@ -184,7 +191,10 @@ static Resource::SharedPtr<Render::Material> createMaterial(Renderer& renderer, 
     materialBuilder.setRoughnessFactor(gltfMaterial.pbr.roughnessFactor);
 
     if (gltfMaterial.pbr.metallicRoughnessTexture.index != -1) {
-        Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, asset.textures[gltfMaterial.pbr.metallicRoughnessTexture.index]);
+        Resource::SharedPtr<Render::Texture> texture = createTexture(
+            renderer, asset,
+            asset.textures[static_cast<size_t>(gltfMaterial.pbr.metallicRoughnessTexture.index)]
+        );
         if (!texture) {
             LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
             return nullptr;
@@ -194,7 +204,10 @@ static Resource::SharedPtr<Render::Material> createMaterial(Renderer& renderer, 
     }
 
     if (gltfMaterial.normalTexture.index != -1) {
-        Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, asset.textures[gltfMaterial.normalTexture.index]);
+        Resource::SharedPtr<Render::Texture> texture = createTexture(
+            renderer, asset,
+            asset.textures[static_cast<size_t>(gltfMaterial.normalTexture.index)]
+        );
         if (!texture) {
             LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
             return nullptr;
@@ -204,7 +217,10 @@ static Resource::SharedPtr<Render::Material> createMaterial(Renderer& renderer, 
     }
 
     if (gltfMaterial.occlusionTexture.index != -1) {
-        Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, asset.textures[gltfMaterial.occlusionTexture.index]);
+        Resource::SharedPtr<Render::Texture> texture = createTexture(
+            renderer, asset,
+            asset.textures[static_cast<size_t>(gltfMaterial.occlusionTexture.index)]
+        );
         if (!texture) {
             LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
             return nullptr;
@@ -214,7 +230,10 @@ static Resource::SharedPtr<Render::Material> createMaterial(Renderer& renderer, 
     }
 
     if (gltfMaterial.emissiveTexture.index != -1) {
-        Resource::SharedPtr<Render::Texture> texture = createTexture(renderer, asset, asset.textures[gltfMaterial.emissiveTexture.index]);
+        Resource::SharedPtr<Render::Texture> texture = createTexture(
+            renderer, asset,
+            asset.textures[static_cast<size_t>(gltfMaterial.emissiveTexture.index)]
+        );
         if (!texture) {
             LUG_LOG.error("GltfLoader::createMaterial Can't create the texture resource");
             return nullptr;
@@ -291,7 +310,7 @@ static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gl
 
         // Indices
         if (gltfPrimitive.indices != -1) {
-            const gltf2::Accessor& accessor = asset.accessors[gltfPrimitive.indices]; // Get the accessor from its index (directly from indices)
+            const gltf2::Accessor& accessor = asset.accessors[static_cast<size_t>(gltfPrimitive.indices)]; // Get the accessor from its index (directly from indices)
 
             uint32_t componentSize = getAttributeSize(accessor);
             void* data = getBufferViewData(asset, accessor);
@@ -348,7 +367,7 @@ static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gl
 
         // Generate flat normals if there is not any
         if (!hasNormals) {
-            void* data = generateNormals((float*)positions.data, positions.accessorCount);
+            void* data = generateNormals(static_cast<float*>(positions.data), positions.accessorCount);
             if (!data) {
                 return nullptr;
             }
@@ -359,7 +378,9 @@ static Resource::SharedPtr<Render::Mesh> createMesh(Renderer& renderer, const gl
         }
 
         // Material
-        Resource::SharedPtr<Render::Material> material = gltfPrimitive.material != -1 ? createMaterial(renderer, asset, asset.materials[gltfPrimitive.material]) : createDefaultMaterial(renderer);
+        Resource::SharedPtr<Render::Material> material = gltfPrimitive.material != -1
+            ? createMaterial(renderer, asset, asset.materials[static_cast<size_t>(gltfPrimitive.material)])
+            : createDefaultMaterial(renderer);
         if (!material) {
             LUG_LOG.error("GltfLoader::createMesh Can't create the material resource");
             return nullptr;
@@ -378,7 +399,7 @@ static bool createNode(Renderer& renderer, const gltf2::Asset& asset, const gltf
     parent.attachChild(*node);
 
     if (gltfNode.mesh != -1) {
-        Resource::SharedPtr<Render::Mesh> mesh = createMesh(renderer, asset, asset.meshes[gltfNode.mesh]);
+        Resource::SharedPtr<Render::Mesh> mesh = createMesh(renderer, asset, asset.meshes[static_cast<size_t>(gltfNode.mesh)]);
         if (!mesh) {
             LUG_LOG.error("GltfLoader::createNode Can't create the mesh resource");
             return false;
@@ -406,7 +427,7 @@ static bool createNode(Renderer& renderer, const gltf2::Asset& asset, const gltf
     });
 
     for (uint32_t nodeIdx : gltfNode.children) {
-        const gltf2::Node& childrenGltfNode = asset.nodes[nodeIdx];
+        const gltf2::Node& childrenGltfNode = asset.nodes[static_cast<size_t>(nodeIdx)];
         if (!createNode(renderer, asset, childrenGltfNode, *node)) {
             return false;
         }
@@ -433,7 +454,7 @@ Resource::SharedPtr<Resource> GltfLoader::loadFile(const std::string& filename) 
     if (asset.scene == -1) { // No scene to load
         return nullptr;
     }
-    const gltf2::Scene& gltfScene = asset.scenes[asset.scene];
+    const gltf2::Scene& gltfScene = asset.scenes[static_cast<size_t>(asset.scene)];
 
     Builder::Scene sceneBuilder(_renderer);
     sceneBuilder.setName(gltfScene.name);

@@ -11,13 +11,13 @@ namespace System {
 namespace Logger {
 
 /**
- * \cond HIDDEN_SYMBOLS
+ * @cond HIDDEN_SYMBOLS
  */
 namespace priv {
 class Message;
 } // priv
 /**
- * \endcond
+ * @endcond HIDDEN_SYMBOLS
  */
 
 class Formatter;
@@ -25,12 +25,13 @@ class Formatter;
 using FlagHandlerPointer = std::string (Formatter::*)(const std::tm* now);
 
 /**
- * \cond HIDDEN_SYMBOLS
+ * @cond HIDDEN_SYMBOLS
  */
 namespace priv {
 
 class Formattable {
 public:
+    virtual ~Formattable();
     virtual std::string format(Message* = nullptr) const = 0;
 };
 
@@ -40,7 +41,7 @@ public:
     virtual std::string format(Message* = nullptr) const;
 
 private:
-    std::string _chars;
+    std::string _chars{};
 };
 
 class LevelFlag : public Formattable {
@@ -64,7 +65,7 @@ struct Token {
 
 } // priv
 /**
- * \endcond
+ * @endcond HIDDEN_SYMBOLS
  */
 
 class LUG_SYSTEM_API Formatter {
@@ -94,7 +95,7 @@ private:
     std::string handleFlagM(const std::tm* now); // Minute from 0 to 59
     std::string handleFlagS(const std::tm* now); // Sec from 0 to 61
 
-    std::vector<priv::Token> _formatChain;
+    std::vector<priv::Token> _formatChain{};
 };
 
 } // Logger

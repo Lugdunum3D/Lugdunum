@@ -17,9 +17,9 @@ namespace Render {
 class LUG_GRAPHICS_API Queue final : public ::lug::Graphics::Render::Queue {
 public:
     struct PrimitiveSetInstance {
-        Scene::Node* node;
-        const Render::Mesh::PrimitiveSet* primitiveSet;
-        Render::Material* material;
+        Scene::Node* node{nullptr};
+        const Render::Mesh::PrimitiveSet* primitiveSet{nullptr};
+        Render::Material* material{nullptr};
     };
 
 public:
@@ -48,7 +48,7 @@ public:
 private:
     // TODO: Use a custom frame allocator for the content of the queue
     // TODO: Also sort by material ?
-    std::map<Render::Pipeline::Id, std::vector<PrimitiveSetInstance>> _primitiveSets;
+    std::map<Render::Pipeline::Id, std::vector<PrimitiveSetInstance>> _primitiveSets{};
 
     std::vector<Scene::Node*> _lights{50};
     std::size_t _lightsCount{0};

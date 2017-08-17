@@ -147,7 +147,7 @@ public:
 #endif
 
 protected:
-    Values _values;
+    Values _values{};
 };
 
 #define DEFINE_LENGTH_MATRIX(rows, columns)                             \

@@ -55,13 +55,13 @@ private:
 
     const Renderer::Preferences::Swapchain* _preferences{nullptr};
     VkSurfaceKHR _surface{VK_NULL_HANDLE};
-    uint32_t _minImageCount;
+    uint32_t _minImageCount{1};
     VkFormat _imageFormat{VK_FORMAT_MAX_ENUM};
     VkColorSpaceKHR _imageColorSpace{VK_COLOR_SPACE_MAX_ENUM_KHR};
     VkExtent2D _imageExtent{};
     VkImageUsageFlags _imageUsage{VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT};
     bool _exclusive{false};
-    std::set<uint32_t> _queueFamilyIndices;
+    std::set<uint32_t> _queueFamilyIndices{};
     VkSurfaceTransformFlagBitsKHR _preTransform{VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR};
     VkCompositeAlphaFlagBitsKHR _compositeAlpha{VK_COMPOSITE_ALPHA_FLAG_BITS_MAX_ENUM_KHR};
     VkPresentModeKHR _presentMode{VK_PRESENT_MODE_MAX_ENUM_KHR};

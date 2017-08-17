@@ -298,13 +298,20 @@ namespace Vulkan {
 namespace API {
 namespace RTTI {
 
-LUG_GRAPHICS_API const char* toStr(VkResult enumVal);
-LUG_GRAPHICS_API const char* toStr(VkPhysicalDeviceType enumVal);
-LUG_GRAPHICS_API const char* toStr(VkFormat enumVal);
-LUG_GRAPHICS_API const char* toStr(VkColorSpaceKHR enumVal);
-LUG_GRAPHICS_API const char* toStr(VkPresentModeKHR enumVal);
-LUG_GRAPHICS_API const char* toStr(VkSurfaceTransformFlagBitsKHR enumVal);
-LUG_GRAPHICS_API const char* toStr(VkCompositeAlphaFlagBitsKHR enumVal);
+#define LUG_ENUM_TO_STR_FUNCTION_PROTO(type) LUG_GRAPHICS_API const char* toStr(type enumVal);
+
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkPhysicalDeviceType)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkFormat)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkColorSpaceKHR)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkPresentModeKHR)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkMemoryPropertyFlagBits)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkQueueFlagBits)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkFormatFeatureFlagBits)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkMemoryHeapFlagBits)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkImageUsageFlagBits)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkSampleCountFlagBits)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkSurfaceTransformFlagBitsKHR)
+LUG_ENUM_TO_STR_FUNCTION_PROTO(VkCompositeAlphaFlagBitsKHR)
 
 LUG_GRAPHICS_API std::vector<const char*> VkMemoryPropertyFlagsToStrVec(VkMemoryPropertyFlags flag);
 LUG_GRAPHICS_API std::vector<const char*> VkQueueFlagsToStrVec(VkQueueFlags flag);

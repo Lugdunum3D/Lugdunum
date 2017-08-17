@@ -52,7 +52,7 @@ private:
     VkFramebuffer _framebuffer{VK_NULL_HANDLE};
     const Device* _device{nullptr};
 
-    Extent _extent;
+    Extent _extent{};
 };
 
 } // API

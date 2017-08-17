@@ -38,12 +38,12 @@ struct CmdPipelineBarrier {
         uint32_t srcQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
         uint32_t dstQueueFamilyIndex{VK_QUEUE_FAMILY_IGNORED};
         const API::Image* image{nullptr};
-        ImageSubresourceRange subresourceRange;
+        ImageSubresourceRange subresourceRange{};
     };
 
-    std::vector<MemoryBarrier> memoryBarriers;
-    std::vector<ImageMemoryBarrier> imageMemoryBarriers;
-    std::vector<BufferMemoryBarrier> bufferMemoryBarriers;
+    std::vector<MemoryBarrier> memoryBarriers{};
+    std::vector<ImageMemoryBarrier> imageMemoryBarriers{};
+    std::vector<BufferMemoryBarrier> bufferMemoryBarriers{};
 };
 
 struct CmdPushConstants {

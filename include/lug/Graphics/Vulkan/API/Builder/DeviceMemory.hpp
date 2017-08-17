@@ -47,8 +47,8 @@ private:
     VkMemoryPropertyFlags _memoryFlags{VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT};
     uint32_t _memoryTypeBits{0xFFFFFFFF};
 
-    std::vector<API::Buffer*> _buffers;
-    std::vector<API::Image*> _images;
+    std::vector<API::Buffer*> _buffers{};
+    std::vector<API::Image*> _images{};
 };
 
 #include <lug/Graphics/Vulkan/API/Builder/DeviceMemory.inl>

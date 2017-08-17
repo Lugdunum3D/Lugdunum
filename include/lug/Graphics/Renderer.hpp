@@ -54,7 +54,7 @@ public:
 protected:
     Graphics& _graphics;
     Type _type;
-    InitInfo _initInfo;
+    InitInfo _initInfo{};
     std::unique_ptr<ResourceManager> _resourceManager{nullptr};
 };
 

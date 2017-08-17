@@ -456,13 +456,13 @@ typename std::enable_if<(Rows > 4) && EnableBool, T>::type Matrix<Rows, Columns,
                 continue;
             }
 
-            const uint8_t indexRow = row + (row > k ? -1 : 0);
+            const uint8_t indexRow = row - (row > k ? 1 : 0);
             for (uint8_t column = 0; column < Columns; ++column) {
                 if (column == i) {
                     continue;
                 }
 
-                const uint8_t indexColumn = column + (column > i ? -1 : 0);
+                const uint8_t indexColumn = column - (column > i ? 1 : 0);
                 minorMatrix(indexRow, indexColumn) = (*this)(row, column);
             }
         }

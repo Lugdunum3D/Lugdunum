@@ -44,8 +44,8 @@ if (NOT GTEST_FOUND)
     find_package(GTest REQUIRED)
 endif()
 
-include_directories(${GTEST_INCLUDE_DIRS})
-include_directories(${GMOCK_INCLUDE_DIRS})
+include_directories(SYSTEM ${GTEST_INCLUDE_DIRS})
+include_directories(SYSTEM ${GMOCK_INCLUDE_DIRS})
 
 find_package(Threads REQUIRED)
 

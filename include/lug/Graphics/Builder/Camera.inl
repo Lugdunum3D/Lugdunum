@@ -6,9 +6,9 @@ inline void Camera::setType(Type type) {
     _type = type;
 }
 
-inline void Camera::setFovY(float fovy) {
+inline void Camera::setFovY(float fovY) {
     LUG_ASSERT(_type == Camera::Type::Perspective, "You need to build a persepctive camera to set the fov y");
-    _fovy = fovy;
+    _fovY = fovY;
 }
 
 inline void Camera::setAspectRatio(float aspectRatio) {
@@ -16,21 +16,21 @@ inline void Camera::setAspectRatio(float aspectRatio) {
     _aspectRatio = aspectRatio;
 }
 
-inline void Camera::setXMag(float xmag) {
+inline void Camera::setXMag(float xMag) {
     LUG_ASSERT(_type == Camera::Type::Orthographic, "You need to build a orthographic camera to set the x magnification");
-    _xmag = xmag;
+    _xMag = xMag;
 }
 
-inline void Camera::setYMag(float ymag) {
+inline void Camera::setYMag(float yMag) {
     LUG_ASSERT(_type == Camera::Type::Orthographic, "You need to build a orthographic camera to set the y magnification");
-    _ymag = ymag;
+    _yMag = yMag;
 }
 
-inline void Camera::setZNear(float znear) {
-    _znear = znear;
+inline void Camera::setZNear(float zNear) {
+    _zNear = zNear;
 }
 
-inline void Camera::setZFar(float zfar) {
-    _zfar = zfar;
+inline void Camera::setZFar(float zFar) {
+    _zFar = zFar;
 }
 

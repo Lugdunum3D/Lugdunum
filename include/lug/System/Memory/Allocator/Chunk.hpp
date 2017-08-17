@@ -51,7 +51,7 @@ public:
 private:
     static constexpr size_t ChunkSize = (MaxAlignment <= 1 ? MaxSize : priv::ceil(static_cast<float>(MaxSize) / MaxAlignment) * MaxAlignment);
 
-    lug::System::Memory::Area::IArea* const _area;
+    lug::System::Memory::Area::IArea* const _area{nullptr};
     FreeList _freeList{ChunkSize};
 
     lug::System::Memory::Area::Page* _currentPage{nullptr};

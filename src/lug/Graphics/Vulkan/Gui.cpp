@@ -261,7 +261,7 @@ bool Gui::initFontsTexture() {
             }
         }
 
-        stagingBuffer.updateData(fontData, (uint32_t)uploadSize);
+        stagingBuffer.updateData(fontData, static_cast<uint32_t>(uploadSize));
 
         // Copy buffer data to font image
         {
@@ -722,7 +722,7 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
     // Render commands
     ImDrawData* imDrawData = ImGui::GetDrawData();
 
-    uint32_t vertexCount = 0;
+    int32_t vertexCount = 0;
     uint32_t indexCount = 0;
 
     for (int32_t i = 0; i < imDrawData->CmdListsCount; i++) {
@@ -811,8 +811,8 @@ bool Gui::updateBuffers(uint32_t currentImageIndex) {
     FrameData& frameData = _framesData[currentImageIndex];
 
     // Note: Alignment is done inside buffer creation
-    const VkDeviceSize vertexBufferSize = imDrawData->TotalVtxCount * sizeof(ImDrawVert);
-    const VkDeviceSize indexBufferSize = imDrawData->TotalIdxCount * sizeof(ImDrawIdx);
+    const VkDeviceSize vertexBufferSize = static_cast<uint32_t>(imDrawData->TotalVtxCount) * sizeof(ImDrawVert);
+    const VkDeviceSize indexBufferSize = static_cast<uint32_t>(imDrawData->TotalIdxCount) * sizeof(ImDrawIdx);
 
     // Update buffers only if vertex or index count has been changed compared to current buffer size
     {
@@ -894,8 +894,8 @@ bool Gui::updateBuffers(uint32_t currentImageIndex) {
 
         for (int n = 0; n < imDrawData->CmdListsCount; n++) {
             const ImDrawList* cmd_list = imDrawData->CmdLists[n];
-            memcpy(vertexMemoryPtr, cmd_list->VtxBuffer.Data, cmd_list->VtxBuffer.Size * sizeof(ImDrawVert));
-            memcpy(indexMemoryPtr, cmd_list->IdxBuffer.Data, cmd_list->IdxBuffer.Size * sizeof(ImDrawIdx));
+            memcpy(vertexMemoryPtr, cmd_list->VtxBuffer.Data, static_cast<uint32_t>(cmd_list->VtxBuffer.Size) * sizeof(ImDrawVert));
+            memcpy(indexMemoryPtr, cmd_list->IdxBuffer.Data, static_cast<uint32_t>(cmd_list->IdxBuffer.Size) * sizeof(ImDrawIdx));
             vertexMemoryPtr += cmd_list->VtxBuffer.Size;
             indexMemoryPtr += cmd_list->IdxBuffer.Size;
         }

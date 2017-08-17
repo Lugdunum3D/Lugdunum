@@ -24,7 +24,7 @@ public:
     void onFrame(const lug::System::Time& elapsedTime) override final;
 
 private:
-    lug::Graphics::Resource::SharedPtr<lug::Graphics::Scene::Scene> _scene;
-    lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> _sphereMesh;
-    lug::Core::FreeMovement _mover;
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Scene::Scene> _scene{};
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> _sphereMesh{};
+    lug::Core::FreeMovement _mover{};
 };

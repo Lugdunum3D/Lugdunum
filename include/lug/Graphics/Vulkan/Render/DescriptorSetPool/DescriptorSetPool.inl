@@ -11,7 +11,7 @@ inline bool DescriptorSetPool<maxSets>::init() {
     if (static_cast<VkDescriptorPool>(descriptorPool) == VK_NULL_HANDLE) {
         API::Builder::DescriptorPool descriptorPoolBuilder(_renderer.getDevice());
 
-        // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
+        // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descriptors sets
         descriptorPoolBuilder.setFlags(0);
 
         descriptorPoolBuilder.setMaxSets(42); // TODO: Replace this arbitrary number

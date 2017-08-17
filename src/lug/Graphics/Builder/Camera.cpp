@@ -19,10 +19,10 @@ Resource::SharedPtr<Render::Camera::Camera> Camera::build() {
             Render::Camera::Perspective* camera = static_cast<Render::Camera::Perspective*>(resource.get());
 
             camera->setAspectRatio(_aspectRatio);
-            camera->setFovY(_fovy);
+            camera->setFovY(_fovY);
 
-            camera->setZNear(_znear);
-            camera->setZFar(_zfar);
+            camera->setZNear(_zNear);
+            camera->setZFar(_zFar);
 
             break;
         }
@@ -31,11 +31,11 @@ Resource::SharedPtr<Render::Camera::Camera> Camera::build() {
             resource = std::unique_ptr<Resource>(new Render::Camera::Orthographic(_name));
             Render::Camera::Orthographic* camera = static_cast<Render::Camera::Orthographic*>(resource.get());
 
-            camera->setXMag(_xmag);
-            camera->setYMag(_ymag);
+            camera->setXMag(_xMag);
+            camera->setYMag(_yMag);
 
-            camera->setZNear(_znear);
-            camera->setZFar(_zfar);
+            camera->setZNear(_zNear);
+            camera->setZFar(_zFar);
 
             break;
         }

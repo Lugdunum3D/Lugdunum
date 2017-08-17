@@ -58,7 +58,7 @@ public:
 protected:
     Renderer& _renderer;
 
-    std::string _name;
+    std::string _name{};
 
     Render::Texture::Filter _magFilter{Render::Texture::Filter::Nearest};
     Render::Texture::Filter _minFilter{Render::Texture::Filter::Nearest};
@@ -68,7 +68,7 @@ protected:
     Render::Texture::WrappingMode _wrapT{Render::Texture::WrappingMode::ClampToEdge};
 
     // Contains alls file names for faces
-    std::array<std::string, 6> _faces;
+    std::array<std::string, 6> _faces{};
 };
 
 #include <lug/Graphics/Builder/SkyBox.inl>

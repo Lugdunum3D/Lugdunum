@@ -30,7 +30,7 @@ public:
     std::vector<std::unique_ptr<View>>& getRenderViews();
 
 protected:
-    std::vector<std::unique_ptr<View>> _renderViews;
+    std::vector<std::unique_ptr<View>> _renderViews{};
 };
 
 #include <lug/Graphics/Render/Target.inl>

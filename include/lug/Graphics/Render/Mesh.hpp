@@ -38,8 +38,8 @@ public:
                 Normal,     ///< Normal (VEC3<FLOAT>)
                 TexCoord,   ///< UV (VEC2<FLOAT>)
                 Tangent,    ///< Tangent (VEC4<FLOAT> w component is a sign value (-1 or +1) indicating handedness of the tangent basis)
-                Color,      ///< Color (VEC4<FLOAT>)
-            } type;
+                Color       ///< Color (VEC4<FLOAT>)
+            } type{};
 
             /**
              * @brief      Access to the data of the attribute.
@@ -48,7 +48,7 @@ public:
                 char* data{nullptr};        ///< The data of the buffer.
                 uint32_t size{0};           ///< The size of the above data buffer, in bytes.
                 uint32_t elementsCount{0};  ///< The number of elements (indices, vertices, normals)
-            } buffer;
+            } buffer{};
 
             void* _data{nullptr}; // Specific to each Renderer
         };
@@ -94,7 +94,7 @@ protected:
     explicit Mesh(const std::string& name);
 
 protected:
-    std::vector<PrimitiveSet> _primitiveSets;
+    std::vector<PrimitiveSet> _primitiveSets{};
 };
 
 #include <lug/Graphics/Render/Mesh.inl>

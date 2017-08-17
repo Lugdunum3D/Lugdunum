@@ -157,7 +157,7 @@ LUG_EXPORTED_VULKAN_FUNCTIONS(LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS);
 LUG_CORE_VULKAN_FUNCTIONS(LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS);
 LUG_INSTANCE_VULKAN_FUNCTIONS(LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS);
 LUG_DEVICE_VULKAN_FUNCTIONS(LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS);
-#undef LUG_DEFINE_DECLARATION__VULKAN_FUNCTIONS
+#undef LUG_DEFINE_DECLARATION_VULKAN_FUNCTIONS
 
 } // Vulkan
 
@@ -166,36 +166,36 @@ namespace Graphics {
 namespace Vulkan {
 
 struct InstanceInfo {
-    std::vector<VkExtensionProperties> extensions;
-    std::vector<VkLayerProperties> layers;
+    std::vector<VkExtensionProperties> extensions{};
+    std::vector<VkLayerProperties> layers{};
 
     bool containsExtension(const char* extensionName) const;
     bool containsLayer(const char* layerName) const;
 };
 
 struct PhysicalDeviceInfo {
-    VkPhysicalDevice handle;
+    VkPhysicalDevice handle{VK_NULL_HANDLE};
 
-    VkPhysicalDeviceProperties properties;
-    VkPhysicalDeviceFeatures features;
+    VkPhysicalDeviceProperties properties{};
+    VkPhysicalDeviceFeatures features{};
 
-    VkPhysicalDeviceMemoryProperties memoryProperties;
+    VkPhysicalDeviceMemoryProperties memoryProperties{};
 
-    std::vector<VkQueueFamilyProperties> queueFamilies;
+    std::vector<VkQueueFamilyProperties> queueFamilies{};
 
-    std::vector<VkExtensionProperties> extensions;
+    std::vector<VkExtensionProperties> extensions{};
 
-    std::unordered_map<VkFormat, VkFormatProperties> formatProperties;
+    std::unordered_map<VkFormat, VkFormatProperties> formatProperties{};
 
     struct Swapchain {
-        VkSurfaceCapabilitiesKHR capabilities;
+        VkSurfaceCapabilitiesKHR capabilities{};
 
-        std::vector<VkSurfaceFormatKHR> formats;
-        std::vector<VkPresentModeKHR> presentModes;
-    } swapchain;
+        std::vector<VkSurfaceFormatKHR> formats{};
+        std::vector<VkPresentModeKHR> presentModes{};
+    } swapchain{};
 
     bool containsExtension(const char* extensionName) const;
-    bool containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const;
+    bool containsQueueFlags(VkQueueFlags queueFlags, uint8_t& idx) const;
 };
 
 } // Vulkan
@@ -275,6 +275,15 @@ inline std::ostream& operator<<(std::ostream& ss, VkResult result) {
             break;
         case VK_ERROR_VALIDATION_FAILED_EXT:
             ss << "A validation layer found an error";
+            break;
+        case VK_ERROR_OUT_OF_POOL_MEMORY_KHR:
+            ss << "A pool memory allocation has failed";
+            break;
+        case VK_ERROR_INVALID_SHADER_NV:
+            ss << "One or more shaders failed to compile or link";
+            break;
+        case VK_ERROR_FRAGMENTED_POOL:
+            ss << "A pool allocation has failed due to fragmentation of the pool’s memory";
             break;
         default:
             ss << "ERROR: UNKNOWN VULKAN ERROR";

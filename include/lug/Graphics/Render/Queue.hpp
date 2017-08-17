@@ -21,7 +21,7 @@ public:
     Queue& operator=(const Queue&) = delete;
     Queue& operator=(Queue&&) = delete;
 
-    ~Queue() = default;
+    virtual ~Queue() = default;
 
     virtual void addMeshInstance(Scene::Node& node) = 0;
     virtual void addLight(Scene::Node& node) = 0;

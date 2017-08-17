@@ -25,8 +25,9 @@ void* Linear::allocate(size_t size, size_t alignment, size_t offset) {
         // Try to allocate memory on the current page
         _current = static_cast<char*>(_current) + newOffset;
 
+        // If we have memory left on this page
         if (_current <= _currentPage->end) {
-            size_t sizeLeft = static_cast<char*>(_currentPage->end) - static_cast<char*>(_current) + 1;
+            size_t sizeLeft = static_cast<size_t>(static_cast<char*>(_currentPage->end) - static_cast<char*>(_current)) + 1;
 
             if (std::align(alignment, newSize - newOffset, _current, sizeLeft)) {
                 _current = static_cast<char*>(_current) + newSize - newOffset;

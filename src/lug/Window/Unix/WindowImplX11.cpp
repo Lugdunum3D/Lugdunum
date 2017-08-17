@@ -24,7 +24,7 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
     ::Window parent = RootWindow(_display, screen);
 
     // The default color
-    uint32_t blackColor = BlackPixel(_display, DefaultScreen(_display));
+    uint64_t blackColor = BlackPixel(_display, DefaultScreen(_display));
 
     _window = XCreateSimpleWindow(_display, parent, 0, 0, initInfo.width, initInfo.height, 90, 2, blackColor);
 
@@ -443,8 +443,8 @@ bool WindowImpl::pollEvent(Event& event) {
 
         case ConfigureNotify:
             if (xEvent.xconfigure.width != _parent->_mode.width || xEvent.xconfigure.height != _parent->_mode.height) {
-                _parent->_mode.width = xEvent.xconfigure.width;
-                _parent->_mode.height = xEvent.xconfigure.height;
+                _parent->_mode.width = static_cast<uint16_t>(xEvent.xconfigure.width);
+                _parent->_mode.height = static_cast<uint16_t>(xEvent.xconfigure.height);
 
                 event.type = Event::Type::Resize;
             } else {

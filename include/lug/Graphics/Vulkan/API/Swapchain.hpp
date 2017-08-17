@@ -61,11 +61,11 @@ private:
     VkSwapchainKHR _swapchain{VK_NULL_HANDLE};
     const Device* _device{nullptr};
 
-    std::vector<Image> _images;
-    std::vector<ImageView> _imagesViews;
+    std::vector<Image> _images{};
+    std::vector<ImageView> _imagesViews{};
 
-    VkSurfaceFormatKHR _format;
-    VkExtent2D _extent;
+    VkSurfaceFormatKHR _format{VK_FORMAT_UNDEFINED, VK_COLOR_SPACE_MAX_ENUM_KHR};
+    VkExtent2D _extent{0, 0};
 
     bool _outOfDate{false};
 };

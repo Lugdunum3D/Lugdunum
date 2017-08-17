@@ -5,6 +5,8 @@
 #include <lug/Math/Vector.hpp>
 #include <lug/Math/Constant.hpp>
 
+#include <cmath>
+
 namespace lug {
 namespace Math {
 

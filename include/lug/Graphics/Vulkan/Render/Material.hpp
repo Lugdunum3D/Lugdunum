@@ -36,12 +36,11 @@ private:
      * @brief      Constructs a Material
      *
      * @param[in]  name  The name of the Material
-     * @param[in]  type  The type of the Material
      */
     Material(const std::string& name);
 
 private:
-    Pipeline::Id::MaterialPart _pipelineIdMaterialPart;
+    Pipeline::Id::MaterialPart _pipelineIdMaterialPart{};
 };
 
 } // Render

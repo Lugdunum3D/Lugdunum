@@ -40,8 +40,24 @@ macro(lug_add_compile_options target)
     # use warnings and errors
     if(LUG_COMPILER_MSVC)
         target_compile_options(${target} PUBLIC /W4 /WX)
-    elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
-        target_compile_options(${target} PUBLIC -Wall -Wextra -Werror)
+    elseif(LUG_COMPILER_GCC)
+        target_compile_options(${target} PUBLIC -Wall -Weffc++ -Wextra -Werror)
+    elseif(LUG_COMPILER_CLANG)
+        target_compile_options(${target} PUBLIC
+            -Weverything -Werror -Weffc++ -Wextra
+            -fcomment-block-commands=copybrief,cond,endcond
+            -Wno-c++98-compat
+            -Wno-c++98-compat-pedantic
+            -Wno-padded
+            -Wno-weak-vtables
+            -Wno-exit-time-destructors
+            -Wno-global-constructors
+            -Wno-nested-anon-types
+            -Wno-gnu-anonymous-struct
+            -Wno-switch-enum
+            -Wno-covered-switch-default
+            -Wno-shadow-uncaptured-local
+            )
     endif()
 
     # add parallel build for MSVC

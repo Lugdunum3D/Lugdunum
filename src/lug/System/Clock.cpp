@@ -5,24 +5,16 @@ namespace System {
 
 Clock::Clock() : _startTime(Time::getCurrentTime()) {}
 
-Clock::Clock(const Clock& clock)
-{
-    _startTime = clock._startTime;
-}
+Clock::Clock(const Clock& clock) : _startTime{clock._startTime} {}
 
-Clock::Clock(Clock&& clock)
-{
-    _startTime = clock._startTime;
-}
+Clock::Clock(Clock&& clock) : _startTime{clock._startTime} {}
 
-Clock& Clock::operator=(const Clock& clock)
-{
+Clock& Clock::operator=(const Clock& clock) {
     _startTime = clock._startTime;
     return *this;
 }
 
-Clock& Clock::operator=(Clock&& clock)
-{
+Clock& Clock::operator=(Clock&& clock) {
     _startTime = clock._startTime;
     return *this;
 }

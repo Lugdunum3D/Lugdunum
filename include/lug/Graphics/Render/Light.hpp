@@ -45,7 +45,7 @@ public:
         float quadraticAttenuation{0.0f};
         float falloffAngle{0.0f};
         float falloffExponent{0.0f};
-        uint32_t type;
+        uint32_t type{0};
     };
 
     static constexpr uint32_t strideShader = 80;

@@ -67,14 +67,14 @@ public:
 
 private:
     Renderer& _renderer;
-    std::vector<std::unique_ptr<Resource>> _resources;
+    std::vector<std::unique_ptr<Resource>> _resources{};
 
     /**
      * The list of the available loaders. The string is the extension of the file, and the
      * pointer is the corresponding loader. The implementation will determine which loader to
      * call in loadFile thanks to this map.
      */
-    std::unordered_map<std::string, std::unique_ptr<Loader>> _loaders;
+    std::unordered_map<std::string, std::unique_ptr<Loader>> _loaders{};
 };
 
 #include <lug/Graphics/ResourceManager.inl>

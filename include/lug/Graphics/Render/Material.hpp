@@ -26,7 +26,7 @@ class LUG_GRAPHICS_API Material : public Resource, public DirtyObject {
 
 public:
     struct TextureInfo {
-        Resource::SharedPtr<Texture> texture;
+        Resource::SharedPtr<Texture> texture{};
         uint32_t texCoord{0};
     };
 
@@ -44,7 +44,6 @@ public:
      * @brief      Constructs a Material
      *
      * @param[in]  name  The name of the Material
-     * @param[in]  type  The type of the Material
      */
     Material(const std::string& name);
 
@@ -67,12 +66,12 @@ public:
     const TextureInfo& getEmissiveTexture() const;
 
 protected:
-    Constants _constants;
-    TextureInfo _baseColorTexture;
-    TextureInfo _metallicRoughnessTexture;
-    TextureInfo _normalTexture;
-    TextureInfo _occlusionTexture;
-    TextureInfo _emissiveTexture;
+    Constants _constants{};
+    TextureInfo _baseColorTexture{};
+    TextureInfo _metallicRoughnessTexture{};
+    TextureInfo _normalTexture{};
+    TextureInfo _occlusionTexture{};
+    TextureInfo _emissiveTexture{};
 };
 
 #include <lug/Graphics/Render/Material.inl>

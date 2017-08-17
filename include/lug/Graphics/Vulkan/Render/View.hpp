@@ -52,10 +52,10 @@ private:
     Renderer& _renderer;
     std::unique_ptr<Technique::Technique> _renderTechnique{nullptr};
 
-    std::vector<API::Semaphore> _drawCompleteSemaphores;
-    const API::Queue* _presentQueue;
+    std::vector<API::Semaphore> _drawCompleteSemaphores{};
+    const API::Queue* _presentQueue{nullptr};
 
-    Render::Queue _renderQueue;
+    Render::Queue _renderQueue{};
 };
 
 #include <lug/Graphics/Vulkan/Render/View.inl>

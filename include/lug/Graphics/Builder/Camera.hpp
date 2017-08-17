@@ -39,36 +39,36 @@ public:
     void setType(Type type);
 
     // Perspective
-    void setFovY(float fovy);
+    void setFovY(float fovY);
     void setAspectRatio(float aspectRatio);
 
     // Orthographic
-    void setXMag(float xmag);
-    void setYMag(float ymag);
+    void setXMag(float xMag);
+    void setYMag(float yMag);
 
     // Both
-    void setZNear(float znear);
-    void setZFar(float zfar);
+    void setZNear(float zNear);
+    void setZFar(float zFar);
 
     Resource::SharedPtr<Render::Camera::Camera> build();
 
 protected:
     Renderer& _renderer;
 
-    std::string _name;
+    std::string _name{};
     Type _type{Type::Perspective};
 
     // Perspective
-    float _fovy{0.0f};
+    float _fovY{0.0f};
     float _aspectRatio{0.0f};
 
     // Orthographic
-    float _xmag{0.0f};
-    float _ymag{0.0f};
+    float _xMag{0.0f};
+    float _yMag{0.0f};
 
     // Both
-    float _znear{0.0f};
-    float _zfar{0.0f};
+    float _zNear{0.0f};
+    float _zFar{0.0f};
 };
 
 #include <lug/Graphics/Builder/Camera.inl>

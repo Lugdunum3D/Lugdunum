@@ -65,7 +65,7 @@ public:
 
 protected:
     const std::string _name;
-    std::set<Handler*> _handlers;
+    std::set<Handler*> _handlers{};
 };
 
 #include <lug/System/Logger/Logger.inl>

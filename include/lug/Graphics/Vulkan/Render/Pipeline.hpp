@@ -38,7 +38,7 @@ public:
                 struct {
                     uint32_t positionVertexData : 1;    ///< 0 if no attribute position.
                     uint32_t normalVertexData : 1;      ///< 0 if no attribute normal.
-                    uint32_t tangentVertexData : 1;     ///< 0 if no attribute tangeant.
+                    uint32_t tangentVertexData : 1;     ///< 0 if no attribute tangent.
                     uint32_t countTexCoord : 2;         ///< The number of texcoord (maximum 3).
                     uint32_t countColor : 2;            ///< The number of colors (maximum 3).
                     uint32_t primitiveMode : 3;         ///< The primitive mode. @see Mesh::PrimitiveSet::Mode.
@@ -133,7 +133,7 @@ public:
             id.materialPart = static_cast<uint32_t>(materialPart);
 
             return id;
-        };
+        }
     };
 
 public:
@@ -189,9 +189,9 @@ private:
 
 private:
     Renderer& _renderer;
-    Id _id;
+    Id _id{};
 
-    API::GraphicsPipeline _pipeline;
+    API::GraphicsPipeline _pipeline{};
 };
 
 #include <lug/Graphics/Vulkan/Render/Pipeline.inl>

@@ -59,10 +59,10 @@ enum class LUG_WINDOW_API Style : uint16_t {
 class LUG_WINDOW_API Window {
 public:
     struct InitInfo {
-        uint16_t width;
-        uint16_t height;
-        std::string title;
-        ::lug::Window::Style style;
+        uint16_t width{0};
+        uint16_t height{0};
+        std::string title{};
+        ::lug::Window::Style style{::lug::Window::Style::Default};
     };
 
 public:
@@ -168,34 +168,35 @@ protected:
     void initKeyState();
 
     /**
-    * @brief        Inits every button in @p _mouseState to false
-    */
+     * @brief       Inits every button in @p _mouseState to false
+     */
     void initMouseState();
 
     /**
-     * Internal representation of the platform specific implementation.
+     * @brief       Internal representation of the platform specific implementation.
      */
     priv::WindowImpl* _impl{nullptr};
 
     /**
-     * Default video mode.
+     * @brief      Default video mode.
      */
     VideoMode _mode{800, 600, 8, 8, 8, 60};
 
     /**
-     * Map to store the current state of the keys, used by #isKeyPressed.
+     * @brief      Map to store the current state of the keys, used by #isKeyPressed.
      */
-    std::unordered_map<Keyboard::Key, bool> _keyState;
+    std::unordered_map<Keyboard::Key, bool> _keyState{};
 
     /**
-    * Map to store the current state of the mouse buttons, used by #isMousePressed.
-    */
-    std::unordered_map<Mouse::Button, bool> _mouseState;
+     * @brief      Map to store the current state of the mouse buttons, used by #isMousePressed.
+     */
+    std::unordered_map<Mouse::Button, bool> _mouseState{};
 
     /**
-    * Used to store the mouse's position, used by #getMousePos.
-    */
+     * @brief      Used to store the mouse's position, used by #getMousePos.
+     */
     Math::Vec2i _mousePosition{0, 0};
+
     friend lug::Window::priv::WindowImpl;
 };
 

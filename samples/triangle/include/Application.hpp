@@ -22,5 +22,5 @@ public:
     void onFrame(const lug::System::Time& elapsedTime) override final;
 
 private:
-    lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> _triangleMesh;
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> _triangleMesh{};
 };

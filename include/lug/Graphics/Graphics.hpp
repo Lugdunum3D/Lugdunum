@@ -19,8 +19,9 @@ namespace Graphics {
  * @brief      Class for graphics.
  *
  *             This class is the root class of the 3D engine. It handles modules, will create
- *             the Graphics::Renderer based on the @p rendererType given in the Graphics::InitInfo
- *             structure. @n
+ *             the Graphics::Renderer based on the param rendererType given in the Graphics::InitInfo
+ *             structure.
+ *             It also handles Scene, Camera and Mesh creation.
  */
 class LUG_GRAPHICS_API Graphics {
 public:
@@ -28,8 +29,8 @@ public:
      * @brief      Utility structure used to initialize the Graphics component.
      */
     struct InitInfo {
-        Renderer::Type rendererType;            /** The renderer to use. */
-        Renderer::InitInfo rendererInitInfo;    /** Initialization info for the renderer. */
+        Renderer::Type rendererType;            ///> The renderer to use
+        Renderer::InitInfo rendererInitInfo;    ///> Initialization info for the renderer
         std::set<Module::Type> mandatoryModules;
         std::set<Module::Type> optionalModules;
     };
@@ -103,7 +104,12 @@ private:
     std::string _appName;
     Core::Version _appVersion;
 
-    InitInfo _initInfo;
+    InitInfo _initInfo{
+        /* rendererType     */ Renderer::Type::Vulkan,
+        /* rendererInitInfo */ {},
+        /* mandatoryModules */ {},
+        /* optionalModules  */ {}
+    };
 
     std::set<Module::Type> _loadedMandatoryModules{};
     std::set<Module::Type> _loadedOptionalModules{};

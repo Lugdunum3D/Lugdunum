@@ -107,7 +107,7 @@ macro(lug_add_sample target)
         message(STATUS "Found Vulkan: ${VULKAN_INCLUDE_DIR}")
     endif()
 
-    include_directories(${VULKAN_INCLUDE_DIR})
+    include_directories(SYSTEM ${VULKAN_INCLUDE_DIR})
 
     # find fmt
     find_package(Fmt)
@@ -121,7 +121,7 @@ macro(lug_add_sample target)
         message(STATUS "Found Fmt: ${FMT_INCLUDE_DIR}")
     endif()
 
-    include_directories(${FMT_INCLUDE_DIR})
+    include_directories(SYSTEM ${FMT_INCLUDE_DIR})
 
     # find imgui
     if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/imgui")
@@ -155,7 +155,7 @@ macro(lug_add_sample target)
     endif()
 
     # use lugdunum
-    include_directories(${LUG_INCLUDE_DIR})
+    include_directories(SYSTEM ${LUG_INCLUDE_DIR})
     target_link_libraries(${target} ${LUG_LIBRARIES})
 
     # copy / build shaders

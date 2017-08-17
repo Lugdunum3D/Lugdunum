@@ -4,8 +4,6 @@
 namespace lug {
 namespace System {
 
-Time::Time(const Time& time) : _microseconds(time._microseconds) {}
-
 Time::Time(int64_t microseconds) : _microseconds(microseconds) {}
 
 Time Time::getCurrentTime() {

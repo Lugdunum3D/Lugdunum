@@ -42,6 +42,7 @@ PREDEFINED             = __attribute__(x)= \
                          LUG_SYSTEM_API \
                          LUG_GRAPHICS_API \
                          LUG_CORE_API
+EXCLUDE_SYMBOLS        = priv
 
 
 #---------------------------------------------------------------------------

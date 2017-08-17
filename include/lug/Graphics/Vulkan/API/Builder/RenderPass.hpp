@@ -74,10 +74,10 @@ private:
 private:
     const API::Device& _device;
 
-    std::list<VkAttachmentDescription> _attachments;
-    std::list<VkSubpassDescription> _subpasses;
-    std::list<SubpassResources> _subpassesResources;
-    std::list<VkSubpassDependency> _dependencies;
+    std::list<VkAttachmentDescription> _attachments{};
+    std::list<VkSubpassDescription> _subpasses{};
+    std::list<SubpassResources> _subpassesResources{};
+    std::list<VkSubpassDependency> _dependencies{};
 };
 
 } // Builder

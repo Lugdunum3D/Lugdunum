@@ -49,7 +49,7 @@ public:
 protected:
     Renderer& _renderer;
 
-    std::string _name;
+    std::string _name{};
 
     Render::Light::Type _type{Render::Light::Type::Ambient};
 

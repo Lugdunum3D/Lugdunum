@@ -188,7 +188,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
 
     // Create staging buffers for image upload
     {
-        VkDeviceSize imageSize = texWidth * texHeight * 4 * layersPixels.size();
+        VkDeviceSize imageSize = static_cast<uint32_t>(texWidth) * static_cast<uint32_t>(texHeight) * 4 * layersPixels.size();
 
         API::Buffer stagingBuffer;
         API::DeviceMemory stagingBufferMemory;

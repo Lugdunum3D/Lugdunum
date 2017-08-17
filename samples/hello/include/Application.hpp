@@ -21,6 +21,6 @@ public:
     void onFrame(const lug::System::Time& elapsedTime) override final;
 
 private:
-    lug::Graphics::Resource::SharedPtr<lug::Graphics::Scene::Scene> _scene;
-    lug::Core::FreeMovement _cameraMover;
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Scene::Scene> _scene{};
+    lug::Core::FreeMovement _cameraMover{};
 };

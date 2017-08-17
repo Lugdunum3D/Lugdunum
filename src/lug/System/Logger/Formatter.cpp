@@ -9,6 +9,8 @@ namespace System {
 namespace Logger {
 namespace priv {
 
+Formattable::~Formattable() = default;
+
 std::string UserChars::format(Message*) const {
     return _chars;
 }

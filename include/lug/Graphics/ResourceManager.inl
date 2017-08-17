@@ -23,7 +23,8 @@ Resource::SharedPtr<T> ResourceManager::add(std::unique_ptr<Resource> resource) 
         "T must inherit from Resource"
     );
 
-    resource->_handle.index = _resources.size();
+    // TODO: ensure _resources.size() does not goes above the size of the index bit-field
+    resource->_handle.index = static_cast<uint32_t>(_resources.size());
     _resources.push_back(std::move(resource));
 
     return dynamic_cast<T*>(_resources.back().get());

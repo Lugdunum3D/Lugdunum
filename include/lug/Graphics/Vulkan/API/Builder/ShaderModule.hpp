@@ -37,7 +37,7 @@ private:
     const API::Device& _device;
 
     size_t _codeSize{0};
-    std::vector<uint32_t> _data;
+    std::vector<uint32_t> _data{};
 };
 
 } // Builder

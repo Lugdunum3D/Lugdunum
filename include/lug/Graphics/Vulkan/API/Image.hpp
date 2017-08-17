@@ -57,12 +57,40 @@ public:
     VkDeviceSize getDeviceMemoryOffset() const;
     VkFormat getFormat() const;
 
-    // Return first format supported by given features and tiling
+    /**
+     * @brief      Return first format supported by given features and tiling
+     *
+     * @param[in]  device    The device
+     * @param[in]  formats   The formats to iterate over
+     * @param[in]  tiling    The tiling that must be supported
+     * @param[in]  features  The features that must be supported
+     *
+     * @return     The format that supports both features and tiling given in parameter
+     */
     static VkFormat findSupportedFormat(const Device& device, const std::set<VkFormat>& formats, VkImageTiling tiling, VkFormatFeatureFlags features);
 
 private:
+    /**
+     * @brief      Private ctor
+     *
+     * @param[in]  Image           The underlying image
+     * @param[in]  device          The device
+     * @param[in]  extent          The extent
+     * @param[in]  format          The format
+     * @param[in]  swapchainImage  True if the swapchain has the ownership on the underlying VkImage type
+     */
     explicit Image(VkImage Image, const Device* device, const Extent& extent, VkFormat format, bool swapchainImage);
 
+    /**
+     * @brief      Return true if the format uis supported with the given features and tiling
+     *
+     * @param[in]  device    The device
+     * @param[in]  format    The format
+     * @param[in]  tiling    The tiling that must be supported
+     * @param[in]  features  The features that must be supported
+     *
+     * @return     Wether the format given in parameter supports both features and tiling given in parameter
+     */
     static bool isFormatSupported(const Device& device, VkFormat format, VkImageTiling tiling, VkFormatFeatureFlags features);
 
 private:
@@ -72,10 +100,10 @@ private:
     const DeviceMemory* _deviceMemory{nullptr};
     VkDeviceSize _deviceMemoryOffset{0};
 
-    Extent _extent;
-    VkFormat _format;
-    VkImageAspectFlags _aspect;
-    bool _swapchainImage;
+    Extent _extent{};
+    VkFormat _format{};
+    VkImageAspectFlags _aspect{};
+    bool _swapchainImage{};
 
     VkMemoryRequirements _requirements{};
 };

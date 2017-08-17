@@ -60,7 +60,7 @@ public:
 protected:
     Renderer& _renderer;
 
-    std::string _name;
+    std::string _name{};
 
     Type _type{Type::Texture2D};
 
@@ -71,7 +71,7 @@ protected:
     Render::Texture::WrappingMode _wrapS{Render::Texture::WrappingMode::ClampToEdge};
     Render::Texture::WrappingMode _wrapT{Render::Texture::WrappingMode::ClampToEdge};
 
-    std::vector<Layer> _layers;
+    std::vector<Layer> _layers{};
 };
 
 #include <lug/Graphics/Builder/Texture.inl>

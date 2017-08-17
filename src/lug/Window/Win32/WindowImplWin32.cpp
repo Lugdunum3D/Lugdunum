@@ -69,7 +69,7 @@ bool WindowImpl::init(const Window::InitInfo& initInfo) {
         }
     }
 
-    _fullscreen = (initInfo.style & Style::Fullscreen) == Style::Fullscreen ? true : false;
+    _fullscreen = (initInfo.style & Style::Fullscreen) == Style::Fullscreen;
     // In windowed mode, adjust width and height so that the window will have the requested client area
     RECT rectangle = { 0, 0, initInfo.width, initInfo.height };
 

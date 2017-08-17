@@ -27,7 +27,7 @@ public:
     void flush();
 
 private:
-    std::ofstream _ofs;
+    std::ofstream _ofs{};
 };
 
 } // Logger

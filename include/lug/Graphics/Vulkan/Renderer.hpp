@@ -21,16 +21,16 @@ namespace Vulkan {
 class LUG_GRAPHICS_API Renderer final : public ::lug::Graphics::Renderer {
 public:
     struct Requirements {
-        const std::vector<const char*> mandatoryInstanceExtensions;
-        const std::vector<const char*> mandatoryInstanceLayers;
-        const std::vector<const char*> mandatoryDeviceExtensions;
+        const std::vector<const char*> mandatoryInstanceExtensions{};
+        const std::vector<const char*> mandatoryInstanceLayers{};
+        const std::vector<const char*> mandatoryDeviceExtensions{};
 
-        const std::vector<const char*> optionalInstanceExtensions;
-        const std::vector<const char*> optionalInstanceLayers;
-        const std::vector<const char*> optionalDeviceExtensions;
+        const std::vector<const char*> optionalInstanceExtensions{};
+        const std::vector<const char*> optionalInstanceLayers{};
+        const std::vector<const char*> optionalDeviceExtensions{};
 
-        const VkPhysicalDeviceFeatures mandatoryFeatures;
-        const VkPhysicalDeviceFeatures optionalFeatures;
+        const VkPhysicalDeviceFeatures mandatoryFeatures{};
+        const VkPhysicalDeviceFeatures optionalFeatures{};
 
         // TODO: PhysicalDeviceLimits / PhysicalDeviceSparseProperties
         // TODO: Memory properties
@@ -38,13 +38,13 @@ public:
     };
 
     struct Preferences {
-        PhysicalDeviceInfo* device;
+        PhysicalDeviceInfo* device{nullptr};
 
         struct Swapchain {
-            std::vector<VkPresentModeKHR> presentModes;                 // By order of preference
-            std::vector<VkFormat> formats;                              // By order of preference
-            std::vector<VkCompositeAlphaFlagBitsKHR> compositeAlphas;   // By order of preference
-        } swapchain;
+            std::vector<VkPresentModeKHR> presentModes{};               // By order of preference
+            std::vector<VkFormat> formats{};                            // By order of preference
+            std::vector<VkCompositeAlphaFlagBitsKHR> compositeAlphas{}; // By order of preference
+        } swapchain{};
     };
 
 public:
@@ -109,7 +109,7 @@ private:
     std::vector<const char*> checkRequirementsExtensions(const Info& info, const std::vector<const char*>& extensions, std::vector<const char*>& extensionsFound);
 
 private:
-    API::Loader _loader;
+    API::Loader _loader{};
 
     API::Instance _instance{};
     API::Device _device{};
@@ -120,7 +120,7 @@ private:
 
     VkDebugReportCallbackEXT _debugReportCallback{VK_NULL_HANDLE};
 
-    std::unique_ptr<Render::Window> _window;
+    std::unique_ptr<Render::Window> _window{nullptr};
 
     std::vector<const char*> _loadedInstanceLayers{};
     std::vector<const char*> _loadedInstanceExtensions{};
@@ -147,7 +147,7 @@ private:
         }
     };
 
-    std::unordered_map<Render::Pipeline::Id, Resource::WeakPtr<Render::Pipeline>> _pipelines;
+    std::unordered_map<Render::Pipeline::Id, Resource::WeakPtr<Render::Pipeline>> _pipelines{};
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;

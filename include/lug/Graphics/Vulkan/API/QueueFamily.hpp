@@ -50,8 +50,8 @@ private:
     bool _presentation{false};
     VkQueueFlags _flags{0};
 
-    std::vector<Queue> _queues;
-    std::unordered_map<std::string, uint32_t>  _queuesIndices;
+    std::vector<Queue> _queues{};
+    std::unordered_map<std::string, uint32_t>  _queuesIndices{};
 };
 
 #include <lug/Graphics/Vulkan/API/QueueFamily.inl>

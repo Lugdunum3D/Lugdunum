@@ -31,12 +31,12 @@ bool Application::init(int argc, char* argv[]) {
         }
     }
 
-    // Build the triangle
+    // Build the cube
     if (!initCubeMesh()) {
         return false;
     }
 
-    // Attach the triangle
+    // Attach the cube
     {
         lug::Graphics::Builder::Material materialBuilder(*renderer);
 

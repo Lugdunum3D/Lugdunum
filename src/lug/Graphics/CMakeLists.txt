@@ -343,7 +343,7 @@ if (NOT GLTF2-LOADER_FOUND)
     message(STATUS "Found glTF2-loader includes: ${GLTF2-LOADER_INCLUDE_DIR}")
 endif()
 
-include_directories(${GLTF2-LOADER_INCLUDE_DIR})
+include_directories(SYSTEM ${GLTF2-LOADER_INCLUDE_DIR})
 
 find_package(Threads)
 
@@ -358,7 +358,7 @@ message(STATUS "Found Imgui: ${IMGUI_INCLUDE_DIR}")
 set(IMGUI_SOURCE_DIR ${LUG_THIRDPARTY_DIR}/imgui/src)
 message(STATUS "Found Imgui: ${IMGUI_SOURCE_DIR}")
 
-include_directories(${IMGUI_INCLUDE_DIR})
+include_directories(SYSTEM ${IMGUI_INCLUDE_DIR})
 
 set(IMGUI_SOURCE_FILES
     ${IMGUI_SOURCE_DIR}/imgui.cpp
@@ -367,7 +367,9 @@ set(IMGUI_SOURCE_FILES
 )
 
 if(LUG_COMPILER_GCC)
-    set_source_files_properties(${IMGUI_SOURCE_FILES} PROPERTIES COMPILE_FLAGS -Wno-error=maybe-uninitialized)
+    set_source_files_properties(${IMGUI_SOURCE_FILES} PROPERTIES COMPILE_FLAGS "-Wno-effc++ -Wno-error=maybe-uninitialized")
+elseif(LUG_COMPILER_CLANG)
+    set_source_files_properties(${IMGUI_SOURCE_FILES} PROPERTIES COMPILE_FLAGS "-Wno-effc++ -Wno-everything")
 endif()
 
 # define the target

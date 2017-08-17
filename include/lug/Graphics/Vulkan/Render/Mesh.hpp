@@ -22,8 +22,8 @@ class LUG_GRAPHICS_API Mesh : public ::lug::Graphics::Render::Mesh {
 
 public:
     struct PrimitiveSetData {
-        Pipeline::Id::PrimitivePart pipelineIdPrimitivePart;
-        std::vector<API::Buffer> buffers;
+        Pipeline::Id::PrimitivePart pipelineIdPrimitivePart{};
+        std::vector<API::Buffer> buffers{};
     };
 
 public:
@@ -41,7 +41,7 @@ private:
     explicit Mesh(const std::string& name);
 
 private:
-    API::DeviceMemory _deviceMemory;
+    API::DeviceMemory _deviceMemory{};
 };
 
 #include <lug/Graphics/Vulkan/Render/Mesh.inl>

@@ -33,30 +33,30 @@ namespace Technique {
 class LUG_GRAPHICS_API Forward final : public Technique {
 private:
     struct DepthBuffer {
-        API::Image image;
-        API::ImageView imageView;
+        API::Image image{};
+        API::ImageView imageView{};
     };
 
     struct FrameData {
-        DepthBuffer depthBuffer;
-        API::Framebuffer framebuffer;
+        DepthBuffer depthBuffer{};
+        API::Framebuffer framebuffer{};
 
-        API::Fence renderFence;
-        API::CommandBuffer renderCmdBuffer;
+        API::Fence renderFence{};
+        API::CommandBuffer renderCmdBuffer{};
 
-        API::Fence transferFence;
-        API::CommandBuffer transferCmdBuffer;
-        API::Semaphore transferSemaphore;
+        API::Fence transferFence{};
+        API::CommandBuffer transferCmdBuffer{};
+        API::Semaphore transferSemaphore{};
 
         const BufferPool::SubBuffer* cameraBuffer{nullptr};
-        std::vector<const BufferPool::SubBuffer*> lightBuffers;
-        std::vector<const BufferPool::SubBuffer*> materialBuffers;
+        std::vector<const BufferPool::SubBuffer*> lightBuffers{};
+        std::vector<const BufferPool::SubBuffer*> materialBuffers{};
 
         const DescriptorSetPool::DescriptorSet* cameraDescriptorSet{nullptr};
         const DescriptorSetPool::DescriptorSet* skyBoxDescriptorSet{nullptr};
-        std::vector<const DescriptorSetPool::DescriptorSet*> lightDescriptorSets;
-        std::vector<const DescriptorSetPool::DescriptorSet*> materialDescriptorSets;
-        std::vector<const DescriptorSetPool::DescriptorSet*> materialTexturesDescriptorSets;
+        std::vector<const DescriptorSetPool::DescriptorSet*> lightDescriptorSets{};
+        std::vector<const DescriptorSetPool::DescriptorSet*> materialDescriptorSets{};
+        std::vector<const DescriptorSetPool::DescriptorSet*> materialTexturesDescriptorSets{};
     };
 
 public:
@@ -84,15 +84,15 @@ public:
     bool initFramebuffers(const std::vector<API::ImageView>& imageViews) override final;
 
 private:
-    API::DeviceMemory _depthBufferMemory;
+    API::DeviceMemory _depthBufferMemory{};
 
-    std::vector<FrameData> _framesData;
+    std::vector<FrameData> _framesData{};
 
     const API::Queue* _graphicsQueue{nullptr};
-    API::CommandPool _graphicsCommandPool;
+    API::CommandPool _graphicsCommandPool{};
 
     const API::Queue* _transferQueue{nullptr};
-    API::CommandPool _transferCommandPool;
+    API::CommandPool _transferCommandPool{};
 
 private:
     // TODO: Use shared_ptr in the instance and static weak_ptr to avoid problem when we delete one forward renderer and not the others

@@ -62,7 +62,7 @@ private:
 
     Resource::SharedPtr<Render::SkyBox> _skyBox{nullptr};
 
-    std::list<Node> _nodes;
+    std::list<Node> _nodes{};
 };
 
 #include <lug/Graphics/Scene/Scene.inl>

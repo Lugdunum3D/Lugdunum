@@ -37,10 +37,10 @@ private:
 
 protected:
     Renderer& _renderer;
-    std::set<uint32_t> _queueFamilyIndices;
+    std::set<uint32_t> _queueFamilyIndices{};
 
-    std::list<Chunk<subBufferPerChunk, subBufferSize>> _chunks;
-    std::map<size_t, SubBuffer*> _subBuffersInUse;
+    std::list<Chunk<subBufferPerChunk, subBufferSize>> _chunks{};
+    std::map<size_t, SubBuffer*> _subBuffersInUse{};
 };
 
 #include <lug/Graphics/Vulkan/Render/BufferPool/BufferPool.inl>

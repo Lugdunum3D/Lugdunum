@@ -50,12 +50,16 @@ bool ShaderModule::loadFromFile(const std::string& filename) {
     }
 
     shaderFile.seekg(0, shaderFile.end);
-    _codeSize = shaderFile.tellg();
+    std::streamoff shaderCodeSize; // tellg can return -1 so we have a std::streamoff instead of size_t
+    if ((shaderCodeSize = shaderFile.tellg()) < 0) {
+        return false;
+    }
+    _codeSize = static_cast<std::size_t>(shaderCodeSize);
     shaderFile.seekg(0, shaderFile.beg);
 
     _data.resize(_codeSize % 4 ? (_codeSize + 4 - _codeSize % 4) : (_codeSize));
 
-    shaderFile.read(reinterpret_cast<char*>(_data.data()), _codeSize);
+    shaderFile.read(reinterpret_cast<char*>(_data.data()), static_cast<long>(_codeSize));
     shaderFile.close();
 #endif
 

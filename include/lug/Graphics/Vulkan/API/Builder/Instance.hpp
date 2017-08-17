@@ -16,10 +16,10 @@ namespace Builder {
 class Instance {
 public:
     struct ApplicationInfo {
-        std::string appName;
+        std::string appName{};
         Core::Version appVersion{0, 0, 0};
 
-        std::string engineName;
+        std::string engineName{};
         Core::Version engineVersion{0, 0, 0};
 
         Core::Version apiVersion{0, 0, 0};
@@ -49,10 +49,10 @@ public:
     std::unique_ptr<API::Instance> build(VkResult* returnResult = nullptr);
 
 private:
-    ApplicationInfo _appInfo;
+    ApplicationInfo _appInfo{};
 
-    std::vector<const char*> _layers;
-    std::vector<const char*> _extensions;
+    std::vector<const char*> _layers{};
+    std::vector<const char*> _extensions{};
 };
 
 #include <lug/Graphics/Vulkan/API/Builder/Instance.inl>

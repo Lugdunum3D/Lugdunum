@@ -134,7 +134,7 @@ inline Quaternion<T> Quaternion<T>::fromRotationMatrix(const Matrix<4, 4, T>& ro
     const T tr = rotMatrix(0, 0) + rotMatrix(1, 1) + rotMatrix(2, 2);
 
     if (tr > 0.0f) {
-        const T s = sqrt(T(1) + tr) * T(2);
+        const T s = std::sqrt(T(1) + tr) * T(2);
 
         return Quaternion<T>(
             T(0.25f) * s,
@@ -143,7 +143,7 @@ inline Quaternion<T> Quaternion<T>::fromRotationMatrix(const Matrix<4, 4, T>& ro
             (rotMatrix(1, 0) - rotMatrix(0, 1)) / s
         );
     } else if ((rotMatrix(0, 0) > rotMatrix(1, 1)) && (rotMatrix(0, 0) > rotMatrix(2, 2))) {
-        const T s = sqrt(T(1) + rotMatrix(0, 0) - rotMatrix(1, 1) - rotMatrix(2, 2)) * T(2);
+        const T s = std::sqrt(T(1) + rotMatrix(0, 0) - rotMatrix(1, 1) - rotMatrix(2, 2)) * T(2);
 
         return Quaternion<T>(
             (rotMatrix(2, 1) - rotMatrix(1, 2)) / s,
@@ -152,7 +152,7 @@ inline Quaternion<T> Quaternion<T>::fromRotationMatrix(const Matrix<4, 4, T>& ro
             (rotMatrix(0, 2) + rotMatrix(2, 0)) / s
         );
     } else if (rotMatrix(1, 1) > rotMatrix(2, 2)) {
-        const T s = sqrt(T(1) + rotMatrix(1, 1) - rotMatrix(0, 0) - rotMatrix(2, 2)) * T(2);
+        const T s = std::sqrt(T(1) + rotMatrix(1, 1) - rotMatrix(0, 0) - rotMatrix(2, 2)) * T(2);
 
         return Quaternion<T>(
             (rotMatrix(0, 2) - rotMatrix(2, 0)) / s,
@@ -161,7 +161,7 @@ inline Quaternion<T> Quaternion<T>::fromRotationMatrix(const Matrix<4, 4, T>& ro
             (rotMatrix(1, 2) + rotMatrix(2, 1)) / s
         );
     } else {
-        const T s = sqrt(T(1) + rotMatrix(2, 2) - rotMatrix(0, 0) - rotMatrix(1, 1)) * T(2);
+        const T s = std::sqrt(T(1) + rotMatrix(2, 2) - rotMatrix(0, 0) - rotMatrix(1, 1)) * T(2);
 
         return Quaternion<T>(
             (rotMatrix(1, 0) - rotMatrix(0, 1)) / s,
@@ -223,14 +223,14 @@ Quaternion<T> directionTo(const Vector<3, T>& original, const Vector<3, T>& expe
     if (cosTheta < T(-1) + epsilon<T>()) {
         // Generate a fallback vector
         Vector<3, T> axis = cross(Vector<3, T>{0.0f, 0.0f, 1.0f}, v0);
-        if (axis.squaredLength() <= (1e-06 * 1e-06)) {
+        if (axis.squaredLength() <= (1e-06f * 1e-06f)) {
             axis = cross(Vector<3, T>{1.0f, 0.0f, 0.0f}, v0);
         }
 
         axis.normalize();
         result = Quaternion<T>(pi<T>(), axis);
     } else {
-        T s = sqrt((T(1) + cosTheta) * T(2));
+        T s = std::sqrt((T(1) + cosTheta) * T(2));
         T invs = T(1) / s;
 
         Vector<3, T> c = cross(v0, v1);

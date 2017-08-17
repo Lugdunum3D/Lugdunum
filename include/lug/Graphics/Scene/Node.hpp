@@ -30,7 +30,7 @@ class LUG_GRAPHICS_API Node : public ::lug::Graphics::Node, public Render::Dirty
 public:
     struct MeshInstance {
         Resource::SharedPtr<Render::Mesh> mesh{nullptr};
-        std::vector<Resource::SharedPtr<Render::Material>> materials;
+        std::vector<Resource::SharedPtr<Render::Material>> materials{};
     };
 
 public:
@@ -71,7 +71,7 @@ private:
     Scene &_scene;
 
     Resource::SharedPtr<Render::Light> _light{nullptr};
-    MeshInstance _meshInstance;
+    MeshInstance _meshInstance{};
     Resource::SharedPtr<Render::Camera::Camera> _camera{nullptr};
 };
 

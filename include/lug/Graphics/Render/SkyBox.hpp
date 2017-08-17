@@ -31,7 +31,7 @@ public:
     const Resource::SharedPtr<lug::Graphics::Render::Texture> getTexture() const;
 
 protected:
-    lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> _texture;
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> _texture{};
 };
 
 #include <lug/Graphics/Render/SkyBox.inl>

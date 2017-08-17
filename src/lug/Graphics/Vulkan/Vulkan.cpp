@@ -41,18 +41,23 @@ bool PhysicalDeviceInfo::containsExtension(const char* extensionName) const {
     return std::find_if(extensions.cbegin(), extensions.cend(), compareExtensions) != extensions.cend();
 }
 
-bool PhysicalDeviceInfo::containsQueueFlags(VkQueueFlags queueFlags, int8_t& idx) const {
-    idx = -1;
+bool PhysicalDeviceInfo::containsQueueFlags(VkQueueFlags queueFlags, uint8_t& idx) const {
+    bool matched = false;
 
     for (uint8_t i = 0; i < queueFamilies.size(); ++i) {
+        // First match a queue that can have other flags
         if (queueFamilies[i].queueCount && (queueFamilies[i].queueFlags & queueFlags) == queueFlags) {
-            if (idx == -1 || queueFamilies[i].queueFlags == queueFlags) {
-                idx = i;
+            // If that's the first, match it
+            idx = i;
+            matched = true;
+            // If it's an exact match, no need to look any further
+            if (queueFamilies[i].queueFlags == queueFlags) {
+                return true;
             }
         }
     }
 
-    return idx != -1;
+    return matched;
 }
 
 } // Vulkan

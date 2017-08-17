@@ -39,9 +39,10 @@ private:
     Display* _display{nullptr};
     ::Window  _window{0};
 
-    Atom _wmProtocols;
-    Atom _wmDeleteWindow;
-    Atom _wmHints;
+    // Atoms are really are just ints, so we can initialize them to 0 with {}
+    Atom _wmProtocols{};
+    Atom _wmDeleteWindow{};
+    Atom _wmHints{};
 
     Cursor _hiddenCursor{0};    ///< Invisible cursor used to hide the pointer
 

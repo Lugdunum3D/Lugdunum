@@ -1,6 +1,8 @@
 #include <lug/Graphics/Vulkan/API/Builder/Device.hpp>
 
-#define NOMINMAX
+#if defined(LUG_SYSTEM_WINDOWS)
+    #define NOMINMAX
+#endif
 #include <algorithm>
 
 #include <lug/System/Logger/Logger.hpp>
@@ -21,7 +23,7 @@ Device::Device(const PhysicalDeviceInfo& physicalDeviceInfo): _physicalDeviceInf
 }
 
 uint8_t Device::addQueues(VkQueueFlags queueFlags, const std::vector<std::string>& queuesNames) {
-    int8_t queuesNb = 0;
+    uint8_t queuesNb = 0;
 
     for (const std::string& queueName: queuesNames) {
         if (!addQueue(queueFlags, queueName)) {
@@ -30,7 +32,7 @@ uint8_t Device::addQueues(VkQueueFlags queueFlags, const std::vector<std::string
             if (queueFlags & VK_QUEUE_TRANSFER_BIT) {
                 // We try to find a queue first by replacing VK_QUEUE_TRANSFER_BIT with VK_QUEUE_GRAPHICS_BIT
                 // then with VK_QUEUE_COMPUTE_BIT
-                VkQueueFlags queueFlagsTmp = queueFlags & ~VK_QUEUE_TRANSFER_BIT;
+                VkQueueFlags queueFlagsTmp = queueFlags & static_cast<VkQueueFlags>(~VK_QUEUE_TRANSFER_BIT);
                 if (!addQueue(queueFlagsTmp | VK_QUEUE_GRAPHICS_BIT, queueName) &&
                     !addQueue(queueFlagsTmp | VK_QUEUE_COMPUTE_BIT, queueName)) {
                     return queuesNb;

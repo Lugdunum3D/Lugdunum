@@ -47,7 +47,7 @@ public:
         Render::Mesh::PrimitiveSet::Mode _mode{Render::Mesh::PrimitiveSet::Mode::Triangles};
         Resource::SharedPtr<Render::Material> _material{nullptr};
 
-        std::vector<Render::Mesh::PrimitiveSet::Attribute> _attributes;
+        std::vector<Render::Mesh::PrimitiveSet::Attribute> _attributes{};
     };
 
     friend class PrimitiveSet;
@@ -79,8 +79,8 @@ public:
 protected:
     Renderer& _renderer;
 
-    std::string _name;
-    std::list<PrimitiveSet> _primitiveSets;
+    std::string _name{};
+    std::list<PrimitiveSet> _primitiveSets{};
 };
 
 #include <lug/Graphics/Builder/Mesh.inl>

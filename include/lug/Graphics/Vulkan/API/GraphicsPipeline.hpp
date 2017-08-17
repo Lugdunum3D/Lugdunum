@@ -42,10 +42,10 @@ private:
 
 private:
     VkPipeline _pipeline{VK_NULL_HANDLE};
-    const Device* _device;
+    const Device* _device{nullptr};
 
-    RenderPass _renderPass;
-    PipelineLayout _pipelineLayout;
+    RenderPass _renderPass{};
+    PipelineLayout _pipelineLayout{};
 };
 
 } // API

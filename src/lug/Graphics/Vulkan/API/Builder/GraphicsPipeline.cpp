@@ -28,7 +28,7 @@ bool GraphicsPipeline::build(API::GraphicsPipeline& graphicPipeline, VkResult* r
         /* inputAssemblyCreateInfo.pNext */ nullptr,
         /* inputAssemblyCreateInfo.flags */ 0,
         /* inputAssemblyCreateInfo.topology */ _topology,
-        /* inputAssemblyCreateInfo.primitiveRestartEnable */ _primitiveRestartEnable
+        /* inputAssemblyCreateInfo.primitiveRestartEnable */ static_cast<VkBool32>(_primitiveRestartEnable)
     };
 
     // Viewport state

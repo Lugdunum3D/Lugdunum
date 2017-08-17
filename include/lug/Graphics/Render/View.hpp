@@ -84,8 +84,8 @@ public:
     virtual bool endFrame() = 0;
 
 protected:
-    const Target* _renderTarget;
-    InitInfo _info;
+    const Target* _renderTarget{nullptr};
+    InitInfo _info{};
 
     Viewport _viewport{};
     Scissor _scissor{};

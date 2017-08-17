@@ -43,7 +43,7 @@ const API::QueueFamily* Device::getQueueFamily(VkQueueFlags flags, bool supportP
     }
 
     if (!returnQueue && flags & VK_QUEUE_TRANSFER_BIT) {
-        return getQueueFamily((flags & ~VK_QUEUE_TRANSFER_BIT) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
+        return getQueueFamily((flags & static_cast<VkQueueFlags>(~VK_QUEUE_TRANSFER_BIT)) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
     }
 
     return returnQueue;
@@ -61,7 +61,7 @@ API::QueueFamily* Device::getQueueFamily(VkQueueFlags flags, bool supportPresent
     }
 
     if (!returnQueue && flags & VK_QUEUE_TRANSFER_BIT) {
-        return getQueueFamily((flags & ~VK_QUEUE_TRANSFER_BIT) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
+        return getQueueFamily((flags & static_cast<VkQueueFlags>(~VK_QUEUE_TRANSFER_BIT)) | VK_QUEUE_GRAPHICS_BIT, supportPresentation);
     }
 
     return returnQueue;

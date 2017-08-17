@@ -59,7 +59,7 @@ if (NOT VULKAN_INCLUDE_DIR)
     message(STATUS "Found Vulkan: ${VULKAN_INCLUDE_DIR}")
 endif()
 
-include_directories(${VULKAN_INCLUDE_DIR})
+include_directories(SYSTEM ${VULKAN_INCLUDE_DIR})
 
 # find fmt
 find_package(Fmt)
@@ -73,7 +73,7 @@ if (NOT FMT_INCLUDE_DIR)
     message(STATUS "Found Fmt: ${FMT_INCLUDE_DIR}")
 endif()
 
-include_directories(${FMT_INCLUDE_DIR})
+include_directories(SYSTEM ${FMT_INCLUDE_DIR})
 
 # find shaderc
 find_package(Shaderc)
@@ -90,7 +90,7 @@ if (NOT SHADERC_FOUND)
     message(STATUS "Found shaderc includes: ${SHADERC_INCLUDE_DIR}")
 endif()
 
-include_directories(${SHADERC_INCLUDE_DIR})
+include_directories(SYSTEM ${SHADERC_INCLUDE_DIR})
 
 include_directories(SYSTEM ext/)
 

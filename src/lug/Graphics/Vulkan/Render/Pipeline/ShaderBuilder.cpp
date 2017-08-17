@@ -62,7 +62,7 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromFile(std::string f
     std::ifstream file(filename);
 
     if (!file.good()) {
-        LUG_EXCEPT(FileNotFoundException, "Can't find shader file");
+        LUG_EXCEPT(FileNotFoundException, "Can't find shader file: " + filename);
     }
 
     std::string content = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());

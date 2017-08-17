@@ -59,11 +59,11 @@ bool Application::init(int argc, char* argv[]) {
 
         // Attach the camera node to the mover
         _cameraMover.setTargetNode(*node);
-        _cameraMover.setEventSource(*_graphics.getRenderer()->getWindow());
+        _cameraMover.setEventSource(*renderer->getWindow());
 
         // Attach camera to RenderView
         {
-            auto& renderViews = _graphics.getRenderer()->getWindow()->getRenderViews();
+            auto& renderViews = renderer->getWindow()->getRenderViews();
 
             LUG_ASSERT(renderViews.size() > 0, "There should be at least 1 render view");
 

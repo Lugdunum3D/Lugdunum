@@ -47,7 +47,7 @@ public:
     ValArray<Size, T>& operator/=(const ValArray<Size, T>& rhs);
 
 private:
-    std::array<T, Size> _data;
+    std::array<T, Size> _data{};
 };
 
 // ValArray/Scalar operations

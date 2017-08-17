@@ -44,6 +44,13 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
                 continue;
             }
 
+            // Pipeline::Handle::PrimitivePart support only 3 colors
+            if (targetPrimitiveSet.attributes[i].type == lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Color &&
+                targetPrimitiveSet.colors.size() == 3) {
+                LUG_LOG.warn("Vulkan::Mesh::build: More than 3 colors, others will be ignored");
+                continue;
+            }
+
             switch (targetPrimitiveSet.attributes[i].type) {
                 case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice:
                     targetPrimitiveSet.indices = &targetPrimitiveSet.attributes[i];
@@ -94,11 +101,13 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
             }
         }
 
+
+
         primitiveSetData->pipelineIdPrimitivePart.positionVertexData = targetPrimitiveSet.position != nullptr;
         primitiveSetData->pipelineIdPrimitivePart.normalVertexData = targetPrimitiveSet.normal != nullptr;
         primitiveSetData->pipelineIdPrimitivePart.tangentVertexData = targetPrimitiveSet.tangent != nullptr;
-        primitiveSetData->pipelineIdPrimitivePart.countTexCoord = targetPrimitiveSet.texCoords.size();
-        primitiveSetData->pipelineIdPrimitivePart.countColor = targetPrimitiveSet.colors.size();
+        primitiveSetData->pipelineIdPrimitivePart.countTexCoord = static_cast<uint32_t>(targetPrimitiveSet.texCoords.size());
+        primitiveSetData->pipelineIdPrimitivePart.countColor = static_cast<uint32_t>(targetPrimitiveSet.colors.size());
         primitiveSetData->pipelineIdPrimitivePart.primitiveMode = static_cast<uint32_t>(targetPrimitiveSet.mode);
 
         targetPrimitiveSet._data = static_cast<void*>(primitiveSetData);

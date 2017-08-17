@@ -15,11 +15,9 @@ bool FreeList::grow(void* start, void* end, size_t alignment, size_t offset) {
     {
         start = static_cast<char*>(start) + offset;
 
-        if (start > end) {
-            return false;
-        }
+        LUG_ASSERT(start <= end, "Start was greater than end");
 
-        size_t size = static_cast<char*>(end) - static_cast<char*>(start) + 1;
+        size_t size = static_cast<size_t>(static_cast<char*>(end) - static_cast<char*>(start)) + 1;
 
         if (!std::align(alignment, _size - offset, start, size)) {
             return false;
@@ -33,7 +31,9 @@ bool FreeList::grow(void* start, void* end, size_t alignment, size_t offset) {
         Element* it = static_cast<Element*>(start);
         _nextFree = it;
 
-        size_t size = static_cast<char*>(end) - static_cast<char*>(start) + 1;
+        LUG_ASSERT(start <= end, "Start was greater than end");
+
+        size_t size = static_cast<size_t>(static_cast<char*>(end) - static_cast<char*>(start)) + 1;
 
         for (size_t i = 1, count = size / _size; i < count; ++i) {
             void* const next = static_cast<char*>(static_cast<void*>(it)) + _size;

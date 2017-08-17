@@ -46,12 +46,12 @@ protected:
     Renderer& _renderer;
 
     size_t _descriptorSetsCount{0};
-    std::array<DescriptorSet, maxSets> _descriptorSets;
+    std::array<DescriptorSet, maxSets> _descriptorSets{};
 
     size_t _freeDescriptorSetsCount{0};
-    std::array<DescriptorSet*, maxSets> _freeDescriptorSets;
+    std::array<DescriptorSet*, maxSets> _freeDescriptorSets{};
 
-    std::map<size_t, DescriptorSet*> _descriptorSetsInUse;
+    std::map<size_t, DescriptorSet*> _descriptorSetsInUse{};
 };
 
 #include <lug/Graphics/Vulkan/Render/DescriptorSetPool/DescriptorSetPool.inl>

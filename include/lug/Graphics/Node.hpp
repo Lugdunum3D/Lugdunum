@@ -82,7 +82,7 @@ protected:
     Node* _parent{nullptr};
 
     std::string _name;
-    std::vector<Node*> _children;
+    std::vector<Node*> _children{};
 
 private:
     Math::Vec3f _position{Math::Vec3f(0.0f)};

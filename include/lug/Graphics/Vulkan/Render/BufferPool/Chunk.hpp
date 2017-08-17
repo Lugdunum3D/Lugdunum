@@ -30,10 +30,10 @@ public:
     SubBuffer* getFreeSubBuffer();
 
 private:
-    API::DeviceMemory _bufferMemory;
-    API::Buffer _buffer;
+    API::DeviceMemory _bufferMemory{};
+    API::Buffer _buffer{};
 
-    std::array<SubBuffer, subBufferPerChunk> _subBuffers;
+    std::array<SubBuffer, subBufferPerChunk> _subBuffers{};
 };
 
 #include <lug/Graphics/Vulkan/Render/BufferPool/Chunk.inl>

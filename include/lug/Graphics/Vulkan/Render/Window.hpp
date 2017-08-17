@@ -4,6 +4,7 @@
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Window.hpp>
+#include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/API/Surface.hpp>
@@ -26,14 +27,14 @@ namespace Render {
 class LUG_GRAPHICS_API Window final : public ::lug::Graphics::Render::Window {
 private:
     struct AcquireImageData {
-        API::Semaphore completeSemaphore;
-        int imageIdx = -1;
+        API::Semaphore completeSemaphore{};
+        int imageIdx{-1};
     };
 
     struct FrameData {
         API::Semaphore allDrawsFinishedSemaphore{};
         std::vector<API::Semaphore> imageReadySemaphores{};
-        std::vector<API::CommandBuffer> cmdBuffers;
+        std::vector<API::CommandBuffer> cmdBuffers{};
     };
 
 public:
@@ -79,7 +80,7 @@ private:
     bool buildCommandBuffers();
 
 private:
-    InitInfo _initInfo;
+    InitInfo _initInfo{};
 
     lug::Graphics::Vulkan::Renderer& _renderer;
     API::Surface _surface{};
@@ -89,13 +90,13 @@ private:
     const API::QueueFamily* _presentQueueFamily{nullptr};
     uint32_t _currentImageIndex{0};
 
-    std::vector<FrameData> _framesData;
+    std::vector<FrameData> _framesData{};
 
-    std::vector<AcquireImageData> _acquireImageDatas;
+    std::vector<AcquireImageData> _acquireImageDatas{};
 
     API::CommandPool _commandPool{};
 
-    lug::Graphics::Vulkan::Gui  _guiInstance;
+    Gui  _guiInstance;
 };
 
 #include <lug/Graphics/Vulkan/Render/Window.inl>

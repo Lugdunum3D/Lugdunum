@@ -44,8 +44,8 @@ private:
     HINSTANCE _hinstance;
     HWND _hwnd;
 #elif defined(LUG_SYSTEM_LINUX) // Linux surface
-    Display* _dpy;
-    ::Window _window;
+    Display* _dpy{nullptr};
+    ::Window _window{0};
 #elif defined(LUG_SYSTEM_ANDROID) // Android Surface
     ANativeWindow* _window;
 #endif

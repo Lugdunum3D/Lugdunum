@@ -6,9 +6,6 @@ namespace lug {
 namespace System {
 namespace Logger {
 
-/**
- * \cond HIDDEN_SYMBOLS
- */
 namespace priv {
 
 class Message {
@@ -27,14 +24,11 @@ public:
     const std::string loggerName;
     Level level;
 
-    fmt::MemoryWriter raw;
-    fmt::MemoryWriter formatted;
+    fmt::MemoryWriter raw{};
+    fmt::MemoryWriter formatted{};
 };
 
 } // priv
-/**
- * \endcond
- */
 
 } // Logger
 } // System

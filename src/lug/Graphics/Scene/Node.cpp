@@ -45,7 +45,7 @@ void Node::fetchVisibleObjects(const Render::View& renderView, const Render::Cam
     }
 
     // Check the distance with the light
-    if (_light && (_light->getDistance() == 0.0f || _light->getDistance() >= fabs((Math::Vec3f(const_cast<Node*>(this)->getAbsolutePosition() - camera.getParent()->getAbsolutePosition())).length()))) {
+    if (_light && (_light->getDistance() == 0.0f || _light->getDistance() >= std::fabs((Math::Vec3f(const_cast<Node*>(this)->getAbsolutePosition() - camera.getParent()->getAbsolutePosition())).length()))) {
         renderQueue.addLight(*const_cast<Node*>(this));
     }
 }

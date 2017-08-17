@@ -38,10 +38,10 @@ private:
     Texture(const std::string& name);
 
 private:
-    API::DeviceMemory _deviceMemory;
-    API::Image _image;
-    API::ImageView _imageView;
-    API::Sampler _sampler;
+    API::DeviceMemory _deviceMemory{};
+    API::Image _image{};
+    API::ImageView _imageView{};
+    API::Sampler _sampler{};
 };
 
 #include <lug/Graphics/Vulkan/Render/Texture.inl>

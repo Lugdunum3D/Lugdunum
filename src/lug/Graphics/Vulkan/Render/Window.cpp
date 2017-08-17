@@ -90,13 +90,13 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
     // Set previous AcquireImageData free
     {
         for (auto& acquireImageData_ : _acquireImageDatas) {
-            if (acquireImageData_.imageIdx == (int)_currentImageIndex) {
+            if (acquireImageData_.imageIdx == static_cast<int>(_currentImageIndex)) {
                 acquireImageData_.imageIdx = -1;
             }
         }
     }
 
-    acquireImageData->imageIdx = (int)_currentImageIndex;
+    acquireImageData->imageIdx = static_cast<int>(_currentImageIndex);
 
     FrameData& frameData = _framesData[_currentImageIndex];
     API::CommandBuffer& cmdBuffer = frameData.cmdBuffers[0];
@@ -271,7 +271,7 @@ bool Window::initSwapchainCapabilities() {
 
 bool Window::initGui() {
     if (!_guiInstance.init(_swapchain.getImagesViews())) {
-        LUG_LOG.error("RendererWindow: Failed to initialise Gui");
+        LUG_LOG.error("RendererWindow: Failed to initialize Gui");
         return false;
     }
 
@@ -381,7 +381,7 @@ bool Window::initSwapchain() {
         // Reset command buffers because they use the swapchain images
         _presentQueue->waitIdle();
         {
-            uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+            uint32_t frameDataSize = static_cast<uint32_t>(_swapchain.getImages().size());
 
             for (uint32_t i = 0; i < frameDataSize; ++i) {
                 for (uint32_t j = 0; j < _framesData[i].cmdBuffers.size(); ++j) {
@@ -401,7 +401,7 @@ bool Window::initSwapchain() {
 }
 
 bool Window::initFramesData() {
-    uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+    uint32_t frameDataSize = static_cast<uint32_t>(_swapchain.getImages().size());
 
     if (_framesData.size() == frameDataSize) {
         return true;
@@ -466,7 +466,7 @@ bool Window::initFramesData() {
 }
 
 bool Window::buildCommandBuffers() {
-    uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+    uint32_t frameDataSize = static_cast<uint32_t>(_swapchain.getImages().size());
 
     for (uint32_t i = 0; i < frameDataSize; ++i) {
         // Build command buffer image present to color attachment

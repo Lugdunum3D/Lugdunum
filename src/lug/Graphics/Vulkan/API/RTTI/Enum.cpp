@@ -36,11 +36,11 @@ LUG_ENUM_TO_STR_FUNCTION(VkSurfaceTransformFlagBitsKHR, LUG_VULKAN_SURFACE_TRANS
 LUG_ENUM_TO_STR_FUNCTION(VkCompositeAlphaFlagBitsKHR, LUG_VULKAN_COMPOSITE_ALPHA_KHR_BIT)
 
 
-#define LUG_FLAGS_TO_STR_VEC(enum)  \
-    if (flag & enum) {              \
-        retVal.push_back(#enum);    \
-    }                               \
-    flag &= ~enum;
+#define LUG_FLAGS_TO_STR_VEC(enum)          \
+    if (flag & enum) {                      \
+        retVal.push_back(#enum);            \
+    }                                       \
+    flag &= static_cast<VkFlags>(~enum);
 
 #define LUG_FLAGS_TO_STR_VEC_FUNCTION(type, macro)                                              \
     std::vector<const char*> type ## ToStrVec(type flag) {                                      \
@@ -62,13 +62,13 @@ LUG_FLAGS_TO_STR_VEC_FUNCTION(VkSampleCountFlags, LUG_VULKAN_SAMPLE_COUNT_BIT)
 LUG_FLAGS_TO_STR_VEC_FUNCTION(VkSurfaceTransformFlagsKHR, LUG_VULKAN_SURFACE_TRANSFORM_KHR_BIT)
 LUG_FLAGS_TO_STR_VEC_FUNCTION(VkCompositeAlphaFlagsKHR, LUG_VULKAN_COMPOSITE_ALPHA_KHR_BIT)
 
-#define LUG_FLAGS_TO_STR(enum)  \
-    if (flag & enum) {          \
-        val += #enum;           \
-        if ((flag & ~enum))     \
-            val += " | ";       \
-    }                           \
-    flag &= ~enum;
+#define LUG_FLAGS_TO_STR(enum)                  \
+    if (flag & enum) {                          \
+        val += #enum;                           \
+        if (flag & static_cast<VkFlags>(~enum)) \
+            val += " | ";                       \
+    }                                           \
+    flag &= static_cast<VkFlags>(~enum);
 
 #define LUG_FLAGS_TO_STR_FUNCTION(type, macro)                                              \
     std::string type ## ToStr(type flag) {                                                  \

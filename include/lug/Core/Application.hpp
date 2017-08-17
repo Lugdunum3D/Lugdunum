@@ -89,10 +89,10 @@ public:
     lug::Graphics::Graphics::InitInfo& getGraphicsInfo();
 
     /**
-     * @brief      Init the application with the informations filled in the lug::Graphics::Graphics::InitInfo
+     * @brief      Init the application with the information filled in the lug::Graphics::Graphics::InitInfo
      *             and lug::Graphics::RenderWindow::InitInfo structures.
      *
-     *             The lug::Graphics::Graphics::InitInfo structure can be modified by calling #getGraphicsInfo or #setGraphicsInfo. @n
+     *             The lug::Graphics::Graphics::InitInfo structure can be modified by calling #getGraphicsInfo or #setGraphicsInfo.
      *             The lug::Graphics::RenderWindow::InitInfo structure can be modified by calling #getRenderWindowInfo or #setRenderWindowInfo.
      *
      * @param[in]  argc  The argc argument as received from the main function.
@@ -103,10 +103,10 @@ public:
     bool init(int argc, char* argv[]);
 
     /**
-     * @brief      Begin the initialization of the application with the informations filled in the
+     * @brief      Begin the initialization of the application with the information filled in the
      *             lug::Graphics::Graphics::InitInfo structure.
      *
-     *             The lug::Graphics::Graphics::InitInfo structure can be modified by calling #getGraphicsInfo or #setGraphicsInfo. @n
+     *             The lug::Graphics::Graphics::InitInfo structure can be modified by calling #getGraphicsInfo or #setGraphicsInfo.
      *
      * @param[in]  argc  The argc argument as received from the main function.
      * @param[in]  argv  The argv argument as received from the main function.
@@ -116,7 +116,7 @@ public:
     bool beginInit(int argc, char* argv[]);
 
     /**
-     * @brief      Finish the initialization of the application with the informations filled in the
+     * @brief      Finish the initialization of the application with the information filled in the
      *             lug::Graphics::RenderWindow::InitInfo structure.
      *
      *             The lug::Graphics::RenderWindow::InitInfo structure can be modified by calling #getRenderWindowInfo or #setRenderWindowInfo.

@@ -239,12 +239,12 @@ private:
     const API::Device& _device;
 
     // Shaders state
-    std::vector<API::ShaderModule> _shaderModules;
-    std::vector<VkPipelineShaderStageCreateInfo> _shaderStages;
+    std::vector<API::ShaderModule> _shaderModules{};
+    std::vector<VkPipelineShaderStageCreateInfo> _shaderStages{};
 
     // Vertex input state
-    std::vector<VkVertexInputBindingDescription> _inputBindings;
-    std::vector<VkVertexInputAttributeDescription> _inputAttributes;
+    std::vector<VkVertexInputBindingDescription> _inputBindings{};
+    std::vector<VkVertexInputAttributeDescription> _inputAttributes{};
 
     // Input assembly state
     VkPrimitiveTopology _topology{VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST};
@@ -261,8 +261,8 @@ private:
         /* _viewportState.pScissors */ nullptr // Will be set to _scissors.data()
     };
 
-    std::vector<VkViewport> _viewports;
-    std::vector<VkRect2D> _scissors;
+    std::vector<VkViewport> _viewports{};
+    std::vector<VkRect2D> _scissors{};
 
     // Rasterization state
     VkPipelineRasterizationStateCreateInfo _rasterizationState{
@@ -322,14 +322,14 @@ private:
         /* _colorBlendState.blendConstants */ {0.0f, 0.0f, 0.0f, 0.0f}
     };
 
-    std::vector<VkPipelineColorBlendAttachmentState> _colorBlendAttachments;
+    std::vector<VkPipelineColorBlendAttachmentState> _colorBlendAttachments{};
 
     // Dynamic state
-    std::set<VkDynamicState> _dynamicStates;
+    std::set<VkDynamicState> _dynamicStates{};
 
     // General
-    API::PipelineLayout _pipelineLayout;
-    API::RenderPass _renderPass;
+    API::PipelineLayout _pipelineLayout{};
+    API::RenderPass _renderPass{};
     uint32_t _subpass{0};
     VkPipelineCache _pipelineCache{VK_NULL_HANDLE};
 };

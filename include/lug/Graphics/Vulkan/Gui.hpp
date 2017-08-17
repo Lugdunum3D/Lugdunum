@@ -25,9 +25,8 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-namespace Render
-{
-    class Window;
+namespace Render {
+class Window;
 } // Render
 
 class Renderer;
@@ -36,21 +35,21 @@ class LUG_GRAPHICS_API Gui {
 private:
     // UI params are set via push constants
     struct PushConstBlock {
-        lug::Math::Vec2f scale;
-        lug::Math::Vec2f translate;
+        Math::Vec2f scale{1, 1};
+        Math::Vec2f translate{0, 0};
     };
 
     struct FrameData {
-        API::Framebuffer framebuffer;
-        Vulkan::API::Semaphore semaphore;
-        Vulkan::API::Fence fence;
-        Vulkan::API::CommandBuffer commandBuffer;
+        API::Framebuffer framebuffer{};
+        Vulkan::API::Semaphore semaphore{};
+        Vulkan::API::Fence fence{};
+        Vulkan::API::CommandBuffer commandBuffer{};
 
-        Vulkan::API::DeviceMemory vertexMemory;
-        Vulkan::API::DeviceMemory indexMemory;
+        Vulkan::API::DeviceMemory vertexMemory{};
+        Vulkan::API::DeviceMemory indexMemory{};
 
-        Vulkan::API::Buffer vertexBuffer;
-        Vulkan::API::Buffer indexBuffer;
+        Vulkan::API::Buffer vertexBuffer{};
+        Vulkan::API::Buffer indexBuffer{};
 
         void* vertexMemoryPtr{nullptr};
         void* indexMemoryPtr{nullptr};
@@ -96,18 +95,18 @@ private:
     API::CommandPool _graphicQueueCommandPool{};
     API::CommandPool _transferQueueCommandPool{};
 
-    API::Image _fontImage;
-    API::ImageView _fontImageView;
-    API::DeviceMemory _fontDeviceMemory;
-    API::Sampler _fontSampler;
+    API::Image _fontImage{};
+    API::ImageView _fontImageView{};
+    API::DeviceMemory _fontDeviceMemory{};
+    API::Sampler _fontSampler{};
 
-    API::DescriptorPool _descriptorPool;
-    API::DescriptorSet _descriptorSet;
+    API::DescriptorPool _descriptorPool{};
+    API::DescriptorSet _descriptorSet{};
 
-    API::PipelineLayout _pipelineLayout;
-    API::GraphicsPipeline _pipeline;
+    API::PipelineLayout _pipelineLayout{};
+    API::GraphicsPipeline _pipeline{};
 
-    std::vector<FrameData> _framesData;
+    std::vector<FrameData> _framesData{};
 };
 
 } // Vulkan

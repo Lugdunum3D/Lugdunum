@@ -48,7 +48,7 @@ private:
 
     VkImageCreateFlags _createFlags{0};
     VkImageType _imageType{VK_IMAGE_TYPE_2D};
-    std::set<VkFormat> _preferedFormats;
+    std::set<VkFormat> _preferedFormats{};
     VkFormatFeatureFlags _featureFlags{0};
     VkExtent3D _extent{};
     uint32_t _mipLevels{1};
@@ -57,7 +57,7 @@ private:
     VkImageTiling _tiling{VK_IMAGE_TILING_OPTIMAL};
     VkImageUsageFlags _usage{VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT};
     bool _exclusive{false};
-    std::set<uint32_t> _queueFamilyIndices;
+    std::set<uint32_t> _queueFamilyIndices{};
     VkImageLayout _initialLayout{VK_IMAGE_LAYOUT_UNDEFINED};
 };
 

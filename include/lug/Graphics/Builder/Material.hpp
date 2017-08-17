@@ -50,13 +50,13 @@ public:
 protected:
     Renderer& _renderer;
 
-    std::string _name;
-    Render::Material::Constants _constants;
-    Render::Material::TextureInfo _baseColorTexture;
-    Render::Material::TextureInfo _metallicRoughnessTexture;
-    Render::Material::TextureInfo _normalTexture;
-    Render::Material::TextureInfo _occlusionTexture;
-    Render::Material::TextureInfo _emissiveTexture;
+    std::string _name{};
+    Render::Material::Constants _constants{};
+    Render::Material::TextureInfo _baseColorTexture{};
+    Render::Material::TextureInfo _metallicRoughnessTexture{};
+    Render::Material::TextureInfo _normalTexture{};
+    Render::Material::TextureInfo _occlusionTexture{};
+    Render::Material::TextureInfo _emissiveTexture{};
 };
 
 #include <lug/Graphics/Builder/Material.inl>

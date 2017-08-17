@@ -121,6 +121,9 @@ bool Application::init(int argc, char* argv[]) {
         lug::Graphics::Scene::Node* node = _scene->createSceneNode("camera");
         _scene->getRoot().attachChild(*node);
 
+        _mover.setTargetNode(*node);
+        _mover.setEventSource(*_graphics.getRenderer()->getWindow());
+
         node->attachCamera(camera);
 
         node->setPosition({0.0f, 0.0f, 5.0f}, lug::Graphics::Node::TransformSpace::World);
@@ -264,19 +267,23 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
-    _rotation += 0.05f * elapsedTime.getMilliseconds<float>();
+    // _rotation += 0.01f * elapsedTime.getMilliseconds<float>();
 
-    if (_rotation > 360.0f) {
-        _rotation -= 360.0f;
-    }
+    // if (_rotation > 360.0f) {
+    //     _rotation -= 360.0f;
+    // }
 
-    auto& renderViews = _graphics.getRenderer()->getWindow()->getRenderViews();
+    // _scene->getSceneNode("sphere")->setRotation(lug::Math::Geometry::radians(_rotation), {0, 1, 0});
 
-    for (int i = 0; i < 1; ++i) {
-        float x = 2.0f * cos(lug::Math::Geometry::radians((i % 2) ? _rotation : -_rotation));
-        float y = 2.0f * sin(lug::Math::Geometry::radians((i % 2) ? _rotation : -_rotation));
+    // auto& renderViews = _graphics.getRenderer()->getWindow()->getRenderViews();
 
-        _scene->getSceneNode("camera")->setPosition({x, 2.0f, y}, lug::Graphics::Node::TransformSpace::World);
-        renderViews[i]->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
-    }
+    // for (int i = 0; i < 1; ++i) {
+    //     float x = 2.0f * cos(lug::Math::Geometry::radians((i % 2) ? _rotation : -_rotation));
+    //     float y = 2.0f * sin(lug::Math::Geometry::radians((i % 2) ? _rotation : -_rotation));
+
+    //     _scene->getSceneNode("camera")->setPosition({x, 2.0f, y}, lug::Graphics::Node::TransformSpace::World);
+    //     renderViews[i]->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+    // }
+
+    _mover.onFrame(elapsedTime);
 }

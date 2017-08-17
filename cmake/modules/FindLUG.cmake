@@ -30,7 +30,7 @@
 #
 # example:
 #   find_package(LUG COMPONENTS system window graphics REQUIRED)
-#   include_directories(${LUG_INCLUDE_DIR})
+#   include_directories(SYSTEM ${LUG_INCLUDE_DIR})
 #   add_executable(myapp ...)
 #   target_link_libraries(myapp ${LUG_LIBRARIES})
 

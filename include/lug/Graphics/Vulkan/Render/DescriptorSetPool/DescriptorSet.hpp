@@ -33,7 +33,7 @@ public:
     void setHash(size_t hash);
 
 private:
-    API::DescriptorSet _descriptorSet;
+    API::DescriptorSet _descriptorSet{};
 
     size_t _hash{0};
     uint32_t _referenceCount{0};

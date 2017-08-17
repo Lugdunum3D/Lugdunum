@@ -6,13 +6,17 @@
 namespace lug {
 namespace System {
 
-class LUG_SYSTEM_API Time
-{
+class LUG_SYSTEM_API Time {
 public:
     Time() = default;
-    ~Time() = default;
-    Time(const Time& time);
     Time(int64_t microseconds);
+    Time(const Time&) = default;
+    Time(Time&&) = default;
+
+    Time& operator=(const Time&) = default;
+    Time& operator=(Time&&) = default;
+
+    ~Time() = default;
 
     int64_t getMicroseconds() const;
 

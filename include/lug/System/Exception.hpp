@@ -12,53 +12,53 @@ namespace System {
 class LUG_SYSTEM_API Exception: public std::exception {
 public:
     /**
-     * \brief Exception constructor.
-     * \param typeName The exception type.
-     * \param description The exception description.
-     * \param file The file where exception was thrown.
-     * \param function The function where exception was thrown.
-     * \param line The line where exception was thrown.
+     * @brief Exception constructor.
+     * @param typeName The exception type.
+     * @param description The exception description.
+     * @param file The file where exception was thrown.
+     * @param function The function where exception was thrown.
+     * @param line The line where exception was thrown.
      */
     Exception(const char *typeName, const std::string &description, const char* file, const char* function, uint32_t line);
     Exception(Exception&& other) = default;
     Exception(const Exception& other) = default;
     Exception& operator=(const Exception& other) = default;
     Exception& operator=(Exception&& other) = default;
-    virtual ~Exception() throw() {}
+    virtual ~Exception() noexcept {}
 
     /**
-     * \brief TypeName getter.
-     * \return The typeName of the current exception.
+     * @brief TypeName getter.
+     * @return The typeName of the current exception.
      */
     const std::string& getTypeName() const;
 
     /**
-     * \brief Description getter.
-     * \return The description of the current exception.
+     * @brief Description getter.
+     * @return The description of the current exception.
      */
     const std::string& getDescription() const;
 
     /**
-     * \brief File getter.
-     * \return The file of the current exception.
+     * @brief File getter.
+     * @return The file of the current exception.
      */
     const std::string& getFile() const;
 
     /**
-     * \brief Function getter.
-     * \return The function of the current exception.
+     * @brief Function getter.
+     * @return The function of the current exception.
      */
     const std::string& getFunction() const;
 
     /**
-     * \brief Line getter.
-     * \return The line of the current exception.
+     * @brief Line getter.
+     * @return The line of the current exception.
      */
     uint32_t getLine() const;
 
     /**
-     * \brief Return the full formated exception.
-     * \return The full formated exceptionn.
+     * @brief Return the full formated exception.
+     * @return The full formated exceptionn.
      */
     const char* what() const noexcept override;
 

@@ -18,7 +18,7 @@ public:
     DirtyObject& operator=(const DirtyObject&) = delete;
     DirtyObject& operator=(DirtyObject&&) = delete;
 
-    ~DirtyObject() = default;
+    virtual ~DirtyObject() = default;
 
     void setDirty();
     void setDirty(uint32_t currentFrame);

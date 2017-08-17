@@ -16,13 +16,13 @@ class Device {
 private:
     struct Queue {
         VkQueueFlags flagsUsed{};
-        std::vector<std::string> names;
+        std::vector<std::string> names{};
     };
 
     struct QueueFamily {
         VkQueueFlags flags{};
         uint32_t queuesUsed{0};
-        std::vector<Queue> queues;
+        std::vector<Queue> queues{};
     };
 
 public:
@@ -53,10 +53,10 @@ private:
     const PhysicalDeviceInfo& _physicalDeviceInfo;
 
     // We don't have layers because it's deprecated
-    std::vector<const char*> _extensions;
+    std::vector<const char*> _extensions{};
     VkPhysicalDeviceFeatures _features{};
 
-    std::vector<QueueFamily> _queueFamiliesInfos;
+    std::vector<QueueFamily> _queueFamiliesInfos{};
 };
 
 #include <lug/Graphics/Vulkan/API/Builder/Device.inl>
