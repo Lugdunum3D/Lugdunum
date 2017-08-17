@@ -33,6 +33,29 @@ bool WindowImpl::pollEvent(lug::Window::Event& event) {
             if (AInputQueue_preDispatchEvent(inputQueue, androidEvent)) {
                 continue;
             }
+          
+            switch (AInputEvent_getType(androidEvent) ) {
+                case AINPUT_EVENT_TYPE_MOTION:
+                    event.mouse.code = Mouse::Button::Left;
+                    event.mouse.coord.x = AMotionEvent_getX(androidEvent, 0);
+                    event.mouse.coord.y = AMotionEvent_getY(androidEvent, 0);
+                    switch (AKeyEvent_getAction(androidEvent)) {
+                        case AKEY_EVENT_ACTION_DOWN:
+                            event.type = Event::Type::ButtonPressed;
+                        break;
+
+                        case AKEY_EVENT_ACTION_UP:
+                            event.type = Event::Type::ButtonReleased;
+                        break;
+
+                        default:
+                        break;
+                }
+                break;
+
+                default:
+                break;
+            }
 
             AInputQueue_finishEvent(inputQueue, androidEvent, 0);
         }
