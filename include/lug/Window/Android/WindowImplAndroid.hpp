@@ -5,6 +5,8 @@
 #include <android/input.h>
 #include <android/native_window.h>
 #include <android/native_activity.h>
+#include "gestureDetector.hpp"
+#include <lug/System/Logger/Logger.hpp>
 
 namespace lug {
 namespace Window {
@@ -31,8 +33,13 @@ public:
 
 private:
     float MapCenteredAxis(AInputEvent* event, int32_t axis);
+    int32_t HandleInput(AInputEvent* event);
 
     Window* _parent{nullptr};
+
+    ndk_helper::DoubletapDetector doubletap_detector_;
+    ndk_helper::PinchDetector pinch_detector_;
+    ndk_helper::DragDetector drag_detector_;
 };
 
 } // namespace priv

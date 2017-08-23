@@ -37,6 +37,67 @@ float WindowImpl::MapCenteredAxis(AInputEvent* event, int32_t axis) {
     }
 }
 
+int32_t WindowImpl::HandleInput(AInputEvent* event) {
+  // Engine* eng = (Engine*)app->userData;
+  if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
+    ndk_helper::GESTURE_STATE doubleTapState = doubletap_detector_.Detect(event);
+    ndk_helper::GESTURE_STATE dragState = drag_detector_.Detect(event);
+    ndk_helper::GESTURE_STATE pinchState = pinch_detector_.Detect(event);
+
+    // Double tap detector has a priority over other detectors
+    if (doubleTapState == ndk_helper::GESTURE_STATE_ACTION) {
+      // Detect double tap
+        LUG_LOG.info("should start detecting double tap");
+      // tap_camera_.Reset(true);
+    } else {
+      // Handle drag state
+      if (dragState & ndk_helper::GESTURE_STATE_START) {
+        // // Otherwise, start dragging
+        // ndk_helper::Vec2 v;
+        // drag_detector_.GetPointer(v);
+        // TransformPosition(v);
+        // tap_camera_.BeginDrag(v);
+        LUG_LOG.info("start dragging");
+      } else if (dragState & ndk_helper::GESTURE_STATE_MOVE) {
+        // ndk_helper::Vec2 v;
+        // drag_detector_.GetPointer(v);
+        // TransformPosition(v);
+        // tap_camera_.Drag(v);
+        LUG_LOG.info("dragging");
+      } else if (dragState & ndk_helper::GESTURE_STATE_END) {
+        LUG_LOG.info("end dragging");
+        // tap_camera_.EndDrag();
+      }
+
+      // Handle pinch state
+      if (pinchState & ndk_helper::GESTURE_STATE_START) {
+        LUG_LOG.info("Start new pinch");
+        // // Start new pinch
+        // ndk_helper::Vec2 v1;
+        // ndk_helper::Vec2 v2;
+        // pinch_detector_.GetPointers(v1, v2);
+        // TransformPosition(v1);
+        // TransformPosition(v2);
+        // tap_camera_.BeginPinch(v1, v2);
+      } else if (pinchState & ndk_helper::GESTURE_STATE_MOVE) {
+        // Multi touch
+        // Start new pinch
+        LUG_LOG.info("Multi touch  Start new pinch");
+
+        // ndk_helper::Vec2 v1;
+        // ndk_helper::Vec2 v2;
+        // pinch_detector_.GetPointers(v1, v2);
+        // TransformPosition(v1);
+        // TransformPosition(v2);
+        // tap_camera_.Pinch(v1, v2);
+      }
+    }
+    return 1;
+  }
+  return 0;
+}
+
+
 bool WindowImpl::pollEvent(lug::Window::Event& event) {
 
     if (inputQueue != nullptr) {
@@ -47,45 +108,47 @@ bool WindowImpl::pollEvent(lug::Window::Event& event) {
                 return false;
             }
 
-            if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_MOTION) {
+            HandleInput(androidEvent);
 
-                if (AInputEvent_getSource(androidEvent) == AINPUT_SOURCE_JOYSTICK) {
-                    // Left thumbstick
-                    float axisLeftX = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_X);
-                    float axisLeftY = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_Y);
+            // if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_MOTION) {
 
-                    // // Right thumbstick
-                    float axisRightX = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_Z);
-                    float axisRightY = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_RZ);
+            //     if (AInputEvent_getSource(androidEvent) == AINPUT_SOURCE_JOYSTICK) {
+            //         // Left thumbstick
+            //         float axisLeftX = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_X);
+            //         float axisLeftY = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_Y);
 
-                    event.type = Event::Type::GamePadChange;
-                    event.gamePad.axisLeft = {axisLeftX, axisLeftY};
-                    event.gamePad.axisRight = {axisRightX, axisRightY};
+            //         // // Right thumbstick
+            //         float axisRightX = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_Z);
+            //         float axisRightY = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_RZ);
 
-                    events.push(std::move(event));
-                }
+            //         event.type = Event::Type::GamePadChange;
+            //         event.gamePad.axisLeft = {axisLeftX, axisLeftY};
+            //         event.gamePad.axisRight = {axisRightX, axisRightY};
 
-                if (AInputEvent_getSource(androidEvent) == AINPUT_SOURCE_TOUCHSCREEN) {
-                    event.mouse.code = Mouse::Button::Left;
-                    event.mouse.coord.x = AMotionEvent_getX(androidEvent, 0);
-                    event.mouse.coord.y = AMotionEvent_getY(androidEvent, 0);
-                    switch (AKeyEvent_getAction(androidEvent)) {
-                        case AKEY_EVENT_ACTION_DOWN:
-                            event.type = Event::Type::ButtonPressed;
-                        break;
+            //         events.push(std::move(event));
+            //     }
 
-                        case AKEY_EVENT_ACTION_UP:
-                            event.type = Event::Type::ButtonReleased;
-                        break;
+            //     if (AInputEvent_getSource(androidEvent) == AINPUT_SOURCE_TOUCHSCREEN) {
+            //         event.mouse.code = Mouse::Button::Left;
+            //         event.mouse.coord.x = AMotionEvent_getX(androidEvent, 0);
+            //         event.mouse.coord.y = AMotionEvent_getY(androidEvent, 0);
+            //         switch (AKeyEvent_getAction(androidEvent)) {
+            //             case AKEY_EVENT_ACTION_DOWN:
+            //                 event.type = Event::Type::ButtonPressed;
+            //             break;
 
-                        default:
-                        break;
-                    }
-                }
-            }
-            if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_KEY) {
-                // TODO
-            }
+            //             case AKEY_EVENT_ACTION_UP:
+            //                 event.type = Event::Type::ButtonReleased;
+            //             break;
+
+            //             default:
+            //             break;
+            //         }
+            //     }
+            // }
+            // if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_KEY) {
+            //     // TODO
+            // }
 
             AInputQueue_finishEvent(inputQueue, androidEvent, 1);
         }
