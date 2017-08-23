@@ -5,8 +5,6 @@
 #include <imgui.h>
 #include <imgui_freetype.h>
 
-#include <IconsFontAwesome.h>
-
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSet.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSetLayout.hpp>
