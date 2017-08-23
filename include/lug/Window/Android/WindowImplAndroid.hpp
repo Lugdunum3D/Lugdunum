@@ -30,6 +30,8 @@ public:
     LUG_WINDOW_API static ANativeActivity* activity;
 
 private:
+    float MapCenteredAxis(AInputEvent* event, int32_t axis);
+
     Window* _parent{nullptr};
 };
 

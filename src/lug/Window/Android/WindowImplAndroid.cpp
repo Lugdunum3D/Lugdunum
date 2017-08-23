@@ -24,18 +24,48 @@ ANativeWindow* WindowImpl::getWindow() {
     return nativeWindow;
 }
 
+// credits to nvidia : https://github.com/NVIDIAGameWorks/GraphicsSamples/blob/master/extensions/src/NvGamepad/android/NvGamepadAndroid.cpp
+float WindowImpl::MapCenteredAxis(AInputEvent* event, int32_t axis) {
+    const float deadZone = (8689.0f / 32768.0f); // 0,2651672363
+    float value = AMotionEvent_getAxisValue(event, axis, 0);
+    if (value > deadZone) {
+        return (value - deadZone) / (1.0f - deadZone);
+    } else if (value < -deadZone) {
+        return (value + deadZone) / (1.0f - deadZone);
+    } else {
+        return 0.0f;
+    }
+}
+
 bool WindowImpl::pollEvent(lug::Window::Event& event) {
 
     if (inputQueue != nullptr) {
         AInputEvent* androidEvent = nullptr;
 
-        while (AInputQueue_getEvent(inputQueue, &androidEvent) >= 0) {
+        if (AInputQueue_getEvent(inputQueue, &androidEvent) >= 0) {
             if (AInputQueue_preDispatchEvent(inputQueue, androidEvent)) {
-                continue;
+                return false;
             }
-          
-            switch (AInputEvent_getType(androidEvent) ) {
-                case AINPUT_EVENT_TYPE_MOTION:
+
+            if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_MOTION) {
+
+                if (AInputEvent_getSource(androidEvent) == AINPUT_SOURCE_JOYSTICK) {
+                    // Left thumbstick
+                    float axisLeftX = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_X);
+                    float axisLeftY = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_Y);
+
+                    // // Right thumbstick
+                    float axisRightX = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_Z);
+                    float axisRightY = MapCenteredAxis(androidEvent, AMOTION_EVENT_AXIS_RZ);
+
+                    event.type = Event::Type::GamePadChange;
+                    event.gamePad.axisLeft = {axisLeftX, axisLeftY};
+                    event.gamePad.axisRight = {axisRightX, axisRightY};
+
+                    events.push(std::move(event));
+                }
+
+                if (AInputEvent_getSource(androidEvent) == AINPUT_SOURCE_TOUCHSCREEN) {
                     event.mouse.code = Mouse::Button::Left;
                     event.mouse.coord.x = AMotionEvent_getX(androidEvent, 0);
                     event.mouse.coord.y = AMotionEvent_getY(androidEvent, 0);
@@ -50,14 +80,14 @@ bool WindowImpl::pollEvent(lug::Window::Event& event) {
 
                         default:
                         break;
+                    }
                 }
-                break;
-
-                default:
-                break;
+            }
+            if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_KEY) {
+                // TODO
             }
 
-            AInputQueue_finishEvent(inputQueue, androidEvent, 0);
+            AInputQueue_finishEvent(inputQueue, androidEvent, 1);
         }
     }
 

@@ -49,6 +49,11 @@ struct LUG_WINDOW_API MouseEvent {
     bool x2;        ///< True if extra 2 mouse button was pressed, False otherwise
 };
 
+struct LUG_WINDOW_API GamePadEvent {
+    lug::Math::Vec2f axisLeft;
+    lug::Math::Vec2f axisRight;
+};
+
 /**
  * @brief      Represents a char event
  */
@@ -75,7 +80,8 @@ struct LUG_WINDOW_API Event {
         MouseMoved,     ///< MouseMoved event
         MouseWheel,     ///< MouseWheelRotated event
         MouseLeave,     ///< Mouse left window event
-        MouseEnter      ///< Mouse entered window event
+        MouseEnter,     ///< Mouse entered window event
+        GamePadChange
     };
 
     Type type;          ///< The type of the event
@@ -87,6 +93,7 @@ struct LUG_WINDOW_API Event {
         KeyEvent key;           ///< A KeyEvent
         CharEvent character;    ///< A CharEvent
         MouseEvent mouse;      ///< A MouseEvent
+        GamePadEvent gamePad;
     };
 };
 

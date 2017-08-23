@@ -225,6 +225,10 @@ bool Window::pollEvent(Event& event) {
             _mousePosition.y() = event.mouse.coord.y;
         }
 
+        if (event.type == Event::Type::GamePadChange) {
+            _gamePadState = event.gamePad;
+        }
+
         return value;
     }
     return false;

@@ -158,6 +158,9 @@ public:
      */
     void setMouseCursorVisible(bool visible);
 
+    GamePadEvent _gamePadState{{0.0f, 0.0f}, {0.0f, 0.0f}};
+
+
 protected:
     Window();
     bool init(const InitInfo& initInfo);
