@@ -68,11 +68,12 @@ public:
     bool initRender();
     void destroyRender();
 
+    bool initGui();
+
 private:
     bool init(Window::InitInfo& initInfo);
     bool initSurface();
     bool initSwapchainCapabilities();
-    bool initGui();
     bool initPresentQueue();
     bool initSwapchain();
     bool initFramesData();

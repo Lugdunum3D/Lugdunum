@@ -364,7 +364,22 @@ set(IMGUI_SOURCE_FILES
     ${IMGUI_SOURCE_DIR}/imgui.cpp
     ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
     ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
+#    ${IMGUI_SOURCE_DIR}/imgui_freetype.cpp
 )
+
+# find freetype
+if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/freetype")
+    message(FATAL_ERROR "Can't find freetype in the thirdparty directory")
+endif()
+
+set(FREETYPE_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/freetype/include)
+message(STATUS "Found freetype: ${FREETYPE_INCLUDE_DIR}")
+
+include_directories(${FREETYPE_INCLUDE_DIR})
+
+#TODO find()
+set(FREETYPE_LIBRARIES ${LUG_THIRDPARTY_DIR}/freetype/lib/freetype.lib)
+
 
 # find IconFontCppHeaders
 if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/IconFontCppHeaders")
@@ -384,5 +399,5 @@ endif()
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC} ${IMGUI_SOURCE_FILES}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY} ${CMAKE_THREAD_LIBS_INIT}
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${FREETYPE_LIBRARIES}
 )
