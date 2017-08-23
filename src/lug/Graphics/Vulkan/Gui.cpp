@@ -1,6 +1,7 @@
 #include <lug/Graphics/Vulkan/Gui.hpp>
 
 #include <imgui.h>
+#include <imgui_freetype.h>
 
 #include <IconsFontAwesome.h>
 
@@ -138,12 +139,12 @@ void Gui::initKeyMapping() {
 bool Gui::initFontsTexture() {
     ImGuiIO& io = ImGui::GetIO();
     // merge in icons from Font Awesome
-    io.Fonts->AddFontDefault();
-    static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    ImFontConfig icons_config;
-    icons_config.MergeMode = true;
-    icons_config.PixelSnapH = true;
-    io.Fonts->AddFontFromFileTTF("./fonts/fontawesome-webfont.ttf", 16.0f, &icons_config, icons_ranges);
+//    io.Fonts->AddFontDefault();
+//    static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+//    ImFontConfig icons_config;
+//    icons_config.MergeMode = true;
+//    icons_config.PixelSnapH = true;
+//    io.Fonts->AddFontFromFileTTF("./fonts/fontawesome-webfont.ttf", 16.0f, &icons_config, icons_ranges);
 
     // Create font texture
     unsigned char* fontData = nullptr;
@@ -153,6 +154,9 @@ bool Gui::initFontsTexture() {
     {
         int tempWidth;
         int tempHeight;
+        // See ImGuiFreeType::RasterizationFlags
+//        unsigned int flags = ImGuiFreeType::LightHinting;
+//        ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
         io.Fonts->GetTexDataAsRGBA32(&fontData, &tempWidth, &tempHeight);
         texWidth = static_cast<uint32_t>(tempWidth);
         texHeight = static_cast<uint32_t>(tempHeight);
