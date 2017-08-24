@@ -22,7 +22,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
 
     Vulkan::Renderer& renderer = static_cast<Vulkan::Renderer&>(builder._renderer);
 
-    const uint32_t primitiveSetsNb = builder._primitiveSets.size();
+    const size_t primitiveSetsNb = builder._primitiveSets.size();
     mesh->_primitiveSets.resize(primitiveSetsNb);
 
     uint32_t i = 0;
@@ -142,7 +142,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
 
             uint32_t attributesNb = static_cast<uint32_t>(primitiveSet.attributes.size());
 
-            for (uint32_t i = 0; i < attributesNb; ++i) {
+            for (i = 0; i < attributesNb; ++i) {
                 primitiveSetData->buffers[i].updateData(
                     primitiveSet.attributes[i].buffer.data,
                     primitiveSet.attributes[i].buffer.size
