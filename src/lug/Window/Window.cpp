@@ -229,6 +229,10 @@ bool Window::pollEvent(Event& event) {
             _gamePadState = event.gamePad;
         }
 
+        if (event.type == Event::Type::TouchScreenChange) {
+            _touchScreenState = event.touchScreen;
+        }
+
         return value;
     }
     return false;

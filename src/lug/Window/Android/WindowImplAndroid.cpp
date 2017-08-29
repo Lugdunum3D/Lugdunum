@@ -37,28 +37,34 @@ float WindowImpl::MapCenteredAxis(AInputEvent* event, int32_t axis) {
     }
 }
 
-int32_t WindowImpl::HandleInput(AInputEvent* event) {
+int32_t WindowImpl::HandleInput(lug::Window::Event& event, AInputEvent* androidEvent) {
   // Engine* eng = (Engine*)app->userData;
-  if (AInputEvent_getType(event) == AINPUT_EVENT_TYPE_MOTION) {
-    ndk_helper::GESTURE_STATE doubleTapState = doubletap_detector_.Detect(event);
-    ndk_helper::GESTURE_STATE dragState = drag_detector_.Detect(event);
-    ndk_helper::GESTURE_STATE pinchState = pinch_detector_.Detect(event);
+  if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_MOTION) {
+    ndk_helper::GESTURE_STATE doubleTapState = doubletap_detector_.Detect(androidEvent);
+    ndk_helper::GESTURE_STATE dragState = drag_detector_.Detect(androidEvent);
+    ndk_helper::GESTURE_STATE pinchState = pinch_detector_.Detect(androidEvent);
 
     // Double tap detector has a priority over other detectors
     if (doubleTapState == ndk_helper::GESTURE_STATE_ACTION) {
       // Detect double tap
         LUG_LOG.info("should start detecting double tap");
-      // tap_camera_.Reset(true);
+        
     } else {
       // Handle drag state
       if (dragState & ndk_helper::GESTURE_STATE_START) {
+        
         // // Otherwise, start dragging
-        // ndk_helper::Vec2 v;
-        // drag_detector_.GetPointer(v);
+        lug::Math::Vec2f v;
+         drag_detector_.GetPointer(v);
         // TransformPosition(v);
         // tap_camera_.BeginDrag(v);
+        event.touchScreen.coordinates[0] = v;      
         LUG_LOG.info("start dragging");
       } else if (dragState & ndk_helper::GESTURE_STATE_MOVE) {
+        event.touchScreen.drag = true;
+        lug::Math::Vec2f v;
+        drag_detector_.GetPointer(v);
+        event.touchScreen.coordinates[0] = v;
         // ndk_helper::Vec2 v;
         // drag_detector_.GetPointer(v);
         // TransformPosition(v);
@@ -72,6 +78,12 @@ int32_t WindowImpl::HandleInput(AInputEvent* event) {
       // Handle pinch state
       if (pinchState & ndk_helper::GESTURE_STATE_START) {
         LUG_LOG.info("Start new pinch");
+        event.touchScreen.pinch = true;
+
+  
+        pinch_detector_.GetPointers(event.touchScreen.coordinates[0], event.touchScreen.coordinates[1]);
+
+
         // // Start new pinch
         // ndk_helper::Vec2 v1;
         // ndk_helper::Vec2 v2;
@@ -83,7 +95,10 @@ int32_t WindowImpl::HandleInput(AInputEvent* event) {
         // Multi touch
         // Start new pinch
         LUG_LOG.info("Multi touch  Start new pinch");
-
+        event.touchScreen.pinch = true;
+        
+        pinch_detector_.GetPointers(event.touchScreen.coordinates[0], event.touchScreen.coordinates[1]);
+                   
         // ndk_helper::Vec2 v1;
         // ndk_helper::Vec2 v2;
         // pinch_detector_.GetPointers(v1, v2);
@@ -108,7 +123,7 @@ bool WindowImpl::pollEvent(lug::Window::Event& event) {
                 return false;
             }
 
-            HandleInput(androidEvent);
+            HandleInput(event, androidEvent);
 
             // if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_MOTION) {
 

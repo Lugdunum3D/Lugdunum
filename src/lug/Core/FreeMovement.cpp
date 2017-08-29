@@ -59,6 +59,13 @@ void FreeMovement::onFrame(const System::Time& elapsedTime) {
             _target->rotate(-_speed * axisRightY, {1, 0, 0});
         }
     }
+    // TouchScreen
+    {
+        if (_eventSource->_touchScreenState.drag) {
+            _target->rotate(-_speed * _eventSource->_touchScreenState.coordinates[0].x(), {0, 1, 0}, lug::Graphics::Node::TransformSpace::World);
+            _target->rotate(-_speed * _eventSource->_touchScreenState.coordinates[0].y(), {1, 0, 0});
+        }
+    }
 
     // Capture / Release the mouse cursor
     if (_eventSource->isKeyPressed(lug::Window::Keyboard::Key::C) && !_hasFocus) {

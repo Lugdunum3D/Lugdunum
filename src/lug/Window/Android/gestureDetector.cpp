@@ -177,26 +177,26 @@ GESTURE_STATE PinchDetector::Detect(const AInputEvent* event) {
   return ret;
 }
 
-// bool PinchDetector::GetPointers(Vec2& v1, Vec2& v2) {
-//   if (vec_pointers_.size() < 2) return false;
+bool PinchDetector::GetPointers(lug::Math::Vec2f&v1, lug::Math::Vec2f& v2) {
+  if (vec_pointers_.size() < 2) return false;
 
-//   int32_t index = FindIndex(event_, vec_pointers_[0]);
-//   if (index == -1) return false;
+  int32_t index = FindIndex(event_, vec_pointers_[0]);
+  if (index == -1) return false;
 
-//   float x = AMotionEvent_getX(event_, index);
-//   float y = AMotionEvent_getY(event_, index);
+  float x = AMotionEvent_getX(event_, index);
+  float y = AMotionEvent_getY(event_, index);
 
-//   index = FindIndex(event_, vec_pointers_[1]);
-//   if (index == -1) return false;
+  index = FindIndex(event_, vec_pointers_[1]);
+  if (index == -1) return false;
 
-//   float x2 = AMotionEvent_getX(event_, index);
-//   float y2 = AMotionEvent_getY(event_, index);
+  float x2 = AMotionEvent_getX(event_, index);
+  float y2 = AMotionEvent_getY(event_, index);
 
-//   v1 = Vec2(x, y);
-//   v2 = Vec2(x2, y2);
+  v1 = lug::Math::Vec2f{x, y};
+  v2 = lug::Math::Vec2f{x2, y2};
 
-//   return true;
-// }
+  return true;
+}
 
 //--------------------------------------------------------------------------------
 // DragDetector
@@ -269,18 +269,18 @@ GESTURE_STATE DragDetector::Detect(const AInputEvent* event) {
   return ret;
 }
 
-// bool DragDetector::GetPointer(Vec2& v) {
-//   if (vec_pointers_.size() < 1) return false;
+bool DragDetector::GetPointer(lug::Math::Vec2f& v) {
+  if (vec_pointers_.size() < 1) return false;
 
-//   int32_t iIndex = FindIndex(event_, vec_pointers_[0]);
-//   if (iIndex == -1) return false;
+  int32_t iIndex = FindIndex(event_, vec_pointers_[0]);
+  if (iIndex == -1) return false;
 
-//   float x = AMotionEvent_getX(event_, iIndex);
-//   float y = AMotionEvent_getY(event_, iIndex);
+  float x = AMotionEvent_getX(event_, iIndex);
+  float y = AMotionEvent_getY(event_, iIndex);
 
-//   v = Vec2(x, y);
+  v = lug::Math::Vec2f{x, y};
 
-//   return true;
-// }
+  return true;
+}
 
 }  // namespace ndkHelper

@@ -14,6 +14,8 @@
 #include <android/input.h>
 #include <android/keycodes.h>
 
+#include <lug/Math/Vector.hpp>
+
 // #include "JNIHelper.h"
 // #include "vecmath.h"
 
@@ -107,7 +109,7 @@ class PinchDetector : public GestureDetector {
   PinchDetector() {}
   virtual ~PinchDetector() {}
   virtual GESTURE_STATE Detect(const AInputEvent* event);
-  // bool GetPointers(Vec2& v1, Vec2& v2);
+  bool GetPointers(lug::Math::Vec2f& v1, lug::Math::Vec2f& v2);
 };
 
 /******************************************************************
@@ -125,7 +127,7 @@ class DragDetector : public GestureDetector {
   DragDetector() : event_(nullptr) {}
   virtual ~DragDetector() {}
   virtual GESTURE_STATE Detect(const AInputEvent* event);
-  // bool GetPointer(Vec2& v);
+  bool GetPointer(lug::Math::Vec2f& v);
 };
 
 }  // namespace ndkHelper

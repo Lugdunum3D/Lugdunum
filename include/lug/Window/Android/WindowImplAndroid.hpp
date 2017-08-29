@@ -33,7 +33,7 @@ public:
 
 private:
     float MapCenteredAxis(AInputEvent* event, int32_t axis);
-    int32_t HandleInput(AInputEvent* event);
+    int32_t HandleInput(lug::Window::Event& event, AInputEvent* androidEvent);
 
     Window* _parent{nullptr};
 

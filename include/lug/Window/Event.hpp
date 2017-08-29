@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 #include <lug/Window/Export.hpp>
 #include <lug/Window/Keyboard.hpp>
@@ -54,6 +55,15 @@ struct LUG_WINDOW_API GamePadEvent {
     lug::Math::Vec2f axisRight;
 };
 
+struct LUG_WINDOW_API TouchScreenEvent {
+   lug::Math::Vec2f coordinates[2]; ///< The Touch coordinate
+
+   bool drag;       ///< True if a drag event occured, False otherwise
+   bool pinch;      ///< True if a pinch event occured, False otherwise
+   bool doubleTap;  ///< True if a double tap event occured, False otherwise
+   ~TouchScreenEvent() = default;
+};
+
 /**
  * @brief      Represents a char event
  */
@@ -81,8 +91,27 @@ struct LUG_WINDOW_API Event {
         MouseWheel,     ///< MouseWheelRotated event
         MouseLeave,     ///< Mouse left window event
         MouseEnter,     ///< Mouse entered window event
-        GamePadChange
+        GamePadChange,
+        TouchScreenChange
     };
+
+    Event& operator=(const Event& o) {
+        if (this != &o)
+        {
+            this->key = o.key;
+            this->character = o.character;    ///< A CharEvent
+            this->mouse = o.mouse;      ///< A MouseEvent
+            this->gamePad = o.gamePad;
+            this->touchScreen.coordinates[0] = o.touchScreen.coordinates[0];
+            if (o.touchScreen.pinch)
+                this->touchScreen.coordinates[1] = o.touchScreen.coordinates[1];
+            this->touchScreen.drag = o.touchScreen.drag;
+            this->touchScreen.pinch = o.touchScreen.pinch;
+            this->touchScreen.doubleTap = o.touchScreen.doubleTap;
+        }
+        return *this;
+    }
+   // Event& operator=(Event&&);
 
     Type type;          ///< The type of the event
 
@@ -94,6 +123,7 @@ struct LUG_WINDOW_API Event {
         CharEvent character;    ///< A CharEvent
         MouseEvent mouse;      ///< A MouseEvent
         GamePadEvent gamePad;
+        TouchScreenEvent touchScreen;
     };
 };
 
