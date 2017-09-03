@@ -364,7 +364,7 @@ set(IMGUI_SOURCE_FILES
     ${IMGUI_SOURCE_DIR}/imgui.cpp
     ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
     ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
-#    ${IMGUI_SOURCE_DIR}/imgui_freetype.cpp
+    ${IMGUI_SOURCE_DIR}/imgui_freetype.cpp
 )
 
 # find freetype
