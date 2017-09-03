@@ -641,9 +641,6 @@ io.MouseDown[0] = _window._touchScreenState.tap;
 #else
     const auto mousePos = _window.getMousePos();
     io.MousePos = ImVec2(static_cast<float>(mousePos.x()), static_cast<float>(mousePos.y()));
-    io.MouseDown[0] = _window.isMousePressed(lug::Window::Mouse::Button::Left);
-    io.MouseDown[1] = _window.isMousePressed(lug::Window::Mouse::Button::Right);
-    io.MouseDown[2] = _window.isMousePressed(lug::Window::Mouse::Button::Middle);
 
     #endif
     ImGui::NewFrame();
@@ -813,7 +810,12 @@ void Gui::processEvent(const lug::Window::Event event) {
                 LUG_LOG.info("io.MouseWheel{}", io.MouseWheel);
             }
             break;
-        
+        case lug::Window::Event::Type::ButtonPressed:
+        case lug::Window::Event::Type::ButtonReleased:
+            if ((static_cast<int>(event.mouse.code) - 1) >= 0) {
+                io.MouseDown[static_cast<int>(event.mouse.code) - 1] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                break;
+            }
         default:
         io.MouseWheel = 0;
             break;
