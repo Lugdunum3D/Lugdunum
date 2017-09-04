@@ -28,6 +28,8 @@ public:
     LUG_WINDOW_API static AInputQueue* inputQueue;
     LUG_WINDOW_API static ANativeWindow* nativeWindow;
     LUG_WINDOW_API static ANativeActivity* activity;
+    LUG_WINDOW_API static std::mutex androidMutex;
+    LUG_WINDOW_API static std::condition_variable cv;
 
 private:
     Window* _parent{nullptr};
