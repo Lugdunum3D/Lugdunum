@@ -41,3 +41,7 @@ inline const Math::Mat4x4f& Node::getTransform() {
     }
     return _transform;
 }
+
+inline const std::vector<Node*>& Node::getChildren() const {
+    return _children;
+}

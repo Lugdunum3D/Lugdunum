@@ -47,6 +47,7 @@ public:
 
     #include <lug/Graphics/Vulkan/API/CommandBuffer/Buffer.inl>
     #include <lug/Graphics/Vulkan/API/CommandBuffer/DescriptorSet.inl>
+    #include <lug/Graphics/Vulkan/API/CommandBuffer/Image.inl>
     #include <lug/Graphics/Vulkan/API/CommandBuffer/RenderPass.inl>
     #include <lug/Graphics/Vulkan/API/CommandBuffer/Pipeline.inl>
 

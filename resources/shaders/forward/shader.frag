@@ -104,8 +104,13 @@ layout (set = 3, binding = TEXTURE_OCCLUSION_BINDING) uniform sampler2D textureO
 #if TEXTURE_EMISSIVE
 layout (set = 3, binding = TEXTURE_EMISSIVE_BINDING) uniform sampler2D textureEmissive;
 #endif
+#if TEXTURE_IRRADIANCE_MAP
+layout (set = 3, binding = TEXTURE_IRRADIANCE_MAP_BINDING) uniform samplerCube textureIrradianceMap;
+#endif
+
 
 layout (location = IN_FREE_LOCATION) in vec3 inCameraPositionWorldSpace;
+
 
 //////////////////////////////////////////////////////////////////////////////
 // BLOCK OF STATIC OUTPUTS
@@ -119,6 +124,10 @@ layout (location = 0) out vec4 outColor;
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
 float DistributionGGX(float NdotH, float roughness) {
@@ -281,6 +290,23 @@ void main() {
     vec3 Lo = vec3(0.0);
     vec3 ambient = vec3(0.0);
 
+    const float NdotV = clamp(dot(normalWorldSpace, viewDirection), 0.0, 1.0);
+    const vec3 F = fresnelSchlick(NdotV, F0); // Fresnel factor (Reflectance depending on angle of incidence)
+    const vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);
+
+    #if TEXTURE_IRRADIANCE_MAP
+    {
+        const vec3 irradiance = texture(textureIrradianceMap, normalWorldSpace).rgb;
+        const vec3 diffuse = albedo.xyz * irradiance;
+
+        const vec3 FRoughness = fresnelSchlickRoughness(NdotV, F0, roughness);
+        const vec3 kDRoughness = (vec3(1.0) - FRoughness) * (1.0 - metallic);
+
+        // Calculate the ambient part of the IBL
+        ambient = (kDRoughness * diffuse /*+ specular*/);
+    }
+    #endif
+
     for (int i = 0; i < lightsNb; ++i) {
         // Ambient Light (0) : No position + No direction
         // Direction (1) : Position + Direction + No falloffAngle
@@ -304,21 +330,15 @@ void main() {
 
         if (NdotL > 0.0) {
             const vec3 halfViewLightDirection = normalize(viewDirection + lightDirection);
-
-            const float NdotV = clamp(dot(normalWorldSpace, viewDirection), 0.0, 1.0);
-            const float LdotH = clamp(dot(lightDirection, halfViewLightDirection), 0.0, 1.0);
             const float NdotH = clamp(dot(normalWorldSpace, halfViewLightDirection), 0.0, 1.0);
 
             // Calculate light radiance
             const float attenuation = lights[i].type == 1 ? 1.0 : lights[i].constantAttenuation + lights[i].linearAttenuation * lightDistance + lights[i].quadraticAttenuation * (lightDistance * lightDistance);
-            vec3 radiance = lights[i].color.xyz / attenuation;
+            const vec3 radiance = lights[i].color.xyz / attenuation;
 
             // cook-torrance brdf
             const float NDF = DistributionGGX(NdotH, roughness); // Normal distribution (Distribution of the microfacets)
             const float G = GeometrySchlickGGX(NdotV, NdotL, roughness); // Geometric shadowing term (Microfacets shadowing)
-            const vec3 F = fresnelSchlick(NdotH, F0); // Fresnel factor (Reflectance depending on angle of incidence)
-
-            const vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);
 
             const float denominator = 4 * NdotV * NdotL + 0.00001;
             const vec3 specular = NDF * G * F / denominator;

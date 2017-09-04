@@ -19,6 +19,7 @@ class LUG_GRAPHICS_API Texture {
 
     struct Layer {
         // TODO(nokitoo): add other infos(layers count, aspect mask, mip level, etc...)
+        // If filename is empty, create an empty texture with width/height
         std::string filename;
 
         unsigned char* const data{nullptr};
@@ -57,9 +58,10 @@ public:
     void setMipMapFilter(Render::Texture::Filter mipMapFilter);
     void setWrapS(Render::Texture::WrappingMode wrapS);
     void setWrapT(Render::Texture::WrappingMode wrapT);
+    void setWrapW(Render::Texture::WrappingMode wrapW);
 
     void addLayer(const std::string& filename);
-    void addLayer(uint32_t width, uint32_t height, unsigned char* const data);
+    void addLayer(uint32_t width, uint32_t height, unsigned char* const data = nullptr);
 
     Resource::SharedPtr<Render::Texture> build();
 
@@ -76,6 +78,7 @@ protected:
 
     Render::Texture::WrappingMode _wrapS{Render::Texture::WrappingMode::ClampToEdge};
     Render::Texture::WrappingMode _wrapT{Render::Texture::WrappingMode::ClampToEdge};
+    Render::Texture::WrappingMode _wrapW{Render::Texture::WrappingMode::ClampToEdge};
 
     std::vector<Layer> _layers;
 };

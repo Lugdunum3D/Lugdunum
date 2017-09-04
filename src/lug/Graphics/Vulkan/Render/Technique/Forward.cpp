@@ -349,6 +349,10 @@ bool Forward::render(
                                     textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getEmissiveTexture().texture.get()));
                                 }
 
+                                if (material.getIrradianceMap()) {
+                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getIrradianceMap()->getTexture().get()));
+                                }
+
                                 return textures;
                             }()
                         );
@@ -374,6 +378,7 @@ bool Forward::render(
 
                         frameData.renderCmdBuffer.bindDescriptorSets(materialBind);
                     }
+
 
                     if (!primitiveSet.position || !primitiveSet.normal) {
                         LUG_LOG.warn("Forward::render: Mesh should have positions and normals data");

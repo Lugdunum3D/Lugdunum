@@ -1,3 +1,8 @@
+inline void Material::setIrradianceMap(const Resource::SharedPtr<SkyBox> irradianceMap) {
+    _irradianceMap = irradianceMap;
+    DirtyObject::setDirty(true);
+}
+
 inline const Material::Constants& Material::getConstants() const {
     return _constants;
 }
@@ -22,3 +27,6 @@ inline const Material::TextureInfo& Material::getEmissiveTexture() const {
     return _emissiveTexture;
 }
 
+inline const Resource::SharedPtr<SkyBox> Material::getIrradianceMap() const {
+    return _irradianceMap;
+}

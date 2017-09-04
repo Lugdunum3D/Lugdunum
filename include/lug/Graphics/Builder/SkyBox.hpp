@@ -51,6 +51,7 @@ public:
     void setMipMapFilter(Render::Texture::Filter mipMapFilter);
     void setWrapS(Render::Texture::WrappingMode wrapS);
     void setWrapT(Render::Texture::WrappingMode wrapT);
+    void setWrapW(Render::Texture::WrappingMode wrapW);
     void setFaceFilename(Face face, const std::string& filename);
 
     Resource::SharedPtr<Render::SkyBox> build();
@@ -66,6 +67,7 @@ protected:
 
     Render::Texture::WrappingMode _wrapS{Render::Texture::WrappingMode::ClampToEdge};
     Render::Texture::WrappingMode _wrapT{Render::Texture::WrappingMode::ClampToEdge};
+    Render::Texture::WrappingMode _wrapW{Render::Texture::WrappingMode::ClampToEdge};
 
     // Contains alls file names for faces
     std::array<std::string, 6> _faces;

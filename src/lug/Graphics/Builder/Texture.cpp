@@ -9,12 +9,22 @@ namespace Builder {
 Texture::Texture(Renderer& renderer) : _renderer(renderer) {}
 
 Resource::SharedPtr<Render::Texture> Texture::build() {
+    Resource::SharedPtr<Render::Texture> texture{nullptr};
+
     switch (_renderer.getType()) {
         case Renderer::Type::Vulkan:
-            return lug::Graphics::Vulkan::Builder::Texture::build(*this);
+            texture = lug::Graphics::Vulkan::Builder::Texture::build(*this);
     }
 
-    return nullptr;
+    if (texture) {
+        texture->_magFilter = _magFilter;
+        texture->_minFilter = _minFilter;
+        texture->_mipMapFilter = _mipMapFilter;
+        texture->_wrapS = _wrapS;
+        texture->_wrapT = _wrapT;
+    }
+
+    return texture;
 }
 
 } // Builder

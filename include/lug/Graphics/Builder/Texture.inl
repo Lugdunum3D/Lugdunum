@@ -26,6 +26,10 @@ inline void Texture::setWrapT(Render::Texture::WrappingMode wrapT) {
     _wrapT = wrapT;
 }
 
+inline void Texture::setWrapW(Render::Texture::WrappingMode wrapW) {
+    _wrapW = wrapW;
+}
+
 inline void Texture::addLayer(const std::string& filename) {
     _layers.push_back({filename});
 }

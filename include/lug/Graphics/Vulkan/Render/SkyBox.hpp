@@ -11,10 +11,10 @@
 
 namespace lug {
 namespace Graphics {
-namespace Vulkan {
 
 class Renderer;
 
+namespace Vulkan {
 namespace Render {
 
 /**
@@ -34,6 +34,7 @@ public:
 
     void destroy();
 
+    Resource::SharedPtr<lug::Graphics::Render::SkyBox> createIrradianceMap(lug::Graphics::Renderer& renderer) const override final;
     static const API::GraphicsPipeline& getPipeline();
     static const lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> getMesh();
 
@@ -48,6 +49,7 @@ private:
 
 private:
     static API::GraphicsPipeline _pipeline;
+    static API::GraphicsPipeline _irradianceMapPipeline;
     static lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> _mesh;
 
     /**

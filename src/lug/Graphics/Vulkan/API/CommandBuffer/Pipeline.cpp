@@ -110,10 +110,10 @@ static void setupImageBarriers(
             vkImageMemoryBarriers[i].dstAccessMask = getImageDstAccessMask(vkImageMemoryBarriers[i].newLayout);
         }
 
-        if (vkImageMemoryBarriers[i].srcAccessMask == 0 &&
+/*        if (vkImageMemoryBarriers[i].srcAccessMask == 0 &&
             vkImageMemoryBarriers[i].newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
             vkImageMemoryBarriers[i].srcAccessMask = VK_ACCESS_HOST_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
-        }
+        }*/
     }
 }
 

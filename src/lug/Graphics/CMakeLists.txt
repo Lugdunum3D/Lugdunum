@@ -62,6 +62,7 @@ set(SRC
     ${SRCROOT}/Vulkan/API/Buffer.cpp
     ${SRCROOT}/Vulkan/API/CommandBuffer/Buffer.cpp
     ${SRCROOT}/Vulkan/API/CommandBuffer/DescriptorSet.cpp
+    ${SRCROOT}/Vulkan/API/CommandBuffer/Image.cpp
     ${SRCROOT}/Vulkan/API/CommandBuffer/Pipeline.cpp
     ${SRCROOT}/Vulkan/API/CommandBuffer/RenderPass.cpp
     ${SRCROOT}/Vulkan/API/CommandBuffer.cpp
@@ -237,6 +238,7 @@ set(INC
     ${INCROOT}/Vulkan/API/Buffer.inl
     ${INCROOT}/Vulkan/API/CommandBuffer/Buffer.inl
     ${INCROOT}/Vulkan/API/CommandBuffer/DescriptorSet.inl
+    ${INCROOT}/Vulkan/API/CommandBuffer/Image.inl
     ${INCROOT}/Vulkan/API/CommandBuffer/Pipeline.inl
     ${INCROOT}/Vulkan/API/CommandBuffer/RenderPass.inl
     ${INCROOT}/Vulkan/API/CommandBuffer.hpp

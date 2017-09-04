@@ -40,6 +40,8 @@ set(SHADERS
     gui.vert
     skybox.vert
     skybox.frag
+    irradiance.vert
+    irradiance.frag
 )
 
 set(LUG_RESOURCES
@@ -56,6 +58,12 @@ set(LUG_RESOURCES
     textures/skybox/left.jpg
     textures/skybox/right.jpg
     textures/skybox/top.jpg
+    textures/skybox2/posx.bmp
+    textures/skybox2/negx.bmp
+    textures/skybox2/posy.bmp
+    textures/skybox2/negy.bmp
+    textures/skybox2/posz.bmp
+    textures/skybox2/negz.bmp
     shaders/forward/shader.frag
     shaders/forward/shader.vert
 )

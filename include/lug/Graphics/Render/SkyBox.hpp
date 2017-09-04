@@ -7,6 +7,8 @@
 namespace lug {
 namespace Graphics {
 
+class Renderer;
+
 // For friend
 namespace Builder {
 class SkyBox;
@@ -29,6 +31,7 @@ public:
     virtual ~SkyBox() = default;
 
     const Resource::SharedPtr<lug::Graphics::Render::Texture> getTexture() const;
+    virtual Resource::SharedPtr<lug::Graphics::Render::SkyBox> createIrradianceMap(Renderer& renderer) const = 0;
 
 protected:
     lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> _texture;

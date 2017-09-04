@@ -35,7 +35,6 @@ bool Pipeline::init() {
                 shaderCode = Pipeline::ShaderBuilder::buildShader(
                     _renderer.getInfo().shadersRoot,
                     _renderer.getInfo().renderTechnique,
-                    static_cast<Renderer::DisplayMode>(extraPart.displayMode),
                     Pipeline::ShaderBuilder::Type::Vertex,
                     _id
                 );
@@ -58,7 +57,6 @@ bool Pipeline::init() {
                 shaderCode = Pipeline::ShaderBuilder::buildShader(
                     _renderer.getInfo().shadersRoot,
                     _renderer.getInfo().renderTechnique,
-                    static_cast<Renderer::DisplayMode>(extraPart.displayMode),
                     Pipeline::ShaderBuilder::Type::Fragment,
                     _id
                 );
@@ -296,6 +294,19 @@ bool Pipeline::init() {
 
                 bindings.push_back(std::move(textureBinding));
             }
+
+            if (extraPart.irradianceMapInfo) {
+                const VkDescriptorSetLayoutBinding textureBinding = {
+                    /* textureBinding.binding */ binding++,
+                    /* textureBinding.descriptorType */ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                    /* textureBinding.descriptorCount */ 1,
+                    /* textureBinding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
+                    /* textureBinding.pImmutableSamplers */ nullptr
+                };
+
+                bindings.push_back(std::move(textureBinding));
+            }
+
 
             if (bindings.size() > 0) {
                 descriptorSetLayouts.resize(4);

@@ -78,8 +78,11 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
     int texChannels{0};
     std::vector<stbi_uc*> layersPixels;
     for (auto& layer: builder._layers) {
-        if (layer.filename.size() == 0 && layer.data) {
-            layersPixels.push_back(layer.data);
+        if (!layer.filename.size()) {
+            if (layer.data) {
+                layersPixels.push_back(layer.data);
+            }
+
             texWidth = layer.width;
             texHeight = layer.height;
             continue;
@@ -124,16 +127,29 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
         layersPixels.push_back(pixels);
     }
 
+    // Save texture width/height
+    {
+        texture->setWidth(static_cast<uint32_t>(texWidth));
+        texture->setHeight(static_cast<uint32_t>(texHeight));
+    }
+
     // Create the API::Image
     {
         API::Builder::Image imageBuilder(device);
+        static int i = 0;
+
+        VkFormat format = VK_FORMAT_R8G8B8A8_UNORM;
+        ++i;
+        if (i == 7) {
+            format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        }
 
         imageBuilder.setUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT);
-        imageBuilder.setPreferedFormats({ VK_FORMAT_R8G8B8A8_UNORM });
+        imageBuilder.setPreferedFormats({ format });
         imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
         imageBuilder.setQueueFamilyIndices({ transferQueue->getQueueFamily()->getIdx() });
         imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
-        imageBuilder.setArrayLayers(static_cast<uint32_t>(layersPixels.size()));
+        imageBuilder.setArrayLayers(static_cast<uint32_t>(builder._layers.size()));
 
         API::Builder::DeviceMemory deviceMemoryBuilder(device);
         deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -179,7 +195,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
 
         imageViewBuilder.setFormat(texture->_image.getFormat());
         imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
-        imageViewBuilder.setLayerCount(static_cast<uint32_t>(layersPixels.size()));
+        imageViewBuilder.setLayerCount(static_cast<uint32_t>(builder._layers.size()));
 
         if (builder._type == ::lug::Graphics::Builder::Texture::Type::CubeMap) {
             imageViewBuilder.setViewType(VK_IMAGE_VIEW_TYPE_CUBE);
@@ -194,6 +210,8 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
     }
 
     // Create staging buffers for image upload
+    // The number of layers is not neccessarily equals to builder._layers.size() (5 layers and 2 filenames)
+    if (layersPixels.size())
     {
         VkDeviceSize imageSize = texWidth * texHeight * 4 * layersPixels.size();
 
@@ -388,6 +406,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
 
         samplerBuilder.setAddressModeU(wrappingModeToVulkan(builder._wrapS));
         samplerBuilder.setAddressModeV(wrappingModeToVulkan(builder._wrapT));
+        samplerBuilder.setAddressModeW(wrappingModeToVulkan(builder._wrapW));
 
         const auto& filterToVulkan = [](Render::Texture::Filter filter){
             switch(filter) {

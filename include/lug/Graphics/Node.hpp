@@ -43,6 +43,8 @@ public:
 
     const Math::Mat4x4f& getTransform();
 
+    const std::vector<Node*>& getChildren() const;
+
     void attachChild(Node& child);
 
     void translate(const Math::Vec3f& direction, TransformSpace space = TransformSpace::Local);

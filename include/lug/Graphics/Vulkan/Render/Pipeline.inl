@@ -20,6 +20,7 @@ inline Pipeline::Id Pipeline::getBaseId() {
 
     Pipeline::Id::ExtraPart extraPart;
     extraPart.displayMode = 0;
+    extraPart.irradianceMapInfo = 0; // No texture
 
     return Pipeline::Id::create(primitivePart, materialPart, extraPart);
 }
