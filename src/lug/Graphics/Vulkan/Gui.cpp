@@ -812,8 +812,21 @@ void Gui::processEvent(const lug::Window::Event event) {
             break;
         case lug::Window::Event::Type::ButtonPressed:
         case lug::Window::Event::Type::ButtonReleased:
-            if ((static_cast<int>(event.mouse.code) - 1) >= 0) {
-                io.MouseDown[static_cast<int>(event.mouse.code) - 1] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+            switch (event.mouse.code) {
+            case lug::Window::Mouse::Button::Left:
+                io.MouseDown[0] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                break;
+            case lug::Window::Mouse::Button::Right:
+                io.MouseDown[1] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                break;
+            case lug::Window::Mouse::Button::Middle:
+                io.MouseDown[2] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                break;
+            case lug::Window::Mouse::Button::XButton1:
+                io.MouseDown[3] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                break;
+            case lug::Window::Mouse::Button::XButton2:
+                io.MouseDown[4] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
                 break;
             }
         default:
