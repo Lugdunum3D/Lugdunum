@@ -1,9 +1,12 @@
 #include <lug/Window/Android/WindowImplAndroid.hpp>
+#include <mutex>
 
 namespace lug {
 namespace Window {
 namespace priv {
 
+std::mutex WindowImpl::androidMutex;
+std::condition_variable WindowImpl::cv;
 std::queue<lug::Window::Event> WindowImpl::events;
 AInputQueue* WindowImpl::inputQueue = nullptr;
 ANativeWindow* WindowImpl::nativeWindow = nullptr;
@@ -12,9 +15,12 @@ ANativeActivity* WindowImpl::activity = nullptr;
 WindowImpl::WindowImpl(Window* win) : _parent{win} {}
 
 bool WindowImpl::init(const Window::InitInfo&) {
+    if (!WindowImpl::nativeWindow) {
+        std::unique_lock<std::mutex> lk(WindowImpl::androidMutex);
+        WindowImpl::cv.wait(lk);
+    }
     _parent->_mode.width = ANativeWindow_getWidth(nativeWindow);
     _parent->_mode.height = ANativeWindow_getHeight(nativeWindow);
-
     return true;
 }
 
