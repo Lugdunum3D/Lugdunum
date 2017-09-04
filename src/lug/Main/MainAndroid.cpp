@@ -1,4 +1,5 @@
 #include <thread>
+#include <mutex>
 #include <lug/Main/MainAndroid.hpp>
 #include <lug/Window/Android/WindowImplAndroid.hpp>
 
@@ -64,6 +65,7 @@ void AndroidApp::onPause(ANativeActivity*) {}
 void AndroidApp::onStop(ANativeActivity*) {}
 
 void AndroidApp::onDestroy(ANativeActivity* ) {
+    std::lock_guard<std::mutex> lock(lug::Window::priv::WindowImpl::androidMutex);
     lug::Window::Event e;
     e.type = lug::Window::Event::Type::Close;
     lug::Window::priv::WindowImpl::events.push(std::move(e));
@@ -72,7 +74,9 @@ void AndroidApp::onDestroy(ANativeActivity* ) {
 void AndroidApp::onWindowFocusChanged(ANativeActivity*, int) {}
 
 void AndroidApp::onNativeWindowCreated(ANativeActivity*, ANativeWindow* window) {
+    std::lock_guard<std::mutex> lk(lug::Window::priv::WindowImpl::androidMutex);
     lug::Window::priv::WindowImpl::nativeWindow = window;
+    lug::Window::priv::WindowImpl::cv.notify_one();
 }
 
 void AndroidApp::onNativeWindowResized(ANativeActivity*, ANativeWindow* ) {}
@@ -80,14 +84,17 @@ void AndroidApp::onNativeWindowResized(ANativeActivity*, ANativeWindow* ) {}
 void AndroidApp::onNativeWindowRedrawNeeded(ANativeActivity*, ANativeWindow*) {}
 
 void AndroidApp::onNativeWindowDestroyed(ANativeActivity*, ANativeWindow* window) {
+    std::lock_guard<std::mutex> lock(lug::Window::priv::WindowImpl::androidMutex);
     lug::Window::priv::WindowImpl::nativeWindow = window;
 }
 
 void AndroidApp::onInputQueueCreated(ANativeActivity*, AInputQueue* input) {
+    std::lock_guard<std::mutex> lock(lug::Window::priv::WindowImpl::androidMutex);
     lug::Window::priv::WindowImpl::inputQueue = input;
 }
 
 void AndroidApp::onInputQueueDestroyed(ANativeActivity*, AInputQueue*) {
+    std::lock_guard<std::mutex> lock(lug::Window::priv::WindowImpl::androidMutex);
     lug::Window::priv::WindowImpl::inputQueue = nullptr;
 }
 
@@ -101,6 +108,7 @@ void AndroidApp::onLowMemory(ANativeActivity*) {}
 } // lug
 
 void ANativeActivity_onCreate(ANativeActivity* activity, void* savedState, size_t savedStateSize) {
+    std::lock_guard<std::mutex> lock(lug::Window::priv::WindowImpl::androidMutex);
     activity->instance = new lug::Main::AndroidApp(activity, savedState, savedStateSize);
     lug::Window::priv::WindowImpl::activity = activity;
 }
