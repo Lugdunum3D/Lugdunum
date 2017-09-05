@@ -802,6 +802,8 @@ void Gui::processEvent(const lug::Window::Event event) {
             case lug::Window::Mouse::Button::XButton2:
                 io.MouseDown[4] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
                 break;
+            default:
+                break;
             }
         default:
             break;
