@@ -364,21 +364,34 @@ set(IMGUI_SOURCE_FILES
     ${IMGUI_SOURCE_DIR}/imgui.cpp
     ${IMGUI_SOURCE_DIR}/imgui_demo.cpp
     ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
-    ${IMGUI_SOURCE_DIR}/imgui_freetype.cpp
 )
 
-# find freetype
-if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/freetype")
-    message(FATAL_ERROR "Can't find freetype in the thirdparty directory")
+# find imgui_club
+if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/imgui_club")
+    message(FATAL_ERROR "Can't find imgui_club in the thirdparty directory")
 endif()
 
-set(FREETYPE_INCLUDE_DIR ${LUG_THIRDPARTY_DIR}/freetype/include)
-message(STATUS "Found freetype: ${FREETYPE_INCLUDE_DIR}")
+set(IMGUI_CLUB_DIR ${LUG_THIRDPARTY_DIR}/imgui_club)
+message(STATUS "Found Imgui_club: ${IMGUI_CLUB_DIR}")
 
-include_directories(${FREETYPE_INCLUDE_DIR})
+include_directories(${IMGUI_CLUB_DIR}/include)
+list(APPEND IMGUI_SOURCE_FILES ${IMGUI_CLUB_DIR}/src/imgui_freetype.cpp)
 
-#TODO find()
-set(FREETYPE_LIBRARIES ${LUG_THIRDPARTY_DIR}/freetype/lib/freetype.lib)
+# find freetype
+find_package(Freetype)
+if (NOT FREETYPE_FOUND)
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/freetype")
+        message(FATAL_ERROR "Can't find freetype in the thirdparty directory")
+    endif()
+
+    set(CMAKE_FIND_ROOT_PATH "${LUG_THIRDPARTY_DIR}/freetype")
+    find_package(Freetype REQUIRED)
+
+    message(STATUS "Found freetype include : ${FREETYPE_INCLUDE_DIRS}")
+    message(STATUS "Found freetype library : ${FREETYPE_LIBRARIES}")
+endif()
+
+include_directories(${FREETYPE_INCLUDE_DIRS})
 
 if(LUG_COMPILER_GCC)
     set_source_files_properties(${IMGUI_SOURCE_FILES} PROPERTIES COMPILE_FLAGS -Wno-error=maybe-uninitialized)

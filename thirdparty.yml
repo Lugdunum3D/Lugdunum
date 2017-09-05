@@ -20,4 +20,12 @@ gltf2-loader:
 
 imgui:
     repository:
-        tag: 1094afc6bef39080b60cbc7f44bb3eb52cd597d8
+        tag: 8971d701495eeb557e6f098f7d273f74ac08ae28
+
+imgui_club:
+    repository:
+        tag: 45f25c407a4baf2fbe6018e94db213e3f3c97663
+
+freetype:
+    repository:
+        tag: f0898b9259d4b3b99a1e720924683730dd36d3db
