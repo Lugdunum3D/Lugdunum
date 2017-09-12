@@ -1,3 +1,5 @@
+
+#include <math.h>
 #include <lug/Graphics/Vulkan/Gui.hpp>
 
 #include <imgui.h>
@@ -629,13 +631,17 @@ void Gui::beginFrame(const lug::System::Time& elapsedTime) {
     io.DeltaTime = elapsedTime.getSeconds();
 
     io.DisplaySize = ImVec2(_window.getWidth(), _window.getHeight());
-
+#if defined(LUG_SYSTEM_ANDROID)
+io.MousePos = ImVec2(_window._touchScreenState.coordinates[0].x(), _window._touchScreenState.coordinates[0].y());
+io.MouseDown[0] = _window._touchScreenState.tap;
+#else
     const auto mousePos = _window.getMousePos();
     io.MousePos = ImVec2(static_cast<float>(mousePos.x()), static_cast<float>(mousePos.y()));
     io.MouseDown[0] = _window.isMousePressed(lug::Window::Mouse::Button::Left);
     io.MouseDown[1] = _window.isMousePressed(lug::Window::Mouse::Button::Right);
     io.MouseDown[2] = _window.isMousePressed(lug::Window::Mouse::Button::Middle);
 
+    #endif
     ImGui::NewFrame();
 }
 
@@ -768,6 +774,7 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
 }
 
 void Gui::processEvent(const lug::Window::Event event) {
+   
     ImGuiIO& io = ImGui::GetIO();
     switch (event.type) {
         case lug::Window::Event::Type::KeyPressed:
@@ -787,7 +794,24 @@ void Gui::processEvent(const lug::Window::Event event) {
         case lug::Window::Event::Type::MouseWheel:
             io.MouseWheel += static_cast<float>(event.mouse.scrollOffset.xOffset);
             break;
+         case lug::Window::Event::Type::TouchScreenChange:
+        
+            if (event.touchScreen.drag) {
+
+                float draggedDistance = sqrtf(((event.touchScreen.coordinates[0].x()  - io.MousePosPrev.x ) * (event.touchScreen.coordinates[0].x()  - io.MousePosPrev.x))
+                + ((event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y) * (event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y)));
+                LUG_LOG.info("draggedDistance {}, displaysize {}", draggedDistance, io.DisplaySize.y);
+                if ((static_cast<float>(io.MousePosPrev.y) - event.touchScreen.coordinates[0].y()) > 0) {
+                    io.MouseWheel += draggedDistance / (io.DisplaySize.y - static_cast<float>(io.MousePosPrev.y));
+                } else {
+                    io.MouseWheel -= draggedDistance / (io.DisplaySize.y - static_cast<float>(io.MousePosPrev.y));
+                }
+                LUG_LOG.info("io.MouseWheel{}", io.MouseWheel);
+            }
+            break;
+        
         default:
+        io.MouseWheel = 0;
             break;
     }
 }

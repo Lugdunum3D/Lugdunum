@@ -197,7 +197,6 @@ bool Window::isOpen() const {
 bool Window::pollEvent(Event& event) {
     if (_impl != nullptr) {
         const bool value = _impl->pollEvent(event);
-
         // If we've receive Destroy just close window without returning the event to the user
         if (value && event.type == Event::Type::Destroy) {
             close();

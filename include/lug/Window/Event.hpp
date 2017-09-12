@@ -57,11 +57,11 @@ struct LUG_WINDOW_API GamePadEvent {
 
 struct LUG_WINDOW_API TouchScreenEvent {
    lug::Math::Vec2f coordinates[2]; ///< The Touch coordinate
-
-   bool drag;       ///< True if a drag event occured, False otherwise
+   
+   bool drag;
+   bool tap;       ///< True if a drag event occured, False otherwise
    bool pinch;      ///< True if a pinch event occured, False otherwise
    bool doubleTap;  ///< True if a double tap event occured, False otherwise
-   ~TouchScreenEvent() = default;
 };
 
 /**
