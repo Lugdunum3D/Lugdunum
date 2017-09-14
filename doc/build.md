@@ -27,9 +27,10 @@ You can find the sources of the framework at the [following link](https://github
 
 ## How it works
 
-All the dependencies can be found in our [ThirdParty repository](https://github.com/Lugdunum3D/Lugdunum-ThirdParty), which is added as a submodule of the main repository.
 
-It is planned to add an utility script to update and compile all the dependencies at once, but as of now, it is still a manual task.
+All dependencies can now be found on [thirdparty-dl.lugbench.eu](https://thirdparty-dl.lugbench.eu). The CMake build system is configured to use this host by default and pull the required files from there, so you shouldn't have to compile them all from source.
+
+In the case this host goes down in the future, the dependencies can be easily built using the `thirdpary.yml` file in the root of the repository along the building scripts located in our [ThirdParty repository](https://github.com/Lugdunum3D/ThirdParty-Builder).
 
 # How to build Lugdunum
 
