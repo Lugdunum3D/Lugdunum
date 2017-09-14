@@ -19,19 +19,18 @@
 #endif
 
 #define LUG_LOG_LEVELS(PROCESS)     \
-    PROCESS(Debug)                  \
-    PROCESS(Info)                   \
-    PROCESS(Warning)                \
-    PROCESS(Error)                  \
-    PROCESS(Fatal)                  \
-    PROCESS(Assert)                 \
-    PROCESS(Off)                    \
+    PROCESS(Debug, 0x01)            \
+    PROCESS(Info, 0x02)             \
+    PROCESS(Warning, 0x04)          \
+    PROCESS(Error, 0x08)            \
+    PROCESS(Fatal, 0x10)            \
+    PROCESS(Assert, 0x20)           
 
 namespace lug {
 namespace System {
 namespace Logger {
 
-#define LUG_LOG_ENUM(CHANNEL) CHANNEL,
+#define LUG_LOG_ENUM(CHANNEL, VALUE) CHANNEL = VALUE,
 enum class Level : uint8_t {
     LUG_LOG_LEVELS(LUG_LOG_ENUM)
 };

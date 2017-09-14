@@ -32,13 +32,13 @@ public:
     virtual void handle(const priv::Message& msg) = 0;
 
     bool shouldLog(Level level) const;
-    void setLevel(Level level);
-    Level getLevel() const;
+    void setLevels(Level level);
+    Level getLevels() const;
 
 protected:
     std::string _name;
     std::unique_ptr<Formatter> _formatter;
-    Level _level;
+    Level _levels;
 };
 
 template<typename T, typename... Args>
@@ -49,4 +49,3 @@ T* makeHandler(const std::string& handlerName, Args&&... args);
 } // Logger
 } // System
 } // lug
-

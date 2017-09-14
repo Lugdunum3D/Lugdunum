@@ -9,7 +9,7 @@ namespace Logger {
 Handler::Handler(const std::string& name) :
     _name(name),
     _formatter(std::make_unique<Formatter>("[%H:%M:%S][%l] %v\n")),
-    _level(Level::Debug) {}
+    _levels(Level::Debug) {}
 
 void Handler::setFormatter(std::unique_ptr<Formatter> formatter) {
     _formatter = std::move(formatter);
@@ -23,16 +23,16 @@ void Handler::format(priv::Message& msg) {
     _formatter->format(msg);
 }
 
-void Handler::setLevel(Level level) {
-    _level = level;
+void Handler::setLevels(Level levels) {
+    _levels = levels;
 }
 
-Level Handler::getLevel() const {
-    return _level;
+Level Handler::getLevels() const {
+    return _levels;
 }
 
 bool Handler::shouldLog(Level level) const {
-    return level >= _level;
+    return ((uint8_t)level & (uint8_t)_levels);
 }
 
 } // Logger

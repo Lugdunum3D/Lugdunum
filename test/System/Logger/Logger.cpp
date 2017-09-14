@@ -85,7 +85,6 @@ TEST(Logger, LevelsExplicit) {
         logger.log(level, helloWorld);
     };
 
-    testOneLevel(Level::Off);
     testOneLevel(Level::Debug);
     testOneLevel(Level::Info);
     testOneLevel(Level::Warning);
@@ -134,11 +133,11 @@ TEST(Logger, LevelsFilter) {
     logger->addHandler(handler);
 
     auto testOneLevel = [&](Level level, Level levelPlusOne) {
-        handler->setLevel(levelPlusOne);
+        handler->setLevels(levelPlusOne);
         EXPECT_CALL(*handler, handle(_)).Times(0);
         logger->log(level, helloWorld);
 
-        handler->setLevel(level);
+        handler->setLevels(level);
         EXPECT_CALL(*handler, handle(_)).Times(1);
         logger->log(level, helloWorld);
     };
@@ -148,7 +147,6 @@ TEST(Logger, LevelsFilter) {
     testOneLevel(Level::Warning, Level::Error);
     testOneLevel(Level::Error, Level::Fatal);
     testOneLevel(Level::Fatal, Level::Assert);
-    testOneLevel(Level::Assert, Level::Off);
 
     LoggingFacility::clear();
 }
@@ -314,4 +312,3 @@ TEST(Logger, LogsExceptionWhenParseFails) {
 }
 }
 }
-
