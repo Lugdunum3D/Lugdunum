@@ -154,3 +154,114 @@ macro(lug_add_test name)
 
     add_test(NAME ${name}UnitTests COMMAND ${target} --gtest_output=xml:${TEST_OUTPUT}/${name}UnitTests.xml)
 endmacro()
+
+function(lug_download_thirdparty)
+    lug_set_option(LUG_THIRDPARTY_URL "https://thirdparty-dl.lugbench.eu" STRING "Choose the server from which to download the thirdparty directory")
+    lug_set_option(LUG_ACCEPT_DL OFF BOOL "Choose whether to accept or not the download of the thirdparty directory")
+
+    string(TOLOWER "${CMAKE_SYSTEM_NAME}" THIRDPARTY_PLATFORM)
+
+    if (NOT EXISTS "${CMAKE_SOURCE_DIR}/.git")
+        message(FATAL_ERROR "Can't find the .git directory")
+    endif()
+
+    find_package(Git)
+    if (GIT_FOUND)
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} log -n 1 --pretty=format:%h -- thirdparty.yml
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+            OUTPUT_VARIABLE "THIRDPARTY_LATEST_HASH"
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        message(STATUS "Thirdparty hash: ${THIRDPARTY_LATEST_HASH}")
+    else()
+        message(FATAL_ERROR "Can't find the latest revision of `thirdparty.yml`")
+    endif()
+
+    if (EXISTS "${LUG_THIRDPARTY_DIR}")
+        if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/version")
+            message(STATUS "Thirdparty dir exists and version is UNKNOWN, using as-is")
+            return()
+        endif()
+
+        file(STRINGS "${LUG_THIRDPARTY_DIR}/version" LUG_THIRDPARTY_VERSION)
+        if (${LUG_THIRDPARTY_VERSION} STREQUAL "${THIRDPARTY_PLATFORM}_${THIRDPARTY_LATEST_HASH}")
+            message(STATUS "Thirdparty dir exists and version is OK")
+            return()
+        endif()
+        message(STATUS "Thirdparty dir exists but is outdated (${LUG_THIRDPARTY_VERSION}, needs ${THIRDPARTY_PLATFORM}_${THIRDPARTY_LATEST_HASH}), updating...")
+        file(REMOVE_RECURSE "${LUG_THIRDPARTY_DIR}")
+    endif()
+
+    if (NOT "${LUG_ACCEPT_DL}")
+        message(
+            FATAL_ERROR
+            "\n"
+            "NOT FOUND: ${LUG_THIRDPARTY_DIR}\n"
+            "---\n"
+            "The thirdparty directory was NOT found, "
+            "but we can download it for your architecture. "
+            "To protect your privacy the download is not automatic.\n"
+            "To proceed and accept the download, re-run cmake with -DLUG_ACCEPT_DL=ON\n"
+            "---\n"
+            "You can also compile it from source: see https://github.com/Lugdunum3D/ThirdParty-Builder\n"
+            "---\n"
+            "Thanks,\n"
+            "The Lugdunum3D Team.\n"
+            "\n"
+        )
+    endif()
+
+    set(SHOULD_DOWNLOAD ON)
+    set(DL_FILE "${CMAKE_BINARY_DIR}/thirdparty-${THIRDPARTY_LATEST_HASH}.zip")
+    set(DL_URL "${LUG_THIRDPARTY_URL}/${THIRDPARTY_LATEST_HASH}/${THIRDPARTY_PLATFORM}.zip")
+
+    # Checksums
+    set(DL_FILE_EXPECTED_MD5 "${CMAKE_BINARY_DIR}/thirdparty-${THIRDPARTY_LATEST_HASH}.md5")
+    set(DL_URL_EXPECTED_MD5 "${LUG_THIRDPARTY_URL}/${THIRDPARTY_LATEST_HASH}/${THIRDPARTY_PLATFORM}.md5")
+
+    file(DOWNLOAD "${DL_URL_EXPECTED_MD5}" "${DL_FILE_EXPECTED_MD5}")
+    file(STRINGS "${DL_FILE_EXPECTED_MD5}" DL_EXPECTED_MD5)
+    message(STATUS "Expected MD5 will be '${DL_EXPECTED_MD5}'")
+
+    # Check MD5 if file exists
+    if (EXISTS "${DL_FILE}")
+        file(MD5 "${DL_FILE}" DL_FILE_MD5)
+        if (DL_FILE_MD5 STREQUAL DL_EXPECTED_MD5)
+            message(STATUS "Already exists and checks valid: ${DL_FILE}")
+            set(SHOULD_DOWNLOAD OFF)
+        else()
+            message(STATUS "Already exists but not valid: ${DL_FILE}")
+        endif()
+    endif()
+
+    if(SHOULD_DOWNLOAD)
+        message(STATUS "Downloading ${DL_URL}")
+        file(
+            DOWNLOAD
+            "${DL_URL}" "${DL_FILE}"
+            EXPECTED_MD5 "${DL_EXPECTED_MD5}"
+        )
+    endif()
+
+    # Extract zip
+    message(STATUS "Extracting...")
+    file(MAKE_DIRECTORY "${LUG_THIRDPARTY_DIR}")
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar xfz "${DL_FILE}"
+        WORKING_DIRECTORY "${LUG_THIRDPARTY_DIR}"
+        RESULT_VARIABLE rv
+    )
+    if (NOT rv EQUAL 0)
+        file(REMOVE_RECURSE "${LUG_THIRDPARTY_DIR}")
+        message(
+            FATAL_ERROR
+            "Extract of '${DL_FILE}' failed"
+            "Try to remove it to download it again"
+        )
+    endif()
+
+    file(WRITE "${LUG_THIRDPARTY_DIR}/version" "${THIRDPARTY_PLATFORM}_${THIRDPARTY_LATEST_HASH}")
+    message(STATUS "Done!")
+
+endfunction()

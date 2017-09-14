@@ -46,7 +46,10 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
 
 # set the path of thirdparty
-lug_set_option(LUG_THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/thirdparty" STRING "Choose the path for the thirdparty directory")
+lug_set_option(LUG_THIRDPARTY_DIR "${CMAKE_BINARY_DIR}/thirdparty" STRING "Choose the path for the thirdparty directory")
+
+# download thirdparty dir if not specified
+lug_download_thirdparty()
 
 # find Vulkan
 find_package(Vulkan)

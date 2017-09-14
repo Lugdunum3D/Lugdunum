@@ -328,7 +328,7 @@ if(LUG_OS_ANDROID)
 endif()
 
 # Find glTF2-loader
-find_package(GLTF2-Loader)
+find_package(GLTF2-Loader QUIET)
 
 if (NOT GLTF2-LOADER_FOUND)
     if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/glTF2-loader")
