@@ -384,7 +384,11 @@ if (NOT FREETYPE_FOUND)
         message(FATAL_ERROR "Can't find freetype in the thirdparty directory")
     endif()
 
-    set(ENV{FREETYPE_DIR} "${LUG_THIRDPARTY_DIR}/freetype")
+    if(LUG_OS_ANDROID)
+        set(CMAKE_FIND_ROOT_PATH "${LUG_THIRDPARTY_DIR}/freetype")
+    else()
+        set(ENV{FREETYPE_DIR} "${LUG_THIRDPARTY_DIR}/freetype")
+    endif()
     find_package(Freetype REQUIRED)
 
     message(STATUS "Found freetype include : ${FREETYPE_INCLUDE_DIRS}")
