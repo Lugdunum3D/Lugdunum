@@ -22,6 +22,10 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
 
     Vulkan::Renderer& renderer = static_cast<Vulkan::Renderer&>(builder._renderer);
 
+    const size_t primitiveSetsNb = builder._primitiveSets.size();
+    mesh->_primitiveSets.resize(primitiveSetsNb);
+
+    uint32_t i = 0;
     for (auto& builderPrimitiveSet : builder._primitiveSets) {
         Render::Mesh::PrimitiveSetData* primitiveSetData = new Render::Mesh::PrimitiveSetData();
         lug::Graphics::Render::Mesh::PrimitiveSet targetPrimitiveSet;
@@ -30,38 +34,39 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
         targetPrimitiveSet.material = builderPrimitiveSet.getMaterial();
 
         auto& builderAttributes = builderPrimitiveSet.getAttributes();
-        uint32_t attributesNb = static_cast<uint32_t>(builderAttributes.size());
+
+        const uint32_t attributesNb = static_cast<uint32_t>(builderAttributes.size());
         targetPrimitiveSet.attributes.resize(attributesNb);
         primitiveSetData->buffers.resize(attributesNb);
 
-        for (uint32_t i = 0; i < attributesNb; ++i) {
-            targetPrimitiveSet.attributes[i] = builderAttributes[i];
+        for (uint32_t j = 0; j < attributesNb; ++j) {
+            targetPrimitiveSet.attributes[j] = builderAttributes[j];
 
             // Pipeline::Handle::PrimitivePart support only 3 texture coordinates
-            if (targetPrimitiveSet.attributes[i].type == lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::TexCoord &&
+            if (targetPrimitiveSet.attributes[j].type == lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::TexCoord &&
                 targetPrimitiveSet.texCoords.size() == 3) {
                 LUG_LOG.warn("Vulkan::Mesh::build: More than 3 texture coordinates, others will be ignored");
                 continue;
             }
 
-            switch (targetPrimitiveSet.attributes[i].type) {
+            switch (targetPrimitiveSet.attributes[j].type) {
                 case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice:
-                    targetPrimitiveSet.indices = &targetPrimitiveSet.attributes[i];
+                    targetPrimitiveSet.indices = &targetPrimitiveSet.attributes[j];
                     break;
                 case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Position:
-                    targetPrimitiveSet.position = &targetPrimitiveSet.attributes[i];
+                    targetPrimitiveSet.position = &targetPrimitiveSet.attributes[j];
                     break;
                 case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Normal:
-                    targetPrimitiveSet.normal = &targetPrimitiveSet.attributes[i];
+                    targetPrimitiveSet.normal = &targetPrimitiveSet.attributes[j];
                     break;
                 case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::TexCoord:
-                    targetPrimitiveSet.texCoords.push_back(&targetPrimitiveSet.attributes[i]);
+                    targetPrimitiveSet.texCoords.push_back(&targetPrimitiveSet.attributes[j]);
                     break;
                 case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Color:
-                    targetPrimitiveSet.colors.push_back(&targetPrimitiveSet.attributes[i]);
+                    targetPrimitiveSet.colors.push_back(&targetPrimitiveSet.attributes[j]);
                     break;
                 case lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Tangent:
-                    targetPrimitiveSet.tangent = &targetPrimitiveSet.attributes[i];
+                    targetPrimitiveSet.tangent = &targetPrimitiveSet.attributes[j];
                     break;
             }
 
@@ -76,21 +81,21 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
                 }
 
                 bufferBuilder.setQueueFamilyIndices({graphicsQueue->getQueueFamily()->getIdx()});
-                bufferBuilder.setSize(targetPrimitiveSet.attributes[i].buffer.size);
+                bufferBuilder.setSize(targetPrimitiveSet.attributes[j].buffer.size);
 
-                if (targetPrimitiveSet.attributes[i].type == lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice) {
+                if (targetPrimitiveSet.attributes[j].type == lug::Graphics::Render::Mesh::PrimitiveSet::Attribute::Type::Indice) {
                     bufferBuilder.setUsage(VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
                 } else {
                     bufferBuilder.setUsage(VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
                 }
 
                 VkResult result{VK_SUCCESS};
-                if (!bufferBuilder.build(primitiveSetData->buffers[i], &result)) {
+                if (!bufferBuilder.build(primitiveSetData->buffers[j], &result)) {
                     LUG_LOG.error("Vulkan::Mesh::build: Can't create buffer: {}", result);
                     return nullptr;
                 }
 
-                targetPrimitiveSet.attributes[i]._data = static_cast<void*>(&primitiveSetData->buffers[i]);
+                targetPrimitiveSet.attributes[j]._data = static_cast<void*>(&primitiveSetData->buffers[j]);
             }
         }
 
@@ -102,7 +107,9 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
         primitiveSetData->pipelineIdPrimitivePart.primitiveMode = static_cast<uint32_t>(targetPrimitiveSet.mode);
 
         targetPrimitiveSet._data = static_cast<void*>(primitiveSetData);
-        mesh->_primitiveSets.push_back(std::move(targetPrimitiveSet));
+        mesh->_primitiveSets[i] = std::move(targetPrimitiveSet);
+
+        ++i;
     }
 
     // Bind attributes buffers to mesh device memory
@@ -135,7 +142,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Mesh> build(const ::lug::Graphics::
 
             uint32_t attributesNb = static_cast<uint32_t>(primitiveSet.attributes.size());
 
-            for (uint32_t i = 0; i < attributesNb; ++i) {
+            for (i = 0; i < attributesNb; ++i) {
                 primitiveSetData->buffers[i].updateData(
                     primitiveSet.attributes[i].buffer.data,
                     primitiveSet.attributes[i].buffer.size

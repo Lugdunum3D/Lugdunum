@@ -636,9 +636,6 @@ void Gui::beginFrame(const lug::System::Time& elapsedTime) {
 
     const auto mousePos = _window.getMousePos();
     io.MousePos = ImVec2(static_cast<float>(mousePos.x()), static_cast<float>(mousePos.y()));
-    io.MouseDown[0] = _window.isMousePressed(lug::Window::Mouse::Button::Left);
-    io.MouseDown[1] = _window.isMousePressed(lug::Window::Mouse::Button::Right);
-    io.MouseDown[2] = _window.isMousePressed(lug::Window::Mouse::Button::Middle);
 
     ImGui::NewFrame();
 }
@@ -791,6 +788,27 @@ void Gui::processEvent(const lug::Window::Event event) {
         case lug::Window::Event::Type::MouseWheel:
             io.MouseWheel += static_cast<float>(event.mouse.scrollOffset.xOffset);
             break;
+        case lug::Window::Event::Type::ButtonPressed:
+        case lug::Window::Event::Type::ButtonReleased:
+            switch (event.mouse.code) {
+            case lug::Window::Mouse::Button::Left:
+                io.MouseDown[0] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                break;
+            case lug::Window::Mouse::Button::Right:
+                io.MouseDown[1] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                break;
+            case lug::Window::Mouse::Button::Middle:
+                io.MouseDown[2] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                break;
+            case lug::Window::Mouse::Button::XButton1:
+                io.MouseDown[3] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                break;
+            case lug::Window::Mouse::Button::XButton2:
+                io.MouseDown[4] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                break;
+            default:
+                break;
+            }
         default:
             break;
     }
