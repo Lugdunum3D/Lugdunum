@@ -102,8 +102,8 @@ macro(lug_add_library target)
     # setup the install of the library
     install(TARGETS ${target}
             RUNTIME DESTINATION bin COMPONENT bin
-            LIBRARY DESTINATION lib${LIB_SUFFIX} COMPONENT bin
-            ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT devel
+            LIBRARY DESTINATION lib${LIB_SUFFIX}/${ANDROID_ABI} COMPONENT bin
+            ARCHIVE DESTINATION lib${LIB_SUFFIX}/${ANDROID_ABI} COMPONENT devel
             FRAMEWORK DESTINATION ${CMAKE_INSTALL_FRAMEWORK_PREFIX} COMPONENT bin
     )
 endmacro()
