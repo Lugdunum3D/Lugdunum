@@ -1,6 +1,7 @@
 #include <lug/Graphics/Vulkan/Gui.hpp>
 
 #include <imgui.h>
+#include <imgui_freetype.h>
 
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSet.hpp>
@@ -144,6 +145,9 @@ bool Gui::initFontsTexture() {
     {
         int tempWidth;
         int tempHeight;
+        // See ImGuiFreeType::RasterizationFlags
+        unsigned int flags = ImGuiFreeType::NoHinting;
+        ImGuiFreeType::BuildFontAtlas(io.Fonts, flags);
         io.Fonts->GetTexDataAsRGBA32(&fontData, &tempWidth, &tempHeight);
         texWidth = static_cast<uint32_t>(tempWidth);
         texHeight = static_cast<uint32_t>(tempHeight);

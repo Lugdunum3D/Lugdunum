@@ -561,7 +561,7 @@ bool Window::init(Window::InitInfo& initInfo) {
 }
 
 bool Window::initRender() {
-    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData() && initGui())) {
+    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData())) {
         return false;
     }
 

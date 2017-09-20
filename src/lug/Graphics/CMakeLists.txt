@@ -366,6 +366,37 @@ set(IMGUI_SOURCE_FILES
     ${IMGUI_SOURCE_DIR}/imgui_draw.cpp
 )
 
+# find imgui_club
+if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/imgui_club")
+    message(FATAL_ERROR "Can't find imgui_club in the thirdparty directory")
+endif()
+
+set(IMGUI_CLUB_DIR ${LUG_THIRDPARTY_DIR}/imgui_club)
+message(STATUS "Found Imgui_club: ${IMGUI_CLUB_DIR}")
+
+include_directories(${IMGUI_CLUB_DIR}/include)
+list(APPEND IMGUI_SOURCE_FILES ${IMGUI_CLUB_DIR}/src/imgui_freetype.cpp)
+
+# find freetype
+find_package(Freetype)
+if (NOT FREETYPE_FOUND)
+    if (NOT EXISTS "${LUG_THIRDPARTY_DIR}/freetype")
+        message(FATAL_ERROR "Can't find freetype in the thirdparty directory")
+    endif()
+
+    if(LUG_OS_ANDROID)
+        set(CMAKE_FIND_ROOT_PATH "${LUG_THIRDPARTY_DIR}/freetype")
+    else()
+        set(ENV{FREETYPE_DIR} "${LUG_THIRDPARTY_DIR}/freetype")
+    endif()
+    find_package(Freetype REQUIRED)
+
+    message(STATUS "Found freetype include : ${FREETYPE_INCLUDE_DIRS}")
+    message(STATUS "Found freetype library : ${FREETYPE_LIBRARIES}")
+endif()
+
+include_directories(${FREETYPE_INCLUDE_DIRS})
+
 if(LUG_COMPILER_GCC)
     set_source_files_properties(${IMGUI_SOURCE_FILES} PROPERTIES COMPILE_FLAGS -Wno-error=maybe-uninitialized)
 endif()
@@ -374,5 +405,5 @@ endif()
 lug_add_library(lug-graphics
                 SOURCES ${SRC} ${INC} ${IMGUI_SOURCE_FILES}
                 DEPENDS lug-window lug-system lug-math
-                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY} ${CMAKE_THREAD_LIBS_INIT}
+                EXTERNAL_LIBS ${EXT_LIBRARIES} ${GLTF2-LOADER_LIBRARY} ${SHADERC_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${FREETYPE_LIBRARIES}
 )
