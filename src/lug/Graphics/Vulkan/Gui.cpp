@@ -803,9 +803,9 @@ void Gui::processEvent(const lug::Window::Event event) {
                 + ((event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y) * (event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y)));
                 LUG_LOG.info("draggedDistance {}, displaysize {}", draggedDistance, io.DisplaySize.y);
                 if ((static_cast<float>(io.MousePosPrev.y) - event.touchScreen.coordinates[0].y()) > 0) {
-                    io.MouseWheel += draggedDistance / (io.DisplaySize.y - static_cast<float>(io.MousePosPrev.y));
-                } else {
                     io.MouseWheel -= draggedDistance / (io.DisplaySize.y - static_cast<float>(io.MousePosPrev.y));
+                } else {
+                    io.MouseWheel += draggedDistance / (io.DisplaySize.y - static_cast<float>(io.MousePosPrev.y));
                 }
                 LUG_LOG.info("io.MouseWheel{}", io.MouseWheel);
             }
