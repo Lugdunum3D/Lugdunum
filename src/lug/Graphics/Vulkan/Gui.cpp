@@ -59,6 +59,8 @@ void Gui::destroy() {
 bool Gui::init(const std::vector<API::ImageView>& imageViews) {
     ImGuiIO& io = ImGui::GetIO();
 
+    io.Fonts->AddFontDefault();
+
     initKeyMapping();
 
     io.DisplaySize = ImVec2(_window.getWidth(), _window.getHeight());
@@ -231,6 +233,9 @@ bool Gui::initFontsTexture() {
             LUG_LOG.error("Gui::initFontsTexture: Can't create image view: {}", result);
             return false;
         }
+
+        // Set font id to font image view
+        io.Fonts->TexID = (void *)(intptr_t)static_cast<VkImageView>(_fontImageView);
     }
 
     // Create staging buffers for font data upload
@@ -530,14 +535,6 @@ bool Gui::initPipeline() {
             }
         }
 
-        // Update descriptor set
-        VkDescriptorImageInfo descriptorImageInfo;
-        descriptorImageInfo.sampler = static_cast<VkSampler>(_fontSampler);
-        descriptorImageInfo.imageView = static_cast<VkImageView>(_fontImageView);
-        descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-        _descriptorSet.updateImages(0, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, {descriptorImageInfo});
-
         VkPushConstantRange pushConstant{
             /*pushConstant.stageFlags*/ VK_SHADER_STAGE_VERTEX_BIT,
             /*pushConstant.offset*/ 0,
@@ -747,6 +744,16 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
                 }
             };
             frameData.commandBuffer.setScissor({scissor});
+
+            // Update texture descriptor
+            // pcmd->TextureId can be io.Fonts->TexID or
+            // a texture id passed in ImGui images functions (eg. ImGui::Image())
+            VkDescriptorImageInfo descriptorImageInfo;
+            descriptorImageInfo.sampler = static_cast<VkSampler>(_fontSampler);
+            descriptorImageInfo.imageView = (VkImageView)(intptr_t)pcmd->TextureId;
+            descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+            _descriptorSet.updateImages(0, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, {descriptorImageInfo});
 
             const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
                 /* cmdDrawIndexed.indexCount */ pcmd->ElemCount,
