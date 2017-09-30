@@ -103,6 +103,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Material.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/MaterialTextures.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/SkyBox.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/GuiTexture.cpp
     ${SRCROOT}/Vulkan/Render/Material.cpp
     ${SRCROOT}/Vulkan/Render/SkyBox.cpp
 
@@ -297,6 +298,7 @@ set(INC
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/Material.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/MaterialTextures.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/SkyBox.hpp
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/GuiTexture.hpp
     ${INCROOT}/Vulkan/Render/Material.hpp
     ${INCROOT}/Vulkan/Render/SkyBox.hpp
     ${INCROOT}/Vulkan/Render/SkyBox.inl

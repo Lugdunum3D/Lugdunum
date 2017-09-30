@@ -4,10 +4,14 @@
 #include <lug/Graphics/Builder/Camera.hpp>
 #include <lug/Graphics/Builder/Light.hpp>
 #include <lug/Graphics/Builder/SkyBox.hpp>
+#include <lug/Graphics/Builder/Texture.hpp>
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
+#include <lug/Graphics/Vulkan/Render/Texture.hpp>
 #include <lug/Math/Geometry/Trigonometry.hpp>
+
+#include <imgui.h>
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
     getRenderWindowInfo().windowInitInfo.title = "Hello";
@@ -127,7 +131,23 @@ bool Application::init(int argc, char* argv[]) {
         _scene->setSkyBox(skyBox);
     }
 
-    return true;
+    // Build imgui texture
+    {
+        lug::Graphics::Builder::Texture textureBuilder(*renderer);
+
+        textureBuilder.addLayer("textures/skybox/right.jpg");
+        textureBuilder.setMagFilter(lug::Graphics::Render::Texture::Filter::Linear);
+        textureBuilder.setMinFilter(lug::Graphics::Render::Texture::Filter::Linear);
+        textureBuilder.setMipMapFilter(lug::Graphics::Render::Texture::Filter::Linear);
+
+        _texture = textureBuilder.build();
+        if (!_texture) {
+            LUG_LOG.error("Application::init Can't create texture");
+            return false;
+        }
+    }
+
+    return static_cast<lug::Graphics::Vulkan::Render::Window*>(_graphics.getRenderer()->getWindow())->initGui();
 }
 
 void Application::onEvent(const lug::Window::Event& event) {
@@ -137,5 +157,9 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
+    auto vkTexture = lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(_texture);    ImGui::Begin("About ImGui", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    //ImGui::Text("By Omar Cornut and all github contributors.");
+    ImGui::Image(vkTexture.get(), ImVec2(200, 200), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
+    ImGui::End();
     _cameraMover.onFrame(elapsedTime);
 }

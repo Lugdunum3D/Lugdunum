@@ -2,6 +2,7 @@
 
 #include <lug/Core/Application.hpp>
 #include <lug/Core/FreeMovement.hpp>
+#include <lug/Graphics/Render/Texture.hpp>
 
 class Application : public ::lug::Core::Application {
 public:
@@ -22,5 +23,6 @@ public:
 
 private:
     lug::Graphics::Resource::SharedPtr<lug::Graphics::Scene::Scene> _scene;
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> _texture;
     lug::Core::FreeMovement _cameraMover;
 };

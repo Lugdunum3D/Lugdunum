@@ -15,6 +15,7 @@
 #include <lug/Graphics/Vulkan/API/QueueFamily.hpp>
 #include <lug/Graphics/Vulkan/API/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Sampler.hpp>
+#include <lug/Graphics/Render/Texture.hpp>
 #include <lug/Graphics/Vulkan/API/Fence.hpp>
 #include <lug/Graphics/Vulkan/API/Queue.hpp>
 #include <lug/Graphics/Render/Window.hpp>
@@ -25,8 +26,11 @@ namespace lug {
 namespace Graphics {
 namespace Vulkan {
 
-namespace Render
-{
+namespace Render {
+    namespace DescriptorSetPool {
+        class GuiTexture;
+        class DescriptorSet;
+    };
     class Window;
 } // Render
 
@@ -45,6 +49,8 @@ private:
         Vulkan::API::Semaphore semaphore;
         Vulkan::API::Fence fence;
         Vulkan::API::CommandBuffer commandBuffer;
+
+        std::vector<const Render::DescriptorSetPool::DescriptorSet*> texturesDescriptorSets;
 
         Vulkan::API::DeviceMemory vertexMemory;
         Vulkan::API::DeviceMemory indexMemory;
@@ -93,13 +99,12 @@ private:
     const API::Queue* _graphicQueue{nullptr};
     const API::Queue* _transferQueue{nullptr};
 
+    std::unique_ptr<Render::DescriptorSetPool::GuiTexture> _texturesDescriptorSetPool;
+
     API::CommandPool _graphicQueueCommandPool{};
     API::CommandPool _transferQueueCommandPool{};
 
-    API::Image _fontImage;
-    API::ImageView _fontImageView;
-    API::DeviceMemory _fontDeviceMemory;
-    API::Sampler _fontSampler;
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> _fontTexture;
 
     API::DescriptorPool _descriptorPool;
     API::DescriptorSet _descriptorSet;

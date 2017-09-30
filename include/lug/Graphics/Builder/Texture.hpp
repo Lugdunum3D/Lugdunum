@@ -20,6 +20,11 @@ class LUG_GRAPHICS_API Texture {
     struct Layer {
         // TODO(nokitoo): add other infos(layers count, aspect mask, mip level, etc...)
         std::string filename;
+
+        unsigned char* const data{nullptr};
+
+        uint32_t width{0};
+        uint32_t height{0};
     };
 
 public:
@@ -54,6 +59,7 @@ public:
     void setWrapT(Render::Texture::WrappingMode wrapT);
 
     void addLayer(const std::string& filename);
+    void addLayer(uint32_t width, uint32_t height, unsigned char* const data);
 
     Resource::SharedPtr<Render::Texture> build();
 
