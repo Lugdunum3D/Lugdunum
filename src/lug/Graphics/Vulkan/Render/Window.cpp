@@ -24,7 +24,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Window::Window(lug::Graphics::Vulkan::Renderer& renderer) : _renderer(renderer), _guiInstance(_renderer, *this) {}
+Window::Window(lug::Graphics::Vulkan::Renderer& renderer) : _renderer(renderer), _guiInstance(_renderer, *this), _isGuiInitialized(false) {}
 
 Window::~Window() {
     destroyRender();
@@ -41,7 +41,9 @@ bool Window::pollEvent(lug::Window::Event& event) {
             }
         }
 
-        _guiInstance.processEvent(event);
+        if (_isGuiInitialized == true) {
+            _guiInstance.processEvent(event);
+        }
 
         return true;
     }
@@ -61,17 +63,21 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
         }
     }
 
-    _guiInstance.beginFrame(elapsedTime);
+    if (_isGuiInitialized == true) {
+        _guiInstance.beginFrame(elapsedTime);
+    }
 
     while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, static_cast<VkSemaphore>(acquireImageData->completeSemaphore))) {
         if (_swapchain.isOutOfDate()) {
             if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
                 return false;
             }
-
-            if (!_guiInstance.initFramebuffers(_swapchain.getImagesViews())) {
-                LUG_LOG.error("Window::beginFrame: Failed to initialise Gui framebuffers");
-                return false;
+            
+            if (_isGuiInitialized == true) {
+                if (!_guiInstance.initFramebuffers(_swapchain.getImagesViews())) {
+                    LUG_LOG.error("Window::beginFrame: Failed to initialise Gui framebuffers");
+                    return false;
+                }
             }
 
             for (auto& renderView: _renderViews) {
@@ -127,6 +133,9 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
 }
 
 bool Window::endFrame() {
+    bool uiResult = false;
+    bool presentQueueResult = false;
+
     FrameData& frameData = _framesData[_currentImageIndex];
 
     API::CommandBuffer& cmdBuffer = frameData.cmdBuffers[1];
@@ -148,12 +157,22 @@ bool Window::endFrame() {
 
     std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
 
-    return _guiInstance.endFrame(waitSemaphores, _currentImageIndex)
-        && _presentQueue->submit(
-        cmdBuffer,
-        {static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore)},
-        { static_cast<VkSemaphore>(_guiInstance.getSemaphore(_currentImageIndex)) },
-        { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT })
+    if (_isGuiInitialized == true) {
+        uiResult = _guiInstance.endFrame(waitSemaphores, _currentImageIndex);
+        presentQueueResult = _presentQueue->submit(cmdBuffer,
+                                                   { static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore) },
+                                                   { static_cast<VkSemaphore>(_guiInstance.getSemaphore(_currentImageIndex)) },
+                                                   { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT });
+    } else {
+        uiResult = true;
+        presentQueueResult = _presentQueue->submit(cmdBuffer,
+                                                   { static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore) },
+                                                   { },
+                                                   { });
+    }
+
+    return uiResult
+        && presentQueueResult
         && _swapchain.present(_presentQueue, _currentImageIndex, static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore));
 }
 
@@ -275,7 +294,8 @@ bool Window::initGui() {
         return false;
     }
 
-    return true;
+    _isGuiInitialized = true;
+    return _isGuiInitialized;
 }
 
 bool Window::initPresentQueue() {
@@ -594,7 +614,9 @@ void Window::destroyRender() {
 
     _commandPool.destroy();
 
-    _guiInstance.destroy();
+    if (_isGuiInitialized == true) {
+        _guiInstance.destroy();
+    }
 }
 
 } // Render

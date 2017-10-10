@@ -97,6 +97,8 @@ private:
     API::CommandPool _commandPool{};
 
     lug::Graphics::Vulkan::Gui  _guiInstance;
+
+    bool _isGuiInitialized;
 };
 
 #include <lug/Graphics/Vulkan/Render/Window.inl>
