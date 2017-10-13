@@ -11,6 +11,9 @@
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
     getRenderWindowInfo().windowInitInfo.title = "Hello";
+
+    // We can set the display mode, by default to full
+    getGraphicsInfo().rendererInitInfo.displayMode = ::lug::Graphics::Renderer::DisplayMode::Full;
 }
 
 bool Application::init(int argc, char* argv[]) {

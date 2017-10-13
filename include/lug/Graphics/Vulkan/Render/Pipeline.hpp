@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Render/Technique/Type.hpp>
 #include <lug/Graphics/Resource.hpp>
 #include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
@@ -156,9 +157,9 @@ public:
         ~ShaderBuilder() = delete;
 
     public:
-        static std::vector<uint32_t> buildShader(std::string shaderRoot, ::lug::Graphics::Render::Technique::Type technique, Type type, Pipeline::Id id);
-        static std::vector<uint32_t> buildShaderFromFile(std::string filename, Type type, Pipeline::Id id);
-        static std::vector<uint32_t> buildShaderFromString(std::string filename, std::string content, Type type, Pipeline::Id id);
+        static std::vector<uint32_t> buildShader(std::string shaderRoot, ::lug::Graphics::Render::Technique::Type technique, ::lug::Graphics::Renderer::DisplayMode displayMode, Type type, Pipeline::Id id);
+        static std::vector<uint32_t> buildShaderFromFile(std::string filename, ::lug::Graphics::Renderer::DisplayMode displayMode, Type type, Pipeline::Id id);
+        static std::vector<uint32_t> buildShaderFromString(std::string filename, std::string content, ::lug::Graphics::Renderer::DisplayMode displayMode, Type type, Pipeline::Id id);
     };
 
 public:

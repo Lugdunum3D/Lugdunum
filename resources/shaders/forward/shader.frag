@@ -1,5 +1,17 @@
 #version 450
 
+/*
+    DISPLAY_MODE:
+        0: Display correctly the rendering
+        1: Display the base albedo (base albedo times the colors vertex data)
+        2: Display the world space normal
+        3: Display the metallic value
+        4: Display the roughness value
+        5: Display the ambient occlusion value
+        6: Display the metallic / rougness / occlusion value in b / g / r
+        7: Display the emissive value
+*/
+
 //////////////////////////////////////////////////////////////////////////////
 // CONSTANTS
 //////////////////////////////////////////////////////////////////////////////
@@ -157,6 +169,11 @@ void main() {
     albedo = albedo * inColor2;
     #endif
 
+    #if DISPLAY_MODE == 1
+    outColor = vec4(albedo.rgb, 1.0);
+    return;
+    #endif
+
     //////////////////////////////////////////////////////////////////////
     // CALCULATE THE FINAL METALLIC & ROUGHNESS
     //////////////////////////////////////////////////////////////////////
@@ -169,6 +186,14 @@ void main() {
     # else
     const float metallic = material.metallic;
     const float roughness = max(material.roughness, 0.05);
+    #endif
+
+    #if DISPLAY_MODE == 3
+    outColor = vec4(vec3(metallic), 1.0);
+    return;
+    #elif DISPLAY_MODE == 4
+    outColor = vec4(vec3(roughness), 1.0);
+    return;
     #endif
 
     //////////////////////////////////////////////////////////////////////
@@ -203,6 +228,11 @@ void main() {
     const vec3 normalWorldSpace = inNormalWorldSpace;
     #endif
 
+    #if DISPLAY_MODE == 2
+    outColor = vec4(normalWorldSpace, 1.0);
+    return;
+    #endif
+
     //////////////////////////////////////////////////////////////////////
     // CALCULATE THE FINAL OCCLUSION
     //////////////////////////////////////////////////////////////////////
@@ -213,6 +243,14 @@ void main() {
     const float occlusion = 1.0;
     #endif
 
+    #if DISPLAY_MODE == 5
+    outColor = vec4(vec3(occlusion), 1.0);
+    return;
+    #elif DISPLAY_MODE == 6
+    outColor = vec4(vec3(occlusion, roughness, metallic), 1.0);
+    return;
+    #endif
+
     //////////////////////////////////////////////////////////////////////
     // CALCULATE THE FINAL EMISSIVE
     //////////////////////////////////////////////////////////////////////
@@ -221,6 +259,11 @@ void main() {
     const vec3 emissive = material.emissive * pow(texture(textureEmissive, TEXTURE_EMISSIVE_UV).rgb, vec3(2.2));
     #else
     const vec3 emissive = material.emissive;
+    #endif
+
+    #if DISPLAY_MODE == 7
+    outColor = vec4(emissive, 1.0);
+    return;
     #endif
 
     //////////////////////////////////////////////////////////////////////

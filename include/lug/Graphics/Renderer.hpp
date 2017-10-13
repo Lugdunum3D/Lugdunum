@@ -21,9 +21,21 @@ public:
         Vulkan
     };
 
+    enum class DisplayMode : uint8_t {
+        Full,
+        Albedo,
+        Normal,
+        Metallic,
+        Roughness,
+        AmbientOcclusion,
+        AmbientOcclusionRoughnessMetallic,
+        Emissive
+    };
+
     struct InitInfo {
         std::string shadersRoot;
         Render::Technique::Type renderTechnique;
+        DisplayMode displayMode{DisplayMode::Full};
     };
 
 public:

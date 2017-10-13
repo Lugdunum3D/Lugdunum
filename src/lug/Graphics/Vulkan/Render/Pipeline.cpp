@@ -34,6 +34,7 @@ bool Pipeline::init() {
                 shaderCode = Pipeline::ShaderBuilder::buildShader(
                     _renderer.getInfo().shadersRoot,
                     _renderer.getInfo().renderTechnique,
+                    _renderer.getInfo().displayMode,
                     Pipeline::ShaderBuilder::Type::Vertex,
                     _id
                 );
@@ -56,6 +57,7 @@ bool Pipeline::init() {
                 shaderCode = Pipeline::ShaderBuilder::buildShader(
                     _renderer.getInfo().shadersRoot,
                     _renderer.getInfo().renderTechnique,
+                    _renderer.getInfo().displayMode,
                     Pipeline::ShaderBuilder::Type::Fragment,
                     _id
                 );

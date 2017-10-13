@@ -167,15 +167,16 @@ private:
 
 
     lug::Graphics::Graphics::InitInfo _graphicsInitInfo{
-        lug::Graphics::Renderer::Type::Vulkan,              // type
-        {                                                   // rendererInitInfo
-            "shaders/",                                     // shaders root
-            lug::Graphics::Render::Technique::Type::Forward // renderTechnique
+        lug::Graphics::Renderer::Type::Vulkan,                  // type
+        {                                                       // rendererInitInfo
+            "shaders/",                                         // shaders root
+            lug::Graphics::Render::Technique::Type::Forward,    // renderTechnique
+            lug::Graphics::Renderer::DisplayMode::Full          // displayMode
         },
-        {                                                   // mandatoryModules
+        {                                                       // mandatoryModules
             lug::Graphics::Module::Type::Core
         },
-        {},                                                 // optionalModules
+        {},                                                     // optionalModules
     };
 
     lug::Graphics::Render::Window::InitInfo _renderWindowInitInfo{
