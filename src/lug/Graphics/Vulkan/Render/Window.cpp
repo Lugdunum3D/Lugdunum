@@ -155,9 +155,7 @@ bool Window::endFrame() {
     // it could be != from _renderViews.size(), if some render views has no camera
     waitSemaphores.resize(i);
 
-    std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-
-    if (_isGuiInitialized == true) {
+    if (_isGuiInitialized) {
         uiResult = _guiInstance.endFrame(waitSemaphores, _currentImageIndex);
         presentQueueResult = _presentQueue->submit(cmdBuffer,
                                                    { static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore) },
@@ -165,10 +163,12 @@ bool Window::endFrame() {
                                                    { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT });
     } else {
         uiResult = true;
+        std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+
         presentQueueResult = _presentQueue->submit(cmdBuffer,
                                                    { static_cast<VkSemaphore>(frameData.allDrawsFinishedSemaphore) },
-                                                   { },
-                                                   { });
+                                                   waitSemaphores,
+                                                   waitDstStageMasks);
     }
 
     return uiResult
