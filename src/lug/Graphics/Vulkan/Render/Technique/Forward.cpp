@@ -399,7 +399,13 @@ bool Forward::render(
 
                     if (primitiveSet.indices) {
                         API::Buffer* indicesBuffer = static_cast<API::Buffer*>(primitiveSet.indices->_data);
-                        frameData.renderCmdBuffer.bindIndexBuffer(*indicesBuffer, VK_INDEX_TYPE_UINT16);
+
+                        if (primitiveSet.indices->buffer.size / primitiveSet.indices->buffer.elementsCount == 4) {
+                            frameData.renderCmdBuffer.bindIndexBuffer(*indicesBuffer, VK_INDEX_TYPE_UINT32);
+                        } else {
+                            frameData.renderCmdBuffer.bindIndexBuffer(*indicesBuffer, VK_INDEX_TYPE_UINT16);
+                        }
+
                         const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
                             /* cmdDrawIndexed.indexCount    */ primitiveSet.indices->buffer.elementsCount,
                             /* cmdDrawIndexed.instanceCount */ 1,
