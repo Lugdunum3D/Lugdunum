@@ -222,6 +222,9 @@ bool Forward::render(
         }
     }
 
+    // Bind a default pipeline for the rendering
+    frameData.renderCmdBuffer.bindPipeline(_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI());
+
     // Render objects
     {
         // Blend constants are used as dst blend factor
