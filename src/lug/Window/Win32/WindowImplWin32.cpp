@@ -393,7 +393,7 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
 
             // The handle is not set on first call (window not yet created)
             if (!_handle) {
-                break;
+                return;
             }
 
             RECT rect;

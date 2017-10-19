@@ -39,7 +39,7 @@ macro(lug_add_compile_options target)
 
     # use warnings and errors
     if(LUG_COMPILER_MSVC)
-        target_compile_options(${target} PUBLIC /W4 /WX)
+        target_compile_options(${target} PUBLIC /W4 /WX /MP)
     elseif(LUG_COMPILER_GCC OR LUG_COMPILER_CLANG)
         target_compile_options(${target} PUBLIC -Wall -Wextra -Werror)
     endif()
