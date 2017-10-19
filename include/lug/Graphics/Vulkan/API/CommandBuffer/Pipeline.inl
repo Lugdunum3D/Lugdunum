@@ -57,8 +57,8 @@ struct CmdPushConstants {
 void pipelineBarrier(
     const CmdPipelineBarrier& parameters,
     VkDependencyFlags dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT,
-    VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-    VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
+    VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+    VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT
 ) const;
 
 void bindPipeline(const API::GraphicsPipeline& pipeline, VkPipelineBindPoint pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS) const;

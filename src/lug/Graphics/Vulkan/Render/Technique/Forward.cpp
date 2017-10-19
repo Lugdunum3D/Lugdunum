@@ -222,6 +222,9 @@ bool Forward::render(
         }
     }
 
+    // Bind a default pipeline for the rendering
+    frameData.renderCmdBuffer.bindPipeline(_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI());
+
     // Render objects
     {
         // Blend constants are used as dst blend factor
@@ -325,26 +328,25 @@ bool Forward::render(
                             [&material]() {
                                 std::vector<const ::lug::Graphics::Vulkan::Render::Texture*> textures;
 
-                                if (material.getBaseColorTexture().texture) {
+                                if (material.getPipelineId().baseColorInfo != 0b11) {
                                     textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getBaseColorTexture().texture.get()));
                                 }
 
-                                if (material.getMetallicRoughnessTexture().texture) {
+                                if (material.getPipelineId().metallicRoughnessInfo != 0b11) {
                                     textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getMetallicRoughnessTexture().texture.get()));
                                 }
 
-                                if (material.getNormalTexture().texture) {
+                                if (material.getPipelineId().normalInfo != 0b11) {
                                     textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getNormalTexture().texture.get()));
                                 }
 
-                                if (material.getOcclusionTexture().texture) {
+                                if (material.getPipelineId().occlusionInfo != 0b11) {
                                     textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getOcclusionTexture().texture.get()));
                                 }
 
-                                if (material.getEmissiveTexture().texture) {
+                                if (material.getPipelineId().emissiveInfo != 0b11) {
                                     textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getEmissiveTexture().texture.get()));
                                 }
-
 
                                 return textures;
                             }()

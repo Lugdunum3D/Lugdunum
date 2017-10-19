@@ -12,7 +12,7 @@ inline bool DescriptorSetPool<maxSets>::init() {
         API::Builder::DescriptorPool descriptorPoolBuilder(_renderer.getDevice());
 
         // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
-        descriptorPoolBuilder.setFlags(0);
+        descriptorPoolBuilder.setFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
 
         descriptorPoolBuilder.setMaxSets(42); // TODO: Replace this arbitrary number
 
@@ -75,6 +75,10 @@ inline void DescriptorSetPool<maxSets>::free(const DescriptorSet* descriptorSet)
 
         _freeDescriptorSets[_freeDescriptorSetsCount] = const_cast<DescriptorSet*>(descriptorSet);
         ++_freeDescriptorSetsCount;
+
+        // TODO: Put this method in API::DescriptorPool
+        VkDescriptorSet vkDescriptorSet = static_cast<VkDescriptorSet>(descriptorSet->getDescriptorSet());
+        vkFreeDescriptorSets(static_cast<VkDevice>(_renderer.getDevice()), static_cast<VkDescriptorPool>(descriptorPool), 1, &vkDescriptorSet);
     }
 }
 
@@ -86,8 +90,19 @@ inline DescriptorSet* DescriptorSetPool<maxSets>::allocateNewDescriptorSet(const
         DescriptorSet* tmp = _freeDescriptorSets[_freeDescriptorSetsCount];
         _freeDescriptorSets[_freeDescriptorSetsCount] = nullptr;
 
+        API::Builder::DescriptorSet descriptorSetBuilder(_renderer.getDevice(), descriptorPool);
+        descriptorSetBuilder.setDescriptorSetLayouts({static_cast<VkDescriptorSetLayout>(descriptorSetLayout)});
+
+        VkResult result{VK_SUCCESS};
+        if (!descriptorSetBuilder.build(tmp->_descriptorSet, &result)) {
+            LUG_LOG.error("DescriptorSetPool: Can't create descriptor set: {}", result);
+            return nullptr;
+        }
+
         return tmp;
-    } else if (_descriptorSetsCount < maxSets) {
+    }
+
+    if (_descriptorSetsCount < maxSets) {
         API::Builder::DescriptorSet descriptorSetBuilder(_renderer.getDevice(), descriptorPool);
         descriptorSetBuilder.setDescriptorSetLayouts({static_cast<VkDescriptorSetLayout>(descriptorSetLayout)});
 

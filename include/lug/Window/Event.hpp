@@ -95,24 +95,6 @@ struct LUG_WINDOW_API Event {
         TouchScreenChange
     };
 
-    Event& operator=(const Event& o) {
-        if (this != &o)
-        {
-            this->key = o.key;
-            this->character = o.character;    ///< A CharEvent
-            this->mouse = o.mouse;      ///< A MouseEvent
-            this->gamePad = o.gamePad;
-            this->touchScreen.coordinates[0] = o.touchScreen.coordinates[0];
-            if (o.touchScreen.pinch)
-                this->touchScreen.coordinates[1] = o.touchScreen.coordinates[1];
-            this->touchScreen.drag = o.touchScreen.drag;
-            this->touchScreen.pinch = o.touchScreen.pinch;
-            this->touchScreen.doubleTap = o.touchScreen.doubleTap;
-        }
-        return *this;
-    }
-   // Event& operator=(Event&&);
-
     Type type;          ///< The type of the event
 
     /**

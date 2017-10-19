@@ -31,11 +31,12 @@ const DescriptorSet* MaterialTextures::allocate(const API::GraphicsPipeline& pip
             imageInfos[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         }
 
+
         std::get<1>(result)->getDescriptorSet().updateImages(
             0,
             0,
             VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            std::move(imageInfos)
+            imageInfos
         );
     }
 
