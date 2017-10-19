@@ -141,6 +141,7 @@
     macro(vkCreateDescriptorPool)                       \
     macro(vkAllocateDescriptorSets)                     \
     macro(vkUpdateDescriptorSets)                       \
+    macro(vkFreeDescriptorSets)                         \
     macro(vkCmdUpdateBuffer)                            \
     macro(vkCmdBindDescriptorSets)                      \
     macro(vkDestroyDescriptorPool)                      \
