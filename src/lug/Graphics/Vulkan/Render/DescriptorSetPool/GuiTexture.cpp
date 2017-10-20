@@ -18,7 +18,7 @@ const DescriptorSet* GuiTexture::allocate(const API::GraphicsPipeline& pipeline,
         pipeline.getLayout()->getDescriptorSetLayouts()[0]
     );
 
-    if (std::get<0>(result)) {
+    if (std::get<0>(result) && std::get<1>(result)) {
         std::get<1>(result)->getDescriptorSet().updateImages(
             0,
             0,

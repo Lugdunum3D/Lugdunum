@@ -166,8 +166,6 @@ bool Gui::initFontsTexture() {
         texHeight = static_cast<uint32_t>(tempHeight);
     }
 
-    const size_t uploadSize = texWidth * texHeight * 4 * sizeof(char);
-
     API::Device &device = _renderer.getDevice();
 
     // Get transfer queue family and retrieve the first queue
@@ -329,18 +327,6 @@ bool Gui::initPipeline() {
             }
         }
 
-        // Create and update descriptor set
-        {
-            API::Builder::DescriptorSet descriptorSetBuilder(device, _descriptorPool);
-            descriptorSetBuilder.setDescriptorSetLayouts({ static_cast<VkDescriptorSetLayout>(descriptorSetLayouts[0]) });
-
-            VkResult result{VK_SUCCESS};
-            if (!descriptorSetBuilder.build(_descriptorSet, &result)) {
-                LUG_LOG.error("Gui::initPipeline: Can't create descriptor set: {}", result);
-                return false;
-            }
-        }
-
         VkPushConstantRange pushConstant{
             /*pushConstant.stageFlags*/ VK_SHADER_STAGE_VERTEX_BIT,
             /*pushConstant.offset*/ 0,
@@ -496,15 +482,6 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
 
     frameData.commandBuffer.beginRenderPass(*renderPass, beginRenderPass);
 
-    const API::CommandBuffer::CmdBindDescriptors cmdDescriptorSet{
-        /* cameraBind.pipelineLayout */ *_pipeline.getLayout(),
-        /* lightBind.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
-        /* lightBind.firstSet */ 0,
-        /* lightBind.descriptorSets */{ &_descriptorSet },
-        /* lightBind.dynamicOffsets */{ },
-    };
-
-    frameData.commandBuffer.bindDescriptorSets(cmdDescriptorSet);
     frameData.commandBuffer.bindPipeline(_pipeline);
 
     if (static_cast<VkBuffer>(frameData.vertexBuffer) != VK_NULL_HANDLE) {
@@ -555,41 +532,31 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
             };
             frameData.commandBuffer.setScissor({scissor});
 
-        // Get the new (or old) material descriptor set
-        const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
-            _pipeline,
-            (Vulkan::Render::Texture*)pcmd->TextureId);
+            // Get the new (or old) textures descriptor set
+            const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
+                _pipeline,
+                (Vulkan::Render::Texture*)pcmd->TextureId
+            );
 
-        if (!texturesDescriptorSet) {
-            LUG_LOG.error("Gui::endFrame: Can't allocate textures descriptor set");
-            return false;
-        }
+            if (!texturesDescriptorSet) {
+                LUG_LOG.error("Gui::endFrame: Can't allocate textures descriptor set");
+                return false;
+            }
 
-        texturesDescriptorSets.push_back(texturesDescriptorSet);
+            texturesDescriptorSets.push_back(texturesDescriptorSet);
 
-        // Bind descriptor set of the material
-        {
-            const API::CommandBuffer::CmdBindDescriptors texturesBind{
-                /* texturesBind.pipelineLayout     */ *_pipeline.getLayout(),
-                /* texturesBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
-                /* texturesBind.firstSet           */ 0,
-                /* texturesBind.descriptorSets     */ {&texturesDescriptorSet->getDescriptorSet()},
-                /* texturesBind.dynamicOffsets     */ {0},
-            };
+            // Bind descriptor set of the texture
+            {
+                const API::CommandBuffer::CmdBindDescriptors texturesBind{
+                    /* texturesBind.pipelineLayout     */ *_pipeline.getLayout(),
+                    /* texturesBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    /* texturesBind.firstSet           */ 0,
+                    /* texturesBind.descriptorSets     */ {&texturesDescriptorSet->getDescriptorSet()},
+                    /* texturesBind.dynamicOffsets     */ {}
+                };
 
-            frameData.commandBuffer.bindDescriptorSets(texturesBind);
-        }
-
-
-            // Update texture descriptor
-            // pcmd->TextureId can be io.Fonts->TexID or
-            // a texture id passed in ImGui images functions (eg. ImGui::Image())
-/*            VkDescriptorImageInfo descriptorImageInfo;
-            descriptorImageInfo.sampler = static_cast<VkSampler>(_fontSampler);
-            descriptorImageInfo.imageView = (VkImageView)(intptr_t)pcmd->TextureId;
-            descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-            _descriptorSet.updateImages(0, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, {descriptorImageInfo});*/
+                frameData.commandBuffer.bindDescriptorSets(texturesBind);
+            }
 
             const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
                 /* cmdDrawIndexed.indexCount */ pcmd->ElemCount,
@@ -605,7 +572,7 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
         vertexCount += cmd_list->VtxBuffer.Size;
     }
 
-    // Free and replace previous materialTexturesDescriptorSets
+    // Free and replace previous texturesDescriptorSets
     {
         for (const auto& descriptorSet : frameData.texturesDescriptorSets) {
             _texturesDescriptorSetPool->free(descriptorSet);
@@ -627,7 +594,6 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
 }
 
 void Gui::processEvent(const lug::Window::Event event) {
-
     ImGuiIO& io = ImGui::GetIO();
     switch (event.type) {
         case lug::Window::Event::Type::KeyPressed:
@@ -648,9 +614,7 @@ void Gui::processEvent(const lug::Window::Event event) {
             io.MouseWheel += static_cast<float>(event.mouse.scrollOffset.xOffset);
             break;
          case lug::Window::Event::Type::TouchScreenChange:
-
             if (event.touchScreen.drag) {
-
                 float draggedDistance = sqrtf(((event.touchScreen.coordinates[0].x()  - io.MousePosPrev.x ) * (event.touchScreen.coordinates[0].x()  - io.MousePosPrev.x))
                 + ((event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y) * (event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y)));
                 LUG_LOG.info("draggedDistance {}, displaysize {}", draggedDistance, io.DisplaySize.y);

@@ -157,9 +157,11 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
-    auto vkTexture = lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(_texture);    ImGui::Begin("About ImGui", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-    //ImGui::Text("By Omar Cornut and all github contributors.");
+    auto vkTexture = lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(_texture);
+
+    ImGui::Begin("Imgui texture", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::Image(vkTexture.get(), ImVec2(200, 200), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
     ImGui::End();
+
     _cameraMover.onFrame(elapsedTime);
 }
