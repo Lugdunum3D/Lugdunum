@@ -137,6 +137,16 @@ void Application::onEvent(const lug::Window::Event& event) {
     if (event.type == lug::Window::Event::Type::Close) {
         close();
     }
+
+    if (event.type == lug::Window::Event::Type::KeyPressed) {
+        const uint32_t currentDisplayMode = static_cast<uint32_t>(_graphics.getRenderer()->getDisplayMode());
+
+        if (event.key.code == lug::Window::Keyboard::Key::F1) {
+            _graphics.getRenderer()->setDisplayMode(static_cast<::lug::Graphics::Renderer::DisplayMode>(currentDisplayMode == 0 ? 7 : currentDisplayMode - 1));
+        } else if (event.key.code == lug::Window::Keyboard::Key::F2) {
+            _graphics.getRenderer()->setDisplayMode(static_cast<::lug::Graphics::Renderer::DisplayMode>((currentDisplayMode + 1) % 8));
+        }
+    }
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
