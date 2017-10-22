@@ -85,10 +85,11 @@ public:
      * @brief      Update the render queue of the Camera by fetching
      *             the visible objects of the attached scene.
      *
+     * @param[in]  renderer    The renderer
      * @param[in]  renderView  The render view
      * @param[in]  renderQueue The render queue
      */
-    void update(const View& renderView, Queue& renderQueue);
+    void update(const Renderer& renderer, const View& renderView, Queue& renderQueue);
 
     void setRenderView(View* renderView);
 

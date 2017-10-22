@@ -21,6 +21,7 @@ Pipeline::Pipeline(Renderer& renderer, Id id) : Resource(Resource::Type::Pipelin
 bool Pipeline::init() {
     Pipeline::Id::PrimitivePart primitivePart = _id.getPrimitivePart();
     Pipeline::Id::MaterialPart materialPart = _id.getMaterialPart();
+    Pipeline::Id::ExtraPart extraPart = _id.getExtraPart();
 
     API::Builder::GraphicsPipeline graphicsPipelineBuilder(_renderer.getDevice());
 
@@ -34,7 +35,7 @@ bool Pipeline::init() {
                 shaderCode = Pipeline::ShaderBuilder::buildShader(
                     _renderer.getInfo().shadersRoot,
                     _renderer.getInfo().renderTechnique,
-                    _renderer.getInfo().displayMode,
+                    static_cast<Renderer::DisplayMode>(extraPart.displayMode),
                     Pipeline::ShaderBuilder::Type::Vertex,
                     _id
                 );
@@ -57,7 +58,7 @@ bool Pipeline::init() {
                 shaderCode = Pipeline::ShaderBuilder::buildShader(
                     _renderer.getInfo().shadersRoot,
                     _renderer.getInfo().renderTechnique,
-                    _renderer.getInfo().displayMode,
+                    static_cast<Renderer::DisplayMode>(extraPart.displayMode),
                     Pipeline::ShaderBuilder::Type::Fragment,
                     _id
                 );

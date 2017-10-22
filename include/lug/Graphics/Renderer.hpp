@@ -61,11 +61,15 @@ public:
     const InitInfo& getInfo() const;
     Type getType() const;
 
+    const DisplayMode& getDisplayMode() const;
+    void setDisplayMode(DisplayMode displayMode);
+
     ResourceManager* getResourceManager() const;
 
 protected:
     Graphics& _graphics;
     Type _type;
+    DisplayMode _displayMode;
     InitInfo _initInfo;
     std::unique_ptr<ResourceManager> _resourceManager{nullptr};
 };

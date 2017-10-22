@@ -33,7 +33,7 @@ public:
 
     ~Queue() = default;
 
-    void addMeshInstance(Scene::Node& node) override final;
+    void addMeshInstance(Scene::Node& node, const lug::Graphics::Renderer& renderer) override final;
     void addLight(Scene::Node& node) override final;
     void addSkyBox(Resource::SharedPtr<::lug::Graphics::Render::SkyBox> skyBox) override final;
     void clear() override final;

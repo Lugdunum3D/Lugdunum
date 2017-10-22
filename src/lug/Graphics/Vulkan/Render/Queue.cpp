@@ -8,7 +8,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-void Queue::addMeshInstance(Scene::Node& node) {
+void Queue::addMeshInstance(Scene::Node& node, const lug::Graphics::Renderer& renderer) {
     auto meshInstance = node.getMeshInstance();
 
     uint32_t i = 0;
@@ -26,7 +26,10 @@ void Queue::addMeshInstance(Scene::Node& node) {
             Pipeline::Id::PrimitivePart pipelineIdPrimitivePart = primitiveSetData->pipelineIdPrimitivePart;
             Pipeline::Id::MaterialPart pipelineIdMaterialPart = material->getPipelineId();
 
-            pipelineId = Pipeline::Id::create(pipelineIdPrimitivePart, pipelineIdMaterialPart);
+            Pipeline::Id::ExtraPart pipelineIdExtraPart;
+            pipelineIdExtraPart.displayMode = static_cast<uint32_t>(renderer.getDisplayMode());
+
+            pipelineId = Pipeline::Id::create(pipelineIdPrimitivePart, pipelineIdMaterialPart, pipelineIdExtraPart);
         }
 
         // Add in the list

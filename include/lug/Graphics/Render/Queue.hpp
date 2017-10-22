@@ -5,6 +5,9 @@
 
 namespace lug {
 namespace Graphics {
+
+class Renderer;
+
 namespace Scene {
 class Node;
 }
@@ -23,7 +26,7 @@ public:
 
     ~Queue() = default;
 
-    virtual void addMeshInstance(Scene::Node& node) = 0;
+    virtual void addMeshInstance(Scene::Node& node, const Renderer& renderer) = 0;
     virtual void addLight(Scene::Node& node) = 0;
     virtual void addSkyBox(Resource::SharedPtr<Render::SkyBox> skyBox) = 0;
     virtual void clear() = 0;

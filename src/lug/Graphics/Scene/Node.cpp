@@ -35,13 +35,13 @@ void Node::attachCamera(Resource::SharedPtr<Render::Camera::Camera> camera) {
     _camera = std::move(camera);
 }
 
-void Node::fetchVisibleObjects(const Render::View& renderView, const Render::Camera::Camera& camera, Render::Queue& renderQueue) const {
+void Node::fetchVisibleObjects(const Renderer& renderer, const Render::View& renderView, const Render::Camera::Camera& camera, Render::Queue& renderQueue) const {
     for (const auto& child : _children) {
-        static_cast<const Node*>(child)->fetchVisibleObjects(renderView, camera, renderQueue);
+        static_cast<const Node*>(child)->fetchVisibleObjects(renderer, renderView, camera, renderQueue);
     }
 
     if (_meshInstance.mesh) {
-        renderQueue.addMeshInstance(*const_cast<Node*>(this));
+        renderQueue.addMeshInstance(*const_cast<Node*>(this), renderer);
     }
 
     // Check the distance with the light
