@@ -48,6 +48,55 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
 # set the path of thirdparty
 lug_set_option(LUG_THIRDPARTY_DIR "${CMAKE_SOURCE_DIR}/thirdparty" STRING "Choose the path for the thirdparty directory")
 
+
+# download thirdparty dir if not specified
+lug_set_option(LUG_THIRDPARTY_URL "https://thirdparty-dl.lugbench.eu" STRING "Choose the server from which to download the thirdparty directory")
+lug_set_option(LUG_ACCEPT_DL OFF BOOL "Choose whether to accept or not the download of the thirdparty directory")
+
+if (NOT EXISTS "${LUG_THIRDPARTY_DIR}" AND NOT "${LUG_ACCEPT_DL}")
+    message(
+        FATAL_ERROR "You don't have the ${LUG_THIRDPARTY_DIR} directory installed, "
+        "but we can download it for your architecture.\n"
+        "To protect your privacy the download is not automatic.\n"
+        "To proceed and accept the download, re-run cmake with -DLUG_ACCEPT_DL=ON\n"
+        "---\n"
+        "You can also compile it from source: see https://github.com/Lugdunum3D/ThirdParty-Builder\n"
+        "---\n"
+        "Thanks, the Lugdunum3D Team."
+    )
+endif()
+
+if (EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    find_package(Git)
+    if (GIT_FOUND)
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} log -n 1 --pretty=format:%h -- thirdparty.yml
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+            OUTPUT_VARIABLE "THIRDPARTY_LATEST_HASH"
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+        message(STATUS "Thirdparty hash: ${THIRDPARTY_LATEST_HASH}")
+    else()
+        message(FATAL_ERROR "Can't find the latest revision of `thirdparty.yml`")
+    endif()
+
+    string(TOLOWER "${CMAKE_SYSTEM_NAME}" THRIDPARTY_PLATFORM)
+    message(STATUS "Downloading ${LUG_THIRDPARTY_URL}/${THIRDPARTY_LATEST_HASH}/${THRIDPARTY_PLATFORM}.zip")
+    set(DOWNLOAD_TARGET "${CMAKE_SOURCE_DIR}/thirdparty-${THIRDPARTY_LATEST_HASH}.zip")
+    file(DOWNLOAD "${LUG_THIRDPARTY_URL}/${THIRDPARTY_LATEST_HASH}/${THRIDPARTY_PLATFORM}.zip" "${DOWNLOAD_TARGET}")
+    message(STATUS "Extracting...")
+    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/thirdparty")
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar xfz "${DOWNLOAD_TARGET}"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/thirdparty"
+        RESULT_VARIABLE rv
+    )
+    if (NOT rv EQUAL 0)
+        file(REMOVE_RECURSE "${CMAKE_SOURCE_DIR}/thirdparty")
+        message(FATAL_ERROR "error: extract of '${DOWNLOAD_TARGET}' failed")
+    endif()
+endif()
+
 # find Vulkan
 find_package(Vulkan)
 if (NOT VULKAN_INCLUDE_DIR)

@@ -1,0 +1,49 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/Lugdunum
+    docker:
+      - image: lugdunum3d/thirdparty-builder:latest
+    steps:
+      - checkout
+
+      - run:
+          name: Fetch Thirdparty-Builder
+          command: |
+            pwd
+            ls
+            git clone https://github.com/Lugdunum3D/ThirdParty-Builder.git ~/ThirdParty-Builder
+
+      - run:
+          name: Build thirdparty
+          command: |
+            cd ~/Lugdunum
+            git log -n 1 --pretty=format:%h -- thirdparty.yml | xargs echo -n > thirdparty_short_sha1
+            cd ~/ThirdParty-Builder
+            mkdir -p build-circleci
+            cd build-circleci
+            python3 ../build.py -vvv -z ../linux.zip ~/Lugdunum/thirdparty.yml
+
+      - run:
+          name: Upload to https://thirdparty-dl.lugbench.eu
+          command: |
+            curl --user "upload:${UPLOAD_PASSWORD}" -T linux.zip https://thirdparty-dl.lugbench.eu/$(cat thirdparty_short_sha1)/linux.zip
+
+      - run:
+          name: Compile Lugdunum
+          command: |
+            cd ~/Lugdunum
+            mkdir build && cd build
+            (cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DLUG_THIRDPARTY_DIR=$HOME/.local/thirdparty) || return 1
+            (make all test && sudo make install) || return 1
+            return 0
+
+      - run:
+          name: Compile Samples
+          command: |
+            cd ~/Lugdunum/samples
+            mkdir build && cd build
+            (cmake .. -DBUILD_SHADERS=false -DLUG_THIRDPARTY_DIR=$HOME/.local/thirdparty) || return 1
+            (make all) || return 1
+
+            return 0
