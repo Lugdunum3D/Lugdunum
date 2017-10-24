@@ -63,7 +63,10 @@ void Gui::destroy() {
 bool Gui::init(const std::vector<API::ImageView>& imageViews) {
     ImGuiIO& io = ImGui::GetIO();
 
-    io.Fonts->AddFontDefault();
+    // Load default font if no font has been configured
+    if (!io.Fonts->Fonts.Size) {
+        io.Fonts->AddFontDefault();
+    }
 
     initKeyMapping();
 
