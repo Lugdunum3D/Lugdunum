@@ -78,6 +78,13 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
     int texChannels{0};
     std::vector<stbi_uc*> layersPixels;
     for (auto& layer: builder._layers) {
+        if (layer.filename.size() == 0 && layer.data) {
+            layersPixels.push_back(layer.data);
+            texWidth = layer.width;
+            texHeight = layer.height;
+            continue;
+        }
+
 #if defined(LUG_SYSTEM_ANDROID)
         // Load shader from compressed asset
         AAsset* asset = AAssetManager_open((lug::Window::priv::WindowImpl::activity)->assetManager, layer.filename.c_str(), AASSET_MODE_STREAMING);

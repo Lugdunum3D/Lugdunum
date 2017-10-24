@@ -13,6 +13,9 @@
 #include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Sampler.hpp>
+#include <lug/Graphics/Builder/Texture.hpp>
+#include <lug/Graphics/Vulkan/Render/Texture.hpp>
+#include <lug/Graphics/Vulkan/Render/DescriptorSetPool/GuiTexture.hpp>
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 
@@ -28,11 +31,6 @@ Gui::~Gui() {
 }
 
 void Gui::destroy() {
-    _fontImage.destroy();
-    _fontImageView.destroy();
-    _fontDeviceMemory.destroy();
-    _fontSampler.destroy();
-
     _descriptorPool.destroy();
 
     _pipeline.destroy();
@@ -45,9 +43,15 @@ void Gui::destroy() {
         if (frameData.indexMemoryPtr) {
             frameData.indexMemory.unmap();
         }
+
+        for (const auto& descriptorSet : frameData.texturesDescriptorSets) {
+            _texturesDescriptorSetPool->free(descriptorSet);
+        }
     }
 
     _framesData.clear();
+
+    _texturesDescriptorSetPool.reset();
 
     _graphicQueueCommandPool.destroy();
     _transferQueueCommandPool.destroy();
@@ -58,6 +62,11 @@ void Gui::destroy() {
 
 bool Gui::init(const std::vector<API::ImageView>& imageViews) {
     ImGuiIO& io = ImGui::GetIO();
+
+    // Load default font if no font has been configured
+    if (!io.Fonts->Fonts.Size) {
+        io.Fonts->AddFontDefault();
+    }
 
     initKeyMapping();
 
@@ -108,6 +117,11 @@ bool Gui::init(const std::vector<API::ImageView>& imageViews) {
     }
     commandBuffers.clear(); // clear the array
 
+    _texturesDescriptorSetPool = std::make_unique<Render::DescriptorSetPool::GuiTexture>(_renderer);
+    if (!_texturesDescriptorSetPool->init()) {
+        return false;
+    }
+
     return initFontsTexture() && initPipeline() && initFramebuffers(imageViews);
 }
 
@@ -155,8 +169,6 @@ bool Gui::initFontsTexture() {
         texHeight = static_cast<uint32_t>(tempHeight);
     }
 
-    const size_t uploadSize = texWidth * texHeight * 4 * sizeof(char);
-
     API::Device &device = _renderer.getDevice();
 
     // Get transfer queue family and retrieve the first queue
@@ -173,227 +185,27 @@ bool Gui::initFontsTexture() {
         VkResult result{ VK_SUCCESS };
         API::Builder::CommandPool commandPoolBuilder(device, *_transferQueue->getQueueFamily());
         if (!commandPoolBuilder.build(_transferQueueCommandPool, &result)) {
-            LUG_LOG.error("Gui::init: Can't create a command pool: {}", result);
+            LUG_LOG.error("Gui::initFontsTexture: Can't create a command pool: {}", result);
             return false;
         }
     }
 
-    // Create FontsTexture image
+    // Create fonts texture
     {
-        API::Builder::Image imageBuilder(device);
+        lug::Graphics::Builder::Texture textureBuilder(_renderer);
 
-        imageBuilder.setUsage(VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT);
-        imageBuilder.setPreferedFormats({ VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT });
-        imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
-        imageBuilder.setQueueFamilyIndices({ _transferQueue->getQueueFamily()->getIdx() });
-        imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
+        textureBuilder.addLayer(texWidth, texHeight, fontData);
+        textureBuilder.setMagFilter(lug::Graphics::Render::Texture::Filter::Linear);
+        textureBuilder.setMinFilter(lug::Graphics::Render::Texture::Filter::Linear);
 
-        API::Builder::DeviceMemory deviceMemoryBuilder(device);
-        deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-        VkExtent3D extent{
-            /* extent.width */ texWidth,
-            /* extent.height */ texHeight,
-            /* extent.depth */ 1
-        };
-
-        imageBuilder.setExtent(extent);
-
-        {
-            VkResult result{VK_SUCCESS};
-            if (!imageBuilder.build(_fontImage, &result)) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't create depth buffer image: {}", result);
-                return false;
-            }
-            result = VK_SUCCESS;
-            if (!deviceMemoryBuilder.addImage(_fontImage)) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't add image to device memory");
-                return false;
-            }
-
-            result = VK_SUCCESS;
-            if (!deviceMemoryBuilder.build(_fontDeviceMemory, &result)) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't create font buffer device memory: {}", result);
-                return false;
-            }
-        }
-    }
-
-    // Create FontsTexture image view
-    {
-        API::Builder::ImageView imageViewBuilder(device, _fontImage);
-
-        imageViewBuilder.setFormat(_fontImage.getFormat());
-        imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
-
-        VkResult result{VK_SUCCESS};
-        if (!imageViewBuilder.build(_fontImageView, &result)) {
-            LUG_LOG.error("Gui::initFontsTexture: Can't create image view: {}", result);
+        _fontTexture = textureBuilder.build();
+        if (!_fontTexture) {
+            LUG_LOG.error("Gui::initFontsTexture Can't create fonts texture");
             return false;
         }
-    }
 
-    // Create staging buffers for font data upload
-    {
-        API::Buffer stagingBuffer;
-        API::DeviceMemory stagingBufferMemory;
-        std::set<uint32_t> queueFamilyIndices = { _transferQueue->getQueueFamily()->getIdx() };
-
-        // Create staging buffer
-        {
-            API::Builder::Buffer bufferBuilder(device);
-            bufferBuilder.setQueueFamilyIndices(queueFamilyIndices);
-            bufferBuilder.setSize(uploadSize);
-            bufferBuilder.setUsage(VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-            bufferBuilder.setExclusive(VK_SHARING_MODE_EXCLUSIVE);
-
-            VkResult result{VK_SUCCESS};
-            if (!bufferBuilder.build(stagingBuffer, &result)) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer: {}", result);
-                return false;
-            }
-        }
-
-        // Create staging buffer memory
-        {
-            API::Builder::DeviceMemory deviceMemoryBuilder(device);
-            deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-            deviceMemoryBuilder.addBuffer(stagingBuffer);
-
-            VkResult result{VK_SUCCESS};
-            if (!deviceMemoryBuilder.build(stagingBufferMemory, &result)) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't create staging buffer device memory: {}", result);
-                return false;
-            }
-        }
-
-        stagingBuffer.updateData(fontData, (uint32_t)uploadSize);
-
-        // Copy buffer data to font image
-        {
-            VkResult result{VK_SUCCESS};
-            API::CommandBuffer commandBuffer;
-
-            API::Builder::CommandBuffer commandBufferBuilder(_renderer.getDevice(), _transferQueueCommandPool);
-            commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-
-            if (!commandBufferBuilder.build(commandBuffer, &result)) {
-                LUG_LOG.error("Gui::init: Can't create the command buffer: {}", result);
-                return false;
-            }
-
-            // Create fence
-            API::Fence fence;
-            {
-                API::Builder::Fence fenceBuilder(device);
-
-                if (!fenceBuilder.build(fence, &result)) {
-                    LUG_LOG.error("Gui::initFontsTexture: Can't create swapchain fence: {}", result);
-                    return false;
-                }
-            }
-
-            commandBuffer.begin();
-
-            // Prepare for transfer
-            {
-                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
-                pipelineBarrier.imageMemoryBarriers.resize(1);
-                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
-                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &_fontImage;
-
-                commandBuffer.pipelineBarrier(pipelineBarrier);
-            }
-
-            // Copy
-            VkBufferImageCopy bufferCopyRegion{
-                /* bufferCopyRegion.bufferOffset */ 0,
-                /* bufferCopyRegion.bufferRowLength */ 0,
-                /* bufferCopyRegion.bufferImageHeight */ 0,
-                {
-                    /* bufferCopyRegion.imageSubresource.aspectMask */ VK_IMAGE_ASPECT_COLOR_BIT,
-                    /* bufferCopyRegion.imageSubresource.mipLevel */ 0,
-                    /* bufferCopyRegion.imageSubresource.baseArrayLayer */ 0,
-                    /* bufferCopyRegion.imageSubresource.layerCount */ 1
-                },
-                {
-                    /* bufferCopyRegion.imageOffset.x */ 0,
-                    /* bufferCopyRegion.imageOffset.y */ 0,
-                    /* bufferCopyRegion.imageOffset.z */ 0,
-                },
-                {
-                    /* bufferCopyRegion.imageExtent.width */ texWidth,
-                    /* bufferCopyRegion.imageExtent.height */ texHeight,
-                    /* bufferCopyRegion.imageExtent.depth */ 1
-                }
-            };
-
-//            // TODO write this function
-//            commandBuffer.copyBufferToImage();
-
-            vkCmdCopyBufferToImage(
-                static_cast<VkCommandBuffer>(commandBuffer),
-                static_cast<VkBuffer>(stagingBuffer),
-                static_cast<VkImage>(_fontImage),
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                1,
-                &bufferCopyRegion
-            );
-
-            // Prepare for shader read
-            {
-                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
-                pipelineBarrier.imageMemoryBarriers.resize(1);
-                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &_fontImage;
-
-                commandBuffer.pipelineBarrier(pipelineBarrier);
-            }
-
-            if (commandBuffer.end() == false) {
-                LUG_LOG.error("Gui::initFontsTexture: Failed to end commandBuffer");
-                return false;
-            }
-
-            if (_transferQueue->submit(commandBuffer, {}, {}, {}, static_cast<VkFence>(fence)) == false) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't submit commandBuffer");
-                return false;
-            }
-
-            // TODO(saveman71): set a define for the fence timeout
-            if (!fence.wait()) {
-                LUG_LOG.error("Gui::initFontsTexture: Can't vkWaitForFences");
-                return false;
-            }
-
-            // Properly destroy everything in the right order
-            fence.destroy();
-            stagingBufferMemory.destroy();
-            stagingBuffer.destroy();
-            commandBuffer.destroy();
-        }
-    }
-
-    // Font texture Sampler
-    {
-        API::Builder::Sampler samplerBuilder(device);
-
-        samplerBuilder.setAddressModeU(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
-        samplerBuilder.setAddressModeV(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
-        samplerBuilder.setAddressModeW(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
-        samplerBuilder.setBorderColor(VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE);
-
-        VkResult result{VK_SUCCESS};
-        if (!samplerBuilder.build(_fontSampler, &result)) {
-            LUG_LOG.error("Gui::initFontsTexture: Can't create image view: {}", result);
-            return false;
-        }
+        // Set font id to font texture
+        io.Fonts->TexID = lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(_fontTexture).get();
     }
 
     if (initFrameData() == false) {
@@ -517,26 +329,6 @@ bool Gui::initPipeline() {
                 return false;
             }
         }
-
-        // Create and update descriptor set
-        {
-            API::Builder::DescriptorSet descriptorSetBuilder(device, _descriptorPool);
-            descriptorSetBuilder.setDescriptorSetLayouts({ static_cast<VkDescriptorSetLayout>(descriptorSetLayouts[0]) });
-
-            VkResult result{VK_SUCCESS};
-            if (!descriptorSetBuilder.build(_descriptorSet, &result)) {
-                LUG_LOG.error("Gui::initPipeline: Can't create descriptor set: {}", result);
-                return false;
-            }
-        }
-
-        // Update descriptor set
-        VkDescriptorImageInfo descriptorImageInfo;
-        descriptorImageInfo.sampler = static_cast<VkSampler>(_fontSampler);
-        descriptorImageInfo.imageView = static_cast<VkImageView>(_fontImageView);
-        descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-        _descriptorSet.updateImages(0, 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, {descriptorImageInfo});
 
         VkPushConstantRange pushConstant{
             /*pushConstant.stageFlags*/ VK_SHADER_STAGE_VERTEX_BIT,
@@ -693,15 +485,6 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
 
     frameData.commandBuffer.beginRenderPass(*renderPass, beginRenderPass);
 
-    const API::CommandBuffer::CmdBindDescriptors cmdDescriptorSet{
-        /* cameraBind.pipelineLayout */ *_pipeline.getLayout(),
-        /* lightBind.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
-        /* lightBind.firstSet */ 0,
-        /* lightBind.descriptorSets */{ &_descriptorSet },
-        /* lightBind.dynamicOffsets */{ },
-    };
-
-    frameData.commandBuffer.bindDescriptorSets(cmdDescriptorSet);
     frameData.commandBuffer.bindPipeline(_pipeline);
 
     if (static_cast<VkBuffer>(frameData.vertexBuffer) != VK_NULL_HANDLE) {
@@ -726,6 +509,10 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
     };
     frameData.commandBuffer.pushConstants(cmdPushConstants);
 
+    // Temporary array of descriptor sets use to render this frame
+    // they will replace frameData.texturesDescriptorSets atfer the rendering
+    std::vector<const Render::DescriptorSetPool::DescriptorSet*> texturesDescriptorSets;
+
     // Render commands
     ImDrawData* imDrawData = ImGui::GetDrawData();
 
@@ -748,6 +535,32 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
             };
             frameData.commandBuffer.setScissor({scissor});
 
+            // Get the new (or old) textures descriptor set
+            const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
+                _pipeline,
+                (Vulkan::Render::Texture*)pcmd->TextureId
+            );
+
+            if (!texturesDescriptorSet) {
+                LUG_LOG.error("Gui::endFrame: Can't allocate textures descriptor set");
+                return false;
+            }
+
+            texturesDescriptorSets.push_back(texturesDescriptorSet);
+
+            // Bind descriptor set of the texture
+            {
+                const API::CommandBuffer::CmdBindDescriptors texturesBind{
+                    /* texturesBind.pipelineLayout     */ *_pipeline.getLayout(),
+                    /* texturesBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    /* texturesBind.firstSet           */ 0,
+                    /* texturesBind.descriptorSets     */ {&texturesDescriptorSet->getDescriptorSet()},
+                    /* texturesBind.dynamicOffsets     */ {}
+                };
+
+                frameData.commandBuffer.bindDescriptorSets(texturesBind);
+            }
+
             const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
                 /* cmdDrawIndexed.indexCount */ pcmd->ElemCount,
                 /* cmdDrawIndexed.instanceCount */ 1,
@@ -760,6 +573,15 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
             indexCount += pcmd->ElemCount;
         }
         vertexCount += cmd_list->VtxBuffer.Size;
+    }
+
+    // Free and replace previous texturesDescriptorSets
+    {
+        for (const auto& descriptorSet : frameData.texturesDescriptorSets) {
+            _texturesDescriptorSetPool->free(descriptorSet);
+        }
+
+        frameData.texturesDescriptorSets = texturesDescriptorSets;
     }
 
     frameData.commandBuffer.endRenderPass();
@@ -775,7 +597,6 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
 }
 
 void Gui::processEvent(const lug::Window::Event event) {
-   
     ImGuiIO& io = ImGui::GetIO();
     switch (event.type) {
         case lug::Window::Event::Type::KeyPressed:
@@ -796,9 +617,7 @@ void Gui::processEvent(const lug::Window::Event event) {
             io.MouseWheel += static_cast<float>(event.mouse.scrollOffset.xOffset);
             break;
          case lug::Window::Event::Type::TouchScreenChange:
-        
             if (event.touchScreen.drag) {
-
                 float draggedDistance = sqrtf(((event.touchScreen.coordinates[0].x()  - io.MousePosPrev.x ) * (event.touchScreen.coordinates[0].x()  - io.MousePosPrev.x))
                 + ((event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y) * (event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y)));
                 LUG_LOG.info("draggedDistance {}, displaysize {}", draggedDistance, io.DisplaySize.y);
