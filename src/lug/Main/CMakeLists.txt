@@ -31,4 +31,4 @@ set_target_properties(lug-main PROPERTIES FOLDER "lug")
 
 # setup the install of the library
 install(TARGETS lug-main
-        ARCHIVE DESTINATION lib${LIB_SUFFIX}/${ANDROID_ABI} COMPONENT devel)
+        ARCHIVE DESTINATION lib${LIB_SUFFIX} COMPONENT devel)
