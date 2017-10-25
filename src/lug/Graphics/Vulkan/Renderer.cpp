@@ -85,6 +85,7 @@ void Renderer::destroy() {
 
 bool Renderer::beginInit(const std::string& appName, const Core::Version& appVersion, const Renderer::InitInfo& initInfo) {
     _initInfo = initInfo;
+    _displayMode = _initInfo.displayMode;
 
     if (!initInstance(appName, appVersion)) {
         LUG_LOG.error("RendererVulkan: Can't init the instance");

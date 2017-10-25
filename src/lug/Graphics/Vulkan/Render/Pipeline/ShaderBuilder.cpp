@@ -21,22 +21,23 @@ namespace Render {
 std::vector<uint32_t> Pipeline::ShaderBuilder::buildShader(
     std::string shaderRoot,
     ::lug::Graphics::Render::Technique::Type technique,
+    ::lug::Graphics::Renderer::DisplayMode displayMode,
     Pipeline::ShaderBuilder::Type type,
     Pipeline::Id id) {
     switch (technique) {
         case ::lug::Graphics::Render::Technique::Type::Forward:
             switch (type) {
                 case Pipeline::ShaderBuilder::Type::Vertex:
-                    return Pipeline::ShaderBuilder::buildShaderFromFile(shaderRoot + "forward/shader.vert", type, id);
+                    return Pipeline::ShaderBuilder::buildShaderFromFile(shaderRoot + "forward/shader.vert", displayMode, type, id);
                 case Pipeline::ShaderBuilder::Type::Fragment:
-                    return Pipeline::ShaderBuilder::buildShaderFromFile(shaderRoot + "forward/shader.frag", type, id);
+                    return Pipeline::ShaderBuilder::buildShaderFromFile(shaderRoot + "forward/shader.frag", displayMode, type, id);
             }
     }
 
     return {};
 }
 
-std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromFile(std::string filename, Pipeline::ShaderBuilder::Type type, Pipeline::Id id) {
+std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromFile(std::string filename, ::lug::Graphics::Renderer::DisplayMode displayMode, Pipeline::ShaderBuilder::Type type, Pipeline::Id id) {
 #if defined(LUG_SYSTEM_ANDROID)
     // Load shader from compressed asset
     AAsset* asset = AAssetManager_open((lug::Window::priv::WindowImpl::activity)->assetManager, filename.c_str(), AASSET_MODE_STREAMING);
@@ -68,12 +69,15 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromFile(std::string f
     std::string content = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 #endif
 
-    return Pipeline::ShaderBuilder::buildShaderFromString(filename, content, type, id);
+    return Pipeline::ShaderBuilder::buildShaderFromString(filename, content, displayMode, type, id);
 }
 
-std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string filename, std::string content, Pipeline::ShaderBuilder::Type type, Pipeline::Id id) {
+std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string filename, std::string content, ::lug::Graphics::Renderer::DisplayMode displayMode, Pipeline::ShaderBuilder::Type type, Pipeline::Id id) {
     shaderc::Compiler compiler;
     shaderc::CompileOptions options;
+
+    // Set the display mode
+    options.AddMacroDefinition("DISPLAY_MODE", std::to_string(static_cast<uint8_t>(displayMode)));
 
     // Set macros according to the pipeline ID
     {

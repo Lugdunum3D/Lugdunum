@@ -9,3 +9,11 @@ inline Renderer::Type Renderer::getType() const {
 inline ResourceManager* Renderer::getResourceManager() const {
     return _resourceManager.get();
 }
+
+inline const Renderer::DisplayMode& Renderer::getDisplayMode() const {
+    return _displayMode;
+}
+
+inline void Renderer::setDisplayMode(Renderer::DisplayMode displayMode) {
+    _displayMode = displayMode;
+}

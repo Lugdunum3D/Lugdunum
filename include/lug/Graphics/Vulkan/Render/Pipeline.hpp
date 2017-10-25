@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Render/Technique/Type.hpp>
 #include <lug/Graphics/Resource.hpp>
 #include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
@@ -75,10 +76,25 @@ public:
             }
         };
 
+        struct ExtraPart {
+            union {
+                struct {
+                    uint32_t displayMode : 3;    ///< Corresponding to the value in Renderer::DisplayMode.
+                };
+
+                uint32_t value;
+            };
+
+            explicit operator uint32_t() {
+                return value;
+            }
+        };
+
         union {
             struct {
                 uint32_t primitivePart : 10;
                 uint32_t materialPart : 10;
+                uint32_t extraPart : 3;
             };
 
             uint32_t value;
@@ -118,19 +134,27 @@ public:
             return tmp;
         }
 
+        ExtraPart getExtraPart() {
+            ExtraPart tmp;
+            tmp.value = extraPart;
+            return tmp;
+        }
+
         /**
          * @brief      Create a pipeline id.
          *
          * @param[in]  primitivePart  The primitive part. It should be created manually beforehand.
          * @param[in]  materialPart   The material part. It should be created manually beforehand.
+         * @param[in]  extraPart      The extra part. It should be created manually beforehand.
          *
          * @return     The created id.
          */
-        static Id create(PrimitivePart primitivePart, MaterialPart materialPart) {
+        static Id create(PrimitivePart primitivePart, MaterialPart materialPart, ExtraPart extraPart) {
             Id id;
 
             id.primitivePart = static_cast<uint32_t>(primitivePart);
             id.materialPart = static_cast<uint32_t>(materialPart);
+            id.extraPart = static_cast<uint32_t>(extraPart);
 
             return id;
         };
@@ -156,9 +180,9 @@ public:
         ~ShaderBuilder() = delete;
 
     public:
-        static std::vector<uint32_t> buildShader(std::string shaderRoot, ::lug::Graphics::Render::Technique::Type technique, Type type, Pipeline::Id id);
-        static std::vector<uint32_t> buildShaderFromFile(std::string filename, Type type, Pipeline::Id id);
-        static std::vector<uint32_t> buildShaderFromString(std::string filename, std::string content, Type type, Pipeline::Id id);
+        static std::vector<uint32_t> buildShader(std::string shaderRoot, ::lug::Graphics::Render::Technique::Type technique, ::lug::Graphics::Renderer::DisplayMode displayMode, Type type, Pipeline::Id id);
+        static std::vector<uint32_t> buildShaderFromFile(std::string filename, ::lug::Graphics::Renderer::DisplayMode displayMode, Type type, Pipeline::Id id);
+        static std::vector<uint32_t> buildShaderFromString(std::string filename, std::string content, ::lug::Graphics::Renderer::DisplayMode displayMode, Type type, Pipeline::Id id);
     };
 
 public:

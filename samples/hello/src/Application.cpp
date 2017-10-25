@@ -15,6 +15,9 @@
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
     getRenderWindowInfo().windowInitInfo.title = "Hello";
+
+    // We can set the display mode, by default to full
+    getGraphicsInfo().rendererInitInfo.displayMode = ::lug::Graphics::Renderer::DisplayMode::Full;
 }
 
 bool Application::init(int argc, char* argv[]) {
@@ -153,6 +156,16 @@ bool Application::init(int argc, char* argv[]) {
 void Application::onEvent(const lug::Window::Event& event) {
     if (event.type == lug::Window::Event::Type::Close) {
         close();
+    }
+
+    if (event.type == lug::Window::Event::Type::KeyPressed) {
+        const uint32_t currentDisplayMode = static_cast<uint32_t>(_graphics.getRenderer()->getDisplayMode());
+
+        if (event.key.code == lug::Window::Keyboard::Key::F1) {
+            _graphics.getRenderer()->setDisplayMode(static_cast<::lug::Graphics::Renderer::DisplayMode>(currentDisplayMode == 0 ? 7 : currentDisplayMode - 1));
+        } else if (event.key.code == lug::Window::Keyboard::Key::F2) {
+            _graphics.getRenderer()->setDisplayMode(static_cast<::lug::Graphics::Renderer::DisplayMode>((currentDisplayMode + 1) % 8));
+        }
     }
 }
 

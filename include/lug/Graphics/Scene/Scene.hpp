@@ -52,7 +52,7 @@ public:
     const Node* getSceneNode(const std::string& name) const;
     const Resource::SharedPtr<Render::SkyBox> getSkyBox() const;
 
-    void fetchVisibleObjects(const Render::View& renderView, const Render::Camera::Camera& camera, Render::Queue& renderQueue) const;
+    void fetchVisibleObjects(const Renderer& renderer, const Render::View& renderView, const Render::Camera::Camera& camera, Render::Queue& renderQueue) const;
 
 private:
     Scene(const std::string& name);

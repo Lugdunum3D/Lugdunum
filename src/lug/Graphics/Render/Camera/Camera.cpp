@@ -19,9 +19,9 @@ void Camera::lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& up, No
     }
 }
 
-void Camera::update(const ::lug::Graphics::Render::View& renderView, Queue& renderQueue) {
+void Camera::update(const Renderer& renderer, const ::lug::Graphics::Render::View& renderView, Queue& renderQueue) {
     if (_parent) {
-        _parent->getScene().fetchVisibleObjects(renderView, *this, renderQueue);
+        _parent->getScene().fetchVisibleObjects(renderer, renderView, *this, renderQueue);
     }
 }
 
