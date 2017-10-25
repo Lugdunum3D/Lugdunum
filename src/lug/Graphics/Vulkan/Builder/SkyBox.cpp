@@ -333,7 +333,7 @@ static bool initIrradianceMapPipeline(Renderer& renderer, API::GraphicsPipeline&
 
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
-            /* colorAttachment.format */ VK_FORMAT_R32G32B32A32_SFLOAT,
+            /* colorAttachment.format */ VK_FORMAT_R8G8B8A8_UNORM, // TODO: Set the format otherwise
             /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
             /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
             /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
@@ -511,12 +511,16 @@ Resource::SharedPtr<::lug::Graphics::Render::SkyBox> build(const ::lug::Graphics
     textureBuilder.setMipMapFilter(builder._mipMapFilter);
     textureBuilder.setWrapS(builder._wrapS);
     textureBuilder.setWrapT(builder._wrapT);
-    textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::PositiveX)]);
-    textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::NegativeX)]);
-    textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::PositiveY)]);
-    textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::NegativeY)]);
-    textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::PositiveZ)]);
-    textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::NegativeZ)]);
+
+    if (!textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::PositiveX)])
+        || !textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::NegativeX)])
+        || !textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::PositiveY)])
+        || !textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::NegativeY)])
+        || !textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::PositiveZ)])
+        || !textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::NegativeZ)])) {
+        LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build Can't create skybox layers");
+        return nullptr;
+    }
 
     skyBox->_texture = textureBuilder.build();
     if (!skyBox->_texture) {

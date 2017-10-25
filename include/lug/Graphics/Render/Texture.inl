@@ -1,9 +1,9 @@
-inline void Texture::setWidth(uint32_t width) {
-    _width = width;
+inline uint32_t Texture::getWidth() const {
+    return _width;
 }
 
-inline void Texture::setHeight(uint32_t height) {
-    _height = height;
+inline uint32_t Texture::getHeight() const {
+    return _height;
 }
 
 inline Render::Texture::Filter Texture::getMagFilter() const {
@@ -24,12 +24,4 @@ inline Render::Texture::WrappingMode Texture::getWrapS() const {
 
 inline Render::Texture::WrappingMode Texture::getWrapT() const {
     return _wrapT;
-}
-
-inline uint32_t Texture::getWidth() const {
-    return _width;
-}
-
-inline uint32_t Texture::getHeight() const {
-    return _height;
 }

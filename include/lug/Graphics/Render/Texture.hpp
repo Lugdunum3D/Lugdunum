@@ -39,27 +39,25 @@ public:
 
     virtual ~Texture() = default;
 
-    void setWidth(uint32_t width);
-    void setHeight(uint32_t height);
+    uint32_t getWidth() const;
+    uint32_t getHeight() const;
 
     Render::Texture::Filter getMagFilter() const;
     Render::Texture::Filter getMinFilter() const;
     Render::Texture::Filter getMipMapFilter() const;
     Render::Texture::WrappingMode getWrapS() const;
     Render::Texture::WrappingMode getWrapT() const;
-    uint32_t getWidth() const;
-    uint32_t getHeight() const;
 
 private:
+    uint32_t _width{0};
+    uint32_t _height{0};
+
     Render::Texture::Filter _magFilter;
     Render::Texture::Filter _minFilter;
     Render::Texture::Filter _mipMapFilter;
 
     Render::Texture::WrappingMode _wrapS;
     Render::Texture::WrappingMode _wrapT;
-
-    uint32_t _width{0};
-    uint32_t _height{0};
 };
 
 #include <lug/Graphics/Render/Texture.inl>

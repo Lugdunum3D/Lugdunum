@@ -163,7 +163,11 @@ bool Application::init(int argc, char* argv[]) {
     {
         lug::Graphics::Builder::Texture textureBuilder(*renderer);
 
-        textureBuilder.addLayer("textures/skybox/right.jpg");
+        if (!textureBuilder.addLayer("textures/skybox/right.jpg")) {
+            LUG_LOG.error("Application: Can't load texture");
+            return false;
+        }
+
         textureBuilder.setMagFilter(lug::Graphics::Render::Texture::Filter::Linear);
         textureBuilder.setMinFilter(lug::Graphics::Render::Texture::Filter::Linear);
         textureBuilder.setMipMapFilter(lug::Graphics::Render::Texture::Filter::Linear);

@@ -18,14 +18,7 @@ class LUG_GRAPHICS_API Texture {
     friend Resource::SharedPtr<lug::Graphics::Render::Texture> lug::Graphics::Vulkan::Builder::Texture::build(const ::lug::Graphics::Builder::Texture&);
 
     struct Layer {
-        // TODO(nokitoo): add other infos(layers count, aspect mask, mip level, etc...)
-        // If filename is empty, create an empty texture with width/height
-        std::string filename;
-
-        unsigned char* const data{nullptr};
-
-        uint32_t width{0};
-        uint32_t height{0};
+        const unsigned char* data{nullptr};
     };
 
 public:
@@ -43,7 +36,7 @@ public:
     Texture& operator=(const Texture&) = delete;
     Texture& operator=(Texture&&) = delete;
 
-    ~Texture() = default;
+    ~Texture();
 
     /**
      * @brief      Sets the name.
@@ -60,8 +53,8 @@ public:
     void setWrapT(Render::Texture::WrappingMode wrapT);
     void setWrapW(Render::Texture::WrappingMode wrapW);
 
-    void addLayer(const std::string& filename);
-    void addLayer(uint32_t width, uint32_t height, unsigned char* const data = nullptr);
+    bool addLayer(const std::string& filename);
+    bool addLayer(uint32_t width, uint32_t height, const unsigned char* data = nullptr);
 
     Resource::SharedPtr<Render::Texture> build();
 
@@ -71,6 +64,9 @@ protected:
     std::string _name;
 
     Type _type{Type::Texture2D};
+
+    uint32_t _width{0};
+    uint32_t _height{0};
 
     Render::Texture::Filter _magFilter{Render::Texture::Filter::Nearest};
     Render::Texture::Filter _minFilter{Render::Texture::Filter::Nearest};

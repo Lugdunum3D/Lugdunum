@@ -29,11 +29,3 @@ inline void Texture::setWrapT(Render::Texture::WrappingMode wrapT) {
 inline void Texture::setWrapW(Render::Texture::WrappingMode wrapW) {
     _wrapW = wrapW;
 }
-
-inline void Texture::addLayer(const std::string& filename) {
-    _layers.push_back({filename});
-}
-
-inline void Texture::addLayer(uint32_t width, uint32_t height, unsigned char* const data) {
-    _layers.push_back({"", data, width, height});
-}

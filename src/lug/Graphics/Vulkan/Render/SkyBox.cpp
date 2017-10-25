@@ -41,7 +41,7 @@ void SkyBox::destroy() {
 }
 
 Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(lug::Graphics::Renderer& renderer) const {
-    constexpr uint32_t irradianceMapSize = 128;
+    constexpr uint32_t irradianceMapSize = 64;
 
     // Constructor of SkyBox is private, we can't use std::make_unique
     std::unique_ptr<Resource> resource{new Vulkan::Render::SkyBox(_name + "_irradiance_map")};
@@ -57,12 +57,17 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
     textureBuilder.setMipMapFilter(getTexture()->getMipMapFilter());
     textureBuilder.setWrapS(getTexture()->getWrapS());
     textureBuilder.setWrapT(getTexture()->getWrapT());
-    textureBuilder.addLayer(irradianceMapSize, irradianceMapSize);
-    textureBuilder.addLayer(irradianceMapSize, irradianceMapSize);
-    textureBuilder.addLayer(irradianceMapSize, irradianceMapSize);
-    textureBuilder.addLayer(irradianceMapSize, irradianceMapSize);
-    textureBuilder.addLayer(irradianceMapSize, irradianceMapSize);
-    textureBuilder.addLayer(irradianceMapSize, irradianceMapSize);
+
+
+    if (!textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)) {
+        LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build: Can't create irradiance map texture layers");
+        return nullptr;
+    }
 
     irradianceMap->_texture = textureBuilder.build();
     if (!irradianceMap->_texture) {
@@ -205,7 +210,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
 
                 imageBuilder.setExtent(extent);
                 imageBuilder.setUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-                imageBuilder.setPreferedFormats({ VK_FORMAT_R32G32B32A32_SFLOAT });
+                imageBuilder.setPreferedFormats({ VK_FORMAT_R8G8B8A8_UNORM }); // TODO: Set the format otherwise
                 imageBuilder.setQueueFamilyIndices({ graphicsQueue->getQueueFamily()->getIdx() });
                 imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
 
