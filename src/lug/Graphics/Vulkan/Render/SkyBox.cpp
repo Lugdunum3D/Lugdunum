@@ -78,9 +78,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
     // Create Framebuffer for irradiance map generation
     API::CommandPool commandPool;
     API::CommandBuffer cmdBuffer;
-    API::Image depthImage;
     API::Image offscreenImage;
-    API::ImageView depthImageView;
     API::ImageView offscreenImageView;
     API::DeviceMemory imagesMemory;
     API::Framebuffer framebuffer;
@@ -183,27 +181,6 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
                 /* extent.depth     */ 1
             };
 
-
-            // Create depth buffer image
-            {
-                API::Builder::Image imageBuilder(vkRenderer.getDevice());
-
-                imageBuilder.setExtent(extent);
-                imageBuilder.setUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-                imageBuilder.setPreferedFormats({VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT});
-                imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-
-                if (!imageBuilder.build(depthImage, &result)) {
-                    LUG_LOG.error("Forward::iniResource::SharedPtr<::lug::Graphics::Render::SkyBox>::createIrradianceMap: Can't create depth buffer image: {}", result);
-                    return nullptr;
-                }
-
-                if (!deviceMemoryBuilder.addImage(depthImage)) {
-                    LUG_LOG.error("Forward::iniResource::SharedPtr<::lug::Graphics::Render::SkyBox>::createIrradianceMap: Can't add image to device memory");
-                    return nullptr;
-                }
-            }
-
             // Create offscreen image
             {
                 API::Builder::Image imageBuilder(vkRenderer.getDevice());
@@ -233,19 +210,6 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
                 }
             }
 
-            // Create depth buffer image view
-            {
-                API::Builder::ImageView imageViewBuilder(vkRenderer.getDevice(), depthImage);
-
-                imageViewBuilder.setFormat(depthImage.getFormat());
-                imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_DEPTH_BIT);
-
-                if (!imageViewBuilder.build(depthImageView, &result)) {
-                    LUG_LOG.error("Forward::iniResource::SharedPtr<::lug::Graphics::Render::SkyBox>::createIrradianceMap: Can't create depth buffer image view: {}", result);
-                    return nullptr;
-                }
-            }
-
             // Create offscreen image view
             {
                 API::Builder::ImageView imageViewBuilder(vkRenderer.getDevice(), offscreenImage);
@@ -269,7 +233,6 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
 
             framebufferBuilder.setRenderPass(renderPass);
             framebufferBuilder.addAttachment(&offscreenImageView);
-            framebufferBuilder.addAttachment(&depthImageView);
             framebufferBuilder.setWidth(irradianceMapSize);
             framebufferBuilder.setHeight(irradianceMapSize);
 
@@ -481,9 +444,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
 
     cmdBuffer.destroy();
     commandPool.destroy();
-    depthImage.destroy();
     offscreenImage.destroy();
-    depthImageView.destroy();
     offscreenImageView.destroy();
     framebuffer.destroy();
     descriptorPool.destroy();

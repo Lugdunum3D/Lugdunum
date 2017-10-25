@@ -345,33 +345,12 @@ static bool initIrradianceMapPipeline(Renderer& renderer, API::GraphicsPipeline&
 
         auto colorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
 
-        const VkFormat depthFormat = API::Image::findSupportedFormat(
-            renderer.getDevice(),
-            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-            VK_IMAGE_TILING_OPTIMAL,
-            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-        );
-
-        const VkAttachmentDescription depthAttachment{
-            /* depthAttachment.flags */ 0,
-            /* depthAttachment.format */ depthFormat,
-            /* depthAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
-            /* depthAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
-            /* depthAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
-            /* depthAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-            /* depthAttachment.stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            /* depthAttachment.initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
-            /* depthAttachment.finalLayout */ VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-        };
-
-        auto depthAttachmentIndex = renderPassBuilder.addAttachment(depthAttachment);
-
         const API::Builder::RenderPass::SubpassDescription subpassDescription{
             /* subpassDescription.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
             /* subpassDescription.inputAttachments */ {},
             /* subpassDescription.colorAttachments */ {{colorAttachmentIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}},
             /* subpassDescription.resolveAttachments */ {},
-            /* subpassDescription.depthStencilAttachment */ {depthAttachmentIndex, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL},
+            /* subpassDescription.depthStencilAttachment */ {},
             /* subpassDescription.preserveAttachments */ {},
         };
 
