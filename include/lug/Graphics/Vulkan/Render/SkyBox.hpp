@@ -35,8 +35,11 @@ public:
     void destroy();
 
     Resource::SharedPtr<lug::Graphics::Render::SkyBox> createIrradianceMap(lug::Graphics::Renderer& renderer) const override final;
+    Resource::SharedPtr<lug::Graphics::Render::SkyBox> createPrefilteredMap(lug::Graphics::Renderer& renderer) const override final;
+
     static const API::GraphicsPipeline& getPipeline();
     static const lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> getMesh();
+    static const lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> getBrdfLut();
 
 private:
     /**
@@ -50,7 +53,9 @@ private:
 private:
     static API::GraphicsPipeline _pipeline;
     static API::GraphicsPipeline _irradianceMapPipeline;
+    static API::GraphicsPipeline _prefilteredMapPipeline;
     static lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> _mesh;
+    static lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> _brdfLut;
 
     /**
      * @brief      Store the number of skybox created to know when

@@ -6,6 +6,10 @@ inline void Texture::setType(Type type) {
     _type = type;
 }
 
+inline void Texture::setMipLevels(uint32_t mipLevels) {
+    _mipLevels = mipLevels;
+}
+
 inline void Texture::setMagFilter(Render::Texture::Filter magFilter) {
     _magFilter = magFilter;
 }

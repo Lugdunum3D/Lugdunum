@@ -353,6 +353,11 @@ bool Forward::render(
                                     textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getIrradianceMap()->getTexture().get()));
                                 }
 
+                                if (material.getPrefilteredMap()) {
+                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(Render::SkyBox::getBrdfLut().get()));
+                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getPrefilteredMap()->getTexture().get()));
+                                }
+
                                 return textures;
                             }()
                         );

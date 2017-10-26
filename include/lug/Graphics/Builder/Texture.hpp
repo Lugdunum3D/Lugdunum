@@ -46,6 +46,8 @@ public:
 
     void setType(Type type);
 
+    void setMipLevels(uint32_t mipLevels);
+
     void setMagFilter(Render::Texture::Filter magFilter);
     void setMinFilter(Render::Texture::Filter minFilter);
     void setMipMapFilter(Render::Texture::Filter mipMapFilter);
@@ -67,6 +69,8 @@ protected:
 
     uint32_t _width{0};
     uint32_t _height{0};
+
+    uint32_t _mipLevels{1};
 
     Render::Texture::Filter _magFilter{Render::Texture::Filter::Nearest};
     Render::Texture::Filter _minFilter{Render::Texture::Filter::Nearest};

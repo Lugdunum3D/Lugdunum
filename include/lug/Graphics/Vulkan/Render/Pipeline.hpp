@@ -79,8 +79,9 @@ public:
         struct ExtraPart {
             union {
                 struct {
-                    uint32_t displayMode : 3;       ///< Corresponding to the value in Renderer::DisplayMode.
-                    uint32_t irradianceMapInfo : 1; ///< 1 texture, 0 no texture.
+                    uint32_t displayMode : 3;           ///< Corresponding to the value in Renderer::DisplayMode.
+                    uint32_t irradianceMapInfo : 1;     ///< 1 texture, 0 no texture.
+                    uint32_t prefilteredMapInfo : 1;    ///< 1 texture, 0 no texture
                 };
 
                 uint32_t value;
@@ -95,7 +96,7 @@ public:
             struct {
                 uint32_t primitivePart : 10;
                 uint32_t materialPart : 10;
-                uint32_t extraPart : 4;
+                uint32_t extraPart : 5;
             };
 
             uint32_t value;

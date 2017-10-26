@@ -31,7 +31,9 @@ public:
     virtual ~SkyBox() = default;
 
     const Resource::SharedPtr<lug::Graphics::Render::Texture> getTexture() const;
+
     virtual Resource::SharedPtr<lug::Graphics::Render::SkyBox> createIrradianceMap(Renderer& renderer) const = 0;
+    virtual Resource::SharedPtr<lug::Graphics::Render::SkyBox> createPrefilteredMap(Renderer& renderer) const = 0;
 
 protected:
     lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> _texture;

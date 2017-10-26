@@ -57,6 +57,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
         imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
         imageBuilder.setQueueFamilyIndices({ transferQueue->getQueueFamily()->getIdx() });
         imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
+        imageBuilder.setMipLevels(builder._mipLevels);
         imageBuilder.setArrayLayers(static_cast<uint32_t>(builder._layers.size()));
 
         API::Builder::DeviceMemory deviceMemoryBuilder(device);
@@ -101,6 +102,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
         imageViewBuilder.setFormat(texture->_image.getFormat());
         imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
         imageViewBuilder.setLayerCount(static_cast<uint32_t>(builder._layers.size()));
+        imageViewBuilder.setLevelCount(builder._mipLevels);
 
         if (builder._type == ::lug::Graphics::Builder::Texture::Type::CubeMap) {
             imageViewBuilder.setViewType(VK_IMAGE_VIEW_TYPE_CUBE);
@@ -343,6 +345,8 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
 
             return VkSamplerMipmapMode{};
         }(builder._mipMapFilter));
+
+        samplerBuilder.setMaxLod(static_cast<float>(builder._mipLevels));
 
         VkResult result{VK_SUCCESS};
         if (!samplerBuilder.build(texture->_sampler, &result)) {

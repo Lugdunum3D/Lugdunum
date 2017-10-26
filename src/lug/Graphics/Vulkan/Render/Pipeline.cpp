@@ -307,6 +307,33 @@ bool Pipeline::init() {
                 bindings.push_back(std::move(textureBinding));
             }
 
+            if (extraPart.prefilteredMapInfo) {
+                // BRDF LUT
+                {
+                    const VkDescriptorSetLayoutBinding textureBinding = {
+                        /* textureBinding.binding */ binding++,
+                        /* textureBinding.descriptorType */ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        /* textureBinding.descriptorCount */ 1,
+                        /* textureBinding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
+                        /* textureBinding.pImmutableSamplers */ nullptr
+                    };
+
+                    bindings.push_back(std::move(textureBinding));
+                }
+
+                // Prefiltered Map
+                {
+                    const VkDescriptorSetLayoutBinding textureBinding = {
+                        /* textureBinding.binding */ binding++,
+                        /* textureBinding.descriptorType */ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        /* textureBinding.descriptorCount */ 1,
+                        /* textureBinding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
+                        /* textureBinding.pImmutableSamplers */ nullptr
+                    };
+
+                    bindings.push_back(std::move(textureBinding));
+                }
+            }
 
             if (bindings.size() > 0) {
                 descriptorSetLayouts.resize(4);

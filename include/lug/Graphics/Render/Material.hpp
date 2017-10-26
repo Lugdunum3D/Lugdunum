@@ -59,6 +59,7 @@ public:
 
     // TODO: Setters which call ::lug::Graphics::Render::DirtyObject::setDirty()
     void setIrradianceMap(const Resource::SharedPtr<SkyBox> irradianceMap);
+    void setPrefilteredMap(const Resource::SharedPtr<SkyBox> prefilteredMap);
 
     const Constants& getConstants() const;
 
@@ -68,6 +69,7 @@ public:
     const TextureInfo& getOcclusionTexture() const;
     const TextureInfo& getEmissiveTexture() const;
     const Resource::SharedPtr<SkyBox> getIrradianceMap() const;
+    const Resource::SharedPtr<SkyBox> getPrefilteredMap() const;
 
 protected:
     Constants _constants;
@@ -77,6 +79,7 @@ protected:
     TextureInfo _occlusionTexture;
     TextureInfo _emissiveTexture;
     Resource::SharedPtr<SkyBox> _irradianceMap;
+    Resource::SharedPtr<SkyBox> _prefilteredMap;
 };
 
 #include <lug/Graphics/Render/Material.inl>

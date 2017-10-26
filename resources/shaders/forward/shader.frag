@@ -107,7 +107,10 @@ layout (set = 3, binding = TEXTURE_EMISSIVE_BINDING) uniform sampler2D textureEm
 #if TEXTURE_IRRADIANCE_MAP
 layout (set = 3, binding = TEXTURE_IRRADIANCE_MAP_BINDING) uniform samplerCube textureIrradianceMap;
 #endif
-
+#if TEXTURE_PREFILTERED_MAP
+layout (set = 3, binding = TEXTURE_BRDF_LUT_BINDING) uniform sampler2D textureBrdfLut;
+layout (set = 3, binding = TEXTURE_PREFILTERED_MAP_BINDING) uniform samplerCube texturePrefilteredMap;
+#endif
 
 layout (location = IN_FREE_LOCATION) in vec3 inCameraPositionWorldSpace;
 
@@ -318,8 +321,24 @@ void main() {
         const vec3 FRoughness = fresnelSchlickRoughness(NdotV, F0, roughness);
         const vec3 kDRoughness = (vec3(1.0) - FRoughness) * (1.0 - metallic);
 
-        // Calculate the ambient part of the IBL
-        ambient = (kDRoughness * diffuse /*+ specular*/);
+        // Calculate the ambient part of the irradiance
+        ambient += (kDRoughness * diffuse);
+    }
+    #endif
+
+    #if TEXTURE_PREFILTERED_MAP
+    {
+        const vec3 VreflN = reflect(-viewDirection, normalWorldSpace);
+
+        const vec2 brdf = texture(textureBrdfLut, vec2(NdotV, roughness)).xy;
+
+        // TODO: Put that in a push const
+        const float MAX_REFLECTION_LOD = 9.0f;
+        const vec3 reflection = textureLod(texturePrefilteredMap, VreflN, roughness * MAX_REFLECTION_LOD).rgb;
+
+        const vec3 FRoughness = fresnelSchlickRoughness(NdotV, F0, roughness);
+
+        ambient += reflection * (FRoughness * brdf.x + brdf.y);
     }
     #endif
 

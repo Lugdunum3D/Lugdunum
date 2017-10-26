@@ -3,6 +3,11 @@ inline void Material::setIrradianceMap(const Resource::SharedPtr<SkyBox> irradia
     DirtyObject::setDirty(true);
 }
 
+inline void Material::setPrefilteredMap(const Resource::SharedPtr<SkyBox> prefilteredMap) {
+    _prefilteredMap = prefilteredMap;
+    DirtyObject::setDirty(true);
+}
+
 inline const Material::Constants& Material::getConstants() const {
     return _constants;
 }
@@ -29,4 +34,8 @@ inline const Material::TextureInfo& Material::getEmissiveTexture() const {
 
 inline const Resource::SharedPtr<SkyBox> Material::getIrradianceMap() const {
     return _irradianceMap;
+}
+
+inline const Resource::SharedPtr<SkyBox> Material::getPrefilteredMap() const {
+    return _prefilteredMap;
 }

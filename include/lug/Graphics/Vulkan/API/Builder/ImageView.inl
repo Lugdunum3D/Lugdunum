@@ -13,3 +13,7 @@ inline void ImageView::setAspectFlags(VkImageAspectFlags aspectFlags) {
 inline void ImageView::setLayerCount(uint32_t layerCount) {
     _layerCount = layerCount;
 }
+
+inline void ImageView::setLevelCount(uint32_t levelCount) {
+    _levelCount = levelCount;
+}

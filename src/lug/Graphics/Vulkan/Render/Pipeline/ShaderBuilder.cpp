@@ -114,6 +114,7 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string
         // Indirect lightning part
         {
             options.AddMacroDefinition("TEXTURE_IRRADIANCE_MAP", extraPart.irradianceMapInfo ? "1" : "0");
+            options.AddMacroDefinition("TEXTURE_PREFILTERED_MAP", extraPart.prefilteredMapInfo ? "1" : "0");
         }
 
         // Set location
@@ -161,6 +162,11 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string
 
             if (extraPart.irradianceMapInfo) {
                 options.AddMacroDefinition("TEXTURE_IRRADIANCE_MAP_BINDING", std::to_string(binding++));
+            }
+
+            if (extraPart.prefilteredMapInfo) {
+                options.AddMacroDefinition("TEXTURE_BRDF_LUT_BINDING", std::to_string(binding++));
+                options.AddMacroDefinition("TEXTURE_PREFILTERED_MAP_BINDING", std::to_string(binding++));
             }
         }
     }
