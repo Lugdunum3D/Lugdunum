@@ -26,7 +26,12 @@ void Camera::update(const Renderer& renderer, const ::lug::Graphics::Render::Vie
 }
 
 void Camera::updateView() {
-    _viewMatrix = _parent->getTransform().inverse();
+    if (_parent) {
+        _viewMatrix = _parent->getTransform().inverse();
+    }
+    else {
+        _viewMatrix = Math::Mat4x4f::identity();
+    }
     _needUpdateView = false;
 }
 
