@@ -106,8 +106,6 @@ private:
 
     lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> _fontTexture;
 
-    API::DescriptorPool _descriptorPool;
-
     API::PipelineLayout _pipelineLayout;
     API::GraphicsPipeline _pipeline;
 
