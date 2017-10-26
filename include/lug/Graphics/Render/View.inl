@@ -21,12 +21,20 @@ inline void View::attachCamera(Resource::SharedPtr<Camera::Camera> camera) {
 
     _camera = std::move(camera);
     _camera->setRenderView(this);
+    _dirty = true;
 }
 
 inline Resource::SharedPtr<Camera::Camera> View::getCamera() const {
     return _camera;
 }
 
+inline void View::isDirty(bool dirty) {
+    _dirty = dirty;
+}
+
+inline bool View::isDirty() const {
+    return _dirty;
+}
 
 inline float View::Viewport::getRatio() const {
     return extent.width / extent.height;
