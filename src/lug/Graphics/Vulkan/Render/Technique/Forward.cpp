@@ -104,8 +104,9 @@ bool Forward::render(
         beginRenderPass.renderArea.offset = {static_cast<int32_t>(viewport.offset.x), static_cast<int32_t>(viewport.offset.y)};
         beginRenderPass.renderArea.extent = {static_cast<uint32_t>(viewport.extent.width), static_cast<uint32_t>(viewport.extent.height)};
 
+        const auto& clearColor = _renderView.getClearColor();
         beginRenderPass.clearValues.resize(2);
-        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        beginRenderPass.clearValues[0].color = {{clearColor.r(), clearColor.g(), clearColor.b(), 1.0f}};
         beginRenderPass.clearValues[1].depthStencil = {1.0f, 0};
 
         frameData.renderCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);

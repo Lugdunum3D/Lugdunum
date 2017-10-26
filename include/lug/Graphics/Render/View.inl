@@ -14,6 +14,14 @@ inline const View::Scissor& View::getScissor() const {
     return _scissor;
 }
 
+inline const Math::Vec3f& View::getClearColor() const {
+    return _clearColor;
+}
+
+inline void View::setClearColor(const Math::Vec3f& color) {
+    _clearColor = color;
+}
+
 inline void View::attachCamera(Resource::SharedPtr<Camera::Camera> camera) {
     if (_camera) {
         _camera->setRenderView(nullptr);
