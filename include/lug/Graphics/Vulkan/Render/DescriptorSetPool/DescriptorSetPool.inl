@@ -1,9 +1,15 @@
 template <size_t maxSets>
-inline DescriptorSetPool<maxSets>::DescriptorSetPool(Renderer& renderer) : _renderer(renderer) {}
+inline DescriptorSetPool<maxSets>::DescriptorSetPool(Renderer& renderer) : _renderer(renderer) {
+    ++poolCount;
+}
 
 template <size_t maxSets>
 inline DescriptorSetPool<maxSets>::~DescriptorSetPool() {
-    descriptorPool.destroy();
+    --poolCount;
+
+    if (poolCount == 0) {
+        descriptorPool.destroy();
+    }
 }
 
 template <size_t maxSets>
