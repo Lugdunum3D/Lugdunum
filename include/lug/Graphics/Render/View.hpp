@@ -75,6 +75,9 @@ public:
     const Viewport& getViewport() const;
     const Scissor& getScissor() const;
 
+    const Math::Vec3f& getClearColor() const;
+    void setClearColor(const Math::Vec3f& color);
+
     void attachCamera(Resource::SharedPtr<Camera::Camera> camera);
     Resource::SharedPtr<Camera::Camera> getCamera() const;
 
@@ -89,6 +92,7 @@ protected:
 
     Viewport _viewport{};
     Scissor _scissor{};
+    Math::Vec3f _clearColor{0.0f, 0.0f, 0.0f};
     Resource::SharedPtr<Camera::Camera> _camera{nullptr};
 };
 
