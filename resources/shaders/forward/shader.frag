@@ -152,6 +152,22 @@ float GeometrySchlickGGX(float NdotV, float NdotL, float roughness) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// TONE MAPPING HELPER
+//////////////////////////////////////////////////////////////////////////////
+
+// See http://filmicworlds.com/blog/filmic-tonemapping-operators/
+vec3 Uncharted2Tonemap(vec3 x) {
+    const float A = 0.15f;
+    const float B = 0.50f;
+    const float C = 0.10f;
+    const float D = 0.20f;
+    const float E = 0.02f;
+    const float F = 0.30f;
+
+    return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // MAIN BLOCK
 //////////////////////////////////////////////////////////////////////////////
 
@@ -362,12 +378,14 @@ void main() {
     vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo;
 
     // Tone mapping
-    color = color / (color + vec3(1.0));
+    // TODO: Replace 4.5f by an exposure argument
+    color = Uncharted2Tonemap(color * 4.5f) * (1.0f / Uncharted2Tonemap(vec3(11.2f)));
 
     color += emissive;
 
     // Gamma correction
-    color = pow(color, vec3(1.0 / 2.2));
+    // TODO: Replace 2.2f by a gamma argument
+    color = pow(color, vec3(1.0f / 2.2f));
 
     // Final output
     outColor = vec4(color, 1.0);
