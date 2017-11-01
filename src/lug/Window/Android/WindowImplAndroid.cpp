@@ -69,12 +69,11 @@ int32_t WindowImpl::HandleInput(lug::Window::Event& event, AInputEvent* androidE
         event.touchScreen.tap= false;
       }
 
-      if (pinchState & (ndk_helper::GESTURE_STATE_START || ndk_helper::GESTURE_STATE_MOVE)) {
+      if ((pinchState == ndk_helper::GESTURE_STATE_START) || (pinchState ==  ndk_helper::GESTURE_STATE_MOVE)) {
         event.touchScreen.pinch = true;
         pinch_detector_.GetPointers(event.touchScreen.coordinates[0], event.touchScreen.coordinates[1]);
-      } else if (pinchState & ndk_helper::GESTURE_STATE_END) {
+      } else {
         event.touchScreen.pinch = false;
-
       }
     }
     return 1;
