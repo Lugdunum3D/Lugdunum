@@ -43,6 +43,8 @@ set(SHADERS
     filtercube.vert
     irradiance.frag
     prefiltered.frag
+    genbrdflut.vert
+    genbrdflut.frag
 )
 
 set(LUG_RESOURCES
@@ -53,7 +55,6 @@ set(LUG_RESOURCES
     models/DamagedHelmet/textures/Default_metallic_roughness.jpg
     models/DamagedHelmet/textures/Default_emissive.jpg
     models/DamagedHelmet/textures/Default_normal.jpg
-    textures/brdfLut.png
     textures/skybox/back.jpg
     textures/skybox/bottom.jpg
     textures/skybox/front.jpg

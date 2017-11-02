@@ -1,7 +1,10 @@
 #include <lug/Graphics/Vulkan/Builder/SkyBox.hpp>
 
 #include <lug/Graphics/Builder/Mesh.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/DescriptorSetLayout.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Fence.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/GraphicsPipeline.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
@@ -10,6 +13,7 @@
 #include <lug/Graphics/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Render/SkyBox.hpp>
+#include <lug/Graphics/Vulkan/Render/Texture.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -545,6 +549,127 @@ static bool initPrefilteredMapPipeline(Renderer& renderer, API::GraphicsPipeline
     return true;
 }
 
+static bool initBrdfLutPipeline(Renderer& renderer, API::GraphicsPipeline& brdfLutPipeline) {
+    API::Builder::GraphicsPipeline graphicsPipelineBuilder(renderer.getDevice());
+
+    // Set shaders
+    {
+        if (!graphicsPipelineBuilder.setShaderFromFile(VK_SHADER_STAGE_VERTEX_BIT, "main", renderer.getInfo().shadersRoot + "genbrdflut.vert.spv")
+            || !graphicsPipelineBuilder.setShaderFromFile(VK_SHADER_STAGE_FRAGMENT_BIT, "main", renderer.getInfo().shadersRoot + "genbrdflut.frag.spv")) {
+            LUG_LOG.error("initPipeline: Can't create skybox shader");
+            return false;
+        }
+    }
+
+    // Set input assembly state
+    graphicsPipelineBuilder.setInputAssemblyInfo(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, false);
+
+    // Set viewport state
+    const VkViewport viewport{
+        /* viewport.x */ 0.0f,
+        /* viewport.y */ 0.0f,
+        /* viewport.width */ 0.0f,
+        /* viewport.height */ 0.0f,
+        /* viewport.minDepth */ 0.0f,
+        /* viewport.maxDepth */ 1.0f,
+    };
+
+    const VkRect2D scissor{
+        /* scissor.offset */ {0, 0},
+        /* scissor.extent */ {0, 0}
+    };
+
+    auto viewportState = graphicsPipelineBuilder.getViewportState();
+    viewportState.addViewport(viewport);
+    viewportState.addScissor(scissor);
+
+    // Disable the culling
+    auto rasterizationState = graphicsPipelineBuilder.getRasterizationState();
+    rasterizationState.setCullMode(VK_CULL_MODE_NONE);
+
+    // Set color blend state
+    const VkPipelineColorBlendAttachmentState colorBlendAttachment{
+        /* colorBlendAttachment.blendEnable */ VK_TRUE,
+        /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_ONE,
+        /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
+        /* colorBlendAttachment.colorBlendOp */ VK_BLEND_OP_ADD,
+        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
+        /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
+        /* colorBlendAttachment.alphaBlendOp */ VK_BLEND_OP_ADD,
+        /* colorBlendAttachment.colorWriteMask */ VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
+    };
+
+    auto colorBlendState = graphicsPipelineBuilder.getColorBlendState();
+    colorBlendState.addAttachment(colorBlendAttachment);
+
+    // Set dynamic states
+    graphicsPipelineBuilder.setDynamicStates({
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR
+    });
+
+    // Set pipeline layout
+    {
+        API::PipelineLayout pipelineLayout{};
+        API::Builder::PipelineLayout pipelineLayoutBuilder(renderer.getDevice());
+
+        VkResult result{VK_SUCCESS};
+        if (!pipelineLayoutBuilder.build(pipelineLayout, &result)) {
+            LUG_LOG.error("initPipeline: Can't create pipeline layout: {}", result);
+            return false;
+        }
+
+        graphicsPipelineBuilder.setPipelineLayout(std::move(pipelineLayout));
+    }
+
+    // Set render pass
+    {
+        API::Builder::RenderPass renderPassBuilder(renderer.getDevice());
+
+        const VkAttachmentDescription colorAttachment{
+            /* colorAttachment.flags */ 0,
+            /* colorAttachment.format */ VK_FORMAT_R8G8B8A8_UNORM, // TODO: Set the format otherwise
+            /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
+            /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
+            /* colorAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            /* colorAttachment.stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            /* colorAttachment.initialLayout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            /* colorAttachment.finalLayout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+        };
+
+        auto colorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
+
+        const API::Builder::RenderPass::SubpassDescription subpassDescription{
+            /* subpassDescription.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+            /* subpassDescription.inputAttachments */ {},
+            /* subpassDescription.colorAttachments */ {{colorAttachmentIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}},
+            /* subpassDescription.resolveAttachments */ {},
+            /* subpassDescription.depthStencilAttachment */ {},
+            /* subpassDescription.preserveAttachments */ {},
+        };
+
+        renderPassBuilder.addSubpass(subpassDescription);
+
+        VkResult result{VK_SUCCESS};
+        API::RenderPass renderPass;
+        if (!renderPassBuilder.build(renderPass, &result)) {
+            LUG_LOG.error("initPipeline: Can't create render pass: {}", result);
+            return false;
+        }
+
+        graphicsPipelineBuilder.setRenderPass(std::move(renderPass), 0);
+    }
+
+    VkResult result{VK_SUCCESS};
+    if (!graphicsPipelineBuilder.build(brdfLutPipeline, &result)) {
+        LUG_LOG.error("initPipeline: Can't create pipeline: {}", result);
+        return false;
+    }
+
+    return true;
+}
+
 static bool initMesh(Renderer& renderer, lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh>& skyBoxMesh) {
     const std::vector<lug::Math::Vec3f> positions = {
         // Back
@@ -644,20 +769,205 @@ static bool initMesh(Renderer& renderer, lug::Graphics::Resource::SharedPtr<lug:
     return true;
 }
 
-static bool initBrdfLut(Renderer& renderer, lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture>& brdfLut) {
-    // TODO: Really generate it
+static bool initBrdfLut(Renderer& renderer, API::GraphicsPipeline& brdfLutPipeline, lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture>& brdfLut) {
+    constexpr uint32_t brdfLutSize = 512;
+
+     Vulkan::Renderer& vkRenderer = static_cast<Vulkan::Renderer&>(renderer);
+
+    // Create the texture
+    // TODO: Create it with VK_FORMAT_R16G16_FLOAT
+    // TODO: Set sampler borderColor to VK_BORDER_COOLOR_FLOAT_OPAQUE_WHITE
     lug::Graphics::Builder::Texture textureBuilder(renderer);
 
-    if (!textureBuilder.addLayer("textures/brdfLut.png")) {
-        LUG_LOG.error("Application: Can't load the brdf lut texture");
+    textureBuilder.setMagFilter(lug::Graphics::Render::Texture::Filter::Linear);
+    textureBuilder.setMinFilter(lug::Graphics::Render::Texture::Filter::Linear);
+
+    if (!textureBuilder.addLayer(brdfLutSize, brdfLutSize)) {
+        LUG_LOG.error("Application: Can't create the brdf lut texture layer");
         return false;
     }
 
     brdfLut = textureBuilder.build();
     if (!brdfLut) {
-        LUG_LOG.error("Application: Can't create the metallic roughness texture");
+        LUG_LOG.error("Application: Can't create the brdf lut texture");
         return false;
     }
+
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture> vKBrdfLut = Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(brdfLut);
+
+    // Create Framebuffer for brdf lut generation
+    API::CommandPool commandPool;
+    API::CommandBuffer cmdBuffer;
+    API::Framebuffer framebuffer;
+    API::Fence fence;
+    const API::Queue* graphicsQueue = nullptr;
+    VkResult result{VK_SUCCESS};
+    {
+        // Graphics queue
+        graphicsQueue = vkRenderer.getDevice().getQueue("queue_graphics");
+        if (!graphicsQueue) {
+            LUG_LOG.error("Skybox::initBrdfLut: Can't find queue with name queue_graphics");
+            return false;
+        }
+
+        // Command pool
+        API::Builder::CommandPool commandPoolBuilder(vkRenderer.getDevice(), *graphicsQueue->getQueueFamily());
+        if (!commandPoolBuilder.build(commandPool, &result)) {
+            LUG_LOG.error("Skybox::initBrdfLut: Can't create the graphics command pool: {}", result);
+            return false;
+        }
+
+        // Command buffer
+        API::Builder::CommandBuffer commandBufferBuilder(vkRenderer.getDevice(), commandPool);
+        commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
+        // Create the render command buffer
+        if (!commandBufferBuilder.build(cmdBuffer, &result)) {
+            LUG_LOG.error("Skybox::initBrdfLut: Can't create the command buffer: {}", result);
+            return false;
+        }
+
+        // Fence
+        {
+            API::Builder::Fence fenceBuilder(vkRenderer.getDevice());
+
+            if (!fenceBuilder.build(fence, &result)) {
+                LUG_LOG.error("Skybox::initBrdfLut: Can't create render fence: {}", result);
+                return false;
+            }
+        }
+
+        // Create framebuffer
+        {
+            API::Builder::Framebuffer framebufferBuilder(vkRenderer.getDevice());
+
+            const API::RenderPass* renderPass = brdfLutPipeline.getRenderPass();
+
+            framebufferBuilder.setRenderPass(renderPass);
+            framebufferBuilder.addAttachment(&vKBrdfLut->getImageView());
+            framebufferBuilder.setWidth(brdfLutSize);
+            framebufferBuilder.setHeight(brdfLutSize);
+
+            if (!framebufferBuilder.build(framebuffer, &result)) {
+                LUG_LOG.error("tFramebuffers: Can't create framebuffer: {}", result);
+                return false;
+            }
+        }
+    }
+
+    // Generate the brdf lut
+    {
+        if (!cmdBuffer.begin()) {
+            return false;
+        }
+
+        cmdBuffer.bindPipeline(brdfLutPipeline);
+
+        // Change texture image layout to VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL for render
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &vKBrdfLut->getImage();
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier);
+        }
+
+        // Begin of the render pass
+        {
+            // All the pipelines have the same renderPass
+            const API::RenderPass* renderPass = brdfLutPipeline.getRenderPass();
+
+            API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
+                /* beginRenderPass.framebuffer  */ framebuffer,
+                /* beginRenderPass.renderArea   */ {},
+                /* beginRenderPass.clearValues  */ {}
+            };
+
+            beginRenderPass.renderArea.offset = {0, 0};
+            beginRenderPass.renderArea.extent = {brdfLutSize, brdfLutSize};
+
+            beginRenderPass.clearValues.resize(2);
+            beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+            beginRenderPass.clearValues[1].depthStencil = {1.0f, 0};
+
+            cmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
+
+            const VkViewport vkViewport{
+                /* vkViewport.x         */ 0.0f,
+                /* vkViewport.y         */ 0.0f,
+                /* vkViewport.width     */ static_cast<float>(brdfLutSize),
+                /* vkViewport.height    */ static_cast<float>(brdfLutSize),
+                /* vkViewport.minDepth  */ 0.0f,
+                /* vkViewport.maxDepth  */ 1.0f,
+            };
+
+            const VkRect2D scissor{
+                /* scissor.offset */ {
+                    0,
+                    0
+                },
+                /* scissor.extent */ {
+                   static_cast<uint32_t>(brdfLutSize),
+                   static_cast<uint32_t>(brdfLutSize)
+                }
+            };
+
+            cmdBuffer.setViewport({vkViewport});
+            cmdBuffer.setScissor({scissor});
+        }
+
+        cmdBuffer.draw({
+            /* vertexCount */ 3,
+            /* instanceCount */ 1,
+            /* firstVertex */ 0,
+            /* firstInstance */ 0
+        });
+
+        // End of the render pass
+        cmdBuffer.endRenderPass();
+
+        // Change texture layout to VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier;
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &vKBrdfLut->getImage();
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier);
+        }
+
+        if (!cmdBuffer.end()) {
+            return false;
+        }
+    }
+
+    if (!graphicsQueue->submit(
+        cmdBuffer,
+        {},
+        {},
+        {},
+        static_cast<VkFence>(fence)
+    )) {
+        LUG_LOG.error("Skybox::initBrdfLut: Can't submit work to graphics queue: {}", result);
+        return false;
+    }
+
+    if (!fence.wait() || !graphicsQueue->waitIdle()) {
+        LUG_LOG.error("Skybox::initBrdfLut:: Can't wait fence");
+        return false;
+    }
+
+    cmdBuffer.destroy();
+    commandPool.destroy();
+    framebuffer.destroy();
+    fence.destroy();
 
     return true;
 }
@@ -700,7 +1010,8 @@ Resource::SharedPtr<::lug::Graphics::Render::SkyBox> build(const ::lug::Graphics
         if (!initSkyBoxPipeline(renderer, Render::SkyBox::_pipeline) ||
             !initIrradianceMapPipeline(renderer, Render::SkyBox::_irradianceMapPipeline) ||
             !initPrefilteredMapPipeline(renderer, Render::SkyBox::_prefilteredMapPipeline) ||
-            !initBrdfLut(renderer, Render::SkyBox::_brdfLut) ||
+            !initBrdfLutPipeline(renderer, Render::SkyBox::_brdfLutPipeline) ||
+            !initBrdfLut(renderer, Render::SkyBox::_brdfLutPipeline, Render::SkyBox::_brdfLut) ||
             !initMesh(renderer, Render::SkyBox::_mesh)) {
             LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build Can't init skybox pipeline/mesh resources");
             return nullptr;

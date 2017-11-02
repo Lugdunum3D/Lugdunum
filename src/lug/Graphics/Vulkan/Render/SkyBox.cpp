@@ -23,6 +23,7 @@ namespace Render {
 API::GraphicsPipeline SkyBox::_pipeline;
 API::GraphicsPipeline SkyBox::_irradianceMapPipeline;
 API::GraphicsPipeline SkyBox::_prefilteredMapPipeline;
+API::GraphicsPipeline SkyBox::_brdfLutPipeline;
 lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> SkyBox::_mesh;
 lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> SkyBox::_brdfLut;
 uint32_t SkyBox::_skyBoxCount{0};
@@ -39,6 +40,7 @@ void SkyBox::destroy() {
         SkyBox::_pipeline.destroy();
         SkyBox::_irradianceMapPipeline.destroy();
         SkyBox::_prefilteredMapPipeline.destroy();
+        SkyBox::_brdfLutPipeline.destroy();
 
         Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture> brdfLut = Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(SkyBox::_brdfLut);
         if (brdfLut) {
