@@ -341,7 +341,7 @@ static bool initIrradianceMapPipeline(Renderer& renderer, API::GraphicsPipeline&
 
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
-            /* colorAttachment.format */ VK_FORMAT_R8G8B8A8_UNORM, // TODO: Set the format otherwise
+            /* colorAttachment.format */ VK_FORMAT_R16G16B16_SFLOAT, // TODO: Set the format otherwise
             /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
             /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
             /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
@@ -510,7 +510,7 @@ static bool initPrefilteredMapPipeline(Renderer& renderer, API::GraphicsPipeline
 
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
-            /* colorAttachment.format */ VK_FORMAT_R8G8B8A8_UNORM, // TODO: Set the format otherwise
+            /* colorAttachment.format */ VK_FORMAT_R16G16B16_SFLOAT, // TODO: Set the format otherwise
             /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
             /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
             /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
@@ -631,7 +631,7 @@ static bool initBrdfLutPipeline(Renderer& renderer, API::GraphicsPipeline& brdfL
 
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
-            /* colorAttachment.format */ VK_FORMAT_R8G8B8A8_UNORM, // TODO: Set the format otherwise
+            /* colorAttachment.format */ VK_FORMAT_R16G16_SFLOAT, // TODO: Set the format otherwise
             /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
             /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
             /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
@@ -778,14 +778,13 @@ static bool initBrdfLut(Renderer& renderer, API::GraphicsPipeline& brdfLutPipeli
      Vulkan::Renderer& vkRenderer = static_cast<Vulkan::Renderer&>(renderer);
 
     // Create the texture
-    // TODO: Create it with VK_FORMAT_R16G16_FLOAT
     // TODO: Set sampler borderColor to VK_BORDER_COOLOR_FLOAT_OPAQUE_WHITE
     lug::Graphics::Builder::Texture textureBuilder(renderer);
 
     textureBuilder.setMagFilter(lug::Graphics::Render::Texture::Filter::Linear);
     textureBuilder.setMinFilter(lug::Graphics::Render::Texture::Filter::Linear);
 
-    if (!textureBuilder.addLayer(brdfLutSize, brdfLutSize)) {
+    if (!textureBuilder.addLayer(brdfLutSize, brdfLutSize, lug::Graphics::Render::Texture::Format::R16G16_SFLOAT)) {
         LUG_LOG.error("Application: Can't create the brdf lut texture layer");
         return false;
     }

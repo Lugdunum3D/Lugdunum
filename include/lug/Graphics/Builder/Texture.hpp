@@ -56,7 +56,7 @@ public:
     void setWrapW(Render::Texture::WrappingMode wrapW);
 
     bool addLayer(const std::string& filename);
-    bool addLayer(uint32_t width, uint32_t height, const unsigned char* data = nullptr);
+    bool addLayer(uint32_t width, uint32_t height, Render::Texture::Format format, const unsigned char* data = nullptr);
 
     Resource::SharedPtr<Render::Texture> build();
 
@@ -69,6 +69,7 @@ protected:
 
     uint32_t _width{0};
     uint32_t _height{0};
+    Render::Texture::Format _format{Render::Texture::Format::Undefined};
 
     uint32_t _mipLevels{1};
 

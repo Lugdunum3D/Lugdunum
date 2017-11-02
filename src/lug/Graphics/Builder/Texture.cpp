@@ -46,6 +46,8 @@ Resource::SharedPtr<Render::Texture> Texture::build() {
         texture->_width = _width;
         texture->_height = _height;
 
+        texture->_format = _format;
+
         texture->_magFilter = _magFilter;
         texture->_minFilter = _minFilter;
         texture->_mipMapFilter = _mipMapFilter;
@@ -56,11 +58,19 @@ Resource::SharedPtr<Render::Texture> Texture::build() {
     return texture;
 }
 
-bool Texture::addLayer(uint32_t width, uint32_t height, const unsigned char* data) {
+bool Texture::addLayer(uint32_t width, uint32_t height, Render::Texture::Format format, const unsigned char* data) {
     if (!_width && !_height) {
         _width = width;
         _height = height;
     } else if (width != _width || height != _height) {
+        return false;
+    }
+
+    if (format == Render::Texture::Format::Undefined) {
+        return false;
+    } else if (_format == Render::Texture::Format::Undefined) {
+        _format = format;
+    } else if (_format != format) {
         return false;
     }
 
@@ -69,13 +79,15 @@ bool Texture::addLayer(uint32_t width, uint32_t height, const unsigned char* dat
         return true;
     }
 
-    unsigned char* newData = new unsigned char[width * height * 4];
+    const size_t sizePixel = Render::Texture::formatToSize(format);
+
+    unsigned char* newData = new unsigned char[width * height * sizePixel];
 
     if (!newData) {
         return false;
 
     }
-    std::memcpy(newData, data, width * height * 4 * sizeof(unsigned char));
+    std::memcpy(newData, data, width * height * sizePixel);
 
     _layers.push_back({newData});
 
@@ -122,7 +134,7 @@ bool Texture::addLayer(const std::string& filename) {
         return false;
     }
 
-    if (!addLayer(texWidth, texHeight, pixels)) {
+    if (!addLayer(texWidth, texHeight, Render::Texture::Format::R8G8B8A8_UNORM, pixels)) {
         stbi_image_free(pixels);
         return false;
     }

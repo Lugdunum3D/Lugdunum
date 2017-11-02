@@ -70,13 +70,13 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
     textureBuilder.setWrapS(getTexture()->getWrapS());
     textureBuilder.setWrapT(getTexture()->getWrapT());
 
-
-    if (!textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)
-        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)
-        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)
-        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)
-        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)
-        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize)) {
+    // TODO: Check which format to use
+    if (!textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)) {
         LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build: Can't create irradiance map texture layers");
         return nullptr;
     }
@@ -199,7 +199,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
 
                 imageBuilder.setExtent(extent);
                 imageBuilder.setUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-                imageBuilder.setPreferedFormats({ VK_FORMAT_R8G8B8A8_UNORM }); // TODO: Set the format otherwise
+                imageBuilder.setPreferedFormats({ Resource::SharedPtr<Render::Texture>::cast(irradianceMap->_texture)->getImage().getFormat() });
                 imageBuilder.setQueueFamilyIndices({ graphicsQueue->getQueueFamily()->getIdx() });
                 imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
 
@@ -509,12 +509,13 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
     textureBuilder.setWrapS(getTexture()->getWrapS());
     textureBuilder.setWrapT(getTexture()->getWrapT());
 
-    if (!textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize)
-        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize)
-        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize)
-        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize)
-        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize)
-        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize)) {
+    // TODO: Check which format to use
+    if (!textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
+        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
+        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
+        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
+        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
+        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)) {
         LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build: Can't create prefiltered map texture layers");
         return nullptr;
     }
@@ -637,7 +638,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
 
                 imageBuilder.setExtent(extent);
                 imageBuilder.setUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-                imageBuilder.setPreferedFormats({ VK_FORMAT_R8G8B8A8_UNORM }); // TODO: Set the format otherwise
+                imageBuilder.setPreferedFormats({ Resource::SharedPtr<Render::Texture>::cast(prefilteredMap->_texture)->getImage().getFormat() });
                 imageBuilder.setQueueFamilyIndices({ graphicsQueue->getQueueFamily()->getIdx() });
                 imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
 

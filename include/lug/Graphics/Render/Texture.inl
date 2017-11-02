@@ -6,6 +6,10 @@ inline uint32_t Texture::getHeight() const {
     return _height;
 }
 
+inline Render::Texture::Format Texture::getFormat() const {
+    return _format;
+}
+
 inline Render::Texture::Filter Texture::getMagFilter() const {
     return _magFilter;
 }
@@ -24,4 +28,16 @@ inline Render::Texture::WrappingMode Texture::getWrapS() const {
 
 inline Render::Texture::WrappingMode Texture::getWrapT() const {
     return _wrapT;
+}
+
+inline size_t Texture::formatToSize(Render::Texture::Format format) {
+    switch(format) {
+        case Texture::Format::R8G8B8A8_UNORM:
+        case Texture::Format::R16G16_SFLOAT:
+            return 4;
+        case Texture::Format::R16G16B16_SFLOAT:
+            return 6;
+        default:
+            return 0;
+    };
 }

@@ -197,7 +197,7 @@ bool Gui::initFontsTexture() {
     {
         lug::Graphics::Builder::Texture textureBuilder(_renderer);
 
-        if (!textureBuilder.addLayer(texWidth, texHeight, fontData)) {
+        if (!textureBuilder.addLayer(texWidth, texHeight, Render::Texture::Format::R8G8B8A8_UNORM, fontData)) {
             LUG_LOG.error("Gui::initFontsTexture: Can't load fonts texture");
             return false;
         }

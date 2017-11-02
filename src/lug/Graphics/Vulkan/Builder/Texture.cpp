@@ -52,9 +52,25 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
     {
         API::Builder::Image imageBuilder(device);
 
+        const VkFormat format = [](Render::Texture::Format format) {
+            switch(format) {
+                case Render::Texture::Format::R8G8B8A8_UNORM:
+                    return VK_FORMAT_R8G8B8A8_UNORM;
+
+                case Render::Texture::Format::R16G16_SFLOAT:
+                    return VK_FORMAT_R16G16_SFLOAT;
+
+                case Render::Texture::Format::R16G16B16_SFLOAT:
+                    return VK_FORMAT_R16G16B16_SFLOAT;
+
+                default:
+                    return VK_FORMAT_UNDEFINED;
+            };
+        }(builder._format);
+
         // TODO: Take the usage from the builder (TRANSFER_DST only if we want to copy image to it, etc)
         imageBuilder.setUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-        imageBuilder.setPreferedFormats({VK_FORMAT_R8G8B8A8_UNORM});
+        imageBuilder.setPreferedFormats({format});
         imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
         imageBuilder.setQueueFamilyIndices({ transferQueue->getQueueFamily()->getIdx() });
         imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
