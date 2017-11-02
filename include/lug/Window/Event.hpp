@@ -57,7 +57,15 @@ struct LUG_WINDOW_API GamePadEvent {
 
 struct LUG_WINDOW_API TouchScreenEvent {
    lug::Math::Vec2f coordinates[2]; ///< The Touch coordinate
-   
+   enum class LUG_WINDOW_API GestureState : uint32_t  {
+      None = 0,  
+      Start = 1,
+      Move = 2,
+      End = 4,
+      Action = Start | End,
+   };
+
+   GestureState state;
    bool drag;
    bool tap;       ///< True if a drag event occured, False otherwise
    bool pinch;      ///< True if a pinch event occured, False otherwise

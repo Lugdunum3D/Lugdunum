@@ -44,7 +44,8 @@ float WindowImpl::MapCenteredAxis(AInputEvent* event, int32_t axis) {
 }
 
 int32_t WindowImpl::HandleInput(lug::Window::Event& event, AInputEvent* androidEvent) {
-  // Engine* eng = (Engine*)app->userData;
+    //TODO : refactor
+    // Engine* eng = (Engine*)app->userData;
   if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_MOTION) {
     event.type = Event::Type::TouchScreenChange;
     ndk_helper::GESTURE_STATE doubleTapState = doubletap_detector_.Detect(androidEvent);
@@ -53,29 +54,33 @@ int32_t WindowImpl::HandleInput(lug::Window::Event& event, AInputEvent* androidE
 
     // Double tap detector has a priority over other detectors
     if (doubleTapState == ndk_helper::GESTURE_STATE_ACTION) {
-        event.touchScreen.doubleTap = true;
-    } else {
+      drag_detector_.GetPointer(event.touchScreen.coordinates[0]);
+        event.touchScreen.state = static_cast<lug::Window::TouchScreenEvent::GestureState>(doubleTapState);
+        event.touchScreen.doubleTap = !event.touchScreen.doubleTap;
+    } else if (dragState == ndk_helper::GESTURE_STATE_ACTION || dragState == ndk_helper::GESTURE_STATE_MOVE) {
       // Handle drag state
+      event.touchScreen.state = static_cast<lug::Window::TouchScreenEvent::GestureState>(dragState);
+      drag_detector_.GetPointer(event.touchScreen.coordinates[0]);
       if (dragState & ndk_helper::GESTURE_STATE_START) {
         event.touchScreen.drag = false;
         event.touchScreen.tap= true;
-        drag_detector_.GetPointer(event.touchScreen.coordinates[0]);
-      } else if (dragState & ndk_helper::GESTURE_STATE_MOVE) {
+    } else if (dragState & ndk_helper::GESTURE_STATE_MOVE) {
         event.touchScreen.drag = true;
         event.touchScreen.tap= false;
-        drag_detector_.GetPointer(event.touchScreen.coordinates[0]);
       } else if (dragState & ndk_helper::GESTURE_STATE_END) {
         event.touchScreen.drag = false;
         event.touchScreen.tap= false;
       }
-
-      if ((pinchState == ndk_helper::GESTURE_STATE_START) || (pinchState ==  ndk_helper::GESTURE_STATE_MOVE)) {
-        event.touchScreen.pinch = true;
+    } else  if (pinchState == ndk_helper::GESTURE_STATE_ACTION || pinchState == ndk_helper::GESTURE_STATE_MOVE) {
+        event.touchScreen.state = static_cast<lug::Window::TouchScreenEvent::GestureState>(pinchState);
         pinch_detector_.GetPointers(event.touchScreen.coordinates[0], event.touchScreen.coordinates[1]);
-      } else {
+        if (pinchState & ndk_helper::GESTURE_STATE_START) {
+        event.touchScreen.pinch = true;
+        } else if (pinchState & ndk_helper::GESTURE_STATE_END) {
         event.touchScreen.pinch = false;
-      }
-    }
+        }
+
+    } 
     return 1;
   }
   return 0;
