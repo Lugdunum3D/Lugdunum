@@ -109,27 +109,16 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
 
     std::vector<VkSemaphore> imageReadyVkSemaphores(frameData.imageReadySemaphores.size());
 
-    uint32_t i = 0;
-    uint32_t j = 0;
-    for (auto& renderView: _renderViews) {
-        View* renderView_ = static_cast<View*>(renderView.get());
-
-        // Render views with no camera don't signal the semaphore as they don't draw
-        if (renderView_->getCamera()) {
-            imageReadyVkSemaphores[i++] = static_cast<VkSemaphore>(frameData.imageReadySemaphores[j]);
-        }
-
-        ++j;
+    for (unsigned i = 0; i < frameData.imageReadySemaphores.size(); ++i) {
+        imageReadyVkSemaphores[i] = static_cast<VkSemaphore>(frameData.imageReadySemaphores[i]);
     }
-
-    imageReadyVkSemaphores.resize(i);
 
     return _presentQueue->submit(
         cmdBuffer,
         imageReadyVkSemaphores,
         {static_cast<VkSemaphore>(acquireImageData->completeSemaphore)},
         {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT}
-        );
+    );
 }
 
 bool Window::endFrame() {
@@ -147,13 +136,13 @@ bool Window::endFrame() {
 
         // Render views with no camera don't signal the semaphore as they don't draw
         if (renderView_->getCamera()) {
-            waitSemaphores[i++] = static_cast<VkSemaphore>(renderView_->getDrawCompleteSemaphore(_currentImageIndex));
+            waitSemaphores[i] = static_cast<VkSemaphore>(renderView_->getDrawCompleteSemaphore(_currentImageIndex));
+        } else {
+            waitSemaphores[i] = static_cast<VkSemaphore>(frameData.imageReadySemaphores[i]);
         }
-    }
 
-    // Update wait semaphores vector size,
-    // it could be != from _renderViews.size(), if some render views has no camera
-    waitSemaphores.resize(i);
+        ++i;
+    }
 
     if (_isGuiInitialized) {
         uiResult = _guiInstance.endFrame(waitSemaphores, _currentImageIndex);
