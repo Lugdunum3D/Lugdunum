@@ -340,6 +340,7 @@ bool Window::initSwapchain() {
 
     API::Builder::Swapchain swapchainBuilder(_renderer.getDevice());
     swapchainBuilder.setPreferences(_renderer.getPreferences().swapchain);
+    swapchainBuilder.setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
     swapchainBuilder.setImageColorSpace(VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
     swapchainBuilder.setMinImageCount(3);
 
@@ -474,58 +475,106 @@ bool Window::initFramesData() {
     return buildCommandBuffers();
 }
 
-bool Window::buildCommandBuffers() {
+bool Window::buildBeginCommandBuffer() {
     uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
 
     for (uint32_t i = 0; i < frameDataSize; ++i) {
-        // Build command buffer image present to color attachment
+        // Build command buffer
+        API::CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[0];
+
+        if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)) {
+            return false;
+        }
+
+        // Presentation to dst optimal
         {
-            API::CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[0];
-
-            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)) {
-                return false;
-            }
-
             API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
             pipelineBarrier.imageMemoryBarriers.resize(1);
             pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+        }
+
+        // Clear the image to black
+        {
+            VkClearColorValue clearColor;
+            std::memset(&clearColor, 0, sizeof(clearColor));
+
+            const VkImageSubresourceRange range{
+                /* range.aspectMask */ VK_IMAGE_ASPECT_COLOR_BIT,
+                /* range.baseMipLevel */ 0,
+                /* range.levelCount */ 1,
+                /* range.baseArrayLayer*/ 0,
+                /* range.layerCount */ 1
+            };
+
+            // TODO: Put this method in CommandBuffer
+            vkCmdClearColorImage(
+                static_cast<VkCommandBuffer>(cmdBuffer),
+                static_cast<VkImage>(_swapchain.getImages()[i]),
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                &clearColor,
+                1,
+                &range
+            );
+        }
+
+        // Dst optimal to color attachment optimal
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
 
             cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-
-            if (!cmdBuffer.end()) {
-                return false;
-            }
         }
 
-        // Build command buffer image color attachment to present
-        {
-            API::CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[1];
-
-            if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)) {
-                return false;
-            }
-
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
-
-            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-
-            if (!cmdBuffer.end()) {
-                return false;
-            }
+        if (!cmdBuffer.end()) {
+            return false;
         }
     }
 
     return true;
+}
+
+bool Window::buildEndCommandBuffer() {
+    uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+
+    for (uint32_t i = 0; i < frameDataSize; ++i) {
+        // Build command buffer image color attachment to present
+        API::CommandBuffer& cmdBuffer = _framesData[i].cmdBuffers[1];
+
+        if (!cmdBuffer.begin(VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT)) {
+            return false;
+        }
+
+        API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+        pipelineBarrier.imageMemoryBarriers.resize(1);
+        pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+        pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
+
+        cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+
+        if (!cmdBuffer.end()) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Window::buildCommandBuffers() {
+    return buildBeginCommandBuffer() && buildEndCommandBuffer();
 }
 
 bool Window::init(Window::InitInfo& initInfo) {
