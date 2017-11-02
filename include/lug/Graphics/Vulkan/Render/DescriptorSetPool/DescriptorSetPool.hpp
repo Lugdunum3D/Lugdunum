@@ -18,8 +18,9 @@ class Renderer;
 namespace Render {
 namespace DescriptorSetPool {
 
-// TODO: Use another method than a global
+// TODO: Use another method than a global (same for reference counting)
 extern API::DescriptorPool descriptorPool;
+extern uint32_t poolCount;
 
 template <size_t maxSets>
 class LUG_GRAPHICS_API DescriptorSetPool {

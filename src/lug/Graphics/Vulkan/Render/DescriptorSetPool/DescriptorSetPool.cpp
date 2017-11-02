@@ -7,6 +7,7 @@ namespace Render {
 namespace DescriptorSetPool {
 
 API::DescriptorPool descriptorPool;
+uint32_t poolCount = 0;
 
 } // DescriptorSetPool
 } // Render

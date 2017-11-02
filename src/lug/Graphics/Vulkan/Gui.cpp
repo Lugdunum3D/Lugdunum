@@ -31,8 +31,6 @@ Gui::~Gui() {
 }
 
 void Gui::destroy() {
-    _descriptorPool.destroy();
-
     _pipeline.destroy();
 
     for (const auto& frameData: _framesData) {
@@ -52,6 +50,11 @@ void Gui::destroy() {
     _framesData.clear();
 
     _texturesDescriptorSetPool.reset();
+
+    if (_fontTexture) {
+        lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(_fontTexture)->destroy();
+        _fontTexture = nullptr;
+    }
 
     _graphicQueueCommandPool.destroy();
     _transferQueueCommandPool.destroy();
@@ -282,30 +285,6 @@ bool Gui::initPipeline() {
 
     std::vector<Vulkan::API::DescriptorSetLayout> descriptorSetLayouts;
     {
-        // creating descriptor pool
-        {
-            API::Builder::DescriptorPool descriptorPoolBuilder(device);
-
-            // Use VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT to individually free descritors sets
-            descriptorPoolBuilder.setFlags(VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT);
-
-            // Only ForwardRenderTechnique has 1 descriptor sets (for lights) and 1 (for the camera)
-            descriptorPoolBuilder.setMaxSets(1);
-
-            VkDescriptorPoolSize poolSize{
-                // Dynamic uniform buffers descriptors (1 for camera and 1 for lights in ForwardRenderTechnique)
-                poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-                poolSize.descriptorCount = 1
-            };
-            descriptorPoolBuilder.setPoolSizes({ poolSize });
-
-            VkResult result{VK_SUCCESS};
-            if (!descriptorPoolBuilder.build(_descriptorPool, &result)) {
-                LUG_LOG.error("Gui::initPipeline: Can't create the descriptor pool: {}", result);
-                return false;
-            }
-        }
-
         // descriptorSetLayout
         {
             API::Builder::DescriptorSetLayout descriptorSetLayoutBuilder(device);
