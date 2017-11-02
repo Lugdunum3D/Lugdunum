@@ -270,7 +270,7 @@ static bool initIrradianceMapPipeline(Renderer& renderer, API::GraphicsPipeline&
         /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
         /* colorBlendAttachment.colorBlendOp */ VK_BLEND_OP_ADD,
-        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
+        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
         /* colorBlendAttachment.alphaBlendOp */ VK_BLEND_OP_ADD,
         /* colorBlendAttachment.colorWriteMask */ VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
@@ -432,7 +432,7 @@ static bool initPrefilteredMapPipeline(Renderer& renderer, API::GraphicsPipeline
         /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
         /* colorBlendAttachment.colorBlendOp */ VK_BLEND_OP_ADD,
-        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
+        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
         /* colorBlendAttachment.alphaBlendOp */ VK_BLEND_OP_ADD,
         /* colorBlendAttachment.colorWriteMask */ VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
@@ -596,7 +596,7 @@ static bool initBrdfLutPipeline(Renderer& renderer, API::GraphicsPipeline& brdfL
         /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
         /* colorBlendAttachment.colorBlendOp */ VK_BLEND_OP_ADD,
-        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
+        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
         /* colorBlendAttachment.alphaBlendOp */ VK_BLEND_OP_ADD,
         /* colorBlendAttachment.colorWriteMask */ VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
@@ -875,6 +875,7 @@ static bool initBrdfLut(Renderer& renderer, API::GraphicsPipeline& brdfLutPipeli
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].image = &vKBrdfLut->getImage();
+            pipelineBarrier.imageMemoryBarriers[0].subresourceRange.layerCount = 1;
 
             cmdBuffer.pipelineBarrier(pipelineBarrier);
         }
@@ -942,6 +943,7 @@ static bool initBrdfLut(Renderer& renderer, API::GraphicsPipeline& brdfLutPipeli
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].image = &vKBrdfLut->getImage();
+            pipelineBarrier.imageMemoryBarriers[0].subresourceRange.layerCount = 1;
 
             cmdBuffer.pipelineBarrier(pipelineBarrier);
         }

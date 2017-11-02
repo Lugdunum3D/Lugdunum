@@ -151,7 +151,7 @@ bool Pipeline::init() {
         /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
         /* colorBlendAttachment.colorBlendOp */ VK_BLEND_OP_ADD,
-        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
+        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
         /* colorBlendAttachment.alphaBlendOp */ VK_BLEND_OP_ADD,
         /* colorBlendAttachment.colorWriteMask */ VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
