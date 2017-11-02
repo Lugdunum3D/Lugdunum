@@ -334,7 +334,11 @@ void main() {
 
         // TODO: Put that in a push const
         const float MAX_REFLECTION_LOD = 9.0f;
-        const vec3 reflection = textureLod(texturePrefilteredMap, VreflN, roughness * MAX_REFLECTION_LOD).rgb;
+        const float lod = roughness * MAX_REFLECTION_LOD;
+
+        const vec3 reflectionFloor = textureLod(texturePrefilteredMap, VreflN, floor(lod)).rgb;
+        const vec3 reflectionCeil = textureLod(texturePrefilteredMap, VreflN, ceil(lod)).rgb;
+        const vec3 reflection = mix(reflectionFloor, reflectionCeil, lod - floor(lod));
 
         const vec3 FRoughness = fresnelSchlickRoughness(NdotV, F0, roughness);
 
