@@ -302,7 +302,7 @@ void main() {
         const vec3 lightDirection = lights[i].type == 1 ? normalize(-lights[i].direction) : normalize(lights[i].position - inPositionWorldSpace);
         const float NdotL = clamp(dot(normalWorldSpace, lightDirection), 0.0, 1.0);
 
-        if (dot(normalWorldSpace, lightDirection) > 0.0) {
+        if (NdotL > 0.0) {
             const vec3 halfViewLightDirection = normalize(viewDirection + lightDirection);
 
             const float NdotV = clamp(dot(normalWorldSpace, viewDirection), 0.0, 1.0);
@@ -320,7 +320,7 @@ void main() {
 
             const vec3 kD = (vec3(1.0) - F) * (1.0 - metallic);
 
-            const float denominator = 4 * NdotV * NdotL;
+            const float denominator = 4 * NdotV * NdotL + 0.00001;
             const vec3 specular = NDF * G * F / denominator;
 
             const vec3 lightFinalColor = (kD * albedo.xyz / PI + specular) * radiance * NdotL;
