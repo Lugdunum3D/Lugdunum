@@ -77,6 +77,9 @@ private:
     bool initPresentQueue();
     bool initSwapchain();
     bool initFramesData();
+
+    bool buildBeginCommandBuffer();
+    bool buildEndCommandBuffer();
     bool buildCommandBuffers();
 
 private:
