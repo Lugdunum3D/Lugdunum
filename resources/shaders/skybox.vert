@@ -20,4 +20,5 @@ void main() {
 
     gl_Position = camera.proj * cameraView * vec4(inPos, 1.0);
     gl_Position.y = -gl_Position.y;
+    gl_Position = gl_Position.xyww;
 }

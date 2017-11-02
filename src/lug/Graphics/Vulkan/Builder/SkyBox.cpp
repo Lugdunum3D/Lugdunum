@@ -79,6 +79,9 @@ static bool initSkyBoxPipeline(Renderer& renderer, API::GraphicsPipeline& skyBox
     auto colorBlendState = graphicsPipelineBuilder.getColorBlendState();
     colorBlendState.addAttachment(colorBlendAttachment);
 
+    auto depthStencilState = graphicsPipelineBuilder.getDepthStencilState();
+    depthStencilState.enableDepthTest(VK_COMPARE_OP_LESS_OR_EQUAL);
+
     // Set dynamic states
     graphicsPipelineBuilder.setDynamicStates({
         VK_DYNAMIC_STATE_VIEWPORT,

@@ -172,57 +172,6 @@ bool Forward::render(
     std::vector<const DescriptorSetPool::DescriptorSet*> materialDescriptorSets;
     std::vector<const DescriptorSetPool::DescriptorSet*> materialTexturesDescriptorSets;
 
-    // Render skybox
-    {
-        Resource::SharedPtr<Render::SkyBox> skyBox = renderQueue.getSkyBox();
-        if (skyBox) {
-            Resource::SharedPtr<Render::Texture> skyBoxTexture =  Resource::SharedPtr<Render::Texture>::cast(skyBox->getTexture());
-            // Get the new (or old) skyBox descriptor set
-            {
-                const DescriptorSetPool::DescriptorSet* skyBoxDescriptorSet = _skyBoxDescriptorSetPool->allocate(skyBoxTexture.get());
-
-                if (!skyBoxDescriptorSet) {
-                    LUG_LOG.error("Forward::render: Can't allocate skyBox descriptor set");
-                    return false;
-                }
-
-                _skyBoxDescriptorSetPool->free(frameData.skyBoxDescriptorSet);
-                frameData.skyBoxDescriptorSet = skyBoxDescriptorSet;
-            }
-
-            // Bind descriptor set of the skybox
-            {
-                const API::CommandBuffer::CmdBindDescriptors skyBoxBind{
-                    /* skyBoxBind.pipelineLayout     */ *SkyBox::getPipeline().getLayout(),
-                    /* skyBoxBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
-                    /* skyBoxBind.firstSet           */ 1,
-                    /* skyBoxBind.descriptorSets     */ {&frameData.skyBoxDescriptorSet->getDescriptorSet()},
-                    /* skyBoxBind.dynamicOffsets     */ {},
-                };
-
-                frameData.renderCmdBuffer.bindDescriptorSets(skyBoxBind);
-            }
-
-            frameData.renderCmdBuffer.bindPipeline(SkyBox::getPipeline());
-
-            auto& primitiveSet = SkyBox::getMesh()->getPrimitiveSets()[0];
-
-            frameData.renderCmdBuffer.bindVertexBuffers(
-                {static_cast<API::Buffer*>(primitiveSet.position->_data)},
-                {0}
-            );
-
-            API::Buffer* indicesBuffer = static_cast<API::Buffer*>(primitiveSet.indices->_data);
-            frameData.renderCmdBuffer.bindIndexBuffer(*indicesBuffer, VK_INDEX_TYPE_UINT16);
-            const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
-                /* cmdDrawIndexed.indexCount    */ primitiveSet.indices->buffer.elementsCount,
-                /* cmdDrawIndexed.instanceCount */ 1,
-            };
-
-            frameData.renderCmdBuffer.drawIndexed(cmdDrawIndexed);
-        }
-    }
-
     // Bind a default pipeline for the rendering
     frameData.renderCmdBuffer.bindPipeline(_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI());
 
@@ -435,6 +384,57 @@ bool Forward::render(
                     }
                 }
             }
+        }
+    }
+
+    // Render skybox
+    {
+        Resource::SharedPtr<Render::SkyBox> skyBox = renderQueue.getSkyBox();
+        if (skyBox) {
+            Resource::SharedPtr<Render::Texture> skyBoxTexture =  Resource::SharedPtr<Render::Texture>::cast(skyBox->getTexture());
+            // Get the new (or old) skyBox descriptor set
+            {
+                const DescriptorSetPool::DescriptorSet* skyBoxDescriptorSet = _skyBoxDescriptorSetPool->allocate(skyBoxTexture.get());
+
+                if (!skyBoxDescriptorSet) {
+                    LUG_LOG.error("Forward::render: Can't allocate skyBox descriptor set");
+                    return false;
+                }
+
+                _skyBoxDescriptorSetPool->free(frameData.skyBoxDescriptorSet);
+                frameData.skyBoxDescriptorSet = skyBoxDescriptorSet;
+            }
+
+            // Bind descriptor set of the skybox
+            {
+                const API::CommandBuffer::CmdBindDescriptors skyBoxBind{
+                    /* skyBoxBind.pipelineLayout     */ *SkyBox::getPipeline().getLayout(),
+                    /* skyBoxBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+                    /* skyBoxBind.firstSet           */ 1,
+                    /* skyBoxBind.descriptorSets     */ {&frameData.skyBoxDescriptorSet->getDescriptorSet()},
+                    /* skyBoxBind.dynamicOffsets     */ {},
+                };
+
+                frameData.renderCmdBuffer.bindDescriptorSets(skyBoxBind);
+            }
+
+            frameData.renderCmdBuffer.bindPipeline(SkyBox::getPipeline());
+
+            auto& primitiveSet = SkyBox::getMesh()->getPrimitiveSets()[0];
+
+            frameData.renderCmdBuffer.bindVertexBuffers(
+                {static_cast<API::Buffer*>(primitiveSet.position->_data)},
+                {0}
+            );
+
+            API::Buffer* indicesBuffer = static_cast<API::Buffer*>(primitiveSet.indices->_data);
+            frameData.renderCmdBuffer.bindIndexBuffer(*indicesBuffer, VK_INDEX_TYPE_UINT16);
+            const API::CommandBuffer::CmdDrawIndexed cmdDrawIndexed {
+                /* cmdDrawIndexed.indexCount    */ primitiveSet.indices->buffer.elementsCount,
+                /* cmdDrawIndexed.instanceCount */ 1,
+            };
+
+            frameData.renderCmdBuffer.drawIndexed(cmdDrawIndexed);
         }
     }
 
