@@ -146,9 +146,11 @@ bool Window::endFrame() {
         View* renderView_ = static_cast<View*>(renderView.get());
 
         // Render views with no camera don't signal the semaphore as they don't draw
-        if (renderView_->getCamera()) {
+        if (!renderView->isDirty() && renderView_->getCamera()) {
             waitSemaphores[i++] = static_cast<VkSemaphore>(renderView_->getDrawCompleteSemaphore(_currentImageIndex));
         }
+
+        renderView->isDirty(false);
     }
 
     // Update wait semaphores vector size,
@@ -193,7 +195,11 @@ bool Window::render() {
     uint32_t i = 0;
 
     for (auto& renderView: _renderViews) {
-        if (!static_cast<View*>(renderView.get())->render(frameData.imageReadySemaphores[i++], _currentImageIndex)) {
+        // Don't render renderView if dirty because imageReadySemaphores[i] is not signaled
+        if (renderView->isDirty()) {
+            continue;
+        }
+        else if (!static_cast<View*>(renderView.get())->render(frameData.imageReadySemaphores[i++], _currentImageIndex)) {
             return false;
         }
     }

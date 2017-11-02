@@ -81,6 +81,9 @@ public:
     void attachCamera(Resource::SharedPtr<Camera::Camera> camera);
     Resource::SharedPtr<Camera::Camera> getCamera() const;
 
+    void isDirty(bool dirty);
+    bool isDirty() const;
+
     void update();
 
     virtual void destroy() = 0;
@@ -94,6 +97,8 @@ protected:
     Scissor _scissor{};
     Math::Vec3f _clearColor{0.0f, 0.0f, 0.0f};
     Resource::SharedPtr<Camera::Camera> _camera{nullptr};
+
+    bool _dirty{true};
 };
 
 #include <lug/Graphics/Render/View.inl>
