@@ -243,9 +243,8 @@ void main() {
     const vec2 deltaUvX = dFdx(TEXTURE_NORMAL_UV);
     const vec2 deltaUvY = dFdy(TEXTURE_NORMAL_UV);
 
-    vec3 tangent = (deltaUvY.t * deltaPosX - deltaUvX.t * deltaPosY) / (deltaUvX.s * deltaUvY.t - deltaUvY.s * deltaUvX.t);
-    tangent = normalize(tangent - inNormalWorldSpace * dot(inNormalWorldSpace, tangent));
-    const vec3 bitangent = normalize(cross(inNormalWorldSpace, tangent));
+    const vec3 tangent = normalize(deltaPosX * deltaUvY.t - deltaPosY * deltaUvX.t);
+    const vec3 bitangent = -normalize(cross(inNormalWorldSpace, tangent));
     # endif
 
     const mat3 tbn = mat3(tangent, bitangent, inNormalWorldSpace);
