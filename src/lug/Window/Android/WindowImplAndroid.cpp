@@ -30,7 +30,7 @@ ANativeWindow* WindowImpl::getWindow() {
     return nativeWindow;
 }
 
-// credits to nvidia : https://github.com/NVIDIAGameWorks/GraphicsSamples/blob/master/extensions/src/NvGamepad/android/NvGamepadAndroid.cpp
+// Credits to nvidia : https://github.com/NVIDIAGameWorks/GraphicsSamples/blob/master/extensions/src/NvGamepad/android/NvGamepadAndroid.cpp
 float WindowImpl::MapCenteredAxis(AInputEvent* event, int32_t axis) {
     const float deadZone = (8689.0f / 32768.0f); // 0,2651672363
     float value = AMotionEvent_getAxisValue(event, axis, 0);
@@ -44,42 +44,44 @@ float WindowImpl::MapCenteredAxis(AInputEvent* event, int32_t axis) {
 }
 
 int32_t WindowImpl::HandleInput(lug::Window::Event& event, AInputEvent* androidEvent) {
-  // Engine* eng = (Engine*)app->userData;
-  if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_MOTION) {
-    event.type = Event::Type::TouchScreenChange;
-    ndk_helper::GESTURE_STATE doubleTapState = doubletap_detector_.Detect(androidEvent);
-    ndk_helper::GESTURE_STATE dragState = drag_detector_.Detect(androidEvent);
-    ndk_helper::GESTURE_STATE pinchState = pinch_detector_.Detect(androidEvent);
+    event.touchScreen.drag = false;
+    event.touchScreen.tap = false;
+    event.touchScreen.pinch = false;
+    event.touchScreen.state = lug::Window::TouchScreenEvent::GestureState::None;
 
-    // Double tap detector has a priority over other detectors
-    if (doubleTapState == ndk_helper::GESTURE_STATE_ACTION) {
-        event.touchScreen.doubleTap = true;
-    } else {
-      // Handle drag state
-      if (dragState & ndk_helper::GESTURE_STATE_START) {
-        event.touchScreen.drag = false;
-        event.touchScreen.tap= true;
-        drag_detector_.GetPointer(event.touchScreen.coordinates[0]);
-      } else if (dragState & ndk_helper::GESTURE_STATE_MOVE) {
-        event.touchScreen.drag = true;
-        event.touchScreen.tap= false;
-        drag_detector_.GetPointer(event.touchScreen.coordinates[0]);
-      } else if (dragState & ndk_helper::GESTURE_STATE_END) {
-        event.touchScreen.drag = false;
-        event.touchScreen.tap= false;
-      }
+    if (AInputEvent_getType(androidEvent) == AINPUT_EVENT_TYPE_MOTION) {
+        event.type = Event::Type::TouchScreenChange;
+        ndk_helper::GESTURE_STATE doubleTapState = doubletap_detector_.Detect(androidEvent);
+        ndk_helper::GESTURE_STATE dragState = drag_detector_.Detect(androidEvent);
+        ndk_helper::GESTURE_STATE pinchState = pinch_detector_.Detect(androidEvent);
 
-      if (pinchState & (ndk_helper::GESTURE_STATE_START || ndk_helper::GESTURE_STATE_MOVE)) {
-        event.touchScreen.pinch = true;
-        pinch_detector_.GetPointers(event.touchScreen.coordinates[0], event.touchScreen.coordinates[1]);
-      } else if (pinchState & ndk_helper::GESTURE_STATE_END) {
-        event.touchScreen.pinch = false;
+        // Double tap detector has a priority over other detectors
+        if (doubleTapState == ndk_helper::GESTURE_STATE_ACTION) {
+            event.touchScreen.doubleTap = !event.touchScreen.doubleTap;
+            event.touchScreen.state = static_cast<lug::Window::TouchScreenEvent::GestureState>(doubleTapState);
+            drag_detector_.GetPointer(event.touchScreen.coordinates[0]);
+        }
+        // Drag state
+        else if (dragState & ndk_helper::GESTURE_STATE_START ||
+                dragState & ndk_helper::GESTURE_STATE_MOVE ||
+                dragState & ndk_helper::GESTURE_STATE_END) {
+            event.touchScreen.drag = true;
+            event.touchScreen.state = static_cast<lug::Window::TouchScreenEvent::GestureState>(dragState);
+            drag_detector_.GetPointer(event.touchScreen.coordinates[0]);
+        }
+        // Pinch state
+        else if (pinchState & ndk_helper::GESTURE_STATE_START ||
+                pinchState & ndk_helper::GESTURE_STATE_MOVE ||
+                pinchState & ndk_helper::GESTURE_STATE_END) {
+            event.touchScreen.pinch = true;
+            event.touchScreen.state = static_cast<lug::Window::TouchScreenEvent::GestureState>(pinchState);
+            pinch_detector_.GetPointers(event.touchScreen.coordinates[0], event.touchScreen.coordinates[1]);
+        }
 
-      }
+        return 1;
     }
-    return 1;
-  }
-  return 0;
+
+    return 0;
 }
 
 

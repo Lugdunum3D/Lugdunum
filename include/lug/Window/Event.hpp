@@ -56,10 +56,22 @@ struct LUG_WINDOW_API GamePadEvent {
 };
 
 struct LUG_WINDOW_API TouchScreenEvent {
-   lug::Math::Vec2f coordinates[2]; ///< The Touch coordinate
-   
+    lug::Math::Vec2f coordinates[2]; ///< The Touch coordinate
+    /**
+     * Type of TouchScreen event state
+     * Use same enum type as ndk_helper::GESTURE_STATE
+     * because we cast it to TouchScreenEvent::GestureState
+     */
+    enum class LUG_WINDOW_API GestureState : int32_t  {
+        None = 0,
+        Start = 1,
+        Move = 2,
+        End = 4,
+        Action = Start | End,
+   };
+
+   GestureState state;
    bool drag;
-   bool tap;       ///< True if a drag event occured, False otherwise
    bool pinch;      ///< True if a pinch event occured, False otherwise
    bool doubleTap;  ///< True if a double tap event occured, False otherwise
 };

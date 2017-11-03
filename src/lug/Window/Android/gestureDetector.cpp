@@ -46,7 +46,6 @@ GESTURE_STATE TapDetector::Detect(const AInputEvent* motion_event) {
           float x = AMotionEvent_getX(motion_event, 0) - down_x_;
           float y = AMotionEvent_getY(motion_event, 0) - down_y_;
           if (x * x + y * y < TOUCH_SLOP * TOUCH_SLOP * dp_factor_) {
-            LUG_LOG.info("TapDetector: Tap detected");
             return GESTURE_STATE_ACTION;
           }
         }
@@ -80,7 +79,6 @@ GESTURE_STATE DoubletapDetector::Detect(const AInputEvent* motion_event) {
         float x = AMotionEvent_getX(motion_event, 0) - last_tap_x_;
         float y = AMotionEvent_getY(motion_event, 0) - last_tap_y_;
         if (x * x + y * y < DOUBLE_TAP_SLOP * DOUBLE_TAP_SLOP * dp_factor_) {
-          LUG_LOG.info("DoubletapDetector: Doubletap detected");
           return GESTURE_STATE_ACTION;
         }
       }
