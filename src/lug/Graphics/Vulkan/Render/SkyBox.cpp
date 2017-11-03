@@ -71,12 +71,12 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
     textureBuilder.setWrapT(getTexture()->getWrapT());
 
     // TODO: Check which format to use
-    if (!textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
-        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
-        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
-        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
-        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
-        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)) {
+    if (!textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
+        || !textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)) {
         LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build: Can't create irradiance map texture layers");
         return nullptr;
     }
@@ -510,12 +510,12 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
     textureBuilder.setWrapT(getTexture()->getWrapT());
 
     // TODO: Check which format to use
-    if (!textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
-        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
-        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
-        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
-        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)
-        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R16G16B16_SFLOAT)) {
+    if (!textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
+        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
+        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
+        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
+        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
+        || !textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)) {
         LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build: Can't create prefiltered map texture layers");
         return nullptr;
     }

@@ -37,6 +37,8 @@ inline size_t Texture::formatToSize(Render::Texture::Format format) {
             return 4;
         case Texture::Format::R16G16B16_SFLOAT:
             return 6;
+        case Texture::Format::R32G32B32A32_SFLOAT:
+            return 16;
         default:
             return 0;
     };

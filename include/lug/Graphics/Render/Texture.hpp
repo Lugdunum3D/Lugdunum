@@ -32,7 +32,8 @@ public:
         Undefined,
         R8G8B8A8_UNORM,
         R16G16_SFLOAT,
-        R16G16B16_SFLOAT
+        R16G16B16_SFLOAT,
+        R32G32B32A32_SFLOAT
     };
 
 public:

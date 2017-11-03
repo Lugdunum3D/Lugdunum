@@ -63,6 +63,9 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
                 case Render::Texture::Format::R16G16B16_SFLOAT:
                     return VK_FORMAT_R16G16B16_SFLOAT;
 
+                case Render::Texture::Format::R32G32B32A32_SFLOAT:
+                    return VK_FORMAT_R32G32B32A32_SFLOAT;
+
                 default:
                     return VK_FORMAT_UNDEFINED;
             };
@@ -143,8 +146,7 @@ Resource::SharedPtr<::lug::Graphics::Render::Texture> build(const ::lug::Graphic
     // The number of layers is not neccessarily equals to builder._layers.size() (5 layers and 2 filenames)
     if (nbLayersWithData)
     {
-        // TODO: Replace 4 with the value depending on the format
-        const VkDeviceSize layerSize = builder._width * builder._height * 4;
+        const VkDeviceSize layerSize = builder._width * builder._height * Render::Texture::formatToSize(builder._format);
         const VkDeviceSize bufferSize = layerSize * nbLayersWithData;
 
         API::Buffer stagingBuffer;
