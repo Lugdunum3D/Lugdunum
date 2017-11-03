@@ -45,7 +45,6 @@ float WindowImpl::MapCenteredAxis(AInputEvent* event, int32_t axis) {
 
 int32_t WindowImpl::HandleInput(lug::Window::Event& event, AInputEvent* androidEvent) {
     event.touchScreen.drag = false;
-    event.touchScreen.tap = false;
     event.touchScreen.pinch = false;
     event.touchScreen.state = lug::Window::TouchScreenEvent::GestureState::None;
 
