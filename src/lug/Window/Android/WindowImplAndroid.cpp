@@ -30,7 +30,7 @@ ANativeWindow* WindowImpl::getWindow() {
     return nativeWindow;
 }
 
-// credits to nvidia : https://github.com/NVIDIAGameWorks/GraphicsSamples/blob/master/extensions/src/NvGamepad/android/NvGamepadAndroid.cpp
+// Credits to nvidia : https://github.com/NVIDIAGameWorks/GraphicsSamples/blob/master/extensions/src/NvGamepad/android/NvGamepadAndroid.cpp
 float WindowImpl::MapCenteredAxis(AInputEvent* event, int32_t axis) {
     const float deadZone = (8689.0f / 32768.0f); // 0,2651672363
     float value = AMotionEvent_getAxisValue(event, axis, 0);
@@ -44,9 +44,6 @@ float WindowImpl::MapCenteredAxis(AInputEvent* event, int32_t axis) {
 }
 
 int32_t WindowImpl::HandleInput(lug::Window::Event& event, AInputEvent* androidEvent) {
-    //TODO : refactor
-    // Engine* eng = (Engine*)app->userData;
-
     event.touchScreen.drag = false;
     event.touchScreen.tap = false;
     event.touchScreen.pinch = false;
