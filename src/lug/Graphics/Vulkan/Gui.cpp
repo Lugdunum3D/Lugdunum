@@ -408,7 +408,7 @@ void Gui::beginFrame(const lug::System::Time& elapsedTime) {
     io.DisplaySize = ImVec2(_window.getWidth(), _window.getHeight());
 #if defined(LUG_SYSTEM_ANDROID)
 io.MousePos = ImVec2(_window._touchScreenState.coordinates[0].x(), _window._touchScreenState.coordinates[0].y());
-io.MouseDown[0] = _window._touchScreenState.drag && _window->_touchScreenState.state == lug::Window::TouchScreenEvent::GestureState::Start;
+io.MouseDown[0] = _window._touchScreenState.drag && _window._touchScreenState.state == lug::Window::TouchScreenEvent::GestureState::Start;
 #else
     const auto mousePos = _window.getMousePos();
     io.MousePos = ImVec2(static_cast<float>(mousePos.x()), static_cast<float>(mousePos.y()));
