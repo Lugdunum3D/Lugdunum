@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit if a command fails
+set -e
+
 invalidate=false
 cache_dir="$HOME/.local/debs"
 
@@ -36,6 +39,7 @@ if [[ ! -d "$cache_dir" || "$invalidate" = true ]]; then
 
     packages=(
         clang-3.8 cmake gcc-6 g++-6     # compilation
+        ninja-build                     # ninja
         doxygen graphviz                # doxigen
     )
 
