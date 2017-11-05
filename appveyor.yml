@@ -87,7 +87,8 @@ init:
 environment:
     Toolset: v140
     TEST_OUTPUT: '%APPVEYOR_BUILD_FOLDER%/build/test'
-
+    UPLOAD_PASSWORD:
+      secure: 'P1pz3f/34/M58WAhAE8LR4YRM5LJJYbQC//9gPdbnwrlffaVKfMyVf1CUHrJl25w'
 # environment variables
 # environment:
 #   my_var1: value1
@@ -116,7 +117,8 @@ matrix:
 
 # build cache to preserve files/folders between builds
 cache:
-  - thirdparty -> thirdparty.yml
+  - thirdparty -> thirdparty.yml, appveyor.yml, ./test/ci/scripts/appveyor_thirdparty.ps1
+  - thirdparty_builder_sha1
   # - packages -> **\packages.config  # preserve "packages" directory in the root of build folder but will reset it if packages.config is modified
   # - projectA\libs
   # - node_modules                    # local npm modules
@@ -138,20 +140,7 @@ cache:
 
 # scripts that run after cloning repository
 install:
-  - ps: |
-      if((Test-Path thirdparty) -eq 0)
-      {
-        cd ..
-        git clone https://github.com/Lugdunum3D/Lugdunum-ThirdParty.git
-
-        cd Lugdunum-ThirdParty
-
-        pip install -r requirements.txt
-
-        python build.py -vvv --path ../lugdunum/thirdparty ../lugdunum/thirdparty.yml
-
-        cd ../lugdunum
-      }
+  - ps: '& ./test/ci/scripts/appveyor_thirdparty.ps1'
 
   # # by default, all script lines are interpreted as batch
   # - echo This is batch
