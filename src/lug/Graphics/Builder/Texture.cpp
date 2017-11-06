@@ -108,16 +108,14 @@ bool Texture::addLayer(const std::string& filename, bool hdr) {
 
     if (!asset) {
         LUG_LOG.error("Vulkan::Texture::build: Can't open Android asset \"{}\"", filename);
-        freePixels(layersPixels);
-        return nullptr;
+        return false;
     }
 
     uint32_t size = AAsset_getLength(asset);
 
     if (size <= 0) {
         LUG_LOG.error("Vulkan::Texture::build: Android asset \"{}\" is empty", filename);
-        freePixels(layersPixels);
-        return nullptr;
+        return false;
     }
 
     unsigned char* data = new unsigned char[size];
