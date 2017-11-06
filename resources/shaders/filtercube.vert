@@ -10,6 +10,8 @@ layout (location = 0) out vec3 outPos;
 
 void main() {
     outPos = inPos;
+    outPos.x *= -1.0;
+    outPos.y *= -1.0;
 
     gl_Position = pushConstants.mvp * vec4(inPos, 1.0);
     gl_Position.y = -gl_Position.y;

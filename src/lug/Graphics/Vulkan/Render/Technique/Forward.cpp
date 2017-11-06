@@ -298,13 +298,13 @@ bool Forward::render(
                                     textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getEmissiveTexture().texture.get()));
                                 }
 
-                                if (material.getIrradianceMap()) {
-                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getIrradianceMap()->getTexture().get()));
+                                if (material.getIrradianceMap() && material.getIrradianceMap()->getEnvironnementTexture()) {
+                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getIrradianceMap()->getEnvironnementTexture().get()));
                                 }
 
-                                if (material.getPrefilteredMap()) {
+                                if (material.getPrefilteredMap() && material.getPrefilteredMap()->getEnvironnementTexture()) {
                                     textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(Render::SkyBox::getBrdfLut().get()));
-                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getPrefilteredMap()->getTexture().get()));
+                                    textures.push_back(static_cast<const ::lug::Graphics::Vulkan::Render::Texture*>(material.getPrefilteredMap()->getEnvironnementTexture().get()));
                                 }
 
                                 return textures;
@@ -390,8 +390,8 @@ bool Forward::render(
     // Render skybox
     {
         Resource::SharedPtr<Render::SkyBox> skyBox = renderQueue.getSkyBox();
-        if (skyBox) {
-            Resource::SharedPtr<Render::Texture> skyBoxTexture =  Resource::SharedPtr<Render::Texture>::cast(skyBox->getTexture());
+        if (skyBox && skyBox->getBackgroundTexture()) {
+            Resource::SharedPtr<Render::Texture> skyBoxTexture =  Resource::SharedPtr<Render::Texture>::cast(skyBox->getBackgroundTexture());
             // Get the new (or old) skyBox descriptor set
             {
                 const DescriptorSetPool::DescriptorSet* skyBoxDescriptorSet = _skyBoxDescriptorSetPool->allocate(skyBoxTexture.get());

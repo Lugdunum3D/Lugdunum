@@ -20,16 +20,6 @@ class LUG_GRAPHICS_API SkyBox {
     friend Resource::SharedPtr<lug::Graphics::Render::SkyBox> lug::Graphics::Vulkan::Builder::SkyBox::build(const ::lug::Graphics::Builder::SkyBox&);
 
 public:
-    enum class Face: uint8_t {
-        PositiveX = 0,
-        NegativeX = 1,
-        PositiveY = 2,
-        NegativeY = 3,
-        PositiveZ = 4,
-        NegativeZ = 5
-    };
-
-public:
     explicit SkyBox(Renderer& renderer);
 
     SkyBox(const SkyBox&) = delete;
@@ -52,7 +42,8 @@ public:
     void setWrapS(Render::Texture::WrappingMode wrapS);
     void setWrapT(Render::Texture::WrappingMode wrapT);
     void setWrapW(Render::Texture::WrappingMode wrapW);
-    void setFaceFilename(Face face, const std::string& filename);
+    void setBackgroundFilename(const std::string& filename);
+    void setEnvironnementFilename(const std::string& filename);
 
     Resource::SharedPtr<Render::SkyBox> build();
 
@@ -69,8 +60,8 @@ protected:
     Render::Texture::WrappingMode _wrapT{Render::Texture::WrappingMode::ClampToEdge};
     Render::Texture::WrappingMode _wrapW{Render::Texture::WrappingMode::ClampToEdge};
 
-    // Contains alls file names for faces
-    std::array<std::string, 6> _faces;
+    std::string _backgroundFilename;
+    std::string _environnementFilename;
 };
 
 #include <lug/Graphics/Builder/SkyBox.inl>

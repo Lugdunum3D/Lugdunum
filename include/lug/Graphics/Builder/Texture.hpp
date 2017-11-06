@@ -55,7 +55,7 @@ public:
     void setWrapT(Render::Texture::WrappingMode wrapT);
     void setWrapW(Render::Texture::WrappingMode wrapW);
 
-    bool addLayer(const std::string& filename);
+    bool addLayer(const std::string& filename, bool hdr = false);
     bool addLayer(uint32_t width, uint32_t height, Render::Texture::Format format, const unsigned char* data = nullptr);
 
     Resource::SharedPtr<Render::Texture> build();

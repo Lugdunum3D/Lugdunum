@@ -137,27 +137,14 @@ bool Application::init(int argc, char* argv[]) {
         skyBoxBuilder.setMagFilter(lug::Graphics::Render::Texture::Filter::Linear);
         skyBoxBuilder.setMinFilter(lug::Graphics::Render::Texture::Filter::Linear);
 
-        // skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveX, "textures/skybox2/posx.bmp");
-        // skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeX, "textures/skybox2/negx.bmp");
-        // skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveY, "textures/skybox2/posy.bmp");
-        // skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeY, "textures/skybox2/negy.bmp");
-        // skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveZ, "textures/skybox2/posz.bmp");
-        // skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeZ, "textures/skybox2/negz.bmp");
-
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveX, "textures/skybox/right.jpg");
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeX, "textures/skybox/left.jpg");
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveY, "textures/skybox/top.jpg");
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeY, "textures/skybox/bottom.jpg");
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveZ, "textures/skybox/back.jpg");
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeZ, "textures/skybox/front.jpg");
+        skyBoxBuilder.setBackgroundFilename("textures/Road_to_MonumentValley/Background.jpg");
+        skyBoxBuilder.setEnvironnementFilename("textures/Road_to_MonumentValley/Environnement.hdr");
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> skyBox = skyBoxBuilder.build();
         if (!skyBox) {
             LUG_LOG.error("Application::init Can't create skyBox");
             return false;
         }
-
-        _scene->setSkyBox(skyBox);
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> irradianceMap = skyBox->createIrradianceMap(*renderer);
 
@@ -173,27 +160,8 @@ bool Application::init(int argc, char* argv[]) {
             return false;
         }
 
+        _scene->setSkyBox(skyBox);
         applyIBL(&_scene->getRoot(), irradianceMap, prefilteredMap);
-    }
-
-    // Build imgui texture
-    {
-        lug::Graphics::Builder::Texture textureBuilder(*renderer);
-
-        if (!textureBuilder.addLayer("textures/skybox/right.jpg")) {
-            LUG_LOG.error("Application: Can't load texture");
-            return false;
-        }
-
-        textureBuilder.setMagFilter(lug::Graphics::Render::Texture::Filter::Linear);
-        textureBuilder.setMinFilter(lug::Graphics::Render::Texture::Filter::Linear);
-        textureBuilder.setMipMapFilter(lug::Graphics::Render::Texture::Filter::Linear);
-
-        _texture = textureBuilder.build();
-        if (!_texture) {
-            LUG_LOG.error("Application::init Can't create texture");
-            return false;
-        }
     }
 
     return static_cast<lug::Graphics::Vulkan::Render::Window*>(_graphics.getRenderer()->getWindow())->initGui();
@@ -218,7 +186,7 @@ void Application::onEvent(const lug::Window::Event& event) {
 void Application::onFrame(const lug::System::Time& elapsedTime) {
     auto vkTexture = lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(lug::Graphics::Vulkan::Render::SkyBox::getBrdfLut());
 
-    ImGui::Begin("Imgui texture", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("BRDF Lut", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::Image(vkTexture.get(), ImVec2(200, 200), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
     ImGui::End();
 

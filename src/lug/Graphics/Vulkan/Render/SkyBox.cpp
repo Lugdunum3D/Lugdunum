@@ -61,14 +61,20 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
 
     Vulkan::Renderer& vkRenderer = static_cast<Vulkan::Renderer&>(renderer);
 
+    const Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture> texture = Resource::SharedPtr<Render::Texture>::cast(getEnvironnementTexture());
+    if (!texture) {
+        LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::createIrradianceMap: The skybox doesn't have an environnement");
+        return nullptr;
+    }
+
     lug::Graphics::Builder::Texture textureBuilder(vkRenderer);
 
     textureBuilder.setType(lug::Graphics::Builder::Texture::Type::CubeMap);
-    textureBuilder.setMagFilter(getTexture()->getMagFilter());
-    textureBuilder.setMinFilter(getTexture()->getMinFilter());
-    textureBuilder.setMipMapFilter(getTexture()->getMipMapFilter());
-    textureBuilder.setWrapS(getTexture()->getWrapS());
-    textureBuilder.setWrapT(getTexture()->getWrapT());
+    textureBuilder.setMagFilter(texture->getMagFilter());
+    textureBuilder.setMinFilter(texture->getMinFilter());
+    textureBuilder.setMipMapFilter(texture->getMipMapFilter());
+    textureBuilder.setWrapS(texture->getWrapS());
+    textureBuilder.setWrapT(texture->getWrapT());
 
     // TODO: Check which format to use
     if (!textureBuilder.addLayer(irradianceMapSize, irradianceMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
@@ -81,8 +87,8 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
         return nullptr;
     }
 
-    irradianceMap->_texture = textureBuilder.build();
-    if (!irradianceMap->_texture) {
+    irradianceMap->_environnementTexture = textureBuilder.build();
+    if (!irradianceMap->_environnementTexture) {
         LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build Can't create the irradiance map texture");
         return nullptr;
     }
@@ -156,7 +162,6 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
                 return nullptr;
             }
 
-            auto texture = Resource::SharedPtr<Render::Texture>::cast(getTexture());
             descriptorSet.updateImages(
                 0,
                 0,
@@ -199,7 +204,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
 
                 imageBuilder.setExtent(extent);
                 imageBuilder.setUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-                imageBuilder.setPreferedFormats({ Resource::SharedPtr<Render::Texture>::cast(irradianceMap->_texture)->getImage().getFormat() });
+                imageBuilder.setPreferedFormats({ Resource::SharedPtr<Render::Texture>::cast(irradianceMap->_environnementTexture)->getImage().getFormat() });
                 imageBuilder.setQueueFamilyIndices({ graphicsQueue->getQueueFamily()->getIdx() });
                 imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
 
@@ -321,7 +326,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
             pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &Resource::SharedPtr<Render::Texture>::cast(irradianceMap->_texture)->getImage();
+            pipelineBarrier.imageMemoryBarriers[0].image = &Resource::SharedPtr<Render::Texture>::cast(irradianceMap->_environnementTexture)->getImage();
             pipelineBarrier.imageMemoryBarriers[0].subresourceRange.layerCount = 6;
 
             cmdBuffer.pipelineBarrier(pipelineBarrier);
@@ -424,7 +429,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
             const API::CommandBuffer::CmdCopyImage cmdCopyImage{
                 /* cmdCopyImage.srcImage      */ offscreenImage,
                 /* cmdCopyImage.srcImageLayout  */ VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                /* cmdCopyImage.dstImage      */ Resource::SharedPtr<Render::Texture>::cast(irradianceMap->_texture)->getImage(),
+                /* cmdCopyImage.dstImage      */ Resource::SharedPtr<Render::Texture>::cast(irradianceMap->_environnementTexture)->getImage(),
                 /* cmdCopyImage.dsrImageLayout        */ VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 /* cmdCopyImage.regions      */ { copyRegion }
             };
@@ -451,7 +456,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
             pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &Resource::SharedPtr<Render::Texture>::cast(irradianceMap->_texture)->getImage();
+            pipelineBarrier.imageMemoryBarriers[0].image = &Resource::SharedPtr<Render::Texture>::cast(irradianceMap->_environnementTexture)->getImage();
             pipelineBarrier.imageMemoryBarriers[0].subresourceRange.layerCount = 6;
 
             cmdBuffer.pipelineBarrier(pipelineBarrier);
@@ -501,13 +506,19 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
 
     lug::Graphics::Builder::Texture textureBuilder(vkRenderer);
 
+    const Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture> texture = Resource::SharedPtr<Render::Texture>::cast(getEnvironnementTexture());
+    if (!texture) {
+        LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::createPrefilteredMap: The skybox doesn't have an environnement");
+        return nullptr;
+    }
+
     textureBuilder.setType(lug::Graphics::Builder::Texture::Type::CubeMap);
     textureBuilder.setMipLevels(mipMapCount);
-    textureBuilder.setMagFilter(getTexture()->getMagFilter());
-    textureBuilder.setMinFilter(getTexture()->getMinFilter());
-    textureBuilder.setMipMapFilter(getTexture()->getMipMapFilter());
-    textureBuilder.setWrapS(getTexture()->getWrapS());
-    textureBuilder.setWrapT(getTexture()->getWrapT());
+    textureBuilder.setMagFilter(texture->getMagFilter());
+    textureBuilder.setMinFilter(texture->getMinFilter());
+    textureBuilder.setMipMapFilter(texture->getMipMapFilter());
+    textureBuilder.setWrapS(texture->getWrapS());
+    textureBuilder.setWrapT(texture->getWrapT());
 
     // TODO: Check which format to use
     if (!textureBuilder.addLayer(prefilteredMapSize, prefilteredMapSize, lug::Graphics::Render::Texture::Format::R32G32B32A32_SFLOAT)
@@ -520,8 +531,8 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
         return nullptr;
     }
 
-    prefilteredMap->_texture = textureBuilder.build();
-    if (!prefilteredMap->_texture) {
+    prefilteredMap->_environnementTexture = textureBuilder.build();
+    if (!prefilteredMap->_environnementTexture) {
         LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build Can't create the prefiltered map texture");
         return nullptr;
     }
@@ -595,7 +606,6 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
                 return nullptr;
             }
 
-            auto texture = Resource::SharedPtr<Render::Texture>::cast(getTexture());
             descriptorSet.updateImages(
                 0,
                 0,
@@ -638,7 +648,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
 
                 imageBuilder.setExtent(extent);
                 imageBuilder.setUsage(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT);
-                imageBuilder.setPreferedFormats({ Resource::SharedPtr<Render::Texture>::cast(prefilteredMap->_texture)->getImage().getFormat() });
+                imageBuilder.setPreferedFormats({ Resource::SharedPtr<Render::Texture>::cast(prefilteredMap->_environnementTexture)->getImage().getFormat() });
                 imageBuilder.setQueueFamilyIndices({ graphicsQueue->getQueueFamily()->getIdx() });
                 imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
 
@@ -760,7 +770,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
             pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &Resource::SharedPtr<Render::Texture>::cast(prefilteredMap->_texture)->getImage();
+            pipelineBarrier.imageMemoryBarriers[0].image = &Resource::SharedPtr<Render::Texture>::cast(prefilteredMap->_environnementTexture)->getImage();
             pipelineBarrier.imageMemoryBarriers[0].subresourceRange.levelCount = mipMapCount;
             pipelineBarrier.imageMemoryBarriers[0].subresourceRange.layerCount = 6;
 
@@ -882,7 +892,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
                 const API::CommandBuffer::CmdCopyImage cmdCopyImage{
                     /* cmdCopyImage.srcImage      */ offscreenImage,
                     /* cmdCopyImage.srcImageLayout  */ VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                    /* cmdCopyImage.dstImage      */ Resource::SharedPtr<Render::Texture>::cast(prefilteredMap->_texture)->getImage(),
+                    /* cmdCopyImage.dstImage      */ Resource::SharedPtr<Render::Texture>::cast(prefilteredMap->_environnementTexture)->getImage(),
                     /* cmdCopyImage.dsrImageLayout        */ VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                     /* cmdCopyImage.regions      */ { copyRegion }
                 };
@@ -910,7 +920,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
             pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &Resource::SharedPtr<Render::Texture>::cast(prefilteredMap->_texture)->getImage();
+            pipelineBarrier.imageMemoryBarriers[0].image = &Resource::SharedPtr<Render::Texture>::cast(prefilteredMap->_environnementTexture)->getImage();
             pipelineBarrier.imageMemoryBarriers[0].subresourceRange.levelCount = mipMapCount;
             pipelineBarrier.imageMemoryBarriers[0].subresourceRange.layerCount = 6;
 

@@ -2,11 +2,19 @@
 
 #define PI 3.1415926535897932384626433832795
 
-layout (set = 0, binding = 0) uniform samplerCube environmentMap;
+layout (set = 0, binding = 0) uniform sampler2D environmentMap;
 
 layout (location = 0) in vec3 inPos;
 
 layout (location = 0) out vec4 outColor;
+
+const vec2 invAtan = vec2(0.1591, 0.3183);
+vec2 SampleSphericalMap(vec3 v) {
+    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+    uv *= invAtan;
+    uv += 0.5;
+    return uv;
+}
 
 void main() {
     vec3 normal = normalize(inPos);
@@ -28,7 +36,7 @@ void main() {
             // tangent space to world
             vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
 
-            irradiance += texture(environmentMap, sampleVec).rgb * cos(theta) * sin(theta);
+            irradiance += texture(environmentMap, SampleSphericalMap(normalize(sampleVec))).rgb * cos(theta) * sin(theta);
             nrSamples++;
         }
     }

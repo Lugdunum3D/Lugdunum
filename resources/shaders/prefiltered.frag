@@ -6,7 +6,7 @@ layout (push_constant) uniform PushConstants {
     layout(offset = 64) float roughness;
 } pushConstants;
 
-layout (set = 0, binding = 0) uniform samplerCube environmentMap;
+layout (set = 0, binding = 0) uniform sampler2D environmentMap;
 
 layout (location = 0) in vec3 inPos;
 
@@ -50,6 +50,14 @@ vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness)
     return normalize(sampleVec);
 }
 
+const vec2 invAtan = vec2(0.1591, 0.3183);
+vec2 SampleSphericalMap(vec3 v) {
+    vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+    uv *= invAtan;
+    uv += 0.5;
+    return uv;
+}
+
 void main()
 {
     vec3 N = normalize(inPos);
@@ -68,7 +76,7 @@ void main()
         float NdotL = max(dot(N, L), 0.0);
         if(NdotL > 0.0)
         {
-            prefilteredColor += texture(environmentMap, L).rgb * NdotL;
+            prefilteredColor += texture(environmentMap, SampleSphericalMap(normalize(L))).rgb * NdotL;
             totalWeight      += NdotL;
         }
     }

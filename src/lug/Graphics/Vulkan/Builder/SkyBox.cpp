@@ -983,29 +983,50 @@ Resource::SharedPtr<::lug::Graphics::Render::SkyBox> build(const ::lug::Graphics
 
     Vulkan::Renderer& renderer = static_cast<Vulkan::Renderer&>(builder._renderer);
 
-    lug::Graphics::Builder::Texture textureBuilder(builder._renderer);
+    // Load background image
+    if (builder._backgroundFilename.size())
+    {
+        lug::Graphics::Builder::Texture textureBuilder(builder._renderer);
 
-    textureBuilder.setType(lug::Graphics::Builder::Texture::Type::CubeMap);
-    textureBuilder.setMagFilter(builder._magFilter);
-    textureBuilder.setMinFilter(builder._minFilter);
-    textureBuilder.setMipMapFilter(builder._mipMapFilter);
-    textureBuilder.setWrapS(builder._wrapS);
-    textureBuilder.setWrapT(builder._wrapT);
+        textureBuilder.setMagFilter(builder._magFilter);
+        textureBuilder.setMinFilter(builder._minFilter);
+        textureBuilder.setMipMapFilter(builder._mipMapFilter);
+        textureBuilder.setWrapS(builder._wrapS);
+        textureBuilder.setWrapT(builder._wrapT);
 
-    if (!textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::PositiveX)])
-        || !textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::NegativeX)])
-        || !textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::PositiveY)])
-        || !textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::NegativeY)])
-        || !textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::PositiveZ)])
-        || !textureBuilder.addLayer(builder._faces[static_cast<uint8_t>(lug::Graphics::Builder::SkyBox::Face::NegativeZ)])) {
-        LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build Can't create skybox layers");
-        return nullptr;
+        if (!textureBuilder.addLayer(builder._backgroundFilename)) {
+            LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build Can't create skybox layers");
+            return nullptr;
+        }
+
+        skyBox->_backgroundTexture = textureBuilder.build();
+        if (!skyBox->_backgroundTexture) {
+            LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build Can't create skyBox texture");
+            return nullptr;
+        }
     }
 
-    skyBox->_texture = textureBuilder.build();
-    if (!skyBox->_texture) {
-        LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build Can't create skyBox texture");
-        return nullptr;
+    // Load environnement image
+    if (builder._environnementFilename.size())
+    {
+        lug::Graphics::Builder::Texture textureBuilder(builder._renderer);
+
+        textureBuilder.setMagFilter(builder._magFilter);
+        textureBuilder.setMinFilter(builder._minFilter);
+        textureBuilder.setMipMapFilter(builder._mipMapFilter);
+        textureBuilder.setWrapS(builder._wrapS);
+        textureBuilder.setWrapT(builder._wrapT);
+
+        if (!textureBuilder.addLayer(builder._environnementFilename, true)) {
+            LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build Can't create skybox layers");
+            return nullptr;
+        }
+
+        skyBox->_environnementTexture = textureBuilder.build();
+        if (!skyBox->_environnementTexture) {
+            LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::build Can't create skyBox texture");
+            return nullptr;
+        }
     }
 
     // Init the skyBox pipeline and mesh only one time

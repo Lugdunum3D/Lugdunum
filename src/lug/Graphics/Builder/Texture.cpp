@@ -95,10 +95,12 @@ bool Texture::addLayer(uint32_t width, uint32_t height, Render::Texture::Format 
 }
 
 
-bool Texture::addLayer(const std::string& filename) {
+bool Texture::addLayer(const std::string& filename, bool hdr) {
     int texWidth{0};
     int texHeight{0};
     int texChannels{0};
+
+    stbi_uc* pixels = nullptr;
 
 #if defined(LUG_SYSTEM_ANDROID)
     // Load shader from compressed asset
@@ -123,18 +125,27 @@ bool Texture::addLayer(const std::string& filename) {
     AAsset_read(asset, reinterpret_cast<char*>(data), size);
     AAsset_close(asset);
 
-    stbi_uc* pixels = stbi_load_from_memory(data, size, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    if (hdr) {
+        pixels = reinterpret_cast<unsigned char*>(stbi_loadf_from_memory(data, size, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha));
+    } else {
+        pixels = stbi_load_from_memory(data, size, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    }
 
     delete[] data;
 #else
-    stbi_uc* pixels = stbi_load(filename.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    if (hdr) {
+        pixels = reinterpret_cast<unsigned char*>(stbi_loadf(filename.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha));
+    } else {
+        pixels = stbi_load(filename.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    }
 #endif
 
     if (!pixels) {
         return false;
     }
 
-    if (!addLayer(texWidth, texHeight, Render::Texture::Format::R8G8B8A8_UNORM, pixels)) {
+    Render::Texture::Format format = hdr ? Render::Texture::Format::R32G32B32A32_SFLOAT : Render::Texture::Format::R8G8B8A8_UNORM;
+    if (!addLayer(texWidth, texHeight, format, pixels)) {
         stbi_image_free(pixels);
         return false;
     }
