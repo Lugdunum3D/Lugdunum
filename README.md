@@ -12,10 +12,17 @@ A modern cross-platform 3D rendering engine built with Vulkan and modern C++14. 
 Our build system is CMake and this repository contains the appropriate build files to build on Linux, Windows and Android using a C++14 compiler (see [tested toolchains](#tested-toolchains)). Third party dependencies are built using [Lugdunum-ThirdParty](https://github.com/Lugdunum3D/Lugdunum-ThirdParty) and the `thirdpary.yml` file located at the root of this repository. [Follow the instructions on our documentation](https://lugdunum3d.github.io/doc/build.html) to build Lugdunum.
 
 ## <img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg" width="16"> Linux
-[![CircleCI](https://img.shields.io/circleci/project/github/Lugdunum3D/Lugdunum/master.svg?label=build%20(master)&maxAge=300)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/master) [![CircleCI](https://img.shields.io/circleci/project/github/Lugdunum3D/Lugdunum/dev.svg?label=build%20(dev)&maxAge=300)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/dev)
+
+<!---
+[![CircleCI](https://img.shields.io/circleci/project/github/Lugdunum3D/Lugdunum/master.svg?label=build%20(master)&maxAge=300)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/master) 
+-->
+[![CircleCI](https://img.shields.io/circleci/project/github/Lugdunum3D/Lugdunum/dev.svg?label=build%20(dev)&maxAge=300)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/dev)
 
 ## <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/Windows_logo_%E2%80%93_2012_%28dark_blue%29.svg" width="16"> Windows 
-[![CircleCI](https://img.shields.io/appveyor/ci/Lugdunum/lugdunum/master.svg?label=build%20(master)&maxAge=300)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/master) [![CircleCI](https://img.shields.io/appveyor/ci/Lugdunum/lugdunum/dev.svg?label=build%20(dev)&maxAge=300)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/dev)
+<!---
+[![AppVeyor](https://img.shields.io/appveyor/ci/Lugdunum/lugdunum/master.svg?label=build%20(master)&maxAge=300)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/master) 
+-->
+[![AppVeyor](https://img.shields.io/appveyor/ci/Lugdunum/lugdunum/dev.svg?label=build%20(dev)&maxAge=300)](https://circleci.com/gh/Lugdunum3D/Lugdunum/tree/dev)
 
 # Examples
 
