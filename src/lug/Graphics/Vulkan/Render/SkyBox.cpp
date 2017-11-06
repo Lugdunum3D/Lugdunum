@@ -41,14 +41,6 @@ void SkyBox::destroy() {
         SkyBox::_irradianceMapPipeline.destroy();
         SkyBox::_prefilteredMapPipeline.destroy();
         SkyBox::_brdfLutPipeline.destroy();
-
-        Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture> brdfLut = Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(SkyBox::_brdfLut);
-        if (brdfLut) {
-            brdfLut->destroy();
-            SkyBox::_brdfLut = nullptr;
-        }
-
-        // TODO(nokitoo): destroy SkyBox::_mesh (Can't delete resources in resource manager yet)
     }
 }
 
