@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -75,6 +76,8 @@ private:
      * call in loadFile thanks to this map.
      */
     std::unordered_map<std::string, std::unique_ptr<Loader>> _loaders;
+
+    std::mutex _mutex;
 };
 
 #include <lug/Graphics/ResourceManager.inl>

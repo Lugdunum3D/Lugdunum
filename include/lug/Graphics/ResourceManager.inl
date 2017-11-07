@@ -1,5 +1,7 @@
 template <typename T>
 Resource::SharedPtr<T> ResourceManager::get(Resource::Handle handle) {
+    std::lock_guard<std::mutex> resourcesGuard(_mutex);
+
     static_assert(
         std::is_base_of<Resource, T>::value,
         "T must inherit from Resource"
@@ -18,6 +20,8 @@ Resource::SharedPtr<T> ResourceManager::get(Resource::Handle handle) {
 
 template <typename T>
 Resource::SharedPtr<T> ResourceManager::add(std::unique_ptr<Resource> resource) {
+    std::lock_guard<std::mutex> resourcesGuard(_mutex);
+
     static_assert(
         std::is_base_of<Resource, T>::value,
         "T must inherit from Resource"
