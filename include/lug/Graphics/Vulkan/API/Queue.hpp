@@ -3,6 +3,8 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 
+#include <mutex>
+
 namespace lug {
 namespace Graphics {
 namespace Vulkan {
@@ -42,6 +44,7 @@ private:
     VkQueue _queue{VK_NULL_HANDLE};
 
     const QueueFamily* _queueFamily{nullptr};
+    mutable std::mutex _mutex;
 };
 
 } // API
