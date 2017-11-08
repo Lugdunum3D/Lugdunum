@@ -136,6 +136,7 @@
     macro(vkGetImageMemoryRequirements)                 \
     macro(vkBindImageMemory)                            \
     macro(vkCreateSampler)                              \
+    macro(vkCmdCopyImage)                               \
     macro(vkCmdCopyBufferToImage)                       \
     macro(vkCreateDescriptorSetLayout)                  \
     macro(vkCreateDescriptorPool)                       \

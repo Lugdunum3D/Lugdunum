@@ -22,6 +22,14 @@ inline void SkyBox::setWrapT(Render::Texture::WrappingMode wrapT) {
     _wrapT = wrapT;
 }
 
-inline void SkyBox::setFaceFilename(Face face, const std::string& filename) {
-    _faces[static_cast<uint8_t>(face)] = filename;
+inline void SkyBox::setWrapW(Render::Texture::WrappingMode wrapW) {
+    _wrapW = wrapW;
+}
+
+inline void SkyBox::setBackgroundFilename(const std::string& filename) {
+    _backgroundFilename = filename;
+}
+
+inline void SkyBox::setEnvironnementFilename(const std::string& filename) {
+    _environnementFilename = filename;
 }

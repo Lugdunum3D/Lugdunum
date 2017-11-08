@@ -35,7 +35,6 @@ bool Pipeline::init() {
                 shaderCode = Pipeline::ShaderBuilder::buildShader(
                     _renderer.getInfo().shadersRoot,
                     _renderer.getInfo().renderTechnique,
-                    static_cast<Renderer::DisplayMode>(extraPart.displayMode),
                     Pipeline::ShaderBuilder::Type::Vertex,
                     _id
                 );
@@ -58,7 +57,6 @@ bool Pipeline::init() {
                 shaderCode = Pipeline::ShaderBuilder::buildShader(
                     _renderer.getInfo().shadersRoot,
                     _renderer.getInfo().renderTechnique,
-                    static_cast<Renderer::DisplayMode>(extraPart.displayMode),
                     Pipeline::ShaderBuilder::Type::Fragment,
                     _id
                 );
@@ -153,7 +151,7 @@ bool Pipeline::init() {
         /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
         /* colorBlendAttachment.colorBlendOp */ VK_BLEND_OP_ADD,
-        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
+        /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_CONSTANT_COLOR,
         /* colorBlendAttachment.alphaBlendOp */ VK_BLEND_OP_ADD,
         /* colorBlendAttachment.colorWriteMask */ VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
@@ -295,6 +293,46 @@ bool Pipeline::init() {
                 };
 
                 bindings.push_back(std::move(textureBinding));
+            }
+
+            if (extraPart.irradianceMapInfo) {
+                const VkDescriptorSetLayoutBinding textureBinding = {
+                    /* textureBinding.binding */ binding++,
+                    /* textureBinding.descriptorType */ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                    /* textureBinding.descriptorCount */ 1,
+                    /* textureBinding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
+                    /* textureBinding.pImmutableSamplers */ nullptr
+                };
+
+                bindings.push_back(std::move(textureBinding));
+            }
+
+            if (extraPart.prefilteredMapInfo) {
+                // BRDF LUT
+                {
+                    const VkDescriptorSetLayoutBinding textureBinding = {
+                        /* textureBinding.binding */ binding++,
+                        /* textureBinding.descriptorType */ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        /* textureBinding.descriptorCount */ 1,
+                        /* textureBinding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
+                        /* textureBinding.pImmutableSamplers */ nullptr
+                    };
+
+                    bindings.push_back(std::move(textureBinding));
+                }
+
+                // Prefiltered Map
+                {
+                    const VkDescriptorSetLayoutBinding textureBinding = {
+                        /* textureBinding.binding */ binding++,
+                        /* textureBinding.descriptorType */ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                        /* textureBinding.descriptorCount */ 1,
+                        /* textureBinding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
+                        /* textureBinding.pImmutableSamplers */ nullptr
+                    };
+
+                    bindings.push_back(std::move(textureBinding));
+                }
             }
 
             if (bindings.size() > 0) {

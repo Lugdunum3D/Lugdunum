@@ -22,7 +22,7 @@ public:
 
     ~MaterialTextures() = default;
 
-    const DescriptorSet* allocate(const API::GraphicsPipeline& pipeline, const std::vector<const ::lug::Graphics::Vulkan::Render::Texture*> textures);
+    const DescriptorSet* allocate(const API::GraphicsPipeline& pipeline, const std::vector<const ::lug::Graphics::Vulkan::Render::Texture*>& textures);
 };
 
 } // DescriptorSetPool

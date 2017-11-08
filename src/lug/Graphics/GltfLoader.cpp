@@ -89,7 +89,10 @@ Resource::SharedPtr<Render::Texture> GltfLoader::createTexture(Renderer& rendere
 
     if (gltfTexture.source != -1) {
         // TODO: Handle correctly the load with bufferView / uri data
-        textureBuilder.addLayer(asset.images[gltfTexture.source].uri);
+        if (!textureBuilder.addLayer(asset.images[gltfTexture.source].uri)) {
+            LUG_LOG.error("GltfLoader::createTexture: Can't load the texture \"{}\"", asset.images[gltfTexture.source].uri);
+            return nullptr;
+        }
     }
 
     if (gltfTexture.sampler != -1) {

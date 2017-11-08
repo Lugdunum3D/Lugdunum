@@ -72,7 +72,7 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
             if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
                 return false;
             }
-            
+
             if (_isGuiInitialized == true) {
                 if (!_guiInstance.initFramebuffers(_swapchain.getImagesViews())) {
                     LUG_LOG.error("Window::beginFrame: Failed to initialise Gui framebuffers");

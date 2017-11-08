@@ -5,6 +5,7 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/DirtyObject.hpp>
 #include <lug/Graphics/Render/Texture.hpp>
+#include <lug/Graphics/Render/SkyBox.hpp>
 #include <lug/Graphics/Resource.hpp>
 #include <lug/Math/Vector.hpp>
 
@@ -57,6 +58,8 @@ public:
     virtual ~Material() = default;
 
     // TODO: Setters which call ::lug::Graphics::Render::DirtyObject::setDirty()
+    void setIrradianceMap(const Resource::SharedPtr<SkyBox> irradianceMap);
+    void setPrefilteredMap(const Resource::SharedPtr<SkyBox> prefilteredMap);
 
     const Constants& getConstants() const;
 
@@ -65,6 +68,8 @@ public:
     const TextureInfo& getNormalTexture() const;
     const TextureInfo& getOcclusionTexture() const;
     const TextureInfo& getEmissiveTexture() const;
+    const Resource::SharedPtr<SkyBox> getIrradianceMap() const;
+    const Resource::SharedPtr<SkyBox> getPrefilteredMap() const;
 
 protected:
     Constants _constants;
@@ -73,6 +78,8 @@ protected:
     TextureInfo _normalTexture;
     TextureInfo _occlusionTexture;
     TextureInfo _emissiveTexture;
+    Resource::SharedPtr<SkyBox> _irradianceMap;
+    Resource::SharedPtr<SkyBox> _prefilteredMap;
 };
 
 #include <lug/Graphics/Render/Material.inl>

@@ -40,6 +40,11 @@ set(SHADERS
     gui.vert
     skybox.vert
     skybox.frag
+    filtercube.vert
+    irradiance.frag
+    prefiltered.frag
+    genbrdflut.vert
+    genbrdflut.frag
 )
 
 set(LUG_RESOURCES
@@ -50,12 +55,8 @@ set(LUG_RESOURCES
     models/DamagedHelmet/textures/Default_metallic_roughness.jpg
     models/DamagedHelmet/textures/Default_emissive.jpg
     models/DamagedHelmet/textures/Default_normal.jpg
-    textures/skybox/back.jpg
-    textures/skybox/bottom.jpg
-    textures/skybox/front.jpg
-    textures/skybox/left.jpg
-    textures/skybox/right.jpg
-    textures/skybox/top.jpg
+    textures/Road_to_MonumentValley/Background.jpg
+    textures/Road_to_MonumentValley/Environnement.hdr
     shaders/forward/shader.frag
     shaders/forward/shader.vert
 )

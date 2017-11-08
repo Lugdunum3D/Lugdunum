@@ -79,7 +79,9 @@ public:
         struct ExtraPart {
             union {
                 struct {
-                    uint32_t displayMode : 3;    ///< Corresponding to the value in Renderer::DisplayMode.
+                    uint32_t displayMode : 3;           ///< Corresponding to the value in Renderer::DisplayMode.
+                    uint32_t irradianceMapInfo : 1;     ///< 1 texture, 0 no texture.
+                    uint32_t prefilteredMapInfo : 1;    ///< 1 texture, 0 no texture
                 };
 
                 uint32_t value;
@@ -94,7 +96,7 @@ public:
             struct {
                 uint32_t primitivePart : 10;
                 uint32_t materialPart : 10;
-                uint32_t extraPart : 3;
+                uint32_t extraPart : 5;
             };
 
             uint32_t value;
@@ -180,9 +182,9 @@ public:
         ~ShaderBuilder() = delete;
 
     public:
-        static std::vector<uint32_t> buildShader(std::string shaderRoot, ::lug::Graphics::Render::Technique::Type technique, ::lug::Graphics::Renderer::DisplayMode displayMode, Type type, Pipeline::Id id);
-        static std::vector<uint32_t> buildShaderFromFile(std::string filename, ::lug::Graphics::Renderer::DisplayMode displayMode, Type type, Pipeline::Id id);
-        static std::vector<uint32_t> buildShaderFromString(std::string filename, std::string content, ::lug::Graphics::Renderer::DisplayMode displayMode, Type type, Pipeline::Id id);
+        static std::vector<uint32_t> buildShader(std::string shaderRoot, ::lug::Graphics::Render::Technique::Type technique, Type type, Pipeline::Id id);
+        static std::vector<uint32_t> buildShaderFromFile(std::string filename, Type type, Pipeline::Id id);
+        static std::vector<uint32_t> buildShaderFromString(std::string filename, std::string content, Type type, Pipeline::Id id);
     };
 
 public:

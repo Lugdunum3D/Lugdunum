@@ -28,6 +28,8 @@ void Queue::addMeshInstance(Scene::Node& node, const lug::Graphics::Renderer& re
 
             Pipeline::Id::ExtraPart pipelineIdExtraPart;
             pipelineIdExtraPart.displayMode = static_cast<uint32_t>(renderer.getDisplayMode());
+            pipelineIdExtraPart.irradianceMapInfo = static_cast<uint32_t>(material->getIrradianceMap() && material->getIrradianceMap()->getEnvironnementTexture() ? 1 : 0);
+            pipelineIdExtraPart.prefilteredMapInfo = static_cast<uint32_t>(material->getPrefilteredMap() && material->getPrefilteredMap()->getEnvironnementTexture() ? 1 : 0);
 
             pipelineId = Pipeline::Id::create(pipelineIdPrimitivePart, pipelineIdMaterialPart, pipelineIdExtraPart);
         }

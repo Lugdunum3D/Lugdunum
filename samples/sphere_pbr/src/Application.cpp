@@ -43,7 +43,10 @@ bool Application::init(int argc, char* argv[]) {
     {
         lug::Graphics::Builder::Texture textureBuilder(*renderer);
 
-        textureBuilder.addLayer("textures/rustediron2_basecolor.jpg");
+        if (!textureBuilder.addLayer("textures/rustediron2_basecolor.jpg")) {
+            LUG_LOG.error("Application: Can't load the base color texture");
+            return false;
+        }
 
         baseColorTexture = textureBuilder.build();
         if (!baseColorTexture) {
@@ -57,7 +60,10 @@ bool Application::init(int argc, char* argv[]) {
     {
         lug::Graphics::Builder::Texture textureBuilder(*renderer);
 
-        textureBuilder.addLayer("textures/rustediron2_metallic_roughness.jpg");
+        if (!textureBuilder.addLayer("textures/rustediron2_metallic_roughness.jpg")) {
+            LUG_LOG.error("Application: Can't load the metallic roughness texture");
+            return false;
+        }
 
         metallicRoughnessTexture = textureBuilder.build();
         if (!metallicRoughnessTexture) {
@@ -71,7 +77,10 @@ bool Application::init(int argc, char* argv[]) {
     {
         lug::Graphics::Builder::Texture textureBuilder(*renderer);
 
-        textureBuilder.addLayer("textures/rustediron2_normal.jpg");
+        if (!textureBuilder.addLayer("textures/rustediron2_normal.jpg")) {
+            LUG_LOG.error("Application: Can't load the normal texture");
+            return false;
+        }
 
         normalTexture = textureBuilder.build();
         if (!normalTexture) {

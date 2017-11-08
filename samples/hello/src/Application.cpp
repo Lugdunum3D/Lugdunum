@@ -6,9 +6,11 @@
 #include <lug/Graphics/Builder/SkyBox.hpp>
 #include <lug/Graphics/Builder/Texture.hpp>
 #include <lug/Graphics/Renderer.hpp>
+#include <lug/Graphics/Scene/Node.hpp>
 #include <lug/Graphics/Scene/Scene.hpp>
 #include <lug/Graphics/Vulkan/Renderer.hpp>
 #include <lug/Graphics/Vulkan/Render/Texture.hpp>
+#include <lug/Graphics/Vulkan/Render/SkyBox.hpp>
 #include <lug/Math/Geometry/Trigonometry.hpp>
 
 #include <imgui.h>
@@ -18,6 +20,20 @@ Application::Application() : lug::Core::Application::Application{{"hello", {0, 1
 
     // We can set the display mode, by default to full
     getGraphicsInfo().rendererInitInfo.displayMode = ::lug::Graphics::Renderer::DisplayMode::Full;
+}
+
+void applyIBL(const lug::Graphics::Scene::Node* node, lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> irradianceMap, lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> prefilteredMap) {
+    const lug::Graphics::Scene::Node::MeshInstance* meshInstance = node->getMeshInstance();
+    if (meshInstance) {
+        for (auto& material: meshInstance->materials) {
+            material->setIrradianceMap(irradianceMap);
+            material->setPrefilteredMap(prefilteredMap);
+        }
+    }
+
+    for (const auto& child : node->getChildren()) {
+        applyIBL(static_cast<const lug::Graphics::Scene::Node*>(child), irradianceMap, prefilteredMap);
+    }
 }
 
 bool Application::init(int argc, char* argv[]) {
@@ -118,12 +134,11 @@ bool Application::init(int argc, char* argv[]) {
     {
         lug::Graphics::Builder::SkyBox skyBoxBuilder(*renderer);
 
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveX, "textures/skybox/right.jpg");
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeX, "textures/skybox/left.jpg");
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveY, "textures/skybox/top.jpg");
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeY, "textures/skybox/bottom.jpg");
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::PositiveZ, "textures/skybox/back.jpg");
-        skyBoxBuilder.setFaceFilename(lug::Graphics::Builder::SkyBox::Face::NegativeZ, "textures/skybox/front.jpg");
+        skyBoxBuilder.setMagFilter(lug::Graphics::Render::Texture::Filter::Linear);
+        skyBoxBuilder.setMinFilter(lug::Graphics::Render::Texture::Filter::Linear);
+
+        skyBoxBuilder.setBackgroundFilename("textures/Road_to_MonumentValley/Background.jpg");
+        skyBoxBuilder.setEnvironnementFilename("textures/Road_to_MonumentValley/Environnement.hdr");
 
         lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> skyBox = skyBoxBuilder.build();
         if (!skyBox) {
@@ -131,23 +146,22 @@ bool Application::init(int argc, char* argv[]) {
             return false;
         }
 
-        _scene->setSkyBox(skyBox);
-    }
+        lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> irradianceMap = skyBox->createIrradianceMap(*renderer);
 
-    // Build imgui texture
-    {
-        lug::Graphics::Builder::Texture textureBuilder(*renderer);
-
-        textureBuilder.addLayer("textures/skybox/right.jpg");
-        textureBuilder.setMagFilter(lug::Graphics::Render::Texture::Filter::Linear);
-        textureBuilder.setMinFilter(lug::Graphics::Render::Texture::Filter::Linear);
-        textureBuilder.setMipMapFilter(lug::Graphics::Render::Texture::Filter::Linear);
-
-        _texture = textureBuilder.build();
-        if (!_texture) {
-            LUG_LOG.error("Application::init Can't create texture");
+        if (!irradianceMap) {
+            LUG_LOG.error("Application::init Can't create irradiance map");
             return false;
         }
+
+        lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> prefilteredMap = skyBox->createPrefilteredMap(*renderer);
+
+        if (!prefilteredMap) {
+            LUG_LOG.error("Application::init Can't create prefiltered map");
+            return false;
+        }
+
+        _scene->setSkyBox(skyBox);
+        applyIBL(&_scene->getRoot(), irradianceMap, prefilteredMap);
     }
 
     return static_cast<lug::Graphics::Vulkan::Render::Window*>(_graphics.getRenderer()->getWindow())->initGui();
@@ -170,9 +184,9 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
-    auto vkTexture = lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(_texture);
+    auto vkTexture = lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(lug::Graphics::Vulkan::Render::SkyBox::getBrdfLut());
 
-    ImGui::Begin("Imgui texture", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    ImGui::Begin("BRDF Lut", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::Image(vkTexture.get(), ImVec2(200, 200), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
     ImGui::End();
 

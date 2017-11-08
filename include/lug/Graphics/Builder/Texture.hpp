@@ -18,13 +18,7 @@ class LUG_GRAPHICS_API Texture {
     friend Resource::SharedPtr<lug::Graphics::Render::Texture> lug::Graphics::Vulkan::Builder::Texture::build(const ::lug::Graphics::Builder::Texture&);
 
     struct Layer {
-        // TODO(nokitoo): add other infos(layers count, aspect mask, mip level, etc...)
-        std::string filename;
-
-        unsigned char* const data{nullptr};
-
-        uint32_t width{0};
-        uint32_t height{0};
+        const unsigned char* data{nullptr};
     };
 
 public:
@@ -42,7 +36,7 @@ public:
     Texture& operator=(const Texture&) = delete;
     Texture& operator=(Texture&&) = delete;
 
-    ~Texture() = default;
+    ~Texture();
 
     /**
      * @brief      Sets the name.
@@ -52,14 +46,17 @@ public:
 
     void setType(Type type);
 
+    void setMipLevels(uint32_t mipLevels);
+
     void setMagFilter(Render::Texture::Filter magFilter);
     void setMinFilter(Render::Texture::Filter minFilter);
     void setMipMapFilter(Render::Texture::Filter mipMapFilter);
     void setWrapS(Render::Texture::WrappingMode wrapS);
     void setWrapT(Render::Texture::WrappingMode wrapT);
+    void setWrapW(Render::Texture::WrappingMode wrapW);
 
-    void addLayer(const std::string& filename);
-    void addLayer(uint32_t width, uint32_t height, unsigned char* const data);
+    bool addLayer(const std::string& filename, bool hdr = false);
+    bool addLayer(uint32_t width, uint32_t height, Render::Texture::Format format, const unsigned char* data = nullptr);
 
     Resource::SharedPtr<Render::Texture> build();
 
@@ -70,12 +67,19 @@ protected:
 
     Type _type{Type::Texture2D};
 
+    uint32_t _width{0};
+    uint32_t _height{0};
+    Render::Texture::Format _format{Render::Texture::Format::Undefined};
+
+    uint32_t _mipLevels{1};
+
     Render::Texture::Filter _magFilter{Render::Texture::Filter::Nearest};
     Render::Texture::Filter _minFilter{Render::Texture::Filter::Nearest};
     Render::Texture::Filter _mipMapFilter{Render::Texture::Filter::Nearest};
 
     Render::Texture::WrappingMode _wrapS{Render::Texture::WrappingMode::ClampToEdge};
     Render::Texture::WrappingMode _wrapT{Render::Texture::WrappingMode::ClampToEdge};
+    Render::Texture::WrappingMode _wrapW{Render::Texture::WrappingMode::ClampToEdge};
 
     std::vector<Layer> _layers;
 };

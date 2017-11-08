@@ -194,7 +194,6 @@ inline void GraphicsPipeline::ColorBlendState::setBlendConstants(const float ble
 
 // GraphicsPipeline
 
-
 inline void GraphicsPipeline::setShader(VkShaderStageFlagBits stage, const char* entry, API::ShaderModule shaderModule) {
     const VkPipelineShaderStageCreateInfo shaderStage{
         /* shaderStage.sType */ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,

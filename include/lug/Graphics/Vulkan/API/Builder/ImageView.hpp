@@ -32,6 +32,7 @@ public:
     void setViewType(VkImageViewType viewType);
     void setAspectFlags(VkImageAspectFlags aspectFlags);
     void setLayerCount(uint32_t layerCount);
+    void setLevelCount(uint32_t levelCount);
 
     // Build methods
     bool build(API::ImageView& instance, VkResult* returnResult = nullptr);
@@ -45,6 +46,7 @@ private:
     VkImageViewType _viewType{VK_IMAGE_VIEW_TYPE_2D};
     VkImageAspectFlags _aspectFlags{VK_IMAGE_ASPECT_COLOR_BIT};
     uint32_t _layerCount{1};
+    uint32_t _levelCount{1};
 };
 
 #include <lug/Graphics/Vulkan/API/Builder/ImageView.inl>
