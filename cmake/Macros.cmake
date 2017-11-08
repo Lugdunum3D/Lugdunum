@@ -48,6 +48,11 @@ macro(lug_add_compile_options target)
     if(LUG_COMPILER_MSVC)
         target_compile_options(${target} PUBLIC /MP)
     endif()
+
+    # use gcc's libstdc++ because it has the modern namespaced ABI for std containers
+    if(LUG_COMPILER_CLANG)
+        target_compile_options(${target} PUBLIC "-stdlib=libstdc++")
+    endif()
 endmacro()
 
 macro(lug_add_library target)

@@ -16,7 +16,7 @@ googlemock:
 
 gltf2-loader:
     repository:
-        tag: fae3205a2a53fbda2270cee34478087065e46079
+        tag: bd9ab3a2cc796d5004d7c616d27cf04f45a7a87c
 
 imgui:
     repository:
