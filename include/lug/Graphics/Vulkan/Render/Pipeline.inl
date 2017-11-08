@@ -20,6 +20,7 @@ inline Pipeline::Id Pipeline::getBaseId() {
 
     Pipeline::Id::ExtraPart extraPart;
     extraPart.displayMode = 0;
+    extraPart.antialiasing = 0;
     extraPart.irradianceMapInfo = 0; // No texture
     extraPart.prefilteredMapInfo = 0; // No texture
 

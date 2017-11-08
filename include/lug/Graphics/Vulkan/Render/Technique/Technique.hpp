@@ -48,8 +48,7 @@ public:
     virtual bool init(const std::vector<API::ImageView>& imageViews) = 0;
     virtual void destroy() = 0;
 
-    virtual bool initDepthBuffers(const std::vector<API::ImageView>& imageViews) = 0;
-    virtual bool initFramebuffers(const std::vector<API::ImageView>& imageViews) = 0;
+    virtual bool initFrameDatas(const std::vector<API::ImageView>& imageViews) = 0;
 
 protected:
     Renderer& _renderer;

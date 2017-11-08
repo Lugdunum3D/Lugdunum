@@ -150,6 +150,7 @@
     macro(vkDestroySampler)                             \
     macro(vkDestroyImage)                               \
     macro(vkCmdPushConstants)                           \
+    macro(vkCmdResolveImage)                            \
     LUG_DEVICE_VULKAN_FUNCTIONS_KHR_SWAPCHAIN(macro)
 
 inline namespace Vulkan {

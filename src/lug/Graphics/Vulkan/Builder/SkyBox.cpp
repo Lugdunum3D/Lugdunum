@@ -159,7 +159,7 @@ static bool initSkyBoxPipeline(Renderer& renderer, API::GraphicsPipeline& skyBox
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
             /* colorAttachment.format */ renderer.getRenderWindow()->getSwapchain().getFormat().format,
-            /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* colorAttachment.samples */ VK_SAMPLE_COUNT_4_BIT, // VK_SAMPLE_COUNT_1_BIT
             /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
             /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
             /* colorAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -180,7 +180,7 @@ static bool initSkyBoxPipeline(Renderer& renderer, API::GraphicsPipeline& skyBox
         const VkAttachmentDescription depthAttachment{
             /* depthAttachment.flags */ 0,
             /* depthAttachment.format */ depthFormat,
-            /* depthAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* depthAttachment.samples */ VK_SAMPLE_COUNT_4_BIT, // VK_SAMPLE_COUNT_1_BIT,
             /* depthAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
             /* depthAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
             /* depthAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -211,6 +211,9 @@ static bool initSkyBoxPipeline(Renderer& renderer, API::GraphicsPipeline& skyBox
 
         graphicsPipelineBuilder.setRenderPass(std::move(renderPass), 0);
     }
+
+    auto multisampleState = graphicsPipelineBuilder.getMultisampleState();
+    multisampleState.setRasterizationSamples(VK_SAMPLE_COUNT_4_BIT);
 
     VkResult result{VK_SUCCESS};
     if (!graphicsPipelineBuilder.build(skyBoxPipeline, &result)) {

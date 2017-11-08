@@ -32,14 +32,26 @@ namespace Technique {
 
 class LUG_GRAPHICS_API Forward final : public Technique {
 private:
-    struct DepthBuffer {
+    struct ImageSet {
         API::Image image;
         API::ImageView imageView;
     };
 
     struct FrameData {
-        DepthBuffer depthBuffer;
-        API::Framebuffer framebuffer;
+        struct {
+            // Used to check the validity of the data
+            Renderer::Antialiasing antialiasing;
+
+            // Memory containing the image and the depth buffer
+            API::DeviceMemory memory;
+
+            const API::ImageView* swapchainImageView;
+
+            ImageSet renderImage;
+            ImageSet depthBuffer;
+
+            API::Framebuffer framebuffer;
+        } framebuffer;
 
         API::Fence renderFence;
         API::CommandBuffer renderCmdBuffer;
@@ -80,12 +92,12 @@ public:
     bool init(const std::vector<API::ImageView>& imageViews) override final;
     void destroy() override final;
 
-    bool initDepthBuffers(const std::vector<API::ImageView>& imageViews) override final;
-    bool initFramebuffers(const std::vector<API::ImageView>& imageViews) override final;
+    bool initFrameDatas(const std::vector<API::ImageView>& imageViews) override final;
 
 private:
-    API::DeviceMemory _depthBufferMemory;
+    bool initFramedata(uint32_t nb, const API::ImageView& swapchainImageView);
 
+private:
     std::vector<FrameData> _framesData;
 
     const API::Queue* _graphicsQueue{nullptr};

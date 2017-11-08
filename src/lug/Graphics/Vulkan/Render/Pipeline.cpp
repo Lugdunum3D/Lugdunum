@@ -367,19 +367,47 @@ bool Pipeline::init() {
         graphicsPipelineBuilder.setPipelineLayout(std::move(pipelineLayout));
     }
 
+    const VkSampleCountFlagBits nbSamples = [](Renderer::Antialiasing antialiasing) {
+        switch (antialiasing) {
+            case Renderer::Antialiasing::MSAA2X:
+                return VK_SAMPLE_COUNT_2_BIT;
+            case Renderer::Antialiasing::MSAA4X:
+                return VK_SAMPLE_COUNT_4_BIT;
+            case Renderer::Antialiasing::MSAA8X:
+                return VK_SAMPLE_COUNT_8_BIT;
+            case Renderer::Antialiasing::MSAA16X:
+                return VK_SAMPLE_COUNT_16_BIT;
+            default:
+                return VK_SAMPLE_COUNT_1_BIT;
+        };
+    }(static_cast<Renderer::Antialiasing>(extraPart.antialiasing));
+
+    auto multisampleState = graphicsPipelineBuilder.getMultisampleState();
+    multisampleState.setRasterizationSamples(nbSamples);
+
+    // TODO: Try the sampleShadingEnable and minSampleShading
+
     // Set render pass
     {
         API::Builder::RenderPass renderPassBuilder(_renderer.getDevice());
 
+        const VkFormat colorFormat = _renderer.getRenderWindow()->getSwapchain().getFormat().format; // TODO: Render in HDR
+        /*API::Image::findSupportedFormat(
+            _renderer.getDevice(),
+            {VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT},
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT
+        );*/
+
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
-            /* colorAttachment.format */ _renderer.getRenderWindow()->getSwapchain().getFormat().format,
-            /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* colorAttachment.format */ colorFormat,
+            /* colorAttachment.samples */ nbSamples,
             /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
             /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
             /* colorAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             /* colorAttachment.stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            /* colorAttachment.initialLayout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            /* colorAttachment.initialLayout */ VK_IMAGE_LAYOUT_UNDEFINED,
             /* colorAttachment.finalLayout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
         };
 
@@ -395,7 +423,7 @@ bool Pipeline::init() {
         const VkAttachmentDescription depthAttachment{
             /* depthAttachment.flags */ 0,
             /* depthAttachment.format */ depthFormat,
-            /* depthAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* depthAttachment.samples */ nbSamples,
             /* depthAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
             /* depthAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
             /* depthAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
