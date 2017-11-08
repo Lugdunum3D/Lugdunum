@@ -42,7 +42,11 @@ bool Window::pollEvent(lug::Window::Event& event) {
         }
 
         if (_isGuiInitialized == true) {
-            _guiInstance.processEvent(event);
+            while (_guiInstance.processEvent(event)) {
+                if (!lug::Window::Window::pollEvent(event)) {
+                    return false;
+                }
+            }
         }
 
         return true;

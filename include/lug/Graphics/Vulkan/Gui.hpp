@@ -84,7 +84,7 @@ public:
     void beginFrame(const lug::System::Time& elapsedTime);
     bool endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t currentImageIndex);
 
-    void processEvent(const lug::Window::Event event);
+    bool processEvent(const lug::Window::Event event);
 
     const Vulkan::API::Semaphore& getSemaphore(uint32_t currentImageIndex) const;
 
