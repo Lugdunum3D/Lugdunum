@@ -10,6 +10,7 @@
 #include <lug/Graphics/Render/Technique/Type.hpp>
 #include <lug/Graphics/Resource.hpp>
 #include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
+#include <lug/Graphics/Vulkan/Render/PipelineId.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -25,79 +26,102 @@ namespace Render {
 */
 class LUG_GRAPHICS_API Pipeline : public Resource {
 public:
+    enum class Type : uint8_t {
+        Model,          // Able to render a model
+        Skybox,         // Able to render the skybox
+        IrradianceMap,  // Able to render the irradiance map
+        PrefilteredMap, // Able to render the prefiltered map
+        BrdfLut         // Able to render the brdf lut
+    };
+
+public:
     /**
      * @brief      Id of the Pipeline.
-     *             It's a concatenation of three parts: PrimitivePart, MaterialPart and PipelinePart
+     *             It's a concatenation of a type and some parts depending of the type
      *             It allows to uniquely identify a pipeline using these characteristics.
      */
     struct Id {
-        /**
-         * @brief      Describes the primitive.
-         */
-        struct PrimitivePart {
-            union {
-                struct {
-                    uint32_t positionVertexData : 1;    ///< 0 if no attribute position.
-                    uint32_t normalVertexData : 1;      ///< 0 if no attribute normal.
-                    uint32_t tangentVertexData : 1;     ///< 0 if no attribute tangeant.
-                    uint32_t countTexCoord : 2;         ///< The number of texcoord (maximum 3).
-                    uint32_t countColor : 2;            ///< The number of colors (maximum 3).
-                    uint32_t primitiveMode : 3;         ///< The primitive mode. @see Mesh::PrimitiveSet::Mode.
+        struct Model {
+            /**
+             * @brief      Describes the primitive.
+             */
+            struct PrimitivePart {
+                union {
+                    struct {
+                        #define LUG_DEFINE_PART(name, bits) \
+                            uint32_t name : bits;
+                        LUG_PIPELINE_ID_MODEL_PRIMITIVE_PART(LUG_DEFINE_PART)
+                        #undef LUG_DEFINE_PART
+                    };
+
+                    uint32_t value;
                 };
 
-                uint32_t value;
+                explicit operator uint32_t() {
+                    return value;
+                }
             };
 
-            explicit operator uint32_t() {
-                return value;
-            }
-        };
+            /**
+             * @brief      Describes the material. How is the material composed,
+             *             with textures, no textures, etc, to be used to construct unique
+             *             pipelines.
+             */
+            struct MaterialPart {
+                union {
+                    struct {
+                        #define LUG_DEFINE_PART(name, bits) \
+                            uint32_t name : bits;
+                        LUG_PIPELINE_ID_MODEL_MATERIAL_PART(LUG_DEFINE_PART)
+                        #undef LUG_DEFINE_PART
+                    };
 
-        /**
-         * @brief      Describes the material. How is the material composed,
-         *             with textures, no textures, etc, to be used to construct unique
-         *             pipelines.
-         */
-        struct MaterialPart {
-            union {
-                struct {
-                    uint32_t baseColorInfo : 2;             ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
-                    uint32_t metallicRoughnessInfo : 2;     ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
-                    uint32_t normalInfo : 2;                ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
-                    uint32_t occlusionInfo : 2;             ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
-                    uint32_t emissiveInfo : 2;              ///< 0b00 texture with UV0, 0b01 texture with UV1, 0b10 texture with UV2, 0b11 no texture.
+                    uint32_t value;
                 };
 
-                uint32_t value;
+                explicit operator uint32_t() {
+                    return value;
+                }
             };
 
-            explicit operator uint32_t() {
-                return value;
-            }
-        };
+            struct ExtraPart {
+                union {
+                    struct {
+                        #define LUG_DEFINE_PART(name, bits) \
+                            uint32_t name : bits;
+                        LUG_PIPELINE_ID_MODEL_EXTRA_PART(LUG_DEFINE_PART)
+                        #undef LUG_DEFINE_PART
+                    };
 
-        struct ExtraPart {
-            union {
-                struct {
-                    uint32_t displayMode : 3;           ///< Corresponding to the value in Renderer::DisplayMode.
-                    uint32_t antialiasing : 4;          ///< Corresponding to the value in Renderer::Antialiasing.
-                    uint32_t irradianceMapInfo : 1;     ///< 1 texture, 0 no texture.
-                    uint32_t prefilteredMapInfo : 1;    ///< 1 texture, 0 no texture
+                    uint32_t value;
                 };
 
-                uint32_t value;
+                explicit operator uint32_t() {
+                    return value;
+                }
             };
 
-            explicit operator uint32_t() {
-                return value;
-            }
+            struct Info {
+                uint32_t type : 3;
+
+                #define LUG_DEFINE_PART(name, bits) \
+                    uint32_t name : bits;
+
+                LUG_PIPELINE_ID_MODEL_PRIMITIVE_PART(LUG_DEFINE_PART)
+                LUG_PIPELINE_ID_MODEL_MATERIAL_PART(LUG_DEFINE_PART)
+                LUG_PIPELINE_ID_MODEL_EXTRA_PART(LUG_DEFINE_PART)
+
+                #undef LUG_DEFINE_PART
+            };
         };
 
         union {
             struct {
-                uint32_t primitivePart : 10;
-                uint32_t materialPart : 10;
-                uint32_t extraPart : 9;
+                union {
+                    uint32_t type : 3;
+
+                    Model::Info modelInfo;
+                };
             };
 
             uint32_t value;
@@ -125,26 +149,51 @@ public:
             return value < other.value;
         }
 
-        PrimitivePart getPrimitivePart() {
-            PrimitivePart tmp;
-            tmp.value = primitivePart;
+        Model::PrimitivePart getModelPrimitivePart() {
+            LUG_ASSERT(static_cast<Type>(type) == Type::Model, "Must be of type Model to use getModelPrimitivePart()");
+
+            Model::PrimitivePart tmp;
+
+            #define LUG_COPY_PRIMITIVE_PART(name, bits) \
+                tmp.name = modelInfo.name;
+            LUG_PIPELINE_ID_MODEL_PRIMITIVE_PART(LUG_COPY_PRIMITIVE_PART)
+            #undef LUG_COPY_PRIMITIVE_PART
+
             return tmp;
         }
 
-        MaterialPart getMaterialPart() {
-            MaterialPart tmp;
-            tmp.value = materialPart;
+        Model::MaterialPart getModelMaterialPart() {
+            LUG_ASSERT(static_cast<Type>(type) == Type::Model, "Must be of type Model to use getModelMaterialPart()");
+
+            Model::MaterialPart tmp;
+
+            #define LUG_COPY_MATERIAL_PART(name, bits) \
+                tmp.name = modelInfo.name;
+            LUG_PIPELINE_ID_MODEL_MATERIAL_PART(LUG_COPY_MATERIAL_PART)
+            #undef LUG_COPY_MATERIAL_PART
+
             return tmp;
         }
 
-        ExtraPart getExtraPart() {
-            ExtraPart tmp;
-            tmp.value = extraPart;
+        Model::ExtraPart getModelExtraPart() {
+            LUG_ASSERT(static_cast<Type>(type) == Type::Model, "Must be of type Model to use getModelExtraPart()");
+
+            Model::ExtraPart tmp;
+
+            #define LUG_COPY_EXTRA_PART(name, bits) \
+                tmp.name = modelInfo.name;
+            LUG_PIPELINE_ID_MODEL_EXTRA_PART(LUG_COPY_EXTRA_PART)
+            #undef LUG_COPY_EXTRA_PART
+
             return tmp;
+        }
+
+        Type getType() {
+            return static_cast<Type>(type);
         }
 
         /**
-         * @brief      Create a pipeline id.
+         * @brief      Create a pipeline id for model rendering
          *
          * @param[in]  primitivePart  The primitive part. It should be created manually beforehand.
          * @param[in]  materialPart   The material part. It should be created manually beforehand.
@@ -152,16 +201,31 @@ public:
          *
          * @return     The created id.
          */
-        static Id create(PrimitivePart primitivePart, MaterialPart materialPart, ExtraPart extraPart) {
+        static Id createModel(Model::PrimitivePart primitivePart, Model::MaterialPart materialPart, Model::ExtraPart extraPart) {
             Id id;
 
-            id.primitivePart = static_cast<uint32_t>(primitivePart);
-            id.materialPart = static_cast<uint32_t>(materialPart);
-            id.extraPart = static_cast<uint32_t>(extraPart);
+            id.type = static_cast<uint8_t>(Type::Model);
+
+            #define LUG_COPY_PRIMITIVE_PART(name, bits) \
+                id.modelInfo.name = primitivePart.name;
+            LUG_PIPELINE_ID_MODEL_PRIMITIVE_PART(LUG_COPY_PRIMITIVE_PART)
+            #undef LUG_COPY_PRIMITIVE_PART
+
+            #define LUG_COPY_MATERIAL_PART(name, bits) \
+                id.modelInfo.name = materialPart.name;
+            LUG_PIPELINE_ID_MODEL_MATERIAL_PART(LUG_COPY_MATERIAL_PART)
+            #undef LUG_COPY_MATERIAL_PART
+
+            #define LUG_COPY_EXTRA_PART(name, bits) \
+                id.modelInfo.name = extraPart.name;
+            LUG_PIPELINE_ID_MODEL_EXTRA_PART(LUG_COPY_EXTRA_PART)
+            #undef LUG_COPY_EXTRA_PART
 
             return id;
         };
     };
+
+    static_assert(sizeof(Id) <= 4, "Pipeline::Id should be less or equal to 4 bytes");
 
 public:
     class LUG_GRAPHICS_API ShaderBuilder {
@@ -205,7 +269,8 @@ public:
      * @return     The id.
      */
     Id getId() const;
-    static inline Id getBaseId();
+
+    static Id getModelBaseId();
 
     const API::GraphicsPipeline& getPipelineAPI();
 
@@ -213,6 +278,8 @@ public:
 
 private:
     bool init();
+
+    bool initModel();
 
 private:
     Renderer& _renderer;

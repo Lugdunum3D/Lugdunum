@@ -94,14 +94,14 @@ bool Forward::render(
         return false;
     }
 
-    auto basePipelineId = Pipeline::getBaseId();
+    auto basePipelineId = Pipeline::getModelBaseId();
 
     // Rebuild the base pipeline id using the antialiasing (to make it compatible)
     {
-        auto extraPart = basePipelineId.getExtraPart();
+        auto extraPart = basePipelineId.getModelExtraPart();
         extraPart.antialiasing = static_cast<uint32_t>(frameData.framebuffer.antialiasing);
 
-        basePipelineId = Pipeline::Id::create(basePipelineId.getPrimitivePart(), basePipelineId.getMaterialPart(), extraPart);
+        basePipelineId = Pipeline::Id::createModel(basePipelineId.getModelPrimitivePart(), basePipelineId.getModelMaterialPart(), extraPart);
     }
 
     // Begin of the render pass
@@ -921,11 +921,11 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
 
     // Build the framebuffer
     {
-        auto basePipelineId = Pipeline::getBaseId();
-        auto extraPart = basePipelineId.getExtraPart();
+        auto basePipelineId = Pipeline::getModelBaseId();
+        auto extraPart = basePipelineId.getModelExtraPart();
         extraPart.antialiasing = static_cast<uint32_t>(frameData.framebuffer.antialiasing);
 
-        const auto& basePipeline = _renderer.getPipeline(Pipeline::Id::create(basePipelineId.getPrimitivePart(), basePipelineId.getMaterialPart(), extraPart));
+        const auto& basePipeline = _renderer.getPipeline(Pipeline::Id::createModel(basePipelineId.getModelPrimitivePart(), basePipelineId.getModelMaterialPart(), extraPart));
 
         if (!basePipeline) {
             return false;

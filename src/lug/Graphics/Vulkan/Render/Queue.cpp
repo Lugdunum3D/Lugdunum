@@ -23,16 +23,16 @@ void Queue::addMeshInstance(Scene::Node& node, const lug::Graphics::Renderer& re
         Pipeline::Id pipelineId = 0;
         {
             Render::Mesh::PrimitiveSetData* primitiveSetData = static_cast<Render::Mesh::PrimitiveSetData*>(primitiveSet._data);
-            Pipeline::Id::PrimitivePart pipelineIdPrimitivePart = primitiveSetData->pipelineIdPrimitivePart;
-            Pipeline::Id::MaterialPart pipelineIdMaterialPart = material->getPipelineId();
+            Pipeline::Id::Model::PrimitivePart pipelineIdPrimitivePart = primitiveSetData->pipelineIdPrimitivePart;
+            Pipeline::Id::Model::MaterialPart pipelineIdMaterialPart = material->getPipelineId();
 
-            Pipeline::Id::ExtraPart pipelineIdExtraPart;
+            Pipeline::Id::Model::ExtraPart pipelineIdExtraPart;
             pipelineIdExtraPart.displayMode = static_cast<uint32_t>(renderer.getDisplayMode());
             pipelineIdExtraPart.antialiasing = static_cast<uint32_t>(renderer.getAntialiasing());
             pipelineIdExtraPart.irradianceMapInfo = static_cast<uint32_t>(material->getIrradianceMap() && material->getIrradianceMap()->getEnvironnementTexture() ? 1 : 0);
             pipelineIdExtraPart.prefilteredMapInfo = static_cast<uint32_t>(material->getPrefilteredMap() && material->getPrefilteredMap()->getEnvironnementTexture() ? 1 : 0);
 
-            pipelineId = Pipeline::Id::create(pipelineIdPrimitivePart, pipelineIdMaterialPart, pipelineIdExtraPart);
+            pipelineId = Pipeline::Id::createModel(pipelineIdPrimitivePart, pipelineIdMaterialPart, pipelineIdExtraPart);
         }
 
         // Add in the list

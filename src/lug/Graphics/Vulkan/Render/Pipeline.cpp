@@ -19,9 +19,21 @@ namespace Render {
 Pipeline::Pipeline(Renderer& renderer, Id id) : Resource(Resource::Type::Pipeline, "Pipeline"), _renderer(renderer), _id(id) {}
 
 bool Pipeline::init() {
-    Pipeline::Id::PrimitivePart primitivePart = _id.getPrimitivePart();
-    Pipeline::Id::MaterialPart materialPart = _id.getMaterialPart();
-    Pipeline::Id::ExtraPart extraPart = _id.getExtraPart();
+    Pipeline::Type type = _id.getType();
+
+    switch(type) {
+        case Pipeline::Type::Model:
+            return initModel();
+        default:
+            LUG_LOG.error("Vulkan::Render::Pipeline::init: Unknown type {}", static_cast<uint32_t>(_id.getType()));
+            return false;
+    }
+}
+
+bool Pipeline::initModel() {
+    Pipeline::Id::Model::PrimitivePart primitivePart = _id.getModelPrimitivePart();
+    Pipeline::Id::Model::MaterialPart materialPart = _id.getModelMaterialPart();
+    Pipeline::Id::Model::ExtraPart extraPart = _id.getModelExtraPart();
 
     API::Builder::GraphicsPipeline graphicsPipelineBuilder(_renderer.getDevice());
 

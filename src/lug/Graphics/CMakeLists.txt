@@ -311,6 +311,7 @@ set(INC
     ${INCROOT}/Vulkan/Render/Mesh.inl
     ${INCROOT}/Vulkan/Render/Pipeline.hpp
     ${INCROOT}/Vulkan/Render/Pipeline.inl
+    ${INCROOT}/Vulkan/Render/PipelineId.hpp
     ${INCROOT}/Vulkan/Render/Queue.hpp
     ${INCROOT}/Vulkan/Render/Technique/Forward.hpp
     ${INCROOT}/Vulkan/Render/Technique/Technique.hpp
