@@ -44,3 +44,10 @@
     macro(antialiasing, 4)                      \
     macro(irradianceMapInfo, 1)                 \
     macro(prefilteredMapInfo, 1)
+
+/*
+    antialiasing        ///< Corresponding to the value in Renderer::Antialiasing.
+*/
+
+#define LUG_PIPELINE_ID_SKYBOX_EXTRA_PART(macro) \
+    macro(antialiasing, 4)

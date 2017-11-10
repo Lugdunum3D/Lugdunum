@@ -27,6 +27,13 @@ inline Pipeline::Id Pipeline::getModelBaseId() {
     return Pipeline::Id::createModel(primitivePart, materialPart, extraPart);
 }
 
+inline Pipeline::Id Pipeline::getSkyboxBaseId() {
+    Pipeline::Id::Skybox::ExtraPart extraPart;
+    extraPart.antialiasing = 0;
+
+    return Pipeline::Id::createSkybox(extraPart);
+}
+
 inline const API::GraphicsPipeline& Pipeline::getPipelineAPI() {
     return _pipeline;
 }

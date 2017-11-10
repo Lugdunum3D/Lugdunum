@@ -15,7 +15,7 @@ SkyBox::SkyBox(Renderer& renderer) : DescriptorSetPool(renderer) {}
 const DescriptorSet* SkyBox::allocate(const ::lug::Graphics::Vulkan::Render::Texture* skyBox) {
     const auto& result = DescriptorSetPool::allocate(
         reinterpret_cast<size_t>(static_cast<VkImage>(skyBox->getImage())),
-        Render::SkyBox::getPipeline().getLayout()->getDescriptorSetLayouts()[1]
+        _renderer.getPipeline(Pipeline::getSkyboxBaseId())->getPipelineAPI().getLayout()->getDescriptorSetLayouts()[1]
     );
 
     if (std::get<0>(result)) {

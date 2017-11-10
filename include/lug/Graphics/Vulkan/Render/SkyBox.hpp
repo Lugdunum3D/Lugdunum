@@ -37,7 +37,6 @@ public:
     Resource::SharedPtr<lug::Graphics::Render::SkyBox> createIrradianceMap(lug::Graphics::Renderer& renderer) const override final;
     Resource::SharedPtr<lug::Graphics::Render::SkyBox> createPrefilteredMap(lug::Graphics::Renderer& renderer) const override final;
 
-    static const API::GraphicsPipeline& getPipeline();
     static const lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> getMesh();
     static const lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> getBrdfLut();
 
@@ -51,7 +50,6 @@ private:
     SkyBox(const std::string& name);
 
 private:
-    static API::GraphicsPipeline _pipeline;
     static API::GraphicsPipeline _irradianceMapPipeline;
     static API::GraphicsPipeline _prefilteredMapPipeline;
     static API::GraphicsPipeline _brdfLutPipeline;

@@ -115,12 +115,43 @@ public:
             };
         };
 
+        struct Skybox {
+            struct ExtraPart {
+                union {
+                    struct {
+                        #define LUG_DEFINE_PART(name, bits) \
+                            uint32_t name : bits;
+                        LUG_PIPELINE_ID_SKYBOX_EXTRA_PART(LUG_DEFINE_PART)
+                        #undef LUG_DEFINE_PART
+                    };
+
+                    uint32_t value;
+                };
+
+                explicit operator uint32_t() {
+                    return value;
+                }
+            };
+
+            struct Info {
+                uint32_t type : 3;
+
+                #define LUG_DEFINE_PART(name, bits) \
+                    uint32_t name : bits;
+
+                LUG_PIPELINE_ID_SKYBOX_EXTRA_PART(LUG_DEFINE_PART)
+
+                #undef LUG_DEFINE_PART
+            };
+        };
+
         union {
             struct {
                 union {
                     uint32_t type : 3;
 
                     Model::Info modelInfo;
+                    Skybox::Info skyboxInfo;
                 };
             };
 
@@ -188,6 +219,19 @@ public:
             return tmp;
         }
 
+        Skybox::ExtraPart getSkyboxExtraPart() {
+            LUG_ASSERT(static_cast<Type>(type) == Type::Skybox, "Must be of type Skybox to use getSkyboxExtraPart()");
+
+            Skybox::ExtraPart tmp;
+
+            #define LUG_COPY_EXTRA_PART(name, bits) \
+                tmp.name = skyboxInfo.name;
+            LUG_PIPELINE_ID_SKYBOX_EXTRA_PART(LUG_COPY_EXTRA_PART)
+            #undef LUG_COPY_EXTRA_PART
+
+            return tmp;
+        }
+
         Type getType() {
             return static_cast<Type>(type);
         }
@@ -219,6 +263,26 @@ public:
             #define LUG_COPY_EXTRA_PART(name, bits) \
                 id.modelInfo.name = extraPart.name;
             LUG_PIPELINE_ID_MODEL_EXTRA_PART(LUG_COPY_EXTRA_PART)
+            #undef LUG_COPY_EXTRA_PART
+
+            return id;
+        };
+
+        /**
+         * @brief      Create a pipeline id for skybox rendering
+         *
+         * @param[in]  extraPart      The extra part. It should be created manually beforehand.
+         *
+         * @return     The created id.
+         */
+        static Id createSkybox(Skybox::ExtraPart extraPart) {
+            Id id;
+
+            id.type = static_cast<uint8_t>(Type::Skybox);
+
+            #define LUG_COPY_EXTRA_PART(name, bits) \
+                id.skyboxInfo.name = extraPart.name;
+            LUG_PIPELINE_ID_SKYBOX_EXTRA_PART(LUG_COPY_EXTRA_PART)
             #undef LUG_COPY_EXTRA_PART
 
             return id;
@@ -271,6 +335,7 @@ public:
     Id getId() const;
 
     static Id getModelBaseId();
+    static Id getSkyboxBaseId();
 
     const API::GraphicsPipeline& getPipelineAPI();
 
@@ -280,6 +345,7 @@ private:
     bool init();
 
     bool initModel();
+    bool initSkybox();
 
 private:
     Renderer& _renderer;

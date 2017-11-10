@@ -20,7 +20,6 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-API::GraphicsPipeline SkyBox::_pipeline;
 API::GraphicsPipeline SkyBox::_irradianceMapPipeline;
 API::GraphicsPipeline SkyBox::_prefilteredMapPipeline;
 API::GraphicsPipeline SkyBox::_brdfLutPipeline;
@@ -37,7 +36,6 @@ SkyBox::~SkyBox() {
 void SkyBox::destroy() {
     --_skyBoxCount;
     if (_skyBoxCount == 0) {
-        SkyBox::_pipeline.destroy();
         SkyBox::_irradianceMapPipeline.destroy();
         SkyBox::_prefilteredMapPipeline.destroy();
         SkyBox::_brdfLutPipeline.destroy();

@@ -405,7 +405,19 @@ bool Forward::render(
     // Render skybox
     {
         Resource::SharedPtr<Render::SkyBox> skyBox = renderQueue.getSkyBox();
+
         if (skyBox && skyBox->getBackgroundTexture()) {
+            Pipeline::Id pipelineId = Pipeline::getSkyboxBaseId();
+
+            {
+                Pipeline::Id::Skybox::ExtraPart extraPart;
+                extraPart.antialiasing = static_cast<uint32_t>(_renderer.getAntialiasing());
+
+                pipelineId = Pipeline::Id::createSkybox(extraPart);
+            }
+
+            const auto& pipeline = _renderer.getPipeline(pipelineId);
+
             Resource::SharedPtr<Render::Texture> skyBoxTexture =  Resource::SharedPtr<Render::Texture>::cast(skyBox->getBackgroundTexture());
             // Get the new (or old) skyBox descriptor set
             {
@@ -423,7 +435,7 @@ bool Forward::render(
             // Bind descriptor set of the skybox
             {
                 const API::CommandBuffer::CmdBindDescriptors skyBoxBind{
-                    /* skyBoxBind.pipelineLayout     */ *SkyBox::getPipeline().getLayout(),
+                    /* skyBoxBind.pipelineLayout     */ *pipeline->getPipelineAPI().getLayout(),
                     /* skyBoxBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
                     /* skyBoxBind.firstSet           */ 1,
                     /* skyBoxBind.descriptorSets     */ {&frameData.skyBoxDescriptorSet->getDescriptorSet()},
@@ -433,7 +445,7 @@ bool Forward::render(
                 frameData.renderCmdBuffer.bindDescriptorSets(skyBoxBind);
             }
 
-            frameData.renderCmdBuffer.bindPipeline(SkyBox::getPipeline());
+            frameData.renderCmdBuffer.bindPipeline(pipeline->getPipelineAPI());
 
             auto& primitiveSet = SkyBox::getMesh()->getPrimitiveSets()[0];
 
