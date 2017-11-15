@@ -72,7 +72,7 @@ private:
     };
 
 public:
-    Forward(Renderer& renderer, const View& renderView);
+    Forward(Renderer& renderer, View& renderView);
 
     Forward(const Forward&) = delete;
     Forward(Forward&&) = delete;
@@ -92,6 +92,7 @@ public:
     bool init(const std::vector<API::ImageView>& imageViews) override final;
     void destroy() override final;
 
+    bool setSwapchainImageViews(const std::vector<API::ImageView>& imageViews) override final;
     bool initFrameDatas(const std::vector<API::ImageView>& imageViews) override final;
 
 private:

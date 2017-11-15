@@ -46,7 +46,7 @@ std::unique_ptr<DescriptorSetPool::SkyBox> Forward::_skyBoxDescriptorSetPool = n
 
 uint32_t Forward::_forwardCount = 0;
 
-Forward::Forward(Renderer& renderer, const Render::View& renderView) : Technique(renderer, renderView) {
+Forward::Forward(Renderer& renderer, Render::View& renderView) : Technique(renderer, renderView) {
     ++_forwardCount;
 }
 
@@ -768,6 +768,14 @@ void Forward::destroy() {
     _transferCommandPool.destroy();
 }
 
+bool Forward::setSwapchainImageViews(const std::vector<API::ImageView>& imageViews) {
+    for (uint32_t i = 0; i < imageViews.size(); ++i) {
+        _framesData[i].framebuffer.swapchainImageView = &imageViews[i];
+    }
+
+    return true;
+}
+
 bool Forward::initFrameDatas(const std::vector<API::ImageView>& imageViews) {
     _framesData.resize(imageViews.size());
 
@@ -787,13 +795,17 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
     frameData.framebuffer.swapchainImageView = &swapchainImageView;
 
     // We don't need to init / re-init the images if we already have them with the good resolution and aliasing
-    if (frameData.framebuffer.antialiasing == _renderer.getAntialiasing()
+    // and if the render view isn't dirty for this frame
+    if (!_renderView.isDirty(nb)
+        && frameData.framebuffer.antialiasing == _renderer.getAntialiasing()
         && static_cast<VkImage>(frameData.framebuffer.depthBuffer.image)
         && frameData.framebuffer.depthBuffer.image.getExtent().width == viewport.extent.width
         && frameData.framebuffer.depthBuffer.image.getExtent().height == viewport.extent.height
     ) {
         return true;
     }
+
+    _renderView.clearDirty(nb);
 
     // Destroy everything to build up
     {

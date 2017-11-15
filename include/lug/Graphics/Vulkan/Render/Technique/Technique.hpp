@@ -28,7 +28,7 @@ namespace Technique {
 
 class LUG_GRAPHICS_API Technique {
 public:
-    Technique(Renderer& renderer, const View& renderView);
+    Technique(Renderer& renderer, View& renderView);
 
     Technique(const Technique&) = delete;
     Technique(Technique&&) = delete;
@@ -48,11 +48,12 @@ public:
     virtual bool init(const std::vector<API::ImageView>& imageViews) = 0;
     virtual void destroy() = 0;
 
+    virtual bool setSwapchainImageViews(const std::vector<API::ImageView>& imageViews) = 0;
     virtual bool initFrameDatas(const std::vector<API::ImageView>& imageViews) = 0;
 
 protected:
     Renderer& _renderer;
-    const View& _renderView;
+    View& _renderView;
 };
 
 } // Technique

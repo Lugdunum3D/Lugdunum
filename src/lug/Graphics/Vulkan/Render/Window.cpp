@@ -83,9 +83,11 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
             for (auto& renderView: _renderViews) {
                 View* renderView_ = static_cast<View*>(renderView.get());
 
-                if (!renderView_->getRenderTechnique()->initFrameDatas(_swapchain.getImagesViews())) {
+                if (!renderView_->getRenderTechnique()->setSwapchainImageViews(_swapchain.getImagesViews())) {
                     return false;
                 }
+
+                renderView_->setDirty();
             }
         } else {
             return false;
