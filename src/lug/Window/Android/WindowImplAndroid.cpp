@@ -40,13 +40,22 @@ bool WindowImpl::pollEvent(lug::Window::Event& event) {
                 continue;
             }
 
-            AInputQueue_finishEvent(inputQueue, androidEvent, 0);
+            AInputQueue_finishEvent(inputQueue, androidEvent, 1);
         }
     }
 
     if (!events.empty()) {
         event = events.front();
         events.pop();
+
+        if (event.type == Event::Type::Resize) {
+            _parent->_mode.width = ANativeWindow_getWidth(nativeWindow);
+            _parent->_mode.height = ANativeWindow_getHeight(nativeWindow);            
+        }
+        // if (event.type == Event::Type::AndroidDestroy) {
+        //     _window
+        // }
+
         return true;
     }
 

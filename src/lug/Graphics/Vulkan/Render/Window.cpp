@@ -32,6 +32,15 @@ Window::~Window() {
 
 bool Window::pollEvent(lug::Window::Event& event) {
     if (lug::Window::Window::pollEvent(event)) {
+        if (event.type == lug::Window::Event::Type::AndroidDestroy) {
+            destroyRender();
+        }
+        if (event.type == lug::Window::Event::Type::AndroidCreate) {
+            initRender();
+//            if (static_cast<VkSwapchainKHR>(_swapchain) != VK_NULL_HANDLE)
+        }
+
+
         if (event.type == lug::Window::Event::Type::Resize) {
             _swapchain.setOutOfDate(true);
 

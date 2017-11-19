@@ -563,10 +563,11 @@ inline std::vector<const char*> Renderer::checkRequirementsExtensions(const Info
         _window = Render::Window::create(*this, initInfo);
     }
 
+#if !defined (LUG_SYSTEM_ANDROID)
     if (!_window->initRender()) {
         _window.reset();
     }
-
+#endif
     return _window.get();
 }
 

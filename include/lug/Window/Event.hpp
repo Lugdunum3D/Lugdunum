@@ -75,7 +75,9 @@ struct LUG_WINDOW_API Event {
         MouseMoved,     ///< MouseMoved event
         MouseWheel,     ///< MouseWheelRotated event
         MouseLeave,     ///< Mouse left window event
-        MouseEnter      ///< Mouse entered window event
+        MouseEnter,      ///< Mouse entered window event
+        AndroidDestroy,
+        AndroidCreate
     };
 
     Type type;          ///< The type of the event
