@@ -4,8 +4,23 @@ function build_lugdunum() {
     cd ~/Lugdunum
 
     mkdir build && cd build
-    (cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DLUG_THIRDPARTY_DIR=$HOME/.local/thirdparty) || return 1
-    (make all test && sudo make install) || return 1
+    # $1 is true if is android build
+    if [[ "$1" != true ]]; then
+        (cmake .. -DBUILD_TESTS=true -DTEST_OUTPUT=$CIRCLE_TEST_REPORTS -DLUG_THIRDPARTY_DIR=$HOME/.local/thirdparty_linux) || return 1
+        (make all test && sudo make install) || return 1
+    else
+        (${ANDROID_SDK_ROOT}/cmake/*/bin/cmake .. \
+            -G "Android Gradle - Unix Makefiles" \
+            -DLUG_THIRDPARTY_DIR=$HOME/.local/thirdparty_android \
+            -DANDROID=ON \
+            -DANDROID_PLATFORM=android-24 \
+            -DANDROID_STL=c++_shared \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake \
+        ) || return 1
+        (make all) || return 1
+    fi
+
 
     return 0
 }
@@ -20,15 +35,16 @@ function build_samples() {
     return 0
 }
 
-case $CIRCLE_NODE_INDEX in
+case $BUILD_ANDROID in
     0)
-        export CXX=clang++
-        build_lugdunum && build_samples
+        # Linux
+        export CXX=g++
+        build_lugdunum false && build_samples
     ;;
 
     1)
-        export CXX=g++
-        build_lugdunum && build_samples
+        # Android
+        build_lugdunum true
     ;;
 esac
 

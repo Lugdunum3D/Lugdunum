@@ -5,6 +5,7 @@ set -e
 
 invalidate=false
 cache_dir="$HOME/.local/debs"
+date_cache=0
 
 if [[ -d "$cache_dir" ]]; then
     echo "$cache_dir is present"
@@ -13,12 +14,12 @@ if [[ -d "$cache_dir" ]]; then
     date -r "$cache_dir"
     echo -ne "$0 modification time: "
     date --date="$(git log -1 --format="%ai" -- $0)"
+    date_cache=$(date -r "$cache_dir" +%s)
 else
     echo "$cache_dir is missing, creating cache"
 fi
 
 date_script=$(date --date="$(git log -1 --format="%ai" -- $0)" +%s)
-date_cache=$(date -r "$cache_dir" +%s)
 
 echo "date_script: $date_script, date_cache: $date_cache"
 if [[ $date_script -gt $date_cache ]]; then
@@ -33,7 +34,7 @@ if [[ ! -d "$cache_dir" || "$invalidate" = true ]]; then
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     sudo apt-get update
 
-    rm -r "$cache_dir"
+    rm -rf "$cache_dir"
     mkdir "$cache_dir"
     cd "$cache_dir"
 

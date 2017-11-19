@@ -1,11 +1,23 @@
+machine:
+  python:
+    version: 3.6.1
+  environment:
+    ANDROID_SDK_ROOT: $HOME/android-sdk
+    ANDROID_NDK_ROOT: $ANDROID_SDK_ROOT/ndk-bundle
+    PATH: $PATH:$ANDROID_SDK_ROOT/platform-tools/:$ANDROID_NDK_ROOT
+    BUILD_ANDROID: $CIRCLE_NODE_INDEX
+
 dependencies:
   override:
     - /bin/true
 
   cache_directories:
-    - "~/.local"
+    - ~/.local
+    - ~/android-sdk
 
   pre:
+    - python --version
+    - ./test/ci/scripts/circle_android.sh
     - ./test/ci/scripts/circle_dependencies.sh
     - ./test/ci/scripts/circle_thirdparty.sh
 
