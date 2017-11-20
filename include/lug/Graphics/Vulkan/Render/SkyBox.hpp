@@ -50,9 +50,6 @@ private:
     SkyBox(const std::string& name);
 
 private:
-    static API::GraphicsPipeline _irradianceMapPipeline;
-    static API::GraphicsPipeline _prefilteredMapPipeline;
-    static API::GraphicsPipeline _brdfLutPipeline;
     static lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> _mesh;
     static lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> _brdfLut;
 

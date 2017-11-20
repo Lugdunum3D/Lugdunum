@@ -20,9 +20,6 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-API::GraphicsPipeline SkyBox::_irradianceMapPipeline;
-API::GraphicsPipeline SkyBox::_prefilteredMapPipeline;
-API::GraphicsPipeline SkyBox::_brdfLutPipeline;
 lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Mesh> SkyBox::_mesh;
 lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::Texture> SkyBox::_brdfLut;
 uint32_t SkyBox::_skyBoxCount{0};
@@ -35,11 +32,6 @@ SkyBox::~SkyBox() {
 
 void SkyBox::destroy() {
     --_skyBoxCount;
-    if (_skyBoxCount == 0) {
-        SkyBox::_irradianceMapPipeline.destroy();
-        SkyBox::_prefilteredMapPipeline.destroy();
-        SkyBox::_brdfLutPipeline.destroy();
-    }
 }
 
 Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(lug::Graphics::Renderer& renderer) const {
@@ -50,6 +42,13 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
     Vulkan::Render::SkyBox* irradianceMap = static_cast<Vulkan::Render::SkyBox*>(resource.get());
 
     Vulkan::Renderer& vkRenderer = static_cast<Vulkan::Renderer&>(renderer);
+
+    auto irradianceMapPipeline = vkRenderer.getPipeline(Render::Pipeline::getIrradianceMapBaseId());
+
+    if (!irradianceMapPipeline) {
+        LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::createIrradianceMap: Can't get the irradiance map pipeline");
+        return nullptr;
+    }
 
     const Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture> texture = Resource::SharedPtr<Render::Texture>::cast(getEnvironnementTexture());
     if (!texture) {
@@ -145,7 +144,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
         // Descriptor set
         {
             API::Builder::DescriptorSet descriptorSetBuilder(vkRenderer.getDevice(), descriptorPool);
-            descriptorSetBuilder.setDescriptorSetLayouts({static_cast<VkDescriptorSetLayout>(SkyBox::_irradianceMapPipeline.getLayout()->getDescriptorSetLayouts()[0])});
+            descriptorSetBuilder.setDescriptorSetLayouts({static_cast<VkDescriptorSetLayout>(irradianceMapPipeline->getPipelineAPI().getLayout()->getDescriptorSetLayouts()[0])});
 
             if (!descriptorSetBuilder.build(descriptorSet, &result)) {
                 LUG_LOG.error("DescriptorSetPool: Can't create descriptor set: {}", result);
@@ -236,7 +235,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
             // Create depth buffer image view
             API::Builder::Framebuffer framebufferBuilder(vkRenderer.getDevice());
 
-            const API::RenderPass* renderPass = SkyBox::_irradianceMapPipeline.getRenderPass();
+            const API::RenderPass* renderPass = irradianceMapPipeline->getPipelineAPI().getRenderPass();
 
             framebufferBuilder.setRenderPass(renderPass);
             framebufferBuilder.addAttachment(&offscreenImageView);
@@ -256,12 +255,12 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
             return nullptr;
         }
 
-        cmdBuffer.bindPipeline(SkyBox::_irradianceMapPipeline);
+        cmdBuffer.bindPipeline(irradianceMapPipeline->getPipelineAPI());
 
         // Bind descriptor set of the skybox
         {
             const API::CommandBuffer::CmdBindDescriptors skyBoxBind{
-                /* skyBoxBind.pipelineLayout     */ *SkyBox::_irradianceMapPipeline.getLayout(),
+                /* skyBoxBind.pipelineLayout     */ *irradianceMapPipeline->getPipelineAPI().getLayout(),
                 /* skyBoxBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
                 /* skyBoxBind.firstSet           */ 0,
                 /* skyBoxBind.descriptorSets     */ {&descriptorSet},
@@ -326,7 +325,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
             // Begin of the render pass
             {
                 // All the pipelines have the same renderPass
-                const API::RenderPass* renderPass = SkyBox::_irradianceMapPipeline.getRenderPass();
+                const API::RenderPass* renderPass = irradianceMapPipeline->getPipelineAPI().getRenderPass();
 
                 API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
                     /* beginRenderPass.framebuffer  */ framebuffer,
@@ -372,7 +371,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createIrradianceMap(l
             };
 
             const API::CommandBuffer::CmdPushConstants cmdPushConstants{
-                /* cmdPushConstants.layout      */ static_cast<VkPipelineLayout>(*SkyBox::_irradianceMapPipeline.getLayout()),
+                /* cmdPushConstants.layout      */ static_cast<VkPipelineLayout>(*irradianceMapPipeline->getPipelineAPI().getLayout()),
                 /* cmdPushConstants.stageFlags  */ VK_SHADER_STAGE_VERTEX_BIT,
                 /* cmdPushConstants.offset      */ 0,
                 /* cmdPushConstants.size        */ sizeof(pushConstants),
@@ -494,6 +493,13 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
 
     Vulkan::Renderer& vkRenderer = static_cast<Vulkan::Renderer&>(renderer);
 
+    auto prefilteredMapPipeline = vkRenderer.getPipeline(Render::Pipeline::getPrefilteredMapBaseId());
+
+    if (!prefilteredMapPipeline) {
+        LUG_LOG.error("Resource::SharedPtr<::lug::Graphics::Render::SkyBox>::createPrefilteredMap: Can't get the prefiltered map pipeline");
+        return nullptr;
+    }
+
     lug::Graphics::Builder::Texture textureBuilder(vkRenderer);
 
     const Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture> texture = Resource::SharedPtr<Render::Texture>::cast(getEnvironnementTexture());
@@ -589,7 +595,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
         // Descriptor set
         {
             API::Builder::DescriptorSet descriptorSetBuilder(vkRenderer.getDevice(), descriptorPool);
-            descriptorSetBuilder.setDescriptorSetLayouts({static_cast<VkDescriptorSetLayout>(SkyBox::_prefilteredMapPipeline.getLayout()->getDescriptorSetLayouts()[0])});
+            descriptorSetBuilder.setDescriptorSetLayouts({static_cast<VkDescriptorSetLayout>(prefilteredMapPipeline->getPipelineAPI().getLayout()->getDescriptorSetLayouts()[0])});
 
             if (!descriptorSetBuilder.build(descriptorSet, &result)) {
                 LUG_LOG.error("DescriptorSetPool: Can't create descriptor set: {}", result);
@@ -680,7 +686,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
             // Create depth buffer image view
             API::Builder::Framebuffer framebufferBuilder(vkRenderer.getDevice());
 
-            const API::RenderPass* renderPass = SkyBox::_prefilteredMapPipeline.getRenderPass();
+            const API::RenderPass* renderPass = prefilteredMapPipeline->getPipelineAPI().getRenderPass();
 
             framebufferBuilder.setRenderPass(renderPass);
             framebufferBuilder.addAttachment(&offscreenImageView);
@@ -700,12 +706,12 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
             return nullptr;
         }
 
-        cmdBuffer.bindPipeline(SkyBox::_prefilteredMapPipeline);
+        cmdBuffer.bindPipeline(prefilteredMapPipeline->getPipelineAPI());
 
         // Bind descriptor set of the skybox
         {
             const API::CommandBuffer::CmdBindDescriptors skyBoxBind{
-                /* skyBoxBind.pipelineLayout     */ *SkyBox::_prefilteredMapPipeline.getLayout(),
+                /* skyBoxBind.pipelineLayout     */ *prefilteredMapPipeline->getPipelineAPI().getLayout(),
                 /* skyBoxBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
                 /* skyBoxBind.firstSet           */ 0,
                 /* skyBoxBind.descriptorSets     */ {&descriptorSet},
@@ -775,7 +781,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
                 // Begin of the render pass
                 {
                     // All the pipelines have the same renderPass
-                    const API::RenderPass* renderPass = SkyBox::_prefilteredMapPipeline.getRenderPass();
+                    const API::RenderPass* renderPass = prefilteredMapPipeline->getPipelineAPI().getRenderPass();
 
                     API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
                         /* beginRenderPass.framebuffer  */ framebuffer,
@@ -822,7 +828,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
                     };
 
                     const API::CommandBuffer::CmdPushConstants cmdPushConstants{
-                        /* cmdPushConstants.layout      */ static_cast<VkPipelineLayout>(*SkyBox::_prefilteredMapPipeline.getLayout()),
+                        /* cmdPushConstants.layout      */ static_cast<VkPipelineLayout>(*prefilteredMapPipeline->getPipelineAPI().getLayout()),
                         /* cmdPushConstants.stageFlags  */ VK_SHADER_STAGE_VERTEX_BIT,
                         /* cmdPushConstants.offset      */ 0,
                         /* cmdPushConstants.size        */ sizeof(pushConstants),
@@ -834,7 +840,7 @@ Resource::SharedPtr<lug::Graphics::Render::SkyBox> SkyBox::createPrefilteredMap(
 
                 {
                     const API::CommandBuffer::CmdPushConstants cmdPushConstants{
-                        /* cmdPushConstants.layout      */ static_cast<VkPipelineLayout>(*SkyBox::_prefilteredMapPipeline.getLayout()),
+                        /* cmdPushConstants.layout      */ static_cast<VkPipelineLayout>(*prefilteredMapPipeline->getPipelineAPI().getLayout()),
                         /* cmdPushConstants.stageFlags  */ VK_SHADER_STAGE_FRAGMENT_BIT,
                         /* cmdPushConstants.offset      */ sizeof(Math::Mat4x4f),
                         /* cmdPushConstants.size        */ sizeof(roughness),

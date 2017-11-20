@@ -145,6 +145,32 @@ public:
             };
         };
 
+        struct IrradianceMap {
+            // For the moment, no ExtraPart
+            // TODO: Add an ExtraPart for equirectangular or cubemap input
+
+            struct Info {
+                uint32_t type : 3;
+            };
+        };
+
+        struct PrefilteredMap {
+            // For the moment, no ExtraPart
+            // TODO: Add an ExtraPart for equirectangular or cubemap input
+
+            struct Info {
+                uint32_t type : 3;
+            };
+        };
+
+        struct BrdfLut {
+            // For the moment, no ExtraPart
+
+            struct Info {
+                uint32_t type : 3;
+            };
+        };
+
         union {
             struct {
                 union {
@@ -287,6 +313,45 @@ public:
 
             return id;
         };
+
+        /**
+         * @brief      Create a pipeline id for irradiance map rendering
+         *
+         * @return     The created id.
+         */
+        static Id createIrradianceMap() {
+            Id id;
+
+            id.type = static_cast<uint8_t>(Type::IrradianceMap);
+
+            return id;
+        };
+
+        /**
+         * @brief      Create a pipeline id for prefiltered map rendering
+         *
+         * @return     The created id.
+         */
+        static Id createPrefilteredMap() {
+            Id id;
+
+            id.type = static_cast<uint8_t>(Type::PrefilteredMap);
+
+            return id;
+        };
+
+        /**
+         * @brief      Create a pipeline id for brdf lut rendering
+         *
+         * @return     The created id.
+         */
+        static Id createBrdfLut() {
+            Id id;
+
+            id.type = static_cast<uint8_t>(Type::BrdfLut);
+
+            return id;
+        };
     };
 
     static_assert(sizeof(Id) <= 4, "Pipeline::Id should be less or equal to 4 bytes");
@@ -336,6 +401,9 @@ public:
 
     static Id getModelBaseId();
     static Id getSkyboxBaseId();
+    static Id getIrradianceMapBaseId();
+    static Id getPrefilteredMapBaseId();
+    static Id getBrdfLutBaseId();
 
     const API::GraphicsPipeline& getPipelineAPI();
 
@@ -346,6 +414,9 @@ private:
 
     bool initModel();
     bool initSkybox();
+    bool initIrradianceMap();
+    bool initPrefilteredMap();
+    bool initBrdfLut();
 
 private:
     Renderer& _renderer;

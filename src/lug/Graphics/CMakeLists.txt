@@ -112,7 +112,12 @@ set(SRC
 
     ${SRCROOT}/Vulkan/Render/Mesh.cpp
     ${SRCROOT}/Vulkan/Render/Pipeline.cpp
+    ${SRCROOT}/Vulkan/Render/Pipeline/BrdfLut.cpp
+    ${SRCROOT}/Vulkan/Render/Pipeline/IrradianceMap.cpp
+    ${SRCROOT}/Vulkan/Render/Pipeline/Model.cpp
+    ${SRCROOT}/Vulkan/Render/Pipeline/PrefilteredMap.cpp
     ${SRCROOT}/Vulkan/Render/Pipeline/ShaderBuilder.cpp
+    ${SRCROOT}/Vulkan/Render/Pipeline/Skybox.cpp
     ${SRCROOT}/Vulkan/Render/Queue.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Forward.cpp
     ${SRCROOT}/Vulkan/Render/Technique/Technique.cpp

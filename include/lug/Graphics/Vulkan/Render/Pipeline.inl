@@ -34,6 +34,18 @@ inline Pipeline::Id Pipeline::getSkyboxBaseId() {
     return Pipeline::Id::createSkybox(extraPart);
 }
 
+inline Pipeline::Id Pipeline::getIrradianceMapBaseId() {
+    return Pipeline::Id::createIrradianceMap();
+}
+
+inline Pipeline::Id Pipeline::getPrefilteredMapBaseId() {
+    return Pipeline::Id::createPrefilteredMap();
+}
+
+inline Pipeline::Id Pipeline::getBrdfLutBaseId() {
+    return Pipeline::Id::createBrdfLut();
+}
+
 inline const API::GraphicsPipeline& Pipeline::getPipelineAPI() {
     return _pipeline;
 }
