@@ -68,7 +68,12 @@ bool Queue::submit(
 }
 
 bool Queue::waitIdle() const {
-    VkResult result = vkQueueWaitIdle(_queue);
+    // Protect wait with mutex
+    VkResult result;
+    {
+        std::lock_guard<std::mutex> submitGuard(_mutex);
+        result = vkQueueWaitIdle(_queue);
+    }
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("Queue::waitIdle: Can't wait for queue work {}", result);
