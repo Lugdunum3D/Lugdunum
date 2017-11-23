@@ -196,9 +196,12 @@ bool Window::isOpen() const {
 
 bool Window::pollEvent(Event& event) {
     if (_impl != nullptr) {
-        const bool value = _impl->pollEvent(event);
+        if (!_impl->pollEvent(event)) {
+            return false;
+        }
+
         // If we've receive Destroy just close window without returning the event to the user
-        if (value && event.type == Event::Type::Destroy) {
+        if (event.type == Event::Type::Destroy) {
             close();
             return false;
         }
@@ -232,7 +235,7 @@ bool Window::pollEvent(Event& event) {
             _touchScreenState = event.touchScreen;
         }
 
-        return value;
+        return true;
     }
     return false;
 }

@@ -579,64 +579,68 @@ bool Gui::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t curr
     return true;
 }
 
-void Gui::processEvent(const lug::Window::Event event) {
+bool Gui::processEvent(const lug::Window::Event event) {
     ImGuiIO& io = ImGui::GetIO();
-    switch (event.type) {
-        case lug::Window::Event::Type::KeyPressed:
-        case lug::Window::Event::Type::KeyReleased:
+
+    if (io.WantCaptureMouse) {
+        if (event.type == lug::Window::Event::Type::ButtonPressed ||
+            event.type == lug::Window::Event::Type::ButtonReleased) {
+            switch (event.mouse.code) {
+                case lug::Window::Mouse::Button::Left:
+                    io.MouseDown[0] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                    break;
+                case lug::Window::Mouse::Button::Right:
+                    io.MouseDown[1] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                    break;
+                case lug::Window::Mouse::Button::Middle:
+                    io.MouseDown[2] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                    break;
+                case lug::Window::Mouse::Button::XButton1:
+                    io.MouseDown[3] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                    break;
+                case lug::Window::Mouse::Button::XButton2:
+                    io.MouseDown[4] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
+                    break;
+                default:
+                    break;
+            }
+            return true;
+        } else if (event.type == lug::Window::Event::Type::MouseWheel) {
+                io.MouseWheel += static_cast<float>(event.mouse.scrollOffset.xOffset);
+                return true;
+        } else if (event.type == lug::Window::Event::Type::TouchScreenChange) {
+            if (event.touchScreen.drag) {
+                float draggedDistance = sqrtf(((event.touchScreen.coordinates[0].x()  - io.MousePosPrev.x ) * (event.touchScreen.coordinates[0].x()  - io.MousePosPrev.x))
+                + ((event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y) * (event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y)));
+                if ((static_cast<float>(io.MousePosPrev.y) - event.touchScreen.coordinates[0].y()) > 0) {
+                    io.MouseWheel -= draggedDistance / (io.DisplaySize.y - static_cast<float>(io.MousePosPrev.y));
+                } else {
+                    io.MouseWheel += draggedDistance / (io.DisplaySize.y - static_cast<float>(io.MousePosPrev.y));
+                }
+            }
+            return true;
+        }
+    }
+
+    if (io.WantCaptureKeyboard) {
+        if (event.type == lug::Window::Event::Type::KeyPressed ||
+            event.type == lug::Window::Event::Type::KeyPressed) {
             io.KeysDown[static_cast<int>(event.key.code)] = (event.type == lug::Window::Event::Type::KeyPressed) ? true : false;
 
             io.KeyCtrl = static_cast<int>(event.key.ctrl);
             io.KeyShift = static_cast<int>(event.key.shift);
             io.KeyAlt = static_cast<int>(event.key.alt);
             io.KeySuper = static_cast<int>(event.key.system);
-            break;
-        case lug::Window::Event::Type::CharEntered:
-            if (isprint(event.character.val)) {
-                io.AddInputCharacter(static_cast<unsigned short>(event.character.val));
-            }
-            break;
-        case lug::Window::Event::Type::MouseWheel:
-            io.MouseWheel += static_cast<float>(event.mouse.scrollOffset.xOffset);
-            break;
-         case lug::Window::Event::Type::TouchScreenChange:
-            if (event.touchScreen.drag) {
-                float draggedDistance = sqrtf(((event.touchScreen.coordinates[0].x()  - io.MousePosPrev.x ) * (event.touchScreen.coordinates[0].x()  - io.MousePosPrev.x))
-                + ((event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y) * (event.touchScreen.coordinates[0].y()  - io.MousePosPrev.y)));
-                LUG_LOG.info("draggedDistance {}, displaysize {}", draggedDistance, io.DisplaySize.y);
-                if ((static_cast<float>(io.MousePosPrev.y) - event.touchScreen.coordinates[0].y()) > 0) {
-                    io.MouseWheel -= draggedDistance / (io.DisplaySize.y - static_cast<float>(io.MousePosPrev.y));
-                } else {
-                    io.MouseWheel += draggedDistance / (io.DisplaySize.y - static_cast<float>(io.MousePosPrev.y));
-                }
-                LUG_LOG.info("io.MouseWheel{}", io.MouseWheel);
-            }
-            break;
-        case lug::Window::Event::Type::ButtonPressed:
-        case lug::Window::Event::Type::ButtonReleased:
-            switch (event.mouse.code) {
-            case lug::Window::Mouse::Button::Left:
-                io.MouseDown[0] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
-                break;
-            case lug::Window::Mouse::Button::Right:
-                io.MouseDown[1] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
-                break;
-            case lug::Window::Mouse::Button::Middle:
-                io.MouseDown[2] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
-                break;
-            case lug::Window::Mouse::Button::XButton1:
-                io.MouseDown[3] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
-                break;
-            case lug::Window::Mouse::Button::XButton2:
-                io.MouseDown[4] = (event.type == lug::Window::Event::Type::ButtonPressed) ? true : false;
-                break;
-            default:
-                break;
-            }
-        default:
-        io.MouseWheel = 0;
-            break;
+            return true;
+        } else if (event.type == lug::Window::Event::Type::CharEntered && isprint(event.character.val)) {
+            io.AddInputCharacter(static_cast<unsigned short>(event.character.val));
+            return true;
+        } else {
+            io.MouseWheel = 0;
+        }
     }
+
+    return false;
 }
 
 const Vulkan::API::Semaphore& Gui::getSemaphore(uint32_t currentImageIndex) const {
