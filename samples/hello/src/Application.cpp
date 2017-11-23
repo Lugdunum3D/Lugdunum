@@ -17,12 +17,14 @@
 
 Application::Application() : lug::Core::Application::Application{{"hello", {0, 1, 0}}} {
     getRenderWindowInfo().windowInitInfo.title = "Hello";
+    getRenderWindowInfo().windowInitInfo.width = 1900;
+    getRenderWindowInfo().windowInitInfo.height = 1000;
 
     // We can set the display mode, by default to full
     getGraphicsInfo().rendererInitInfo.displayMode = ::lug::Graphics::Renderer::DisplayMode::Full;
 
     // Set the antialiasing to MSAA 2x
-    getGraphicsInfo().rendererInitInfo.antialiasing = ::lug::Graphics::Renderer::Antialiasing::MSAA4X;
+    getGraphicsInfo().rendererInitInfo.antialiasing = ::lug::Graphics::Renderer::Antialiasing::MSAA8X;
 }
 
 void applyIBL(const lug::Graphics::Scene::Node* node, lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> irradianceMap, lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> prefilteredMap) {
@@ -46,7 +48,7 @@ bool Application::init(int argc, char* argv[]) {
 
     // Load scene
     lug::Graphics::Renderer* renderer = _graphics.getRenderer();
-    lug::Graphics::Resource::SharedPtr<lug::Graphics::Resource> sceneResource = renderer->getResourceManager()->loadFile("models/DamagedHelmet/DamagedHelmet.gltf");
+    lug::Graphics::Resource::SharedPtr<lug::Graphics::Resource> sceneResource = renderer->getResourceManager()->loadFile("models/centurion/centurion.gltf");
     if (!sceneResource) {
         return false;
     }
@@ -54,11 +56,11 @@ bool Application::init(int argc, char* argv[]) {
     _scene = lug::Graphics::Resource::SharedPtr<lug::Graphics::Scene::Scene>::cast(sceneResource);
 
     // Adjust the model
-    {
+  /*  {
         lug::Graphics::Scene::Node* node = _scene->getSceneNode("UnityGlTF_correctionMatrix");
         node->rotate(lug::Math::Geometry::radians(270.0f), {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
     }
-
+*/
     // Attach camera
     {
         lug::Graphics::Builder::Camera cameraBuilder(*renderer);
@@ -73,18 +75,18 @@ bool Application::init(int argc, char* argv[]) {
             return false;
         }
 
-        lug::Graphics::Scene::Node* node = _scene->createSceneNode("camera");
-        _scene->getRoot().attachChild(*node);
+        _cameraNode = _scene->createSceneNode("camera");
+        _scene->getRoot().attachChild(*_cameraNode);
 
-        node->attachCamera(camera);
+        _cameraNode->attachCamera(camera);
 
         // Set initial position of the camera
-        node->setPosition({5.0f, 0.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+        _cameraNode->setPosition({5.0f, 0.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
         // Look at once
-        node->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+        _cameraNode->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
 
         // Attach the camera node to the mover
-        _cameraMover.setTargetNode(*node);
+        _cameraMover.setTargetNode(*_cameraNode);
         _cameraMover.setEventSource(*_graphics.getRenderer()->getWindow());
 
         // Attach camera to RenderView
@@ -167,7 +169,8 @@ bool Application::init(int argc, char* argv[]) {
         applyIBL(&_scene->getRoot(), irradianceMap, prefilteredMap);
     }
 
-    return static_cast<lug::Graphics::Vulkan::Render::Window*>(_graphics.getRenderer()->getWindow())->initGui();
+    return true;
+    //return static_cast<lug::Graphics::Vulkan::Render::Window*>(_graphics.getRenderer()->getWindow())->initGui();
 }
 
 void Application::onEvent(const lug::Window::Event& event) {
@@ -187,11 +190,28 @@ void Application::onEvent(const lug::Window::Event& event) {
 }
 
 void Application::onFrame(const lug::System::Time& elapsedTime) {
-    auto vkTexture = lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(lug::Graphics::Vulkan::Render::SkyBox::getBrdfLut());
+    static float rotation = 0.0f;
+
+    rotation += elapsedTime.getSeconds<float>() * 20.0f;
+    if (rotation >= 360.0f) {
+        rotation = 0.0f;
+    }
+
+    // Rotate camera
+    {
+        float angle = lug::Math::Geometry::radians(rotation);
+
+        float x = 3.0f * cos(angle);
+        float y = 3.0f * sin(angle);
+
+        _cameraNode->setPosition({x, 0, y}, lug::Graphics::Node::TransformSpace::World);
+        _cameraNode->getCamera()->lookAt({0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, lug::Graphics::Node::TransformSpace::World);
+    }
+/*    auto vkTexture = lug::Graphics::Resource::SharedPtr<lug::Graphics::Vulkan::Render::Texture>::cast(lug::Graphics::Vulkan::Render::SkyBox::getBrdfLut());
 
     ImGui::Begin("BRDF Lut", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
     ImGui::Image(vkTexture.get(), ImVec2(200, 200), ImVec2(0, 0), ImVec2(1, 1), ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128));
     ImGui::End();
 
-    _cameraMover.onFrame(elapsedTime);
+    _cameraMover.onFrame(elapsedTime);*/
 }
