@@ -52,7 +52,12 @@ bool Queue::submit(
         /* submitInfo.pSignalSemaphores */ signalSemaphores.size() > 0 ? signalSemaphores.data() : nullptr
     };
 
-    VkResult result = vkQueueSubmit(_queue, 1, &submitInfo, fence);
+    // Protect submit with mutex
+    VkResult result;
+    {
+        std::lock_guard<std::mutex> submitGuard(_mutex);
+        result = vkQueueSubmit(_queue, 1, &submitInfo, fence);
+    }
 
     if (result != VK_SUCCESS) {
         LUG_LOG.error("Queue::submit: Can't submit command buffer {}", result);

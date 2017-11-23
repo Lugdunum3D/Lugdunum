@@ -23,6 +23,11 @@ inline void View::setClearColor(const Math::Vec3f& color) {
 }
 
 inline void View::attachCamera(Resource::SharedPtr<Camera::Camera> camera) {
+    if (!camera) {
+        _camera = nullptr;
+        return;
+    }
+
     if (_camera) {
         _camera->setRenderView(nullptr);
     }
