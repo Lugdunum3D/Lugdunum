@@ -91,7 +91,7 @@ void main() {
     //////////////////////////////////////////////////////////////////////
 
     #if IN_TANGENT
-    outTangent = inTangent;
+    outTangent = vec4(normalize(mat3(transpose(inverse(model.transform))) * inTangent.xyz), inTangent.w);
     #endif
 
     #if IN_UV >= 1
