@@ -450,7 +450,7 @@ bool Forward::render(
     // Free and replace previous materialBuffers
     {
         for (const auto& subBuffer : frameData.materialBuffers) {
-            _lightBufferPool->free(subBuffer);
+            _materialBufferPool->free(subBuffer);
         }
 
         frameData.materialBuffers = materialBuffers;
