@@ -79,8 +79,11 @@ endif()
 source_group("src" FILES ${SRC})
 source_group("inc" FILES ${INC})
 
+find_package(Threads)
+
 # define the target
 lug_add_library(lug-system
                 SOURCES ${SRC} ${INC}
                 EXTERNAL_LIBS ${EXT_LIBRARIES}
+                ${CMAKE_THREAD_LIBS_INIT}
 )
