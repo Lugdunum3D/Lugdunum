@@ -6,6 +6,7 @@ set(SRC
     ${SRCROOT}/Clock.cpp
     ${SRCROOT}/Exception.cpp
     ${SRCROOT}/Time.cpp
+    ${SRCROOT}/ThreadPool.cpp
     ${SRCROOT}/Logger/FileHandler.cpp
     ${SRCROOT}/Logger/Formatter.cpp
     ${SRCROOT}/Logger/Handler.cpp
@@ -28,6 +29,8 @@ set(INC
     ${INCROOT}/Library.inl
     ${INCROOT}/Time.hpp
     ${INCROOT}/Time.inl
+    ${INCROOT}/ThreadPool.hpp
+    ${INCROOT}/ThreadPool.inl
     ${INCROOT}/Logger/Logger.hpp
     ${INCROOT}/Logger/Logger.inl
     ${INCROOT}/Logger/Common.hpp
