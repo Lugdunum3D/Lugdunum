@@ -184,14 +184,27 @@ lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::Ini
 bool Window::render() {
     FrameData& frameData = _framesData[_currentImageIndex];
     uint32_t i = 0;
+    // Contains all async results of Render::View::render
+    std::vector<std::future<bool>> results(_renderViews.size());
 
+    // Run renderView->render for all render views asynchronously
     for (auto& renderView: _renderViews) {
-        if (!static_cast<View*>(renderView.get())->render(frameData.imageReadySemaphores[i++], _currentImageIndex)) {
-            return false;
-        }
+        auto view = static_cast<View*>(renderView.get());
+        // Bind this contex + params with render function
+        // Use std::ref for semaphore or it will try to copy it
+        auto renderFunc = std::bind(&lug::Graphics::Vulkan::Render::View::render, view, std::ref(frameData.imageReadySemaphores[i++]), _currentImageIndex);
+        // Send function to workers and save async result
+        results[i - 1] = _threadPool->enqueue(renderFunc);
     }
 
-    return true;
+    // Wait for jobs finish and check result
+    bool success = true;
+    for (auto&& result: results) {
+        result.wait();
+        success &= result.get();
+    }
+
+    return success;
 }
 
 std::unique_ptr<Window>
@@ -618,6 +631,8 @@ bool Window::init(Window::InitInfo& initInfo) {
             nullptr                                             // camera
         });
     }
+
+    _threadPool = std::make_unique<lug::System::ThreadPool>(static_cast<uint8_t>(_renderViews.size()));
 
     return true;
 }
