@@ -104,7 +104,7 @@ public:
 
         Id(uint32_t id = 0): value(id) {}
 
-        explicit operator uint32_t() {
+        explicit operator uint32_t() const {
             return value;
         }
 
