@@ -495,7 +495,10 @@ void WindowImpl::processWindowEvents(UINT message, WPARAM wParam, LPARAM lParam)
             configMouseEvent(e.mouse, wParam, lParam);
             configMouseWheelEvent(e.mouse, message, wParam);
             break;
-
+		case WM_GESTURE:
+			e.type = Event::Type::TouchScreenChange;
+			configGestureEvent(e.touchScreen, wParam, lParam);
+			break;
         default:
             return;
     }
@@ -628,6 +631,78 @@ void WindowImpl::configMouseEvent(MouseEvent & mouse, WPARAM wParam, LPARAM lPar
 
     getMouseCoord(mouse, lParam);
     getMouseEventModifier(mouse, wParam);
+}
+
+void WindowImpl::configGestureEvent(TouchScreenEvent & e, WPARAM wParam, LPARAM lParam)
+{
+	GESTUREINFO gi;
+
+	ZeroMemory(&gi, sizeof(GESTUREINFO));
+
+	gi.cbSize = sizeof(GESTUREINFO);
+
+	BOOL bResult = GetGestureInfo((HGESTUREINFO)lParam, &gi);
+	BOOL bHandled = FALSE;
+
+	if (bResult) {
+		// now interpret the gesture
+		switch (gi.dwID) {
+		case GID_ZOOM:
+			// Code for zooming goes here  
+			//e.pinch = true;
+			bHandled = FALSE;
+			break;
+		case GID_PAN:
+			// Code for panning goes here
+			//e.drag = true;
+			bHandled = TRUE;
+			break;
+		case GID_ROTATE:
+			// Code for rotation goes here
+			bHandled = FALSE;
+			break;
+		case GID_TWOFINGERTAP:
+			// Code for two-finger tap goes here
+			//e.doubleTap = true;
+			bHandled = TRUE;
+			break;
+		case GID_PRESSANDTAP:
+			// Code for roll over goes here
+			bHandled = FALSE;
+			break;
+		default:
+			// A gesture was not recognized
+			break;
+		}
+	}
+	else {
+		DWORD dwErr = GetLastError();
+		if (dwErr > 0) {
+			//MessageBoxW(hWnd, L"Error!", L"Could not retrieve a GESTUREINFO structure.", MB_OK);
+		}
+	}
+	if (bHandled) {
+		e.coordinates[0] = lug::Math::Vec2f{ static_cast<float>(gi.ptsLocation.x), static_cast<float>(gi.ptsLocation.y) };
+		switch (gi.dwFlags)
+		{
+		case GF_BEGIN:
+			e.state = lug::Window::TouchScreenEvent::GestureState::Start;
+			break;
+		case GF_INERTIA:
+			e.state = lug::Window::TouchScreenEvent::GestureState::Move;
+			break;
+		case GF_END:
+			e.state = lug::Window::TouchScreenEvent::GestureState::End;
+			break;
+		default:
+			break;
+		}
+		return;
+	}
+	else {
+		// not handled
+		//return DefWindowProc(hWnd, message, wParam, lParam);
+	}
 }
 
 void WindowImpl::getMouseEventModifier(MouseEvent & mouse, WPARAM wParam) {

@@ -45,6 +45,7 @@ private:
     void getMouseCoord(MouseEvent& mouse, LPARAM lParam);
     void configMouseButtonEvent(MouseEvent& mouse, UINT message, WPARAM wParam, LPARAM lParam);
     void configMouseWheelEvent(MouseEvent& mouse, UINT message, WPARAM wParam);
+	void configGestureEvent(TouchScreenEvent& e, WPARAM wParam, LPARAM lParam);
 
     static LRESULT CALLBACK onEvent(HWND handle, UINT message, WPARAM wParam, LPARAM lParam);
 

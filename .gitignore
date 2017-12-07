@@ -43,3 +43,4 @@ build/
 # Android Studio
 *.iml
 /.vs
+/thirdparty
