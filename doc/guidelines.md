@@ -8,18 +8,18 @@ menu:
 
 # Header files
 
-Each `.cpp` file should have an associated `.hpp` file.
+Each `.cpp` files should have an associated `.hpp` file.
 Place the definitions for templates and inline functions in separated `.inl` files, alongside the corresponding header file in which it is included.
 
-If applicable, include the `.inl` file inside the namespaces of the header file, as to not repeat these namespace in the inline file and include it at the end of the header file, just before the namespaces' closing brackets.
+If applicable, include the `.inl` files inside the namespaces of the header file, as to not repeat this namespace in the inline file and include it at the end of the header file, just before the namespaces' closing brackets.
 
 ## Self-contained Headers
 
-Header should be "self-contained", i.e. they must include all their dependencies, and the user should not have to worry about them.
+A header should be "self-contained", i.e., they must include all their dependencies, and the user should not have to worry about them.
 
 ## Headers Guards
 
-To protect headers against double inclusion, headers must start with:
+To protect headers against double inclusion, they must start with:
 
 ```cpp
 #pragma once
@@ -86,7 +86,7 @@ Inclusion should happen in this order, each section separated by a new line and 
 4. Other libraries' headers
 5. Project headers
 
-All of a project's header files should be listed as descendants of the project's source directory without use of UNIX directory shortcuts `.` (the current directory) or `..` (the parent directory).
+All of a project's header files should be descendants of the project's source directory without the use of UNIX directory shortcuts `.` (the current directory) or `..` (the parent directory).
 These headers should be included as "system" headers, with angle brackets instead of double quotes, because it looks better in our opinion. Deal with it ;)
 
 **Example:**
@@ -108,15 +108,15 @@ These headers should be included as "system" headers, with angle brackets instea
 #include <lug/System/Logger/Message.hpp>
 ```
 
-You should include all the headers that define the symbols you rely upon, except in the unusual case of forward declaration. If you rely on symbols from `bar.hpp`, don't rely on the fact that you included `foo.hpp` which (currently) includes `bar.hpp`: include `bar.hpp` yourself, unless `foo.hpp` explicitly demonstrates its intent to provide you the symbols of `bar.hpp`. However, any includes present in the related header do not need to be included again in the related `.cpp` (i.e., `foo.cpp` can rely on `foo.hpp`'s includes).
+You should include all the headers that define the symbols you rely upon, except in the unusual case of forward declaration. If you rely on symbols from `bar.hpp`, don't rely on the fact that you included `foo.hpp` which (currently) includes `bar.hpp`: include `bar.hpp` yourself, unless `foo.hpp` explicitly demonstrates its intent to provide you the symbols of `bar.hpp`. However, any includes present in the related header do not need to be included again in the related `.cpp` (i.e., `foo.cpp` can rely on includes of `foo.hpp` ).
 
 # Scoping
 
 ## Namespaces
 
-All namespaces should be terminated by a comment after the end bracket specifying the name of the corresponding namespace. A namespace doesn't imply another level of indentation, see below for an example.
+All namespaces should be terminated by a comment after the end bracket specifying the name of the corresponding namespace. A namespace does not imply another level of indentation, see below for an example.
 
-Namespaces should be used also in the `.cpp` files to avoid repetition.
+Namespaces should also be used in the `.cpp` files to avoid repetition.
 
 **Example:**
 
@@ -134,19 +134,19 @@ class Logger {
 } // lug
 ```
 
-Do not declare anything in the namespace `std`, and do not use inline namespace, except for very, very specific use-cases.
+Do not declare anything in the namespace `std`, and do not use an inline namespace, except for very, very specific use-cases.
 
 *using-directive* and *namespace-aliases* are prohibited in header files, only use them in `.cpp` files or in some particular cases in internal-only namespaces.
 
 ## Unnamed Namespaces and Static Variables
 
-Use of `static` variables and *unnamed namespaces* is encouraged in `.cpp` files for all code that does not need to be referenced elsewhere. Do not use that in header files.
+The use of `static` variables and *unnamed namespaces* is encouraged in `.cpp` files for all code that does not need to be referenced elsewhere. Do not use that in header files.
 
-## Nonmember, Static Member and Global Functions
+## Nonmember, Static Member, and Global Functions
 
-Do not use global functions, always put them in a namespace. Do not use class as a namespace for some functions, use a namespace for that.
+Do not use global functions, always put them in a namespace. Do not use a class as a namespace for some functions, use a namespace for that.
 
-Static methods should generally be closely related to instances of the class or the class's static data.
+Static methods should be closely related to instances of the class or the class's static data.
 
 ## Local Variables
 
@@ -159,7 +159,7 @@ int y;
 y = 2;      // Bad (initialization separated from declaration)
 ```
 
-Declare variables in the lowerest scope and as close as possible of the first use.
+Declare variables in the lowerest scope and as close as possible to the first use.
 
 ## Static and Global Variables
 
@@ -213,7 +213,7 @@ private:
 
 Do not define implicit conversions, use the `explicit` keyword for conversion operators and single-argument-constructors.
 
-Even with the `explicit` keyword, only use user defined conversions when it's meaningfull in some particular cases. In Lugdunum, we use them to convert types from our Vulkan abstraction to native Vulkan types.
+Even with the `explicit` keyword, only use user-defined conversions when it is meaningful in some particular cases. In Lugdunum, we use them to convert types from our Vulkan abstraction to native Vulkan types.
 
 **Example:**
 
@@ -269,13 +269,13 @@ public:
 
 ## Structs vs. Classes
 
-`struct` are only for passing "inactive" data or Plain Old Data. They don't have constructors, destructors, functions. Everything else is a `class`. 
+`struct` is only for passing "inactive" data or Plain Old Data. They do not have constructors, destructors, functions. Everything else is a `class`. 
 
-## Inheritance and multiple Inheritance
+## Inheritance and Multiple Inheritance
 
 All methods should be private, except for methods that need to be accessed in subclasses which have to be protected.
-When a method need to be override, define it as virtual in the base class and use the key word `override`.
-If no class inherited from the sublclass override the method, the key word `final` must be used. The key word `final` must also be used for the inheritance itself, if no class inherit from the subclass.
+When a method needs to be overridden, define it as virtual in the base class and use the keyword `override`.
+If no class inherited from the subclass override the method, the keyword `final` must be used. The keyword `final` must also be used for the inheritance itself, if no class inherit from the subclass.
 Make your base class destructor virtual;
 
 ```cpp
@@ -329,18 +329,18 @@ public:
 ## Operator Overloading
 
 Do not abuse of operator overloading, only use them if their meaning is obvious.
-The operators should be defined in the same namespace and class as the type it overloads, except from the binary operators (taking two parameters) that is encouraged to be declared in a non-member function (however in the same namespace as the class)
+The operators should be defined in the same namespace and class as the type it overloads, except from the binary operators (taking two parameters) that are encouraged to be declared in a non-member function (however in the same namespace as the class)
 
 
 ## Declaration Order
 
 The declaration order in a class should be `public:`, followed by `protected:`, then `private:`. The methods and data members should have different blocks.
-Each declaration block should be separated with a blank line. It's encouraged to separated with a blank line inside the blocks too for each methods/properties that can be grouped.
+Each declaration block should be separated by a blank line. It is encouraged to add blank lines inside the blocks too group relevant method/properties.
 
-In each declaration block, the order in the following:
-- Using declarations, typedefs and enums
+In each declaration block, the order of the following:
+- Using declarations, typedefs, and enums
 - Constants (static const)
-- Constuctors and assignment operators
+- Constructors and assignment operators
 - Destructors
 - Methods, including static methods
 - Data properties
@@ -349,13 +349,13 @@ In each declaration block, the order in the following:
 
 ## Parameter Ordering
 
-When a function takes inputs and outputs (i.e. an output pointer), it should list inputs first, then outputs. 
+When a function takes inputs and outputs (i.e., an output pointer), it should list inputs first, then outputs. 
 
 Inputs are usually values or `const` references, whereas inputs and input/output should be pointers to non-`const` variables. 
 
 ## Write Short Functions
 
-It seems obvious, but prefer dividing large functions in "atomic" functions, dedicated to one specific task. As a rule of thumb, a function is considered as large when it has more than 50 lines.
+It seems obvious, but prefer dividing large functions into "atomic" functions, dedicated to one specific task. As a rule of thumb, a function is considered as large when it has more than 50 lines.
 
 Short functions improve code maintainability and readability.
 
@@ -372,11 +372,11 @@ If you want to pass a `null`-able value as a parameter, you can use a raw pointe
 
 ## Function Overloading
 
-Function overloading can add complexity to the code and make it less readable. You can use function overlading but ask yourself first if there is not a better, more readable option available.
+Function overloading can add complexity to the code and make it less readable. You can use function overloading but ask yourself first if there is not a better, more readable option available.
 
 ## Default Arguments
 
-Default arguments are allowed on non-virtual functions when the default is guaranteed to always have the same value accross possible overloaded functions. For the same reasons detailed function overloading, be careful when using default arguments.
+Default arguments are allowed on non-virtual functions when the default is guaranteed to always have the same value across possible overloaded functions. For the same reasons detailed function overloading, be careful when using default arguments.
 
 ## Trailing Return Type Syntax
 
@@ -394,14 +394,14 @@ auto foo(int x) -> int;
 
 The difference is that in the new syntax, the type is declared in the function's scope.
 
-Do continue to use the older style of function declaration where the return type goes before the function name. Use the new trailing-return-type form only in cases where it's required (such as lambdas).
+Do continue to use the older style of function declaration where the return type goes before the function name. Use the new trailing-return-type form only in cases where it is required (such as lambdas).
 
 
 # Other
 
 ## Ownership and Smart Pointers
 
-Object ownership is represented by a `std::unique_ptr` or a `std::shared_ptr`, a.k.a. smart pointers. Consider that you never have ownership on raw pointers, so you must never free or delete a raw pointer.
+Object ownership is represented by a `std::unique_ptr` or a `std::shared_ptr`, aka smart pointers. Consider that you never have ownership of raw pointers, so you must never free or delete a raw pointer.
 
 Do not use shared ownership without a very good reason to back it up.
 
@@ -415,7 +415,7 @@ Use rvalues only in constructors and movement operators/constructors, or to do p
 
 ## Friends
 
-Use of `friend` is not strictly forbidden but you should avoid it as possible. You can use friend if it allows to remove a public access that is only used by the friended class.
+Use of `friend` is not strictly forbidden, but you should avoid it as possible. You can use `friend` if it allows removing a public access that is only used by the friended class.
 
 Friends should be defined in the same file as much as possible.
 
@@ -425,15 +425,15 @@ Use exceptions sparsely, only when another option such as return status/code or 
 
 ## Run-Time Type Information (RTTI)
 
-Avoid over using Run Time Type Information (RTTI).
+Avoid overusing Run Time Type Information (RTTI).
 
-Using the type of an object at run-time is in general a problem of architecture. And it's also hard to maintain if you have decision trees or switch statements scattered throughout the code which all need to be updated when making changes.
+Using the type of an object at run-time is, in general, a problem of architecture. Moreover, it is also hard to maintain if you have decision trees or switch statements scattered throughout the code which all need to be updated when making changes.
 
 ## Casting
 
 Even if the C++\-style cast syntax (with `static_cast<>`) is more verbose, always use it over old C-style casts.
 
-* Use brace initialization to convert arithmetic types (e.g. int64{x}). This is the safest approach because code will not compile if conversion can result in information loss. The syntax is also concise.
+* Use brace initialization to convert arithmetic types (e.g., int64{x}). This is the safest approach because the code will not compile if the conversion can result in information loss. The syntax is also concise.
 * Use `static_cast` as the equivalent of a C-style cast that does value conversion, when you need to explicitly up-cast a pointer from a class to its superclass, or when you need to explicitly cast a pointer from a superclass to a subclass. In this last case, you must be sure your object is actually an instance of the subclass.
 * Use `const_cast` to remove the const qualifier, avoid using it too frequently.
 * Use `reinterpret_cast` to do unsafe conversions of pointer types to and from integer and other pointer types. Use this only if you know what you are doing and you understand the aliasing issues.
@@ -444,7 +444,7 @@ Use streams only when they actually are the best tool for the job. Stream format
 
 Do not use `std::cout` or `std::cerr` for logging purpose, use [`System::Logger::Logger`](#lug::System::Logger::Logger) instead, which supports custom types, and other useful features such as easy-to-use formatting and cross-platform handlers/sinks.
 
-Overload `<<` as a streaming operator for your type only if it represents a value and writes a human readable representation of that value. Do not expose implementation details in the output of `<<`. Such overloaded types are de-facto supported by Lugdunum's logger.
+Overload `<<` as a streaming operator for your type only if it represents a value and writes a human-readable representation of that value. Do not expose implementation details in the output of `<<`. Such overloaded types are de-facto supported by Lugdunum's logger.
 
 ## Preincrement and Predecrement
 
@@ -452,7 +452,7 @@ Always use the prefixed form.
 
 ## Use of const
 
-Always use `const` where applicable, and use `constexpr` when you are defining true constants, i.e. fixed at compile time. When writing code, put the `const` keyword before the type:
+Always use `const` where applicable, and use `constexpr` when you are defining true constants, i.e., fixed at compile time. When writing code, put the `const` keyword before the type:
 
 ```cpp
 const int* foo;
@@ -468,7 +468,7 @@ When applicable, always use `size_t` or `ptrdiff_t` to hint at the actual purpos
 
 Avoid preprocessor macros, prefer `constexpr` values, inline functions, or even lambdas.
 
-X macros are a special case and are not as much discouraged, but do weigh the advantages of the code lightness versus the readability disadvantage induced by X macros. X macros are very hard to read for inexperienced programmers, can quickly become too complicated and can really hurt the maintanability of the codebase. Be smart, and keep them simple!
+X macros are a special case and are not as much discouraged, but do weigh the advantages of the code lightness versus the readability disadvantage induced by X macros. X macros are very hard to read for inexperienced programmers, can quickly become too complicated and can really hurt the maintainability of the codebase. Be smart, and keep them simple!
 
 ## 0 and nullptr/NULL
 
@@ -487,7 +487,7 @@ memset(&data, 0, sizeof(SomeType)); // Bad
 
 ## auto
 
-Use `auto` to avoid type names that are noisy, obvious, or unimportant - cases where the type doesn't aid in clarity for the reader. Continue to use manifest type declarations when it helps readability. However, do not use a `auto` variable with initializer lists.
+Use `auto` to avoid type names that are noisy, obvious, or unimportant - cases where the type does not aid in clarity for the reader. Continue to use manifest type declarations when it helps readability. However, do not use an `auto` variable with initializer lists.
 
 Only use auto on local variables.
 
@@ -497,11 +497,11 @@ Prefer using Braced Initializer List where possible.
 
 ## Lambda expressions
 
-Use lambda expressions when appropriate, e.g. to pass a short comparaison function to an std algorithm.
+Use lambda expressions when appropriate, e.g., to pass a short comparison function to an std algorithm.
 
 Always use explicit captures by specifying which variables do you want, and make sure that the lifetime of the variable is longer than the lifetime of the lambda when capturing by reference or capturing a pointer.
 
-Keep unnamed lambdas short and without a lot of captures.
+Keep unnamed lambdas short and with as few captures as possible.
 
 Specify the return type of the lambda explicitly only when it is not obvious to the readers.
 
@@ -519,17 +519,17 @@ Always use C++14 libraries and features if possible, but keep it compatible with
 
 ## Nonstandard Extensions
 
-Only use standard extensions, exeptionnally where at least widely used and available on all the project supported compilers. Be smart and don't introduce non-maintainable code in the codebase ;)
+Only use standard extensions, exceptionally where at least widely used and available on all the project supported compilers. Be smart and don't introduce non-maintainable code in the codebase ;)
 
 # Naming
 
 ## File and Folder Names
 
-File names must match the class defined inside and the file must be placed in a directory structure matching the namespace for the class.
+File names must match the class defined inside, and the file must be placed in a directory structure matching the namespace for the class.
 
-Therefore, filenames should be in UpperCamelCase and shoud not contain separators such as spaces, dashes or underscores.
+Therefore, filenames should be in UpperCamelCase and should not contain separators such as spaces, dashes or underscores.
 
-Header files must head with the `.hpp` extension, inline header files must hend with `.inl` and must be placed alongside the classic header files, and finally, source files must end with the `.cpp` extension.
+Header files must head with the `.hpp` extension, inline header files must end with `.inl` and must be placed alongside the classic header files, and finally, source files must end with the `.cpp` extension.
 
 Source files must be placed in the `./src/` folder, whereas header and inline source files must be located in the `./include/` folder.
 
@@ -554,7 +554,7 @@ Source files must be placed in the `./src/` folder, whereas header and inline so
 ## Type Names
 
 Type names should be in UpperCamelCase (with no underscores): `MyClass`.
-This applies for classes, structs, type aliases, enums and type template parameters.
+This applies to classes, structs, type aliases, enums and type template parameters.
 
 ## Variable Names
 
@@ -584,13 +584,13 @@ Refer to [Variable Names](#variable-names) above.
 
 ## Function Names
 
-Function names shoul be written the same way as variable names, in lowerCamelCase, with no underscores: `myFunction()`.
+Function names should be written the same way as variable names, in lowerCamelCase, with no underscores: `myFunction()`.
 
 When there is an acronym, it should be capitalized: write `sendUDP()`, not `sendUdp()`.
 
 ## Namespace Names
 
-Nested namespaces should be in UpperCamelCase and the top-level namespace should be in lowerCamelCase, with no underscores, e.g.: `lug::Graphics`.
+Nested namespaces should be in UpperCamelCase, and the top-level namespace should be in lowerCamelCase, with no underscores, e.g.: `lug::Graphics`.
 
 Do not use nested namespaces that would match top-level namespaces:
 ```cpp
@@ -607,17 +607,17 @@ Refer to [Variable Names](#variable-names) above.
 
 ## Macro Names
 
-Macro names should be written in upper case with underscore between words: `MY_MACRO`.
-Keep in mind that macros are not recommanded (See [Preprocessor Macros](#preprocessor-macros)).
+Macro names should be written in upper case with underscores between words: `MY_MACRO`.
+Keep in mind that macros are not recommended (See [Preprocessor Macros](#preprocessor-macros)).
 
 
 # Comments
 
 ## Comment Style
 
-Use `//` for single-line comments and `/* */` for multiline comments outside of function blocks. Small blocks of multiline text can be written as mutliple `//` lines, see an example [in the implementation section](#implementation-comments).
+Use `//` for single-line comments and `/* */` for multiline comments outside of function blocks. Small blocks of multiline text can be written as multiple `//` lines, see an example [in the implementation section](#implementation-comments).
 
-A comment should always start with an upper case letter, and there should be a space after the opening comment syntax.
+A comment should always start with an uppercase letter, and there should be a space after the opening comment syntax.
 
 **Example:**
 ```cpp
@@ -634,7 +634,7 @@ A comment should always start with an upper case letter, and there should be a s
  */                                             // Good
  
 // This is also a small
-// mutliline comment, but this is allowed       // Good
+// multiline comment, but this is allowed       // Good
 ```
 
 
@@ -646,7 +646,7 @@ Each class should be described with a block preceding the class declaration, in 
 **Example:**
 ```cpp
 /**
- * @brief      Class for camera.
+ * @brief      Class for the camera.
  *
  *             This class represents a Camera in the 3D engine. A scene can be attached
  *             to a Camera. Only one scene can be attached to a Camera.
@@ -659,7 +659,7 @@ Each class should be described with a block preceding the class declaration, in 
 
 ## Function Comments
 
-Same as classes, function declarations should be preceded with a block defining the function purpose, params, and return values. The block is also in accordance with the Doxygen format (with `@`, not `\`, i.e. `@brief` instead of `\brief`).
+Same as classes, function declarations should be preceded with a block defining the function purpose, params, and return values. The block is also following the Doxygen format (with `@`, not `\`, i.e., `@brief` instead of `\brief`).
 
 **Example:**
 ```cpp
@@ -679,7 +679,7 @@ class LUG_GRAPHICS_API Graphics {
 
 ### Data member
 
-Comments of members of struct, union, class, or enum should be written after the variable declaration, with `///<` (in accordance to the Doxygen format) instead of the usual comment syntax.
+Comments of members of a struct, union, class, or enum should be written after the variable declaration, with `///<` (in accordance to the Doxygen format) instead of the usual comment syntax.
 
 **Example:**
 ```cpp
@@ -690,7 +690,7 @@ struct foo {
 
 The comment should describe, in less than one line, the purpose of the data. This comment will be present in the generated API documentation.
 
-However, no comment is needed if the type and name of the data member are self explanatory.
+However, no comment is needed if the type and name of the data member are self-explanatory.
 
 ### Global variables
 
@@ -723,7 +723,7 @@ for (std::size_t i = 0; i < renderQueue.getLightsNb(); ++i) {
 i += 1;
 ```
 
-The same applies for single lines, however, if you feel like you have to comment everything, maybe you should rethink your code first ;)
+The same applies to single lines; however, if you feel like you have to comment everything, maybe you should rethink your code first ;)
 
 **Example:**
 ```cpp
@@ -733,15 +733,15 @@ API::RenderPass* renderPass = _pipelines[Light::Light::Type::Directional]->getRe
 
 ## Punctuation, Spelling and Grammar
 
-Comments should have good punctuation, spelling and grammar, like narrative texts.
+Comments should have good punctuation, spelling, and grammar, like narrative texts.
 
 Comments can sometimes be less formal, like for short comment describing a data member.
 
 ## TODO Comments
 
-You should generally add a TODO comment before any code that is incomplete or needs review and or particular attention. This allows temporary quircks and hacks to be grouped and easily searched (e.g. in an IDE) in order to be correctly addressed before any merging is done to a definitive branch or version.
+You should generally add a TODO comment before any code that is incomplete or needs review and or particular attention. This allows temporary quirks and hacks to be grouped and easily searched (e.g., in an IDE) to be correctly addressed before any merging is done to a definitive branch or version.
 
-The name of the person who added such comment should appear inside parenthesis, right after the TODO. As such, the person resonsible for the comment remains easily tracked and also accountable for the TODO.
+The name of the person who added such comment should appear inside the parenthesis, right after the TODO. As such, the person responsible for the comment remains easily tracked and also accountable for the TODO.
 
 **Example:**
 ```cpp
@@ -753,13 +753,13 @@ std::ifstream shaderCode(file, std::ios::binary);
 
 ## Line Length
 
-A line should not be more than 120 characters. This greately code enhance readability and prevents editor auto-wrapping that usually isn't smart enough to split the line(s) at the right position(s).
+A line should not be more than 120 characters. This greately enhance readability and prevents editor auto-wrapping that usually isn't smart enough to split the line(s) at the right position(s).
 
 ## Non-ASCII Characters
 
 Although Non-ASCII characters should be rare, because applications should be localized externally, they must use `u8` prefix to ensure that the string literal uses UTF-8 encoding: `u8"äôéè"`.
 
-Don't use `char16_t` or `char32_t` because they are not for UTF-8 character storage. Don't use the Windows type `wchar_t`, unless you are working with the Windows API in implementation specific files, or regions delimited by preprocessor directives.
+Don't use `char16_t` or `char32_t` because they are not for UTF-8 character storage. Don't use the Windows type `wchar_t`, unless you are working with the Windows API in implementation specific files or regions delimited by preprocessor directives.
 
 ## Spaces vs. Tabs
 
@@ -768,7 +768,7 @@ Indentation is only with 4 spaces, so configure your editor to correctly indent 
 
 ## Function Declarations and Definitions
 
-The return type, function name and parameters should be on the same line.
+The return type, function name, and parameters should be on the same line.
 
 **Example:**
 ```cpp
@@ -857,7 +857,7 @@ if (condition) {
 }
 ```
 
-For short single-line conditions, it's OK to put the condition on one line, but only if it improves readability:
+For short single-line conditions, it is OK to put the condition on one line, but only if it improves readability:
 
 ```cpp
 if (!condition) return false; // Ok
@@ -874,7 +874,7 @@ if (!condition) {  // Good
 ```
 ## Loops and Switch Statements
 
-As for conditions, you must always wrap the body for loops statements with curly braces, even if it's only one line long.
+As for conditions, you must always wrap the body for loops statements with curly braces, even if it is only one line long.
 
 **Example:**
 
@@ -900,7 +900,7 @@ switch (enumVal) {
 }
 ```
 
-It's OK to put case on the same line if it enhances readability. However, all the `case`s should one line long, as to keep consistency among each `switch` statement.
+It is OK to put a case on the same line if it enhances readability. However, all the `case`s should one line long, as to keep consistency among each `switch` statement.
 
 **Example:**
 ```cpp
@@ -922,7 +922,7 @@ switch (type) {
 
 ## Pointer and Reference Expressions
 
-When declaring a pointer, the `*` should be placed on the type, i.e. there is no space before the `*` or `&`.
+When declaring a pointer, the `*` should be placed on the type, i.e., there is no space before the `*` or `&`.
 
 **Example:**
 ```cpp
@@ -936,7 +936,7 @@ bar = &foo;
 ## Boolean Expressions
 
 Spaces around boolean operators are obligatory.
-If a boolean expression is longer than the [maximum line length](#line-length), you should write each expression on separate lines, with the boolean operators at the end of each lines.
+If a boolean expression is longer than the [maximum line length](#line-length), you should write each expression on separate lines, with the boolean operators at the end of each line.
 
 **Example:**
 ```cpp
@@ -963,7 +963,7 @@ return (longExpressionA &&
 ## Variable and Array Initialization
 
 Prefer using `{}` than `()`.
-There is no spaces around and inside the `{}` or `()`.
+There are no spaces around and inside the `{}` or `()`.
 
 **Example:**
 ```cpp
@@ -976,7 +976,7 @@ int foo{5}; // Better
 Preprocessor directives follow a separate intentation scheme:
 * Each preprocessor directive starts with a `#` on the first character of the line
 * Nested conditions should have their content indented with one and only space per indent level.
-* Again, preprocessor directive are not dependent on the indentation of the code they currently are located, and in the same way, indentation of code located inside preprocessor directives should not be disturbed.
+* Again, preprocessor directive is not dependent on the indentation of the code they currently are located, and in the same way, indentation of code located inside preprocessor directives should not be disturbed.
 
 A good way to remember this is that final, preprocessed code, should have the correct indentation. 
 
@@ -1018,13 +1018,13 @@ Image::Image(VkImage image, const Device* device, const Extent& extent, bool swa
 
 ## Vertical Whitespace
 
-Try to limit the use of blank lines, but you can use them sparsely to split logically independant code sections and help readability.
+Try to limit the use of blank lines, but you can use them sparsely to split logically independent code sections and help readability.
 Each file should end with a new line (`\n`).
 
 # Conclusion
 
 This style guideline is quite complete, but still missing some details. If you find an edge-case that this guideline does not cover, feel free to report any issue or contribute to this guideline.
 
-As a general rule of thumb, your code should be the most readable possible, and it is always possible to flex some rules, if it makes your code better.
+As a general rule of thumb, your code should be the most readable possible, and it is always possible to flex some rules if it makes your code better.
 
 Good luck, have fun coding with us!

@@ -6,6 +6,10 @@ menu:
   class: documentation button button-green align-right
 ---
 
+# Introduction
+
+We made the choice to base Lugudunum on Vulkan as actual 3D engines are all based on technologies existing since many years now, and don't take advantages of today's hardware. With Lugdunum, we want to enable developers to create powerful 3D applications, capable to run seamlessly on desktop and mobile, without performances loss. 
+
 # Architecture of Lugdunum
 
 The purpose of this section is to introduce you to the internal operation of our 3D engine. We will first talk about the architecture of the renderer. Then we will describe the sequencing of the engine graphic's loop, how each component of the [`Renderer::Target`](#lug::Graphics::Renderer::Target) is interacting with the [`Render::Window`](#lug::Graphics::Render::Window) composed of different [`Renderer::View`](#lug::Graphics::Renderer::View). Then, we will discuss the GPU & CPU's side operation. We will explain how each buffer is loaded and used by our engine.
@@ -51,110 +55,18 @@ struct Scissor {
 
 Each of the components of [`Render::View::Viewport`](#lug::Graphics::Render::View::Viewport) and [`Render::View::Scissor`](#lug::Graphics::Render::View::Scissor) are defined as percentage values (i.e. a float between 0.0 an 1.0), so it has the same appearance on every size of the [`Render::Target`](#lug::Graphics::Render::Target).
 
-A unique [`Render::Camera`](#lug::Graphics::Render::Camera) can be attached to a single [`Render::View`](#lug::Graphics::Render::View), i.e. we cannot have a [`Render::Camera`](#lug::Graphics::Render::Camera) attached to two different [`Render::View`](#lug::Graphics::Render::View)s.
+A [`Render::Camera`](#lug::Graphics::Render::Camera::Camera) can be attached to multiple [`Render::View`](#lug::Graphics::Render::View)s and have a pointer to a [`Scene::Node`](#lug::Graphics::Scene::Node) which can be created by the user and attached to multiple cameras
 
-[`Render::Camera`](#lug::Graphics::Render::Camera)s contain a [`Render::Queue`](#lug::Graphics::Render::Queue) and have pointer to a [`Scene::Scene`](#lug::Graphics::Scene::Scene), which is created by the user, and can be attached to multiple cameras.
-
-Every frame, the [`Render::Queue`](#lug::Graphics::Render::Queue) is cleared, then filled by the [`Scene::Scene`](#lug::Graphics::Scene::Scene) with the objects visible by the [`Render::Camera`](#lug::Graphics::Render::Camera)'s frustrum.
+[`Render::View`](#lug::Graphics::Render::View)s also have a [`Render::Queue`](#lug::Graphics::Render::Queue) which is used for rendering.
+Every frame, the [`Render::Queue`](#lug::Graphics::Render::Queue) is cleared, then filled by the [`Scene::Scene`](#lug::Graphics::Scene::Scene) of the camera's [`Scene::Node`](#lug::Graphics::Scene::Node)  with the objects visible by the [`Render::Camera`](#lug::Graphics::Render::Camera::Camera)'s frustrum.
 
 The [`Render::Queue`](#lug::Graphics::Render::Queue) is finally sent to [`Vulkan::Render::Technique::Technique::render()`](#lug::Graphics::Vulkan::Render::Technique::Technique::render()).
 
-```graphviz
-digraph {
-    graph[fontname="Open Sans", labeljust="l", nodesep=".4", ranksep=".7"]
-    node[
-        shape=record 
-        fontname="Open Sans"
-        penwidth=1
-        fontsize=11
-        style=filled
-        fillcolor="#9FC5E8"
-        width=1.8
-        height=.5
-    ]
-    edge[fontname="Open Sans", fontsize=9, penwidth=1, arrowsize=.6]
-    rankdir=TB
-    splines=ortho
-    newrank=true
-    labeljust="center"
-
-    subgraph cluster_Graphics {
-        style=filled;
-        color="#CFE2F3";
-        label="Graphics"
-
-
-        "Render::Target" [group=a]
-        "Render::Window" [group=a]
-        "Render::View" [group=a]
-        "Render::Camera" [group=a]
-        "Scene::MovableCamera" [group=a]
-
-        "Scene::Scene" [group=d]
-        "Scene::SceneNode" [group=d]
-        "Light::Light" [group=a]
-        "Scene::MovableObject" [group=b]
-        "Scene::MeshInstance" [group=b]
-        "Render::Mesh" [group=b]
-        "Render::Queue"[group=b]
-
-
-        subgraph cluster_Vulkan {
-            node[style=filled, fillcolor="#EA9999"]
-            style=filled;
-            color="#F4CCCC";
-            label="Vulkan"
-            
-            "Vulkan::Render::Window" [label="Render::Window"]
-            "Vulkan::Render::View" [label="Render::View" group=c]
-            "Vulkan::Render::Camera" [label="Render::Camera"]
-            "Vulkan::Render::Mesh" [label="Render::Mesh"]
-
-            "Vulkan::Render::Technique::Technique" [label="Render::Technique\n::Technique" group=c]
-            "Vulkan::Render::Technique::Forward"   [label="Render::Technique\n::Forward"]
-            "Vulkan::Render::Technique::Deffered"  [label="Render::Technique\n::Deffered" group=c]
-
-            "Vulkan::Render::View"->"Vulkan::Render::Technique::Technique" [style="dashed"]
-            "Vulkan::Render::Technique::Technique"->"Vulkan::Render::Technique::Forward"
-            "Vulkan::Render::Technique::Technique"->"Vulkan::Render::Technique::Deffered"
-        }
-        
-
-        "Render::Target"->"Render::Window" [dir=back]
-
-        "Render::Window"->"Render::View" [style="dashed"]
-        "Render::Window"->"Vulkan::Render::Window" [dir=back]
-
-        "Render::View"->"Render::Camera" [style="dashed"]
-        "Render::View"->"Vulkan::Render::View" [dir=back]
-
-        "Render::Camera"->"Scene::MovableCamera" [dir=back style="dotted"]
-        "Render::Camera"->"Vulkan::Render::Camera" [dir=back]
-        "Render::Camera"->"Render::Queue"
-
-        "Render::Camera"->"Scene::Scene" [style="dotted"]
-        "Scene::Scene"->"Scene::SceneNode" [style="dashed"]
-        "Scene::SceneNode"->"Scene::MovableObject" [style="dashed"]
-        "Scene::MovableObject"->"Scene::MeshInstance" [dir=back]
-        "Scene::MovableObject"->"Light::Light" [dir=back]
-        "Scene::MovableObject"->"Scene::MovableCamera" [dir=back]
-        
-        "Scene::MeshInstance"->"Render::Mesh" [style="dotted"]
-        "Render::Mesh"->"Vulkan::Render::Mesh" [dir=back]
-
-        
-        {rank=same "Render::Window" "Vulkan::Render::Window"}
-        {rank=same "Render::View" "Vulkan::Render::View"}
-        {rank=same "Render::Camera" "Vulkan::Render::Camera"}
-
-        {rank=same "Scene::SceneNode" "Scene::MovableObject" "Scene::MovableCamera"}
-        {rank=same "Scene::MeshInstance" "Light::Light"}
-        {rank=same "Render::Mesh" "Vulkan::Render::Mesh"}
-        {rank=same "Scene::Scene" "Render::Camera"}
-    }  
-}
+```google-drive
+type: drawings
+doc_id: 1QMl-q_poKcsFWanBs4SaMJuOSn6--JIz6VERc8vL7XY
 ```
-> [Main classes of the renderer]{#fig:renderer-classes}
+> [Renderer classes]{#fig:renderer-classes}
 
 In the diagram \autoref{fig:renderer-classes}, we are representing the main classes of the renderer and their dependencies.
 
@@ -170,8 +82,8 @@ The diagram \autoref{fig:renderer-view-usage} shows an example of how classes in
     * The render view A
     * The render view B
     * The render view C, which is *disabled*, as each one of these can be enabled and disabled as wished.
-* Both render views A and B each have a camera, and each camera has its own render queue.
-* Cameras are also linked to a scene, and scenes are linked to each camera's render queues.
+* Both render views A and B each have a camera, and each render view has its own render queue.
+* Cameras are also linked to a scene by the means of a Scene::Node, and scenes are linked to each camera's render queues.
 * In this particular case, it appears that we have only one scene, so each camera points to the same scene, and the scene points to two render queues. 
 
 
@@ -230,6 +142,7 @@ participant Application
 participant Renderer
 participant RenderWindow
 participant RenderTarget
+participant Gui
 
 UserApplication->>+Application: run()
 
@@ -243,8 +156,13 @@ loop mainLoop
 
     Application->>+Renderer: beginFrame()
     Renderer->>+RenderWindow: beginFrame()
+    RenderWindow->>+Gui: beginFrame()
+    note right of Gui: ImGui::NewFrame()
+    Gui-->>-RenderWindow: 
     note right of RenderWindow: Get the next image
     RenderWindow-->>-Renderer: 
+
+
     Renderer-->>-Application: 
 
     Application->>+UserApplication: onFrame()
@@ -262,6 +180,10 @@ loop mainLoop
     end
 
     Renderer->>+RenderWindow: endFrame()
+    RenderWindow->>+Gui: endFrame()
+    note right of Gui: Render imgui
+    Gui-->>-RenderWindow: 
+
     note right of RenderWindow: Present the image
     RenderWindow-->>-Renderer: 
 
@@ -296,11 +218,11 @@ int main(int argc, char* argv[]) {
 
 The method [`Core::Application::run()`](#lug::Core::Application::run()) is the main loop of the engine which polls the events from the window and renders everything correctly. As expected, we can see that the [`Core::Application`](#lug::Core::Application) is polling all the events from the [`Render::Window`](#lug::Graphics::Render::Window) and sending them to the `UserApplication` through the method [`UserApplication::onEvent(const lug::Window::Event& event)`](#lug::Core::Application::onEvent()).
 
-Then, [`Core::Application`](#lug::Core::Application) is calling the method [`Renderer::beginFrame()`](#lug::Graphics::Renderer::beginFrame()) which call itself the method [`Render::Window::beginFrame()`](#lug::Graphics::Render::Window::beginFrame()) to notify the [`Render::Window`](#lug::Graphics::Render::Window) that we are starting a new frame.
+Then, [`Core::Application`](#lug::Core::Application) is calling the method [`Renderer::beginFrame()`](#lug::Graphics::Renderer::beginFrame()) which call itself the method [`Render::Window::beginFrame()`].(#lug::Graphics::Render::Window::beginFrame()) to notify the [`Render::Window`](#lug::Graphics::Render::Window) that we are starting a new frame. [`Render::Window::beginFrame()`](#lug::Graphics::Render::Window::beginFrame()) also call [`Gui::beginFrame()`](#lug::Graphics::Vulkan::Gui::beginFrame()) to prepare the rendering of the gui.
 
 Finally, the user can update the logic of their application in the method [`UserApplication::onFrame(const lug::System::Time& elapsedTime)`](#lug::Core::Application::onFrame()).
 
-At the end of the frame, the method [`Renderer::endFrame()`](#lug::Graphics::Renderer::endFrame()) is called and will call the method [`Render::Target::render()`](#lug::Graphics::Render::Target::render()) for all [`Render::Target`](#lug::Graphics::Render::Target) to draw and will finish the frame by calling the method [`Render::Window::endFrame()`](#lug::Graphics::Render::Window::endFrame()) to notify the [`Render::Window`](#lug::Graphics::Render::Window) that we are ending this frame.
+At the end of the frame, the method [`Renderer::endFrame()`](#lug::Graphics::Renderer::endFrame()) is called and will call the method [`Render::Target::render()`](#lug::Graphics::Render::Target::render()) for all [`Render::Target`](#lug::Graphics::Render::Target) to draw and will finish the frame by calling the method [`Render::Window::endFrame()`](#lug::Graphics::Render::Window::endFrame()) to notify the [`Render::Window`](#lug::Graphics::Render::Window) that we are ending this frame. At the beginning of [`Render::Window::endFrame()`](#lug::Graphics::Render::Window::endFrame()), it calls [`Gui::endFrame()`](#lug::Graphics::Vulkan::Gui::endFrame()) to draw the gui.
 
 ```mermaid
 sequenceDiagram
@@ -313,7 +235,7 @@ participant RenderTechnique
 loop for all render views to draw
     RenderTarget->>+RenderView: render()
 
-    RenderView->>+Camera: update(RenderView)
+    RenderView->>+Camera: update(RenderView, RenderQueue)
     Camera->>+Scene: fetchVisibleObjects(RenderView, Camera, RenderQueue)
     note left of Scene: Store the visible object in the RenderQueue
     Scene-->>-Camera: 
@@ -330,11 +252,11 @@ end
 
 In the method [`Render::Target::render()`](#lug::Graphics::Render::Target::render()), the [`Render::Target`](#lug::Graphics::Render::Target) is calling the method [`Render::View::render()`](#lug::Graphics::Render::View::render()) for each enabled [`Render::View`](#lug::Graphics::Render::View).
 
-To be rendered, [`Render::View`](#lug::Graphics::Render::View) needs to update its [`Render::Camera`](#lug::Graphics::Render::Camera) which will fetch all the elements in its [`Render::Queue`](#lug::Graphics::Render::Queue) from the scene with [`Scene::fetchVisibleObjects()`](#lug::Graphics::Scene::Scene::fetchVisibleObjects()).
+To be rendered, [`Render::View`](#lug::Graphics::Render::View) needs to update its [`Render::Camera`](#lug::Graphics::Render::Camera::Camera) which will fetch all the elements in the render view's [`Render::Queue`](#lug::Graphics::Render::Queue) from the scene with [`Scene::fetchVisibleObjects()`](#lug::Graphics::Scene::Scene::fetchVisibleObjects()).
 
-So the [`Render::Queue`](#lug::Graphics::Render::Queue) will contain every elements needed to render the [`Scene::Scene`](#lug::Graphics::Scene::Scene), meshes, models, lights, etc.
+So the [`Render::Queue`](#lug::Graphics::Render::Queue) will contain every elements needed to render the [`Scene::Scene`](#lug::Graphics::Scene::Scene), meshes, materials, lights, etc.
 
-Then the [`Render::View`](#lug::Graphics::Render::View) can call the render technique to draw the the elements in the [`Render::Queue`](#lug::Graphics::Render::Queue) (e.g. for Vulkan a class inheriting from [`Vulkan::Render::Technique::Technique`](#lug::Graphics::Vulkan::Render::Technique::Technique)).
+Then the [`Render::View`](#lug::Graphics::Render::View) can call the render technique to draw the elements in its [`Render::Queue`](#lug::Graphics::Render::Queue) (e.g. for Vulkan a class inheriting from [`Vulkan::Render::Technique::Technique`](#lug::Graphics::Vulkan::Render::Technique::Technique)).
 
 ## Vulkan Rendering
 
@@ -470,22 +392,15 @@ digraph {
             fillcolor="#EA9999";
             label="Transfer Queue"
 
-            subgraph cluster_cmdBufferB {
-                label="Command buffer B"
-                fillcolor="#9FC5E8"
-                color="#9FC5E8"
-                style=filled
-
-                "Update Lights Data"
-            }
-
             subgraph cluster_cmdBufferA {
-                label="Command buffer A"
+                label="Transfer Command Buffer"
                 fillcolor="#9FC5E8"
                 color="#9FC5E8"
                 style=filled
 
                 "Update Camera Data"
+                "Update Light Data"
+                "Update Material Data"
             }  
         }
 
@@ -496,7 +411,7 @@ digraph {
             label="Graphics Queue"
 
             subgraph cluster_cmdBufferC {
-                label="Command buffer C"
+                label="Render Command Buffer"
                 fillcolor="#9FC5E8"
                 color="#9FC5E8"
                 style=filled
@@ -507,56 +422,59 @@ digraph {
         }
         
         "Update Camera Data"->"Draw"
-        "Update Lights Data"->"Draw"
+        "Update Material Data"->"Draw"
+        "Update Light Data"->"Draw"
     }
 }
 ```
 > Forward technique
 
-The [`Vulkan::Render::Technique::Forward`](#lug::Graphics::Vulkan::Render::Technique::Forward) has two different [`Vulkan::Render::Queue`](#lug::Graphics::Vulkan::Render::Queue), i.e. one transfer and one graphics.
+The [`Vulkan::Render::Technique::Forward`](#lug::Graphics::Vulkan::Render::Technique::Forward) has two different [`Vulkan::API::Queue`](#lug::Graphics::Vulkan::API::Queue), i.e. one transfer and one graphics.
 
-The transfer [`Render::Queue`](#lug::Graphics::Render::Queue) is responsible for updating the data of the [`Render::Camera`](#lug::Graphics::Render::Camera) and [`Light::Light`](#lug::Graphics::Light::Light)s, each of which is contained in a uniform buffer [`Vulkan::API::Buffer`](#lug::Graphics::Vulkan::API::Buffer) which is sent through different [`Vulkan::API::CommandBuffer`](#lug::Graphics::Vulkan::API::CommandBuffer)s (i.e. "Command buffer A" and "Command buffer B" in the above schema).
-These [`Vulkan::API::CommandBuffer`](#lug::Graphics::Vulkan::API::CommandBuffer)s are then sent to the transfer [`Render::Queue`](#lug::Graphics::Render::Queue).
+The transfer [`Render::Queue`](#lug::Graphics::Render::Queue) is responsible for updating the data of the [`Render::Camera`](#lug::Graphics::Render::Camera::Camera), [`Render::Light`](#lug::Graphics::Render::Light)s and [`Render::Material`](#lug::Graphics::Render::Material), each of which is contained in a uniform buffer [`Vulkan::API::Buffer`](#lug::Graphics::Vulkan::API::Buffer).
 
-Here is the structure of the uniform buffers for the camera and the lights:
+Here is the structure of the uniform buffers for the camera, lights and materials:
 ```cpp
+struct Light {
+    vec3 position;
+    float distance;
+    vec4 color;
+    vec3 direction;
+    float constantAttenuation;
+    float linearAttenuation;
+    float quadraticAttenuation;
+    float falloffAngle;
+    float falloffExponent;
+    uint type;
+};
+
+struct Material {
+    vec4 color;
+    vec3 emissive;
+    float metallic;
+    float roughness;
+    float normalTextureScale;
+    float occlusionTextureStrength;
+};
+
 // Camera
-layout(set = 0, binding = 0) uniform cameraUniform {
+layout(std140, set = 0, binding = 0) uniform cameraBlock {
     mat4 view;
     mat4 proj;
+} camera;
+
+// Light
+layout(std140, set = 1, binding = 0) uniform lightDataBlock {
+    Light lights[50];
+    uint lightsNb;
 };
 
-// Directional light
-layout(set = 1, binding = 0) uniform lightUniform {
-    vec3 lightAmbient;
-    vec3 lightDiffuse;
-    vec3 lightSpecular;
-    vec3 lightDirection;
-};
-
-// Point light
-layout(set = 1, binding = 0) uniform lightUniform {
-    vec3 lightAmbient;
-    float lightConstant;
-    vec3 lightDiffuse;
-    float lightLinear;
-    vec3 lightSpecular;
-    float lightQuadric;
-    vec3 lightPos;
-};
-
-// Spot light
-layout(set = 1, binding = 0) uniform lightUniform {
-    vec3 lightAmbient;
-    vec3 lightDiffuse;
-    vec3 lightSpecular;
-    float lightAngle;
-    vec3 lightPosition;
-    float lightOuterAngle;
-    vec3 lightDirection;
+// Material
+layout(std140, set = 2, binding = 0) uniform materialBlock {
+    Material material;
 };
 ```
-Each type of light has a different pipeline using different fragment shaders (That's why all the light uniforms are using the same binding point in the above code sample).
+Each type of material has a different pipeline but has the same fragment shader. Each type of material has its own fragment shader compiled using preprocessor definitions.
 
 To pass the transformation matrix of the objects we are using pushconstant:
 ```cpp
@@ -567,7 +485,8 @@ layout (push_constant) uniform blockPushConstants {
 
 The graphics [`Render::Queue`](#lug::Graphics::Render::Queue) is responsible for all the rendering.
 
-The "Command buffer C" for the drawing depends on the two command buffers of transfer by means of semaphores at different stages of the pipeline, `VK_PIPELINE_STAGE_VERTEX_INPUT_BIT` for the camera and `VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT` for the lights.
+The "Render Command Buffer" for the drawing depends on the 
+"Transfer Command buffer" by means of semaphores at different stages of the pipeline, `VK_PIPELINE_STAGE_VERTEX_INPUT_BIT` for the camera and `VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT` for the lights and materials.
 
 
 #### CPU Side
@@ -582,7 +501,7 @@ A [`Vulkan::Render::BufferPool::SubBuffer`](#lug::Graphics::Vulkan::Render::Buff
 
 ##### Triple buffering
 
-Because we are using triple buffering, we need a way to store data for a specific image. For that we have [`Vulkan::Render::Technique::Forward::FrameData`](#lug::Graphics::Vulkan::Render::Technique::Forward::FrameData) that contains all we need to render one specific frame (command buffers, depth buffer, etc.). To avoid using a command buffer already in use, we are synchronizing their access with a fence.
+Because we are using triple buffering, we need a way to store data for a specific image. For that we have [`Vulkan::Render::Window::FrameData`](#lug::Graphics::Vulkan::Render::Window::FrameData) and [`Vulkan::Render::Technique::Forward::FrameData`](#lug::Graphics::Vulkan::Render::Technique::Forward::FrameData) that contains all we need to render one specific frame (command buffers, depth buffer, etc.). To avoid using a command buffer already in use, we are synchronizing their access with a fence.
 
 To share [`Vulkan::Render::BufferPool::SubBuffer`](#lug::Graphics::Vulkan::Render::BufferPool::SubBuffer) across frames, e.g. if the camera does not move, we have a way to reuse the same [`Vulkan::Render::BufferPool::SubBuffer`](#lug::Graphics::Vulkan::Render::BufferPool::SubBuffer). We associate the [`Vulkan::Render::BufferPool::SubBuffer`](#lug::Graphics::Vulkan::Render::BufferPool::SubBuffer) with the object (camera or light), and test at the beginning of the frame if we can use a previous one (if the object has not changed from the update of this [`Vulkan::Render::BufferPool::SubBuffer`](#lug::Graphics::Vulkan::Render::BufferPool::SubBuffer)). 
 
@@ -592,6 +511,7 @@ If it is not possible to use a previously allocated buffer we are allocating a n
 
 Here is the pseudo code that we are using to build the command buffer of drawing:
 ```pseudocode
+ResetCommandBuffer
 BeginCommandBuffer
 
 # The viewport and scissor are provided by the render view
@@ -605,15 +525,15 @@ BeginRenderPass
 BindDescriptorSet(Camera)
 
 # All the lights influencing the rendering (visible to the screen)
-Foreach Light
-    # Each type of Light has a different pipeline
-    BindPipeline(Light)
-    
+Foreach Light    
     # We can bind the uniform buffer of the light
     BindDescriptorSet(Light)
     
     # All the objects influenced by the light
     Foreach Object
+        # Each type of Material has a different pipeline
+        BindPipeline(getMaterialPipeline(Object))
+
         # Push the transformation matrix of the Object
         PushConstant(Object)
         
@@ -625,6 +545,12 @@ Foreach Light
         DrawIndexed(Object)
     EndForeach
 EndForeach
+
+# Draw SkyBox
+If SkyBox
+    BindDescriptorSet(SkyBox)
+    BindPipeline(SkyBox)
+    DrawIndexed(SkyBox)
 
 EndRenderPass
 
