@@ -1,46 +1,34 @@
 #!/bin/bash
 
-# Exit if a command fails
-set -e
 
 invalidate=false
 cache_dir="$HOME/.local/debs"
+dependencies_sums_path="$HOME/.local/dependencies_sums.md5"
 
-if [[ -d "$cache_dir" ]]; then
-    echo "$cache_dir is present"
-
-    echo -ne "$cache_dir modification time: "
-    date -r "$cache_dir"
-    echo -ne "$0 modification time: "
-    date --date="$(git log -1 --format="%ai" -- $0)"
-else
-    echo "$cache_dir is missing, creating cache"
-fi
-
-date_script=$(date --date="$(git log -1 --format="%ai" -- $0)" +%s)
-date_cache=$(date -r "$cache_dir" +%s)
-
-echo "date_script: $date_script, date_cache: $date_cache"
-if [[ $date_script -gt $date_cache ]]; then
-    echo "$0 is newer than $cache_dir, invalidating cache"
+cat $dependencies_sums_path
+md5sum -c $dependencies_sums_path
+if [[ ! $? -eq 0 ]]; then
+    echo "Our script has changed"
     invalidate=true
-else
-    echo "$0 is older than $cache_dir, cache is valid"
+    md5sum $0 > $dependencies_sums_path
 fi
+
+# Exit if a command fails
+set -e
 
 if [[ ! -d "$cache_dir" || "$invalidate" = true ]]; then
     sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     sudo apt-get update
 
-    rm -r "$cache_dir"
+    rm -rf "$cache_dir"
     mkdir "$cache_dir"
     cd "$cache_dir"
 
     packages=(
         clang-3.8 cmake gcc-6 g++-6     # compilation
         ninja-build                     # ninja
-        doxygen graphviz                # doxigen
+        doxygen graphviz                # doxygen
     )
 
     for package in ${packages[*]}; do
