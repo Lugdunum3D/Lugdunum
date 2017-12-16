@@ -19,6 +19,11 @@ set -e
 if [[ ! -d "$cache_dir" || "$invalidate" = true ]]; then
     sudo add-apt-repository ppa:george-edison55/cmake-3.x -y
     sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+
+    # http://apt.llvm.org/
+    wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+    sudo add-apt-repository "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main" -y
+
     sudo apt-get update
 
     rm -rf "$cache_dir"
@@ -26,7 +31,7 @@ if [[ ! -d "$cache_dir" || "$invalidate" = true ]]; then
     cd "$cache_dir"
 
     packages=(
-        clang-3.8 cmake gcc-6 g++-6     # compilation
+        clang-5.0 cmake gcc-6 g++-6     # compilation
         ninja-build                     # ninja
         doxygen graphviz                # doxygen
     )
@@ -41,6 +46,6 @@ fi
 sudo dpkg -i $cache_dir/*.deb
 
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 60 --slave /usr/bin/g++ g++ /usr/bin/g++-6
-sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.8 60 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-3.8
+sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-5.0 60 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-5.0
 sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100
 sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
