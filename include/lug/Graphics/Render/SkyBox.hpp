@@ -30,10 +30,30 @@ public:
 
     virtual ~SkyBox() = default;
 
+    /**
+     * @brief      Gets background texture
+     *
+     * @return     The background texture
+     */
     const Resource::SharedPtr<lug::Graphics::Render::Texture> getBackgroundTexture() const;
+    /**
+     * @brief      Gets environment texture
+     *
+     * @return     The environment texture
+     */
     const Resource::SharedPtr<lug::Graphics::Render::Texture> getEnvironnementTexture() const;
 
+    /**
+     * @brief      Create an irradiance map from the environment texture
+     *
+     * @return     The irradiance map
+     */
     virtual Resource::SharedPtr<lug::Graphics::Render::SkyBox> createIrradianceMap(Renderer& renderer) const = 0;
+    /**
+     * @brief      Create a prefiltered map from the environment texture
+     *
+     * @return     The prefiltered map
+     */
     virtual Resource::SharedPtr<lug::Graphics::Render::SkyBox> createPrefilteredMap(Renderer& renderer) const = 0;
 
 protected:

@@ -24,15 +24,38 @@ public:
 
     ~Orthographic() = default;
 
+    /**
+     * @brief      Gets the projection width
+     *
+     * @return     The projection width
+     */
     float getXMag() const;
+    /**
+     * @brief      Sets the projection width
+     *
+     * @param[in]  xmag    The projection width
+     */
     void setXMag(float xmag);
 
+    /**
+     * @brief      Gets the projection height
+     *
+     * @return     The projection height
+     */
     float getYMag() const;
+    /**
+     * @brief      Sets the projection height
+     *
+     * @param[in]  ymag    The projection height
+     */
     void setYMag(float ymag);
 
 protected:
     explicit Orthographic(const std::string& name);
 
+    /**
+     * @brief      Update the projection matrix
+     */
     void updateProj() override final;
 
 private:
