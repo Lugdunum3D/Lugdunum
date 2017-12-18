@@ -75,6 +75,7 @@ inline bool Renderer::containsPipeline(Render::Pipeline::Id id) const {
 }
 
 inline Resource::SharedPtr<Render::Pipeline> Renderer::getPipeline(Render::Pipeline::Id id) {
+    std::lock_guard<std::mutex> lockGuard(_mutex);
     if (containsPipeline(id)) {
         return _pipelines.at(id).lock();
     }

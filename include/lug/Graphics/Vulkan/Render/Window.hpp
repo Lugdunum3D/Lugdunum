@@ -10,6 +10,7 @@
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
 #include <lug/Graphics/Vulkan/Vulkan.hpp>
 #include <lug/Graphics/Vulkan/Gui.hpp>
+#include <lug/System/ThreadPool.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -89,6 +90,8 @@ private:
     API::Surface _surface{};
     API::Swapchain _swapchain{};
 
+    std::unique_ptr<lug::System::ThreadPool> _threadPool{nullptr};
+
     const API::Queue* _presentQueue{nullptr};
     const API::QueueFamily* _presentQueueFamily{nullptr};
     uint32_t _currentImageIndex{0};
@@ -100,7 +103,6 @@ private:
     API::CommandPool _commandPool{};
 
     lug::Graphics::Vulkan::Gui  _guiInstance;
-
     bool _isGuiInitialized;
 };
 

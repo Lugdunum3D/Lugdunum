@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 #include <lug/Graphics/Export.hpp>
@@ -151,6 +152,8 @@ private:
 
 private:
     static const std::unordered_map<Module::Type, Requirements> modulesRequirements;
+
+    mutable std::mutex _mutex;
 };
 
 #include <lug/Graphics/Vulkan/Renderer.inl>
