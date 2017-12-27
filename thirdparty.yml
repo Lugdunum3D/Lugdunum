@@ -12,7 +12,7 @@ fmt:
 
 googlemock:
     repository:
-        tag: 294f72bc773c92410aa3c5ecdd6cd4a757c3fbf4
+        tag: 5490beb0602eab560fa3969a4410e11d94bf12af
 
 gltf2-loader:
     repository:
