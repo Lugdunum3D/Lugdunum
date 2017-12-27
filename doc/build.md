@@ -10,48 +10,34 @@ menu:
 
 ## Introduction
 
-Lugdunum depends on many different libraries / projects in order to work properly.
-You can find [here](https://github.com/Lugdunum3D/Lugdunum-ThirdParty "third party lugdunum repository") compiled versions, ready to use to compile Lugdunum and get started quickly.
+Lugdunum depends on many different libraries and projects in order to work properly. Hopefully, we put in place a system, [Thirdparty-Builder](https://github.com/Lugdunum3D/ThirdParty-Builder), that allows you to build quickly and automatically all the required depdendencies in order to get started.
+
+On top of that, we already compile our dependencies on the CIs for the tree platform we support: Linux, Android and Windows.
+
+Our build system (via CMake macros) is already configured to download automatically the up-to-date versions. Below is a documentation on how to use our thirdparty management system and how to build Lugdunum.
+
 
 ## List of dependencies
 
-* [Assimp](http://assimp.org/):  _Open Asset Import Library (short name: Assimp) is a portable Open Source library to import various well-known 3D model formats in a uniform manner._
-* [Fmt](http://fmtlib.net/latest/index.html):  _fmt (formerly cppformat) is an open-source formatting library. It can be used as a safe alternative to printf or as a fast alternative to C++ IOStreams._
-* [Vulkan](https://www.khronos.org/vulkan/):  _Vulkan is a new generation graphics and compute API that provides high-efficiency, cross-platform access to modern GPUs used in a wide variety of devices from PCs and consoles to mobile phones and embedded platforms._
+For an updated list of dependencies, you can consult the file [`thirdparty.yml`](https://github.com/Lugdunum3D/Lugdunum/blob/dev/thirdparty.yml) at the root for the repository. It is however designed to machine-readable first, so below is a more human-friendly list of what libraries we depend on:
 
-## Optional dependencies
+### Libraries we use
 
-All our code is covered by different tests through the Googletest / Googlemock framework.
-You can find the sources of the framework at the [following link](https://github.com/google/googletest) or in our [third party repository](https://github.com/Lugdunum3D/Lugdunum-ThirdParty)
+* [ShaderC](https://github.com/google/shaderc): A collection of tools, libraries and tests for shader compilation. We use it to compile _glsl_ shaders at run time.
+* [Fmt](http://fmtlib.net/latest/index.html): An open-source C++ formatting library. We use it in our Logger.
+* [gltf2-loader](https://github.com/Lugdunum3D/glTF2-loader): One of our own libraries. We use it to load _glTF 2.0_ models in Lugdunum.
+* [imgui](https://github.com/ocornut/imgui): A bloat-free Immediate Mode Greetype.org): The popUlafose i tanderingce for C++ with minimal dependencies. We fully support _imgui_ in our rendering engine. The end user has full access to _imgui_'s API.
+* [imgui_club](https://github.com/ocornut/imgui_club): An _imgui_ companion library. It is used to have a nicer font rendering, mostly.
+* [FreeType](https://www.fraphical user interface library for C++.
+* [Vulkan](https://www.khronos.org/vulkan/): This is a new generation graphics and compute API that provides high-efficiency, cross-platform access to modern GPUs.
 
+# Preparing your system
 
-## How it works
-
-
-All dependencies can now be found on [thirdparty-dl.lugbench.eu](https://thirdparty-dl.lugbench.eu). The CMake build system is configured to use this host by default and pull the required files from there, so you shouldn't have to compile them all from source.
-
-In the case this host goes down in the future, the dependencies can be easily built using the `thirdpary.yml` file in the root of the repository along the building scripts located in our [ThirdParty repository](https://github.com/Lugdunum3D/ThirdParty-Builder).
-
-# How to build Lugdunum
-
-## Cloning the repository
-
-First, clone the 3D engine repository:
-
-```
-git clone git@github.com:Lugdunum3D/Lugdunum.git
-```
-
-Now, to build Lugdunum, you'll need to either have some dependencies installed, or you can automatically pull them from the `thirdparty` submodule, that regroups their pre-compiled versions to set you up more quickly:
-
-```
-git submodule update --init --recursive
-```
- 
+Building with Vulkan means building with the latest toolchains and the latest technologies available. In this section, we describe how to upgrade your system to a working development environment.
 
 ## <img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg" width="24"> Linux
 
-### General prerequisites 
+### Supported toolchains 
 
 Target | Toolchain
 ------------ | -------------
@@ -60,45 +46,34 @@ Linux | clang >= 3.8
 
 ### Distribution specific prerequisites 
 
-#### <img src="http://design.ubuntu.com/wp-content/uploads/logo-ubuntu_cof-orange-hex.svg" width="16"> Ubuntu
+#### <img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo-ubuntu_cof-orange-hex.svg" width="16"> Ubuntu
 
-These instructions were tested for Ubuntu 16.04 LTS. A recent version of GCC (at least the version 6) is needed to compile Lugdunum. You can add the correct repository on an Ubuntu machine with the following commands:
+These instructions were tested for Ubuntu 16.04 LTS. You can add the _ubuntu-toolchain-r/test_ repository on your machine to be able to install the most recent GCC version with the following commands:
 
 ```bash
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 sudo apt update
 ```
 
-You can now install the dependencies needed to build Lugdunum: gcc6, CMake (the tool we use to build Lugdunum), the development version of the X11 libraries:
+You can now install the dependencies needed to build Lugdunum: gcc-6, CMake and the development version of the X11 libraries:
 
 ```bash
 sudo apt install gcc-6 cmake libxrandr-dev
 ```
 
-There is not yet a Vulkan SDK package on Ubuntu, so you'll have to download and install it yourself. A very complete documentation is already available [on the LunarG website](https://vulkan.lunarg.com/doc/sdk/latest/linux/getting_started.html), so we won't get into details here. Just make sure you have the `VULKAN_SDK` environment variable set, [as described here](https://vulkan.lunarg.com/doc/sdk/latest/linux/getting_started.html#user-content-set-up-the-runtime-environment), with the `x86_64` architecture.
+As of July 2017, there is still not a Vulkan SDK package on Ubuntu, so you have to download and install it yourself. A complete documentation is already available [on the LunarG website](https://vulkan.lunarg.com/doc/sdk/latest/linux/getting_started.html), so we won't get into details here. Just make sure you have the `VULKAN_SDK` environment variable set, [as described here](https://vulkan.lunarg.com/doc/sdk/latest/linux/getting_started.html#user-content-set-up-the-runtime-environment), with the `x86_64` architecture.
 
 #### <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Archlinux-icon-crystal-64.svg" width="16"> Arch Linux
 
-On Arch Linux, nice people packaged the Vulkan SDK and provided it at [vulkan-validation-layers](https://www.archlinux.org/packages/extra/i686/vulkan-validation-layers/), and it depends on all the right things to make things easier. So all you have to do is:
+On Arch Linux, nice people packaged everything needed in the [vulkan-devel](https://www.archlinux.org/groups/x86_64/vulkan-devel/), so all you have to do is:
 
 ```
-pacman -S vulkan-validation-layers base-devel cmake
-```
-
-### Building
-
-The commands below should be distribution independant, hopefully. What we do is create a "build" directory (out-of-source build), `cd` in it and run `cmake` with the appropriate compiler versions.
-
-```
-mkdir build
-cd build
-cmake ../ -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6
-make
+pacman -S vulkan-devel base-devel cmake
 ```
 
 ## <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/Windows_logo_%E2%80%93_2012_%28dark_blue%29.svg" width="24"> Windows
 
-### General prerequisites
+### Supported toolchains
 
 Target | Toolchain
 ------------ | -------------
@@ -108,87 +83,114 @@ Windows 10 | [Visual Studio 2017](https://www.visualstudio.com/downloads/)
 Visual Studio 2015 is **NOT** supported anymore, Visual Studio 2017 is the only supported toolchain.
 ::: 
 
-### Building
-
 To build Lugdunum on Windows, you'll need [CMake](https://cmake.org/download/). CMake will generate a Visual Studio solution that you can then open, and build.
 
-In command line, you can generate the solution with:
+## <img src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg" width="24"> Android
+
+### Supported toolchains
+
+Target | Toolchain
+------------ | -------------
+Android | NDK >= r14 ; clang ; Gradle >= 2.2
+
+
+* [Android NDK r14+](https://developer.android.com/ndk/index.html)
+* [Android Studio 3+](https://developer.android.com/studio/index.html)
+
+The NDK and CLang can be added [in the SDK Manager in Android Studio](https://developer.android.com/studio/intro/update.html#sdk-manager).
+
+:::info
+At the time this documentation was written, Android was tested with the NDK v16.0.4442984, Android Studio 3.0.0.18 (canary), Gradle 4.3 (plugin version 3.0.0x) and CMake 3.6.4111459.
+:::
+
+Please note that [arm64-v8a](https://developer.android.com/ndk/guides/abis.html#arm64-v8a) is the only supported ABI and that we only support Android N (android-24) and up.
+
+
+### About the Android NDK
+
+As the GCC toolchain is now deprecated by Android's developers, the clang toolchain will be the only one supported in this project. Please note that we're also using [Unified Headers](https://github.com/android-ndk/ndk/wiki/Changelog-r14) from Android NDK 14.
+
+
+# Cloning the repository
+
+First, clone Lugdunum repository:
+
+```
+git clone git@github.com:Lugdunum3D/Lugdunum.git
+```
+
+Then, set your working directory to the cloned repository.
+
+CMake will automatically download all the required dependencies (third-party libraries, models) as long as you specify `LUG_ACCEPT_DL=ON`. If this is set to true then CMake will check if you are missing third party libraries or models and will download them as needed.
+If for some reason you wish to force CMake to retrieve the latest dependencies then you can simply delete the following folders _`thirdparty/`_, _`resources/models/`_ (which should hopefully be in the directory directly "above" _`build/`_) as well as _`build/models/`_.
+
+
+# Building Lugdunum
+
+## <img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg" width="24"> Linux
+
+Create a "build" directory (out-of-source build), `cd` in it and run `cmake`, as the list of commands bellow suggests:
 
 ```
 mkdir build
 cd build
 cmake
-    -G"Visual Studio 15 2017 Win64"
-    -DCMAKE_INSTALL_PREFIX="Path/To/Install"
+    -DCMAKE_INDSTALL_PREFIX=<wanted_install_dir>
+    -DLUG_ACCEPT_DL=ON
     ../
+make install
 ```
 
-:::danger
-As Windows doesn't have a default path to install libraries, CMAKE_INSTALL_PREFIX is mandatory
+:::info
+If you installed multiple _gcc_ versions, you might want to add the `-DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6` flags to CMake to explicitely requires the most recent compilers.
+Of course, `CMAKE_C_COMPILER` and `CMAKE_CXX_COMPILER` can be set to clang and clang++
 :::
 
-Then, open the generated `Lugdunum.sln` with Visual Studio and compile it.
+:::info
+You can use `make -j$(nproc)` to make the compilation faster by running it on all your CPU cores.
+:::
 
-#### Visual studio 2017
-With the [recent support of CMake](https://blogs.msdn.microsoft.com/vcblog/2016/10/05/cmake-support-in-visual-studio/) in Visual Studio 2017, building and installing CMake projects is now possible directly within Visual Studio.
-Just modify the CMake configuration file `CMakeSettings.json` to change the install path.
+## <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/Windows_logo_%E2%80%93_2012_%28dark_blue%29.svg" width="24"> Windows
 
-```json
-{
-  "configurations": [
-   {
-    "name": "my-config",
-    "generator": "Visual Studio 15 2017",
-    "buildRoot": "${env.LOCALAPPDATA}\\CMakeBuild\\${workspaceHash}\\build\\${name}",
-    "cmakeCommandArgs": "",
-    "variables": [
-     {
-      "name": "CMAKE_INSTALL_PREFIX",
-      "value": "Path/To/Install"
-     }
-    ]
-  }
- ]
-}
-```
+To build Lugdunum on Windows, you'll need [CMake](https://cmake.org/download/). CMake will generate a Visual Studio solution that you can then open, and build the project from.
 
-## <img src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg" width="24"> Android
-
-Target | Toolchain
------------- | -------------
-Android | NDK >= r14 + clang + Gradle >= 2.2
-
-
-### General prerequisites
-* [Android NDK r14+](https://developer.android.com/ndk/index.html)
-* [Android Studio 2.2+](https://developer.android.com/studio/index.html)
-
-
-Please note that [arm64-v8a](https://developer.android.com/ndk/guides/abis.html#arm64-v8a) is the only supported ABI and that we only support Android N (android-24) and up.
-
-### About the Android NDK
-
-As the gcc toolchain is now deprecated by Android's developers, the clang toolchain will be the only one supported in this project. Please note that we're also using [Unified Headers](https://github.com/android-ndk/ndk/wiki/Changelog-r14) from Android NDK 14.
-
-
-### Compiling
-
-The following commands should work on a Linux environment, and should give you an idea of what’s necessary to build Lugdunum for Android in another environment.
-
-For better understanding of Android NDK CMake variables, visit [official NDK documentation]( https://developer.android.com/ndk/guides/cmake.html#cmake-variables)
+By using the command line interface, you can generate the solution with:
 
 ```
 mkdir build
 cd build
-~/Android/Sdk/cmake/3.6.3155560/bin/cmake \
+cmake
+    -G"Visual Studio 2017 15 Win64"
+    -DLUG_ACCEPT_DL=ON
+    ../
+```
+
+Then, open the generated `Lugdunum.sln` with Visual Studio and compile it.
+
+## <img src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg" width="24"> Android
+
+* Set the environment variable `ANDROID_SDK` to the location Android Studio downloaded the SDK.SDK
+* Set the environment variable `ANDROID_NDK` to the path of the NDK. If you downloaded it via Android Studio, it should be located in `${ANDROID_SDK}/ndk-bundle`
+
+For example:
+
+```bash
+export ANDROID_SDK=~/Android
+export ANDROID_NDK=${ANDROID_SDK}/ndk-bundle
+```
+
+From a command line prompt, navigate to the folder you cloned Lugdunum in, then run the following commands:
+
+```
+~/Android/Sdk/cmake/3.6.4111459/bin/cmake \ 
     -G "Android Gradle - Unix Makefiles" \
     -DANDROID=true \
     -DANDROID_PLATFORM=android-24 \
     -DANDROID_STL=c++_shared \
     -DCMAKE_BUILD_TYPE=Debug \
-    -DCMAKE_TOOLCHAIN_FILE=PATH_TO_ANDROID_NDK/build/cmake/android.toolchain.cmake \
-    -DANDROID_UNIFIED_HEADERS=ON
-    ../
+    -DLUG_ACCEPT_DL=ON
+    -DCMAKE_INSTALL_PREFIX=${ANDROID_NDK}/sources/lugdunum \
+    -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake
 make install
 ```
 
@@ -196,18 +198,52 @@ make install
 Here the CMake path might be different of the one displayed in the command above, please double-check before executing the command and/or filing a bug report.
 :::
 
-### Samples
+# Building the samples
 
-Open the folder `samples/compiler/android` with Android Studio, let gradle configure the project.
-If the NDK isn’t configured properly, you’ll have to tell Android Studio where to find it:
+To build the samples, it is mandatory to have built and installed Lugdunum.
 
+## <img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg" width="24"> Linux
+
+Navigate to the folder `./samples` and as earlier, create a "build" directory.
+
+```
+cd samples/
+mkdir build
+cd build
+cmake
+    -DLUG_ROOT=<path_where_you_installed_lugdunum>
+    -DLUG_THIRDPARTY_DIR=../../thirdparty_THIRDPARTY_DIR
+    ../
+make
+```
+
+Each sample is built in the current directory. For example, the sample "hello" is located in the directory `samples/build/hello`.
+
+
+## <img src="https://upload.wikimedia.org/wikipedia/commons/e/ee/Windows_logo_%E2%80%93_2012_%28dark_blue%29.svg" width="24"> Windows
+
+As for Lugdunum's build, we are using CMake to generate a Visual Studio solution.
+
+By using the command line interface, you can generate the solution that contains all the samples with:
+
+```
+cd samples
+mkdir build
+cd build
+cmake -G"Visual Studio 15 2017 Win64" ..
+```
+Then, open the generated `samples.sln` with Visual Studio and compile them.
+
+
+## <img src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg" width="24"> Android
+
+
+Open the folder `samples/compiler/android` with Android Studio and let Gradle configure and sync the project.
+
+:::info
+If the NDK isn’t configured properly, you’ll have to tell Android Studio where to find it :
 _`File > Project Structure > SDK Location > Android NDK Location`_
-
-Let the gradle configure and sync the project.
+:::
 
 The samples should now be available as targets and be buildable from Android Studio.
 
-
-## <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" width="24"> Apple macOS & iOS
-
-These platforms are not yet supported, but they might be one day if Apple decides to release Vulkan on their systems.
