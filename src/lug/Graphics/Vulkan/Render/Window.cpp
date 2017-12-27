@@ -5,6 +5,9 @@
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Fence.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Image.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
@@ -73,12 +76,12 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
 
     while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, static_cast<VkSemaphore>(acquireImageData->completeSemaphore))) {
         if (_swapchain.isOutOfDate()) {
-            if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
+            if (!initSwapchainCapabilities() || !initSwapchain() || !initOffscreenData() || !buildCommandBuffers()) {
                 return false;
             }
 
             if (_isGuiInitialized == true) {
-                if (!_guiInstance.initFramebuffers(_swapchain.getImagesViews())) {
+                if (!_guiInstance.initFramebuffers(_offscreenImagesViews)) {
                     LUG_LOG.error("Window::beginFrame: Failed to initialise Gui framebuffers");
                     return false;
                 }
@@ -87,7 +90,7 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
             for (auto& renderView: _renderViews) {
                 View* renderView_ = static_cast<View*>(renderView.get());
 
-                if (!renderView_->getRenderTechnique()->setSwapchainImageViews(_swapchain.getImagesViews())) {
+                if (!renderView_->getRenderTechnique()->setSwapchainImageViews(_offscreenImagesViews)) {
                     return false;
                 }
 
@@ -173,7 +176,7 @@ bool Window::endFrame() {
 lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::InitInfo& initInfo) {
     std::unique_ptr<View> renderView = std::make_unique<View>(_renderer, this);
 
-    if (!renderView->init(initInfo, _presentQueue, _swapchain.getImagesViews())) {
+    if (!renderView->init(initInfo, _presentQueue, _offscreenImagesViews)) {
         return nullptr;
     }
 
@@ -296,7 +299,7 @@ bool Window::initSwapchainCapabilities() {
 }
 
 bool Window::initGui() {
-    if (!_guiInstance.init(_swapchain.getImagesViews())) {
+    if (!_guiInstance.init(_offscreenImagesViews)) {
         LUG_LOG.error("RendererWindow: Failed to initialise Gui");
         return false;
     }
@@ -493,6 +496,163 @@ bool Window::initFramesData() {
     return buildCommandBuffers();
 }
 
+bool Window::initOffscreenData() {
+    auto& device = _renderer.getDevice();
+    uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
+    Vulkan::Renderer& vkRenderer = static_cast<Vulkan::Renderer&>(_renderer);
+
+    // Get transfer queue family and retrieve the first queue
+    const API::Queue* transferQueue = nullptr;
+    {
+        transferQueue = device.getQueue("queue_transfer");
+        if (!transferQueue) {
+            LUG_LOG.error("Window::initOffscreenData: Can't find transfer queue");
+            return false;
+        }
+    }
+
+    // Create command buffer to change layout
+    API::CommandPool commandPool;
+    API::CommandBuffer cmdBuffer;
+    {
+        VkResult result{VK_SUCCESS};
+
+        // Command pool
+        API::Builder::CommandPool commandPoolBuilder(vkRenderer.getDevice(), *transferQueue->getQueueFamily());
+        if (!commandPoolBuilder.build(commandPool, &result)) {
+            LUG_LOG.error("Forward::iniWindow::initOffscreenData: Can't create the graphics command pool: {}", result);
+            return false;
+        }
+
+        // Command buffer
+        API::Builder::CommandBuffer commandBufferBuilder(vkRenderer.getDevice(), commandPool);
+        commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
+        // Create the render command buffer
+        if (!commandBufferBuilder.build(cmdBuffer, &result)) {
+            LUG_LOG.error("Window::initOffscreenData: Can't create the command buffer: {}", result);
+            return false;
+        }
+    }
+
+    if (!cmdBuffer.begin()) {
+        LUG_LOG.error("Window::initOffscreenData: Can't begin command buffer");
+        return false;
+    }
+
+    // Create fence for queue submit synchronisation
+    API::Fence fence;
+    {
+        VkResult result{VK_SUCCESS};
+        API::Builder::Fence fenceBuilder(vkRenderer.getDevice());
+
+        if (!fenceBuilder.build(fence, &result)) {
+            LUG_LOG.error("Window::initOffscreenData: Can't create render fence: {}", result);
+            return false;
+        }
+    }
+
+    API::Builder::DeviceMemory deviceMemoryBuilder(device);
+    deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+    // Create offscreen images
+    {
+        _offscreenImages.resize(frameDataSize);
+        API::Builder::Image imageBuilder(device);
+
+        imageBuilder.setUsage(VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+        imageBuilder.setPreferedFormats({_swapchain.getFormat().format});
+        imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
+        imageBuilder.setQueueFamilyIndices({ transferQueue->getQueueFamily()->getIdx() });
+        imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
+
+        VkExtent3D extent{
+            /* extent.width */ _swapchain.getExtent().width,
+            /* extent.height */ _swapchain.getExtent().height,
+            /* extent.depth */ 1
+        };
+        imageBuilder.setExtent(extent);
+
+        for (uint8_t i = 0; i < frameDataSize; ++i) {
+            VkResult result{VK_SUCCESS};
+            if (!imageBuilder.build(_offscreenImages[i], &result)) {
+                LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image: {}", result);
+                return false;
+            }
+
+            if (!deviceMemoryBuilder.addImage(_offscreenImages[i])) {
+                LUG_LOG.error("Window::initOffscreenData: Can't add offscreen image to device memory");
+                return false;
+            }
+
+            // Change image layout
+            {
+                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+                pipelineBarrier.imageMemoryBarriers.resize(1);
+                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
+                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].image = &_offscreenImages[i];
+
+                cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+            }
+        }
+    }
+
+    // Create offscreen image memory
+    {
+        VkResult result{VK_SUCCESS};
+        if (!deviceMemoryBuilder.build(_offscreenImagesMemory, &result)) {
+            LUG_LOG.error("Vulkan::Texture::build: Can't create buffer device memory: {}", result);
+            return false;
+        }
+    }
+
+    // Create offscreen image views
+    {
+        _offscreenImagesViews.resize(frameDataSize);
+        for (uint8_t i = 0; i < frameDataSize; ++i) {
+            VkResult result{VK_SUCCESS};
+            API::Builder::ImageView imageViewBuilder(device, _offscreenImages[i]);
+
+            imageViewBuilder.setFormat(_swapchain.getFormat().format);
+
+            if (!imageViewBuilder.build(_offscreenImagesViews[i], &result)) {
+                LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image view: {}", result);
+                return false;
+            }
+        }
+    }
+
+    if (!cmdBuffer.end()) {
+        LUG_LOG.error("Window::initOffscreenData: Can't end command buffer");
+        return false;
+    }
+
+    // Submit queue
+    if (!transferQueue->submit(
+        cmdBuffer,
+        {},
+        {},
+        {},
+        static_cast<VkFence>(fence)
+    )) {
+        LUG_LOG.error("Window::initOffscreenData Can't submit work to graphics queue");
+        return false;
+    }
+
+    if (!fence.wait() || !transferQueue->waitIdle()) {
+        LUG_LOG.error("Window::initOffscreenData: Can't wait fence");
+        return false;
+    }
+
+    cmdBuffer.destroy();
+    commandPool.destroy();
+
+    return true;
+}
+
 bool Window::buildBeginCommandBuffer() {
     uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
 
@@ -573,11 +733,81 @@ bool Window::buildEndCommandBuffer() {
             return false;
         }
 
+        // Prepare window image for copying
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+        }
+
+        // Prepare offscreen image for copying
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_offscreenImages[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+        }
+
+        // Copy offscreen image into window image
+        {
+            VkImageCopy copyRegion = {};
+
+            copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            copyRegion.srcSubresource.baseArrayLayer = 0;
+            copyRegion.srcSubresource.mipLevel = 0;
+            copyRegion.srcSubresource.layerCount = 1;
+            copyRegion.srcOffset = { 0, 0, 0 };
+
+            copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            copyRegion.dstSubresource.baseArrayLayer = 0;
+            copyRegion.dstSubresource.mipLevel = 0;
+            copyRegion.dstSubresource.layerCount = 1;
+            copyRegion.dstOffset = { 0, 0, 0 };
+
+            copyRegion.extent.width = _swapchain.getExtent().width;
+            copyRegion.extent.height = _swapchain.getExtent().height;
+            copyRegion.extent.depth = 1;
+
+            const API::CommandBuffer::CmdCopyImage cmdCopyImage{
+                /* cmdCopyImage.srcImage      */ _offscreenImages[i],
+                /* cmdCopyImage.srcImageLayout  */ VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                /* cmdCopyImage.dstImage      */ _swapchain.getImages()[i],
+                /* cmdCopyImage.dsrImageLayout        */ VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                /* cmdCopyImage.regions      */ { copyRegion }
+            };
+
+            cmdBuffer.copyImage(cmdCopyImage);
+        }
+
+        // Prepare offscreen image for writing
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_offscreenImages[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+        }
+
         API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
         pipelineBarrier.imageMemoryBarriers.resize(1);
-        pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-        pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
         pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
 
@@ -639,7 +869,7 @@ bool Window::init(Window::InitInfo& initInfo) {
 }
 
 bool Window::initRender() {
-    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData())) {
+    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initOffscreenData() && initFramesData())) {
         return false;
     }
 
