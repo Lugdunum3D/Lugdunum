@@ -6,7 +6,10 @@ layout (set = 1, binding = 0) uniform sampler2D skyBox;
 
 layout (location = 0) in vec3 inPos;
 
-layout (location = 0) out vec4 outColor;
+layout (location = 0) out vec4 outSceneColor;
+layout (location = 1) out vec4 outGlowColor;
+
+const float threshold = 0.7;
 
 const vec2 invAtan = vec2(0.1591, 0.3183);
 vec2 SampleSphericalMap(vec3 v) {
@@ -17,5 +20,13 @@ vec2 SampleSphericalMap(vec3 v) {
 }
 
 void main() {
-    outColor = vec4(texture(skyBox, SampleSphericalMap(normalize(inPos))).rgb, 1.0);
+    vec3 color = texture(skyBox, SampleSphericalMap(normalize(inPos))).rgb;
+    outSceneColor = vec4(color, 1.0);
+
+    float brightness = (color.r * 0.2126) + (color.g * 0.7152) + (color.b * 0.0722);
+    if (brightness > threshold) {
+        outGlowColor = vec4(color, 1.0);
+    } else {
+        outGlowColor = vec4(0.0);
+    }
 }

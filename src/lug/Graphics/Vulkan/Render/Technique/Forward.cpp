@@ -120,9 +120,10 @@ bool Forward::render(
         beginRenderPass.renderArea.extent = {static_cast<uint32_t>(viewport.extent.width), static_cast<uint32_t>(viewport.extent.height)};
 
         const auto& clearColor = _renderView.getClearColor();
-        beginRenderPass.clearValues.resize(2);
+        beginRenderPass.clearValues.resize(3);
         beginRenderPass.clearValues[0].color = {{clearColor.r(), clearColor.g(), clearColor.b(), 1.0f}};
-        beginRenderPass.clearValues[1].depthStencil = {1.0f, 0};
+        beginRenderPass.clearValues[1].color = {{clearColor.r(), clearColor.g(), clearColor.b(), 1.0f}};
+        beginRenderPass.clearValues[2].depthStencil = {1.0f, 0};
 
         frameData.renderCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
 
@@ -578,7 +579,7 @@ bool Forward::render(
     );
 }
 
-bool Forward::init(const std::vector<API::ImageView>& imageViews) {
+bool Forward::init(const std::vector<API::ImageView>& sceneImageViews, const std::vector<API::ImageView>& glowImageViews) {
     VkResult result{VK_SUCCESS};
 
     // Init graphics queue
@@ -622,7 +623,7 @@ bool Forward::init(const std::vector<API::ImageView>& imageViews) {
 
     API::Builder::Semaphore semaphoreBuilder(_renderer.getDevice());
 
-    _framesData.resize(imageViews.size());
+    _framesData.resize(sceneImageViews.size());
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
         // Create the render fence
         if (!fenceBuilder.build(_framesData[i].renderFence, &result)) {

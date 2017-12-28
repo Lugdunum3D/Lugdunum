@@ -111,9 +111,11 @@ private:
     bool _isGuiInitialized;
 
 
-    std::vector<API::Image> _offscreenImages;
-    std::vector<API::ImageView> _offscreenImagesViews;
     API::DeviceMemory _offscreenImagesMemory;
+    std::vector<API::Image> _sceneOffscreenImages;
+    std::vector<API::ImageView> _sceneOffscreenImagesViews;
+    std::vector<API::Image> _glowOffscreenImages;
+    std::vector<API::ImageView> _glowOffscreenImagesViews;
 
 };
 

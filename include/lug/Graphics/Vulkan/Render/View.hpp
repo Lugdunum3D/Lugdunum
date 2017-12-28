@@ -34,7 +34,8 @@ public:
 
     bool init(View::InitInfo& initInfo,
                 const API::Queue* presentQueue,
-                const std::vector<API::ImageView>& imageViews);
+                const std::vector<API::ImageView>& sceneImageViews,
+                const std::vector<API::ImageView>& glowImageViews);
 
     bool render(const API::Semaphore& imageReadySemaphore, uint32_t currentImageIndex);
     void destroy() override final;
