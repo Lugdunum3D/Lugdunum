@@ -1,12 +1,19 @@
 #pragma once
 
+#include <array>
+#include <memory>
 #include <vector>
 
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Vulkan/API/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/API/Fence.hpp>
+#include <lug/Graphics/Vulkan/API/Framebuffer.hpp>
+#include <lug/Graphics/Vulkan/API/GraphicsPipeline.hpp>
 #include <lug/Graphics/Vulkan/API/Image.hpp>
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
+#include <lug/Graphics/Vulkan/API/Sampler.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
 
 namespace lug {
@@ -17,13 +24,37 @@ class Renderer;
 
 namespace Render {
 
+namespace DescriptorSetPool {
+    class BloomSampler;
+    class DescriptorSet;
+};
+
 class Window;
 
-class LUG_GRAPHICS_API BloomPass final {
+class LUG_GRAPHICS_API BloomPass {
 private:
+    struct BlurPass {
+        // We need 2 passes to blur : one vertical blur, one horizontal blur
+        // Each pass has different color attachment
+        std::array<API::Framebuffer, 2> framebuffers;
+        std::array<API::Sampler, 2> samplers;
+        std::array<API::Image, 2> images;
+        std::array<API::ImageView, 2> imagesViews;
+
+        API::Semaphore glowCopyFinishedSemaphore{};
+        API::Semaphore blurFinishedSemaphore{};
+    };
+
     struct FrameData {
         API::Semaphore bloomFinishedSemaphores{};
-        API::CommandBuffer cmdBuffer;
+
+        std::vector<API::CommandBuffer> transferCmdBuffers;
+        API::CommandBuffer graphicsCmdBuffer;
+
+        BlurPass blurPass;
+        API::Fence fence;
+
+        std::vector<const Render::DescriptorSetPool::DescriptorSet*> texturesDescriptorSets;
     };
 
 public:
@@ -46,6 +77,10 @@ public:
     const Vulkan::API::Semaphore& getSemaphore(uint32_t currentImageIndex) const;
 
 private:
+    bool renderBlurPass(uint32_t currentImageIndex);
+    bool initPipeline(API::GraphicsPipeline& pipeline, int blurDirection);
+    bool initPipelines();
+    bool initBlurPass();
     bool buildEndCommandBuffer();
 
 private:
@@ -53,10 +88,19 @@ private:
     lug::Graphics::Vulkan::Render::Window& _window;
 
     const API::Queue* _transferQueue{nullptr};
+    const API::Queue* _graphicsQueue{nullptr};
 
     std::vector<FrameData> _framesData;
 
-    API::CommandPool _commandPool;
+    API::CommandPool _graphicsCommandPool;
+    API::CommandPool _transferQueueCommandPool;
+
+    API::DeviceMemory _offscreenImagesMemory;
+
+    API::GraphicsPipeline _horizontalPipeline;
+    API::GraphicsPipeline _verticalPipeline;
+
+    std::unique_ptr<Render::DescriptorSetPool::BloomSampler> _texturesDescriptorSetPool;
 };
 
 } // Render

@@ -99,6 +99,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Render/BufferPool/Camera.cpp
     ${SRCROOT}/Vulkan/Render/BufferPool/Light.cpp
     ${SRCROOT}/Vulkan/Render/BufferPool/Material.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/BloomSampler.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Camera.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSetPool.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/GuiTexture.cpp
@@ -298,6 +299,7 @@ set(INC
     ${INCROOT}/Vulkan/Render/BufferPool/Material.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/SubBuffer.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/SubBuffer.inl
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/BloomSampler.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/Camera.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSet.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSet.inl

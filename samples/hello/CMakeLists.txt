@@ -45,6 +45,8 @@ set(SHADERS
     prefiltered.frag
     genbrdflut.vert
     genbrdflut.frag
+    blur.vert
+    blur.frag
 )
 
 set(LUG_RESOURCES

@@ -669,7 +669,7 @@ bool Window::initOffscreenData() {
         {},
         static_cast<VkFence>(fence)
     )) {
-        LUG_LOG.error("Window::initOffscreenData Can't submit work to graphics queue");
+        LUG_LOG.error("Window::initOffscreenData Can't submit work to transfer queue");
         return false;
     }
 
@@ -678,6 +678,7 @@ bool Window::initOffscreenData() {
         return false;
     }
 
+    fence.destroy();
     cmdBuffer.destroy();
     commandPool.destroy();
 
