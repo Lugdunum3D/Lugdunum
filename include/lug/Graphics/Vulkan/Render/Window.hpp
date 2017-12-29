@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <lug/Graphics/Export.hpp>
+#include <lug/Graphics/Vulkan/Render/BloomPass.hpp>
 #include <lug/Graphics/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
 #include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
@@ -67,6 +68,10 @@ public:
 
     uint16_t getWidth() const override final;
     uint16_t getHeight() const override final;
+    const std::vector<API::Image>& getSceneOffscreenImages() const;
+    const std::vector<API::ImageView>& getSceneOffscreenImagesViews() const;
+    const std::vector<API::Image>& getGlowOffscreenImages() const;
+    const std::vector<API::ImageView>& getGlowOffscreenImagesViews() const;
 
     static std::unique_ptr<Window> create(lug::Graphics::Vulkan::Renderer& renderer, Window::InitInfo& initInfo);
 
@@ -117,6 +122,7 @@ private:
     std::vector<API::Image> _glowOffscreenImages;
     std::vector<API::ImageView> _glowOffscreenImagesViews;
 
+    BloomPass _bloomPass;
 };
 
 #include <lug/Graphics/Vulkan/Render/Window.inl>

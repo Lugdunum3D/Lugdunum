@@ -27,7 +27,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Window::Window(lug::Graphics::Vulkan::Renderer& renderer) : _renderer(renderer), _guiInstance(_renderer, *this), _isGuiInitialized(false) {}
+Window::Window(lug::Graphics::Vulkan::Renderer& renderer) : _renderer(renderer), _guiInstance(_renderer, *this), _isGuiInitialized(false), _bloomPass(_renderer, *this) {}
 
 Window::~Window() {
     destroyRender();
@@ -151,6 +151,14 @@ bool Window::endFrame() {
 
         ++i;
     }
+
+    if (!_bloomPass.endFrame(waitSemaphores, _currentImageIndex)) {
+        return false;
+    }
+
+    waitSemaphores = {
+        static_cast<VkSemaphore>(_bloomPass.getSemaphore(_currentImageIndex))
+    };
 
     if (_isGuiInitialized) {
         uiResult = _guiInstance.endFrame(waitSemaphores, _currentImageIndex);
@@ -299,7 +307,7 @@ bool Window::initSwapchainCapabilities() {
 }
 
 bool Window::initGui() {
-    if (!_guiInstance.init(_sceneOffscreenImagesViews)) {
+    if (!_guiInstance.init(_swapchain.getImagesViews())) {
         LUG_LOG.error("RendererWindow: Failed to initialise Gui");
         return false;
     }
@@ -673,7 +681,7 @@ bool Window::initOffscreenData() {
     cmdBuffer.destroy();
     commandPool.destroy();
 
-    return true;
+    return _bloomPass.init();
 }
 
 bool Window::buildBeginCommandBuffer() {
@@ -756,90 +764,11 @@ bool Window::buildEndCommandBuffer() {
             return false;
         }
 
-        // Prepare window image for copying
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
-
-            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
-        // Prepare offscreen images for copying
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_glowOffscreenImages[i];
-
-            // Scene offscreen
-            pipelineBarrier.imageMemoryBarriers[0].image = &_sceneOffscreenImages[i];
-            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-            // Glow offscreen
-            pipelineBarrier.imageMemoryBarriers[0].image = &_glowOffscreenImages[i];
-            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
-        // Copy offscreen image into window image
-        {
-            VkImageCopy copyRegion = {};
-
-            copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            copyRegion.srcSubresource.baseArrayLayer = 0;
-            copyRegion.srcSubresource.mipLevel = 0;
-            copyRegion.srcSubresource.layerCount = 1;
-            copyRegion.srcOffset = { 0, 0, 0 };
-
-            copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            copyRegion.dstSubresource.baseArrayLayer = 0;
-            copyRegion.dstSubresource.mipLevel = 0;
-            copyRegion.dstSubresource.layerCount = 1;
-            copyRegion.dstOffset = { 0, 0, 0 };
-
-            copyRegion.extent.width = _swapchain.getExtent().width;
-            copyRegion.extent.height = _swapchain.getExtent().height;
-            copyRegion.extent.depth = 1;
-
-            const API::CommandBuffer::CmdCopyImage cmdCopyImage{
-                /* cmdCopyImage.srcImage      */ _glowOffscreenImages[i],
-                /* cmdCopyImage.srcImageLayout  */ VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                /* cmdCopyImage.dstImage      */ _swapchain.getImages()[i],
-                /* cmdCopyImage.dsrImageLayout        */ VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                /* cmdCopyImage.regions      */ { copyRegion }
-            };
-
-            cmdBuffer.copyImage(cmdCopyImage);
-        }
-
-        // Prepare offscreen images for writing
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-            // Scene offscreen
-            pipelineBarrier.imageMemoryBarriers[0].image = &_sceneOffscreenImages[i];
-            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-            // Glow offscreen
-            pipelineBarrier.imageMemoryBarriers[0].image = &_glowOffscreenImages[i];
-            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
         API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
         pipelineBarrier.imageMemoryBarriers.resize(1);
-        pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
         pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
-        pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
         pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
         pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
 
@@ -937,6 +866,8 @@ void Window::destroyRender() {
     if (_isGuiInitialized == true) {
         _guiInstance.destroy();
     }
+
+    _bloomPass.destroy();
 }
 
 } // Render
