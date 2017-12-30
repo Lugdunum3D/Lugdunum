@@ -76,7 +76,8 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
 
     while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, static_cast<VkSemaphore>(acquireImageData->completeSemaphore))) {
         if (_swapchain.isOutOfDate()) {
-            if (!initSwapchainCapabilities() || !initSwapchain() || !initOffscreenData() || !buildCommandBuffers()) {
+            if (!initSwapchainCapabilities() || !initSwapchain() || !initOffscreenData() || !buildCommandBuffers() ||
+                !_bloomPass.initBlurPass() || !_bloomPass.buildEndCommandBuffer()) {
                 return false;
             }
 
@@ -682,7 +683,7 @@ bool Window::initOffscreenData() {
     cmdBuffer.destroy();
     commandPool.destroy();
 
-    return _bloomPass.init();
+    return true;
 }
 
 bool Window::buildBeginCommandBuffer() {
@@ -831,7 +832,7 @@ bool Window::init(Window::InitInfo& initInfo) {
 }
 
 bool Window::initRender() {
-    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initOffscreenData() && initFramesData())) {
+    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initOffscreenData() && initFramesData() && _bloomPass.init())) {
         return false;
     }
 

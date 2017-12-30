@@ -74,21 +74,35 @@ bool BloomPass::init() {
         }
     }
 
-    API::Builder::CommandBuffer transferCommandBufferBuilder(_renderer.getDevice(), _transferQueueCommandPool);
+    API::Builder::CommandBuffer transferCommandBufferBuilder(device, _transferQueueCommandPool);
     transferCommandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    API::Builder::CommandBuffer graphicsCommandBufferBuilder(_renderer.getDevice(), _transferQueueCommandPool);
+    API::Builder::CommandBuffer graphicsCommandBufferBuilder(device, _transferQueueCommandPool);
     graphicsCommandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    API::Builder::Semaphore semaphoreBuilder(_renderer.getDevice());
+    API::Builder::Semaphore semaphoreBuilder(device);
+
+    API::Builder::Fence fenceBuilder(device);
+    fenceBuilder.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
 
     _framesData.resize(frameDataSize);
     for (uint32_t i = 0; i < frameDataSize; ++i) {
-        // Bloom finished semaphore
+        // Semaphores
         {
             VkResult result{VK_SUCCESS};
-            if (!semaphoreBuilder.build(_framesData[i].bloomFinishedSemaphores, &result)) {
-                LUG_LOG.error("BloomPass::init: Can't create semaphore: {}", result);
+            if (!semaphoreBuilder.build(_framesData[i].bloomFinishedSemaphores, &result) ||
+                !semaphoreBuilder.build(_framesData[i].blurPass.glowCopyFinishedSemaphore, &result) ||
+                !semaphoreBuilder.build(_framesData[i].blurPass.blurFinishedSemaphore, &result)) {
+                LUG_LOG.error("BloomPass::init: Can't create semaphores: {}", result);
+                return false;
+            }
+        }
+
+        // Fence
+        {
+            VkResult result{VK_SUCCESS};
+            if (!fenceBuilder.build(_framesData[i].fence, &result)) {
+                LUG_LOG.error("Window::init: Can't create fences: {}", result);
                 return false;
             }
         }
@@ -730,35 +744,6 @@ bool BloomPass::initBlurPass() {
                 }
             }
         }
-    }
-
-    // Semaphores
-    {
-        API::Builder::Semaphore semaphoreBuilder(device);
-        for (uint8_t i = 0; i < frameDataSize; ++i) {
-            VkResult result{VK_SUCCESS};
-            if (!semaphoreBuilder.build(_framesData[i].blurPass.glowCopyFinishedSemaphore, &result) ||
-                !semaphoreBuilder.build(_framesData[i].blurPass.blurFinishedSemaphore, &result)) {
-                LUG_LOG.error("BloomPass::initBlurPass: Can't create semaphore: {}", result);
-                return false;
-            }
-        }
-    }
-
-    // Fences
-    {
-        API::Builder::Fence fenceBuilder(device);
-        fenceBuilder.setFlags(VK_FENCE_CREATE_SIGNALED_BIT); // Signaled state
-
-        for (uint8_t i = 0; i < frameDataSize; ++i) {
-            VkResult result{VK_SUCCESS};
-
-            if (!fenceBuilder.build(_framesData[i].fence, &result)) {
-                LUG_LOG.error("Window::initOffscreenData: Can't create render fence: {}", result);
-                return false;
-            }
-        }
-
     }
 
     // Create fence for queue submit synchronisation

@@ -76,12 +76,13 @@ public:
 
     const Vulkan::API::Semaphore& getSemaphore(uint32_t currentImageIndex) const;
 
+    bool initBlurPass();
+    bool buildEndCommandBuffer();
+
 private:
     bool renderBlurPass(uint32_t currentImageIndex);
     bool initPipeline(API::GraphicsPipeline& pipeline, int blurDirection);
     bool initPipelines();
-    bool initBlurPass();
-    bool buildEndCommandBuffer();
 
 private:
     lug::Graphics::Vulkan::Renderer& _renderer;
