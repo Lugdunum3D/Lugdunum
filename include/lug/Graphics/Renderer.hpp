@@ -45,6 +45,11 @@ public:
         Render::Technique::Type renderTechnique;
         DisplayMode displayMode{DisplayMode::Full};
         Antialiasing antialiasing{Antialiasing::NoAA};
+#if defined(LUG_SYSTEM_ANDROID)
+        bool bloomEnabled{false};
+#else
+        bool bloomEnabled{true};
+#endif
     };
 
 public:
@@ -76,6 +81,9 @@ public:
     const Antialiasing& getAntialiasing() const;
     void setAntialiasing(Antialiasing antialiasing);
 
+    const bool& isBloomEnabled() const;
+    void isBloomEnabled(bool enabled);
+
     ResourceManager* getResourceManager() const;
 
 protected:
@@ -83,6 +91,7 @@ protected:
     Type _type;
     DisplayMode _displayMode;
     Antialiasing _antialiasing;
+    bool _bloomEnabled;
     InitInfo _initInfo;
     std::unique_ptr<ResourceManager> _resourceManager{nullptr};
 };

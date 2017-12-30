@@ -153,13 +153,16 @@ bool Window::endFrame() {
         ++i;
     }
 
-    if (!_bloomPass.endFrame(waitSemaphores, _currentImageIndex)) {
-        return false;
+    if (_renderer.isBloomEnabled()) {
+        if (!_bloomPass.endFrame(waitSemaphores, _currentImageIndex)) {
+            return false;
+        }
+
+        waitSemaphores = {
+            static_cast<VkSemaphore>(_bloomPass.getSemaphore(_currentImageIndex))
+        };
     }
 
-    waitSemaphores = {
-        static_cast<VkSemaphore>(_bloomPass.getSemaphore(_currentImageIndex))
-    };
 
     if (_isGuiInitialized) {
         uiResult = _guiInstance.endFrame(waitSemaphores, _currentImageIndex);

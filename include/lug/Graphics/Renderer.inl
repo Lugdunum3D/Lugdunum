@@ -25,3 +25,11 @@ inline const Renderer::Antialiasing& Renderer::getAntialiasing() const {
 inline void Renderer::setAntialiasing(Renderer::Antialiasing antialiasing) {
     _antialiasing = antialiasing;
 }
+
+inline const bool& Renderer::isBloomEnabled() const {
+    return _bloomEnabled;
+}
+
+inline void Renderer::isBloomEnabled(bool enabled) {
+    _bloomEnabled = enabled;
+}

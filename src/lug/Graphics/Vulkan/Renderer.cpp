@@ -87,6 +87,7 @@ bool Renderer::beginInit(const std::string& appName, const Core::Version& appVer
     _initInfo = initInfo;
     _displayMode = _initInfo.displayMode;
     _antialiasing = _initInfo.antialiasing;
+    _bloomEnabled = _initInfo.bloomEnabled;
 
     if (!initInstance(appName, appVersion)) {
         LUG_LOG.error("RendererVulkan: Can't init the instance");

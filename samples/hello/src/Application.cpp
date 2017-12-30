@@ -182,6 +182,8 @@ void Application::onEvent(const lug::Window::Event& event) {
             _graphics.getRenderer()->setDisplayMode(static_cast<::lug::Graphics::Renderer::DisplayMode>(currentDisplayMode == 0 ? 7 : currentDisplayMode - 1));
         } else if (event.key.code == lug::Window::Keyboard::Key::F2) {
             _graphics.getRenderer()->setDisplayMode(static_cast<::lug::Graphics::Renderer::DisplayMode>((currentDisplayMode + 1) % 8));
+        } else if (event.key.code == lug::Window::Keyboard::Key::B) {
+            _graphics.getRenderer()->isBloomEnabled(!_graphics.getRenderer()->isBloomEnabled());
         }
     }
 }
