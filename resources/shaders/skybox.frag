@@ -9,7 +9,7 @@ layout (location = 0) in vec3 inPos;
 layout (location = 0) out vec4 outSceneColor;
 layout (location = 1) out vec4 outGlowColor;
 
-const float threshold = 0.7;
+const float BLUR_THRESHOLD = 0.7;
 
 const vec2 invAtan = vec2(0.1591, 0.3183);
 vec2 SampleSphericalMap(vec3 v) {
@@ -24,7 +24,7 @@ void main() {
     outSceneColor = vec4(color, 1.0);
 
     float brightness = (color.r * 0.2126) + (color.g * 0.7152) + (color.b * 0.0722);
-    if (brightness > threshold) {
+    if (brightness > BLUR_THRESHOLD) {
         outGlowColor = vec4(color, 1.0);
     } else {
         outGlowColor = vec4(0.0);

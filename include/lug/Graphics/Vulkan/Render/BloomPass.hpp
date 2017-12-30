@@ -45,6 +45,13 @@ private:
         API::Semaphore blurFinishedSemaphore{};
     };
 
+    struct BlendPass {
+        API::Framebuffer framebuffer;
+        API::Image image;
+        API::ImageView imageView;
+        API::Sampler sampler;
+    };
+
     struct FrameData {
         API::Semaphore bloomFinishedSemaphores{};
 
@@ -52,7 +59,10 @@ private:
         API::CommandBuffer graphicsCmdBuffer;
 
         BlurPass blurPass;
+        BlendPass blendPass;
         API::Fence fence;
+
+        API::Framebuffer hdrFramebuffer;
 
         std::vector<const Render::DescriptorSetPool::DescriptorSet*> texturesDescriptorSets;
     };
@@ -81,7 +91,9 @@ public:
 
 private:
     bool renderBlurPass(uint32_t currentImageIndex);
-    bool initPipeline(API::GraphicsPipeline& pipeline, int blurDirection);
+    bool initHdrPipeline();
+    bool initBlendPipeline();
+    bool initBlurPipeline(API::GraphicsPipeline& pipeline, int blurDirection);
     bool initPipelines();
 
 private:
@@ -100,6 +112,8 @@ private:
 
     API::GraphicsPipeline _horizontalPipeline;
     API::GraphicsPipeline _verticalPipeline;
+    API::GraphicsPipeline _blendPipeline;
+    API::GraphicsPipeline _hdrPipeline;
 
     std::unique_ptr<Render::DescriptorSetPool::BloomSampler> _texturesDescriptorSetPool;
 };

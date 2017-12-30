@@ -17,7 +17,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 const float PI = 3.14159265359;
-const float threshold = 0.7;
+const float BLUR_THRESHOLD = 0.5;
 
 //////////////////////////////////////////////////////////////////////////////
 // BLOCK OF STATIC INPUTS
@@ -422,7 +422,7 @@ void main() {
     outSceneColor = vec4(color, 1.0);
 
     float brightness = (color.r * 0.2126) + (color.g * 0.7152) + (color.b * 0.0722);
-    if (brightness > threshold) {
+    if (brightness > BLUR_THRESHOLD) {
         outGlowColor = vec4(color, 1.0);
     } else {
         outGlowColor = vec4(0.0);

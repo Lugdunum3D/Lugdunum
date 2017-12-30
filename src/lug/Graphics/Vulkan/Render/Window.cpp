@@ -370,7 +370,7 @@ bool Window::initSwapchain() {
 
     API::Builder::Swapchain swapchainBuilder(_renderer.getDevice());
     swapchainBuilder.setPreferences(_renderer.getPreferences().swapchain);
-    swapchainBuilder.setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    swapchainBuilder.setImageUsage(VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
     swapchainBuilder.setImageColorSpace(VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
     swapchainBuilder.setMinImageCount(3);
 
