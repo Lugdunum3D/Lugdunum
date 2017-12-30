@@ -10,14 +10,6 @@ inline uint16_t Window::getHeight() const {
     return _mode.height;
 }
 
-inline const std::vector<API::Image>& Window::getSceneOffscreenImages() const {
-    return _sceneOffscreenImages;
-}
-
-inline const std::vector<API::ImageView>& Window::getSceneOffscreenImagesViews() const {
-    return _sceneOffscreenImagesViews;
-}
-
 inline const std::vector<API::Image>& Window::getGlowOffscreenImages() const {
     return _glowOffscreenImages;
 }

@@ -34,7 +34,7 @@ public:
 
     bool init(View::InitInfo& initInfo,
                 const API::Queue* presentQueue,
-                const std::vector<API::ImageView>& sceneImageViews,
+                const std::vector<API::ImageView>& swapchainImageViews,
                 const std::vector<API::ImageView>& glowImageViews);
 
     bool render(const API::Semaphore& imageReadySemaphore, uint32_t currentImageIndex);

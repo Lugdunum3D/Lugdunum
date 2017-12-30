@@ -82,7 +82,7 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
             }
 
             if (_isGuiInitialized == true) {
-                if (!_guiInstance.initFramebuffers(_sceneOffscreenImagesViews)) {
+                if (!_guiInstance.initFramebuffers(_swapchain.getImagesViews())) {
                     LUG_LOG.error("Window::beginFrame: Failed to initialise Gui framebuffers");
                     return false;
                 }
@@ -185,7 +185,7 @@ bool Window::endFrame() {
 lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::InitInfo& initInfo) {
     std::unique_ptr<View> renderView = std::make_unique<View>(_renderer, this);
 
-    if (!renderView->init(initInfo, _presentQueue, _sceneOffscreenImagesViews, _glowOffscreenImagesViews)) {
+    if (!renderView->init(initInfo, _presentQueue, _swapchain.getImagesViews(), _glowOffscreenImagesViews)) {
         return nullptr;
     }
 
@@ -566,7 +566,6 @@ bool Window::initOffscreenData() {
 
     // Create offscreen images
     {
-        _sceneOffscreenImages.resize(frameDataSize);
         _glowOffscreenImages.resize(frameDataSize);
         API::Builder::Image imageBuilder(device);
 
@@ -585,12 +584,12 @@ bool Window::initOffscreenData() {
 
         for (uint8_t i = 0; i < frameDataSize; ++i) {
             VkResult result{VK_SUCCESS};
-            if (!imageBuilder.build(_sceneOffscreenImages[i], &result) || !imageBuilder.build(_glowOffscreenImages[i], &result)) {
+            if (!imageBuilder.build(_glowOffscreenImages[i], &result)) {
                 LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image: {}", result);
                 return false;
             }
 
-            if (!deviceMemoryBuilder.addImage(_sceneOffscreenImages[i]) || !deviceMemoryBuilder.addImage(_glowOffscreenImages[i])) {
+            if (!deviceMemoryBuilder.addImage(_glowOffscreenImages[i])) {
                 LUG_LOG.error("Window::initOffscreenData: Can't add offscreen image to device memory");
                 return false;
             }
@@ -603,13 +602,8 @@ bool Window::initOffscreenData() {
                 pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
                 pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &_sceneOffscreenImages[i];
-
-                // Scene image
-                cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-
-                // Glow image
                 pipelineBarrier.imageMemoryBarriers[0].image = &_glowOffscreenImages[i];
+
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
             }
         }
@@ -626,33 +620,16 @@ bool Window::initOffscreenData() {
 
     // Create offscreen image views
     {
-        _sceneOffscreenImagesViews.resize(frameDataSize);
         _glowOffscreenImagesViews.resize(frameDataSize);
         for (uint8_t i = 0; i < frameDataSize; ++i) {
-            // Scene image
-            {
-                VkResult result{VK_SUCCESS};
-                API::Builder::ImageView imageViewBuilder(device, _sceneOffscreenImages[i]);
+            VkResult result{VK_SUCCESS};
+            API::Builder::ImageView imageViewBuilder(device, _glowOffscreenImages[i]);
 
-                imageViewBuilder.setFormat(_swapchain.getFormat().format);
+            imageViewBuilder.setFormat(_swapchain.getFormat().format);
 
-                if (!imageViewBuilder.build(_sceneOffscreenImagesViews[i], &result)) {
-                    LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image view: {}", result);
-                    return false;
-                }
-            }
-
-            // Glow image
-            {
-                VkResult result{VK_SUCCESS};
-                API::Builder::ImageView imageViewBuilder(device, _glowOffscreenImages[i]);
-
-                imageViewBuilder.setFormat(_swapchain.getFormat().format);
-
-                if (!imageViewBuilder.build(_glowOffscreenImagesViews[i], &result)) {
-                    LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image view: {}", result);
-                    return false;
-                }
+            if (!imageViewBuilder.build(_glowOffscreenImagesViews[i], &result)) {
+                LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image view: {}", result);
+                return false;
             }
         }
     }

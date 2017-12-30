@@ -579,7 +579,7 @@ bool Forward::render(
     );
 }
 
-bool Forward::init(const std::vector<API::ImageView>& sceneImageViews, const std::vector<API::ImageView>& glowImageViews) {
+bool Forward::init(const std::vector<API::ImageView>& swapchainImageViews, const std::vector<API::ImageView>& glowImageViews) {
     VkResult result{VK_SUCCESS};
 
     // Init graphics queue
@@ -623,7 +623,7 @@ bool Forward::init(const std::vector<API::ImageView>& sceneImageViews, const std
 
     API::Builder::Semaphore semaphoreBuilder(_renderer.getDevice());
 
-    _framesData.resize(sceneImageViews.size());
+    _framesData.resize(swapchainImageViews.size());
     for (uint32_t i = 0; i < _framesData.size(); ++i) {
         // Create the render fence
         if (!fenceBuilder.build(_framesData[i].renderFence, &result)) {

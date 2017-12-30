@@ -68,8 +68,6 @@ public:
 
     uint16_t getWidth() const override final;
     uint16_t getHeight() const override final;
-    const std::vector<API::Image>& getSceneOffscreenImages() const;
-    const std::vector<API::ImageView>& getSceneOffscreenImagesViews() const;
     const std::vector<API::Image>& getGlowOffscreenImages() const;
     const std::vector<API::ImageView>& getGlowOffscreenImagesViews() const;
 
@@ -117,8 +115,6 @@ private:
 
 
     API::DeviceMemory _offscreenImagesMemory;
-    std::vector<API::Image> _sceneOffscreenImages;
-    std::vector<API::ImageView> _sceneOffscreenImagesViews;
     std::vector<API::Image> _glowOffscreenImages;
     std::vector<API::ImageView> _glowOffscreenImagesViews;
 
