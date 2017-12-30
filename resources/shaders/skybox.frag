@@ -22,11 +22,5 @@ vec2 SampleSphericalMap(vec3 v) {
 void main() {
     vec3 color = texture(skyBox, SampleSphericalMap(normalize(inPos))).rgb;
     outSceneColor = vec4(color, 1.0);
-
-    float brightness = (color.r * 0.2126) + (color.g * 0.7152) + (color.b * 0.0722);
-    if (brightness > BLUR_THRESHOLD) {
-        outGlowColor = vec4(color, 1.0);
-    } else {
-        outGlowColor = vec4(0.0);
-    }
+    outGlowColor = vec4(0.0);
 }
