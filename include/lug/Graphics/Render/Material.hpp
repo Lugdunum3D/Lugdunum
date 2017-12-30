@@ -58,17 +58,62 @@ public:
     virtual ~Material() = default;
 
     // TODO: Setters which call ::lug::Graphics::Render::DirtyObject::setDirty()
+    /**
+     * @brief      Sets the irradiance map
+     *
+     * @param[in]  znear    The irradiance map
+     */
     void setIrradianceMap(const Resource::SharedPtr<SkyBox> irradianceMap);
+    /**
+     * @brief      Sets the prefiltered map
+     *
+     * @param[in]  znear    The prefiltered map
+     */
     void setPrefilteredMap(const Resource::SharedPtr<SkyBox> prefilteredMap);
 
     const Constants& getConstants() const;
 
+    /**
+     * @brief      Gets base color texture
+     *
+     * @return     The base color texture
+     */
     const TextureInfo& getBaseColorTexture() const;
+    /**
+     * @brief      Gets metallic roughness texture
+     *
+     * @return     The metallic roughness texture
+     */
     const TextureInfo& getMetallicRoughnessTexture() const;
+    /**
+     * @brief      Gets normal texture
+     *
+     * @return     The normal texture
+     */
     const TextureInfo& getNormalTexture() const;
+    /**
+     * @brief      Gets occlusion texture
+     *
+     * @return     The occlusion texture
+     */
     const TextureInfo& getOcclusionTexture() const;
+    /**
+     * @brief      Gets emissive texture
+     *
+     * @return     The emissive texture
+     */
     const TextureInfo& getEmissiveTexture() const;
+    /**
+     * @brief      Gets irradiance map
+     *
+     * @return     The irradiance map
+     */
     const Resource::SharedPtr<SkyBox> getIrradianceMap() const;
+    /**
+     * @brief      Gets prefiltered map
+     *
+     * @return     The prefiltered map
+     */
     const Resource::SharedPtr<SkyBox> getPrefilteredMap() const;
 
 protected:

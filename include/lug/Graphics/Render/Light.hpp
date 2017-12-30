@@ -59,14 +59,59 @@ public:
 
     ~Light() = default;
 
+    /**
+     * @brief      Sets the type.
+     *
+     * @param[in]  type  The type
+     */
     void setType(Type type);
+    /**
+     * @brief      Sets the color.
+     *
+     * @param[in]  color  The color
+     */
     void setColor(const Math::Vec4f& color);
+    /**
+     * @brief      Sets the direction.
+     *
+     * @param[in]  direction  The direction
+     */
     void setDirection(const Math::Vec3f& direction);
+    /**
+     * @brief      Sets the constant attenuation.
+     *
+     * @param[in]  constantAttenuation  The constant attenuation
+     */
     void setConstantAttenuation(float constantAttenuation);
+    /**
+     * @brief      Sets the distance.
+     *
+     * @param[in]  distance  The distance
+     */
     void setDistance(float distance);
+    /**
+     * @brief      Sets the linear attenuation.
+     *
+     * @param[in]  linearAttenuation  The linear attenuation
+     */
     void setLinearAttenuation(float linearAttenuation);
+    /**
+     * @brief      Sets the quadratic attenuation.
+     *
+     * @param[in]  quadraticAttenuation  The quadratic attenuation
+     */
     void setQuadraticAttenuation(float quadraticAttenuation);
+    /**
+     * @brief      Sets the falloff angle.
+     *
+     * @param[in]  falloffAngle  The falloff angle
+     */
     void setFalloffAngle(float falloffAngle);
+    /**
+     * @brief      Sets the falloff exponent.
+     *
+     * @param[in]  falloffExponent  The falloff exponent
+     */
     void setFalloffExponent(float falloffExponent);
 
     /**
@@ -76,22 +121,68 @@ public:
      */
     Type getType() const;
 
+    /**
+     * @brief      Gets the color.
+     *
+     * @return     The color.
+     */
     const Math::Vec4f& getColor() const;
+    /**
+     * @brief      Gets the direction.
+     *
+     * @return     The direction.
+     */
     const Math::Vec3f& getDirection() const;
+    /**
+     * @brief      Gets the constant attenuation.
+     *
+     * @return     The constant attenuation.
+     */
     float getConstantAttenuation() const;
+    /**
+     * @brief      Gets the distance.
+     *
+     * @return     The distance.
+     */
     float getDistance() const;
+    /**
+     * @brief      Gets the linear attenuation.
+     *
+     * @return     The linear attenuation.
+     */
     float getLinearAttenuation() const;
+    /**
+     * @brief      Gets the quadratic attenuation.
+     *
+     * @return     The quadratic attenuation.
+     */
     float getQuadraticAttenuation() const;
+    /**
+     * @brief      Gets the falloff angle.
+     *
+     * @return     The falloff angle.
+     */
     float getFalloffAngle() const;
+    /**
+     * @brief      Gets the falloff exponent.
+     *
+     * @return     The falloff exponent.
+     */
     float getFalloffExponent() const;
 
+    /**
+     * @brief      Gets the data.
+     *
+     * @param      lightData  The light data
+     * @param      node       The node
+     */
     void getData(Light::Data& lightData, Scene::Node& node);
 
 private:
     /**
      * @brief      Constructs a light
      *
-     * @param[in]  name  The name of the Node
+     * @param[in]  name  The name of the light
      * @param[in]  type  The type of the Light
      */
     Light(const std::string& name, Type type);

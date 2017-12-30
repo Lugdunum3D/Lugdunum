@@ -88,6 +88,11 @@ public:
 
     virtual ~Mesh();
 
+    /**
+     * @brief      Gets the primitive sets.
+     *
+     * @return     The primitive sets.
+     */
     const std::vector<Mesh::PrimitiveSet>& getPrimitiveSets() const;
 
 protected:

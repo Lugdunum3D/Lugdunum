@@ -47,14 +47,54 @@ public:
 
     virtual ~Texture() = default;
 
+    /**
+     * @brief      Gets the width.
+     *
+     * @return     The width.
+     */
     uint32_t getWidth() const;
+    /**
+     * @brief      Gets the height.
+     *
+     * @return     The height.
+     */
     uint32_t getHeight() const;
+    /**
+     * @brief      Gets the format.
+     *
+     * @return     The format.
+     */
     Render::Texture::Format getFormat() const;
 
+    /**
+     * @brief      Gets the magnitude filter.
+     *
+     * @return     The magnitude filter.
+     */
     Render::Texture::Filter getMagFilter() const;
+    /**
+     * @brief      Gets the minimum filter.
+     *
+     * @return     The minimum filter.
+     */
     Render::Texture::Filter getMinFilter() const;
+    /**
+     * @brief      Gets the mip map filter.
+     *
+     * @return     The mip map filter.
+     */
     Render::Texture::Filter getMipMapFilter() const;
+    /**
+     * @brief      Gets the wrap s.
+     *
+     * @return     The wrap s.
+     */
     Render::Texture::WrappingMode getWrapS() const;
+    /**
+     * @brief      Gets the wrap t.
+     *
+     * @return     The wrap t.
+     */
     Render::Texture::WrappingMode getWrapT() const;
 
     static size_t formatToSize(Render::Texture::Format format);

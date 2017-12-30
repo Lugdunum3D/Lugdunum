@@ -24,15 +24,38 @@ public:
 
     ~Perspective() = default;
 
+    /**
+     * @brief      Gets the field of view
+     *
+     * @return     The field of view value
+     */
     float getFovY() const;
+    /**
+     * @brief      Sets the field of view
+     *
+     * @param[in]  fovy    The field of view value
+     */
     void setFovY(float fovy);
 
+    /**
+     * @brief      Gets the aspect ratio
+     *
+     * @return     The aspect ratio value
+     */
     float getAspectRatio() const;
+    /**
+     * @brief      Sets the aspect ratio
+     *
+     * @param[in]  aspectRatio    The aspect ratio value
+     */
     void setAspectRatio(float aspectRatio);
 
 protected:
     explicit Perspective(const std::string& name);
 
+    /**
+     * @brief      Update the projection matrix
+     */
     void updateProj() override final;
 
 private:

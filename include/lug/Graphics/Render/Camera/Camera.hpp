@@ -82,7 +82,7 @@ public:
     const Math::Mat4x4f& getViewMatrix();
 
     /**
-     * @brief      Update the render queue of the Camera by fetching
+     * @brief      Update the given render queue by fetching
      *             the visible objects of the attached scene.
      *
      * @param[in]  renderer    The renderer
@@ -91,20 +91,57 @@ public:
      */
     void update(const Renderer& renderer, const View& renderView, Queue& renderQueue);
 
+    /**
+     * @brief      Set the render view
+     *
+     * @param[in]  renderView  The render view
+     */
     void setRenderView(View* renderView);
 
+    /**
+     * @brief      Get the node of the camera's scene
+     *
+     * @return     The view matrix.
+     */
     Scene::Node* getParent() const;
+    /**
+     * @brief      Set the node of the scene
+     *
+     * @param[in]  parent  The scene's node
+     */
     void setParent(Scene::Node* parent);
 
+    /**
+     * @brief      Tells the camera to update its projection matrix
+     *             next time it calls getProjectionMatrix()
+     */
     void needUpdateProj();
+
+    /**
+     * @brief      Tells the camera to update its view matrix
+     *             next time it calls getViewMatrix()
+     */
     void needUpdateView();
 
+    /**
+     * @brief      Make the camera look at a specific position
+     *
+     * @param[in]  targetPosition   The target position
+     * @param[in]  up               The up vector
+     * @param[in]  space            The transform space
+     */
     void lookAt(const Math::Vec3f& targetPosition, const Math::Vec3f& up, Node::TransformSpace space = Node::TransformSpace::Local);
 
 protected:
     explicit Camera(const std::string& name);
 
+    /**
+     * @brief      Update the projection matrix
+     */
     virtual void updateProj() = 0;
+    /**
+     * @brief      Update the view matrix
+     */
     void updateView();
 
 protected:
