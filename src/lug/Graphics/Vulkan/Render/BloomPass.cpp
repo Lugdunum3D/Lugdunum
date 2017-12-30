@@ -195,6 +195,14 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
     }
     frameData.fence.reset();
 
+    if (frameData.freeDescriptorSets) {
+        for (const auto& descriptorSet : frameData.texturesDescriptorSets) {
+            _texturesDescriptorSetPool->free(descriptorSet);
+        }
+        frameData.freeDescriptorSets = false;
+        frameData.texturesDescriptorSets.clear();
+    }
+
     frameData.graphicsCmdBuffer.reset();
     frameData.graphicsCmdBuffer.begin();
 
@@ -1112,6 +1120,11 @@ bool BloomPass::initBlurPass() {
     if (!cmdBuffer.begin()) {
         LUG_LOG.error("BloomPass::initBlurPass: Can't begin command buffer");
         return false;
+    }
+
+    // Free all descriptor sets after next frameData.fence.wait()
+    for (auto& frameData: _framesData) {
+        frameData.freeDescriptorSets = true;
     }
 
     // Create images

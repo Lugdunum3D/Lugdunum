@@ -64,6 +64,8 @@ private:
 
         API::Framebuffer hdrFramebuffer;
 
+        bool freeDescriptorSets{false};
+
         std::vector<const Render::DescriptorSetPool::DescriptorSet*> texturesDescriptorSets;
     };
 
