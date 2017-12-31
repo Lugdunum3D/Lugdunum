@@ -250,7 +250,7 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
         beginRenderPass.renderArea.extent = { frameData.blurPass.images[0].getExtent().width, frameData.blurPass.images[0].getExtent().height };
 
         beginRenderPass.clearValues.resize(1);
-        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
 
 
         frameData.graphicsCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
@@ -340,7 +340,7 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
         beginRenderPass.renderArea.extent = { frameData.blurPass.images[0].getExtent().width, frameData.blurPass.images[0].getExtent().height };
 
         beginRenderPass.clearValues.resize(1);
-        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
 
         frameData.graphicsCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
         frameData.graphicsCmdBuffer.bindPipeline(_verticalPipeline);
@@ -578,7 +578,7 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
         beginRenderPass.renderArea.extent = { swapchain.getImages()[0].getExtent().width, swapchain.getImages()[0].getExtent().height };
 
         beginRenderPass.clearValues.resize(1);
-        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
 
         frameData.graphicsCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
         frameData.graphicsCmdBuffer.bindPipeline(_hdrPipeline);
@@ -1250,9 +1250,9 @@ bool BloomPass::initBlurPass() {
     {
         API::Builder::Sampler samplerBuilder(device);
 
-        samplerBuilder.setAddressModeU(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER);
-        samplerBuilder.setAddressModeV(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER);
-        samplerBuilder.setAddressModeW(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER);
+        samplerBuilder.setAddressModeU(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+        samplerBuilder.setAddressModeV(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
+        samplerBuilder.setAddressModeW(VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE);
         samplerBuilder.setMinFilter(VK_FILTER_LINEAR);
         samplerBuilder.setMagFilter(VK_FILTER_LINEAR);
         samplerBuilder.setMipmapMode(VK_SAMPLER_MIPMAP_MODE_LINEAR);
@@ -1430,6 +1430,31 @@ bool BloomPass::buildEndCommandBuffer() {
 
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
             }
+
+            // Clear blur[0] image to black
+            {
+                VkClearColorValue clearColor;
+                std::memset(&clearColor, 0, sizeof(clearColor));
+
+                const VkImageSubresourceRange range{
+                    /* range.aspectMask */ VK_IMAGE_ASPECT_COLOR_BIT,
+                    /* range.baseMipLevel */ 0,
+                    /* range.levelCount */ 1,
+                    /* range.baseArrayLayer*/ 0,
+                    /* range.layerCount */ 1
+                };
+
+                // TODO: Put this method in CommandBuffer
+                vkCmdClearColorImage(
+                    static_cast<VkCommandBuffer>(cmdBuffer),
+                    static_cast<VkImage>(_framesData[i].blurPass.images[0]),
+                    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    &clearColor,
+                    1,
+                    &range
+                );
+            }
+
 
             // Copy glow image into blur[0] image
             {

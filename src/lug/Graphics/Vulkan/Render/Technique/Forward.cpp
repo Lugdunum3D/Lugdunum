@@ -122,7 +122,7 @@ bool Forward::render(
         const auto& clearColor = _renderView.getClearColor();
         beginRenderPass.clearValues.resize(3);
         beginRenderPass.clearValues[0].color = {{clearColor.r(), clearColor.g(), clearColor.b(), 1.0f}};
-        beginRenderPass.clearValues[1].color = {{clearColor.r(), clearColor.g(), clearColor.b(), 1.0f}};
+        beginRenderPass.clearValues[1].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
         beginRenderPass.clearValues[2].depthStencil = {1.0f, 0};
 
         frameData.renderCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);

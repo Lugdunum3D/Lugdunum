@@ -690,6 +690,20 @@ bool Window::buildBeginCommandBuffer() {
             cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
         }
 
+        // Color attachment to dst optimal
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_glowOffscreenImages[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+        }
+
+
         // Clear the image to black
         {
             VkClearColorValue clearColor;
@@ -712,6 +726,14 @@ bool Window::buildBeginCommandBuffer() {
                 1,
                 &range
             );
+            vkCmdClearColorImage(
+                static_cast<VkCommandBuffer>(cmdBuffer),
+                static_cast<VkImage>(_glowOffscreenImages[i]),
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                &clearColor,
+                1,
+                &range
+            );
         }
 
         // Dst optimal to color attachment optimal
@@ -723,6 +745,19 @@ bool Window::buildBeginCommandBuffer() {
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+        }
+
+        // Dst optimal to color attachment optimal
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_glowOffscreenImages[i];
 
             cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
         }
