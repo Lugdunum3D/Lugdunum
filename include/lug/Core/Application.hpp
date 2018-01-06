@@ -171,7 +171,15 @@ private:
         {                                                       // rendererInitInfo
             "shaders/",                                         // shaders root
             lug::Graphics::Render::Technique::Type::Forward,    // renderTechnique
-            lug::Graphics::Renderer::DisplayMode::Full          // displayMode
+            lug::Graphics::Renderer::DisplayMode::Full,         // displayMode
+#if defined(LUG_SYSTEM_ANDROID)                                 // bloomEnabled
+            false,
+#else
+            true,
+#endif
+            {                                                   // bloomOptions
+                0.5f                                            // blurThreshold
+            }
         },
         {                                                       // mandatoryModules
             lug::Graphics::Module::Type::Core

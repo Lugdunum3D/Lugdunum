@@ -96,6 +96,7 @@ set(SRC
     ${SRCROOT}/Vulkan/Builder/SkyBox.cpp
 
     ${SRCROOT}/Vulkan/Render/BloomPass.cpp
+    ${SRCROOT}/Vulkan/Render/BufferPool/Bloom.cpp
     ${SRCROOT}/Vulkan/Render/BufferPool/Camera.cpp
     ${SRCROOT}/Vulkan/Render/BufferPool/Light.cpp
     ${SRCROOT}/Vulkan/Render/BufferPool/Material.cpp
@@ -292,6 +293,7 @@ set(INC
     ${INCROOT}/Vulkan/Render/BloomPass.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/BufferPool.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/BufferPool.inl
+    ${INCROOT}/Vulkan/Render/BufferPool/Bloom.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/Camera.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/Chunk.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/Chunk.inl

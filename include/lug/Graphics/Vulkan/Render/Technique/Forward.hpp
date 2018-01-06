@@ -9,6 +9,7 @@
 #include <lug/Graphics/Vulkan/API/Framebuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Image.hpp>
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
+#include <lug/Graphics/Vulkan/Render/BufferPool/Bloom.hpp>
 #include <lug/Graphics/Vulkan/Render/BufferPool/Camera.hpp>
 #include <lug/Graphics/Vulkan/Render/BufferPool/Light.hpp>
 #include <lug/Graphics/Vulkan/Render/BufferPool/Material.hpp>
@@ -61,10 +62,12 @@ private:
         API::Semaphore transferSemaphore;
 
         const BufferPool::SubBuffer* cameraBuffer{nullptr};
+        const BufferPool::SubBuffer* bloomBuffer{nullptr};
         std::vector<const BufferPool::SubBuffer*> lightBuffers;
         std::vector<const BufferPool::SubBuffer*> materialBuffers;
 
         const DescriptorSetPool::DescriptorSet* cameraDescriptorSet{nullptr};
+        const DescriptorSetPool::DescriptorSet* bloomOptionsDescriptorSet{nullptr};
         const DescriptorSetPool::DescriptorSet* skyBoxDescriptorSet{nullptr};
         std::vector<const DescriptorSetPool::DescriptorSet*> lightDescriptorSets;
         std::vector<const DescriptorSetPool::DescriptorSet*> materialDescriptorSets;
@@ -110,6 +113,7 @@ private:
 private:
     // TODO: Use shared_ptr in the instance and static weak_ptr to avoid problem when we delete one forward renderer and not the others
     static std::unique_ptr<BufferPool::Camera> _cameraBufferPool;
+    static std::unique_ptr<BufferPool::Bloom> _bloomBufferPool;
     static std::unique_ptr<BufferPool::Light> _lightBufferPool;
     static std::unique_ptr<BufferPool::Material> _materialBufferPool;
 

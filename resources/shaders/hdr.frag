@@ -25,6 +25,6 @@ vec3 Uncharted2Tonemap(vec3 x) {
 void main()
 {
     vec3 hdrColor = texture(imageSampler, fragTexCoords).rgb;
-    //vec3 mappedColor = Uncharted2Tonemap(hdrColor * 4.5f) * (1.0f / Uncharted2Tonemap(vec3(11.2f)));
-    outFragColor = vec4(hdrColor, 1.0);
+    vec3 mappedColor = Uncharted2Tonemap(hdrColor * 4.5f) * (1.0f / Uncharted2Tonemap(vec3(11.2f)));
+    outFragColor = vec4(mappedColor, 1.0);
 }

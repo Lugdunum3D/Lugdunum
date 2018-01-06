@@ -17,7 +17,6 @@
 //////////////////////////////////////////////////////////////////////////////
 
 const float PI = 3.14159265359;
-const float BLUR_THRESHOLD = 0.5;
 
 //////////////////////////////////////////////////////////////////////////////
 // BLOCK OF STATIC INPUTS
@@ -27,6 +26,11 @@ layout(std140, set = 0, binding = 0) uniform cameraBlock {
     mat4 view;
     mat4 proj;
 } camera;
+
+layout(std140, set = 0, binding = 1) uniform bloomBlock {
+    float blurThreshold;
+} bloom;
+
 
 struct Light {
     vec3 position;
@@ -422,7 +426,7 @@ void main() {
     outSceneColor = vec4(color, 1.0);
 
     float brightness = (color.r * 0.2126) + (color.g * 0.7152) + (color.b * 0.0722);
-    if (brightness > BLUR_THRESHOLD) {
+    if (brightness > bloom.blurThreshold) {
         outGlowColor = vec4(color, 1.0);
     } else {
         outGlowColor = vec4(0.0);

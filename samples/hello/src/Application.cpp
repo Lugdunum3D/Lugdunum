@@ -185,6 +185,12 @@ void Application::onEvent(const lug::Window::Event& event) {
         } else if (event.key.code == lug::Window::Keyboard::Key::B) {
             _graphics.getRenderer()->isBloomEnabled(!_graphics.getRenderer()->isBloomEnabled());
         }
+        else if (event.key.code == lug::Window::Keyboard::Key::O) {
+            _graphics.getRenderer()->setBlurThreshold(_graphics.getRenderer()->getBlurThreshold() + 0.05f);
+        }
+        else if (event.key.code == lug::Window::Keyboard::Key::L) {
+            _graphics.getRenderer()->setBlurThreshold(_graphics.getRenderer()->getBlurThreshold() - 0.05f);
+        }
     }
 }
 

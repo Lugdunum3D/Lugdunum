@@ -34,6 +34,7 @@ namespace Vulkan {
 namespace Render {
 namespace Technique {
 
+std::unique_ptr<BufferPool::Bloom> Forward::_bloomBufferPool = nullptr;
 std::unique_ptr<BufferPool::Camera> Forward::_cameraBufferPool = nullptr;
 std::unique_ptr<BufferPool::Light> Forward::_lightBufferPool = nullptr;
 std::unique_ptr<BufferPool::Material> Forward::_materialBufferPool = nullptr;
@@ -67,6 +68,20 @@ bool Forward::render(
 
     if (!frameData.transferCmdBuffer.reset() || !frameData.transferCmdBuffer.begin()) {
         return false;
+    }
+
+    // Get the new (or old) bloom buffer
+    {
+        const BufferPool::SubBuffer* bloomBuffer = _bloomBufferPool->allocate(currentImageIndex, frameData.transferCmdBuffer, _renderer.getBlurThreshold(), _renderer.isBloomDirty());
+
+        if (!bloomBuffer) {
+            LUG_LOG.error("Forward::render: Can't allocate bloom buffer");
+            return false;
+        }
+
+        _bloomBufferPool->free(frameData.bloomBuffer);
+        frameData.bloomBuffer = bloomBuffer;
+        _renderer.isBloomDirty(false);
     }
 
     // Get the new (or old) camera buffer
@@ -153,7 +168,7 @@ bool Forward::render(
 
     // Get the new (or old) camera descriptor set
     {
-        const DescriptorSetPool::DescriptorSet* cameraDescriptorSet = _cameraDescriptorSetPool->allocate(*frameData.cameraBuffer);
+        const DescriptorSetPool::DescriptorSet* cameraDescriptorSet = _cameraDescriptorSetPool->allocate(*frameData.cameraBuffer, *frameData.bloomBuffer);
 
         if (!cameraDescriptorSet) {
             LUG_LOG.error("Forward::render: Can't allocate camera descriptor set");
@@ -171,7 +186,7 @@ bool Forward::render(
             /* cameraBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
             /* cameraBind.firstSet           */ 0,
             /* cameraBind.descriptorSets     */ {&frameData.cameraDescriptorSet->getDescriptorSet()},
-            /* cameraBind.dynamicOffsets     */ {frameData.cameraBuffer->getOffset()},
+            /* cameraBind.dynamicOffsets     */ {frameData.cameraBuffer->getOffset(), frameData.bloomBuffer->getOffset()},
         };
 
         frameData.renderCmdBuffer.bindDescriptorSets(cameraBind);
@@ -655,6 +670,10 @@ bool Forward::init(const std::vector<API::ImageView>& swapchainImageViews, const
         }
     }
 
+    if (!_bloomBufferPool) {
+        _bloomBufferPool = std::make_unique<BufferPool::Bloom>(_renderer);
+    }
+
     if (!_cameraBufferPool) {
         _cameraBufferPool = std::make_unique<BufferPool::Camera>(_renderer);
     }
@@ -712,6 +731,8 @@ void Forward::destroy() {
     _transferQueue->waitIdle();
 
     for (auto& frameData : _framesData) {
+        _bloomBufferPool->free(frameData.bloomBuffer);
+
         _cameraBufferPool->free(frameData.cameraBuffer);
 
         for (const auto& subBuffer : frameData.lightBuffers) {
@@ -754,6 +775,7 @@ void Forward::destroy() {
     _framesData.clear();
 
     if (_forwardCount == 0) {
+        _bloomBufferPool.reset();
         _cameraBufferPool.reset();
         _lightBufferPool.reset();
         _materialBufferPool.reset();
