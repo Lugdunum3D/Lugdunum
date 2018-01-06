@@ -72,7 +72,7 @@ bool Forward::render(
 
     // Get the new (or old) bloom buffer
     {
-        const BufferPool::SubBuffer* bloomBuffer = _bloomBufferPool->allocate(currentImageIndex, frameData.transferCmdBuffer, _renderer.getBlurThreshold(), _renderer.isBloomDirty());
+        const BufferPool::SubBuffer* bloomBuffer = _bloomBufferPool->allocate(frameData.transferCmdBuffer, _renderer.getBlurThreshold(), _renderer.isBloomDirty());
 
         if (!bloomBuffer) {
             LUG_LOG.error("Forward::render: Can't allocate bloom buffer");
@@ -81,7 +81,6 @@ bool Forward::render(
 
         _bloomBufferPool->free(frameData.bloomBuffer);
         frameData.bloomBuffer = bloomBuffer;
-        _renderer.isBloomDirty(false);
     }
 
     // Get the new (or old) camera buffer

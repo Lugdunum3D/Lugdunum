@@ -65,6 +65,7 @@ void View::destroy() {
 
 bool View::endFrame() {
     _renderQueue.clear();
+    _renderer.isBloomDirty(false);
 
     return true;
 }

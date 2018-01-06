@@ -4,12 +4,14 @@
 
 layout (set = 1, binding = 0) uniform sampler2D skyBox;
 
+layout(std140, set = 0, binding = 1) uniform bloomBlock {
+    float blurThreshold;
+} bloom;
+
 layout (location = 0) in vec3 inPos;
 
 layout (location = 0) out vec4 outSceneColor;
 layout (location = 1) out vec4 outGlowColor;
-
-const float BLUR_THRESHOLD = 0.7;
 
 const vec2 invAtan = vec2(0.1591, 0.3183);
 vec2 SampleSphericalMap(vec3 v) {

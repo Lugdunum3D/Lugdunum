@@ -27,7 +27,14 @@ const DescriptorSet* Camera::allocate(const BufferPool::SubBuffer& cameraSubBuff
                     static_cast<VkBuffer>(*cameraSubBuffer.getBuffer()),
                     0,
                     cameraSubBuffer.getSize()
-                },
+                }
+            }
+        );
+        std::get<1>(result)->getDescriptorSet().updateBuffers(
+            1,
+            0,
+            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+            {
                 {
                     static_cast<VkBuffer>(*bloomSubBuffer.getBuffer()),
                     0,

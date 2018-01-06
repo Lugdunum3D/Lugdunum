@@ -26,7 +26,7 @@ public:
 
     ~Bloom() = default;
 
-    const SubBuffer* allocate(uint32_t currentFrame, const API::CommandBuffer& cmdBuffer, float blurThreshold, bool dirty);
+    const SubBuffer* allocate(const API::CommandBuffer& cmdBuffer, float blurThreshold, bool dirty);
 };
 
 } // BufferPool
