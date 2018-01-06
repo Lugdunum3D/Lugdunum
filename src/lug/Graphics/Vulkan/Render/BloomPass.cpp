@@ -1185,8 +1185,8 @@ bool BloomPass::initBlurPass() {
                 // 0
                 {
                     VkExtent3D extent{
-                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width) / 2,
-                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height) / 2,
+                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width),
+                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height),
                         /* extent.depth */ 1
                     };
                     imageBuilder.setExtent(extent);
@@ -1202,8 +1202,8 @@ bool BloomPass::initBlurPass() {
                 // 1
                 {
                     VkExtent3D extent{
-                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width) / 4,
-                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height) / 4,
+                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width) / 2,
+                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height) / 2,
                         /* extent.depth */ 1
                     };
                     imageBuilder.setExtent(extent);
@@ -1219,8 +1219,8 @@ bool BloomPass::initBlurPass() {
                 // 2
                 {
                     VkExtent3D extent{
-                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width) / 8,
-                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height) / 8,
+                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width) / 3,
+                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height) / 3,
                         /* extent.depth */ 1
                     };
                     imageBuilder.setExtent(extent);

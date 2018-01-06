@@ -25,7 +25,6 @@ void Queue::addMeshInstance(Scene::Node& node, const lug::Graphics::Renderer& re
             Render::Mesh::PrimitiveSetData* primitiveSetData = static_cast<Render::Mesh::PrimitiveSetData*>(primitiveSet._data);
             Pipeline::Id::Model::PrimitivePart pipelineIdPrimitivePart = primitiveSetData->pipelineIdPrimitivePart;
             Pipeline::Id::Model::MaterialPart pipelineIdMaterialPart = material->getPipelineId();
-
             Pipeline::Id::Model::ExtraPart pipelineIdExtraPart;
             pipelineIdExtraPart.displayMode = static_cast<uint32_t>(renderer.getDisplayMode());
             pipelineIdExtraPart.antialiasing = static_cast<uint32_t>(renderer.getAntialiasing());

@@ -26,5 +26,10 @@ void main()
 {
     vec3 hdrColor = texture(imageSampler, fragTexCoords).rgb;
     vec3 mappedColor = Uncharted2Tonemap(hdrColor * 4.5f) * (1.0f / Uncharted2Tonemap(vec3(11.2f)));
+
+    // Gamma correction
+    // TODO: Replace 2.2f by a gamma argument
+    mappedColor = pow(mappedColor, vec3(1.0f / 2.2f));
+
     outFragColor = vec4(mappedColor, 1.0);
 }

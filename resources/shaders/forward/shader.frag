@@ -412,15 +412,19 @@ void main() {
 
     vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo;
 
+    #if !BLOOM_ENABLED
     // Tone mapping
     // TODO: Replace 4.5f by an exposure argument
     color = Uncharted2Tonemap(color * 4.5f) * (1.0f / Uncharted2Tonemap(vec3(11.2f)));
+    #endif
 
     color += emissive;
 
+    #if !BLOOM_ENABLED
     // Gamma correction
-    // TODO: Replace 2.2f by a gamma argument
+    // TODO: Replace 2.2f by a gamma argumentS
     color = pow(color, vec3(1.0f / 2.2f));
+    #endif
 
     // Final output
     outSceneColor = vec4(color, 1.0);
