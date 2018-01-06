@@ -91,8 +91,8 @@ bool BloomPass::init() {
         {
             VkResult result{VK_SUCCESS};
             if (!semaphoreBuilder.build(_framesData[i].bloomFinishedSemaphores, &result) ||
-                !semaphoreBuilder.build(_framesData[i].blurPass.glowCopyFinishedSemaphore, &result) ||
-                !semaphoreBuilder.build(_framesData[i].blurPass.blurFinishedSemaphore, &result)) {
+                !semaphoreBuilder.build(_framesData[i].glowCopyFinishedSemaphore, &result) ||
+                !semaphoreBuilder.build(_framesData[i].blurFinishedSemaphore, &result)) {
                 LUG_LOG.error("BloomPass::init: Can't create semaphores: {}", result);
                 return false;
             }
@@ -156,11 +156,11 @@ void BloomPass::destroy() {
 bool BloomPass::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t currentImageIndex) {
     FrameData& frameData = _framesData[currentImageIndex];
 
-    // transferCmdBuffers[0] copy the glow image into the first blur image
+    // transferCmdBuffers[0] copy the glow image into the first blur images
     // Then, the layout of the blur images are changed for the first blur pass
     {
         std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-        if (_transferQueue->submit(frameData.transferCmdBuffers[0], { static_cast<VkSemaphore>(frameData.blurPass.glowCopyFinishedSemaphore) }, waitSemaphores, waitDstStageMasks, nullptr) == false) {
+        if (_transferQueue->submit(frameData.transferCmdBuffers[0], { static_cast<VkSemaphore>(frameData.glowCopyFinishedSemaphore) }, waitSemaphores, waitDstStageMasks, nullptr) == false) {
             LUG_LOG.error("BloomPass::endFrame Can't submit commandBuffer");
             return false;
         }
@@ -174,7 +174,7 @@ bool BloomPass::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_
     // Change blur images layout for next frame
     {
         std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-        if (_transferQueue->submit(frameData.transferCmdBuffers[1], { static_cast<VkSemaphore>(frameData.bloomFinishedSemaphores) }, {static_cast<VkSemaphore>(frameData.blurPass.blurFinishedSemaphore)}, waitDstStageMasks, nullptr) == false) {
+        if (_transferQueue->submit(frameData.transferCmdBuffers[1], { static_cast<VkSemaphore>(frameData.bloomFinishedSemaphores) }, {static_cast<VkSemaphore>(frameData.blurFinishedSemaphore)}, waitDstStageMasks, nullptr) == false) {
             LUG_LOG.error("BloomPass::endFrame Can't submit commandBuffer");
             return false;
         }
@@ -210,13 +210,224 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
     // they will replace frameData.texturesDescriptorSets atfer the rendering
     std::vector<const Render::DescriptorSetPool::DescriptorSet*> texturesDescriptorSets;
 
+    // Blur passes
+    {
+        for (auto& blurPass: frameData.blurPasses) {
+            // Set viewport/scissor
+            {
+                const VkViewport vkViewport{
+                    /* vkViewport.x         */ 0.0f,
+                    /* vkViewport.y         */ 0.0f,
+                    /* vkViewport.width     */ static_cast<float>(blurPass.images[0].getExtent().width),
+                    /* vkViewport.height    */ static_cast<float>(blurPass.images[0].getExtent().height),
+                    /* vkViewport.minDepth  */ 0.0f,
+                    /* vkViewport.maxDepth  */ 1.0f,
+                };
+
+                const VkRect2D scissor{
+                    /* scissor.offset */ {
+                       0,
+                       0
+                    },
+                    /* scissor.extent */ {
+                       static_cast<uint32_t>(vkViewport.width),
+                       static_cast<uint32_t>(vkViewport.height)
+                    }
+                };
+
+                frameData.graphicsCmdBuffer.setViewport({vkViewport});
+                frameData.graphicsCmdBuffer.setScissor({scissor});
+            }
+
+            // Horizontal pass
+            {
+                const API::RenderPass* renderPass = _horizontalPipeline.getRenderPass();
+
+                API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
+                    /* beginRenderPass.framebuffer */ blurPass.framebuffers[1],
+                    /* beginRenderPass.renderArea */{},
+                    /* beginRenderPass.clearValues */{}
+                };
+
+                beginRenderPass.renderArea.offset = { 0, 0 };
+                beginRenderPass.renderArea.extent = { blurPass.images[0].getExtent().width, blurPass.images[0].getExtent().height };
+
+                beginRenderPass.clearValues.resize(1);
+                beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
+
+
+                frameData.graphicsCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
+                frameData.graphicsCmdBuffer.bindPipeline(_horizontalPipeline);
+
+
+
+                // Get the new (or old) textures descriptor set
+                const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
+                    _horizontalPipeline,
+                    blurPass.images[0],
+                    blurPass.imagesViews[0],
+                    blurPass.samplers[0]
+                );
+
+                if (!texturesDescriptorSet) {
+                    LUG_LOG.error("BloomPass::renderBlurPass: Can't allocate textures descriptor set");
+                    return false;
+                }
+
+                texturesDescriptorSets.push_back(texturesDescriptorSet);
+
+                // Bind descriptor set of the texture
+                {
+                    const API::CommandBuffer::CmdBindDescriptors texturesBind{
+                        /* texturesBind.pipelineLayout     */ *_horizontalPipeline.getLayout(),
+                        /* texturesBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        /* texturesBind.firstSet           */ 0,
+                        /* texturesBind.descriptorSets     */ {&texturesDescriptorSet->getDescriptorSet()},
+                        /* texturesBind.dynamicOffsets     */ {}
+                    };
+
+                    frameData.graphicsCmdBuffer.bindDescriptorSets(texturesBind);
+                }
+
+                const API::CommandBuffer::CmdDraw cmdDraw {
+                    /* cmdDraw.vertexCount */ 3,
+                    /* cmdDraw.instanceCount */ 1,
+                    /* cmdDraw.firstVertex */ 0,
+                    /* cmdDraw.firstInstance */ 0
+                };
+
+                frameData.graphicsCmdBuffer.draw(cmdDraw);
+                frameData.graphicsCmdBuffer.endRenderPass();
+            }
+
+            // Change images layout for vertical pass
+            {
+                // Prepare blur[0] image for write
+                {
+                    API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+                    pipelineBarrier.imageMemoryBarriers.resize(1);
+                    pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                    pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                    pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                    pipelineBarrier.imageMemoryBarriers[0].image = &blurPass.images[0];
+
+                    frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+                }
+
+                // Prepare blur[1] image for read in shader
+                {
+                    API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+                    pipelineBarrier.imageMemoryBarriers.resize(1);
+                    pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                    pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                    pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                    pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    pipelineBarrier.imageMemoryBarriers[0].image = &blurPass.images[1];
+
+                    frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+                }
+            }
+
+            // Vertical pass
+            {
+                const API::RenderPass* renderPass = _verticalPipeline.getRenderPass();
+
+                API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
+                    /* beginRenderPass.framebuffer */ blurPass.framebuffers[0],
+                    /* beginRenderPass.renderArea */{},
+                    /* beginRenderPass.clearValues */{}
+                };
+
+                beginRenderPass.renderArea.offset = { 0, 0 };
+                beginRenderPass.renderArea.extent = { blurPass.images[0].getExtent().width, blurPass.images[0].getExtent().height };
+
+                beginRenderPass.clearValues.resize(1);
+                beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
+
+                frameData.graphicsCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
+                frameData.graphicsCmdBuffer.bindPipeline(_verticalPipeline);
+
+
+
+                // Get the new (or old) textures descriptor set
+                const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
+                    _verticalPipeline,
+                    blurPass.images[1],
+                    blurPass.imagesViews[1],
+                    blurPass.samplers[1]
+                );
+
+                if (!texturesDescriptorSet) {
+                    LUG_LOG.error("BloomPass::renderBlurPass: Can't allocate textures descriptor set");
+                    return false;
+                }
+
+                texturesDescriptorSets.push_back(texturesDescriptorSet);
+
+                // Bind descriptor set of the texture
+                {
+                    const API::CommandBuffer::CmdBindDescriptors texturesBind{
+                        /* texturesBind.pipelineLayout     */ *_verticalPipeline.getLayout(),
+                        /* texturesBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        /* texturesBind.firstSet           */ 0,
+                        /* texturesBind.descriptorSets     */ {&texturesDescriptorSet->getDescriptorSet()},
+                        /* texturesBind.dynamicOffsets     */ {}
+                    };
+
+                    frameData.graphicsCmdBuffer.bindDescriptorSets(texturesBind);
+                }
+
+                const API::CommandBuffer::CmdDraw cmdDraw {
+                    /* cmdDraw.vertexCount */ 3,
+                    /* cmdDraw.instanceCount */ 1,
+                    /* cmdDraw.firstVertex */ 0,
+                    /* cmdDraw.firstInstance */ 0
+                };
+
+                frameData.graphicsCmdBuffer.draw(cmdDraw);
+                frameData.graphicsCmdBuffer.endRenderPass();
+            }
+
+            // Prepare blur[0] image for read in shader
+            {
+                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+                pipelineBarrier.imageMemoryBarriers.resize(1);
+                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].image = &blurPass.images[0];
+
+                frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+            }
+        }
+    }
+
+    // Change images layout for blend pass
+    {
+
+        // Prepare swapchain image for read in shader
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_window.getSwapchain().getImages()[currentImageIndex];
+
+            frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+        }
+    }
+
     // Set viewport/scissor
     {
         const VkViewport vkViewport{
             /* vkViewport.x         */ 0.0f,
             /* vkViewport.y         */ 0.0f,
-            /* vkViewport.width     */ static_cast<float>(frameData.blurPass.images[0].getExtent().width),
-            /* vkViewport.height    */ static_cast<float>(frameData.blurPass.images[0].getExtent().height),
+            /* vkViewport.width     */ static_cast<float>(frameData.blendPass.image.getExtent().width),
+            /* vkViewport.height    */ static_cast<float>(frameData.blendPass.image.getExtent().height),
             /* vkViewport.minDepth  */ 0.0f,
             /* vkViewport.maxDepth  */ 1.0f,
         };
@@ -236,247 +447,9 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
         frameData.graphicsCmdBuffer.setScissor({scissor});
     }
 
-    // Horizontal pass
-    {
-        const API::RenderPass* renderPass = _horizontalPipeline.getRenderPass();
-
-        API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
-            /* beginRenderPass.framebuffer */ frameData.blurPass.framebuffers[1],
-            /* beginRenderPass.renderArea */{},
-            /* beginRenderPass.clearValues */{}
-        };
-
-        beginRenderPass.renderArea.offset = { 0, 0 };
-        beginRenderPass.renderArea.extent = { frameData.blurPass.images[0].getExtent().width, frameData.blurPass.images[0].getExtent().height };
-
-        beginRenderPass.clearValues.resize(1);
-        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
-
-
-        frameData.graphicsCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
-        frameData.graphicsCmdBuffer.bindPipeline(_horizontalPipeline);
-
-
-
-        // Get the new (or old) textures descriptor set
-        const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
-            _horizontalPipeline,
-            frameData.blurPass.images[0],
-            frameData.blurPass.imagesViews[0],
-            frameData.blurPass.samplers[0]
-        );
-
-        if (!texturesDescriptorSet) {
-            LUG_LOG.error("BloomPass::renderBlurPass: Can't allocate textures descriptor set");
-            return false;
-        }
-
-        texturesDescriptorSets.push_back(texturesDescriptorSet);
-
-        // Bind descriptor set of the texture
-        {
-            const API::CommandBuffer::CmdBindDescriptors texturesBind{
-                /* texturesBind.pipelineLayout     */ *_horizontalPipeline.getLayout(),
-                /* texturesBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
-                /* texturesBind.firstSet           */ 0,
-                /* texturesBind.descriptorSets     */ {&texturesDescriptorSet->getDescriptorSet()},
-                /* texturesBind.dynamicOffsets     */ {}
-            };
-
-            frameData.graphicsCmdBuffer.bindDescriptorSets(texturesBind);
-        }
-
-        const API::CommandBuffer::CmdDraw cmdDraw {
-            /* cmdDraw.vertexCount */ 3,
-            /* cmdDraw.instanceCount */ 1,
-            /* cmdDraw.firstVertex */ 0,
-            /* cmdDraw.firstInstance */ 0
-        };
-
-        frameData.graphicsCmdBuffer.draw(cmdDraw);
-        frameData.graphicsCmdBuffer.endRenderPass();
-    }
-
-    // Change images layout for vertical pass
-    {
-        // Prepare blur[0] image for write
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &frameData.blurPass.images[0];
-
-            frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
-        // Prepare blur[1] image for read in shader
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &frameData.blurPass.images[1];
-
-            frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-    }
-
-    // Vertical pass
-    {
-        const API::RenderPass* renderPass = _verticalPipeline.getRenderPass();
-
-        API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
-            /* beginRenderPass.framebuffer */ frameData.blurPass.framebuffers[0],
-            /* beginRenderPass.renderArea */{},
-            /* beginRenderPass.clearValues */{}
-        };
-
-        beginRenderPass.renderArea.offset = { 0, 0 };
-        beginRenderPass.renderArea.extent = { frameData.blurPass.images[0].getExtent().width, frameData.blurPass.images[0].getExtent().height };
-
-        beginRenderPass.clearValues.resize(1);
-        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
-
-        frameData.graphicsCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
-        frameData.graphicsCmdBuffer.bindPipeline(_verticalPipeline);
-
-
-
-        // Get the new (or old) textures descriptor set
-        const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
-            _verticalPipeline,
-            frameData.blurPass.images[1],
-            frameData.blurPass.imagesViews[1],
-            frameData.blurPass.samplers[1]
-        );
-
-        if (!texturesDescriptorSet) {
-            LUG_LOG.error("BloomPass::renderBlurPass: Can't allocate textures descriptor set");
-            return false;
-        }
-
-        texturesDescriptorSets.push_back(texturesDescriptorSet);
-
-        // Bind descriptor set of the texture
-        {
-            const API::CommandBuffer::CmdBindDescriptors texturesBind{
-                /* texturesBind.pipelineLayout     */ *_verticalPipeline.getLayout(),
-                /* texturesBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
-                /* texturesBind.firstSet           */ 0,
-                /* texturesBind.descriptorSets     */ {&texturesDescriptorSet->getDescriptorSet()},
-                /* texturesBind.dynamicOffsets     */ {}
-            };
-
-            frameData.graphicsCmdBuffer.bindDescriptorSets(texturesBind);
-        }
-
-        const API::CommandBuffer::CmdDraw cmdDraw {
-            /* cmdDraw.vertexCount */ 3,
-            /* cmdDraw.instanceCount */ 1,
-            /* cmdDraw.firstVertex */ 0,
-            /* cmdDraw.firstInstance */ 0
-        };
-
-        frameData.graphicsCmdBuffer.draw(cmdDraw);
-        frameData.graphicsCmdBuffer.endRenderPass();
-    }
-
-    // Copy swapchain image into blend image
-    {
-        // Prepare swapchain image for copy as SRC
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_window.getSwapchain().getImages()[currentImageIndex];
-
-            frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
-        // Prepare blend image for copy as DST
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &frameData.blendPass.image;
-
-            frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
-        // Do the copy
-        {
-            VkImageCopy copyRegion = {};
-
-            copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            copyRegion.srcSubresource.baseArrayLayer = 0;
-            copyRegion.srcSubresource.mipLevel = 0;
-            copyRegion.srcSubresource.layerCount = 1;
-            copyRegion.srcOffset = { 0, 0, 0 };
-
-            copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            copyRegion.dstSubresource.baseArrayLayer = 0;
-            copyRegion.dstSubresource.mipLevel = 0;
-            copyRegion.dstSubresource.layerCount = 1;
-            copyRegion.dstOffset = { 0, 0, 0 };
-
-            copyRegion.extent.width = _window.getSwapchain().getExtent().width;
-            copyRegion.extent.height = _window.getSwapchain().getExtent().height;
-            copyRegion.extent.depth = 1;
-
-            const API::CommandBuffer::CmdCopyImage cmdCopyImage{
-                /* cmdCopyImage.srcImage      */ _window.getSwapchain().getImages()[currentImageIndex],
-                /* cmdCopyImage.srcImageLayout  */ VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                /* cmdCopyImage.dstImage      */ frameData.blendPass.image,
-                /* cmdCopyImage.dsrImageLayout        */ VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                /* cmdCopyImage.regions      */ { copyRegion }
-            };
-
-            frameData.graphicsCmdBuffer.copyImage(cmdCopyImage);
-        }
-    }
-
-    // Change images layout for blend pass
-    {
-        // Prepare blur[0] image for read in shader
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &frameData.blurPass.images[0];
-
-            frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
-        // Prepare blend image for write
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &frameData.blendPass.image;
-
-            frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-    }
-
     // Blend pass
     {
+        auto& swapchain = _window.getSwapchain();
         const API::RenderPass* renderPass = _blendPipeline.getRenderPass();
 
         API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
@@ -491,14 +464,14 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
         frameData.graphicsCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
         frameData.graphicsCmdBuffer.bindPipeline(_blendPipeline);
 
-        // Draw blur image
+        // Draw window image
          {
             // Get the new (or old) textures descriptor set
             const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
                 _blendPipeline,
-                frameData.blurPass.images[0],
-                frameData.blurPass.imagesViews[0],
-                frameData.blurPass.samplers[0]
+                swapchain.getImages()[currentImageIndex],
+                swapchain.getImagesViews()[currentImageIndex],
+                frameData.blendPass.sampler
             );
 
             if (!texturesDescriptorSet) {
@@ -531,6 +504,48 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
             frameData.graphicsCmdBuffer.draw(cmdDraw);
         }
 
+        // Draw blur images
+         {
+            for (auto& blurPass: frameData.blurPasses) {
+                // Get the new (or old) textures descriptor set
+                const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
+                    _blendPipeline,
+                    blurPass.images[0],
+                    blurPass.imagesViews[0],
+                    blurPass.samplers[0]
+                );
+
+                if (!texturesDescriptorSet) {
+                    LUG_LOG.error("BloomPass::renderBlurPass: Can't allocate textures descriptor set");
+                    return false;
+                }
+
+                texturesDescriptorSets.push_back(texturesDescriptorSet);
+
+                // Bind descriptor set of the texture
+                {
+                    const API::CommandBuffer::CmdBindDescriptors texturesBind{
+                        /* texturesBind.pipelineLayout     */ *_blendPipeline.getLayout(),
+                        /* texturesBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+                        /* texturesBind.firstSet           */ 0,
+                        /* texturesBind.descriptorSets     */ {&texturesDescriptorSet->getDescriptorSet()},
+                        /* texturesBind.dynamicOffsets     */ {}
+                    };
+
+                    frameData.graphicsCmdBuffer.bindDescriptorSets(texturesBind);
+                }
+
+                const API::CommandBuffer::CmdDraw cmdDraw {
+                    /* cmdDraw.vertexCount */ 3,
+                    /* cmdDraw.instanceCount */ 1,
+                    /* cmdDraw.firstVertex */ 0,
+                    /* cmdDraw.firstInstance */ 0
+                };
+
+                frameData.graphicsCmdBuffer.draw(cmdDraw);
+            }
+        }
+
         frameData.graphicsCmdBuffer.endRenderPass();
     }
 
@@ -553,14 +568,40 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
         {
             API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
             pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
             pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].image = &_window.getSwapchain().getImages()[currentImageIndex];
 
             frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
         }
+    }
+
+    // Set viewport/scissor
+    {
+        const VkViewport vkViewport{
+            /* vkViewport.x         */ 0.0f,
+            /* vkViewport.y         */ 0.0f,
+            /* vkViewport.width     */ static_cast<float>(_window.getSwapchain().getExtent().width),
+            /* vkViewport.height    */ static_cast<float>(_window.getSwapchain().getExtent().height),
+            /* vkViewport.minDepth  */ 0.0f,
+            /* vkViewport.maxDepth  */ 1.0f,
+        };
+
+        const VkRect2D scissor{
+            /* scissor.offset */ {
+               0,
+               0
+            },
+            /* scissor.extent */ {
+               static_cast<uint32_t>(vkViewport.width),
+               static_cast<uint32_t>(vkViewport.height)
+            }
+        };
+
+        frameData.graphicsCmdBuffer.setViewport({vkViewport});
+        frameData.graphicsCmdBuffer.setScissor({scissor});
     }
 
     // Hdr pass
@@ -635,7 +676,7 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
 
 
     std::vector<VkPipelineStageFlags> waitDstStageMasks{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
-    if (_graphicsQueue->submit(frameData.graphicsCmdBuffer, { static_cast<VkSemaphore>(frameData.blurPass.blurFinishedSemaphore) }, {static_cast<VkSemaphore>(frameData.blurPass.glowCopyFinishedSemaphore)}, waitDstStageMasks, static_cast<VkFence>(frameData.fence)) == false) {
+    if (_graphicsQueue->submit(frameData.graphicsCmdBuffer, { static_cast<VkSemaphore>(frameData.blurFinishedSemaphore) }, {static_cast<VkSemaphore>(frameData.glowCopyFinishedSemaphore)}, waitDstStageMasks, static_cast<VkFence>(frameData.fence)) == false) {
         LUG_LOG.error("BloomPass::renderBlurPass: Can't submit commandBuffer");
         return false;
     }
@@ -890,7 +931,7 @@ bool BloomPass::initBlendPipeline() {
     {
         API::Builder::RenderPass renderPassBuilder(_renderer.getDevice());
 
-        auto colorFormat = _window.getSwapchain().getFormat().format;
+        auto colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
 
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
@@ -1051,7 +1092,7 @@ bool BloomPass::initBlurPipeline(API::GraphicsPipeline& pipeline, int blurDirect
     {
         API::Builder::RenderPass renderPassBuilder(_renderer.getDevice());
 
-        auto colorFormat = _window.getSwapchain().getFormat().format;
+        auto colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
 
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
@@ -1132,32 +1173,97 @@ bool BloomPass::initBlurPass() {
         API::Builder::Image imageBuilder(device);
 
         imageBuilder.setUsage(VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-        imageBuilder.setPreferedFormats({swapchain.getFormat().format});
+        imageBuilder.setPreferedFormats({VK_FORMAT_R16G16B16A16_SFLOAT });
         imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
         imageBuilder.setQueueFamilyIndices({ _transferQueue->getQueueFamily()->getIdx(), _graphicsQueue->getQueueFamily()->getIdx() });
         imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
 
-        VkExtent3D extent{
-            /* extent.width */ swapchain.getExtent().width,
-            /* extent.height */ swapchain.getExtent().height,
-            /* extent.depth */ 1
-        };
-        imageBuilder.setExtent(extent);
-
         for (uint8_t i = 0; i < frameDataSize; ++i) {
-            VkResult result{VK_SUCCESS};
-            if (!imageBuilder.build(_framesData[i].blurPass.images[0], &result) ||
-                !imageBuilder.build(_framesData[i].blurPass.images[1], &result) ||
-                !imageBuilder.build(_framesData[i].blendPass.image, &result)) {
-                LUG_LOG.error("BloomPass::initBlurPass: Can't create offscreen images: {}", result);
-                return false;
+            // Blur images
+            {
+                _framesData[i].blurPasses.resize(3);
+                // 0
+                {
+                    VkExtent3D extent{
+                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width) / 2,
+                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height) / 2,
+                        /* extent.depth */ 1
+                    };
+                    imageBuilder.setExtent(extent);
+
+                    VkResult result{VK_SUCCESS};
+                    if (!imageBuilder.build(_framesData[i].blurPasses[0].images[0], &result) ||
+                        !imageBuilder.build(_framesData[i].blurPasses[0].images[1], &result)) {
+                        LUG_LOG.error("BloomPass::initBlurPass: Can't create blur offscreen images: {}", result);
+                        return false;
+                    }
+                }
+
+                // 1
+                {
+                    VkExtent3D extent{
+                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width) / 4,
+                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height) / 4,
+                        /* extent.depth */ 1
+                    };
+                    imageBuilder.setExtent(extent);
+
+                    VkResult result{VK_SUCCESS};
+                    if (!imageBuilder.build(_framesData[i].blurPasses[1].images[0], &result) ||
+                        !imageBuilder.build(_framesData[i].blurPasses[1].images[1], &result)) {
+                        LUG_LOG.error("BloomPass::initBlurPass: Can't create blur offscreen images: {}", result);
+                        return false;
+                    }
+                }
+
+                // 2
+                {
+                    VkExtent3D extent{
+                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width) / 8,
+                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height) / 8,
+                        /* extent.depth */ 1
+                    };
+                    imageBuilder.setExtent(extent);
+
+                    VkResult result{VK_SUCCESS};
+                    if (!imageBuilder.build(_framesData[i].blurPasses[2].images[0], &result) ||
+                        !imageBuilder.build(_framesData[i].blurPasses[2].images[1], &result)) {
+                        LUG_LOG.error("BloomPass::initBlurPass: Can't create blur offscreen images: {}", result);
+                        return false;
+                    }
+                }
             }
 
-            if (!deviceMemoryBuilder.addImage(_framesData[i].blurPass.images[0]) ||
-                !deviceMemoryBuilder.addImage(_framesData[i].blurPass.images[1]) ||
-                !deviceMemoryBuilder.addImage(_framesData[i].blendPass.image)) {
-                LUG_LOG.error("BloomPass::initBlurPass: Can't add offscreen images to device memory");
-                return false;
+            // Blend image
+            {
+                VkExtent3D extent{
+                    /* extent.width */ swapchain.getExtent().width,
+                    /* extent.height */ swapchain.getExtent().height,
+                    /* extent.depth */ 1
+                };
+                imageBuilder.setExtent(extent);
+
+                VkResult result{VK_SUCCESS};
+                if (!imageBuilder.build(_framesData[i].blendPass.image, &result)) {
+                    LUG_LOG.error("BloomPass::initBlurPass: Can't create blend offscreen images: {}", result);
+                    return false;
+                }
+            }
+
+            // Add images to device memory
+            {
+                if (!deviceMemoryBuilder.addImage(_framesData[i].blendPass.image)) {
+                    LUG_LOG.error("BloomPass::initBlurPass: Can't add offscreen images to device memory");
+                    return false;
+                }
+
+                for (auto& blurPass: _framesData[i].blurPasses) {
+                    if (!deviceMemoryBuilder.addImage(blurPass.images[0]) ||
+                        !deviceMemoryBuilder.addImage(blurPass.images[1])) {
+                        LUG_LOG.error("BloomPass::initBlurPass: Can't add offscreen images to device memory");
+                        return false;
+                    }
+                }
             }
 
             // Change images layout
@@ -1167,21 +1273,26 @@ bool BloomPass::initBlurPass() {
                 pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-                // blur[0]
-                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[i].blurPass.images[0];
-                cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+                // Blur images
+                {
+                    for (auto& blurPass: _framesData[i].blurPasses) {
+                        // blur[0]
+                        pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                        pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                        pipelineBarrier.imageMemoryBarriers[0].image = &blurPass.images[0];
+                        cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
 
-                // blur[1]
-                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[i].blurPass.images[1];
-                cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+                        // blur[1]
+                        pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                        pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                        pipelineBarrier.imageMemoryBarriers[0].image = &blurPass.images[1];
+                        cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+                    }
+                }
 
                 // Blend
-                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[i].blendPass.image;
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
             }
@@ -1205,29 +1316,31 @@ bool BloomPass::initBlurPass() {
     // Create offscreen image views
     {
         for (uint8_t i = 0; i < frameDataSize; ++i) {
-            // blur[0] image view
-            {
-                VkResult result{VK_SUCCESS};
-                API::Builder::ImageView imageViewBuilder(device, _framesData[i].blurPass.images[0]);
+            for (auto& blurPass: _framesData[i].blurPasses) {
+                // blur[0] image view
+                {
+                    VkResult result{VK_SUCCESS};
+                    API::Builder::ImageView imageViewBuilder(device, blurPass.images[0]);
 
-                imageViewBuilder.setFormat(swapchain.getFormat().format);
+                    imageViewBuilder.setFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
 
-                if (!imageViewBuilder.build(_framesData[i].blurPass.imagesViews[0], &result)) {
-                    LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[0] offscreen image view: {}", result);
-                    return false;
+                    if (!imageViewBuilder.build(blurPass.imagesViews[0], &result)) {
+                        LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[0] offscreen image view: {}", result);
+                        return false;
+                    }
                 }
-            }
 
-            // blur[1] image view
-            {
-                VkResult result{VK_SUCCESS};
-                API::Builder::ImageView imageViewBuilder(device, _framesData[i].blurPass.images[1]);
+                // blur[1] image view
+                {
+                    VkResult result{VK_SUCCESS};
+                    API::Builder::ImageView imageViewBuilder(device, blurPass.images[1]);
 
-                imageViewBuilder.setFormat(swapchain.getFormat().format);
+                    imageViewBuilder.setFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
 
-                if (!imageViewBuilder.build(_framesData[i].blurPass.imagesViews[1], &result)) {
-                    LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[1] offscreen image view: {}", result);
-                    return false;
+                    if (!imageViewBuilder.build(blurPass.imagesViews[1], &result)) {
+                        LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[1] offscreen image view: {}", result);
+                        return false;
+                    }
                 }
             }
 
@@ -1236,7 +1349,7 @@ bool BloomPass::initBlurPass() {
                 VkResult result{VK_SUCCESS};
                 API::Builder::ImageView imageViewBuilder(device, _framesData[i].blendPass.image);
 
-                imageViewBuilder.setFormat(swapchain.getFormat().format);
+                imageViewBuilder.setFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
 
                 if (!imageViewBuilder.build(_framesData[i].blendPass.imageView, &result)) {
                     LUG_LOG.error("BloomPass::initBlurPass: Can't create blend offscreen image view: {}", result);
@@ -1258,21 +1371,23 @@ bool BloomPass::initBlurPass() {
         samplerBuilder.setMipmapMode(VK_SAMPLER_MIPMAP_MODE_LINEAR);
 
         for (uint8_t i = 0; i < frameDataSize; ++i) {
-            // blur[0] sampler
-            {
-                VkResult result{VK_SUCCESS};
-                if (!samplerBuilder.build(_framesData[i].blurPass.samplers[0], &result)) {
-                    LUG_LOG.error("BloomPass::initBlurPass: Can't blur[0] create sampler: {}", result);
-                    return false;
+            for (auto& blurPass: _framesData[i].blurPasses) {
+                // blur[0] sampler
+                {
+                    VkResult result{VK_SUCCESS};
+                    if (!samplerBuilder.build(blurPass.samplers[0], &result)) {
+                        LUG_LOG.error("BloomPass::initBlurPass: Can't blur[0] create sampler: {}", result);
+                        return false;
+                    }
                 }
-            }
 
-            // blur[1] sampler
-            {
-                VkResult result{VK_SUCCESS};
-                if (!samplerBuilder.build(_framesData[i].blurPass.samplers[1], &result)) {
-                    LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[1] sampler: {}", result);
-                    return false;
+                // blur[1] sampler
+                {
+                    VkResult result{VK_SUCCESS};
+                    if (!samplerBuilder.build(blurPass.samplers[1], &result)) {
+                        LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[1] sampler: {}", result);
+                        return false;
+                    }
                 }
             }
 
@@ -1291,37 +1406,39 @@ bool BloomPass::initBlurPass() {
     {
 
         for (uint32_t i = 0; i < frameDataSize; i++) {
-            // blur[0] framebuffer
-            {
-                const API::RenderPass* renderPass = _horizontalPipeline.getRenderPass();
+            for (auto& blurPass: _framesData[i].blurPasses) {
+                // blur[0] framebuffer
+                {
+                    const API::RenderPass* renderPass = _horizontalPipeline.getRenderPass();
 
-                API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
-                framebufferBuilder.setRenderPass(renderPass);
-                framebufferBuilder.addAttachment(&_framesData[i].blurPass.imagesViews[0]);
-                framebufferBuilder.setWidth(_framesData[i].blurPass.images[0].getExtent().width);
-                framebufferBuilder.setHeight(_framesData[i].blurPass.images[0].getExtent().height);
+                    API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
+                    framebufferBuilder.setRenderPass(renderPass);
+                    framebufferBuilder.addAttachment(&blurPass.imagesViews[0]);
+                    framebufferBuilder.setWidth(blurPass.images[0].getExtent().width);
+                    framebufferBuilder.setHeight(blurPass.images[0].getExtent().height);
 
-                VkResult result{VK_SUCCESS};
-                if (!framebufferBuilder.build(_framesData[i].blurPass.framebuffers[0], &result)) {
-                    LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[0] framebuffer: {}", result);
-                    return false;
+                    VkResult result{VK_SUCCESS};
+                    if (!framebufferBuilder.build(blurPass.framebuffers[0], &result)) {
+                        LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[0] framebuffer: {}", result);
+                        return false;
+                    }
                 }
-            }
 
-            // blur[1] framebuffer
-            {
-                const API::RenderPass* renderPass = _verticalPipeline.getRenderPass();
+                // blur[1] framebuffer
+                {
+                    const API::RenderPass* renderPass = _verticalPipeline.getRenderPass();
 
-                API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
-                framebufferBuilder.setRenderPass(renderPass);
-                framebufferBuilder.addAttachment(&_framesData[i].blurPass.imagesViews[1]);
-                framebufferBuilder.setWidth(_framesData[i].blurPass.images[1].getExtent().width);
-                framebufferBuilder.setHeight(_framesData[i].blurPass.images[1].getExtent().height);
+                    API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
+                    framebufferBuilder.setRenderPass(renderPass);
+                    framebufferBuilder.addAttachment(&blurPass.imagesViews[1]);
+                    framebufferBuilder.setWidth(blurPass.images[1].getExtent().width);
+                    framebufferBuilder.setHeight(blurPass.images[1].getExtent().height);
 
-                VkResult result{VK_SUCCESS};
-                if (!framebufferBuilder.build(_framesData[i].blurPass.framebuffers[1], &result)) {
-                    LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[1] framebuffer: {}", result);
-                    return false;
+                    VkResult result{VK_SUCCESS};
+                    if (!framebufferBuilder.build(blurPass.framebuffers[1], &result)) {
+                        LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[1] framebuffer: {}", result);
+                        return false;
+                    }
                 }
             }
 
@@ -1332,8 +1449,8 @@ bool BloomPass::initBlurPass() {
                 API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
                 framebufferBuilder.setRenderPass(renderPass);
                 framebufferBuilder.addAttachment(&_framesData[i].blendPass.imageView);
-                framebufferBuilder.setWidth(swapchainImages[i].getExtent().width);
-                framebufferBuilder.setHeight(swapchainImages[i].getExtent().height);
+                framebufferBuilder.setWidth(_framesData[i].blendPass.image.getExtent().width);
+                framebufferBuilder.setHeight(_framesData[i].blendPass.image.getExtent().height);
 
                 VkResult result{VK_SUCCESS};
                 if (!framebufferBuilder.build(_framesData[i].blendPass.framebuffer, &result)) {
@@ -1431,7 +1548,7 @@ bool BloomPass::buildEndCommandBuffer() {
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
             }
 
-            // Clear blur[0] image to black
+            // Clear blur[0] and blend images to black
             {
                 VkClearColorValue clearColor;
                 std::memset(&clearColor, 0, sizeof(clearColor));
@@ -1444,10 +1561,20 @@ bool BloomPass::buildEndCommandBuffer() {
                     /* range.layerCount */ 1
                 };
 
-                // TODO: Put this method in CommandBuffer
+                for (auto& blurPass: _framesData[i].blurPasses) {
+                    vkCmdClearColorImage(
+                        static_cast<VkCommandBuffer>(cmdBuffer),
+                        static_cast<VkImage>(blurPass.images[0]),
+                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                        &clearColor,
+                        1,
+                        &range
+                    );
+                }
+
                 vkCmdClearColorImage(
                     static_cast<VkCommandBuffer>(cmdBuffer),
-                    static_cast<VkImage>(_framesData[i].blurPass.images[0]),
+                    static_cast<VkImage>(_framesData[i].blendPass.image),
                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                     &clearColor,
                     1,
@@ -1456,46 +1583,69 @@ bool BloomPass::buildEndCommandBuffer() {
             }
 
 
-            // Copy glow image into blur[0] image
+            // Copy glow image into blur[0] images
             {
-                VkImageCopy copyRegion = {};
+                VkImageBlit blitRegion = {};
 
-                copyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                copyRegion.srcSubresource.baseArrayLayer = 0;
-                copyRegion.srcSubresource.mipLevel = 0;
-                copyRegion.srcSubresource.layerCount = 1;
-                copyRegion.srcOffset = { 0, 0, 0 };
-
-                copyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                copyRegion.dstSubresource.baseArrayLayer = 0;
-                copyRegion.dstSubresource.mipLevel = 0;
-                copyRegion.dstSubresource.layerCount = 1;
-                copyRegion.dstOffset = { 0, 0, 0 };
-
-                copyRegion.extent.width = _window.getSwapchain().getExtent().width;
-                copyRegion.extent.height = _window.getSwapchain().getExtent().height;
-                copyRegion.extent.depth = 1;
-
-                const API::CommandBuffer::CmdCopyImage cmdCopyImage{
-                    /* cmdCopyImage.srcImage      */ glowOffscreenImages[i],
-                    /* cmdCopyImage.srcImageLayout  */ VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                    /* cmdCopyImage.dstImage      */ _framesData[i].blurPass.images[0],
-                    /* cmdCopyImage.dsrImageLayout        */ VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                    /* cmdCopyImage.regions      */ { copyRegion }
+                blitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                blitRegion.srcSubresource.baseArrayLayer = 0;
+                blitRegion.srcSubresource.mipLevel = 0;
+                blitRegion.srcSubresource.layerCount = 1;
+                blitRegion.srcOffsets[0] = { 0, 0, 0 };
+                blitRegion.srcOffsets[1] = {
+                    static_cast<int32_t>(glowOffscreenImages[0].getExtent().width),
+                    static_cast<int32_t>(glowOffscreenImages[0].getExtent().height),
+                    1
                 };
 
-                cmdBuffer.copyImage(cmdCopyImage);
+                for (auto& blurPass: _framesData[i].blurPasses) {
+                    blitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                    blitRegion.dstSubresource.baseArrayLayer = 0;
+                    blitRegion.dstSubresource.mipLevel = 0;
+                    blitRegion.dstSubresource.layerCount = 1;
+                    blitRegion.dstOffsets[0] = { 0, 0, 0 };
+                    blitRegion.dstOffsets[1] = {
+                        static_cast<int32_t>(blurPass.images[0].getExtent().width),
+                        static_cast<int32_t>(blurPass.images[0].getExtent().height),
+                        1
+                    };
+
+                    const API::CommandBuffer::CmdBlitImage cmdBlitImage{
+                        /* cmdBlitImage.srcImage      */ glowOffscreenImages[i],
+                        /* cmdBlitImage.srcImageLayout  */ VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                        /* cmdBlitImage.dstImage      */ blurPass.images[0],
+                        /* cmdBlitImage.dsrImageLayout        */ VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                        /* cmdBlitImage.regions      */ { blitRegion },
+                        /* cmdBlitImage.filter       */ VK_FILTER_LINEAR
+                    };
+
+                    cmdBuffer.blitImage(cmdBlitImage);
+
+                    // Prepare blur[0] image for reading in shader
+                    {
+                        API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+                        pipelineBarrier.imageMemoryBarriers.resize(1);
+                        pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                        pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                        pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                        pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                        pipelineBarrier.imageMemoryBarriers[0].image = &blurPass.images[0];
+
+                        cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+                    }
+                }
             }
 
-            // Prepare blur[0] image for reading in shader
+
+            // Prepare blend image for write
             {
                 API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
                 pipelineBarrier.imageMemoryBarriers.resize(1);
                 pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[i].blurPass.images[0];
+                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[i].blendPass.image;
 
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
             }
@@ -1515,7 +1665,36 @@ bool BloomPass::buildEndCommandBuffer() {
                 return false;
             }
 
-            // Prepare blur[0] image for copying (next frame)
+            for (auto& blurPass: _framesData[i].blurPasses) {
+                // Prepare blur[0] image for clearing (next frame)
+                {
+                    API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+                    pipelineBarrier.imageMemoryBarriers.resize(1);
+                    pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                    pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                    pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                    pipelineBarrier.imageMemoryBarriers[0].image = &blurPass.images[0];
+
+                    cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+                }
+
+                // Prepare blur[1] image for writing (next frame)
+                {
+                    API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+                    pipelineBarrier.imageMemoryBarriers.resize(1);
+                    pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                    pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                    pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                    pipelineBarrier.imageMemoryBarriers[0].image = &blurPass.images[1];
+
+                    cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+                }
+            }
+
+
+            // Prepare blend image for clearing (next frame)
             {
                 API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
                 pipelineBarrier.imageMemoryBarriers.resize(1);
@@ -1523,32 +1702,6 @@ bool BloomPass::buildEndCommandBuffer() {
                 pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[i].blurPass.images[0];
-
-                cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-            }
-
-            // Prepare blur[1] image for writing (next frame)
-            {
-                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-                pipelineBarrier.imageMemoryBarriers.resize(1);
-                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[i].blurPass.images[1];
-
-                cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-            }
-
-            // Prepare blend image for writing (next frame)
-            {
-                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-                pipelineBarrier.imageMemoryBarriers.resize(1);
-                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                 pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[i].blendPass.image;
 
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);

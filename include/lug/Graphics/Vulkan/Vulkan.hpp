@@ -137,6 +137,7 @@
     macro(vkBindImageMemory)                            \
     macro(vkCreateSampler)                              \
     macro(vkCmdCopyImage)                               \
+    macro(vkCmdBlitImage)                               \
     macro(vkCmdCopyBufferToImage)                       \
     macro(vkCreateDescriptorSetLayout)                  \
     macro(vkCreateDescriptorPool)                       \

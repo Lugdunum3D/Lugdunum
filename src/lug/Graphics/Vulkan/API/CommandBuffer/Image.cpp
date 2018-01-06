@@ -19,6 +19,19 @@ void CommandBuffer::copyImage(const CommandBuffer::CmdCopyImage& parameters) con
         );
 }
 
+void CommandBuffer::blitImage(const CommandBuffer::CmdBlitImage& parameters) const {
+    vkCmdBlitImage(
+        _commandBuffer,
+        static_cast<VkImage>(parameters.srcImage),
+        parameters.srcImageLayout,
+        static_cast<VkImage>(parameters.dstImage),
+        parameters.dstImageLayout,
+        static_cast<uint32_t>(parameters.regions.size()),
+        parameters.regions.data(),
+        parameters.filter
+        );
+}
+
 } // API
 } // Vulkan
 } // Graphics

@@ -40,9 +40,6 @@ private:
         std::array<API::Sampler, 2> samplers;
         std::array<API::Image, 2> images;
         std::array<API::ImageView, 2> imagesViews;
-
-        API::Semaphore glowCopyFinishedSemaphore{};
-        API::Semaphore blurFinishedSemaphore{};
     };
 
     struct BlendPass {
@@ -53,12 +50,14 @@ private:
     };
 
     struct FrameData {
+        API::Semaphore glowCopyFinishedSemaphore{};
+        API::Semaphore blurFinishedSemaphore{};
         API::Semaphore bloomFinishedSemaphores{};
 
         std::vector<API::CommandBuffer> transferCmdBuffers;
         API::CommandBuffer graphicsCmdBuffer;
 
-        BlurPass blurPass;
+        std::vector<BlurPass> blurPasses;
         BlendPass blendPass;
         API::Fence fence;
 

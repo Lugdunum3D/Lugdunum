@@ -12,7 +12,7 @@ namespace Vulkan {
 namespace Render {
 namespace DescriptorSetPool {
 
-class LUG_GRAPHICS_API BloomSampler : public DescriptorSetPool<10> {
+class LUG_GRAPHICS_API BloomSampler : public DescriptorSetPool<30> {
 public:
     BloomSampler(Renderer& renderer);
 
