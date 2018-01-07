@@ -163,7 +163,7 @@ bool Application::init(int argc, char* argv[]) {
             return false;
         }
 
-        _scene->setSkyBox(skyBox);
+        //_scene->setSkyBox(skyBox);
         applyIBL(&_scene->getRoot(), irradianceMap, prefilteredMap);
     }
 

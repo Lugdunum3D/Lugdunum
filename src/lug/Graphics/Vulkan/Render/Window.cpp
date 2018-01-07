@@ -159,7 +159,20 @@ bool Window::endFrame() {
         }
 
         waitSemaphores = {
-            static_cast<VkSemaphore>(_bloomPass.getSemaphore(_currentImageIndex))
+            static_cast<VkSemaphore>(_bloomPass.getBloomSemaphore(_currentImageIndex))
+        };
+    }
+    else {
+        if (!_bloomPass.renderHdr(
+            _sceneOffscreenImages[_currentImageIndex],
+            _sceneOffscreenImagesViews[_currentImageIndex],
+            waitSemaphores,
+            _currentImageIndex)
+        ) {
+            return false;
+        }
+        waitSemaphores = {
+            static_cast<VkSemaphore>(_bloomPass.getHdrSemaphore(_currentImageIndex))
         };
     }
 
@@ -188,7 +201,7 @@ bool Window::endFrame() {
 lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::InitInfo& initInfo) {
     std::unique_ptr<View> renderView = std::make_unique<View>(_renderer, this);
 
-    if (!renderView->init(initInfo, _presentQueue, _swapchain.getImagesViews(), _glowOffscreenImagesViews)) {
+    if (!renderView->init(initInfo, _presentQueue, _swapchain.getImagesViews(), _glowOffscreenImagesViews, _sceneOffscreenImagesViews)) {
         return nullptr;
     }
 
@@ -570,6 +583,7 @@ bool Window::initOffscreenData() {
     // Create offscreen images
     {
         _glowOffscreenImages.resize(frameDataSize);
+        _sceneOffscreenImages.resize(frameDataSize);
         API::Builder::Image imageBuilder(device);
 
         imageBuilder.setUsage(VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
@@ -587,17 +601,17 @@ bool Window::initOffscreenData() {
 
         for (uint8_t i = 0; i < frameDataSize; ++i) {
             VkResult result{VK_SUCCESS};
-            if (!imageBuilder.build(_glowOffscreenImages[i], &result)) {
+            if (!imageBuilder.build(_glowOffscreenImages[i], &result) || !imageBuilder.build(_sceneOffscreenImages[i], &result)) {
                 LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image: {}", result);
                 return false;
             }
 
-            if (!deviceMemoryBuilder.addImage(_glowOffscreenImages[i])) {
+            if (!deviceMemoryBuilder.addImage(_glowOffscreenImages[i]) || !deviceMemoryBuilder.addImage(_sceneOffscreenImages[i])) {
                 LUG_LOG.error("Window::initOffscreenData: Can't add offscreen image to device memory");
                 return false;
             }
 
-            // Change images layout
+            // Change glow images layout
             {
                 API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
                 pipelineBarrier.imageMemoryBarriers.resize(1);
@@ -609,10 +623,23 @@ bool Window::initOffscreenData() {
 
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
             }
+
+            // Change scene images layout
+            {
+                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+                pipelineBarrier.imageMemoryBarriers.resize(1);
+                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
+                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].image = &_sceneOffscreenImages[i];
+
+                cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+            }
         }
     }
 
-    // Create offscreen image memory
+    // Create offscreen images memory
     {
         VkResult result{VK_SUCCESS};
         if (!deviceMemoryBuilder.build(_offscreenImagesMemory, &result)) {
@@ -624,15 +651,32 @@ bool Window::initOffscreenData() {
     // Create offscreen image views
     {
         _glowOffscreenImagesViews.resize(frameDataSize);
+        _sceneOffscreenImagesViews.resize(frameDataSize);
         for (uint8_t i = 0; i < frameDataSize; ++i) {
-            VkResult result{VK_SUCCESS};
-            API::Builder::ImageView imageViewBuilder(device, _glowOffscreenImages[i]);
+            // Glow image view
+            {
+                VkResult result{VK_SUCCESS};
+                API::Builder::ImageView imageViewBuilder(device, _glowOffscreenImages[i]);
 
-            imageViewBuilder.setFormat(_swapchain.getFormat().format);
+                imageViewBuilder.setFormat(_swapchain.getFormat().format);
 
-            if (!imageViewBuilder.build(_glowOffscreenImagesViews[i], &result)) {
-                LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image view: {}", result);
-                return false;
+                if (!imageViewBuilder.build(_glowOffscreenImagesViews[i], &result)) {
+                    LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image view: {}", result);
+                    return false;
+                }
+            }
+
+            // Scene image view
+            {
+                VkResult result{VK_SUCCESS};
+                API::Builder::ImageView imageViewBuilder(device, _sceneOffscreenImages[i]);
+
+                imageViewBuilder.setFormat(_swapchain.getFormat().format);
+
+                if (!imageViewBuilder.build(_sceneOffscreenImagesViews[i], &result)) {
+                    LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image view: {}", result);
+                    return false;
+                }
             }
         }
     }
@@ -703,6 +747,18 @@ bool Window::buildBeginCommandBuffer() {
             cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
         }
 
+        // Color attachment to dst optimal
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_sceneOffscreenImages[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+        }
 
         // Clear the image to black
         {
@@ -734,6 +790,14 @@ bool Window::buildBeginCommandBuffer() {
                 1,
                 &range
             );
+            vkCmdClearColorImage(
+                static_cast<VkCommandBuffer>(cmdBuffer),
+                static_cast<VkImage>(_sceneOffscreenImages[i]),
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                &clearColor,
+                1,
+                &range
+            );
         }
 
         // Dst optimal to color attachment optimal
@@ -758,6 +822,19 @@ bool Window::buildBeginCommandBuffer() {
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].image = &_glowOffscreenImages[i];
+
+            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+        }
+
+        // Dst optimal to color attachment optimal
+        {
+            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+            pipelineBarrier.imageMemoryBarriers.resize(1);
+            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+            pipelineBarrier.imageMemoryBarriers[0].image = &_sceneOffscreenImages[i];
 
             cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
         }

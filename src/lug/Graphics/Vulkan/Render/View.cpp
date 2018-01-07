@@ -20,14 +20,15 @@ bool View::init(
     View::InitInfo& initInfo,
     const API::Queue* presentQueue,
     const std::vector<API::ImageView>& swapchainImageViews,
-    const std::vector<API::ImageView>& glowImageViews) {
+    const std::vector<API::ImageView>& glowImageViews,
+    const std::vector<API::ImageView>& sceneImageViews) {
     ::lug::Graphics::Render::View::init(initInfo);
 
     if (_renderer.getInfo().renderTechnique == lug::Graphics::Render::Technique::Type::Forward) {
         _renderTechnique = std::make_unique<Render::Technique::Forward>(_renderer, *this);
     }
 
-    if (_renderTechnique && !_renderTechnique->init(swapchainImageViews, glowImageViews)) {
+    if (_renderTechnique && !_renderTechnique->init(swapchainImageViews, glowImageViews, sceneImageViews)) {
         LUG_LOG.warn("View::init: Failed to init render technique");
         return false;
     }

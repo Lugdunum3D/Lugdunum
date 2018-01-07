@@ -45,7 +45,11 @@ public:
         uint32_t currentImageIndex
     ) = 0;
 
-    virtual bool init(const std::vector<API::ImageView>& imageViews, const std::vector<API::ImageView>& glowImageViews) = 0;
+    virtual bool init(
+        const std::vector<API::ImageView>& imageViews,
+        const std::vector<API::ImageView>& glowImageViews,
+        const std::vector<API::ImageView>& sceneImageViews
+    ) = 0;
     virtual void destroy() = 0;
 
     virtual bool setSwapchainImageViews(const std::vector<API::ImageView>& imageViews) = 0;

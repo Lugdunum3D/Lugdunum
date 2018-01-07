@@ -29,8 +29,8 @@ BloomPass::~BloomPass() {
 }
 
 bool BloomPass::init() {
-    auto& swapchainImages = _window.getSwapchain().getImages();
-    uint32_t frameDataSize = (uint32_t)swapchainImages.size();
+    auto& sceneImages = _window.getSceneOffscreenImages();
+    uint32_t frameDataSize = (uint32_t)sceneImages.size();
     API::Device& device = _renderer.getDevice();
 
     // Get transfer queue
@@ -92,7 +92,8 @@ bool BloomPass::init() {
             VkResult result{VK_SUCCESS};
             if (!semaphoreBuilder.build(_framesData[i].bloomFinishedSemaphores, &result) ||
                 !semaphoreBuilder.build(_framesData[i].glowCopyFinishedSemaphore, &result) ||
-                !semaphoreBuilder.build(_framesData[i].blurFinishedSemaphore, &result)) {
+                !semaphoreBuilder.build(_framesData[i].blurFinishedSemaphore, &result) ||
+                !semaphoreBuilder.build(_framesData[i].hdrPass.hdrFinishedSemaphore, &result)) {
                 LUG_LOG.error("BloomPass::init: Can't create semaphores: {}", result);
                 return false;
             }
@@ -101,7 +102,8 @@ bool BloomPass::init() {
         // Fence
         {
             VkResult result{VK_SUCCESS};
-            if (!fenceBuilder.build(_framesData[i].fence, &result)) {
+            if (!fenceBuilder.build(_framesData[i].fence, &result) ||
+                !fenceBuilder.build(_framesData[i].hdrPass.fence, &result)) {
                 LUG_LOG.error("Window::init: Can't create fences: {}", result);
                 return false;
             }
@@ -121,6 +123,15 @@ bool BloomPass::init() {
         {
             VkResult result{VK_SUCCESS};
             if (!graphicsCommandBufferBuilder.build(_framesData[i].graphicsCmdBuffer, &result)) {
+                LUG_LOG.error("BloomPass::init: Can't create the command buffer: {}", result);
+                return false;
+            }
+        }
+
+        // Hdr Graphics command buffer
+        {
+            VkResult result{VK_SUCCESS};
+            if (!graphicsCommandBufferBuilder.build(_framesData[i].hdrCmdBuffer, &result)) {
                 LUG_LOG.error("BloomPass::init: Can't create the command buffer: {}", result);
                 return false;
             }
@@ -174,7 +185,7 @@ bool BloomPass::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_
     // Change blur images layout for next frame
     {
         std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-        if (_transferQueue->submit(frameData.transferCmdBuffers[1], { static_cast<VkSemaphore>(frameData.bloomFinishedSemaphores) }, {static_cast<VkSemaphore>(frameData.blurFinishedSemaphore)}, waitDstStageMasks, nullptr) == false) {
+        if (_transferQueue->submit(frameData.transferCmdBuffers[1], { static_cast<VkSemaphore>(frameData.bloomFinishedSemaphores) }, {static_cast<VkSemaphore>(frameData.hdrPass.hdrFinishedSemaphore)}, waitDstStageMasks, nullptr) == false) {
             LUG_LOG.error("BloomPass::endFrame Can't submit commandBuffer");
             return false;
         }
@@ -183,8 +194,134 @@ bool BloomPass::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_
     return true;
 }
 
-const Vulkan::API::Semaphore& BloomPass::getSemaphore(uint32_t currentImageIndex) const {
+bool BloomPass::renderHdr(
+        const API::Image& image,
+        const API::ImageView& imageView,
+        const std::vector<VkSemaphore>& waitSemaphores,
+        uint32_t currentImageIndex
+) {
+    FrameData& frameData = _framesData[currentImageIndex];
+
+    if (!frameData.hdrPass.fence.wait()) {
+        return false;
+    }
+    frameData.hdrPass.fence.reset();
+
+    frameData.hdrCmdBuffer.reset();
+    frameData.hdrCmdBuffer.begin();
+
+    // Temporary array of descriptor sets use to render this frame
+    // they will replace frameData.texturesDescriptorSets atfer the rendering
+    std::vector<const Render::DescriptorSetPool::DescriptorSet*> texturesDescriptorSets;
+
+    // Set viewport/scissor
+    {
+        const VkViewport vkViewport{
+            /* vkViewport.x         */ 0.0f,
+            /* vkViewport.y         */ 0.0f,
+            /* vkViewport.width     */ static_cast<float>(_window.getSwapchain().getExtent().width),
+            /* vkViewport.height    */ static_cast<float>(_window.getSwapchain().getExtent().height),
+            /* vkViewport.minDepth  */ 0.0f,
+            /* vkViewport.maxDepth  */ 1.0f,
+        };
+
+        const VkRect2D scissor{
+            /* scissor.offset */ {
+               0,
+               0
+            },
+            /* scissor.extent */ {
+               static_cast<uint32_t>(vkViewport.width),
+               static_cast<uint32_t>(vkViewport.height)
+            }
+        };
+
+        frameData.hdrCmdBuffer.setViewport({vkViewport});
+        frameData.hdrCmdBuffer.setScissor({scissor});
+    }
+
+    // Begin render pass
+    {
+        const API::RenderPass* renderPass = _hdrPipeline.getRenderPass();
+
+        API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
+            /* beginRenderPass.framebuffer */ frameData.hdrFramebuffer,
+            /* beginRenderPass.renderArea */{},
+            /* beginRenderPass.clearValues */{}
+        };
+
+        beginRenderPass.renderArea.offset = { 0, 0 };
+        beginRenderPass.renderArea.extent = { _window.getSceneOffscreenImages()[0].getExtent().width, _window.getSceneOffscreenImages()[0].getExtent().height };
+
+        frameData.hdrCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
+    }
+
+    frameData.hdrCmdBuffer.bindPipeline(_hdrPipeline);
+
+    // Get the new (or old) textures descriptor set
+    const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
+        _hdrPipeline,
+        image,
+        imageView,
+        frameData.blendPass.sampler
+    );
+
+    if (!texturesDescriptorSet) {
+        LUG_LOG.error("BloomPass::renderHdr: Can't allocate textures descriptor set");
+        return false;
+    }
+
+    texturesDescriptorSets.push_back(texturesDescriptorSet);
+
+    // Bind descriptor set of the texture
+    {
+        const API::CommandBuffer::CmdBindDescriptors texturesBind{
+            /* texturesBind.pipelineLayout     */ *_hdrPipeline.getLayout(),
+            /* texturesBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
+            /* texturesBind.firstSet           */ 0,
+            /* texturesBind.descriptorSets     */ {&texturesDescriptorSet->getDescriptorSet()},
+            /* texturesBind.dynamicOffsets     */ {}
+        };
+
+        frameData.hdrCmdBuffer.bindDescriptorSets(texturesBind);
+    }
+
+    const API::CommandBuffer::CmdDraw cmdDraw {
+        /* cmdDraw.vertexCount */ 3,
+        /* cmdDraw.instanceCount */ 1,
+        /* cmdDraw.firstVertex */ 0,
+        /* cmdDraw.firstInstance */ 0
+    };
+
+    frameData.hdrCmdBuffer.draw(cmdDraw);
+    frameData.hdrCmdBuffer.endRenderPass();
+
+    frameData.hdrCmdBuffer.end();
+
+    // Free and replace previous texturesDescriptorSets
+    {
+        for (const auto& descriptorSet : frameData.hdrPass.texturesDescriptorSets) {
+            _texturesDescriptorSetPool->free(descriptorSet);
+        }
+
+        frameData.hdrPass.texturesDescriptorSets = texturesDescriptorSets;
+    }
+
+    std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
+    if (_graphicsQueue->submit(frameData.hdrCmdBuffer, { static_cast<VkSemaphore>(frameData.hdrPass.hdrFinishedSemaphore) }, waitSemaphores, waitDstStageMasks, static_cast<VkFence>(frameData.hdrPass.fence)) == false) {
+        LUG_LOG.error("BloomPass::renderBlurPass: Can't submit commandBuffer");
+        return false;
+    }
+
+    return true;
+}
+
+const Vulkan::API::Semaphore& BloomPass::getBloomSemaphore(uint32_t currentImageIndex) const {
     return _framesData[currentImageIndex].bloomFinishedSemaphores;
+}
+
+const Vulkan::API::Semaphore& BloomPass::getHdrSemaphore(uint32_t currentImageIndex) const {
+    return _framesData[currentImageIndex].hdrPass.hdrFinishedSemaphore;
 }
 
 bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
@@ -415,7 +552,7 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
             pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_window.getSwapchain().getImages()[currentImageIndex];
+            pipelineBarrier.imageMemoryBarriers[0].image = &_window.getSceneOffscreenImages()[currentImageIndex];
 
             frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
         }
@@ -449,7 +586,6 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
 
     // Blend pass
     {
-        auto& swapchain = _window.getSwapchain();
         const API::RenderPass* renderPass = _blendPipeline.getRenderPass();
 
         API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
@@ -469,8 +605,8 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
             // Get the new (or old) textures descriptor set
             const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
                 _blendPipeline,
-                swapchain.getImages()[currentImageIndex],
-                swapchain.getImagesViews()[currentImageIndex],
+                _window.getSceneOffscreenImages()[currentImageIndex],
+                _window.getSceneOffscreenImagesViews()[currentImageIndex],
                 frameData.blendPass.sampler
             );
 
@@ -563,104 +699,6 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
 
             frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
         }
-
-        // Prepare swapchain image for write
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_window.getSwapchain().getImages()[currentImageIndex];
-
-            frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-    }
-
-    // Set viewport/scissor
-    {
-        const VkViewport vkViewport{
-            /* vkViewport.x         */ 0.0f,
-            /* vkViewport.y         */ 0.0f,
-            /* vkViewport.width     */ static_cast<float>(_window.getSwapchain().getExtent().width),
-            /* vkViewport.height    */ static_cast<float>(_window.getSwapchain().getExtent().height),
-            /* vkViewport.minDepth  */ 0.0f,
-            /* vkViewport.maxDepth  */ 1.0f,
-        };
-
-        const VkRect2D scissor{
-            /* scissor.offset */ {
-               0,
-               0
-            },
-            /* scissor.extent */ {
-               static_cast<uint32_t>(vkViewport.width),
-               static_cast<uint32_t>(vkViewport.height)
-            }
-        };
-
-        frameData.graphicsCmdBuffer.setViewport({vkViewport});
-        frameData.graphicsCmdBuffer.setScissor({scissor});
-    }
-
-    // Hdr pass
-    {
-        auto& swapchain = _window.getSwapchain();
-        const API::RenderPass* renderPass = _hdrPipeline.getRenderPass();
-
-        API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
-            /* beginRenderPass.framebuffer */ frameData.hdrFramebuffer,
-            /* beginRenderPass.renderArea */{},
-            /* beginRenderPass.clearValues */{}
-        };
-
-        beginRenderPass.renderArea.offset = { 0, 0 };
-        beginRenderPass.renderArea.extent = { swapchain.getImages()[0].getExtent().width, swapchain.getImages()[0].getExtent().height };
-
-        beginRenderPass.clearValues.resize(1);
-        beginRenderPass.clearValues[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
-
-        frameData.graphicsCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
-        frameData.graphicsCmdBuffer.bindPipeline(_hdrPipeline);
-
-        // Get the new (or old) textures descriptor set
-        const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
-            _hdrPipeline,
-            frameData.blendPass.image,
-            frameData.blendPass.imageView,
-            frameData.blendPass.sampler
-        );
-
-        if (!texturesDescriptorSet) {
-            LUG_LOG.error("BloomPass::renderBlurPass: Can't allocate textures descriptor set");
-            return false;
-        }
-
-        texturesDescriptorSets.push_back(texturesDescriptorSet);
-
-        // Bind descriptor set of the texture
-        {
-            const API::CommandBuffer::CmdBindDescriptors texturesBind{
-                /* texturesBind.pipelineLayout     */ *_hdrPipeline.getLayout(),
-                /* texturesBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
-                /* texturesBind.firstSet           */ 0,
-                /* texturesBind.descriptorSets     */ {&texturesDescriptorSet->getDescriptorSet()},
-                /* texturesBind.dynamicOffsets     */ {}
-            };
-
-            frameData.graphicsCmdBuffer.bindDescriptorSets(texturesBind);
-        }
-
-        const API::CommandBuffer::CmdDraw cmdDraw {
-            /* cmdDraw.vertexCount */ 3,
-            /* cmdDraw.instanceCount */ 1,
-            /* cmdDraw.firstVertex */ 0,
-            /* cmdDraw.firstInstance */ 0
-        };
-
-        frameData.graphicsCmdBuffer.draw(cmdDraw);
-        frameData.graphicsCmdBuffer.endRenderPass();
     }
 
     frameData.graphicsCmdBuffer.end();
@@ -674,14 +712,13 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
         frameData.texturesDescriptorSets = texturesDescriptorSets;
     }
 
-
     std::vector<VkPipelineStageFlags> waitDstStageMasks{VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT};
     if (_graphicsQueue->submit(frameData.graphicsCmdBuffer, { static_cast<VkSemaphore>(frameData.blurFinishedSemaphore) }, {static_cast<VkSemaphore>(frameData.glowCopyFinishedSemaphore)}, waitDstStageMasks, static_cast<VkFence>(frameData.fence)) == false) {
         LUG_LOG.error("BloomPass::renderBlurPass: Can't submit commandBuffer");
         return false;
     }
 
-    return true;
+    return renderHdr(frameData.blendPass.image, frameData.blendPass.imageView, { static_cast<VkSemaphore>(frameData.blurFinishedSemaphore) }, currentImageIndex);
 }
 
 bool BloomPass::initHdrPipeline() {
@@ -722,8 +759,8 @@ bool BloomPass::initHdrPipeline() {
     // Set color blend state
     const VkPipelineColorBlendAttachmentState colorBlendAttachment{
         /* colorBlendAttachment.blendEnable */ VK_TRUE,
-        /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_SRC_ALPHA,
-        /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+        /* colorBlendAttachment.srcColorBlendFactor */ VK_BLEND_FACTOR_ONE,
+        /* colorBlendAttachment.dstColorBlendFactor */ VK_BLEND_FACTOR_ONE,
         /* colorBlendAttachment.colorBlendOp */ VK_BLEND_OP_ADD,
         /* colorBlendAttachment.srcAlphaBlendFactor */ VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
         /* colorBlendAttachment.dstAlphaBlendFactor */ VK_BLEND_FACTOR_ZERO,
@@ -789,7 +826,7 @@ bool BloomPass::initHdrPipeline() {
             /* colorAttachment.flags */ 0,
             /* colorAttachment.format */ colorFormat,
             /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
-            /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
+            /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_LOAD,
             /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
             /* colorAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             /* colorAttachment.stencilStoreOp */ VK_ATTACHMENT_STORE_OP_DONT_CARE,
@@ -1147,9 +1184,10 @@ bool BloomPass::initPipelines() {
 
 bool BloomPass::initBlurPass() {
     auto& swapchain = _window.getSwapchain();
-    auto& swapchainImages = swapchain.getImages();
-    auto& swapchainImagesViews = swapchain.getImagesViews();
-    uint32_t frameDataSize = (uint32_t)swapchainImages.size();
+    auto& sceneImages = _window.getSceneOffscreenImages();
+    auto& swapchainImagesViews = _window.getSwapchain().getImagesViews();
+    auto& swapchainImages = _window.getSwapchain().getImages();
+    uint32_t frameDataSize = (uint32_t)sceneImages.size();
     API::Device& device = _renderer.getDevice();
 
     API::Builder::DeviceMemory deviceMemoryBuilder(device);
@@ -1519,9 +1557,9 @@ bool BloomPass::initBlurPass() {
 }
 
 bool BloomPass::buildEndCommandBuffer() {
-    auto& swapchainImages = _window.getSwapchain().getImages();
+    auto& sceneImages = _window.getSceneOffscreenImages();
     auto& glowOffscreenImages = _window.getGlowOffscreenImages();
-    uint32_t frameDataSize = (uint32_t)swapchainImages.size();
+    uint32_t frameDataSize = (uint32_t)sceneImages.size();
 
     for (uint32_t i = 0; i < frameDataSize; ++i) {
 
@@ -1656,7 +1694,6 @@ bool BloomPass::buildEndCommandBuffer() {
         }
 
         // transferCmdBuffers[1] generation
-        // Copy blur[0] image into window image
         {
             // Build command buffer image color attachment to present
             API::CommandBuffer& cmdBuffer = _framesData[i].transferCmdBuffers[1];
@@ -1703,6 +1740,19 @@ bool BloomPass::buildEndCommandBuffer() {
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                 pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[i].blendPass.image;
+
+                cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+            }
+
+            // Prepare scene image for writing (next frame)
+            {
+                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+                pipelineBarrier.imageMemoryBarriers.resize(1);
+                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                pipelineBarrier.imageMemoryBarriers[0].image = &sceneImages[i];
 
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
             }

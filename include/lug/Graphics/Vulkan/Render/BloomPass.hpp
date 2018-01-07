@@ -49,6 +49,12 @@ private:
         API::Sampler sampler;
     };
 
+    struct HdrPass {
+        API::Semaphore hdrFinishedSemaphore;
+        std::vector<const Render::DescriptorSetPool::DescriptorSet*> texturesDescriptorSets;
+        API::Fence fence;
+    };
+
     struct FrameData {
         API::Semaphore glowCopyFinishedSemaphore{};
         API::Semaphore blurFinishedSemaphore{};
@@ -56,9 +62,11 @@ private:
 
         std::vector<API::CommandBuffer> transferCmdBuffers;
         API::CommandBuffer graphicsCmdBuffer;
+        API::CommandBuffer hdrCmdBuffer;
 
         std::vector<BlurPass> blurPasses;
         BlendPass blendPass;
+        HdrPass hdrPass;
         API::Fence fence;
 
         API::Framebuffer hdrFramebuffer;
@@ -84,8 +92,15 @@ public:
     void destroy();
 
     bool endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t currentImageIndex);
+    bool renderHdr(
+        const API::Image& image,
+        const API::ImageView& imageView,
+        const std::vector<VkSemaphore>& waitSemaphores,
+        uint32_t currentImageIndex
+    );
 
-    const Vulkan::API::Semaphore& getSemaphore(uint32_t currentImageIndex) const;
+    const Vulkan::API::Semaphore& getBloomSemaphore(uint32_t currentImageIndex) const;
+    const Vulkan::API::Semaphore& getHdrSemaphore(uint32_t currentImageIndex) const;
 
     bool initBlurPass();
     bool buildEndCommandBuffer();

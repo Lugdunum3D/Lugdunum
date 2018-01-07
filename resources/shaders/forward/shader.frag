@@ -124,8 +124,9 @@ layout (location = IN_FREE_LOCATION) in vec3 inCameraPositionWorldSpace;
 // BLOCK OF STATIC OUTPUTS
 //////////////////////////////////////////////////////////////////////////////
 
-layout (location = 0) out vec4 outSceneColor;
-layout (location = 1) out vec4 outGlowColor;
+layout (location = 0) out vec4 outSkyboxColor;
+layout (location = 1) out vec4 outSceneColor;
+layout (location = 2) out vec4 outGlowColor;
 
 //////////////////////////////////////////////////////////////////////////////
 // BRDF FUNCTIONS
@@ -181,6 +182,7 @@ vec3 Uncharted2Tonemap(vec3 x) {
 //////////////////////////////////////////////////////////////////////////////
 
 void main() {
+    outSkyboxColor = vec4(0.0);
     //////////////////////////////////////////////////////////////////////
     // CALCULATE THE FINAL COLOR
     //////////////////////////////////////////////////////////////////////
@@ -412,19 +414,7 @@ void main() {
 
     vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo;
 
-    #if !BLOOM_ENABLED
-    // Tone mapping
-    // TODO: Replace 4.5f by an exposure argument
-    color = Uncharted2Tonemap(color * 4.5f) * (1.0f / Uncharted2Tonemap(vec3(11.2f)));
-    #endif
-
     color += emissive;
-
-    #if !BLOOM_ENABLED
-    // Gamma correction
-    // TODO: Replace 2.2f by a gamma argumentS
-    color = pow(color, vec3(1.0f / 2.2f));
-    #endif
 
     // Final output
     outSceneColor = vec4(color, 1.0);

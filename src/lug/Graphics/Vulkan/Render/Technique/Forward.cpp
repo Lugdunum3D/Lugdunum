@@ -134,10 +134,11 @@ bool Forward::render(
         beginRenderPass.renderArea.extent = {static_cast<uint32_t>(viewport.extent.width), static_cast<uint32_t>(viewport.extent.height)};
 
         const auto& clearColor = _renderView.getClearColor();
-        beginRenderPass.clearValues.resize(3);
+        beginRenderPass.clearValues.resize(4);
         beginRenderPass.clearValues[0].color = {{clearColor.r(), clearColor.g(), clearColor.b(), 1.0f}};
-        beginRenderPass.clearValues[1].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
-        beginRenderPass.clearValues[2].depthStencil = {1.0f, 0};
+        beginRenderPass.clearValues[1].color = {{clearColor.r(), clearColor.g(), clearColor.b(), 1.0f}};
+        beginRenderPass.clearValues[2].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
+        beginRenderPass.clearValues[3].depthStencil = {1.0f, 0};
 
         frameData.renderCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
 
@@ -593,7 +594,11 @@ bool Forward::render(
     );
 }
 
-bool Forward::init(const std::vector<API::ImageView>& swapchainImageViews, const std::vector<API::ImageView>& glowImageViews) {
+bool Forward::init(
+    const std::vector<API::ImageView>& swapchainImageViews,
+    const std::vector<API::ImageView>& glowImageViews,
+    const std::vector<API::ImageView>& sceneImageViews
+) {
     VkResult result{VK_SUCCESS};
 
     // Init graphics queue

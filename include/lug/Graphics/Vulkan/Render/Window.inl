@@ -17,3 +17,11 @@ inline const std::vector<API::Image>& Window::getGlowOffscreenImages() const {
 inline const std::vector<API::ImageView>& Window::getGlowOffscreenImagesViews() const {
     return _glowOffscreenImagesViews;
 }
+
+inline const std::vector<API::Image>& Window::getSceneOffscreenImages() const {
+    return _sceneOffscreenImages;
+}
+
+inline const std::vector<API::ImageView>& Window::getSceneOffscreenImagesViews() const {
+    return _sceneOffscreenImagesViews;
+}

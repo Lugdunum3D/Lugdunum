@@ -70,6 +70,8 @@ public:
     uint16_t getHeight() const override final;
     const std::vector<API::Image>& getGlowOffscreenImages() const;
     const std::vector<API::ImageView>& getGlowOffscreenImagesViews() const;
+    const std::vector<API::Image>& getSceneOffscreenImages() const;
+    const std::vector<API::ImageView>& getSceneOffscreenImagesViews() const;
 
     static std::unique_ptr<Window> create(lug::Graphics::Vulkan::Renderer& renderer, Window::InitInfo& initInfo);
 
@@ -117,6 +119,8 @@ private:
     API::DeviceMemory _offscreenImagesMemory;
     std::vector<API::Image> _glowOffscreenImages;
     std::vector<API::ImageView> _glowOffscreenImagesViews;
+    std::vector<API::Image> _sceneOffscreenImages;
+    std::vector<API::ImageView> _sceneOffscreenImagesViews;
 
     BloomPass _bloomPass;
 };

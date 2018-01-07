@@ -92,7 +92,11 @@ public:
         uint32_t currentImageIndex
     ) override final;
 
-    bool init(const std::vector<API::ImageView>& swapchainImageViews, const std::vector<API::ImageView>& glowImageViews) override final;
+    bool init(
+        const std::vector<API::ImageView>& swapchainImageViews,
+        const std::vector<API::ImageView>& glowImageViews,
+        const std::vector<API::ImageView>& sceneImageViews
+    ) override final;
     void destroy() override final;
 
     bool setSwapchainImageViews(const std::vector<API::ImageView>& imageViews) override final;

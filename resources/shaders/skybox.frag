@@ -10,8 +10,9 @@ layout(std140, set = 0, binding = 1) uniform bloomBlock {
 
 layout (location = 0) in vec3 inPos;
 
-layout (location = 0) out vec4 outSceneColor;
-layout (location = 1) out vec4 outGlowColor;
+layout (location = 0) out vec4 outSkyboxColor;
+layout (location = 1) out vec4 outSceneColor;
+layout (location = 2) out vec4 outGlowColor;
 
 const vec2 invAtan = vec2(0.1591, 0.3183);
 vec2 SampleSphericalMap(vec3 v) {
@@ -23,6 +24,7 @@ vec2 SampleSphericalMap(vec3 v) {
 
 void main() {
     vec3 color = texture(skyBox, SampleSphericalMap(normalize(inPos))).rgb;
-    outSceneColor = vec4(color, 1.0);
+    outSkyboxColor = vec4(color, 1.0);
+    outSceneColor = vec4(0.0);
     outGlowColor = vec4(0.0);
 }
