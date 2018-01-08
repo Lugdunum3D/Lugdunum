@@ -29,6 +29,9 @@ class Queue;
 } // API
 
 namespace Render {
+
+class BloomPass;
+
 namespace Technique {
 
 class LUG_GRAPHICS_API Forward final : public Technique {
@@ -48,7 +51,13 @@ private:
 
             const API::ImageView* swapchainImageView;
 
-            ImageSet renderImage;
+            ImageSet sampledSkyboxImage;
+            ImageSet sampledSceneImage;
+            ImageSet sampledGlowImage;
+
+            ImageSet skyboxImage;
+            ImageSet sceneImage;
+            ImageSet glowImage;
             ImageSet depthBuffer;
 
             API::Framebuffer framebuffer;
@@ -60,6 +69,7 @@ private:
         API::Fence transferFence;
         API::CommandBuffer transferCmdBuffer;
         API::Semaphore transferSemaphore;
+        API::Semaphore drawPassCompleteSemaphore;
 
         const BufferPool::SubBuffer* cameraBuffer{nullptr};
         const BufferPool::SubBuffer* bloomBuffer{nullptr};
@@ -92,15 +102,16 @@ public:
         uint32_t currentImageIndex
     ) override final;
 
-    bool init(
-        const std::vector<API::ImageView>& swapchainImageViews,
-        const std::vector<API::ImageView>& glowImageViews,
-        const std::vector<API::ImageView>& sceneImageViews
-    ) override final;
+    bool init(const std::vector<API::ImageView>& imageViews) override final;
     void destroy() override final;
 
     bool setSwapchainImageViews(const std::vector<API::ImageView>& imageViews) override final;
     bool initFrameDatas(const std::vector<API::ImageView>& imageViews) override final;
+
+    const API::Image& getGlowOffscreenImage(uint32_t currentImageIndex) const;
+    const API::ImageView& getGlowOffscreenImageView(uint32_t currentImageIndex) const;
+    const API::Image& getSceneOffscreenImage(uint32_t currentImageIndex) const;
+    const API::ImageView& getSceneOffscreenImageView(uint32_t currentImageIndex) const;
 
 private:
     bool initFramedata(uint32_t nb, const API::ImageView& swapchainImageView);
@@ -128,6 +139,8 @@ private:
     static std::unique_ptr<DescriptorSetPool::SkyBox> _skyBoxDescriptorSetPool;
 
     static uint32_t _forwardCount;
+
+    std::unique_ptr<BloomPass> _bloomPass;
 };
 
 } // Technique

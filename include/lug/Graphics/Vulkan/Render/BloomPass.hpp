@@ -15,6 +15,7 @@
 #include <lug/Graphics/Vulkan/API/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Sampler.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
+#include <lug/Graphics/Vulkan/Render/Technique/Forward.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -77,7 +78,7 @@ private:
     };
 
 public:
-    BloomPass(lug::Graphics::Vulkan::Renderer& renderer, lug::Graphics::Vulkan::Render::Window& window);
+    BloomPass(lug::Graphics::Vulkan::Renderer& renderer, lug::Graphics::Vulkan::Render::Window& window, lug::Graphics::Vulkan::Render::Technique::Forward& forward);
 
     BloomPass(const BloomPass&) = delete;
     BloomPass(BloomPass&&) = delete;
@@ -91,10 +92,11 @@ public:
 
     void destroy();
 
-    bool endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t currentImageIndex);
+    bool endFrame(const std::vector<VkSemaphore>& signalSemaphores, const std::vector<VkSemaphore>& waitSemaphores, uint32_t currentImageIndex);
     bool renderHdr(
         const API::Image& image,
         const API::ImageView& imageView,
+        const std::vector<VkSemaphore>& signalSemaphores,
         const std::vector<VkSemaphore>& waitSemaphores,
         uint32_t currentImageIndex
     );
@@ -115,6 +117,7 @@ private:
 private:
     lug::Graphics::Vulkan::Renderer& _renderer;
     lug::Graphics::Vulkan::Render::Window& _window;
+    lug::Graphics::Vulkan::Render::Technique::Forward& _forward;
 
     const API::Queue* _transferQueue{nullptr};
     const API::Queue* _graphicsQueue{nullptr};

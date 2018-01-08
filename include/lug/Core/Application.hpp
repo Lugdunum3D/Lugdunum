@@ -172,6 +172,7 @@ private:
             "shaders/",                                         // shaders root
             lug::Graphics::Render::Technique::Type::Forward,    // renderTechnique
             lug::Graphics::Renderer::DisplayMode::Full,         // displayMode
+            lug::Graphics::Renderer::Antialiasing::NoAA,        // antialiasing
 #if defined(LUG_SYSTEM_ANDROID)                                 // bloomEnabled
             false,
 #else

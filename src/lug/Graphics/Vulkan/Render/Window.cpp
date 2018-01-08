@@ -27,7 +27,7 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-Window::Window(lug::Graphics::Vulkan::Renderer& renderer) : _renderer(renderer), _guiInstance(_renderer, *this), _isGuiInitialized(false), _bloomPass(_renderer, *this) {}
+Window::Window(lug::Graphics::Vulkan::Renderer& renderer) : _renderer(renderer), _guiInstance(_renderer, *this), _isGuiInitialized(false) {}
 
 Window::~Window() {
     destroyRender();
@@ -76,8 +76,7 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
 
     while (_swapchain.isOutOfDate() || !_swapchain.getNextImage(&_currentImageIndex, static_cast<VkSemaphore>(acquireImageData->completeSemaphore))) {
         if (_swapchain.isOutOfDate()) {
-            if (!initSwapchainCapabilities() || !initSwapchain() || !initOffscreenData() || !buildCommandBuffers() ||
-                !_bloomPass.initBlurPass() || !_bloomPass.buildEndCommandBuffer()) {
+            if (!initSwapchainCapabilities() || !initSwapchain() || !buildCommandBuffers()) {
                 return false;
             }
 
@@ -91,7 +90,7 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
             for (auto& renderView: _renderViews) {
                 View* renderView_ = static_cast<View*>(renderView.get());
 
-                if (!renderView_->getRenderTechnique()->setSwapchainImageViews(_offscreenImagesViews)) {
+                if (!renderView_->getRenderTechnique()->setSwapchainImageViews(_swapchain.getImagesViews())) {
                     return false;
                 }
 
@@ -153,30 +152,6 @@ bool Window::endFrame() {
         ++i;
     }
 
-    if (_renderer.isBloomEnabled()) {
-        if (!_bloomPass.endFrame(waitSemaphores, _currentImageIndex)) {
-            return false;
-        }
-
-        waitSemaphores = {
-            static_cast<VkSemaphore>(_bloomPass.getBloomSemaphore(_currentImageIndex))
-        };
-    }
-    else {
-        if (!_bloomPass.renderHdr(
-            _sceneOffscreenImages[_currentImageIndex],
-            _sceneOffscreenImagesViews[_currentImageIndex],
-            waitSemaphores,
-            _currentImageIndex)
-        ) {
-            return false;
-        }
-        waitSemaphores = {
-            static_cast<VkSemaphore>(_bloomPass.getHdrSemaphore(_currentImageIndex))
-        };
-    }
-
-
     if (_isGuiInitialized) {
         uiResult = _guiInstance.endFrame(waitSemaphores, _currentImageIndex);
         presentQueueResult = _presentQueue->submit(cmdBuffer,
@@ -201,7 +176,7 @@ bool Window::endFrame() {
 lug::Graphics::Render::View* Window::createView(lug::Graphics::Render::View::InitInfo& initInfo) {
     std::unique_ptr<View> renderView = std::make_unique<View>(_renderer, this);
 
-    if (!renderView->init(initInfo, _presentQueue, _swapchain.getImagesViews(), _glowOffscreenImagesViews, _sceneOffscreenImagesViews)) {
+    if (!renderView->init(initInfo, _presentQueue, _swapchain.getImagesViews())) {
         return nullptr;
     }
 
@@ -521,195 +496,6 @@ bool Window::initFramesData() {
     return buildCommandBuffers();
 }
 
-bool Window::initOffscreenData() {
-    auto& device = _renderer.getDevice();
-    uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
-    Vulkan::Renderer& vkRenderer = static_cast<Vulkan::Renderer&>(_renderer);
-
-    // Get transfer queue family and retrieve the first queue
-    const API::Queue* transferQueue = nullptr;
-    {
-        transferQueue = device.getQueue("queue_transfer");
-        if (!transferQueue) {
-            LUG_LOG.error("Window::initOffscreenData: Can't find transfer queue");
-            return false;
-        }
-    }
-
-    // Create command buffer to change layout
-    API::CommandPool commandPool;
-    API::CommandBuffer cmdBuffer;
-    {
-        VkResult result{VK_SUCCESS};
-
-        // Command pool
-        API::Builder::CommandPool commandPoolBuilder(vkRenderer.getDevice(), *transferQueue->getQueueFamily());
-        if (!commandPoolBuilder.build(commandPool, &result)) {
-            LUG_LOG.error("Forward::iniWindow::initOffscreenData: Can't create the graphics command pool: {}", result);
-            return false;
-        }
-
-        // Command buffer
-        API::Builder::CommandBuffer commandBufferBuilder(vkRenderer.getDevice(), commandPool);
-        commandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-
-        // Create the render command buffer
-        if (!commandBufferBuilder.build(cmdBuffer, &result)) {
-            LUG_LOG.error("Window::initOffscreenData: Can't create the command buffer: {}", result);
-            return false;
-        }
-    }
-
-    if (!cmdBuffer.begin()) {
-        LUG_LOG.error("Window::initOffscreenData: Can't begin command buffer");
-        return false;
-    }
-
-    // Create fence for queue submit synchronisation
-    API::Fence fence;
-    {
-        VkResult result{VK_SUCCESS};
-        API::Builder::Fence fenceBuilder(vkRenderer.getDevice());
-
-        if (!fenceBuilder.build(fence, &result)) {
-            LUG_LOG.error("Window::initOffscreenData: Can't create render fence: {}", result);
-            return false;
-        }
-    }
-
-    API::Builder::DeviceMemory deviceMemoryBuilder(device);
-    deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    // Create offscreen images
-    {
-        _glowOffscreenImages.resize(frameDataSize);
-        _sceneOffscreenImages.resize(frameDataSize);
-        API::Builder::Image imageBuilder(device);
-
-        imageBuilder.setUsage(VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-        imageBuilder.setPreferedFormats({_swapchain.getFormat().format});
-        imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
-        imageBuilder.setQueueFamilyIndices({ transferQueue->getQueueFamily()->getIdx() });
-        imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
-
-        VkExtent3D extent{
-            /* extent.width */ _swapchain.getExtent().width,
-            /* extent.height */ _swapchain.getExtent().height,
-            /* extent.depth */ 1
-        };
-        imageBuilder.setExtent(extent);
-
-        for (uint8_t i = 0; i < frameDataSize; ++i) {
-            VkResult result{VK_SUCCESS};
-            if (!imageBuilder.build(_glowOffscreenImages[i], &result) || !imageBuilder.build(_sceneOffscreenImages[i], &result)) {
-                LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image: {}", result);
-                return false;
-            }
-
-            if (!deviceMemoryBuilder.addImage(_glowOffscreenImages[i]) || !deviceMemoryBuilder.addImage(_sceneOffscreenImages[i])) {
-                LUG_LOG.error("Window::initOffscreenData: Can't add offscreen image to device memory");
-                return false;
-            }
-
-            // Change glow images layout
-            {
-                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-                pipelineBarrier.imageMemoryBarriers.resize(1);
-                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
-                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &_glowOffscreenImages[i];
-
-                cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-            }
-
-            // Change scene images layout
-            {
-                API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-                pipelineBarrier.imageMemoryBarriers.resize(1);
-                pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
-                pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-                pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-                pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &_sceneOffscreenImages[i];
-
-                cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-            }
-        }
-    }
-
-    // Create offscreen images memory
-    {
-        VkResult result{VK_SUCCESS};
-        if (!deviceMemoryBuilder.build(_offscreenImagesMemory, &result)) {
-            LUG_LOG.error("Vulkan::Texture::build: Can't create buffer device memory: {}", result);
-            return false;
-        }
-    }
-
-    // Create offscreen image views
-    {
-        _glowOffscreenImagesViews.resize(frameDataSize);
-        _sceneOffscreenImagesViews.resize(frameDataSize);
-        for (uint8_t i = 0; i < frameDataSize; ++i) {
-            // Glow image view
-            {
-                VkResult result{VK_SUCCESS};
-                API::Builder::ImageView imageViewBuilder(device, _glowOffscreenImages[i]);
-
-                imageViewBuilder.setFormat(_swapchain.getFormat().format);
-
-                if (!imageViewBuilder.build(_glowOffscreenImagesViews[i], &result)) {
-                    LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image view: {}", result);
-                    return false;
-                }
-            }
-
-            // Scene image view
-            {
-                VkResult result{VK_SUCCESS};
-                API::Builder::ImageView imageViewBuilder(device, _sceneOffscreenImages[i]);
-
-                imageViewBuilder.setFormat(_swapchain.getFormat().format);
-
-                if (!imageViewBuilder.build(_sceneOffscreenImagesViews[i], &result)) {
-                    LUG_LOG.error("Window::initOffscreenData: Can't create offscreen image view: {}", result);
-                    return false;
-                }
-            }
-        }
-    }
-
-    if (!cmdBuffer.end()) {
-        LUG_LOG.error("Window::initOffscreenData: Can't end command buffer");
-        return false;
-    }
-
-    // Submit queue
-    if (!transferQueue->submit(
-        cmdBuffer,
-        {},
-        {},
-        {},
-        static_cast<VkFence>(fence)
-    )) {
-        LUG_LOG.error("Window::initOffscreenData Can't submit work to transfer queue");
-        return false;
-    }
-
-    if (!fence.wait() || !transferQueue->waitIdle()) {
-        LUG_LOG.error("Window::initOffscreenData: Can't wait fence");
-        return false;
-    }
-
-    fence.destroy();
-    cmdBuffer.destroy();
-    commandPool.destroy();
-
-    return true;
-}
-
 bool Window::buildBeginCommandBuffer() {
     uint32_t frameDataSize = (uint32_t)_swapchain.getImages().size();
 
@@ -730,32 +516,6 @@ bool Window::buildBeginCommandBuffer() {
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
-
-            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
-        // Color attachment to dst optimal
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_glowOffscreenImages[i];
-
-            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
-        // Color attachment to dst optimal
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_sceneOffscreenImages[i];
 
             cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
         }
@@ -782,22 +542,6 @@ bool Window::buildBeginCommandBuffer() {
                 1,
                 &range
             );
-            vkCmdClearColorImage(
-                static_cast<VkCommandBuffer>(cmdBuffer),
-                static_cast<VkImage>(_glowOffscreenImages[i]),
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                &clearColor,
-                1,
-                &range
-            );
-            vkCmdClearColorImage(
-                static_cast<VkCommandBuffer>(cmdBuffer),
-                static_cast<VkImage>(_sceneOffscreenImages[i]),
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                &clearColor,
-                1,
-                &range
-            );
         }
 
         // Dst optimal to color attachment optimal
@@ -809,32 +553,6 @@ bool Window::buildBeginCommandBuffer() {
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].image = &_swapchain.getImages()[i];
-
-            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
-        // Dst optimal to color attachment optimal
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_glowOffscreenImages[i];
-
-            cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
-        }
-
-        // Dst optimal to color attachment optimal
-        {
-            API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
-            pipelineBarrier.imageMemoryBarriers.resize(1);
-            pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-            pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_sceneOffscreenImages[i];
 
             cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
         }
@@ -924,7 +642,7 @@ bool Window::init(Window::InitInfo& initInfo) {
 }
 
 bool Window::initRender() {
-    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initOffscreenData() && initFramesData() && _bloomPass.init())) {
+    if (!(initSurface() && initSwapchainCapabilities() && initPresentQueue() && initSwapchain() && initFramesData())) {
         return false;
     }
 
@@ -960,8 +678,6 @@ void Window::destroyRender() {
     if (_isGuiInitialized == true) {
         _guiInstance.destroy();
     }
-
-    _bloomPass.destroy();
 }
 
 } // Render

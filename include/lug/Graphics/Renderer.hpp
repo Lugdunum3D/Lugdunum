@@ -102,7 +102,6 @@ protected:
     Type _type;
     DisplayMode _displayMode;
     Antialiasing _antialiasing;
-    bool _bloomEnabled;
     InitInfo _initInfo;
     std::unique_ptr<ResourceManager> _resourceManager{nullptr};
 

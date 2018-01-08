@@ -4,10 +4,6 @@
 
 layout (set = 1, binding = 0) uniform sampler2D skyBox;
 
-layout(std140, set = 0, binding = 1) uniform bloomBlock {
-    float blurThreshold;
-} bloom;
-
 layout (location = 0) in vec3 inPos;
 
 layout (location = 0) out vec4 outSkyboxColor;
@@ -23,8 +19,7 @@ vec2 SampleSphericalMap(vec3 v) {
 }
 
 void main() {
-    vec3 color = texture(skyBox, SampleSphericalMap(normalize(inPos))).rgb;
-    outSkyboxColor = vec4(color, 1.0);
+    outSkyboxColor = vec4(texture(skyBox, SampleSphericalMap(normalize(inPos))).rgb, 1.0);
     outSceneColor = vec4(0.0);
     outGlowColor = vec4(0.0);
 }

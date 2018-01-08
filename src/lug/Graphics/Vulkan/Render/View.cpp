@@ -19,26 +19,24 @@ View::View(Renderer& renderer, const ::lug::Graphics::Render::Target* renderTarg
 bool View::init(
     View::InitInfo& initInfo,
     const API::Queue* presentQueue,
-    const std::vector<API::ImageView>& swapchainImageViews,
-    const std::vector<API::ImageView>& glowImageViews,
-    const std::vector<API::ImageView>& sceneImageViews) {
+    const std::vector<API::ImageView>& imageViews) {
     ::lug::Graphics::Render::View::init(initInfo);
 
     if (_renderer.getInfo().renderTechnique == lug::Graphics::Render::Technique::Type::Forward) {
         _renderTechnique = std::make_unique<Render::Technique::Forward>(_renderer, *this);
     }
 
-    if (_renderTechnique && !_renderTechnique->init(swapchainImageViews, glowImageViews, sceneImageViews)) {
+    if (_renderTechnique && !_renderTechnique->init(imageViews)) {
         LUG_LOG.warn("View::init: Failed to init render technique");
         return false;
     }
 
-    _drawCompleteSemaphores.resize(swapchainImageViews.size());
+    _drawCompleteSemaphores.resize(imageViews.size());
 
     API::Builder::Semaphore semaphoreBuilder(_renderer.getDevice());
 
     // Work complete semaphores
-    for (uint32_t i = 0; i < swapchainImageViews.size(); ++i) {
+    for (uint32_t i = 0; i < imageViews.size(); ++i) {
         VkResult result{VK_SUCCESS};
         if (!semaphoreBuilder.build(_drawCompleteSemaphores[i], &result)) {
             LUG_LOG.error("View::init: Can't create semaphore: {}", result);

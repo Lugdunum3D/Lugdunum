@@ -156,7 +156,13 @@ bool Pipeline::initModel() {
     };
 
     auto colorBlendState = graphicsPipelineBuilder.getColorBlendState();
+    // Skybox color blend
     colorBlendState.addAttachment(colorBlendAttachment);
+    // Scene color color blend
+    colorBlendState.addAttachment(colorBlendAttachment);
+    // Glow color blend
+    colorBlendState.addAttachment(colorBlendAttachment);
+
 
     // Set dynamic states
     graphicsPipelineBuilder.setDynamicStates({
@@ -174,15 +180,23 @@ bool Pipeline::initModel() {
         // Bindings set 0 : Camera uniform buffer (V/F)
         {
             // Camera uniform buffer
-            const VkDescriptorSetLayoutBinding binding{
+            const VkDescriptorSetLayoutBinding cameraBinding{
                 /* binding.binding */ 0,
                 /* binding.descriptorType */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
                 /* binding.descriptorCount */ 1,
                 /* binding.stageFlags */ VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 /* binding.pImmutableSamplers */ nullptr
             };
+            // Bloom options uniform buffer
+            const VkDescriptorSetLayoutBinding bloomBinding{
+                /* binding.binding */ 1,
+                /* binding.descriptorType */ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+                /* binding.descriptorCount */ 1,
+                /* binding.stageFlags */ VK_SHADER_STAGE_FRAGMENT_BIT,
+                /* binding.pImmutableSamplers */ nullptr
+            };
 
-            descriptorSetLayoutBuilder.setBindings({binding});
+            descriptorSetLayoutBuilder.setBindings({cameraBinding, bloomBinding});
             if (!descriptorSetLayoutBuilder.build(descriptorSetLayouts[0], &result)) {
                 LUG_LOG.error("Vulkan::Render::Pipeline: Can't create pipeline descriptor sets layout 0: {}", result);
                 return false;
@@ -409,7 +423,9 @@ bool Pipeline::initModel() {
             /* colorAttachment.finalLayout */ VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
         };
 
-        auto colorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
+        auto skyboxColorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
+        auto sceneColorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
+        auto glowColorAttachmentIndex = renderPassBuilder.addAttachment(colorAttachment);
 
         const VkFormat depthFormat = API::Image::findSupportedFormat(
             _renderer.getDevice(),
@@ -435,7 +451,11 @@ bool Pipeline::initModel() {
         const API::Builder::RenderPass::SubpassDescription subpassDescription{
             /* subpassDescription.pipelineBindPoint */ VK_PIPELINE_BIND_POINT_GRAPHICS,
             /* subpassDescription.inputAttachments */ {},
-            /* subpassDescription.colorAttachments */ {{colorAttachmentIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}},
+            /* subpassDescription.colorAttachments */ {
+                {skyboxColorAttachmentIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+                {sceneColorAttachmentIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL},
+                {glowColorAttachmentIndex, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL}
+            },
             /* subpassDescription.resolveAttachments */ {},
             /* subpassDescription.depthStencilAttachment */ {depthAttachmentIndex, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL},
             /* subpassDescription.preserveAttachments */ {},

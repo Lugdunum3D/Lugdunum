@@ -22,15 +22,17 @@ namespace Graphics {
 namespace Vulkan {
 namespace Render {
 
-BloomPass::BloomPass(lug::Graphics::Vulkan::Renderer& renderer, lug::Graphics::Vulkan::Render::Window& window) : _renderer(renderer), _window(window) {}
+BloomPass::BloomPass(
+    lug::Graphics::Vulkan::Renderer& renderer,
+    lug::Graphics::Vulkan::Render::Window& window,
+    lug::Graphics::Vulkan::Render::Technique::Forward& forward) : _renderer(renderer), _window(window), _forward(forward) {}
 
 BloomPass::~BloomPass() {
     destroy();
 }
 
 bool BloomPass::init() {
-    auto& sceneImages = _window.getSceneOffscreenImages();
-    uint32_t frameDataSize = (uint32_t)sceneImages.size();
+    uint32_t frameDataSize = (uint32_t)_window.getSwapchain().getImages().size();
     API::Device& device = _renderer.getDevice();
 
     // Get transfer queue
@@ -143,7 +145,7 @@ bool BloomPass::init() {
         return false;
     }
 
-    return initPipelines() && initBlurPass() && buildEndCommandBuffer();
+    return initPipelines();
 }
 
 void BloomPass::destroy() {
@@ -164,7 +166,7 @@ void BloomPass::destroy() {
     _graphicsCommandPool.destroy();
 }
 
-bool BloomPass::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_t currentImageIndex) {
+bool BloomPass::endFrame(const std::vector<VkSemaphore>& signalSemaphores, const std::vector<VkSemaphore>& waitSemaphores, uint32_t currentImageIndex) {
     FrameData& frameData = _framesData[currentImageIndex];
 
     // transferCmdBuffers[0] copy the glow image into the first blur images
@@ -185,7 +187,7 @@ bool BloomPass::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_
     // Change blur images layout for next frame
     {
         std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-        if (_transferQueue->submit(frameData.transferCmdBuffers[1], { static_cast<VkSemaphore>(frameData.bloomFinishedSemaphores) }, {static_cast<VkSemaphore>(frameData.hdrPass.hdrFinishedSemaphore)}, waitDstStageMasks, nullptr) == false) {
+        if (_transferQueue->submit(frameData.transferCmdBuffers[1], signalSemaphores, {static_cast<VkSemaphore>(frameData.hdrPass.hdrFinishedSemaphore)}, waitDstStageMasks, nullptr) == false) {
             LUG_LOG.error("BloomPass::endFrame Can't submit commandBuffer");
             return false;
         }
@@ -197,6 +199,7 @@ bool BloomPass::endFrame(const std::vector<VkSemaphore>& waitSemaphores, uint32_
 bool BloomPass::renderHdr(
         const API::Image& image,
         const API::ImageView& imageView,
+        const std::vector<VkSemaphore>& signalSemaphores,
         const std::vector<VkSemaphore>& waitSemaphores,
         uint32_t currentImageIndex
 ) {
@@ -251,7 +254,7 @@ bool BloomPass::renderHdr(
         };
 
         beginRenderPass.renderArea.offset = { 0, 0 };
-        beginRenderPass.renderArea.extent = { _window.getSceneOffscreenImages()[0].getExtent().width, _window.getSceneOffscreenImages()[0].getExtent().height };
+        beginRenderPass.renderArea.extent = { _forward.getSceneOffscreenImage(0).getExtent().width, _forward.getSceneOffscreenImage(0).getExtent().height };
 
         frameData.hdrCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
     }
@@ -308,7 +311,7 @@ bool BloomPass::renderHdr(
     }
 
     std::vector<VkPipelineStageFlags> waitDstStageMasks(waitSemaphores.size(), VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT);
-    if (_graphicsQueue->submit(frameData.hdrCmdBuffer, { static_cast<VkSemaphore>(frameData.hdrPass.hdrFinishedSemaphore) }, waitSemaphores, waitDstStageMasks, static_cast<VkFence>(frameData.hdrPass.fence)) == false) {
+    if (_graphicsQueue->submit(frameData.hdrCmdBuffer, signalSemaphores, waitSemaphores, waitDstStageMasks, static_cast<VkFence>(frameData.hdrPass.fence)) == false) {
         LUG_LOG.error("BloomPass::renderBlurPass: Can't submit commandBuffer");
         return false;
     }
@@ -552,7 +555,7 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
             pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
             pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
             pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            pipelineBarrier.imageMemoryBarriers[0].image = &_window.getSceneOffscreenImages()[currentImageIndex];
+            pipelineBarrier.imageMemoryBarriers[0].image = &_forward.getSceneOffscreenImage(currentImageIndex);
 
             frameData.graphicsCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
         }
@@ -605,8 +608,8 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
             // Get the new (or old) textures descriptor set
             const Render::DescriptorSetPool::DescriptorSet* texturesDescriptorSet = _texturesDescriptorSetPool->allocate(
                 _blendPipeline,
-                _window.getSceneOffscreenImages()[currentImageIndex],
-                _window.getSceneOffscreenImagesViews()[currentImageIndex],
+                _forward.getSceneOffscreenImage(currentImageIndex),
+                _forward.getSceneOffscreenImageView(currentImageIndex),
                 frameData.blendPass.sampler
             );
 
@@ -718,7 +721,7 @@ bool BloomPass::renderBlurPass(uint32_t currentImageIndex) {
         return false;
     }
 
-    return renderHdr(frameData.blendPass.image, frameData.blendPass.imageView, { static_cast<VkSemaphore>(frameData.blurFinishedSemaphore) }, currentImageIndex);
+    return renderHdr(frameData.blendPass.image, frameData.blendPass.imageView, { static_cast<VkSemaphore>(frameData.hdrPass.hdrFinishedSemaphore) }, { static_cast<VkSemaphore>(frameData.blurFinishedSemaphore) }, currentImageIndex);
 }
 
 bool BloomPass::initHdrPipeline() {
@@ -821,11 +824,11 @@ bool BloomPass::initHdrPipeline() {
         API::Builder::RenderPass renderPassBuilder(_renderer.getDevice());
 
         auto colorFormat = _window.getSwapchain().getFormat().format;
-
+        const VkSampleCountFlagBits nbSamples = VK_SAMPLE_COUNT_1_BIT;
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
             /* colorAttachment.format */ colorFormat,
-            /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* colorAttachment.samples */ nbSamples,
             /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_LOAD,
             /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
             /* colorAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -968,12 +971,12 @@ bool BloomPass::initBlendPipeline() {
     {
         API::Builder::RenderPass renderPassBuilder(_renderer.getDevice());
 
-        auto colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-
+        auto colorFormat = _window.getSwapchain().getFormat().format;
+        const VkSampleCountFlagBits nbSamples = VK_SAMPLE_COUNT_1_BIT;
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
             /* colorAttachment.format */ colorFormat,
-            /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* colorAttachment.samples */ nbSamples,
             /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_LOAD,
             /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
             /* colorAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -1129,12 +1132,12 @@ bool BloomPass::initBlurPipeline(API::GraphicsPipeline& pipeline, int blurDirect
     {
         API::Builder::RenderPass renderPassBuilder(_renderer.getDevice());
 
-        auto colorFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
-
+        auto colorFormat = _window.getSwapchain().getFormat().format;
+        const VkSampleCountFlagBits nbSamples = VK_SAMPLE_COUNT_1_BIT;
         const VkAttachmentDescription colorAttachment{
             /* colorAttachment.flags */ 0,
             /* colorAttachment.format */ colorFormat,
-            /* colorAttachment.samples */ VK_SAMPLE_COUNT_1_BIT,
+            /* colorAttachment.samples */ nbSamples,
             /* colorAttachment.loadOp */ VK_ATTACHMENT_LOAD_OP_CLEAR,
             /* colorAttachment.storeOp */ VK_ATTACHMENT_STORE_OP_STORE,
             /* colorAttachment.stencilLoadOp */ VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -1184,10 +1187,7 @@ bool BloomPass::initPipelines() {
 
 bool BloomPass::initBlurPass() {
     auto& swapchain = _window.getSwapchain();
-    auto& sceneImages = _window.getSceneOffscreenImages();
-    auto& swapchainImagesViews = _window.getSwapchain().getImagesViews();
-    auto& swapchainImages = _window.getSwapchain().getImages();
-    uint32_t frameDataSize = (uint32_t)sceneImages.size();
+    uint32_t frameDataSize = (uint32_t)_window.getSwapchain().getImages().size();
     API::Device& device = _renderer.getDevice();
 
     API::Builder::DeviceMemory deviceMemoryBuilder(device);
@@ -1208,15 +1208,19 @@ bool BloomPass::initBlurPass() {
 
     // Create images
     {
+        const VkSampleCountFlagBits nbSamples = VK_SAMPLE_COUNT_1_BIT;
+
         API::Builder::Image imageBuilder(device);
 
         imageBuilder.setUsage(VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
-        imageBuilder.setPreferedFormats({VK_FORMAT_R16G16B16A16_SFLOAT });
+        imageBuilder.setPreferedFormats({_window.getSwapchain().getFormat().format});
         imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT);
         imageBuilder.setQueueFamilyIndices({ _transferQueue->getQueueFamily()->getIdx(), _graphicsQueue->getQueueFamily()->getIdx() });
         imageBuilder.setTiling(VK_IMAGE_TILING_OPTIMAL);
+        imageBuilder.setSampleCount(nbSamples);
 
         for (uint8_t i = 0; i < frameDataSize; ++i) {
+
             // Blur images
             {
                 _framesData[i].blurPasses.resize(3);
@@ -1360,7 +1364,7 @@ bool BloomPass::initBlurPass() {
                     VkResult result{VK_SUCCESS};
                     API::Builder::ImageView imageViewBuilder(device, blurPass.images[0]);
 
-                    imageViewBuilder.setFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
+                    imageViewBuilder.setFormat(_window.getSwapchain().getFormat().format);
 
                     if (!imageViewBuilder.build(blurPass.imagesViews[0], &result)) {
                         LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[0] offscreen image view: {}", result);
@@ -1373,7 +1377,7 @@ bool BloomPass::initBlurPass() {
                     VkResult result{VK_SUCCESS};
                     API::Builder::ImageView imageViewBuilder(device, blurPass.images[1]);
 
-                    imageViewBuilder.setFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
+                    imageViewBuilder.setFormat(_window.getSwapchain().getFormat().format);
 
                     if (!imageViewBuilder.build(blurPass.imagesViews[1], &result)) {
                         LUG_LOG.error("BloomPass::initBlurPass: Can't create blur[1] offscreen image view: {}", result);
@@ -1387,7 +1391,7 @@ bool BloomPass::initBlurPass() {
                 VkResult result{VK_SUCCESS};
                 API::Builder::ImageView imageViewBuilder(device, _framesData[i].blendPass.image);
 
-                imageViewBuilder.setFormat(VK_FORMAT_R16G16B16A16_SFLOAT);
+                imageViewBuilder.setFormat(_window.getSwapchain().getFormat().format);
 
                 if (!imageViewBuilder.build(_framesData[i].blendPass.imageView, &result)) {
                     LUG_LOG.error("BloomPass::initBlurPass: Can't create blend offscreen image view: {}", result);
@@ -1503,9 +1507,9 @@ bool BloomPass::initBlurPass() {
 
                 API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
                 framebufferBuilder.setRenderPass(renderPass);
-                framebufferBuilder.addAttachment(&swapchainImagesViews[i]);
-                framebufferBuilder.setWidth(swapchainImages[i].getExtent().width);
-                framebufferBuilder.setHeight(swapchainImages[i].getExtent().height);
+                framebufferBuilder.addAttachment(&_window.getSwapchain().getImagesViews()[i]);
+                framebufferBuilder.setWidth(_window.getSwapchain().getImages()[i].getExtent().width);
+                framebufferBuilder.setHeight(_window.getSwapchain().getImages()[i].getExtent().height);
 
                 VkResult result{VK_SUCCESS};
                 if (!framebufferBuilder.build(_framesData[i].hdrFramebuffer, &result)) {
@@ -1557,9 +1561,7 @@ bool BloomPass::initBlurPass() {
 }
 
 bool BloomPass::buildEndCommandBuffer() {
-    auto& sceneImages = _window.getSceneOffscreenImages();
-    auto& glowOffscreenImages = _window.getGlowOffscreenImages();
-    uint32_t frameDataSize = (uint32_t)sceneImages.size();
+    uint32_t frameDataSize = (uint32_t)_window.getSwapchain().getImages().size();
 
     for (uint32_t i = 0; i < frameDataSize; ++i) {
 
@@ -1581,7 +1583,7 @@ bool BloomPass::buildEndCommandBuffer() {
                 pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
                 pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &glowOffscreenImages[i];
+                pipelineBarrier.imageMemoryBarriers[0].image = &_forward.getGlowOffscreenImage(i);
 
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
             }
@@ -1631,8 +1633,8 @@ bool BloomPass::buildEndCommandBuffer() {
                 blitRegion.srcSubresource.layerCount = 1;
                 blitRegion.srcOffsets[0] = { 0, 0, 0 };
                 blitRegion.srcOffsets[1] = {
-                    static_cast<int32_t>(glowOffscreenImages[0].getExtent().width),
-                    static_cast<int32_t>(glowOffscreenImages[0].getExtent().height),
+                    static_cast<int32_t>(_forward.getGlowOffscreenImage(0).getExtent().width),
+                    static_cast<int32_t>(_forward.getGlowOffscreenImage(0).getExtent().height),
                     1
                 };
 
@@ -1649,7 +1651,7 @@ bool BloomPass::buildEndCommandBuffer() {
                     };
 
                     const API::CommandBuffer::CmdBlitImage cmdBlitImage{
-                        /* cmdBlitImage.srcImage      */ glowOffscreenImages[i],
+                        /* cmdBlitImage.srcImage      */ _forward.getGlowOffscreenImage(i),
                         /* cmdBlitImage.srcImageLayout  */ VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                         /* cmdBlitImage.dstImage      */ blurPass.images[0],
                         /* cmdBlitImage.dsrImageLayout        */ VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -1752,7 +1754,7 @@ bool BloomPass::buildEndCommandBuffer() {
                 pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                 pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &sceneImages[i];
+                pipelineBarrier.imageMemoryBarriers[0].image = &_forward.getSceneOffscreenImage(i);
 
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
             }
@@ -1765,7 +1767,7 @@ bool BloomPass::buildEndCommandBuffer() {
                 pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
                 pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
                 pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-                pipelineBarrier.imageMemoryBarriers[0].image = &glowOffscreenImages[i];
+                pipelineBarrier.imageMemoryBarriers[0].image = &_forward.getGlowOffscreenImage(i);
 
                 cmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
             }
