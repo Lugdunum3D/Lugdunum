@@ -4,6 +4,7 @@
 #include <memory>
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Camera/Camera.hpp>
+#include <lug/Graphics/Render/DirtyObject.hpp>
 
 namespace lug {
 namespace Graphics {
@@ -15,7 +16,7 @@ class Camera;
 
 class Target;
 
-class LUG_GRAPHICS_API View {
+class LUG_GRAPHICS_API View: public DirtyObject {
 public:
     // x, y, width, height => percentage of the screen
     // TODO: Declare offset and extent outside

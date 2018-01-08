@@ -32,10 +32,19 @@ public:
         Emissive
     };
 
+    enum class Antialiasing : uint8_t {
+        NoAA,
+        MSAA2X,
+        MSAA4X,
+        MSAA8X,
+        MSAA16X
+    };
+
     struct InitInfo {
         std::string shadersRoot;
         Render::Technique::Type renderTechnique;
         DisplayMode displayMode{DisplayMode::Full};
+        Antialiasing antialiasing{Antialiasing::NoAA};
     };
 
 public:
@@ -64,12 +73,16 @@ public:
     const DisplayMode& getDisplayMode() const;
     void setDisplayMode(DisplayMode displayMode);
 
+    const Antialiasing& getAntialiasing() const;
+    void setAntialiasing(Antialiasing antialiasing);
+
     ResourceManager* getResourceManager() const;
 
 protected:
     Graphics& _graphics;
     Type _type;
     DisplayMode _displayMode;
+    Antialiasing _antialiasing;
     InitInfo _initInfo;
     std::unique_ptr<ResourceManager> _resourceManager{nullptr};
 };

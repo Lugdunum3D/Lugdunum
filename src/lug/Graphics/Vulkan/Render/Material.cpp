@@ -18,7 +18,7 @@ void Material::destroy() {
 
 }
 
-Pipeline::Id::MaterialPart Material::getPipelineId() {
+Pipeline::Id::Model::MaterialPart Material::getPipelineId() {
     return _pipelineIdMaterialPart;
 }
 

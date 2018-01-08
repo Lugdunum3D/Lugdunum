@@ -77,9 +77,9 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string
 
     // Set macros according to the pipeline ID
     {
-        Pipeline::Id::PrimitivePart primitivePart = id.getPrimitivePart();
-        Pipeline::Id::MaterialPart materialPart = id.getMaterialPart();
-        Pipeline::Id::ExtraPart extraPart = id.getExtraPart();
+        Pipeline::Id::Model::PrimitivePart primitivePart = id.getModelPrimitivePart();
+        Pipeline::Id::Model::MaterialPart materialPart = id.getModelMaterialPart();
+        Pipeline::Id::Model::ExtraPart extraPart = id.getModelExtraPart();
 
         // Set the display mode
         options.AddMacroDefinition("DISPLAY_MODE", std::to_string(static_cast<uint8_t>(extraPart.displayMode)));

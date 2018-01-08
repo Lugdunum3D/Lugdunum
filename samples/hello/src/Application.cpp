@@ -20,6 +20,9 @@ Application::Application() : lug::Core::Application::Application{{"hello", {0, 1
 
     // We can set the display mode, by default to full
     getGraphicsInfo().rendererInitInfo.displayMode = ::lug::Graphics::Renderer::DisplayMode::Full;
+
+    // Set the antialiasing to MSAA 2x
+    getGraphicsInfo().rendererInitInfo.antialiasing = ::lug::Graphics::Renderer::Antialiasing::MSAA4X;
 }
 
 void applyIBL(const lug::Graphics::Scene::Node* node, lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> irradianceMap, lug::Graphics::Resource::SharedPtr<lug::Graphics::Render::SkyBox> prefilteredMap) {

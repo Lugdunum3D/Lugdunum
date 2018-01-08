@@ -46,7 +46,7 @@ std::unique_ptr<DescriptorSetPool::SkyBox> Forward::_skyBoxDescriptorSetPool = n
 
 uint32_t Forward::_forwardCount = 0;
 
-Forward::Forward(Renderer& renderer, const Render::View& renderView) : Technique(renderer, renderView) {
+Forward::Forward(Renderer& renderer, Render::View& renderView) : Technique(renderer, renderView) {
     ++_forwardCount;
 }
 
@@ -85,17 +85,32 @@ bool Forward::render(
     frameData.renderFence.wait();
     frameData.renderFence.reset();
 
+    // Re-init the frame data if needed
+    if (!initFramedata(currentImageIndex, *frameData.framebuffer.swapchainImageView)) {
+        return false;
+    }
+
     if (!frameData.renderCmdBuffer.reset() || !frameData.renderCmdBuffer.begin()) {
         return false;
+    }
+
+    auto basePipelineId = Pipeline::getModelBaseId();
+
+    // Rebuild the base pipeline id using the antialiasing (to make it compatible)
+    {
+        auto extraPart = basePipelineId.getModelExtraPart();
+        extraPart.antialiasing = static_cast<uint32_t>(frameData.framebuffer.antialiasing);
+
+        basePipelineId = Pipeline::Id::createModel(basePipelineId.getModelPrimitivePart(), basePipelineId.getModelMaterialPart(), extraPart);
     }
 
     // Begin of the render pass
     {
         // All the pipelines have the same renderPass
-        const API::RenderPass* renderPass = _renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getRenderPass();
+        const API::RenderPass* renderPass = _renderer.getPipeline(basePipelineId)->getPipelineAPI().getRenderPass();
 
         API::CommandBuffer::CmdBeginRenderPass beginRenderPass{
-            /* beginRenderPass.framebuffer  */ frameData.framebuffer,
+            /* beginRenderPass.framebuffer  */ frameData.framebuffer.framebuffer,
             /* beginRenderPass.renderArea   */ {},
             /* beginRenderPass.clearValues  */ {}
         };
@@ -151,7 +166,7 @@ bool Forward::render(
     // Bind descriptor set of the camera
     {
         const API::CommandBuffer::CmdBindDescriptors cameraBind{
-            /* cameraBind.pipelineLayout    */ *_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout(),
+            /* cameraBind.pipelineLayout    */ *_renderer.getPipeline(basePipelineId)->getPipelineAPI().getLayout(),
             /* cameraBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
             /* cameraBind.firstSet           */ 0,
             /* cameraBind.descriptorSets     */ {&frameData.cameraDescriptorSet->getDescriptorSet()},
@@ -173,7 +188,7 @@ bool Forward::render(
     std::vector<const DescriptorSetPool::DescriptorSet*> materialTexturesDescriptorSets;
 
     // Bind a default pipeline for the rendering
-    frameData.renderCmdBuffer.bindPipeline(_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI());
+    frameData.renderCmdBuffer.bindPipeline(_renderer.getPipeline(basePipelineId)->getPipelineAPI());
 
     // Render objects
     {
@@ -211,7 +226,7 @@ bool Forward::render(
             // Bind descriptor set of the light
             {
                 const API::CommandBuffer::CmdBindDescriptors lightBind{
-                    /* lightBind.pipelineLayout     */ *_renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout(),
+                    /* lightBind.pipelineLayout     */ *_renderer.getPipeline(basePipelineId)->getPipelineAPI().getLayout(),
                     /* lightBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
                     /* lightBind.firstSet           */ 1,
                     /* lightBind.descriptorSets     */ {&lightDescriptorSet->getDescriptorSet()},
@@ -390,7 +405,19 @@ bool Forward::render(
     // Render skybox
     {
         Resource::SharedPtr<Render::SkyBox> skyBox = renderQueue.getSkyBox();
+
         if (skyBox && skyBox->getBackgroundTexture()) {
+            Pipeline::Id pipelineId = Pipeline::getSkyboxBaseId();
+
+            {
+                Pipeline::Id::Skybox::ExtraPart extraPart;
+                extraPart.antialiasing = static_cast<uint32_t>(_renderer.getAntialiasing());
+
+                pipelineId = Pipeline::Id::createSkybox(extraPart);
+            }
+
+            const auto& pipeline = _renderer.getPipeline(pipelineId);
+
             Resource::SharedPtr<Render::Texture> skyBoxTexture =  Resource::SharedPtr<Render::Texture>::cast(skyBox->getBackgroundTexture());
             // Get the new (or old) skyBox descriptor set
             {
@@ -408,7 +435,7 @@ bool Forward::render(
             // Bind descriptor set of the skybox
             {
                 const API::CommandBuffer::CmdBindDescriptors skyBoxBind{
-                    /* skyBoxBind.pipelineLayout     */ *SkyBox::getPipeline().getLayout(),
+                    /* skyBoxBind.pipelineLayout     */ *pipeline->getPipelineAPI().getLayout(),
                     /* skyBoxBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
                     /* skyBoxBind.firstSet           */ 1,
                     /* skyBoxBind.descriptorSets     */ {&frameData.skyBoxDescriptorSet->getDescriptorSet()},
@@ -418,7 +445,7 @@ bool Forward::render(
                 frameData.renderCmdBuffer.bindDescriptorSets(skyBoxBind);
             }
 
-            frameData.renderCmdBuffer.bindPipeline(SkyBox::getPipeline());
+            frameData.renderCmdBuffer.bindPipeline(pipeline->getPipelineAPI());
 
             auto& primitiveSet = SkyBox::getMesh()->getPrimitiveSets()[0];
 
@@ -485,6 +512,52 @@ bool Forward::render(
 
     // End of the render pass
     frameData.renderCmdBuffer.endRenderPass();
+
+    // Resolve the image
+    {
+        const auto& viewport = _renderView.getViewport();
+
+        const VkImageResolve imageResolve = {
+            {
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                0,
+                0,
+                1
+            },
+            {
+                0,
+                0,
+                0
+            },
+            {
+                VK_IMAGE_ASPECT_COLOR_BIT,
+                0,
+                0,
+                1
+            },
+            {
+                static_cast<int32_t>(viewport.offset.x),
+                static_cast<int32_t>(viewport.offset.y),
+                0
+            },
+            {
+                static_cast<uint32_t>(viewport.extent.width),
+                static_cast<uint32_t>(viewport.extent.height),
+                0
+            }
+        };
+
+        // TODO: Add this to API::CommandBuffer
+        vkCmdResolveImage(
+            static_cast<VkCommandBuffer>(frameData.renderCmdBuffer),
+            static_cast<VkImage>(frameData.framebuffer.renderImage.image),
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            static_cast<VkImage>(*frameData.framebuffer.swapchainImageView->getImage()),
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            1,
+            &imageResolve
+        );
+    }
 
     if (!frameData.renderCmdBuffer.end() || !frameData.transferCmdBuffer.end()) {
         return false;
@@ -628,7 +701,7 @@ bool Forward::init(const std::vector<API::ImageView>& imageViews) {
         }
     }
 
-    return initDepthBuffers(imageViews) && initFramebuffers(imageViews);
+    return initFrameDatas(imageViews);
 }
 
 void Forward::destroy() {
@@ -665,9 +738,19 @@ void Forward::destroy() {
         _skyBoxDescriptorSetPool->free(frameData.skyBoxDescriptorSet);
     }
 
-    _framesData.clear();
+    for (unsigned i = 0; i < _framesData.size(); ++i) {
+        _framesData[i].framebuffer.depthBuffer.imageView.destroy();
+        _framesData[i].framebuffer.depthBuffer.image.destroy();
 
-    _depthBufferMemory.destroy();
+        _framesData[i].framebuffer.renderImage.imageView.destroy();
+        _framesData[i].framebuffer.renderImage.image.destroy();
+
+        _framesData[i].framebuffer.memory.destroy();
+
+        _framesData[i].framebuffer.framebuffer.destroy();
+    }
+
+    _framesData.clear();
 
     if (_forwardCount == 0) {
         _cameraBufferPool.reset();
@@ -685,64 +768,19 @@ void Forward::destroy() {
     _transferCommandPool.destroy();
 }
 
-bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
-    API::Builder::Image imageBuilder(_renderer.getDevice());
+bool Forward::setSwapchainImageViews(const std::vector<API::ImageView>& imageViews) {
+    for (uint32_t i = 0; i < imageViews.size(); ++i) {
+        _framesData[i].framebuffer.swapchainImageView = &imageViews[i];
+    }
 
-    imageBuilder.setUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
-    imageBuilder.setPreferedFormats({VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT});
-    imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    return true;
+}
 
+bool Forward::initFrameDatas(const std::vector<API::ImageView>& imageViews) {
     _framesData.resize(imageViews.size());
 
-    API::Builder::DeviceMemory deviceMemoryBuilder(_renderer.getDevice());
-    deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    // Create images and add them to API::Builder::DeviceMemory
     for (uint32_t i = 0; i < imageViews.size(); ++i) {
-        const VkExtent3D extent{
-            /* extent.width     */ imageViews[i].getImage()->getExtent().width,
-            /* extent.height    */ imageViews[i].getImage()->getExtent().height,
-            /* extent.depth     */ 1
-        };
-
-        imageBuilder.setExtent(extent);
-
-        // Create depth buffer image
-        {
-            VkResult result{VK_SUCCESS};
-            if (!imageBuilder.build(_framesData[i].depthBuffer.image, &result)) {
-                LUG_LOG.error("Forward::initDepthBuffers: Can't create depth buffer image: {}", result);
-                return false;
-            }
-
-            if (!deviceMemoryBuilder.addImage(_framesData[i].depthBuffer.image)) {
-                LUG_LOG.error("Forward::initDepthBuffers: Can't add image to device memory");
-                return false;
-            }
-        }
-    }
-
-    // Initialize depth buffer memory (This memory is common for all depth buffer images)
-    {
-        VkResult result{VK_SUCCESS};
-        if (!deviceMemoryBuilder.build(_depthBufferMemory, &result)) {
-            LUG_LOG.error("Forward::initDepthBuffers: Can't create device memory: {}", result);
-            return false;
-        }
-    }
-
-    // Create images views
-    for (uint32_t i = 0; i < imageViews.size(); ++i) {
-
-        // Create depth buffer image view
-        API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), _framesData[i].depthBuffer.image);
-
-        imageViewBuilder.setFormat(_framesData[i].depthBuffer.image.getFormat());
-        imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_DEPTH_BIT);
-
-        VkResult result{VK_SUCCESS};
-        if (!imageViewBuilder.build(_framesData[i].depthBuffer.imageView, &result)) {
-            LUG_LOG.error("Forward::initDepthBuffers: Can't create depth buffer image view: {}", result);
+        if (!initFramedata(i, imageViews[i])) {
             return false;
         }
     }
@@ -750,30 +788,185 @@ bool Forward::initDepthBuffers(const std::vector<API::ImageView>& imageViews) {
     return true;
 }
 
-bool Forward::initFramebuffers(const std::vector<API::ImageView>& imageViews) {
-    // The lights pipelines renderpass are compatible, so we don't need to create different frame buffers for each pipeline
-    const auto& basePipeline = _renderer.getPipeline(Pipeline::getBaseId());
+bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageView) {
+    auto& frameData = _framesData[nb];
+    const auto& viewport = _renderView.getViewport();
 
-    if (!basePipeline) {
-        return false;
+    frameData.framebuffer.swapchainImageView = &swapchainImageView;
+
+    // We don't need to init / re-init the images if we already have them with the good resolution and aliasing
+    // and if the render view isn't dirty for this frame
+    if (!_renderView.isDirty(nb)
+        && frameData.framebuffer.antialiasing == _renderer.getAntialiasing()
+        && static_cast<VkImage>(frameData.framebuffer.depthBuffer.image)
+        && frameData.framebuffer.depthBuffer.image.getExtent().width == viewport.extent.width
+        && frameData.framebuffer.depthBuffer.image.getExtent().height == viewport.extent.height
+    ) {
+        return true;
     }
 
-    const API::RenderPass* renderPass = basePipeline->getPipelineAPI().getRenderPass();
+    _renderView.clearDirty(nb);
 
-    _framesData.resize(imageViews.size());
+    // Destroy everything to build up
+    {
+        frameData.framebuffer.depthBuffer.imageView.destroy();
+        frameData.framebuffer.depthBuffer.image.destroy();
 
-    for (uint32_t i = 0; i < imageViews.size(); i++) {
+        frameData.framebuffer.renderImage.imageView.destroy();
+        frameData.framebuffer.renderImage.image.destroy();
+
+        frameData.framebuffer.memory.destroy();
+
+        frameData.framebuffer.framebuffer.destroy();
+    }
+
+    // Build everything
+    frameData.framebuffer.antialiasing = _renderer.getAntialiasing();
+
+    // Build images
+    {
+        const VkSampleCountFlagBits nbSamples = [](Renderer::Antialiasing antialiasing) {
+            switch (antialiasing) {
+                case Renderer::Antialiasing::MSAA2X:
+                    return VK_SAMPLE_COUNT_2_BIT;
+                case Renderer::Antialiasing::MSAA4X:
+                    return VK_SAMPLE_COUNT_4_BIT;
+                case Renderer::Antialiasing::MSAA8X:
+                    return VK_SAMPLE_COUNT_8_BIT;
+                case Renderer::Antialiasing::MSAA16X:
+                    return VK_SAMPLE_COUNT_16_BIT;
+                default:
+                    return VK_SAMPLE_COUNT_1_BIT;
+            };
+        }(frameData.framebuffer.antialiasing);
+
+        API::Builder::DeviceMemory deviceMemoryBuilder(_renderer.getDevice());
+        deviceMemoryBuilder.setMemoryFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+        // Create render image
+        {
+            API::Builder::Image imageBuilder(_renderer.getDevice());
+
+            imageBuilder.setUsage(VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+            //imageBuilder.setPreferedFormats({VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT});
+            imageBuilder.setPreferedFormats({_renderer.getRenderWindow()->getSwapchain().getFormat().format}); // TODO: Render in HDR
+            imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT);
+            imageBuilder.setSampleCount(nbSamples);
+
+            // Build at the size of the render view
+            imageBuilder.setExtent({
+                /* width */ static_cast<uint32_t>(viewport.extent.width),
+                /* height */ static_cast<uint32_t>(viewport.extent.height),
+                /* depth */ 1
+            });
+
+            VkResult result{VK_SUCCESS};
+            if (!imageBuilder.build(frameData.framebuffer.renderImage.image, &result)) {
+                LUG_LOG.error("Forward::initFramedata: Can't create render image: {}", result);
+                return false;
+            }
+        }
+
+        // Add the render image to the memory
+        if (!deviceMemoryBuilder.addImage(frameData.framebuffer.renderImage.image)) {
+            LUG_LOG.error("Forward::initFramedata: Can't add image to device memory");
+            return false;
+        }
+
+        // Create depth buffer image
+        {
+            API::Builder::Image imageBuilder(_renderer.getDevice());
+
+            imageBuilder.setUsage(VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT);
+            imageBuilder.setPreferedFormats({VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT});
+            imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+            imageBuilder.setSampleCount(nbSamples);
+
+            // Build at the size of the render view
+            imageBuilder.setExtent({
+                /* width */ static_cast<uint32_t>(viewport.extent.width),
+                /* height */ static_cast<uint32_t>(viewport.extent.height),
+                /* depth */ 1
+            });
+
+            VkResult result{VK_SUCCESS};
+            if (!imageBuilder.build(frameData.framebuffer.depthBuffer.image, &result)) {
+                LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image: {}", result);
+                return false;
+            }
+        }
+
+        // Add the depth buffer image to the memory
+        if (!deviceMemoryBuilder.addImage(frameData.framebuffer.depthBuffer.image)) {
+            LUG_LOG.error("Forward::initFramedata: Can't add image to device memory");
+            return false;
+        }
+
+        // Build the memory
+        {
+            VkResult result{VK_SUCCESS};
+            if (!deviceMemoryBuilder.build(frameData.framebuffer.memory, &result)) {
+                LUG_LOG.error("Forward::initFramedata: Can't create device memory: {}", result);
+                return false;
+            }
+        }
+    }
+
+    // Build image views
+    {
+        // Create render image view
+        {
+            API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), frameData.framebuffer.renderImage.image);
+
+            imageViewBuilder.setFormat(frameData.framebuffer.renderImage.image.getFormat());
+            imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
+
+            VkResult result{VK_SUCCESS};
+            if (!imageViewBuilder.build(frameData.framebuffer.renderImage.imageView, &result)) {
+                LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image view: {}", result);
+                return false;
+            }
+        }
+
         // Create depth buffer image view
+        {
+            API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), frameData.framebuffer.depthBuffer.image);
+
+            imageViewBuilder.setFormat(frameData.framebuffer.depthBuffer.image.getFormat());
+            imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_DEPTH_BIT);
+
+            VkResult result{VK_SUCCESS};
+            if (!imageViewBuilder.build(frameData.framebuffer.depthBuffer.imageView, &result)) {
+                LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image view: {}", result);
+                return false;
+            }
+        }
+    }
+
+    // Build the framebuffer
+    {
+        auto basePipelineId = Pipeline::getModelBaseId();
+        auto extraPart = basePipelineId.getModelExtraPart();
+        extraPart.antialiasing = static_cast<uint32_t>(frameData.framebuffer.antialiasing);
+
+        const auto& basePipeline = _renderer.getPipeline(Pipeline::Id::createModel(basePipelineId.getModelPrimitivePart(), basePipelineId.getModelMaterialPart(), extraPart));
+
+        if (!basePipeline) {
+            return false;
+        }
+
+        const API::RenderPass* renderPass = basePipeline->getPipelineAPI().getRenderPass();
+
         API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
 
         framebufferBuilder.setRenderPass(renderPass);
-        framebufferBuilder.addAttachment(&imageViews[i]);
-        framebufferBuilder.addAttachment(&_framesData[i].depthBuffer.imageView);
-        framebufferBuilder.setWidth(imageViews[i].getImage()->getExtent().width);
-        framebufferBuilder.setHeight(imageViews[i].getImage()->getExtent().height);
+        framebufferBuilder.addAttachment(&frameData.framebuffer.renderImage.imageView);
+        framebufferBuilder.addAttachment(&frameData.framebuffer.depthBuffer.imageView);
+        framebufferBuilder.setWidth(static_cast<uint32_t>(viewport.extent.width));
+        framebufferBuilder.setHeight(static_cast<uint32_t>(viewport.extent.height));
 
         VkResult result{VK_SUCCESS};
-        if (!framebufferBuilder.build(_framesData[i].framebuffer, &result)) {
+        if (!framebufferBuilder.build(frameData.framebuffer.framebuffer, &result)) {
             LUG_LOG.error("Forward::initFramebuffers: Can't create framebuffer: {}", result);
             return false;
         }

@@ -14,7 +14,7 @@ Material::Material(Renderer& renderer) : DescriptorSetPool(renderer) {}
 const DescriptorSet* Material::allocate(const BufferPool::SubBuffer& subBuffer) {
     const auto& result = DescriptorSetPool::allocate(
         reinterpret_cast<size_t>(static_cast<VkBuffer>(*subBuffer.getBuffer())),
-        _renderer.getPipeline(Pipeline::getBaseId())->getPipelineAPI().getLayout()->getDescriptorSetLayouts()[2]
+        _renderer.getPipeline(Pipeline::getModelBaseId())->getPipelineAPI().getLayout()->getDescriptorSetLayouts()[2]
     );
 
     if (std::get<0>(result) && std::get<1>(result)) {

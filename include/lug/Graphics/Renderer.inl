@@ -17,3 +17,11 @@ inline const Renderer::DisplayMode& Renderer::getDisplayMode() const {
 inline void Renderer::setDisplayMode(Renderer::DisplayMode displayMode) {
     _displayMode = displayMode;
 }
+
+inline const Renderer::Antialiasing& Renderer::getAntialiasing() const {
+    return _antialiasing;
+}
+
+inline void Renderer::setAntialiasing(Renderer::Antialiasing antialiasing) {
+    _antialiasing = antialiasing;
+}

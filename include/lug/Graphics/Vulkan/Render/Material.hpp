@@ -29,7 +29,7 @@ public:
 
     void destroy();
 
-    Pipeline::Id::MaterialPart getPipelineId();
+    Pipeline::Id::Model::MaterialPart getPipelineId();
 
 private:
     /**
@@ -41,7 +41,7 @@ private:
     Material(const std::string& name);
 
 private:
-    Pipeline::Id::MaterialPart _pipelineIdMaterialPart;
+    Pipeline::Id::Model::MaterialPart _pipelineIdMaterialPart;
 };
 
 } // Render
