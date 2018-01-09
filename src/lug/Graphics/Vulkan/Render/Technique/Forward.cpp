@@ -101,11 +101,6 @@ bool Forward::render(
     frameData.renderFence.wait();
     frameData.renderFence.reset();
 
-    // Re-init the frame data if needed
-    if (!initFramedata(currentImageIndex, *frameData.framebuffer.swapchainImageView)) {
-        return false;
-    }
-
     if (!frameData.renderCmdBuffer.reset() || !frameData.renderCmdBuffer.begin()) {
         return false;
     }
