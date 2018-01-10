@@ -526,8 +526,8 @@ bool Forward::render(
     // End of the render pass
     frameData.renderCmdBuffer.endRenderPass();
 
-    // Resolve the image
-    {
+    // Resolve the image if antialiasing is enabled
+    if (frameData.framebuffer.antialiasing != Renderer::Antialiasing::NoAA) {
         const auto& viewport = _renderView.getViewport();
 
         const VkImageResolve imageResolve = {
@@ -620,8 +620,8 @@ bool Forward::render(
     }
     else {
         if (!_bloomPass->renderHdr(
-            frameData.framebuffer.sampledSceneImage.image,
-            frameData.framebuffer.sampledSceneImage.imageView,
+            getSceneOffscreenImage(currentImageIndex),
+            getSceneOffscreenImageView(currentImageIndex),
             signalSemaphores,
             waitSemaphores,
             currentImageIndex)
@@ -1181,7 +1181,13 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
         API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
 
         framebufferBuilder.setRenderPass(renderPass);
-        framebufferBuilder.addAttachment(&frameData.framebuffer.skyboxImage.imageView);
+
+        if (frameData.framebuffer.antialiasing != Renderer::Antialiasing::NoAA) {
+            framebufferBuilder.addAttachment(&frameData.framebuffer.skyboxImage.imageView);
+        }
+        else {
+            framebufferBuilder.addAttachment(frameData.framebuffer.swapchainImageView);
+        }
         framebufferBuilder.addAttachment(&frameData.framebuffer.sceneImage.imageView);
         framebufferBuilder.addAttachment(&frameData.framebuffer.glowImage.imageView);
         framebufferBuilder.addAttachment(&frameData.framebuffer.depthBuffer.imageView);
@@ -1220,19 +1226,35 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
 }
 
 const API::Image& Forward::getGlowOffscreenImage(uint32_t currentImageIndex) const {
-    return _framesData[currentImageIndex].framebuffer.sampledGlowImage.image;
+    if (_framesData[currentImageIndex].framebuffer.antialiasing != Renderer::Antialiasing::NoAA) {
+        return _framesData[currentImageIndex].framebuffer.sampledGlowImage.image;
+    }
+
+    return _framesData[currentImageIndex].framebuffer.glowImage.image;
 }
 
 const API::ImageView& Forward::getGlowOffscreenImageView(uint32_t currentImageIndex) const {
-    return _framesData[currentImageIndex].framebuffer.sampledGlowImage.imageView;
+    if (_framesData[currentImageIndex].framebuffer.antialiasing != Renderer::Antialiasing::NoAA) {
+        return _framesData[currentImageIndex].framebuffer.sampledGlowImage.imageView;
+    }
+
+    return _framesData[currentImageIndex].framebuffer.glowImage.imageView;
 }
 
 const API::Image& Forward::getSceneOffscreenImage(uint32_t currentImageIndex) const {
-    return _framesData[currentImageIndex].framebuffer.sampledSceneImage.image;
+    if (_framesData[currentImageIndex].framebuffer.antialiasing != Renderer::Antialiasing::NoAA) {
+        return _framesData[currentImageIndex].framebuffer.sampledSceneImage.image;
+    }
+
+    return _framesData[currentImageIndex].framebuffer.sceneImage.image;
 }
 
 const API::ImageView& Forward::getSceneOffscreenImageView(uint32_t currentImageIndex) const {
-    return _framesData[currentImageIndex].framebuffer.sampledSceneImage.imageView;
+    if (_framesData[currentImageIndex].framebuffer.antialiasing != Renderer::Antialiasing::NoAA) {
+        return _framesData[currentImageIndex].framebuffer.sampledSceneImage.imageView;
+    }
+
+    return _framesData[currentImageIndex].framebuffer.sceneImage.imageView;
 }
 
 } // Technique
