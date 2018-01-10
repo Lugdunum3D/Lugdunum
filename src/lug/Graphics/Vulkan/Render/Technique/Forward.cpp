@@ -1106,6 +1106,64 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
         }
     }
 
+    // Create fence for queue submit synchronisation
+    API::Fence fence;
+    {
+        VkResult result{VK_SUCCESS};
+        API::Builder::Fence fenceBuilder(_renderer.getDevice());
+
+        if (!fenceBuilder.build(fence, &result)) {
+            LUG_LOG.error("Window::initOffscreenData: Can't create render fence: {}", result);
+            return false;
+        }
+    }
+
+    // Create command buffer for image layout
+    API::CommandBuffer imagesLayoutCmdBuffer;
+    {
+        API::Builder::CommandBuffer transferCommandBufferBuilder(_renderer.getDevice(), _transferCommandPool);
+        transferCommandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
+        // Create the render command buffer
+        VkResult result{VK_SUCCESS};
+        if (!transferCommandBufferBuilder.build(imagesLayoutCmdBuffer, &result)) {
+            LUG_LOG.error("Forward::init: Can't create the render command buffer: {}", result);
+            return false;
+        }
+    }
+
+    // Change images layout
+    {
+        if (!imagesLayoutCmdBuffer.begin()) {
+            LUG_LOG.error("Forward::init: Can't begin the images layout command buffer");
+            return false;
+        }
+
+        API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+        pipelineBarrier.imageMemoryBarriers.resize(1);
+        pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
+        pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        // Skybox image
+        pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[nb].framebuffer.sampledSkyboxImage.image;
+        imagesLayoutCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+
+        // Scene image
+        pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[nb].framebuffer.sampledSceneImage.image;
+        imagesLayoutCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+
+        // Glow image
+        pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[nb].framebuffer.sampledGlowImage.image;
+        imagesLayoutCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+
+        if (!imagesLayoutCmdBuffer.end()) {
+            LUG_LOG.error("Forward::init: Can't end the images layout command buffer");
+            return false;
+        }
+    }
+
     // Build the framebuffer
     {
         auto basePipelineId = Pipeline::getModelBaseId();
@@ -1136,6 +1194,27 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
             return false;
         }
     }
+
+
+    // Submit queue
+    if (!_transferQueue->submit(
+        imagesLayoutCmdBuffer,
+        {},
+        {},
+        {},
+        static_cast<VkFence>(fence)
+    )) {
+        LUG_LOG.error("Forward::initFramebuffers Can't submit work to transfer queue");
+        return false;
+    }
+
+    if (!fence.wait() || !_transferQueue->waitIdle()) {
+        LUG_LOG.error("Forward::initFramebuffers: Can't wait fence");
+        return false;
+    }
+
+    fence.destroy();
+    imagesLayoutCmdBuffer.destroy();
 
     return true;
 }
