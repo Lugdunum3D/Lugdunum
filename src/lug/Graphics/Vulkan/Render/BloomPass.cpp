@@ -1223,7 +1223,7 @@ bool BloomPass::initBlurPass() {
 
             // Blur images
             {
-                _framesData[i].blurPasses.resize(3);
+                _framesData[i].blurPasses.resize(2);
                 // 0
                 {
                     VkExtent3D extent{
@@ -1253,23 +1253,6 @@ bool BloomPass::initBlurPass() {
                     VkResult result{VK_SUCCESS};
                     if (!imageBuilder.build(_framesData[i].blurPasses[1].images[0], &result) ||
                         !imageBuilder.build(_framesData[i].blurPasses[1].images[1], &result)) {
-                        LUG_LOG.error("BloomPass::initBlurPass: Can't create blur offscreen images: {}", result);
-                        return false;
-                    }
-                }
-
-                // 2
-                {
-                    VkExtent3D extent{
-                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width) / 3,
-                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height) / 3,
-                        /* extent.depth */ 1
-                    };
-                    imageBuilder.setExtent(extent);
-
-                    VkResult result{VK_SUCCESS};
-                    if (!imageBuilder.build(_framesData[i].blurPasses[2].images[0], &result) ||
-                        !imageBuilder.build(_framesData[i].blurPasses[2].images[1], &result)) {
                         LUG_LOG.error("BloomPass::initBlurPass: Can't create blur offscreen images: {}", result);
                         return false;
                     }
