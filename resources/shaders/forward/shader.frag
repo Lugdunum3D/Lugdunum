@@ -27,6 +27,11 @@ layout(std140, set = 0, binding = 0) uniform cameraBlock {
     mat4 proj;
 } camera;
 
+layout(std140, set = 0, binding = 1) uniform bloomBlock {
+    float blurThreshold;
+} bloom;
+
+
 struct Light {
     vec3 position;
     float distance;
@@ -119,7 +124,9 @@ layout (location = IN_FREE_LOCATION) in vec3 inCameraPositionWorldSpace;
 // BLOCK OF STATIC OUTPUTS
 //////////////////////////////////////////////////////////////////////////////
 
-layout (location = 0) out vec4 outColor;
+layout (location = 0) out vec4 outSkyboxColor;
+layout (location = 1) out vec4 outSceneColor;
+layout (location = 2) out vec4 outGlowColor;
 
 //////////////////////////////////////////////////////////////////////////////
 // BRDF FUNCTIONS
@@ -175,6 +182,7 @@ vec3 Uncharted2Tonemap(vec3 x) {
 //////////////////////////////////////////////////////////////////////////////
 
 void main() {
+    outSkyboxColor = vec4(0.0);
     //////////////////////////////////////////////////////////////////////
     // CALCULATE THE FINAL COLOR
     //////////////////////////////////////////////////////////////////////
@@ -198,7 +206,8 @@ void main() {
     #endif
 
     #if DISPLAY_MODE == 1
-    outColor = vec4(albedo.rgb, 1.0);
+    outSceneColor = vec4(albedo.rgb, 1.0);
+    outGlowColor = vec4(albedo.rgb, 1.0);
     return;
     #endif
 
@@ -217,10 +226,12 @@ void main() {
     #endif
 
     #if DISPLAY_MODE == 3
-    outColor = vec4(vec3(metallic), 1.0);
+    outSceneColor = vec4(vec3(metallic), 1.0);
+    outGlowColor = vec4(vec3(metallic), 1.0);
     return;
     #elif DISPLAY_MODE == 4
-    outColor = vec4(vec3(roughness), 1.0);
+    outSceneColor = vec4(vec3(roughness), 1.0);
+    outGlowColor = vec4(vec3(roughness), 1.0);
     return;
     #endif
 
@@ -256,7 +267,8 @@ void main() {
     #endif
 
     #if DISPLAY_MODE == 2
-    outColor = vec4(normalWorldSpace, 1.0);
+    outSceneColor = vec4(normalWorldSpace, 1.0);
+    outGlowColor = vec4(normalWorldSpace, 1.0);
     return;
     #endif
 
@@ -271,10 +283,12 @@ void main() {
     #endif
 
     #if DISPLAY_MODE == 5
-    outColor = vec4(vec3(occlusion), 1.0);
+    outSceneColor = vec4(vec3(occlusion), 1.0);
+    outGlowColor = vec4(vec3(occlusion), 1.0);
     return;
     #elif DISPLAY_MODE == 6
-    outColor = vec4(vec3(occlusion, roughness, metallic), 1.0);
+    outSceneColor = vec4(vec3(occlusion, roughness, metallic), 1.0);
+    outGlowColor = vec4(vec3(occlusion, roughness, metallic), 1.0);
     return;
     #endif
 
@@ -289,7 +303,8 @@ void main() {
     #endif
 
     #if DISPLAY_MODE == 7
-    outColor = vec4(emissive, 1.0);
+    outSceneColor = vec4(emissive, 1.0);
+    outGlowColor = vec4(emissive, 1.0);
     return;
     #endif
 
@@ -399,16 +414,15 @@ void main() {
 
     vec3 color = mix(ambient, ambient * occlusion, material.occlusionTextureStrength) + Lo;
 
-    // Tone mapping
-    // TODO: Replace 4.5f by an exposure argument
-    color = Uncharted2Tonemap(color * 4.5f) * (1.0f / Uncharted2Tonemap(vec3(11.2f)));
-
     color += emissive;
 
-    // Gamma correction
-    // TODO: Replace 2.2f by a gamma argument
-    color = pow(color, vec3(1.0f / 2.2f));
-
     // Final output
-    outColor = vec4(color, 1.0);
+    outSceneColor = vec4(color, 1.0);
+
+    float brightness = (color.r * 0.2126) + (color.g * 0.7152) + (color.b * 0.0722);
+    if (brightness > bloom.blurThreshold) {
+        outGlowColor = vec4(color, 1.0);
+    } else {
+        outGlowColor = vec4(0.0);
+    }
 }

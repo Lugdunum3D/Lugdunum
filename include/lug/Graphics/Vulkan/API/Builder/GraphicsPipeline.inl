@@ -194,7 +194,7 @@ inline void GraphicsPipeline::ColorBlendState::setBlendConstants(const float ble
 
 // GraphicsPipeline
 
-inline void GraphicsPipeline::setShader(VkShaderStageFlagBits stage, const char* entry, API::ShaderModule shaderModule) {
+inline void GraphicsPipeline::setShader(VkShaderStageFlagBits stage, const char* entry, API::ShaderModule shaderModule, const VkSpecializationInfo* specializationInfo) {
     const VkPipelineShaderStageCreateInfo shaderStage{
         /* shaderStage.sType */ VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
         /* shaderStage.pNext */ nullptr,
@@ -202,14 +202,14 @@ inline void GraphicsPipeline::setShader(VkShaderStageFlagBits stage, const char*
         /* shaderStage.stage */ stage,
         /* shaderStage.module */ static_cast<VkShaderModule>(shaderModule),
         /* shaderStage.pName */ entry,
-        /* shaderStage.pSpecializationInfo */ nullptr
+        /* shaderStage.pSpecializationInfo */ specializationInfo
     };
 
     _shaderStages.push_back(std::move(shaderStage));
     _shaderModules.push_back(std::move(shaderModule));
 }
 
-inline bool GraphicsPipeline::setShaderFromFile(VkShaderStageFlagBits stage, const char* entry, const std::string& filename) {
+inline bool GraphicsPipeline::setShaderFromFile(VkShaderStageFlagBits stage, const char* entry, const std::string& filename, const VkSpecializationInfo* specializationInfo) {
     API::Builder::ShaderModule shaderModuleBuilder(_device);
 
     if (!shaderModuleBuilder.loadFromFile(filename)) {
@@ -224,7 +224,7 @@ inline bool GraphicsPipeline::setShaderFromFile(VkShaderStageFlagBits stage, con
         return false;
     }
 
-    setShader(stage, entry, std::move(shaderModule));
+    setShader(stage, entry, std::move(shaderModule), specializationInfo);
     return true;
 }
 

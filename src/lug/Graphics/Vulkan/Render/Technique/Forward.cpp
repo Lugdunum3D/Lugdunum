@@ -17,6 +17,7 @@
 #include <lug/Graphics/Vulkan/API/Builder/PipelineLayout.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/RenderPass.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
+#include <lug/Graphics/Vulkan/Render/BloomPass.hpp>
 #include <lug/Graphics/Vulkan/Render/Material.hpp>
 #include <lug/Graphics/Vulkan/Render/Mesh.hpp>
 #include <lug/Graphics/Vulkan/Render/Queue.hpp>
@@ -34,6 +35,7 @@ namespace Vulkan {
 namespace Render {
 namespace Technique {
 
+std::unique_ptr<BufferPool::Bloom> Forward::_bloomBufferPool = nullptr;
 std::unique_ptr<BufferPool::Camera> Forward::_cameraBufferPool = nullptr;
 std::unique_ptr<BufferPool::Light> Forward::_lightBufferPool = nullptr;
 std::unique_ptr<BufferPool::Material> Forward::_materialBufferPool = nullptr;
@@ -48,6 +50,7 @@ uint32_t Forward::_forwardCount = 0;
 
 Forward::Forward(Renderer& renderer, Render::View& renderView) : Technique(renderer, renderView) {
     ++_forwardCount;
+    _bloomPass = std::make_unique<BloomPass>(_renderer, *static_cast<lug::Graphics::Vulkan::Render::Window*>(renderer.getWindow()), *this);
 }
 
 Forward::~Forward() {
@@ -69,6 +72,19 @@ bool Forward::render(
         return false;
     }
 
+    // Get the new (or old) bloom buffer
+    {
+        const BufferPool::SubBuffer* bloomBuffer = _bloomBufferPool->allocate(frameData.transferCmdBuffer, _renderer.getBlurThreshold(), _renderer.isBloomDirty());
+
+        if (!bloomBuffer) {
+            LUG_LOG.error("Forward::render: Can't allocate bloom buffer");
+            return false;
+        }
+
+        _bloomBufferPool->free(frameData.bloomBuffer);
+        frameData.bloomBuffer = bloomBuffer;
+    }
+
     // Get the new (or old) camera buffer
     {
         const BufferPool::SubBuffer* cameraBuffer = _cameraBufferPool->allocate(frameData.transferCmdBuffer, *_renderView.getCamera());
@@ -84,11 +100,6 @@ bool Forward::render(
 
     frameData.renderFence.wait();
     frameData.renderFence.reset();
-
-    // Re-init the frame data if needed
-    if (!initFramedata(currentImageIndex, *frameData.framebuffer.swapchainImageView)) {
-        return false;
-    }
 
     if (!frameData.renderCmdBuffer.reset() || !frameData.renderCmdBuffer.begin()) {
         return false;
@@ -120,9 +131,11 @@ bool Forward::render(
         beginRenderPass.renderArea.extent = {static_cast<uint32_t>(viewport.extent.width), static_cast<uint32_t>(viewport.extent.height)};
 
         const auto& clearColor = _renderView.getClearColor();
-        beginRenderPass.clearValues.resize(2);
+        beginRenderPass.clearValues.resize(4);
         beginRenderPass.clearValues[0].color = {{clearColor.r(), clearColor.g(), clearColor.b(), 1.0f}};
-        beginRenderPass.clearValues[1].depthStencil = {1.0f, 0};
+        beginRenderPass.clearValues[1].color = {{clearColor.r(), clearColor.g(), clearColor.b(), 1.0f}};
+        beginRenderPass.clearValues[2].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
+        beginRenderPass.clearValues[3].depthStencil = {1.0f, 0};
 
         frameData.renderCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
 
@@ -152,7 +165,7 @@ bool Forward::render(
 
     // Get the new (or old) camera descriptor set
     {
-        const DescriptorSetPool::DescriptorSet* cameraDescriptorSet = _cameraDescriptorSetPool->allocate(*frameData.cameraBuffer);
+        const DescriptorSetPool::DescriptorSet* cameraDescriptorSet = _cameraDescriptorSetPool->allocate(*frameData.cameraBuffer, *frameData.bloomBuffer);
 
         if (!cameraDescriptorSet) {
             LUG_LOG.error("Forward::render: Can't allocate camera descriptor set");
@@ -170,7 +183,7 @@ bool Forward::render(
             /* cameraBind.pipelineBindPoint  */ VK_PIPELINE_BIND_POINT_GRAPHICS,
             /* cameraBind.firstSet           */ 0,
             /* cameraBind.descriptorSets     */ {&frameData.cameraDescriptorSet->getDescriptorSet()},
-            /* cameraBind.dynamicOffsets     */ {frameData.cameraBuffer->getOffset()},
+            /* cameraBind.dynamicOffsets     */ {frameData.cameraBuffer->getOffset(), frameData.bloomBuffer->getOffset()},
         };
 
         frameData.renderCmdBuffer.bindDescriptorSets(cameraBind);
@@ -550,9 +563,27 @@ bool Forward::render(
         // TODO: Add this to API::CommandBuffer
         vkCmdResolveImage(
             static_cast<VkCommandBuffer>(frameData.renderCmdBuffer),
-            static_cast<VkImage>(frameData.framebuffer.renderImage.image),
+            static_cast<VkImage>(frameData.framebuffer.skyboxImage.image),
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             static_cast<VkImage>(*frameData.framebuffer.swapchainImageView->getImage()),
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            1,
+            &imageResolve
+        );
+        vkCmdResolveImage(
+            static_cast<VkCommandBuffer>(frameData.renderCmdBuffer),
+            static_cast<VkImage>(frameData.framebuffer.sceneImage.image),
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            static_cast<VkImage>(frameData.framebuffer.sampledSceneImage.image),
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            1,
+            &imageResolve
+        );
+        vkCmdResolveImage(
+            static_cast<VkCommandBuffer>(frameData.renderCmdBuffer),
+            static_cast<VkImage>(frameData.framebuffer.glowImage.image),
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            static_cast<VkImage>(frameData.framebuffer.sampledGlowImage.image),
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             1,
             &imageResolve
@@ -563,19 +594,43 @@ bool Forward::render(
         return false;
     }
 
-    return _transferQueue->submit(
+    if (!_transferQueue->submit(
         frameData.transferCmdBuffer,
         {static_cast<VkSemaphore>(frameData.transferSemaphore)},
         {},
         {},
         static_cast<VkFence>(frameData.transferFence)
-    ) && _graphicsQueue->submit(
+    ) || !_graphicsQueue->submit(
         frameData.renderCmdBuffer,
-        {static_cast<VkSemaphore>(drawCompleteSemaphore)},
+        {static_cast<VkSemaphore>(frameData.drawPassCompleteSemaphore)},
         {static_cast<VkSemaphore>(frameData.transferSemaphore), static_cast<VkSemaphore>(imageReadySemaphore)},
         {VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT},
         static_cast<VkFence>(frameData.renderFence)
-    );
+    )) {
+        LUG_LOG.error("Forward::render: Failed draw pass");
+        return false;
+    }
+
+    std::vector<VkSemaphore> waitSemaphores {static_cast<VkSemaphore>(frameData.drawPassCompleteSemaphore)};
+    std::vector<VkSemaphore> signalSemaphores {static_cast<VkSemaphore>(drawCompleteSemaphore)};
+    if (_renderer.isBloomEnabled()) {
+        if (!_bloomPass->endFrame(signalSemaphores, waitSemaphores, currentImageIndex)) {
+            return false;
+        }
+    }
+    else {
+        if (!_bloomPass->renderHdr(
+            frameData.framebuffer.sampledSceneImage.image,
+            frameData.framebuffer.sampledSceneImage.imageView,
+            signalSemaphores,
+            waitSemaphores,
+            currentImageIndex)
+        ) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool Forward::init(const std::vector<API::ImageView>& imageViews) {
@@ -648,10 +703,15 @@ bool Forward::init(const std::vector<API::ImageView>& imageViews) {
             return false;
         }
 
-        if (!semaphoreBuilder.build(_framesData[i].transferSemaphore, &result)) {
+        if (!semaphoreBuilder.build(_framesData[i].transferSemaphore, &result) ||
+            !semaphoreBuilder.build(_framesData[i].drawPassCompleteSemaphore, &result)) {
             LUG_LOG.error("Forward::init: Can't create the transfer semaphore: {}", result);
             return false;
         }
+    }
+
+    if (!_bloomBufferPool) {
+        _bloomBufferPool = std::make_unique<BufferPool::Bloom>(_renderer);
     }
 
     if (!_cameraBufferPool) {
@@ -701,7 +761,7 @@ bool Forward::init(const std::vector<API::ImageView>& imageViews) {
         }
     }
 
-    return initFrameDatas(imageViews);
+    return _bloomPass->init() && initFrameDatas(imageViews);
 }
 
 void Forward::destroy() {
@@ -711,6 +771,8 @@ void Forward::destroy() {
     _transferQueue->waitIdle();
 
     for (auto& frameData : _framesData) {
+        _bloomBufferPool->free(frameData.bloomBuffer);
+
         _cameraBufferPool->free(frameData.cameraBuffer);
 
         for (const auto& subBuffer : frameData.lightBuffers) {
@@ -742,8 +804,12 @@ void Forward::destroy() {
         _framesData[i].framebuffer.depthBuffer.imageView.destroy();
         _framesData[i].framebuffer.depthBuffer.image.destroy();
 
-        _framesData[i].framebuffer.renderImage.imageView.destroy();
-        _framesData[i].framebuffer.renderImage.image.destroy();
+        _framesData[i].framebuffer.skyboxImage.imageView.destroy();
+        _framesData[i].framebuffer.skyboxImage.image.destroy();
+        _framesData[i].framebuffer.sceneImage.imageView.destroy();
+        _framesData[i].framebuffer.sceneImage.image.destroy();
+        _framesData[i].framebuffer.glowImage.imageView.destroy();
+        _framesData[i].framebuffer.glowImage.image.destroy();
 
         _framesData[i].framebuffer.memory.destroy();
 
@@ -753,6 +819,7 @@ void Forward::destroy() {
     _framesData.clear();
 
     if (_forwardCount == 0) {
+        _bloomBufferPool.reset();
         _cameraBufferPool.reset();
         _lightBufferPool.reset();
         _materialBufferPool.reset();
@@ -766,6 +833,8 @@ void Forward::destroy() {
 
     _graphicsCommandPool.destroy();
     _transferCommandPool.destroy();
+
+    _bloomPass->destroy();
 }
 
 bool Forward::setSwapchainImageViews(const std::vector<API::ImageView>& imageViews) {
@@ -785,7 +854,7 @@ bool Forward::initFrameDatas(const std::vector<API::ImageView>& imageViews) {
         }
     }
 
-    return true;
+    return _bloomPass->initBlurPass() && _bloomPass->buildEndCommandBuffer();
 }
 
 bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageView) {
@@ -812,8 +881,13 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
         frameData.framebuffer.depthBuffer.imageView.destroy();
         frameData.framebuffer.depthBuffer.image.destroy();
 
-        frameData.framebuffer.renderImage.imageView.destroy();
-        frameData.framebuffer.renderImage.image.destroy();
+        frameData.framebuffer.skyboxImage.imageView.destroy();
+        frameData.framebuffer.skyboxImage.image.destroy();
+        frameData.framebuffer.sceneImage.imageView.destroy();
+        frameData.framebuffer.sceneImage.image.destroy();
+        frameData.framebuffer.glowImage.imageView.destroy();
+        frameData.framebuffer.glowImage.image.destroy();
+
 
         frameData.framebuffer.memory.destroy();
 
@@ -847,7 +921,7 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
         {
             API::Builder::Image imageBuilder(_renderer.getDevice());
 
-            imageBuilder.setUsage(VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+            imageBuilder.setUsage(VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
             //imageBuilder.setPreferedFormats({VK_FORMAT_R32G32B32A32_SFLOAT, VK_FORMAT_R16G16B16A16_SFLOAT});
             imageBuilder.setPreferedFormats({_renderer.getRenderWindow()->getSwapchain().getFormat().format}); // TODO: Render in HDR
             imageBuilder.setFeatureFlags(VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT);
@@ -861,14 +935,30 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
             });
 
             VkResult result{VK_SUCCESS};
-            if (!imageBuilder.build(frameData.framebuffer.renderImage.image, &result)) {
+            if (!imageBuilder.build(frameData.framebuffer.skyboxImage.image, &result) ||
+                !imageBuilder.build(frameData.framebuffer.sceneImage.image, &result) ||
+                !imageBuilder.build(frameData.framebuffer.glowImage.image, &result)) {
+                LUG_LOG.error("Forward::initFramedata: Can't create render image: {}", result);
+                return false;
+            }
+
+            imageBuilder.setSampleCount(VK_SAMPLE_COUNT_1_BIT);
+            result = VK_SUCCESS;
+            if (!imageBuilder.build(frameData.framebuffer.sampledSkyboxImage.image, &result) ||
+                !imageBuilder.build(frameData.framebuffer.sampledSceneImage.image, &result) ||
+                !imageBuilder.build(frameData.framebuffer.sampledGlowImage.image, &result)) {
                 LUG_LOG.error("Forward::initFramedata: Can't create render image: {}", result);
                 return false;
             }
         }
 
         // Add the render image to the memory
-        if (!deviceMemoryBuilder.addImage(frameData.framebuffer.renderImage.image)) {
+        if (!deviceMemoryBuilder.addImage(frameData.framebuffer.skyboxImage.image) ||
+            !deviceMemoryBuilder.addImage(frameData.framebuffer.sceneImage.image) ||
+            !deviceMemoryBuilder.addImage(frameData.framebuffer.glowImage.image) ||
+            !deviceMemoryBuilder.addImage(frameData.framebuffer.sampledSkyboxImage.image) ||
+            !deviceMemoryBuilder.addImage(frameData.framebuffer.sampledSceneImage.image) ||
+            !deviceMemoryBuilder.addImage(frameData.framebuffer.sampledGlowImage.image)) {
             LUG_LOG.error("Forward::initFramedata: Can't add image to device memory");
             return false;
         }
@@ -916,15 +1006,88 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
     {
         // Create render image view
         {
-            API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), frameData.framebuffer.renderImage.image);
+            // Skybox image
+            {
+                API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), frameData.framebuffer.skyboxImage.image);
 
-            imageViewBuilder.setFormat(frameData.framebuffer.renderImage.image.getFormat());
-            imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
+                imageViewBuilder.setFormat(frameData.framebuffer.skyboxImage.image.getFormat());
+                imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
 
-            VkResult result{VK_SUCCESS};
-            if (!imageViewBuilder.build(frameData.framebuffer.renderImage.imageView, &result)) {
-                LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image view: {}", result);
-                return false;
+                VkResult result{VK_SUCCESS};
+                if (!imageViewBuilder.build(frameData.framebuffer.skyboxImage.imageView, &result)) {
+                    LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image view: {}", result);
+                    return false;
+                }
+            }
+
+            // Sampled skybox image
+            {
+                API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), frameData.framebuffer.sampledSkyboxImage.image);
+
+                imageViewBuilder.setFormat(frameData.framebuffer.sampledSkyboxImage.image.getFormat());
+                imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
+
+                VkResult result{VK_SUCCESS};
+                if (!imageViewBuilder.build(frameData.framebuffer.sampledSkyboxImage.imageView, &result)) {
+                    LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image view: {}", result);
+                    return false;
+                }
+            }
+
+            // Scene image
+            {
+                API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), frameData.framebuffer.sceneImage.image);
+
+                imageViewBuilder.setFormat(frameData.framebuffer.sceneImage.image.getFormat());
+                imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
+
+                VkResult result{VK_SUCCESS};
+                if (!imageViewBuilder.build(frameData.framebuffer.sceneImage.imageView, &result)) {
+                    LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image view: {}", result);
+                    return false;
+                }
+            }
+
+            // Sampled scene image
+            {
+                API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), frameData.framebuffer.sampledSceneImage.image);
+
+                imageViewBuilder.setFormat(frameData.framebuffer.sampledSceneImage.image.getFormat());
+                imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
+
+                VkResult result{VK_SUCCESS};
+                if (!imageViewBuilder.build(frameData.framebuffer.sampledSceneImage.imageView, &result)) {
+                    LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image view: {}", result);
+                    return false;
+                }
+            }
+
+            // Glow image
+            {
+                API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), frameData.framebuffer.glowImage.image);
+
+                imageViewBuilder.setFormat(frameData.framebuffer.glowImage.image.getFormat());
+                imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
+
+                VkResult result{VK_SUCCESS};
+                if (!imageViewBuilder.build(frameData.framebuffer.glowImage.imageView, &result)) {
+                    LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image view: {}", result);
+                    return false;
+                }
+            }
+
+            // Sampled glow image
+            {
+                API::Builder::ImageView imageViewBuilder(_renderer.getDevice(), frameData.framebuffer.sampledGlowImage.image);
+
+                imageViewBuilder.setFormat(frameData.framebuffer.sampledGlowImage.image.getFormat());
+                imageViewBuilder.setAspectFlags(VK_IMAGE_ASPECT_COLOR_BIT);
+
+                VkResult result{VK_SUCCESS};
+                if (!imageViewBuilder.build(frameData.framebuffer.sampledGlowImage.imageView, &result)) {
+                    LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image view: {}", result);
+                    return false;
+                }
             }
         }
 
@@ -940,6 +1103,64 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
                 LUG_LOG.error("Forward::initFramedata: Can't create depth buffer image view: {}", result);
                 return false;
             }
+        }
+    }
+
+    // Create fence for queue submit synchronisation
+    API::Fence fence;
+    {
+        VkResult result{VK_SUCCESS};
+        API::Builder::Fence fenceBuilder(_renderer.getDevice());
+
+        if (!fenceBuilder.build(fence, &result)) {
+            LUG_LOG.error("Window::initOffscreenData: Can't create render fence: {}", result);
+            return false;
+        }
+    }
+
+    // Create command buffer for image layout
+    API::CommandBuffer imagesLayoutCmdBuffer;
+    {
+        API::Builder::CommandBuffer transferCommandBufferBuilder(_renderer.getDevice(), _transferCommandPool);
+        transferCommandBufferBuilder.setLevel(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+
+        // Create the render command buffer
+        VkResult result{VK_SUCCESS};
+        if (!transferCommandBufferBuilder.build(imagesLayoutCmdBuffer, &result)) {
+            LUG_LOG.error("Forward::init: Can't create the render command buffer: {}", result);
+            return false;
+        }
+    }
+
+    // Change images layout
+    {
+        if (!imagesLayoutCmdBuffer.begin()) {
+            LUG_LOG.error("Forward::init: Can't begin the images layout command buffer");
+            return false;
+        }
+
+        API::CommandBuffer::CmdPipelineBarrier pipelineBarrier{};
+        pipelineBarrier.imageMemoryBarriers.resize(1);
+        pipelineBarrier.imageMemoryBarriers[0].srcAccessMask = 0;
+        pipelineBarrier.imageMemoryBarriers[0].dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        pipelineBarrier.imageMemoryBarriers[0].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        pipelineBarrier.imageMemoryBarriers[0].newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        // Skybox image
+        pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[nb].framebuffer.sampledSkyboxImage.image;
+        imagesLayoutCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+
+        // Scene image
+        pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[nb].framebuffer.sampledSceneImage.image;
+        imagesLayoutCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+
+        // Glow image
+        pipelineBarrier.imageMemoryBarriers[0].image = &_framesData[nb].framebuffer.sampledGlowImage.image;
+        imagesLayoutCmdBuffer.pipelineBarrier(pipelineBarrier, VK_DEPENDENCY_BY_REGION_BIT);
+
+        if (!imagesLayoutCmdBuffer.end()) {
+            LUG_LOG.error("Forward::init: Can't end the images layout command buffer");
+            return false;
         }
     }
 
@@ -960,7 +1181,9 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
         API::Builder::Framebuffer framebufferBuilder(_renderer.getDevice());
 
         framebufferBuilder.setRenderPass(renderPass);
-        framebufferBuilder.addAttachment(&frameData.framebuffer.renderImage.imageView);
+        framebufferBuilder.addAttachment(&frameData.framebuffer.skyboxImage.imageView);
+        framebufferBuilder.addAttachment(&frameData.framebuffer.sceneImage.imageView);
+        framebufferBuilder.addAttachment(&frameData.framebuffer.glowImage.imageView);
         framebufferBuilder.addAttachment(&frameData.framebuffer.depthBuffer.imageView);
         framebufferBuilder.setWidth(static_cast<uint32_t>(viewport.extent.width));
         framebufferBuilder.setHeight(static_cast<uint32_t>(viewport.extent.height));
@@ -972,7 +1195,44 @@ bool Forward::initFramedata(uint32_t nb, const API::ImageView& swapchainImageVie
         }
     }
 
+
+    // Submit queue
+    if (!_transferQueue->submit(
+        imagesLayoutCmdBuffer,
+        {},
+        {},
+        {},
+        static_cast<VkFence>(fence)
+    )) {
+        LUG_LOG.error("Forward::initFramebuffers Can't submit work to transfer queue");
+        return false;
+    }
+
+    if (!fence.wait() || !_transferQueue->waitIdle()) {
+        LUG_LOG.error("Forward::initFramebuffers: Can't wait fence");
+        return false;
+    }
+
+    fence.destroy();
+    imagesLayoutCmdBuffer.destroy();
+
     return true;
+}
+
+const API::Image& Forward::getGlowOffscreenImage(uint32_t currentImageIndex) const {
+    return _framesData[currentImageIndex].framebuffer.sampledGlowImage.image;
+}
+
+const API::ImageView& Forward::getGlowOffscreenImageView(uint32_t currentImageIndex) const {
+    return _framesData[currentImageIndex].framebuffer.sampledGlowImage.imageView;
+}
+
+const API::Image& Forward::getSceneOffscreenImage(uint32_t currentImageIndex) const {
+    return _framesData[currentImageIndex].framebuffer.sampledSceneImage.image;
+}
+
+const API::ImageView& Forward::getSceneOffscreenImageView(uint32_t currentImageIndex) const {
+    return _framesData[currentImageIndex].framebuffer.sampledSceneImage.imageView;
 }
 
 } // Technique

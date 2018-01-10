@@ -95,9 +95,12 @@ set(SRC
     ${SRCROOT}/Vulkan/Builder/Texture.cpp
     ${SRCROOT}/Vulkan/Builder/SkyBox.cpp
 
+    ${SRCROOT}/Vulkan/Render/BloomPass.cpp
+    ${SRCROOT}/Vulkan/Render/BufferPool/Bloom.cpp
     ${SRCROOT}/Vulkan/Render/BufferPool/Camera.cpp
     ${SRCROOT}/Vulkan/Render/BufferPool/Light.cpp
     ${SRCROOT}/Vulkan/Render/BufferPool/Material.cpp
+    ${SRCROOT}/Vulkan/Render/DescriptorSetPool/BloomSampler.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/Camera.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSetPool.cpp
     ${SRCROOT}/Vulkan/Render/DescriptorSetPool/GuiTexture.cpp
@@ -287,8 +290,10 @@ set(INC
     ${INCROOT}/Vulkan/Builder/SkyBox.hpp
     ${INCROOT}/Vulkan/Builder/Texture.hpp
 
+    ${INCROOT}/Vulkan/Render/BloomPass.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/BufferPool.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/BufferPool.inl
+    ${INCROOT}/Vulkan/Render/BufferPool/Bloom.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/Camera.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/Chunk.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/Chunk.inl
@@ -296,6 +301,7 @@ set(INC
     ${INCROOT}/Vulkan/Render/BufferPool/Material.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/SubBuffer.hpp
     ${INCROOT}/Vulkan/Render/BufferPool/SubBuffer.inl
+    ${INCROOT}/Vulkan/Render/DescriptorSetPool/BloomSampler.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/Camera.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSet.hpp
     ${INCROOT}/Vulkan/Render/DescriptorSetPool/DescriptorSet.inl

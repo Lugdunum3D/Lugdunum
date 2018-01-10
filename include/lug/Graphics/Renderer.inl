@@ -25,3 +25,28 @@ inline const Renderer::Antialiasing& Renderer::getAntialiasing() const {
 inline void Renderer::setAntialiasing(Renderer::Antialiasing antialiasing) {
     _antialiasing = antialiasing;
 }
+
+inline bool Renderer::isBloomEnabled() const {
+    return _bloomEnabled;
+}
+
+inline void Renderer::isBloomEnabled(bool enabled) {
+    _bloomEnabled = enabled;
+}
+
+inline bool Renderer::isBloomDirty() const {
+    return _bloomDirty;
+}
+
+inline void Renderer::isBloomDirty(bool dirty) {
+    _bloomDirty = dirty;
+}
+
+inline float Renderer::getBlurThreshold() const {
+    return _bloomOptions.blurThreshold;
+}
+
+inline void Renderer::setBlurThreshold(float blurThreshold) {
+    _bloomOptions.blurThreshold = blurThreshold;
+    isBloomDirty(true);
+}

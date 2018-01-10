@@ -67,7 +67,7 @@ bool GraphicsPipeline::build(API::GraphicsPipeline& graphicPipeline, VkResult* r
         /* createInfo.pMultisampleState */ &_multisampleState,
         /* createInfo.pDepthStencilState */ &_depthStencilState,
         /* createInfo.pColorBlendState */ &_colorBlendState,
-        /* createInfo.pDynamicState */ &dynamicStateCreateInfo,
+        /* createInfo.pDynamicState */ dynamicStates.size() > 0 ? &dynamicStateCreateInfo : nullptr,
         /* createInfo.layout */ static_cast<VkPipelineLayout>(_pipelineLayout),
         /* createInfo.renderPass */ static_cast<VkRenderPass>(_renderPass),
         /* createInfo.subpass */ _subpass,

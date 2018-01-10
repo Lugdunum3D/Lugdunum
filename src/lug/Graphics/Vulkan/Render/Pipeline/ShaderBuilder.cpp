@@ -81,8 +81,8 @@ std::vector<uint32_t> Pipeline::ShaderBuilder::buildShaderFromString(std::string
         Pipeline::Id::Model::MaterialPart materialPart = id.getModelMaterialPart();
         Pipeline::Id::Model::ExtraPart extraPart = id.getModelExtraPart();
 
-        // Set the display mode
-        options.AddMacroDefinition("DISPLAY_MODE", std::to_string(static_cast<uint8_t>(extraPart.displayMode)));
+        // Set bloom enabled
+        options.AddMacroDefinition("DISPLAY_MODE", std::to_string(extraPart.displayMode));
 
         // Primitive part
         {

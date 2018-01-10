@@ -5,6 +5,9 @@
 #include <lug/Graphics/Export.hpp>
 #include <lug/Graphics/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/API/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/API/DeviceMemory.hpp>
+#include <lug/Graphics/Vulkan/API/Image.hpp>
+#include <lug/Graphics/Vulkan/API/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/API/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Swapchain.hpp>
@@ -30,6 +33,7 @@ private:
         API::Semaphore completeSemaphore;
         int imageIdx = -1;
     };
+
 
     struct FrameData {
         API::Semaphore allDrawsFinishedSemaphore{};

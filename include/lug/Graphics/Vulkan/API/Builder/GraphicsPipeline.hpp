@@ -210,8 +210,8 @@ public:
     ~GraphicsPipeline() = default;
 
     // Setters
-    void setShader(VkShaderStageFlagBits stage, const char* entry, API::ShaderModule shaderModule);
-    bool setShaderFromFile(VkShaderStageFlagBits stage, const char* entry, const std::string& filename);
+    void setShader(VkShaderStageFlagBits stage, const char* entry, API::ShaderModule shaderModule, const VkSpecializationInfo* specializationInfo = nullptr);
+    bool setShaderFromFile(VkShaderStageFlagBits stage, const char* entry, const std::string& filename, const VkSpecializationInfo* specializationInfo = nullptr);
     bool setShaderFromData(VkShaderStageFlagBits stage, const char* entry, const std::vector<uint32_t>& data);
 
     InputBinding addInputBinding(uint32_t stride, VkVertexInputRate inputRate = VK_VERTEX_INPUT_RATE_VERTEX);
@@ -325,7 +325,7 @@ private:
     std::vector<VkPipelineColorBlendAttachmentState> _colorBlendAttachments;
 
     // Dynamic state
-    std::set<VkDynamicState> _dynamicStates;
+    std::set<VkDynamicState> _dynamicStates{};
 
     // General
     API::PipelineLayout _pipelineLayout;

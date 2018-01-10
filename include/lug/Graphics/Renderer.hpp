@@ -40,11 +40,21 @@ public:
         MSAA16X
     };
 
+    struct BloomOtions {
+        float blurThreshold{0.5f};
+    };
+
     struct InitInfo {
         std::string shadersRoot;
         Render::Technique::Type renderTechnique;
         DisplayMode displayMode{DisplayMode::Full};
         Antialiasing antialiasing{Antialiasing::NoAA};
+#if defined(LUG_SYSTEM_ANDROID)
+        bool bloomEnabled{false};
+#else
+        bool bloomEnabled{true};
+#endif
+        BloomOtions bloomOptions;
     };
 
 public:
@@ -76,6 +86,15 @@ public:
     const Antialiasing& getAntialiasing() const;
     void setAntialiasing(Antialiasing antialiasing);
 
+    bool isBloomEnabled() const;
+    void isBloomEnabled(bool enabled);
+
+    bool isBloomDirty() const;
+    void isBloomDirty(bool dirty);
+
+    float getBlurThreshold() const;
+    void setBlurThreshold(float blurThreshold);
+
     ResourceManager* getResourceManager() const;
 
 protected:
@@ -85,6 +104,10 @@ protected:
     Antialiasing _antialiasing;
     InitInfo _initInfo;
     std::unique_ptr<ResourceManager> _resourceManager{nullptr};
+
+    bool _bloomEnabled;
+    bool _bloomDirty{true}; // Bloom options has been updated
+    BloomOtions _bloomOptions;
 };
 
 #include <lug/Graphics/Renderer.inl>

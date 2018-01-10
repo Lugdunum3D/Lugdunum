@@ -5,6 +5,9 @@
 #include <lug/Graphics/Vulkan/Render/Window.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandBuffer.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/CommandPool.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Fence.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/Image.hpp>
+#include <lug/Graphics/Vulkan/API/Builder/ImageView.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Semaphore.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Surface.hpp>
 #include <lug/Graphics/Vulkan/API/Builder/Swapchain.hpp>
@@ -87,7 +90,8 @@ bool Window::beginFrame(const lug::System::Time &elapsedTime) {
             for (auto& renderView: _renderViews) {
                 View* renderView_ = static_cast<View*>(renderView.get());
 
-                if (!renderView_->getRenderTechnique()->setSwapchainImageViews(_swapchain.getImagesViews())) {
+                if (!renderView_->getRenderTechnique()->setSwapchainImageViews(_swapchain.getImagesViews()) ||
+                    !renderView_->getRenderTechnique()->initFrameDatas(_swapchain.getImagesViews())) {
                     return false;
                 }
 
@@ -358,7 +362,7 @@ bool Window::initSwapchain() {
 
     API::Builder::Swapchain swapchainBuilder(_renderer.getDevice());
     swapchainBuilder.setPreferences(_renderer.getPreferences().swapchain);
-    swapchainBuilder.setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    swapchainBuilder.setImageUsage(VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT  | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
     swapchainBuilder.setImageColorSpace(VK_COLOR_SPACE_SRGB_NONLINEAR_KHR);
     swapchainBuilder.setMinImageCount(3);
 

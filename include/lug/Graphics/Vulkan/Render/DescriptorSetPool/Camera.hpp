@@ -21,7 +21,7 @@ public:
 
     ~Camera() = default;
 
-    const DescriptorSet* allocate(const BufferPool::SubBuffer& subBuffer);
+    const DescriptorSet* allocate(const BufferPool::SubBuffer& cameraSubBuffer, const BufferPool::SubBuffer& bloomSubBuffer);
 };
 
 } // DescriptorSetPool
