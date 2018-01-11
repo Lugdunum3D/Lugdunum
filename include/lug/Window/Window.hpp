@@ -48,7 +48,7 @@ enum class LUG_WINDOW_API Style : uint16_t {
     Close       = 1 << 2,
     Fullscreen  = 1 << 3,
 
-    Default = Titlebar | Resize | Close
+    Default = Titlebar | Close
 };
 
 #include <lug/Window/Style.inl>
