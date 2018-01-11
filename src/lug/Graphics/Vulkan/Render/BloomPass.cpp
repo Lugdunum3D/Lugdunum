@@ -222,8 +222,8 @@ bool BloomPass::renderHdr(
         const VkViewport vkViewport{
             /* vkViewport.x         */ 0.0f,
             /* vkViewport.y         */ 0.0f,
-            /* vkViewport.width     */ static_cast<float>(_window.getSwapchain().getExtent().width),
-            /* vkViewport.height    */ static_cast<float>(_window.getSwapchain().getExtent().height),
+            /* vkViewport.width     */ static_cast<float>(_forward.getSceneOffscreenImage(0).getExtent().width),
+            /* vkViewport.height    */ static_cast<float>(_forward.getSceneOffscreenImage(0).getExtent().height),
             /* vkViewport.minDepth  */ 0.0f,
             /* vkViewport.maxDepth  */ 1.0f,
         };
@@ -1186,7 +1186,6 @@ bool BloomPass::initPipelines() {
 }
 
 bool BloomPass::initBlurPass() {
-    auto& swapchain = _window.getSwapchain();
     uint32_t frameDataSize = (uint32_t)_window.getSwapchain().getImages().size();
     API::Device& device = _renderer.getDevice();
 
@@ -1227,8 +1226,8 @@ bool BloomPass::initBlurPass() {
                 // 0
                 {
                     VkExtent3D extent{
-                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width),
-                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height),
+                        /* extent.width */ static_cast<uint32_t>(_forward.getSceneOffscreenImage(0).getExtent().width),
+                        /* extent.height */ static_cast<uint32_t>(_forward.getSceneOffscreenImage(0).getExtent().height),
                         /* extent.depth */ 1
                     };
                     imageBuilder.setExtent(extent);
@@ -1244,8 +1243,8 @@ bool BloomPass::initBlurPass() {
                 // 1
                 {
                     VkExtent3D extent{
-                        /* extent.width */ static_cast<uint32_t>(swapchain.getExtent().width) / 2,
-                        /* extent.height */ static_cast<uint32_t>(swapchain.getExtent().height) / 2,
+                        /* extent.width */ static_cast<uint32_t>(_forward.getSceneOffscreenImage(0).getExtent().width) / 2,
+                        /* extent.height */ static_cast<uint32_t>(_forward.getSceneOffscreenImage(0).getExtent().height) / 2,
                         /* extent.depth */ 1
                     };
                     imageBuilder.setExtent(extent);
@@ -1262,8 +1261,8 @@ bool BloomPass::initBlurPass() {
             // Blend image
             {
                 VkExtent3D extent{
-                    /* extent.width */ swapchain.getExtent().width,
-                    /* extent.height */ swapchain.getExtent().height,
+                    /* extent.width */ _forward.getSceneOffscreenImage(0).getExtent().width,
+                    /* extent.height */ _forward.getSceneOffscreenImage(0).getExtent().height,
                     /* extent.depth */ 1
                 };
                 imageBuilder.setExtent(extent);

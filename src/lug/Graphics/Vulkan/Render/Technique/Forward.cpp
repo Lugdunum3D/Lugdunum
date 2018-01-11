@@ -127,7 +127,15 @@ bool Forward::render(
         };
 
         const auto& viewport = _renderView.getViewport();
-        beginRenderPass.renderArea.offset = {static_cast<int32_t>(viewport.offset.x), static_cast<int32_t>(viewport.offset.y)};
+        if (frameData.framebuffer.antialiasing == Renderer::Antialiasing::NoAA) {
+            beginRenderPass.renderArea.offset = {
+                static_cast<int32_t>(viewport.offset.x),
+                static_cast<int32_t>(viewport.offset.y)
+            };
+        }
+        else {
+            beginRenderPass.renderArea.offset = {0, 0};
+        }
         beginRenderPass.renderArea.extent = {static_cast<uint32_t>(viewport.extent.width), static_cast<uint32_t>(viewport.extent.height)};
 
         const auto& clearColor = _renderView.getClearColor();
@@ -140,8 +148,8 @@ bool Forward::render(
         frameData.renderCmdBuffer.beginRenderPass(*renderPass, beginRenderPass);
 
         const VkViewport vkViewport{
-            /* vkViewport.x         */ viewport.offset.x,
-            /* vkViewport.y         */ viewport.offset.y,
+            /* vkViewport.x         */ static_cast<float>(beginRenderPass.renderArea.offset.x),
+            /* vkViewport.y         */ static_cast<float>(beginRenderPass.renderArea.offset.y),
             /* vkViewport.width     */ viewport.extent.width,
             /* vkViewport.height    */ viewport.extent.height,
             /* vkViewport.minDepth  */ viewport.minDepth,
