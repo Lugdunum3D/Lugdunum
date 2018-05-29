@@ -6,6 +6,8 @@ We'll still up answer any of your questions to help you to do so 👍
 
 If you are interested to take over this repository, please open an issue!
 
+---
+
 <p align="center"><img src="https://cdn.rawgit.com/Lugdunum3D/Visual-Identity/e9baec645385732329d83c948c8004aeca5f6b3f/logo/dist/long.svg" width="70%"></p>
 
 ---
